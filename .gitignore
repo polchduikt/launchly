@@ -1,0 +1,82 @@
+# ===========================
+# SECRETS
+# ===========================
+.env
+.env.*
+*.env
+application-secrets.yml
+application-secrets.properties
+application.properties.secrets
+**/src/main/resources/application-local.yml
+**/src/main/resources/application-local.properties
+
+# ===========================
+# BACKEND
+# ===========================
+backend/target/
+backend/HELP.md
+backend/.mvn/wrapper/maven-wrapper.jar
+!backend/**/src/main/**/target/
+!backend/**/src/test/**/target/
+
+# ===========================
+# FRONTEND
+# ===========================
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.*
+
+# ===========================
+# AGENT
+# ===========================
+agent/
+
+# ===========================
+# IntelliJ IDEA
+# ===========================
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# ===========================
+# STS
+# ===========================
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# ===========================
+# NetBeans
+# ===========================
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ===========================
+# VS Code
+# ===========================
+.vscode/
+
+# ===========================
+# OS
+# ===========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===========================
+# Logs
+# ===========================
+*.log
+logs/
