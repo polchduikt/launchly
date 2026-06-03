@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset launchly:001
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -13,3 +16,4 @@ CREATE TABLE users (
 );
 
 CREATE INDEX idx_users_email ON users(email);
+

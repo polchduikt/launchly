@@ -1,0 +1,14 @@
+CREATE TABLE bots (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    avatar VARCHAR(500),
+    telegram_token VARCHAR(512) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT FALSE,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_bots_user_id ON bots(user_id);
+

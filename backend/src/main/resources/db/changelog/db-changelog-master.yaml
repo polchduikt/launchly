@@ -3,3 +3,9 @@ databaseChangeLog:
       file: db/changelog/changes/V001__create_users_table.sql
   - include:
       file: db/changelog/changes/V002__create_refresh_tokens_table.sql
+  - include:
+      file: db/changelog/changes/V003__create_bots_table.sql
+  - include:
+      file: db/changelog/changes/V004__create_flow_schemas_table.sql
+  - include:
+      file: db/changelog/changes/V005__create_bot_users_table.sql

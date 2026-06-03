@@ -1,0 +1,43 @@
+package com.launchly.bot.entity;
+
+import com.launchly.auth.entity.User;
+import com.launchly.common.entity.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "bots")
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Bot extends BaseEntity {
+
+    @Column(nullable = false)
+    private String name;
+
+    private String description;
+
+    private String avatar;
+
+    @Column(name = "telegram_token", nullable = false)
+    private String telegramToken;
+
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    private boolean active = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+}
