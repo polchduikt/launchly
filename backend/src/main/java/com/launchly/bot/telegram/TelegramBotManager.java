@@ -3,8 +3,10 @@ package com.launchly.bot.telegram;
 import com.launchly.bot.service.FlowEngineService;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.repository.BotRepository;
+import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.EncryptionUtil;
+import com.launchly.crm.service.CrmService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +26,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TelegramBotManager {
 
     private final BotRepository botRepository;
+    private final BotUserRepository botUserRepository;
     private final EncryptionUtil encryptionUtil;
     private final FlowEngineService flowEngineService;
+    private final CrmService crmService;
 
     @Value("${telegram.mode:polling}")
     private String mode;
@@ -62,14 +66,12 @@ public class TelegramBotManager {
         try {
             String token = encryptionUtil.decrypt(bot.getTelegramToken());
             TelegramClient telegramClient = new OkHttpTelegramClient(token);
-
             TelegramBotsLongPollingApplication pollingApp = new TelegramBotsLongPollingApplication();
-            BotUpdateHandler handler = new BotUpdateHandler(bot.getId(), flowEngineService, telegramClient);
+            BotUpdateHandler handler = new BotUpdateHandler(
+                    bot.getId(), flowEngineService, telegramClient, crmService, botUserRepository);
             pollingApp.registerBot(token, handler);
-
             activeBots.put(bot.getId(), pollingApp);
             telegramClients.put(bot.getId(), telegramClient);
-
             log.info("Registered bot {} for long polling", bot.getId());
         } catch (Exception e) {
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to register bot: " + e.getMessage());
@@ -79,7 +81,6 @@ public class TelegramBotManager {
     public void unregisterBot(Long botId) {
         TelegramBotsLongPollingApplication app = activeBots.remove(botId);
         telegramClients.remove(botId);
-
         if (app != null) {
             try {
                 app.close();

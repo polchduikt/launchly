@@ -5,6 +5,7 @@ import com.launchly.bot.engine.model.FlowNode;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.entity.NodeType;
 import com.launchly.bot.service.BotDialogStateService;
+import com.launchly.crm.service.CrmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +23,7 @@ import java.util.Map;
 public class OrderNodeExecutor implements NodeExecutor {
 
     private final BotDialogStateService stateService;
+    private final CrmService crmService;
 
     @Override
     public NodeType getType() {
@@ -43,6 +46,21 @@ public class OrderNodeExecutor implements NodeExecutor {
         stateService.setSessionData(botId, telegramUserId, "last_order_product", productName);
         stateService.setSessionData(botId, telegramUserId, "last_order_price", price);
         stateService.setSessionData(botId, telegramUserId, "order_status", "created");
+
+        String items = productName;
+        BigDecimal totalAmount;
+        try {
+            totalAmount = new BigDecimal(price);
+        } catch (NumberFormatException e) {
+            totalAmount = BigDecimal.ZERO;
+        }
+        String currency = data != null ? (String) data.getOrDefault("currency", "UAH") : "UAH";
+
+        try {
+            crmService.createOrder(botId, botUser.getId(), items, totalAmount, currency);
+        } catch (Exception e) {
+            log.error("Failed to persist order to CRM for bot {}: {}", botId, e.getMessage());
+        }
 
         String text = data != null ? (String) data.get("text") : null;
         if (text == null) {

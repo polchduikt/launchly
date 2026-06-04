@@ -9,3 +9,13 @@ databaseChangeLog:
       file: db/changelog/changes/V004__create_flow_schemas_table.sql
   - include:
       file: db/changelog/changes/V005__create_bot_users_table.sql
+  - include:
+      file: db/changelog/changes/V006__add_order_sequence_to_bots.sql
+  - include:
+      file: db/changelog/changes/V007__create_orders_table.sql
+  - include:
+      file: db/changelog/changes/V008__create_leads_table.sql
+  - include:
+      file: db/changelog/changes/V009__create_conversations_table.sql
+  - include:
+      file: db/changelog/changes/V010__create_messages_table.sql

@@ -37,6 +37,10 @@ public class Bot extends BaseEntity {
     @Builder.Default
     private boolean active = false;
 
+    @Column(name = "order_sequence", nullable = false)
+    @Builder.Default
+    private Long orderSequence = 1000L;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

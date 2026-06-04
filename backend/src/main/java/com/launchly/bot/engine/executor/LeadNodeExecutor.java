@@ -5,6 +5,7 @@ import com.launchly.bot.engine.model.FlowNode;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.entity.NodeType;
 import com.launchly.bot.service.BotDialogStateService;
+import com.launchly.crm.service.CrmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class LeadNodeExecutor implements NodeExecutor {
 
     private final BotDialogStateService stateService;
+    private final CrmService crmService;
 
     @Override
     public NodeType getType() {
@@ -49,6 +51,12 @@ public class LeadNodeExecutor implements NodeExecutor {
         stateService.setSessionData(botId, telegramUserId, "lead_email", email);
         stateService.setSessionData(botId, telegramUserId, "lead_phone", phone);
         stateService.setSessionData(botId, telegramUserId, "lead_status", "registered");
+
+        try {
+            crmService.createLead(botId, botUser.getId(), name, email, phone, null);
+        } catch (Exception e) {
+            log.error("Failed to persist lead to CRM for bot {}: {}", botId, e.getMessage());
+        }
 
         String text = data != null ? (String) data.get("text") : null;
         if (text == null) {
