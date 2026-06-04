@@ -7,4 +7,8 @@ import java.util.List;
 public interface LeadRepository extends JpaRepository<Lead, Long> {
 
     List<Lead> findByBotIdOrderByCreatedAtDesc(Long botId);
+
+    List<Lead> findByBotUserIdAndBotId(Long botUserId, Long botId);
+
+    boolean existsByBotUserIdAndBotId(Long botUserId, Long botId);
 }

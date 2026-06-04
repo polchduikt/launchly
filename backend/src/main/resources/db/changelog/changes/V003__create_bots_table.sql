@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset launchly:003
 CREATE TABLE bots (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,

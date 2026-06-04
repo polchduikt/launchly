@@ -7,4 +7,8 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByBotIdOrderByCreatedAtDesc(Long botId);
+
+    List<Order> findByBotUserIdAndBotId(Long botUserId, Long botId);
+
+    boolean existsByBotUserIdAndBotId(Long botUserId, Long botId);
 }

@@ -19,3 +19,9 @@ databaseChangeLog:
       file: db/changelog/changes/V009__create_conversations_table.sql
   - include:
       file: db/changelog/changes/V010__create_messages_table.sql
+  - include:
+      file: db/changelog/changes/V011__create_tags_table.sql
+  - include:
+      file: db/changelog/changes/V012__create_bot_user_tags_table.sql
+  - include:
+      file: db/changelog/changes/V013__create_broadcast_campaigns_table.sql

@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset launchly:005
 CREATE TABLE bot_users (
     id BIGSERIAL PRIMARY KEY,
     telegram_id BIGINT NOT NULL,

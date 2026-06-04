@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset launchly:004
 CREATE TABLE flow_schemas (
     id BIGSERIAL PRIMARY KEY,
     version INTEGER NOT NULL DEFAULT 1,

@@ -1,0 +1,66 @@
+package com.launchly.broadcast.entity;
+
+import com.launchly.bot.entity.Bot;
+import com.launchly.common.entity.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "broadcast_campaigns")
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class BroadcastCampaign extends BaseEntity {
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String message;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private CampaignStatus status = CampaignStatus.DRAFT;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "filter_type", nullable = false, length = 20)
+    @Builder.Default
+    private FilterType filterType = FilterType.ALL;
+
+    @Column(name = "filter_value")
+    private String filterValue;
+
+    @Column(name = "scheduled_at")
+    private LocalDateTime scheduledAt;
+
+    @Column(name = "sent_count", nullable = false)
+    @Builder.Default
+    private Integer sentCount = 0;
+
+    @Column(name = "failed_count", nullable = false)
+    @Builder.Default
+    private Integer failedCount = 0;
+
+    @Column(name = "total_count", nullable = false)
+    @Builder.Default
+    private Integer totalCount = 0;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bot_id", nullable = false)
+    private Bot bot;
+}

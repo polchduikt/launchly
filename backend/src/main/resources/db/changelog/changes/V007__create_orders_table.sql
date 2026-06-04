@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset launchly:007
 CREATE TABLE orders (
     id BIGSERIAL PRIMARY KEY,
     order_number VARCHAR(20) NOT NULL UNIQUE,

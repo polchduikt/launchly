@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset launchly:010
 CREATE TABLE messages (
     id BIGSERIAL PRIMARY KEY,
     content TEXT NOT NULL,

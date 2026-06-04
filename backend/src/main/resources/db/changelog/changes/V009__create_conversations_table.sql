@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset launchly:009
 CREATE TABLE conversations (
     id BIGSERIAL PRIMARY KEY,
     status VARCHAR(20) NOT NULL DEFAULT 'OPEN',

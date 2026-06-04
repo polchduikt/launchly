@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset launchly:008
 CREATE TABLE leads (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255),
