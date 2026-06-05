@@ -5,6 +5,7 @@ import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.repository.UserRepository;
 import com.launchly.auth.service.TokenService;
+import com.launchly.billing.service.BillingService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final UserRepository userRepository;
     private final TokenService tokenService;
+    private final BillingService billingService;
 
     @Value("${app.oauth2.redirect-uri}")
     private String redirectUri;
@@ -44,6 +46,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                         .active(true)
                         .emailVerified(true)
                         .build()));
+
+        billingService.createFreeSubscription(user.getId());
 
         String accessToken = tokenService.generateAccessToken(user);
         String refreshToken = tokenService.generateRefreshToken(user);

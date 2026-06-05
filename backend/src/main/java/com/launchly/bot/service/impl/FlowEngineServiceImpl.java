@@ -14,6 +14,7 @@ import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
 import com.launchly.bot.service.BotDialogStateService;
 import com.launchly.bot.service.FlowEngineService;
+import com.launchly.billing.service.PlanLimitService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -33,18 +34,21 @@ public class FlowEngineServiceImpl implements FlowEngineService {
     private final BotDialogStateService stateService;
     private final ObjectMapper objectMapper;
     private final Map<NodeType, NodeExecutor> executors;
+    private final PlanLimitService planLimitService;
 
     public FlowEngineServiceImpl(BotRepository botRepository,
                                   BotUserRepository botUserRepository,
                                   FlowSchemaRepository flowSchemaRepository,
                                   BotDialogStateService stateService,
                                   ObjectMapper objectMapper,
-                                  List<NodeExecutor> nodeExecutors) {
+                                  List<NodeExecutor> nodeExecutors,
+                                  PlanLimitService planLimitService) {
         this.botRepository = botRepository;
         this.botUserRepository = botUserRepository;
         this.flowSchemaRepository = flowSchemaRepository;
         this.stateService = stateService;
         this.objectMapper = objectMapper;
+        this.planLimitService = planLimitService;
         this.executors = new EnumMap<>(NodeType.class);
         nodeExecutors.forEach(e -> executors.put(e.getType(), e));
     }
@@ -133,6 +137,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
     private BotUser getOrCreateBotUser(Bot bot, Update update, Long telegramUserId) {
         return botUserRepository.findByTelegramIdAndBotId(telegramUserId, bot.getId())
                 .orElseGet(() -> {
+                    planLimitService.checkBotUserLimit(bot.getId());
                     String username = null;
                     String firstName = null;
                     String lastName = null;

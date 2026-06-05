@@ -12,6 +12,7 @@ import com.launchly.broadcast.mapper.BroadcastMapper;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.broadcast.service.BroadcastFilterService;
 import com.launchly.broadcast.service.BroadcastService;
+import com.launchly.billing.service.PlanLimitService;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,16 +29,17 @@ public class BroadcastServiceImpl implements BroadcastService {
 
     private static final int BATCH_SIZE = 25;
     private static final long BATCH_DELAY_MS = 1000;
-
     private final BroadcastCampaignRepository campaignRepository;
     private final BotRepository botRepository;
     private final BroadcastFilterService broadcastFilterService;
     private final TelegramSendService telegramSendService;
     private final BroadcastMapper broadcastMapper;
+    private final PlanLimitService planLimitService;
 
     @Override
     @Transactional
     public CampaignResponse createCampaign(Long botId, Long userId, CreateCampaignRequest request) {
+        planLimitService.checkBroadcastAccess(userId);
         Bot bot = validateBotOwnership(botId, userId);
 
         CampaignStatus initialStatus = request.scheduledAt() != null

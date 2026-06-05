@@ -21,6 +21,7 @@ import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
 import com.launchly.bot.service.BotService;
 import com.launchly.bot.telegram.TelegramBotManager;
+import com.launchly.billing.service.PlanLimitService;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.EncryptionUtil;
 import lombok.RequiredArgsConstructor;
@@ -43,10 +44,13 @@ public class BotServiceImpl implements BotService {
     private final EncryptionUtil encryptionUtil;
     private final TelegramBotManager telegramBotManager;
     private final ObjectMapper objectMapper;
+    private final PlanLimitService planLimitService;
 
     @Override
     @Transactional
     public BotResponse createBot(BotCreateRequest request, Long userId) {
+        planLimitService.checkBotLimit(userId);
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
 

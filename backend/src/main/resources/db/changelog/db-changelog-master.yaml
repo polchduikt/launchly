@@ -25,3 +25,9 @@ databaseChangeLog:
       file: db/changelog/changes/V012__create_bot_user_tags_table.sql
   - include:
       file: db/changelog/changes/V013__create_broadcast_campaigns_table.sql
+  - include:
+      file: db/changelog/changes/V014__create_plans_table.sql
+  - include:
+      file: db/changelog/changes/V015__insert_plans_data.sql
+  - include:
+      file: db/changelog/changes/V016__create_subscriptions_table.sql

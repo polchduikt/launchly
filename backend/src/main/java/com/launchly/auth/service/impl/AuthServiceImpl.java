@@ -12,6 +12,7 @@ import com.launchly.auth.mapper.AuthMapper;
 import com.launchly.auth.repository.UserRepository;
 import com.launchly.auth.service.AuthService;
 import com.launchly.auth.service.TokenService;
+import com.launchly.billing.service.BillingService;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ public class AuthServiceImpl implements AuthService {
     private final TokenService tokenService;
     private final AuthMapper authMapper;
     private final PasswordEncoder passwordEncoder;
+    private final BillingService billingService;
 
     @Override
     @Transactional
@@ -45,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         user = userRepository.save(user);
+        billingService.createFreeSubscription(user.getId());
         String accessToken = tokenService.generateAccessToken(user);
         String refreshToken = tokenService.generateRefreshToken(user);
         return new AuthResponse(accessToken, refreshToken, authMapper.toUserResponse(user));
