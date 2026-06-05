@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/refresh",
                                 "/api/v1/telegram/webhook/**",
                                 "/api/v1/billing/webhook",
+                                "/api/v1/integrations/google/callback",
                                 "/ws/**"
                         ).permitAll()
                         .anyRequest().authenticated()

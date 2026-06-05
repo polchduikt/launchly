@@ -31,3 +31,5 @@ databaseChangeLog:
       file: db/changelog/changes/V015__insert_plans_data.sql
   - include:
       file: db/changelog/changes/V016__create_subscriptions_table.sql
+  - include:
+      file: db/changelog/changes/V017__create_integrations_table.sql

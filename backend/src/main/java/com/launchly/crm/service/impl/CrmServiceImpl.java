@@ -19,6 +19,7 @@ import com.launchly.crm.entity.Order;
 import com.launchly.crm.entity.SenderType;
 import com.launchly.crm.mapper.CrmMapper;
 import com.launchly.crm.repository.ConversationRepository;
+import com.launchly.integration.service.IntegrationEventService;
 import com.launchly.crm.repository.LeadRepository;
 import com.launchly.crm.repository.MessageRepository;
 import com.launchly.crm.repository.OrderRepository;
@@ -47,6 +48,7 @@ public class CrmServiceImpl implements CrmService {
     private final CrmMapper crmMapper;
     private final CrmWebSocketService webSocketService;
     private final TelegramSendService telegramSendService;
+    private final IntegrationEventService integrationEventService;
 
     @Override
     @Transactional
@@ -71,6 +73,8 @@ public class CrmServiceImpl implements CrmService {
 
         order = orderRepository.save(order);
         log.info("Created order {} for bot {} by bot user {}", orderNumber, botId, botUserId);
+
+        integrationEventService.onOrderCreated(order);
 
         OrderResponse response = crmMapper.toOrderResponse(order);
         webSocketService.notifyNewOrder(botId, response);
@@ -127,6 +131,9 @@ public class CrmServiceImpl implements CrmService {
 
         lead = leadRepository.save(lead);
         log.info("Created lead for bot {} by bot user {}: name={}", botId, botUserId, name);
+
+        integrationEventService.onLeadCreated(lead);
+
         LeadResponse response = crmMapper.toLeadResponse(lead);
         webSocketService.notifyNewLead(botId, response);
         return response;

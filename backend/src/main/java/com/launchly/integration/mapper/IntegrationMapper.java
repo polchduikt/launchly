@@ -1,0 +1,36 @@
+package com.launchly.integration.mapper;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.launchly.integration.dto.response.IntegrationResponse;
+import com.launchly.integration.entity.Integration;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public abstract class IntegrationMapper {
+
+    @Autowired
+    protected ObjectMapper objectMapper;
+
+    @Mapping(target = "botId", source = "bot.id")
+    @Mapping(target = "config", source = "config", qualifiedByName = "jsonStringToObject")
+    public abstract IntegrationResponse toResponse(Integration integration);
+
+    public abstract List<IntegrationResponse> toResponseList(List<Integration> integrations);
+
+    @Named("jsonStringToObject")
+    protected Object jsonStringToObject(String configStr) {
+        if (configStr == null || configStr.isEmpty()) {
+            return null;
+        }
+        try {
+            return objectMapper.readTree(configStr);
+        } catch (JsonProcessingException e) {
+            return configStr;
+        }
+    }
+}
