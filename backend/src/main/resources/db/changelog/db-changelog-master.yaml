@@ -35,3 +35,5 @@ databaseChangeLog:
       file: db/changelog/changes/V017__create_integrations_table.sql
   - include:
       file: db/changelog/changes/V018__create_ai_usage_table.sql
+  - include:
+      file: db/changelog/changes/V019__add_avatar_public_id_to_bots.sql

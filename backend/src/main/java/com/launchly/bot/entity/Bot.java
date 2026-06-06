@@ -30,6 +30,9 @@ public class Bot extends BaseEntity {
 
     private String avatar;
 
+    @Column(name = "avatar_public_id")
+    private String avatarPublicId;
+
     @Column(name = "telegram_token", nullable = false)
     private String telegramToken;
 

@@ -24,7 +24,9 @@ import com.launchly.bot.telegram.TelegramBotManager;
 import com.launchly.billing.service.PlanLimitService;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.EncryptionUtil;
+import com.launchly.media.service.MediaService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BotServiceImpl implements BotService {
@@ -45,6 +48,7 @@ public class BotServiceImpl implements BotService {
     private final TelegramBotManager telegramBotManager;
     private final ObjectMapper objectMapper;
     private final PlanLimitService planLimitService;
+    private final MediaService mediaService;
 
     @Override
     @Transactional
@@ -95,6 +99,7 @@ public class BotServiceImpl implements BotService {
                 bot.getName(),
                 bot.getDescription(),
                 bot.getAvatar(),
+                bot.getAvatarPublicId(),
                 bot.isActive(),
                 maskedToken,
                 schemaResponse,
@@ -114,7 +119,18 @@ public class BotServiceImpl implements BotService {
             bot.setDescription(request.description());
         }
         if (request.avatar() != null) {
-            bot.setAvatar(request.avatar());
+            if (!request.avatar().equals(bot.getAvatar())) {
+                String oldPublicId = bot.getAvatarPublicId();
+                if (oldPublicId != null && !oldPublicId.trim().isEmpty()) {
+                    try {
+                        mediaService.delete(oldPublicId, userId);
+                    } catch (Exception e) {
+                        log.error("Failed to delete old avatar publicId {} from Cloudinary: {}", oldPublicId, e.getMessage());
+                    }
+                }
+                bot.setAvatar(request.avatar());
+                bot.setAvatarPublicId(request.avatarPublicId());
+            }
         }
 
         bot = botRepository.save(bot);

@@ -7,6 +7,7 @@ public record BotDetailResponse(
         String name,
         String description,
         String avatar,
+        String avatarPublicId,
         boolean active,
         String telegramToken,
         FlowSchemaResponse flowSchema,

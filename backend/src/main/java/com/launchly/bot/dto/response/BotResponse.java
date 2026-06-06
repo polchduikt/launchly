@@ -7,6 +7,7 @@ public record BotResponse(
         String name,
         String description,
         String avatar,
+        String avatarPublicId,
         boolean active,
         LocalDateTime createdAt
 ) {}
