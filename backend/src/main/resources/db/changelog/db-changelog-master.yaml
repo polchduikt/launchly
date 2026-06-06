@@ -33,3 +33,5 @@ databaseChangeLog:
       file: db/changelog/changes/V016__create_subscriptions_table.sql
   - include:
       file: db/changelog/changes/V017__create_integrations_table.sql
+  - include:
+      file: db/changelog/changes/V018__create_ai_usage_table.sql

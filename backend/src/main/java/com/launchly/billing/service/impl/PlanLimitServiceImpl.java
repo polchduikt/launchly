@@ -83,7 +83,8 @@ public class PlanLimitServiceImpl implements PlanLimitService {
         }
     }
 
-    private Plan getActivePlan(Long userId) {
+    @Override
+    public Plan getActivePlan(Long userId) {
         return subscriptionRepository.findByUserId(userId)
                 .filter(sub -> sub.getStatus() == SubscriptionStatus.ACTIVE || sub.getStatus() == SubscriptionStatus.TRIALING)
                 .map(Subscription::getPlan)
