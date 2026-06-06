@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,10 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "bots")
+@Table(name = "bots", indexes = {
+    @Index(name = "idx_bots_user_id", columnList = "user_id"),
+    @Index(name = "idx_bots_active", columnList = "is_active")
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder

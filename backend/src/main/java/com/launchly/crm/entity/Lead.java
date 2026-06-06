@@ -9,6 +9,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,12 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 @Entity
-@Table(name = "leads")
+@Table(name = "leads", indexes = {
+    @Index(name = "idx_leads_bot_id", columnList = "bot_id"),
+    @Index(name = "idx_leads_bot_user_id", columnList = "bot_user_id"),
+    @Index(name = "idx_leads_status", columnList = "status"),
+    @Index(name = "idx_leads_created_at", columnList = "created_at DESC")
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder

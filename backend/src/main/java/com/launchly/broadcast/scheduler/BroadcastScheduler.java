@@ -22,7 +22,7 @@ public class BroadcastScheduler {
     @Scheduled(fixedDelay = 30000)
     public void processScheduledCampaigns() {
         List<BroadcastCampaign> dueCampaigns = campaignRepository
-                .findByStatusAndScheduledAtBefore(CampaignStatus.SCHEDULED, LocalDateTime.now());
+                .findScheduledCampaigns(LocalDateTime.now());
 
         if (dueCampaigns.isEmpty()) {
             return;

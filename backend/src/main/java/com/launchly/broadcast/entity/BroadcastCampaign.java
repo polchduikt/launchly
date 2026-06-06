@@ -8,6 +8,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "broadcast_campaigns")
+@Table(name = "broadcast_campaigns", indexes = {
+    @Index(name = "idx_broadcast_campaigns_bot_id", columnList = "bot_id"),
+    @Index(name = "idx_broadcast_campaigns_status", columnList = "status"),
+    @Index(name = "idx_broadcast_scheduled", columnList = "status, scheduled_at")
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder

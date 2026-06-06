@@ -8,6 +8,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,11 @@ import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "integrations")
+@Table(name = "integrations", indexes = {
+    @Index(name = "idx_integrations_bot_id", columnList = "bot_id"),
+    @Index(name = "idx_integrations_type", columnList = "type"),
+    @Index(name = "idx_integrations_active", columnList = "bot_id, is_active")
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder

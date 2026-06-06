@@ -5,6 +5,7 @@ import com.launchly.common.entity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -17,6 +18,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "bot_user_tags", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"bot_user_id", "tag_id"})
+}, indexes = {
+        @Index(name = "idx_bot_user_tags_bot_user_id", columnList = "bot_user_id"),
+        @Index(name = "idx_bot_user_tags_tag_id", columnList = "tag_id")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)

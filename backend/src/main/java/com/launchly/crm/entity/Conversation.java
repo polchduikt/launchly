@@ -10,6 +10,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
@@ -27,6 +28,10 @@ import java.util.List;
 @Entity
 @Table(name = "conversations", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"bot_id", "bot_user_id"})
+}, indexes = {
+        @Index(name = "idx_conversations_bot_id", columnList = "bot_id"),
+        @Index(name = "idx_conversations_bot_user_id", columnList = "bot_user_id"),
+        @Index(name = "idx_conversations_updated_at", columnList = "updated_at DESC")
 })
 @Data
 @EqualsAndHashCode(callSuper = true, exclude = {"messages"})
