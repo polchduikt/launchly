@@ -14,6 +14,8 @@ import com.launchly.broadcast.service.TagService;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,7 @@ public class TagServiceImpl implements TagService {
     private final BotRepository botRepository;
     private final BotUserRepository botUserRepository;
     private final BroadcastMapper broadcastMapper;
+    private final CacheManager cacheManager;
 
     @Override
     @Transactional
@@ -42,7 +45,9 @@ public class TagServiceImpl implements TagService {
                             .bot(bot)
                             .build();
                     log.info("Created new tag '{}' for botId={}", name, botId);
-                    return tagRepository.save(tag);
+                    Tag savedTag = tagRepository.save(tag);
+                    evictTagsCache(botId);
+                    return savedTag;
                 });
     }
 
@@ -63,6 +68,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "tags", key = "#botId")
     public List<TagResponse> getTagsByBot(Long botId, Long userId) {
         validateBotOwnership(botId, userId);
         return broadcastMapper.toTagResponseList(tagRepository.findByBotId(botId));
@@ -83,6 +89,7 @@ public class TagServiceImpl implements TagService {
                 .bot(bot)
                 .build();
         tag = tagRepository.save(tag);
+        evictTagsCache(botId);
         log.info("Created tag '{}' for botId={}", request.name(), botId);
         return broadcastMapper.toTagResponse(tag);
     }
@@ -92,14 +99,25 @@ public class TagServiceImpl implements TagService {
     public void deleteTag(Long tagId, Long userId) {
         Tag tag = tagRepository.findById(tagId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Tag not found"));
-        validateBotOwnership(tag.getBot().getId(), userId);
+        Long botId = tag.getBot().getId();
+        validateBotOwnership(botId, userId);
         botUserTagRepository.deleteByTagId(tagId);
         tagRepository.delete(tag);
+        evictTagsCache(botId);
         log.info("Deleted tag {} (name='{}')", tagId, tag.getName());
     }
 
     private Bot validateBotOwnership(Long botId, Long userId) {
         return botRepository.findByIdAndUserId(botId, userId)
                 .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Bot not found or access denied"));
+    }
+
+    private void evictTagsCache(Long botId) {
+        if (botId != null) {
+            org.springframework.cache.Cache cache = cacheManager.getCache("tags");
+            if (cache != null) {
+                cache.evict(botId);
+            }
+        }
     }
 }

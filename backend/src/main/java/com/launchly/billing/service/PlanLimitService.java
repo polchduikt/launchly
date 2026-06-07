@@ -9,4 +9,5 @@ public interface PlanLimitService {
     void checkIntegrationAccess(Long userId);
     void checkAiAccess(Long userId);
     Plan getActivePlan(Long userId);
+    Plan getPlan(Long planId);
 }

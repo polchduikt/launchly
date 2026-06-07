@@ -12,6 +12,7 @@ import com.launchly.broadcast.entity.CampaignStatus;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,11 +85,19 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     }
 
     @Override
+    @Cacheable(value = "subscription", key = "'plan:' + #userId")
     public Plan getActivePlan(Long userId) {
         return subscriptionRepository.findByUserId(userId)
                 .filter(sub -> sub.getStatus() == SubscriptionStatus.ACTIVE || sub.getStatus() == SubscriptionStatus.TRIALING)
                 .map(Subscription::getPlan)
                 .orElseGet(() -> planRepository.findByName("FREE")
                         .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found")));
+    }
+
+    @Override
+    @Cacheable(value = "plan", key = "#planId")
+    public Plan getPlan(Long planId) {
+        return planRepository.findById(planId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Plan not found"));
     }
 }

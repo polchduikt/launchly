@@ -17,8 +17,10 @@ import com.launchly.bot.service.FlowEngineService;
 import com.launchly.billing.service.PlanLimitService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import java.time.Duration;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,9 @@ public class FlowEngineServiceImpl implements FlowEngineService {
     private final ObjectMapper objectMapper;
     private final Map<NodeType, NodeExecutor> executors;
     private final PlanLimitService planLimitService;
+    private final StringRedisTemplate redisTemplate;
+    private static final String SCHEMA_KEY = "launchly:bot:schema:%d";
+    private static final Duration SCHEMA_TTL = Duration.ofMinutes(30);
 
     public FlowEngineServiceImpl(BotRepository botRepository,
                                   BotUserRepository botUserRepository,
@@ -42,13 +47,15 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                   BotDialogStateService stateService,
                                   ObjectMapper objectMapper,
                                   List<NodeExecutor> nodeExecutors,
-                                  PlanLimitService planLimitService) {
+                                  PlanLimitService planLimitService,
+                                  StringRedisTemplate redisTemplate) {
         this.botRepository = botRepository;
         this.botUserRepository = botUserRepository;
         this.flowSchemaRepository = flowSchemaRepository;
         this.stateService = stateService;
         this.objectMapper = objectMapper;
         this.planLimitService = planLimitService;
+        this.redisTemplate = redisTemplate;
         this.executors = new EnumMap<>(NodeType.class);
         nodeExecutors.forEach(e -> executors.put(e.getType(), e));
     }
@@ -68,7 +75,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 return;
             }
 
-            FlowSchema schema = flowSchemaRepository.findByBotId(botId).orElse(null);
+            FlowSchema schema = getSchema(botId);
             if (schema == null) {
                 log.warn("No flow schema found for bot {}", botId);
                 return;
@@ -188,5 +195,41 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 .filter(n -> n.id().equals(nodeId))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private record CachedSchema(Long id, int version, String nodes, String edges) {}
+
+    private FlowSchema getSchema(Long botId) {
+        String key = String.format(SCHEMA_KEY, botId);
+        String cached = redisTemplate.opsForValue().get(key);
+
+        if (cached != null) {
+            try {
+                CachedSchema cachedSchema = objectMapper.readValue(cached, CachedSchema.class);
+                FlowSchema schema = new FlowSchema();
+                schema.setId(cachedSchema.id());
+                schema.setVersion(cachedSchema.version());
+                schema.setNodes(cachedSchema.nodes());
+                schema.setEdges(cachedSchema.edges());
+                return schema;
+            } catch (Exception e) {
+                log.error("Failed to deserialize cached schema for bot {}: {}", botId, e.getMessage());
+            }
+        }
+
+        Optional<FlowSchema> schemaOpt = flowSchemaRepository.findByBotId(botId);
+        if (schemaOpt.isEmpty()) {
+            return null;
+        }
+
+        FlowSchema schema = schemaOpt.get();
+        try {
+            CachedSchema cachedSchema = new CachedSchema(schema.getId(), schema.getVersion(), schema.getNodes(), schema.getEdges());
+            redisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(cachedSchema), SCHEMA_TTL);
+        } catch (Exception e) {
+            log.error("Failed to serialize schema for bot {}: {}", botId, e.getMessage());
+        }
+
+        return schema;
     }
 }

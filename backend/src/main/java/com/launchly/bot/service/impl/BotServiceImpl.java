@@ -27,6 +27,9 @@ import com.launchly.common.utils.EncryptionUtil;
 import com.launchly.media.service.MediaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,9 +52,11 @@ public class BotServiceImpl implements BotService {
     private final ObjectMapper objectMapper;
     private final PlanLimitService planLimitService;
     private final MediaService mediaService;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     @Transactional
+    @CacheEvict(value = "bots", key = "#userId")
     public BotResponse createBot(BotCreateRequest request, Long userId) {
         planLimitService.checkBotLimit(userId);
 
@@ -79,6 +84,7 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "bots", key = "#userId")
     public List<BotResponse> getBotsByUser(Long userId) {
         return botRepository.findAllByUserId(userId).stream()
                 .map(botMapper::toBotResponse)
@@ -109,6 +115,7 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "bots", key = "#userId")
     public BotResponse updateBot(Long id, BotUpdateRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
 
@@ -139,6 +146,7 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "bots", key = "#userId")
     public void deleteBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
 
@@ -150,6 +158,7 @@ public class BotServiceImpl implements BotService {
     }
 
     @Override
+    @CacheEvict(value = "bots", key = "#userId")
     public BotResponse startBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
 
@@ -166,7 +175,6 @@ public class BotServiceImpl implements BotService {
             try {
                 telegramBotManager.unregisterBot(bot.getId());
             } catch (Exception ex) {
-                // Log cleanup failure but rethrow original DB error
             }
             throw e;
         }
@@ -175,6 +183,7 @@ public class BotServiceImpl implements BotService {
     }
 
     @Override
+    @CacheEvict(value = "bots", key = "#userId")
     public BotResponse stopBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
 
@@ -191,7 +200,6 @@ public class BotServiceImpl implements BotService {
             try {
                 telegramBotManager.registerBot(bot);
             } catch (Exception ex) {
-                // Log fallback failure but rethrow original DB error
             }
             throw e;
         }
@@ -225,6 +233,7 @@ public class BotServiceImpl implements BotService {
         schema.setVersion(schema.getVersion() + 1);
 
         schema = flowSchemaRepository.save(schema);
+        redisTemplate.delete("launchly:bot:schema:" + botId);
         return toFlowSchemaResponse(schema);
     }
 

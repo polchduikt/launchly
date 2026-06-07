@@ -1,10 +1,11 @@
 package com.launchly.ai.service;
 
+import com.launchly.billing.entity.Plan;
+import com.launchly.ai.dto.response.AiUsageResponse;
+
 public interface AiUsageService {
 
-    int checkUsageLimit(Long userId);
+    void checkAndIncrement(Long userId, Plan plan);
 
-    void incrementUsage(Long userId);
-
-    int getCurrentUsage(Long userId);
+    AiUsageResponse getUsage(Long userId, Plan plan);
 }

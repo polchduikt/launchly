@@ -60,32 +60,24 @@ public class AiServiceImpl implements AiService {
 
     @Override
     public AiChatResponse chat(AiChatRequest request, Long userId) {
-        aiUsageService.checkUsageLimit(userId);
-
+        Plan plan = planLimitService.getActivePlan(userId);
+        aiUsageService.checkAndIncrement(userId, plan);
         List<GroqMessage> messages = new ArrayList<>();
         messages.add(new GroqMessage("system", CHAT_SYSTEM_PROMPT));
-
         if (request.history() != null) {
             messages.addAll(request.history());
         }
-
         messages.add(new GroqMessage("user", request.message()));
-
         String reply = groqClient.chat(messages);
-
-        aiUsageService.incrementUsage(userId);
-
-        Plan plan = planLimitService.getActivePlan(userId);
+        AiUsageResponse usage = aiUsageService.getUsage(userId, plan);
         int limit = "FREE".equalsIgnoreCase(plan.getName()) ? DAILY_LIMIT : 999999;
-        int used = aiUsageService.getCurrentUsage(userId);
-
-        return new AiChatResponse(reply, used, limit);
+        return new AiChatResponse(reply, usage.requestsUsed(), limit);
     }
 
     @Override
     public AiSchemaResponse generateSchema(AiSchemaRequest request, Long userId) {
-        aiUsageService.checkUsageLimit(userId);
-
+        Plan plan = planLimitService.getActivePlan(userId);
+        aiUsageService.checkAndIncrement(userId, plan);
         List<GroqMessage> messages = new ArrayList<>();
         messages.add(new GroqMessage("system", SCHEMA_SYSTEM_PROMPT));
 
@@ -131,21 +123,14 @@ public class AiServiceImpl implements AiService {
             throw new AppException(HttpStatus.BAD_REQUEST, "Generated schema must contain exactly one START node");
         }
 
-        aiUsageService.incrementUsage(userId);
-
-        Plan plan = planLimitService.getActivePlan(userId);
+        AiUsageResponse usage = aiUsageService.getUsage(userId, plan);
         int limit = "FREE".equalsIgnoreCase(plan.getName()) ? DAILY_LIMIT : 999999;
-        int used = aiUsageService.getCurrentUsage(userId);
-        return new AiSchemaResponse(nodesNode, edgesNode, used, limit);
+        return new AiSchemaResponse(nodesNode, edgesNode, usage.requestsUsed(), limit);
     }
 
     @Override
     public AiUsageResponse getUsage(Long userId) {
         Plan plan = planLimitService.getActivePlan(userId);
-        int limit = "FREE".equalsIgnoreCase(plan.getName()) ? DAILY_LIMIT : 999999;
-        int used = aiUsageService.getCurrentUsage(userId);
-        String resetsAt = LocalDate.now().plusDays(1).atStartOfDay().toString();
-
-        return new AiUsageResponse(used, limit, resetsAt);
+        return aiUsageService.getUsage(userId, plan);
     }
 }

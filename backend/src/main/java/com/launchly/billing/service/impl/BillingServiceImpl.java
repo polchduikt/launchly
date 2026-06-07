@@ -12,6 +12,7 @@ import com.launchly.billing.mapper.BillingMapper;
 import com.launchly.billing.repository.PlanRepository;
 import com.launchly.billing.repository.SubscriptionRepository;
 import com.launchly.billing.service.BillingService;
+import com.launchly.billing.service.PlanLimitService;
 import com.launchly.common.exception.AppException;
 import com.stripe.Stripe;
 import com.stripe.model.Event;
@@ -25,6 +26,9 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +48,8 @@ public class BillingServiceImpl implements BillingService {
     private final PlanRepository planRepository;
     private final UserRepository userRepository;
     private final BillingMapper billingMapper;
+    private final CacheManager cacheManager;
+    private final PlanLimitService planLimitService;
 
     @Value("${stripe.api.key:}")
     private String apiKey;
@@ -97,6 +103,7 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     @Transactional
+    @Cacheable(value = "subscription", key = "#userId")
     public SubscriptionResponse getSubscriptionByUser(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseGet(() -> {
@@ -113,9 +120,7 @@ public class BillingServiceImpl implements BillingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Plan plan = planRepository.findById(planId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Plan not found"));
-
+        Plan plan = planLimitService.getPlan(planId);
         if ("FREE".equalsIgnoreCase(plan.getName())) {
             throw new AppException(HttpStatus.BAD_REQUEST, "Cannot checkout to FREE plan via Stripe");
         }
@@ -164,6 +169,10 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.Caching(evict = {
+        @CacheEvict(value = "subscription", key = "#userId"),
+        @CacheEvict(value = "subscription", key = "'plan:' + #userId")
+    })
     public SubscriptionResponse cancelSubscription(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
@@ -192,6 +201,10 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     @Transactional
+    @org.springframework.cache.annotation.Caching(evict = {
+        @CacheEvict(value = "subscription", key = "#userId"),
+        @CacheEvict(value = "subscription", key = "'plan:' + #userId")
+    })
     public SubscriptionResponse resumeSubscription(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
@@ -279,19 +292,14 @@ public class BillingServiceImpl implements BillingService {
             log.warn("Missing metadata in Stripe Session: userId={}, planId={}", userIdStr, planIdStr);
             return;
         }
-
         Long userId = Long.valueOf(userIdStr);
         Long planId = Long.valueOf(planIdStr);
-
-        Plan plan = planRepository.findById(planId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Plan not found"));
-
+        Plan plan = planLimitService.getPlan(planId);
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
 
         String stripeSubId = session.getSubscription();
         com.stripe.model.Subscription stripeSub = com.stripe.model.Subscription.retrieve(stripeSubId);
-
         subscription.setPlan(plan);
         subscription.setStripeSubscriptionId(stripeSubId);
         subscription.setStripeCustomerId(session.getCustomer());
@@ -301,6 +309,7 @@ public class BillingServiceImpl implements BillingService {
         subscription.setCancelAtPeriodEnd(stripeSub.getCancelAtPeriodEnd());
 
         subscriptionRepository.save(subscription);
+        evictSubscriptionCache(userId);
         log.info("Activated plan {} for user {}", plan.getName(), userId);
     }
 
@@ -317,6 +326,7 @@ public class BillingServiceImpl implements BillingService {
         subscription.setCurrentPeriodStart(mapEpoch(stripeSub.getCurrentPeriodStart()));
         subscription.setCurrentPeriodEnd(mapEpoch(stripeSub.getCurrentPeriodEnd()));
         subscriptionRepository.save(subscription);
+        evictSubscriptionCache(subscription.getUser().getId());
         log.info("Payment succeeded. Renewed subscription for user {}", subscription.getUser().getId());
     }
 
@@ -330,6 +340,7 @@ public class BillingServiceImpl implements BillingService {
 
         subscription.setStatus(SubscriptionStatus.PAST_DUE);
         subscriptionRepository.save(subscription);
+        evictSubscriptionCache(subscription.getUser().getId());
         log.warn("Payment failed. Subscription status marked PAST_DUE for user {}", subscription.getUser().getId());
     }
 
@@ -351,6 +362,7 @@ public class BillingServiceImpl implements BillingService {
         subscription.setCancelAtPeriodEnd(false);
 
         subscriptionRepository.save(subscription);
+        evictSubscriptionCache(subscription.getUser().getId());
         log.info("Subscription deleted in Stripe. Downgraded user {} to FREE plan", subscription.getUser().getId());
     }
 
@@ -367,6 +379,7 @@ public class BillingServiceImpl implements BillingService {
         subscription.setCancelAtPeriodEnd(stripeSub.getCancelAtPeriodEnd());
 
         subscriptionRepository.save(subscription);
+        evictSubscriptionCache(subscription.getUser().getId());
         log.info("Subscription updated in Stripe for user {}", subscription.getUser().getId());
     }
 
@@ -384,5 +397,15 @@ public class BillingServiceImpl implements BillingService {
             case "canceled", "unpaid" -> SubscriptionStatus.CANCELLED;
             default -> SubscriptionStatus.ACTIVE;
         };
+    }
+
+    private void evictSubscriptionCache(Long userId) {
+        if (userId != null) {
+            org.springframework.cache.Cache cache = cacheManager.getCache("subscription");
+            if (cache != null) {
+                cache.evict(userId);
+                cache.evict("plan:" + userId);
+            }
+        }
     }
 }
