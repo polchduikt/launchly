@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import com.launchly.common.utils.SanitizationUtil;
 import java.util.List;
 import java.util.Map;
 
@@ -29,10 +30,12 @@ public class MessageNodeExecutor implements NodeExecutor {
         String text = data != null ? (String) data.getOrDefault("text", "...") : "...";
         String chatId = botUser.getTelegramId().toString();
 
+        String sanitizedText = SanitizationUtil.sanitizeForTelegram(text);
+
         try {
             SendMessage message = SendMessage.builder()
                     .chatId(chatId)
-                    .text(text)
+                    .text(sanitizedText)
                     .build();
             client.execute(message);
         } catch (TelegramApiException e) {

@@ -1,5 +1,6 @@
 package com.launchly.bot.dto.request;
 
+import com.launchly.common.validation.ValidTelegramToken;
 import jakarta.validation.constraints.NotBlank;
 
 public record BotCreateRequest(
@@ -10,5 +11,6 @@ public record BotCreateRequest(
         String description,
 
         @NotBlank(message = "Telegram token is required")
+        @ValidTelegramToken
         String telegramToken
 ) {}

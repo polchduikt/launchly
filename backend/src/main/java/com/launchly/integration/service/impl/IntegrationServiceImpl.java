@@ -15,12 +15,14 @@ import com.launchly.integration.entity.IntegrationType;
 import com.launchly.integration.mapper.IntegrationMapper;
 import com.launchly.integration.repository.IntegrationRepository;
 import com.launchly.integration.service.IntegrationService;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,6 +34,7 @@ public class IntegrationServiceImpl implements IntegrationService {
     private final PlanLimitService planLimitService;
     private final IntegrationMapper integrationMapper;
     private final ObjectMapper objectMapper;
+    private final Validator validator;
 
     @Override
     @Transactional(readOnly = true)
@@ -128,35 +131,29 @@ public class IntegrationServiceImpl implements IntegrationService {
             throw new AppException(HttpStatus.BAD_REQUEST, "Configuration details are required");
         }
         try {
+            Object configObj;
             if (type == IntegrationType.GOOGLE_SHEETS) {
-                GoogleSheetsConfig config = objectMapper.readValue(configStr, GoogleSheetsConfig.class);
-                if (config.spreadsheetId() == null || config.spreadsheetId().trim().isEmpty()) {
-                    throw new AppException(HttpStatus.BAD_REQUEST, "spreadsheetId is required for Google Sheets");
-                }
-                if (config.sheetName() == null || config.sheetName().trim().isEmpty()) {
-                    throw new AppException(HttpStatus.BAD_REQUEST, "sheetName is required for Google Sheets");
-                }
-                if (!"ORDERS".equalsIgnoreCase(config.dataType()) && !"LEADS".equalsIgnoreCase(config.dataType())) {
-                    throw new AppException(HttpStatus.BAD_REQUEST, "dataType must be ORDERS or LEADS for Google Sheets");
-                }
+                configObj = objectMapper.readValue(configStr, GoogleSheetsConfig.class);
             } else if (type == IntegrationType.WEBHOOK) {
-                WebhookConfig config = objectMapper.readValue(configStr, WebhookConfig.class);
-                if (config.url() == null || config.url().trim().isEmpty() || (!config.url().startsWith("http://") && !config.url().startsWith("https://"))) {
-                    throw new AppException(HttpStatus.BAD_REQUEST, "A valid Webhook URL starting with http/https is required");
-                }
-                if (config.events() == null || config.events().isEmpty()) {
-                    throw new AppException(HttpStatus.BAD_REQUEST, "At least one target event is required for Webhooks");
-                }
-                for (String eventName : config.events()) {
-                    if (!"ORDER_CREATED".equalsIgnoreCase(eventName) && !"LEAD_CREATED".equalsIgnoreCase(eventName)) {
-                        throw new AppException(HttpStatus.BAD_REQUEST, "Invalid event: " + eventName);
-                    }
-                }
+                configObj = objectMapper.readValue(configStr, WebhookConfig.class);
             } else if (type == IntegrationType.EXCEL) {
-                ExcelConfig config = objectMapper.readValue(configStr, ExcelConfig.class);
-                if (!"ORDERS".equalsIgnoreCase(config.dataType()) && !"LEADS".equalsIgnoreCase(config.dataType())) {
-                    throw new AppException(HttpStatus.BAD_REQUEST, "dataType must be ORDERS or LEADS for Excel export config");
-                }
+                configObj = objectMapper.readValue(configStr, ExcelConfig.class);
+            } else {
+                throw new AppException(HttpStatus.BAD_REQUEST, "Unsupported integration type");
+            }
+
+            var violations = validator.validate(configObj);
+            if (!violations.isEmpty()) {
+                String errorMsg = violations.stream()
+                        .map(violation -> {
+                            String msg = violation.getMessage();
+                            if ("Invalid event".equals(msg)) {
+                                return msg + ": " + violation.getInvalidValue();
+                            }
+                            return msg;
+                        })
+                        .collect(Collectors.joining(", "));
+                throw new AppException(HttpStatus.BAD_REQUEST, errorMsg);
             }
         } catch (AppException e) {
             throw e;

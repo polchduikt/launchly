@@ -14,6 +14,7 @@ import com.launchly.broadcast.service.BroadcastFilterService;
 import com.launchly.broadcast.service.BroadcastService;
 import com.launchly.billing.service.PlanLimitService;
 import com.launchly.common.exception.AppException;
+import com.launchly.common.utils.SanitizationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -102,7 +103,8 @@ public class BroadcastServiceImpl implements BroadcastService {
         for (int i = 0; i < targetUsers.size(); i++) {
             BotUser user = targetUsers.get(i);
             try {
-                telegramSendService.sendMessage(botId, user.getTelegramId(), campaign.getMessage());
+                String sanitizedText = SanitizationUtil.sanitizeForTelegram(campaign.getMessage());
+                telegramSendService.sendMessage(botId, user.getTelegramId(), sanitizedText);
                 sent++;
             } catch (Exception e) {
                 failed++;
