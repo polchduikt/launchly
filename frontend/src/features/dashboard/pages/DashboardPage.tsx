@@ -1,6 +1,6 @@
 import React from 'react';
-import { useAuthStore } from '../store/useAuthStore';
-import { logoutApi } from '../features/auth/api/auth';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { logoutApi } from '../../auth/api/auth';
 import { LogOut } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
@@ -30,7 +30,7 @@ const DashboardPage: React.FC = () => {
         </h1>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:scale-[0.98] transition-all cursor-pointer shadow-md shadow-red-600/10 mx-auto"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer mx-auto"
         >
           <LogOut size={16} />
           Sign Out

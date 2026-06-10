@@ -1,49 +1,13 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
-import { loginApi } from '../api/auth';
-import { useAuthStore } from '../../../store/useAuthStore';
+import { Link } from 'react-router-dom';
+import { useLoginForm } from '../hooks/useLoginForm';
 import { AuthPageLayout } from '../components/AuthPageLayout';
 
-const loginSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-type LoginFields = z.infer<typeof loginSchema>;
-
 const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
+  const { form, onSubmit, isPending, apiError } = useLoginForm();
+  const { register, formState: { errors } } = form;
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFields>({
-    resolver: zodResolver(loginSchema),
-  });
-
-  const onSubmit = async (data: LoginFields) => {
-    setIsLoading(true);
-    setApiError(null);
-    try {
-      const response = await loginApi(data);
-      login(response.accessToken, response.refreshToken, response.user);
-      navigate('/', { replace: true });
-    } catch (error: any) {
-      const msg = error.response?.data?.message || 'Invalid email or password. Please try again.';
-      setApiError(msg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleGoogleLogin = () => {
     window.location.href = '/api/v1/auth/google-login/google';
@@ -62,7 +26,7 @@ const LoginPage: React.FC = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={onSubmit} className="space-y-5">
         <div>
           <label className="block text-sm font-bold text-on-surface mb-1.5" htmlFor="email">
             Email Address
@@ -123,10 +87,10 @@ const LoginPage: React.FC = () => {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isPending}
           className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded bg-primary text-on-primary font-semibold text-sm hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-sm disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
         >
-          {isLoading ? (
+          {isPending ? (
             <Loader2 className="animate-spin" size={16} />
           ) : (
             'Sign In'
