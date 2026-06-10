@@ -31,7 +31,7 @@ export const useRegisterForm = () => {
     setApiError(null);
     try {
       await registerMutate(data);
-      navigate('/', { replace: true });
+      navigate('/home', { replace: true });
     } catch (error: any) {
       const msg = error.response?.data?.message || error.message || 'Email already in use. Please try another one.';
       setApiError(msg);

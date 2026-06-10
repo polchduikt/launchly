@@ -23,7 +23,7 @@ const OAuth2Callback: React.FC = () => {
         useAuthStore.setState({ accessToken, refreshToken });
         const user = await getCurrentUserApi();
         login(accessToken, refreshToken, user);
-        navigate('/', { replace: true });
+        navigate('/home', { replace: true });
       } catch (error) {
         useAuthStore.getState().logout();
         navigate('/login', { replace: true });

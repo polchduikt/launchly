@@ -29,7 +29,7 @@ export const useLoginForm = () => {
     setApiError(null);
     try {
       await loginMutate(data);
-      navigate('/', { replace: true });
+      navigate('/home', { replace: true });
     } catch (error: any) {
       const msg = error.response?.data?.message || error.message || 'Invalid email or password. Please try again.';
       setApiError(msg);
