@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import type { User } from '../features/auth/types';
+import { queryClient } from '../lib/queryClient';
+import { useBotStore } from './useBotStore';
 
 interface AuthState {
   user: User | null;
   accessToken: string | null;
   refreshToken: string | null;
-  isAuthenticated: boolean;
   login: (accessToken: string, refreshToken: string, user: User) => void;
   logout: () => void;
   setUser: (user: User) => void;
@@ -30,7 +31,6 @@ export const useAuthStore = create<AuthState>((set) => {
     user: savedUser,
     accessToken: savedAccessToken,
     refreshToken: savedRefreshToken,
-    isAuthenticated: !!savedAccessToken,
 
     login: (accessToken, refreshToken, user) => {
       localStorage.setItem('accessToken', accessToken);
@@ -40,7 +40,6 @@ export const useAuthStore = create<AuthState>((set) => {
         accessToken,
         refreshToken,
         user,
-        isAuthenticated: true,
       });
     },
 
@@ -48,11 +47,12 @@ export const useAuthStore = create<AuthState>((set) => {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      useBotStore.getState().clearBots();
+      queryClient.clear();
       set({
         accessToken: null,
         refreshToken: null,
         user: null,
-        isAuthenticated: false,
       });
     },
 

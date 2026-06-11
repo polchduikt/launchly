@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -7,7 +8,7 @@ import { useLoginMutation } from './useLoginMutation';
 
 export const loginSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
 export type LoginFields = z.infer<typeof loginSchema>;
@@ -30,8 +31,10 @@ export const useLoginForm = () => {
     try {
       await loginMutate(data);
       navigate('/home', { replace: true });
-    } catch (error: any) {
-      const msg = error.response?.data?.message || error.message || 'Invalid email or password. Please try again.';
+    } catch (error: unknown) {
+      const msg = axios.isAxiosError(error)
+        ? (error.response?.data?.message ?? 'Invalid email or password. Please try again.')
+        : (error instanceof Error ? error.message : 'Something went wrong');
       setApiError(msg);
     }
   };

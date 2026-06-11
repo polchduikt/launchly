@@ -34,10 +34,10 @@ const OAuth2Callback: React.FC = () => {
   }, [searchParams, login, navigate]);
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 flex flex-col justify-center items-center">
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="animate-spin text-blue-600" size={40} />
-        <p className="text-slate-600 font-medium">Completing secure sign in...</p>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="animate-spin text-indigo-600" size={32} />
+        <span className="text-sm font-semibold text-slate-500">Completing secure sign in...</span>
       </div>
     </div>
   );

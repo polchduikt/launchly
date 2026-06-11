@@ -1,47 +1,62 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useBotStore } from '../../../store/useBotStore';
+import axios from 'axios';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import logo from '../../../assets/logo.png';
 import { useCreateBotMutation } from '../hooks/useBotMutations';
+import { useBotsQuery } from '../hooks/useBotsQuery';
 import { AlertCircle, ArrowLeft, Loader2, Sparkles, MessageCircle, Send, Check } from 'lucide-react';
+
+const botSchema = z.object({
+  botName: z.string().min(1, 'Bot name is required'),
+  botToken: z.string().min(1, 'Telegram bot token is required'),
+  botDesc: z.string().optional(),
+});
+
+type BotFormValues = z.infer<typeof botSchema>;
 
 export const BotsConnectPage: React.FC = () => {
   const navigate = useNavigate();
-  const { bots } = useBotStore();
+  const { data: bots = [] } = useBotsQuery();
   const hasBots = bots.length > 0;
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [botName, setBotName] = useState('');
-  const [botToken, setBotToken] = useState('');
-  const [botDesc, setBotDesc] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
+
 
   const createBotMutation = useCreateBotMutation();
 
-  const handleConnect = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setValidationError(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<BotFormValues>({
+    resolver: zodResolver(botSchema),
+    defaultValues: {
+      botName: '',
+      botToken: '',
+      botDesc: '',
+    },
+  });
 
-    if (!botName.trim()) {
-      setValidationError('Bot name is required');
-      return;
-    }
-    if (!botToken.trim()) {
-      setValidationError('Telegram bot token is required');
-      return;
-    }
+  const handleConnect = (data: BotFormValues) => {
+    setValidationError(null);
 
     createBotMutation.mutate(
       {
-        name: botName.trim(),
-        telegramToken: botToken.trim(),
-        description: botDesc.trim() || undefined,
+        name: data.botName.trim(),
+        telegramToken: data.botToken.trim(),
+        description: data.botDesc?.trim() || undefined,
       },
       {
         onSuccess: () => {
           navigate('/home');
         },
-        onError: (err: any) => {
-          const errMsg = err.response?.data?.message || 'Failed to connect bot. Please verify your token.';
+        onError: (err: unknown) => {
+          const errMsg = axios.isAxiosError(err)
+            ? (err.response?.data?.message ?? 'Failed to connect bot. Please verify your token.')
+            : (err instanceof Error ? err.message : 'Something went wrong');
           setValidationError(errMsg);
         },
       }
@@ -52,8 +67,9 @@ export const BotsConnectPage: React.FC = () => {
     if (step === 3) setStep(2);
     else if (step === 2) setStep(1);
     else if (hasBots) navigate('/home');
-    else navigate(-1);
+    else navigate('/');
   };
+
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row overflow-hidden font-sans">
@@ -146,14 +162,14 @@ export const BotsConnectPage: React.FC = () => {
               ].map((c) => (
                 <div
                   key={c.name}
-                  className="w-full bg-white/70 border border-slate-150 p-5 rounded-2xl flex items-center gap-4 select-none opacity-60 relative group"
+                  className="w-full bg-white/70 border border-slate-200 p-5 rounded-2xl flex items-center gap-4 select-none opacity-60 relative group"
                 >
                   <span className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${c.color}`}>
                     <MessageCircle size={24} />
                   </span>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-slate-700">{c.name}</h3>
-                    <p className="text-xs text-slate-450 truncate">{c.desc}</p>
+                    <p className="text-xs text-slate-500 truncate">{c.desc}</p>
                   </div>
                   <span className="absolute right-4 top-4 text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">
                     Coming Soon
@@ -202,7 +218,7 @@ export const BotsConnectPage: React.FC = () => {
 
               <div className="space-y-4 mb-6">
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Instructions:</h4>
-                <ol className="space-y-3 text-sm text-slate-650">
+                <ol className="space-y-3 text-sm text-slate-700">
                   <li className="flex gap-2">
                     <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center shrink-0">1</span>
                     <span>
@@ -229,7 +245,7 @@ export const BotsConnectPage: React.FC = () => {
                 </ol>
               </div>
 
-              <form onSubmit={handleConnect} className="space-y-4">
+              <form onSubmit={handleSubmit(handleConnect)} className="space-y-4">
                 <div>
                   <label htmlFor="botName" className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">
                     Bot Name
@@ -237,12 +253,14 @@ export const BotsConnectPage: React.FC = () => {
                   <input
                     id="botName"
                     type="text"
-                    value={botName}
-                    onChange={(e) => setBotName(e.target.value)}
+                    {...register('botName')}
                     placeholder="Enter your bot name (e.g. SupportBot)"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-sm transition-all"
+                    className={`w-full px-4 py-2.5 rounded-xl border ${errors.botName ? 'border-rose-300 focus:border-rose-500' : 'border-slate-200 focus:border-indigo-500'} focus:outline-none text-sm transition-all`}
                     disabled={createBotMutation.isPending}
                   />
+                  {errors.botName && (
+                    <span className="text-rose-600 text-xs mt-1 block">{errors.botName.message}</span>
+                  )}
                 </div>
 
                 <div>
@@ -252,12 +270,14 @@ export const BotsConnectPage: React.FC = () => {
                   <input
                     id="botToken"
                     type="text"
-                    value={botToken}
-                    onChange={(e) => setBotToken(e.target.value)}
+                    {...register('botToken')}
                     placeholder="Enter token (e.g. 123456:ABC-DEF...)"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-sm transition-all"
+                    className={`w-full px-4 py-2.5 rounded-xl border ${errors.botToken ? 'border-rose-300 focus:border-rose-500' : 'border-slate-200 focus:border-indigo-500'} focus:outline-none text-sm transition-all`}
                     disabled={createBotMutation.isPending}
                   />
+                  {errors.botToken && (
+                    <span className="text-rose-600 text-xs mt-1 block">{errors.botToken.message}</span>
+                  )}
                 </div>
 
                 <div>
@@ -266,8 +286,7 @@ export const BotsConnectPage: React.FC = () => {
                   </label>
                   <textarea
                     id="botDesc"
-                    value={botDesc}
-                    onChange={(e) => setBotDesc(e.target.value)}
+                    {...register('botDesc')}
                     placeholder="Enter a brief description"
                     rows={2}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-sm transition-all resize-none"

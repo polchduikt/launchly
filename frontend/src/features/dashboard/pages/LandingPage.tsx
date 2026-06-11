@@ -1,12 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { Bot, Users, Cpu, Send, Check, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight } from 'lucide-react';
 import logo from '../../../assets/logo.png';
+import { LANDING_FEATURES } from '../config/features';
+import { LANDING_PLANS } from '../config/plans';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isAuthenticated = useAuthStore((state) => !!state.accessToken);
 
   const handleCta = () => {
     if (isAuthenticated) {
@@ -16,68 +18,6 @@ export const LandingPage: React.FC = () => {
     }
   };
 
-  const features = [
-    {
-      icon: Bot,
-      title: 'Visual Flow Builder',
-      desc: 'Design advanced conversational flows visually. No coding required.',
-      color: 'bg-indigo-50 text-indigo-650 border-indigo-100',
-    },
-    {
-      icon: Cpu,
-      title: 'AI-Powered Responses',
-      desc: 'Train your bot with custom instructions to answer complex queries automatically.',
-      color: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    },
-    {
-      icon: Users,
-      title: 'Built-in CRM',
-      desc: 'Segment contacts, assign custom tags, and view conversations in real-time.',
-      color: 'bg-sky-50 text-sky-500 border-sky-100',
-    },
-    {
-      icon: Send,
-      title: 'Broadcast Campaigns',
-      desc: 'Send targeted broadcast messages to specific segments instantly.',
-      color: 'bg-rose-50 text-rose-500 border-rose-100',
-    },
-  ];
-
-  const plans = [
-    {
-      name: 'Free',
-      price: '$0',
-      period: 'forever',
-      features: ['1 connected bot', '100 bot users', 'Basic flow builder', 'Community support'],
-      cta: 'Get Started',
-      popular: false,
-    },
-    {
-      name: 'Starter',
-      price: '$10',
-      period: 'per month',
-      features: ['3 connected bots', '1,000 bot users', 'Broadcast campaigns', 'Integrations', 'Priority support'],
-      cta: 'Go Starter',
-      popular: false,
-    },
-    {
-      name: 'Pro',
-      price: '$25',
-      period: 'per month',
-      features: ['10 connected bots', '10,000 bot users', 'AI Agent automated chats', 'Stripe payments', '24/7 support'],
-      cta: 'Go Pro',
-      popular: true,
-    },
-    {
-      name: 'Unlimited',
-      price: '$99',
-      period: 'per month',
-      features: ['100 connected bots', '100,000 bot users', 'AI Agent unlimited usage', 'Stripe payments', 'Dedicated manager'],
-      cta: 'Go Unlimited',
-      popular: false,
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased selection:bg-indigo-500 selection:text-white">
       <header className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-slate-200 z-50 transition-all">
@@ -86,9 +26,9 @@ export const LandingPage: React.FC = () => {
             <img src={logo} alt="Launchly Logo" className="h-10 w-auto object-contain" />
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-            <a href="#features" className="hover:text-indigo-650 transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-indigo-650 transition-colors">Pricing</a>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-700">
+            <a href="#features" className="hover:text-indigo-700 transition-colors">Features</a>
+            <a href="#pricing" className="hover:text-indigo-700 transition-colors">Pricing</a>
           </nav>
 
           <div>
@@ -126,12 +66,12 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-6 text-center space-y-8 relative z-10">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight">
             Supercharge your business with{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-500">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-600">
               Telegram automation
             </span>
           </h1>
 
-          <p className="text-slate-550 text-base md:text-lg leading-relaxed max-w-2xl mx-auto font-medium">
+          <p className="text-slate-500 text-base md:text-lg leading-relaxed max-w-2xl mx-auto font-medium">
             Connect your Telegram bots, automate customer support with AI, build custom marketing funnels, and close sales automatically.
           </p>
 
@@ -165,7 +105,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {features.map((f) => {
+            {LANDING_FEATURES.map((f) => {
               const Icon = f.icon;
               return (
                 <div
@@ -202,7 +142,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-stretch">
-            {plans.map((p) => (
+            {LANDING_PLANS.map((p) => (
               <div
                 key={p.name}
                 className={`bg-white border rounded-3xl p-8 flex flex-col justify-between relative transition-all hover:shadow-lg ${
@@ -220,13 +160,13 @@ export const LandingPage: React.FC = () => {
                     <h4 className="font-bold text-slate-400 text-xs uppercase tracking-wider">{p.name}</h4>
                     <div className="flex items-baseline gap-1 mt-2">
                       <span className="text-4xl font-extrabold text-slate-900">{p.price}</span>
-                      <span className="text-xs text-slate-550 font-semibold">/{p.period}</span>
+                      <span className="text-xs text-slate-600 font-semibold">/{p.period}</span>
                     </div>
                   </div>
 
                   <ul className="space-y-3 pt-6 border-t border-slate-100">
                     {p.features.map((f) => (
-                      <li key={f} className="flex gap-2 text-xs text-slate-650 font-medium">
+                      <li key={f} className="flex gap-2 text-xs text-slate-700 font-medium">
                         <Check size={14} className="text-indigo-600 shrink-0" />
                         <span>{f}</span>
                       </li>

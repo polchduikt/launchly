@@ -1,5 +1,6 @@
 import apiClient from '../../../lib/axios';
-import type { BotResponse, BotCreateRequest, BotDetailResponse } from '../../../types/bot';
+import type { BotResponse, BotCreateRequest, BotDetailResponse, FlowSchemaResponse } from '../../../types/bot';
+
 
 export const getBotsApi = async (): Promise<BotResponse[]> => {
   const response = await apiClient.get<BotResponse[]>('/bots');
@@ -29,3 +30,21 @@ export const stopBotApi = async (id: number): Promise<BotResponse> => {
   const response = await apiClient.post<BotResponse>(`/bots/${id}/stop`);
   return response.data;
 };
+
+export const getFlowSchemaApi = async (botId: number): Promise<FlowSchemaResponse> => {
+  const response = await apiClient.get<FlowSchemaResponse>(`/bots/${botId}/schema`);
+  return response.data;
+};
+
+export const saveFlowSchemaApi = async (
+  botId: number,
+  nodes: Record<string, unknown>[],
+  edges: Record<string, unknown>[]
+): Promise<FlowSchemaResponse> => {
+  const response = await apiClient.put<FlowSchemaResponse>(`/bots/${botId}/schema`, {
+    nodes,
+    edges,
+  });
+  return response.data;
+};
+

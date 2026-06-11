@@ -1,55 +1,24 @@
 import React, { useState } from 'react';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
+import { SETTINGS_SECTIONS } from '../config/settingsSections';
+import { useLogoutMutation } from '../../auth/hooks/useLogoutMutation';
+import { Loader2 } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('general');
   const [timeZone, setTimeZone] = useState('UTC+07:00');
+  const logoutMutation = useLogoutMutation();
 
-  const sidebarSections = [
-    {
-      title: 'Main',
-      items: [
-        { id: 'general', label: 'General' },
-        { id: 'notifications', label: 'Notifications' },
-        { id: 'members', label: 'Team Members' },
-        { id: 'logs', label: 'Logs' },
-        { id: 'display', label: 'Display' },
-      ],
-    },
-    {
-      title: 'Billing',
-      items: [
-        { id: 'subscriptions', label: 'Subscriptions' },
-        { id: 'invoices', label: 'Invoices' },
-        { id: 'payment', label: 'Payment Details' },
-      ],
-    },
-    {
-      title: 'Inbox',
-      items: [
-        { id: 'live-chat', label: 'Live Chat Behavior' },
-        { id: 'assignment', label: 'Auto-Assignment' },
-      ],
-    },
-    {
-      title: 'Channels',
-      items: [
-        { id: 'instagram', label: 'Instagram' },
-        { id: 'whatsapp', label: 'WhatsApp' },
-        { id: 'messenger', label: 'Facebook Messenger' },
-        { id: 'sms', label: 'SMS' },
-        { id: 'email', label: 'Email' },
-        { id: 'telegram', label: 'Telegram' },
-      ],
-    },
-  ];
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   return (
     <DashboardLayout>
       <div className="flex h-full min-h-screen bg-slate-50 font-sans">
         <aside className="w-60 bg-slate-50 border-r border-slate-200 p-4 shrink-0 hidden md:block overflow-y-auto max-h-screen pb-20">
           <div className="space-y-6">
-            {sidebarSections.map((section) => (
+            {SETTINGS_SECTIONS.map((section) => (
               <div key={section.title}>
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-2 select-none">
                   {section.title}
@@ -98,7 +67,7 @@ export const SettingsPage: React.FC = () => {
                       <option value="UTC-05:00">(UTC-05:00) - New York, EST</option>
                     </select>
                     <div className="text-xs text-slate-400 leading-relaxed md:max-w-xs">
-                      All the data in Manychat will be displayed and exported according to this timezone.{' '}
+                      All the data in Launchly will be displayed and exported according to this timezone.{' '}
                       <button className="text-indigo-600 font-bold hover:underline">Learn more</button>
                     </div>
                   </div>
@@ -140,8 +109,33 @@ export const SettingsPage: React.FC = () => {
                     <button className="px-5 py-2.5 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl transition-all select-none cursor-not-allowed border border-slate-200">
                       Leave
                     </button>
-                    <p className="text-xs text-slate-450 leading-relaxed md:max-w-xs">
+                    <p className="text-xs text-slate-500 leading-relaxed md:max-w-xs">
                       Transfer your ownership to another team member if you want to leave this account
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
+                  <div className="w-full md:w-1/3">
+                    <h3 className="font-bold text-sm text-slate-800">Sign Out</h3>
+                  </div>
+                  <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
+                    <button
+                      onClick={handleLogout}
+                      disabled={logoutMutation.isPending}
+                      className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed"
+                    >
+                      {logoutMutation.isPending ? (
+                        <>
+                          <Loader2 className="animate-spin" size={14} />
+                          <span>Signing out...</span>
+                        </>
+                      ) : (
+                        <span>Sign Out</span>
+                      )}
+                    </button>
+                    <p className="text-xs text-slate-400 leading-relaxed md:max-w-xs">
+                      Sign out of your Launchly account from this device
                     </p>
                   </div>
                 </div>

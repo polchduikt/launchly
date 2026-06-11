@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import logoL from '../../assets/logo-l.png';
+import { ROUTES } from '../../constants/routes';
 import {
   Home,
   Zap,
@@ -13,17 +14,17 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
+const NAV_ITEMS = [
+  { label: 'Home', path: ROUTES.HOME, icon: Home },
+  { label: 'Automation', path: ROUTES.AUTOMATIONS, icon: Zap },
+  { label: 'CRM', path: '/crm', icon: Users, disabled: true },
+  { label: 'Settings', path: ROUTES.SETTINGS, icon: Settings },
+];
+
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
-
-  const navItems = [
-    { label: 'Home', path: '/home', icon: Home },
-    { label: 'Automation', path: '/automations', icon: Zap },
-    { label: 'CRM', path: '/crm', icon: Users, disabled: true },
-    { label: 'Settings', path: '/settings', icon: Settings },
-  ];
 
   if (!user) return null;
 
@@ -36,7 +37,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </div>
 
           <nav className="flex-1 py-4 flex flex-col items-center gap-2">
-            {navItems.map((item) => {
+            {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
               if (item.disabled) {

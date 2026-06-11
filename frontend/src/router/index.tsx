@@ -1,38 +1,51 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from '../features/auth/pages/LoginPage';
-import RegisterPage from '../features/auth/pages/RegisterPage';
-import OAuth2Callback from '../features/auth/pages/OAuth2Callback';
-import { LandingPage } from '../features/dashboard/pages/LandingPage';
-import DashboardPage from '../features/dashboard/pages/DashboardPage';
-import { BotsConnectPage } from '../features/bot/pages/BotsConnectPage';
-import { AutomationsPage } from '../features/bot/pages/AutomationsPage';
-import { SettingsPage } from '../features/bot/pages/SettingsPage';
+import { ROUTES } from '../constants/routes';
 import PrivateRoute from '../components/shared/PrivateRoute';
 import PublicRoute from '../components/shared/PublicRoute';
 import { AuthLayout } from '../components/layouts';
+import { Loader2 } from 'lucide-react';
+
+const LoginPage = lazy(() => import('../features/auth/pages/LoginPage'));
+const RegisterPage = lazy(() => import('../features/auth/pages/RegisterPage'));
+const OAuth2Callback = lazy(() => import('../features/auth/pages/OAuth2Callback'));
+const LandingPage = lazy(() => import('../features/dashboard/pages/LandingPage').then(m => ({ default: m.LandingPage })));
+const DashboardPage = lazy(() => import('../features/dashboard/pages/DashboardPage'));
+const BotsConnectPage = lazy(() => import('../features/bot/pages/BotsConnectPage').then(m => ({ default: m.BotsConnectPage })));
+const AutomationsPage = lazy(() => import('../features/bot/pages/AutomationsPage').then(m => ({ default: m.AutomationsPage })));
+const SettingsPage = lazy(() => import('../features/bot/pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const FlowBuilderPage = lazy(() => import('../features/bot/pages/FlowBuilderPage').then(m => ({ default: m.FlowBuilderPage })));
+
+const LoadingSpinner = () => (
+  <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+    <Loader2 className="animate-spin text-indigo-600" size={32} />
+  </div>
+);
 
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path={ROUTES.LANDING} element={<LandingPage />} />
 
-        <Route element={<PublicRoute />}>
-          <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
-          <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
-          <Route path="/oauth2/callback" element={<OAuth2Callback />} />
-        </Route>
+          <Route element={<PublicRoute />}>
+            <Route path={ROUTES.LOGIN} element={<AuthLayout><LoginPage /></AuthLayout>} />
+            <Route path={ROUTES.REGISTER} element={<AuthLayout><RegisterPage /></AuthLayout>} />
+            <Route path={ROUTES.OAUTH_CALLBACK} element={<OAuth2Callback />} />
+          </Route>
 
-        <Route element={<PrivateRoute />}>
-          <Route path="/home" element={<DashboardPage />} />
-          <Route path="/connect-bot" element={<BotsConnectPage />} />
-          <Route path="/automations" element={<AutomationsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Route>
+          <Route element={<PrivateRoute />}>
+            <Route path={ROUTES.HOME} element={<DashboardPage />} />
+            <Route path={ROUTES.CONNECT_BOT} element={<BotsConnectPage />} />
+            <Route path={ROUTES.AUTOMATIONS} element={<AutomationsPage />} />
+            <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
+            <Route path={ROUTES.FLOW_BUILDER} element={<FlowBuilderPage />} />
+          </Route>
 
-        <Route path="*" element={<Navigate to="/home" replace />} />
-      </Routes>
+          <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 };

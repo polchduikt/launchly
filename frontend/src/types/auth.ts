@@ -17,13 +17,7 @@ export interface RegisterRequest {
   password: string;
 }
 
-export interface UserResponse {
-  id: number;
-  email: string;
-  name: string;
-  avatar: string | null;
-  role: string;
-}
+export type UserResponse = User;
 
 export interface AuthResponse {
   accessToken: string;

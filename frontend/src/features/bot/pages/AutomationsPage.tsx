@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { Search, FolderPlus, Plus, MoreVertical, Trash2, LayoutGrid, List } from 'lucide-react';
+import { AUTOMATION_TABS } from '../config/automationTabs';
 
 interface AutomationFlow {
   id: number;
@@ -12,9 +14,11 @@ interface AutomationFlow {
 }
 
 export const AutomationsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'my' | 'basic' | 'sequences'>('my');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+
 
   const [flows] = useState<AutomationFlow[]>([
     { id: 1, name: 'Telegram Welcome Message', runs: 'n/a', ctr: 'n/a', modified: '18 seconds ago', status: 'draft' },
@@ -31,14 +35,10 @@ export const AutomationsPage: React.FC = () => {
         <aside className="w-56 bg-slate-50 border-r border-slate-200 p-4 shrink-0 hidden md:block">
           <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2">Automation</h2>
           <nav className="space-y-1">
-            {[
-              { id: 'my', label: 'My Automations' },
-              { id: 'basic', label: 'Basic' },
-              { id: 'sequences', label: 'Sequences' }
-            ].map((tab) => (
+            {AUTOMATION_TABS.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id)}
                 className={`w-full flex items-center px-3 py-2 rounded-xl text-sm font-semibold text-left transition-all ${
                   activeTab === tab.id
                     ? 'bg-white text-slate-900 border border-slate-200 shadow-sm'
@@ -66,7 +66,10 @@ export const AutomationsPage: React.FC = () => {
                   <FolderPlus size={14} />
                   <span>New Folder</span>
                 </button>
-                <button className="flex items-center gap-1 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100">
+                <button
+                  onClick={() => navigate('/builder')}
+                  className="flex items-center gap-1 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
+                >
                   <Plus size={14} />
                   <span>New Automation</span>
                 </button>
@@ -125,22 +128,26 @@ export const AutomationsPage: React.FC = () => {
                 <tbody>
                   {filteredFlows.length > 0 ? (
                     filteredFlows.map((flow) => (
-                      <tr key={flow.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-all group">
-                        <td className="py-4 px-4 text-center">
+                      <tr
+                        key={flow.id}
+                        onClick={() => navigate('/builder')}
+                        className="border-b border-slate-100 hover:bg-slate-50/50 transition-all group cursor-pointer"
+                      >
+                        <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
                           <input type="checkbox" className="rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" />
                         </td>
                         <td className="py-4 px-2">
                           <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full shrink-0 ${flow.status === 'active' ? 'bg-amber-450' : 'bg-amber-300'}`} />
-                            <span className="font-semibold text-sm text-slate-800 hover:text-indigo-600 transition-all cursor-pointer">
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${flow.status === 'active' ? 'bg-amber-500' : 'bg-amber-300'}`} />
+                            <span className="font-semibold text-sm text-slate-800 hover:text-indigo-600 transition-all">
                               {flow.name}
                             </span>
                           </div>
                         </td>
                         <td className="py-4 px-2 text-sm text-slate-500 text-center">{flow.runs}</td>
                         <td className="py-4 px-2 text-sm text-slate-500 text-center">{flow.ctr}</td>
-                        <td className="py-4 px-2 text-xs text-slate-450">{flow.modified}</td>
-                        <td className="py-4 px-4 text-right">
+                        <td className="py-4 px-2 text-xs text-slate-500">{flow.modified}</td>
+                        <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                           <button className="text-slate-400 hover:text-slate-700 p-1 rounded transition-all cursor-pointer">
                             <MoreVertical size={16} />
                           </button>

@@ -1,8 +1,10 @@
 export interface FlowSchemaResponse {
   id: number;
-  schemaJson: string;
-  updatedAt: string;
+  version: number;
+  nodes: Record<string, unknown>[];
+  edges: Record<string, unknown>[];
 }
+
 
 export interface BotResponse {
   id: number;
@@ -14,16 +16,9 @@ export interface BotResponse {
   createdAt: string;
 }
 
-export interface BotDetailResponse {
-  id: number;
-  name: string;
-  description: string | null;
-  avatar: string | null;
-  avatarPublicId: string | null;
-  active: boolean;
+export interface BotDetailResponse extends BotResponse {
   telegramToken: string;
   flowSchema: FlowSchemaResponse | null;
-  createdAt: string;
 }
 
 export interface BotCreateRequest {

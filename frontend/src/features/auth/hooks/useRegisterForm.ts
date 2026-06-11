@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -32,8 +33,10 @@ export const useRegisterForm = () => {
     try {
       await registerMutate(data);
       navigate('/home', { replace: true });
-    } catch (error: any) {
-      const msg = error.response?.data?.message || error.message || 'Email already in use. Please try another one.';
+    } catch (error: unknown) {
+      const msg = axios.isAxiosError(error)
+        ? (error.response?.data?.message ?? 'Email already in use. Please try another one.')
+        : (error instanceof Error ? error.message : 'Something went wrong');
       setApiError(msg);
     }
   };

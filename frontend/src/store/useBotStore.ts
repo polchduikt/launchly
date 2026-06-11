@@ -1,62 +1,39 @@
 import { create } from 'zustand';
-import type { BotResponse } from '../types/bot';
 
 interface BotState {
-  bots: BotResponse[];
-  activeBot: BotResponse | null;
-  setBots: (bots: BotResponse[]) => void;
-  setActiveBot: (bot: BotResponse | null) => void;
+  activeBotId: number | null;
+  setActiveBotId: (id: number | null) => void;
   clearBots: () => void;
 }
 
 export const useBotStore = create<BotState>((set) => {
-  const savedActiveBotJson = localStorage.getItem('activeBot');
-  let savedActiveBot: BotResponse | null = null;
+  const savedActiveBotIdStr = localStorage.getItem('activeBotId');
+  let savedActiveBotId: number | null = null;
   
-  if (savedActiveBotJson) {
-    try {
-      savedActiveBot = JSON.parse(savedActiveBotJson);
-    } catch {
-      localStorage.removeItem('activeBot');
+  if (savedActiveBotIdStr) {
+    const parsed = parseInt(savedActiveBotIdStr, 10);
+    if (!isNaN(parsed)) {
+      savedActiveBotId = parsed;
+    } else {
+      localStorage.removeItem('activeBotId');
     }
   }
 
   return {
-    bots: [],
-    activeBot: savedActiveBot,
+    activeBotId: savedActiveBotId,
 
-    setBots: (bots) => {
-      set((state) => {
-        let newActiveBot = state.activeBot;
-        if (bots.length === 0) {
-          newActiveBot = null;
-          localStorage.removeItem('activeBot');
-        } else if (!state.activeBot || !bots.some((b) => b.id === state.activeBot?.id)) {
-          newActiveBot = bots[0];
-          localStorage.setItem('activeBot', JSON.stringify(bots[0]));
-        } else {
-          const updatedActive = bots.find((b) => b.id === state.activeBot?.id);
-          if (updatedActive) {
-            newActiveBot = updatedActive;
-            localStorage.setItem('activeBot', JSON.stringify(updatedActive));
-          }
-        }
-        return { bots, activeBot: newActiveBot };
-      });
-    },
-
-    setActiveBot: (bot) => {
-      if (bot) {
-        localStorage.setItem('activeBot', JSON.stringify(bot));
+    setActiveBotId: (id) => {
+      if (id !== null) {
+        localStorage.setItem('activeBotId', String(id));
       } else {
-        localStorage.removeItem('activeBot');
+        localStorage.removeItem('activeBotId');
       }
-      set({ activeBot: bot });
+      set({ activeBotId: id });
     },
 
     clearBots: () => {
-      localStorage.removeItem('activeBot');
-      set({ bots: [], activeBot: null });
+      localStorage.removeItem('activeBotId');
+      set({ activeBotId: null });
     },
   };
 });
