@@ -15,6 +15,7 @@ const BotsConnectPage = lazy(() => import('../features/bot/pages/BotsConnectPage
 const AutomationsPage = lazy(() => import('../features/bot/pages/AutomationsPage').then(m => ({ default: m.AutomationsPage })));
 const SettingsPage = lazy(() => import('../features/bot/pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const FlowBuilderPage = lazy(() => import('../features/bot/pages/FlowBuilderPage').then(m => ({ default: m.FlowBuilderPage })));
+const CrmPage = lazy(() => import('../features/crm/pages/CrmPage').then(m => ({ default: m.CrmPage })));
 
 const LoadingSpinner = () => (
   <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -41,6 +42,7 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.AUTOMATIONS} element={<AutomationsPage />} />
             <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
             <Route path={ROUTES.FLOW_BUILDER} element={<FlowBuilderPage />} />
+            <Route path={ROUTES.CRM} element={<CrmPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />

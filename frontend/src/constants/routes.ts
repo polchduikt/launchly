@@ -8,4 +8,5 @@ export const ROUTES = {
   AUTOMATIONS: '/automations',
   SETTINGS: '/settings',
   FLOW_BUILDER: '/builder',
+  CRM: '/crm',
 } as const;

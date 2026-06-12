@@ -14,10 +14,17 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-const NAV_ITEMS = [
+interface NavItem {
+  label: string;
+  path: string;
+  icon: React.ComponentType<{ size?: number }>;
+  disabled?: boolean;
+}
+
+const NAV_ITEMS: NavItem[] = [
   { label: 'Home', path: ROUTES.HOME, icon: Home },
   { label: 'Automation', path: ROUTES.AUTOMATIONS, icon: Zap },
-  { label: 'CRM', path: '/crm', icon: Users, disabled: true },
+  { label: 'CRM', path: ROUTES.CRM, icon: Users },
   { label: 'Settings', path: ROUTES.SETTINGS, icon: Settings },
 ];
 
