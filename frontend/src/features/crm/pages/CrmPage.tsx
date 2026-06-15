@@ -18,8 +18,10 @@ import {
   Send,
   Loader2,
   AlertCircle,
+  Download,
 } from 'lucide-react';
 import type { LeadStatus, OrderStatus } from '../../../types/crm';
+import { exportExcelApi } from '../../integration/api/integration';
 
 export const CrmPage: React.FC = () => {
   const activeBotId = useBotStore((state) => state.activeBotId);
@@ -62,10 +64,35 @@ export const CrmPage: React.FC = () => {
 
   const selectedConversation = conversations.find((c) => c.id === selectedConvId);
 
+  const [isExportingLeads, setIsExportingLeads] = useState(false);
+  const [isExportingOrders, setIsExportingOrders] = useState(false);
+
+  const handleExportExcel = async (type: 'LEADS' | 'ORDERS') => {
+    if (type === 'LEADS') setIsExportingLeads(true);
+    else setIsExportingOrders(true);
+
+    try {
+      const blob = await exportExcelApi(botId, type);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${type.toLowerCase()}_bot_${botId}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to export Excel:', err);
+    } finally {
+      if (type === 'LEADS') setIsExportingLeads(false);
+      else setIsExportingOrders(false);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="h-[calc(100vh-4rem)] flex flex-col bg-slate-50 font-sans">
-        {/* Header Tabs */}
+
         <header className="bg-white border-b border-slate-200 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 shadow-sm">
           <div>
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">CRM Workspace</h1>
@@ -109,7 +136,7 @@ export const CrmPage: React.FC = () => {
           </div>
         </header>
 
-        {/* Tab Content */}
+
         <div className="flex-1 overflow-hidden">
           {botId === 0 ? (
             <div className="h-full flex items-center justify-center p-8 text-center">
@@ -121,7 +148,7 @@ export const CrmPage: React.FC = () => {
             </div>
           ) : activeTab === 'chat' ? (
             <div className="h-full flex overflow-hidden">
-              {/* Conversations Sidebar */}
+
               <aside className="w-80 border-r border-slate-200 bg-white flex flex-col shrink-0">
                 <div className="p-4 border-b border-slate-100 select-none">
                   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Conversations</h3>
@@ -170,11 +197,11 @@ export const CrmPage: React.FC = () => {
                 </div>
               </aside>
 
-              {/* Chat Thread */}
+
               <main className="flex-1 flex flex-col bg-slate-50">
                 {selectedConvId ? (
                   <>
-                    {/* Selected Contact Header */}
+
                     <div className="bg-white border-b border-slate-200 px-6 py-3 flex justify-between items-center shadow-sm z-10 shrink-0">
                       <div>
                         <h2 className="font-bold text-sm text-slate-800">
@@ -188,7 +215,7 @@ export const CrmPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Messages Body */}
+
                     <div className="flex-1 overflow-y-auto p-6 space-y-4">
                       {isMsgLoading ? (
                         <div className="h-full flex items-center justify-center">
@@ -234,7 +261,7 @@ export const CrmPage: React.FC = () => {
                       <div ref={messagesEndRef} />
                     </div>
 
-                    {/* Chat Input */}
+
                     <div className="bg-white border-t border-slate-200 p-4 flex gap-3 items-end shrink-0 shadow-lg">
                       <textarea
                         value={typedMessage}
@@ -267,8 +294,20 @@ export const CrmPage: React.FC = () => {
           ) : activeTab === 'contacts' ? (
             <div className="h-full overflow-y-auto p-6">
               <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                <div className="p-5 border-b border-slate-100 select-none">
+                <div className="p-5 border-b border-slate-100 flex justify-between items-center select-none">
                   <h2 className="font-bold text-slate-800 text-sm">Leads Contacts</h2>
+                  <button
+                    onClick={() => handleExportExcel('LEADS')}
+                    disabled={isExportingLeads || leads.length === 0}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 text-indigo-700 text-xs font-bold rounded-xl transition-all border border-indigo-100 cursor-pointer shadow-sm shadow-indigo-50/50"
+                  >
+                    {isExportingLeads ? (
+                      <Loader2 className="animate-spin" size={14} />
+                    ) : (
+                      <Download size={14} />
+                    )}
+                    <span>Export to Excel</span>
+                  </button>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
@@ -361,8 +400,20 @@ export const CrmPage: React.FC = () => {
           ) : (
             <div className="h-full overflow-y-auto p-6">
               <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                <div className="p-5 border-b border-slate-100 select-none">
+                <div className="p-5 border-b border-slate-100 flex justify-between items-center select-none">
                   <h2 className="font-bold text-slate-800 text-sm">Product Orders</h2>
+                  <button
+                    onClick={() => handleExportExcel('ORDERS')}
+                    disabled={isExportingOrders || orders.length === 0}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 text-indigo-700 text-xs font-bold rounded-xl transition-all border border-indigo-100 cursor-pointer shadow-sm shadow-indigo-50/50"
+                  >
+                    {isExportingOrders ? (
+                      <Loader2 className="animate-spin" size={14} />
+                    ) : (
+                      <Download size={14} />
+                    )}
+                    <span>Export to Excel</span>
+                  </button>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">

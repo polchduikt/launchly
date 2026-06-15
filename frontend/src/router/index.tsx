@@ -43,6 +43,7 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.CONNECT_BOT} element={<BotsConnectPage />} />
             <Route path={ROUTES.AUTOMATIONS} element={<AutomationsPage />} />
             <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
+            <Route path={ROUTES.INTEGRATIONS} element={<SettingsPage />} />
             <Route path={ROUTES.FLOW_BUILDER} element={<FlowBuilderPage />} />
             <Route path={ROUTES.CRM} element={<CrmPage />} />
             <Route path={ROUTES.BROADCASTS} element={<BroadcastsPage />} />

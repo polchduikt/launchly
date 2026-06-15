@@ -11,4 +11,6 @@ export const ROUTES = {
   CRM: '/crm',
   BROADCASTS: '/broadcasts',
   BROADCAST_BUILDER: '/broadcasts/:id',
+  INTEGRATIONS: '/integrations',
 };
+
