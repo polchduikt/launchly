@@ -12,5 +12,7 @@ export const ROUTES = {
   BROADCASTS: '/broadcasts',
   BROADCAST_BUILDER: '/broadcasts/:id',
   INTEGRATIONS: '/integrations',
+  BILLING_SUCCESS: '/billing/success',
+  BILLING_CANCEL: '/billing/cancel',
 };
 

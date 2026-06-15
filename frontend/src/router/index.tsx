@@ -18,6 +18,8 @@ const FlowBuilderPage = lazy(() => import('../features/bot/pages/FlowBuilderPage
 const CrmPage = lazy(() => import('../features/crm/pages/CrmPage').then(m => ({ default: m.CrmPage })));
 const BroadcastsPage = lazy(() => import('../features/broadcast/pages/BroadcastsPage').then(m => ({ default: m.BroadcastsPage })));
 const BroadcastBuilderPage = lazy(() => import('../features/broadcast/pages/BroadcastBuilderPage').then(m => ({ default: m.BroadcastBuilderPage })));
+const CheckoutSuccessPage = lazy(() => import('../features/billing/pages/CheckoutSuccessPage'));
+const CheckoutCancelPage = lazy(() => import('../features/billing/pages/CheckoutCancelPage'));
 
 const LoadingSpinner = () => (
   <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -48,6 +50,8 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.CRM} element={<CrmPage />} />
             <Route path={ROUTES.BROADCASTS} element={<BroadcastsPage />} />
             <Route path={ROUTES.BROADCAST_BUILDER} element={<BroadcastBuilderPage />} />
+            <Route path={ROUTES.BILLING_SUCCESS} element={<CheckoutSuccessPage />} />
+            <Route path={ROUTES.BILLING_CANCEL} element={<CheckoutCancelPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
