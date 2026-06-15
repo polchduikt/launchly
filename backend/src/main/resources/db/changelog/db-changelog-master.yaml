@@ -41,5 +41,7 @@ databaseChangeLog:
       file: db/changelog/changes/V020__add_indexes.sql
   - include:
       file: db/changelog/changes/V021__add_nodes_and_edges_to_broadcast_campaigns.sql
+  - include:
+      file: db/changelog/changes/V022__update_pro_price_id.sql
 
 

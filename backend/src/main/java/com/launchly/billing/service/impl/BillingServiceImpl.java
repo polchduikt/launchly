@@ -18,6 +18,8 @@ import com.stripe.Stripe;
 import com.stripe.model.Event;
 import com.stripe.model.Invoice;
 import com.stripe.model.checkout.Session;
+import com.stripe.model.EventDataObjectDeserializer;
+import com.stripe.model.StripeObject;
 import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.stripe.param.CustomerCreateParams;
@@ -231,6 +233,19 @@ public class BillingServiceImpl implements BillingService {
         }
     }
 
+    private StripeObject deserializeEventObject(Event event) {
+        EventDataObjectDeserializer deserializer = event.getDataObjectDeserializer();
+        if (deserializer.getObject().isPresent()) {
+            return deserializer.getObject().get();
+        }
+        try {
+            return deserializer.deserializeUnsafe();
+        } catch (Exception e) {
+            log.error("Failed to deserialize event object for event {}: {}", event.getId(), e.getMessage(), e);
+            return null;
+        }
+    }
+
     @Override
     @Transactional
     public void handleStripeWebhook(String payload, String sigHeader) {
@@ -245,34 +260,39 @@ public class BillingServiceImpl implements BillingService {
         log.info("Received Stripe webhook event: {}", event.getType());
 
         try {
+            StripeObject stripeObject = deserializeEventObject(event);
+            if (stripeObject == null) {
+                log.warn("Stripe object could not be deserialized for event: {}", event.getId());
+                return;
+            }
+
             switch (event.getType()) {
                 case "checkout.session.completed":
-                    Session session = (Session) event.getDataObjectDeserializer().getObject().orElse(null);
-                    if (session != null) {
+                    if (stripeObject instanceof Session session) {
                         handleCheckoutCompleted(session);
                     }
                     break;
                 case "invoice.payment_succeeded":
-                    Invoice invoice = (Invoice) event.getDataObjectDeserializer().getObject().orElse(null);
-                    if (invoice != null && invoice.getSubscription() != null) {
-                        handlePaymentSucceeded(invoice);
+                    if (stripeObject instanceof Invoice invoice) {
+                        if (invoice.getSubscription() != null) {
+                            handlePaymentSucceeded(invoice);
+                        }
                     }
                     break;
                 case "invoice.payment_failed":
-                    Invoice failedInvoice = (Invoice) event.getDataObjectDeserializer().getObject().orElse(null);
-                    if (failedInvoice != null && failedInvoice.getSubscription() != null) {
-                        handlePaymentFailed(failedInvoice);
+                    if (stripeObject instanceof Invoice failedInvoice) {
+                        if (failedInvoice.getSubscription() != null) {
+                            handlePaymentFailed(failedInvoice);
+                        }
                     }
                     break;
                 case "customer.subscription.deleted":
-                    com.stripe.model.Subscription deletedSub = (com.stripe.model.Subscription) event.getDataObjectDeserializer().getObject().orElse(null);
-                    if (deletedSub != null) {
+                    if (stripeObject instanceof com.stripe.model.Subscription deletedSub) {
                         handleSubscriptionDeleted(deletedSub);
                     }
                     break;
                 case "customer.subscription.updated":
-                    com.stripe.model.Subscription updatedSub = (com.stripe.model.Subscription) event.getDataObjectDeserializer().getObject().orElse(null);
-                    if (updatedSub != null) {
+                    if (stripeObject instanceof com.stripe.model.Subscription updatedSub) {
                         handleSubscriptionUpdated(updatedSub);
                     }
                     break;

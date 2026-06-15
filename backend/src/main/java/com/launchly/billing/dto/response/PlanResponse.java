@@ -1,18 +1,26 @@
 package com.launchly.billing.dto.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
-public record PlanResponse(
-    Long id,
-    String name,
-    String displayName,
-    BigDecimal price,
-    String currency,
-    int maxBots,
-    int maxBotUsers,
-    int maxBroadcastsPerMonth,
-    boolean canUseBroadcast,
-    boolean canUseIntegrations,
-    boolean canUseAiAgent,
-    boolean canUsePayments
-) {}
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PlanResponse {
+    private Long id;
+    private String name;
+    private String displayName;
+    private BigDecimal price;
+    private String currency;
+    private int maxBots;
+    private int maxBotUsers;
+    private int maxBroadcastsPerMonth;
+    private boolean canUseBroadcast;
+    private boolean canUseIntegrations;
+    private boolean canUseAiAgent;
+    private boolean canUsePayments;
+}

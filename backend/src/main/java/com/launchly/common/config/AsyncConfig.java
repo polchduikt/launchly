@@ -13,6 +13,17 @@ import java.util.concurrent.Executor;
 @EnableScheduling
 public class AsyncConfig {
 
+    @Bean(name = "taskExecutor")
+    public Executor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(20);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("async-task-");
+        executor.initialize();
+        return executor;
+    }
+
     @Bean(name = "broadcastExecutor")
     public Executor broadcastExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

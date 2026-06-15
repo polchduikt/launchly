@@ -26,7 +26,7 @@ public class CacheConfig {
                         .fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(
                     RedisSerializationContext.SerializationPair
-                        .fromSerializer(GenericJacksonJsonRedisSerializer.builder().build()));
+                        .fromSerializer(GenericJacksonJsonRedisSerializer.builder().enableUnsafeDefaultTyping().build()));
 
         Map<String, RedisCacheConfiguration> configs = Map.of(
             "subscription", defaultConfig.entryTtl(Duration.ofMinutes(10)),

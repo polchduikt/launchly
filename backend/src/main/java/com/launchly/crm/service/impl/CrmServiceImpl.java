@@ -31,6 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -74,7 +76,17 @@ public class CrmServiceImpl implements CrmService {
         order = orderRepository.save(order);
         log.info("Created order {} for bot {} by bot user {}", orderNumber, botId, botUserId);
 
-        integrationEventService.onOrderCreated(order);
+        final Order savedOrder = order;
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    integrationEventService.onOrderCreated(savedOrder);
+                }
+            });
+        } else {
+            integrationEventService.onOrderCreated(savedOrder);
+        }
 
         OrderResponse response = crmMapper.toOrderResponse(order);
         webSocketService.notifyNewOrder(botId, response);
@@ -132,7 +144,17 @@ public class CrmServiceImpl implements CrmService {
         lead = leadRepository.save(lead);
         log.info("Created lead for bot {} by bot user {}: name={}", botId, botUserId, name);
 
-        integrationEventService.onLeadCreated(lead);
+        final Lead savedLead = lead;
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    integrationEventService.onLeadCreated(savedLead);
+                }
+            });
+        } else {
+            integrationEventService.onLeadCreated(savedLead);
+        }
 
         LeadResponse response = crmMapper.toLeadResponse(lead);
         webSocketService.notifyNewLead(botId, response);

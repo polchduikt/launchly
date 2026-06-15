@@ -210,8 +210,6 @@ public class BroadcastServiceImpl implements BroadcastService {
         campaignRepository.save(campaign);
 
         log.info("Starting broadcast campaign {} to {} users", campaignId, targetUsers.size());
-
-        // Find if we have a visual campaign flow to run
         String firstConnectedNodeId = null;
         try {
             String nodesJson = campaign.getNodes();
