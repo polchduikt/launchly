@@ -3,15 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { Search, FolderPlus, Plus, MoreVertical, Trash2, LayoutGrid, List } from 'lucide-react';
 import { AUTOMATION_TABS } from '../config/automationTabs';
-
-interface AutomationFlow {
-  id: number;
-  name: string;
-  runs: string | number;
-  ctr: string;
-  modified: string;
-  status: 'draft' | 'active';
-}
+import type { AutomationFlow } from '../../../types/bot';
 
 export const AutomationsPage: React.FC = () => {
   const navigate = useNavigate();

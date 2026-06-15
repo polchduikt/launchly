@@ -1,14 +1,7 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { MessageSquare } from 'lucide-react';
-
-interface InputNodeProps {
-  selected?: boolean;
-  data: {
-    text?: string;
-    variableName?: string;
-  };
-}
+import type { InputNodeProps } from '../../../../types/bot';
 
 export const InputNode: React.FC<InputNodeProps> = ({ selected, data = {} }) => {
   const text = data?.text || 'Please enter a value:';

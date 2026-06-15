@@ -13,10 +13,11 @@ import {
   Octagon,
   Edit,
 } from 'lucide-react';
+import type { CustomNodeData } from '../../../../types/bot';
 
 interface NodeEditorPanelProps {
   node?: Node;
-  onUpdateNodeData: (nodeId: string, newData: Record<string, any>) => void;
+  onUpdateNodeData: (nodeId: string, newData: Record<string, unknown>) => void;
 }
 
 export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({ node, onUpdateNodeData }) => {
@@ -31,9 +32,9 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({ node, onUpdate
     );
   }
 
-  const data = (node.data || {}) as Record<string, any>;
+  const data = (node.data || {}) as CustomNodeData;
 
-  const handleChange = (key: string, value: any) => {
+  const handleChange = (key: string, value: unknown) => {
     onUpdateNodeData(node.id, {
       ...data,
       [key]: value,

@@ -24,3 +24,14 @@ export interface AuthResponse {
   refreshToken: string;
   user: User;
 }
+
+export interface AuthState {
+  user: User | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  login: (accessToken: string, refreshToken: string, user: User) => void;
+  logout: () => void;
+  setUser: (user: User) => void;
+  setAccessToken: (token: string) => void;
+}
+

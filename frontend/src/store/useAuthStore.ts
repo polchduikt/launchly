@@ -1,17 +1,7 @@
 import { create } from 'zustand';
-import type { User } from '../features/auth/types';
+import type { User, AuthState } from '../types/auth';
 import { queryClient } from '../lib/queryClient';
 import { useBotStore } from './useBotStore';
-
-interface AuthState {
-  user: User | null;
-  accessToken: string | null;
-  refreshToken: string | null;
-  login: (accessToken: string, refreshToken: string, user: User) => void;
-  logout: () => void;
-  setUser: (user: User) => void;
-  setAccessToken: (token: string) => void;
-}
 
 export const useAuthStore = create<AuthState>((set) => {
   const savedAccessToken = localStorage.getItem('accessToken');

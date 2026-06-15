@@ -1,10 +1,5 @@
 import { create } from 'zustand';
-
-interface BotState {
-  activeBotId: number | null;
-  setActiveBotId: (id: number | null) => void;
-  clearBots: () => void;
-}
+import type { BotState } from '../types/bot';
 
 export const useBotStore = create<BotState>((set) => {
   const savedActiveBotIdStr = localStorage.getItem('activeBotId');

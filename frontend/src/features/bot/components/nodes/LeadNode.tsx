@@ -1,16 +1,7 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { UserCheck } from 'lucide-react';
-
-interface LeadNodeProps {
-  selected?: boolean;
-  data: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    text?: string;
-  };
-}
+import type { LeadNodeProps } from '../../../../types/bot';
 
 export const LeadNode: React.FC<LeadNodeProps> = ({ selected, data = {} }) => {
   const name = data?.name || '{name}';

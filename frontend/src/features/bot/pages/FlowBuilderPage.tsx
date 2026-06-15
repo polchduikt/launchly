@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import {
   ReactFlow,
   Controls,
@@ -15,6 +14,7 @@ import '@xyflow/react/dist/style.css';
 import { useBotStore } from '../../../store/useBotStore';
 import { useFlowSchemaQuery, useSaveFlowSchemaMutation } from '../hooks/useFlowSchema';
 import { NodeEditorPanel } from '../components/sidebar/NodeEditorPanel';
+import { FLOW_BLOCKS, createDefaultNodeData } from '../config/flowBlocks';
 
 import {
   StartNode,
@@ -69,8 +69,9 @@ export const FlowBuilderPage: React.FC = () => {
   }, []);
 
   const getErrorMessage = (err: unknown) => {
-    if (axios.isAxiosError(err)) {
-      return err.response?.data?.message || err.message || 'An error occurred';
+    if (err && typeof err === 'object' && 'response' in err) {
+      const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
+      return axiosErr.response?.data?.message || axiosErr.message || 'An error occurred';
     }
     return err instanceof Error ? err.message : 'An error occurred';
   };
@@ -148,7 +149,7 @@ export const FlowBuilderPage: React.FC = () => {
   }, []);
 
   const handleUpdateNodeData = useCallback(
-    (nodeId: string, newData: Record<string, any>) => {
+    (nodeId: string, newData: Record<string, unknown>) => {
       setNodes((nds) =>
         nds.map((node) => {
           if (node.id === nodeId) {
@@ -175,20 +176,7 @@ export const FlowBuilderPage: React.FC = () => {
       id,
       type,
       position: { x: Math.random() * 200 + 150, y: Math.random() * 200 + 100 },
-      data:
-        type === 'MESSAGE'
-          ? { text: 'Hello! Enter your text here.', buttons: [] }
-          : type === 'INPUT'
-          ? { text: 'Please enter a value:', variableName: 'input_var' }
-          : type === 'CONDITION'
-          ? { variable: 'user_input', operator: 'equals', value: 'Yes' }
-          : type === 'ORDER'
-          ? { productName: 'Product Name', price: '100', currency: 'UAH' }
-          : type === 'LEAD'
-          ? { name: 'user_name', email: 'user_email', phone: 'user_phone' }
-          : type === 'API_CALL'
-          ? { url: 'https://api.example.com/endpoint', method: 'GET' }
-          : {},
+      data: createDefaultNodeData(type),
     };
 
     setNodes((nds) => [...nds, newNode]);
@@ -307,18 +295,10 @@ export const FlowBuilderPage: React.FC = () => {
               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">
                 Add Flow Blocks
               </span>
-              {[
-                { type: 'MESSAGE', label: 'Send Message', color: 'text-sky-500 bg-sky-50' },
-                { type: 'INPUT', label: 'Input Prompt', color: 'text-amber-500 bg-amber-50' },
-                { type: 'CONDITION', label: 'Condition Rule', color: 'text-purple-700 bg-purple-50' },
-                { type: 'ORDER', label: 'Create Order', color: 'text-emerald-500 bg-emerald-50' },
-                { type: 'LEAD', label: 'CRM Lead Capture', color: 'text-sky-500 bg-sky-50' },
-                { type: 'API_CALL', label: 'API Integration', color: 'text-indigo-500 bg-indigo-50' },
-                { type: 'END', label: 'End Session', color: 'text-slate-500 bg-slate-50' },
-              ].map((item) => (
+              {FLOW_BLOCKS.map((item) => (
                 <button
                   key={item.type}
-                  onClick={() => handleAddNode(item.type as any)}
+                  onClick={() => handleAddNode(item.type as keyof typeof nodeTypes)}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-slate-50 border border-transparent hover:border-slate-200 rounded-xl text-left text-xs font-semibold text-slate-700 transition-all cursor-pointer group"
                 >
                   <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${item.color}`}>

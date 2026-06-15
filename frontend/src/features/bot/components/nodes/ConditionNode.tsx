@@ -1,15 +1,7 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { GitFork } from 'lucide-react';
-
-interface ConditionNodeProps {
-  selected?: boolean;
-  data: {
-    variable?: string;
-    operator?: string;
-    value?: string;
-  };
-}
+import type { ConditionNodeProps } from '../../../../types/bot';
 
 export const ConditionNode: React.FC<ConditionNodeProps> = ({ selected, data = {} }) => {
   const variable = data?.variable || 'variable';

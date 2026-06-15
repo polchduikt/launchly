@@ -1,16 +1,7 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { ShoppingCart } from 'lucide-react';
-
-interface OrderNodeProps {
-  selected?: boolean;
-  data: {
-    productName?: string;
-    price?: string;
-    currency?: string;
-    text?: string;
-  };
-}
+import type { OrderNodeProps } from '../../../../types/bot';
 
 export const OrderNode: React.FC<OrderNodeProps> = ({ selected, data = {} }) => {
   const productName = data?.productName || 'Product';

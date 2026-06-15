@@ -1,10 +1,7 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Octagon } from 'lucide-react';
-
-interface EndNodeProps {
-  selected?: boolean;
-}
+import type { EndNodeProps } from '../../../../types/bot';
 
 export const EndNode: React.FC<EndNodeProps> = ({ selected }) => {
   return (

@@ -16,6 +16,8 @@ const AutomationsPage = lazy(() => import('../features/bot/pages/AutomationsPage
 const SettingsPage = lazy(() => import('../features/bot/pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const FlowBuilderPage = lazy(() => import('../features/bot/pages/FlowBuilderPage').then(m => ({ default: m.FlowBuilderPage })));
 const CrmPage = lazy(() => import('../features/crm/pages/CrmPage').then(m => ({ default: m.CrmPage })));
+const BroadcastsPage = lazy(() => import('../features/broadcast/pages/BroadcastsPage').then(m => ({ default: m.BroadcastsPage })));
+const BroadcastBuilderPage = lazy(() => import('../features/broadcast/pages/BroadcastBuilderPage').then(m => ({ default: m.BroadcastBuilderPage })));
 
 const LoadingSpinner = () => (
   <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -43,6 +45,8 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
             <Route path={ROUTES.FLOW_BUILDER} element={<FlowBuilderPage />} />
             <Route path={ROUTES.CRM} element={<CrmPage />} />
+            <Route path={ROUTES.BROADCASTS} element={<BroadcastsPage />} />
+            <Route path={ROUTES.BROADCAST_BUILDER} element={<BroadcastBuilderPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />

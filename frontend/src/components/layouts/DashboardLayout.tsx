@@ -2,31 +2,8 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import logoL from '../../assets/logo-l.png';
-import { ROUTES } from '../../constants/routes';
-import {
-  Home,
-  Zap,
-  Users,
-  Settings
-} from 'lucide-react';
-
-interface DashboardLayoutProps {
-  children: React.ReactNode;
-}
-
-interface NavItem {
-  label: string;
-  path: string;
-  icon: React.ComponentType<{ size?: number }>;
-  disabled?: boolean;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Home', path: ROUTES.HOME, icon: Home },
-  { label: 'Automation', path: ROUTES.AUTOMATIONS, icon: Zap },
-  { label: 'CRM', path: ROUTES.CRM, icon: Users },
-  { label: 'Settings', path: ROUTES.SETTINGS, icon: Settings },
-];
+import { NAV_ITEMS } from './config/navItems';
+import type { DashboardLayoutProps } from '../../types/shared';
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();

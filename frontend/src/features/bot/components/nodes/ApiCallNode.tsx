@@ -1,14 +1,7 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Globe } from 'lucide-react';
-
-interface ApiCallNodeProps {
-  selected?: boolean;
-  data: {
-    url?: string;
-    method?: string;
-  };
-}
+import type { ApiCallNodeProps } from '../../../../types/bot';
 
 export const ApiCallNode: React.FC<ApiCallNodeProps> = ({ selected, data = {} }) => {
   const url = data?.url || 'https://api.example.com/endpoint';

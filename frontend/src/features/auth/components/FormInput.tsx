@@ -1,13 +1,5 @@
-import React, { forwardRef } from 'react';
-import type { UseFormRegisterReturn } from 'react-hook-form';
-
-interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  icon?: React.ReactNode;
-  error?: string;
-  registration: Partial<UseFormRegisterReturn>;
-  rightElement?: React.ReactNode;
-}
+import { forwardRef } from 'react';
+import type { FormInputProps } from '../types';
 
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   ({ label, icon, error, registration, rightElement, className = '', ...props }, ref) => {

@@ -1,20 +1,7 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Send } from 'lucide-react';
-
-interface ButtonData {
-  label: string;
-  value: string;
-}
-
-interface MessageNodeProps {
-  selected?: boolean;
-  data: {
-    text?: string;
-    imageUrl?: string;
-    buttons?: ButtonData[];
-  };
-}
+import type { MessageNodeProps } from '../../../../types/bot';
 
 export const MessageNode: React.FC<MessageNodeProps> = ({ selected, data = {} }) => {
   const text = data?.text || 'Add a text...';

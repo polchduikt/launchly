@@ -1,11 +1,6 @@
 import React from 'react';
 import logo from '../../../assets/logo.png';
-
-interface AuthPageLayoutProps {
-  leftTitle?: string;
-  leftDescription?: string;
-  rightContent: React.ReactNode;
-}
+import type { AuthPageLayoutProps } from '../types';
 
 export const AuthPageLayout: React.FC<AuthPageLayoutProps> = ({
   leftTitle = 'Automate your business workflow with precision.',

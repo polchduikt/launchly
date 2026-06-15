@@ -1,8 +1,5 @@
 import React from 'react';
-
-interface GoogleLoginButtonProps {
-  onClick: () => void;
-}
+import type { GoogleLoginButtonProps } from '../types';
 
 export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onClick }) => {
   return (

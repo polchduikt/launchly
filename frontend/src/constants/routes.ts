@@ -9,4 +9,6 @@ export const ROUTES = {
   SETTINGS: '/settings',
   FLOW_BUILDER: '/builder',
   CRM: '/crm',
-} as const;
+  BROADCASTS: '/broadcasts',
+  BROADCAST_BUILDER: '/broadcasts/:id',
+};

@@ -1,13 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Trash2 } from 'lucide-react';
-
-interface EditButtonDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  button: { label: string; value: string } | null;
-  onSave: (updated: { label: string; value: string }) => void;
-  onRemove: () => void;
-}
+import type { EditButtonDialogProps } from '../../../../types/bot';
 
 export const EditButtonDialog: React.FC<EditButtonDialogProps> = ({
   isOpen,

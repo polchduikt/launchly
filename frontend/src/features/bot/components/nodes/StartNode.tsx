@@ -1,10 +1,7 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Play, Sparkles } from 'lucide-react';
-
-interface StartNodeProps {
-  selected?: boolean;
-}
+import type { StartNodeProps } from '../../../../types/bot';
 
 export const StartNode: React.FC<StartNodeProps> = ({ selected }) => {
   return (
