@@ -18,6 +18,9 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -127,8 +130,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
+        log.error("Unhandled exception occurred on path {}: {}", request.getRequestURI(), ex.getMessage(), ex);
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-        ErrorResponse response = ErrorResponse.of(status, "An unexpected error occurred", request.getRequestURI());
+        ErrorResponse response = ErrorResponse.of(status, ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred", request.getRequestURI());
         return ResponseEntity.status(status).body(response);
     }
 }

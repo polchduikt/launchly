@@ -16,6 +16,8 @@ public record CampaignResponse(
         Integer failedCount,
         Integer totalCount,
         Long botId,
+        String nodes,
+        String edges,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {}

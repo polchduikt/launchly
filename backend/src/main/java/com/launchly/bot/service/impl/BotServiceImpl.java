@@ -84,7 +84,6 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "bots", key = "#userId")
     public List<BotResponse> getBotsByUser(Long userId) {
         return botRepository.findAllByUserId(userId).stream()
                 .map(botMapper::toBotResponse)
@@ -208,11 +207,11 @@ public class BotServiceImpl implements BotService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public FlowSchemaResponse getFlowSchema(Long botId, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
         FlowSchema schema = flowSchemaRepository.findByBotId(bot.getId())
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Flow schema not found"));
+                .orElseGet(() -> flowSchemaRepository.save(FlowSchema.builder().bot(bot).build()));
         return toFlowSchemaResponse(schema);
     }
 
@@ -226,7 +225,7 @@ public class BotServiceImpl implements BotService {
         validateFlowSchema(nodesNode, edgesNode);
 
         FlowSchema schema = flowSchemaRepository.findByBotId(bot.getId())
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Flow schema not found"));
+                .orElseGet(() -> FlowSchema.builder().bot(bot).build());
 
         schema.setNodes(toJsonString(nodesNode));
         schema.setEdges(toJsonString(edgesNode));
@@ -234,6 +233,17 @@ public class BotServiceImpl implements BotService {
 
         schema = flowSchemaRepository.save(schema);
         redisTemplate.delete("launchly:bot:schema:" + botId);
+
+        if (!bot.isActive()) {
+            try {
+                telegramBotManager.registerBot(bot);
+                bot.setActive(true);
+                botRepository.save(bot);
+            } catch (Exception e) {
+                log.error("Failed to register bot: {}", e.getMessage(), e);
+            }
+        }
+
         return toFlowSchemaResponse(schema);
     }
 
@@ -318,9 +328,9 @@ public class BotServiceImpl implements BotService {
         );
     }
 
-    private JsonNode parseJson(String json) {
+    private Object parseJson(String json) {
         try {
-            return objectMapper.readTree(json);
+            return objectMapper.readValue(json, Object.class);
         } catch (JsonProcessingException e) {
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to parse JSON");
         }

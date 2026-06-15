@@ -19,5 +19,11 @@ public interface BotDialogStateService {
 
     Map<String, String> getSessionData(Long botId, Long telegramUserId);
 
+    void setActiveCampaignId(Long botId, Long telegramUserId, Long campaignId);
+
+    Optional<Long> getActiveCampaignId(Long botId, Long telegramUserId);
+
+    void clearActiveCampaignId(Long botId, Long telegramUserId);
+
     void clearSession(Long botId, Long telegramUserId);
 }

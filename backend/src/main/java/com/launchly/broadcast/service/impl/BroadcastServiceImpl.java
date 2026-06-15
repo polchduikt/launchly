@@ -3,6 +3,7 @@ package com.launchly.broadcast.service.impl;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotRepository;
+import com.launchly.bot.service.FlowEngineService;
 import com.launchly.bot.service.TelegramSendService;
 import com.launchly.broadcast.dto.request.CreateCampaignRequest;
 import com.launchly.broadcast.dto.response.CampaignResponse;
@@ -15,6 +16,9 @@ import com.launchly.broadcast.service.BroadcastService;
 import com.launchly.billing.service.PlanLimitService;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.SanitizationUtil;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.annotation.Lazy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class BroadcastServiceImpl implements BroadcastService {
 
@@ -36,6 +39,26 @@ public class BroadcastServiceImpl implements BroadcastService {
     private final TelegramSendService telegramSendService;
     private final BroadcastMapper broadcastMapper;
     private final PlanLimitService planLimitService;
+    private final ObjectMapper objectMapper;
+    private final FlowEngineService flowEngineService;
+
+    public BroadcastServiceImpl(BroadcastCampaignRepository campaignRepository,
+                                BotRepository botRepository,
+                                BroadcastFilterService broadcastFilterService,
+                                TelegramSendService telegramSendService,
+                                BroadcastMapper broadcastMapper,
+                                PlanLimitService planLimitService,
+                                ObjectMapper objectMapper,
+                                @Lazy FlowEngineService flowEngineService) {
+        this.campaignRepository = campaignRepository;
+        this.botRepository = botRepository;
+        this.broadcastFilterService = broadcastFilterService;
+        this.telegramSendService = telegramSendService;
+        this.broadcastMapper = broadcastMapper;
+        this.planLimitService = planLimitService;
+        this.objectMapper = objectMapper;
+        this.flowEngineService = flowEngineService;
+    }
 
     @Override
     @Transactional
@@ -47,13 +70,17 @@ public class BroadcastServiceImpl implements BroadcastService {
                 ? CampaignStatus.SCHEDULED
                 : CampaignStatus.DRAFT;
 
+        String messageText = extractFirstMessageText(request.nodes(), request.edges(), request.message());
+
         BroadcastCampaign campaign = BroadcastCampaign.builder()
                 .name(request.name())
-                .message(request.message())
+                .message(messageText)
                 .status(initialStatus)
                 .filterType(request.filterType())
                 .filterValue(request.filterValue())
                 .scheduledAt(request.scheduledAt())
+                .nodes(request.nodes() != null ? request.nodes() : "[]")
+                .edges(request.edges() != null ? request.edges() : "[]")
                 .bot(bot)
                 .build();
 
@@ -61,6 +88,93 @@ public class BroadcastServiceImpl implements BroadcastService {
         log.info("Created campaign '{}' (id={}) for botId={} with status={}",
                 campaign.getName(), campaign.getId(), botId, initialStatus);
         return broadcastMapper.toCampaignResponse(campaign);
+    }
+
+    @Override
+    @Transactional
+    public CampaignResponse updateCampaign(Long botId, Long campaignId, Long userId, CreateCampaignRequest request) {
+        validateBotOwnership(botId, userId);
+        BroadcastCampaign campaign = campaignRepository.findById(campaignId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
+
+        if (!campaign.getBot().getId().equals(botId)) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Campaign does not belong to this bot");
+        }
+
+        if (campaign.getStatus() == CampaignStatus.IN_PROGRESS
+                || campaign.getStatus() == CampaignStatus.COMPLETED) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Cannot update campaign that is already " + campaign.getStatus());
+        }
+
+        String messageText = extractFirstMessageText(request.nodes(), request.edges(), request.message());
+
+        campaign.setName(request.name());
+        campaign.setMessage(messageText);
+        campaign.setFilterType(request.filterType());
+        campaign.setFilterValue(request.filterValue());
+        campaign.setScheduledAt(request.scheduledAt());
+        campaign.setNodes(request.nodes() != null ? request.nodes() : "[]");
+        campaign.setEdges(request.edges() != null ? request.edges() : "[]");
+
+        if (request.scheduledAt() != null) {
+            campaign.setStatus(CampaignStatus.SCHEDULED);
+        } else if (campaign.getStatus() == CampaignStatus.SCHEDULED) {
+            campaign.setStatus(CampaignStatus.DRAFT);
+        }
+
+        campaign = campaignRepository.save(campaign);
+        log.info("Updated campaign '{}' (id={}) for botId={}",
+                campaign.getName(), campaign.getId(), botId);
+        return broadcastMapper.toCampaignResponse(campaign);
+    }
+
+    private String extractFirstMessageText(String nodesJson, String edgesJson, String defaultMessage) {
+        if (nodesJson == null || nodesJson.trim().isEmpty() || "[]".equals(nodesJson)) {
+            return defaultMessage != null ? defaultMessage : "";
+        }
+        try {
+            JsonNode nodesNode = objectMapper.readTree(nodesJson);
+            JsonNode edgesNode = edgesJson != null && !edgesJson.trim().isEmpty() ? objectMapper.readTree(edgesJson) : objectMapper.createArrayNode();
+            
+            String startNodeId = null;
+            for (JsonNode n : nodesNode) {
+                if ("START_BROADCAST".equals(n.get("type").asText())) {
+                    startNodeId = n.get("id").asText();
+                    break;
+                }
+            }
+            
+            if (startNodeId == null) {
+                return defaultMessage != null ? defaultMessage : "";
+            }
+            
+            String firstConnectedNodeId = null;
+            for (JsonNode e : edgesNode) {
+                if (startNodeId.equals(e.get("source").asText())) {
+                    firstConnectedNodeId = e.get("target").asText();
+                    break;
+                }
+            }
+            
+            if (firstConnectedNodeId == null) {
+                return defaultMessage != null ? defaultMessage : "";
+            }
+            
+            for (JsonNode n : nodesNode) {
+                if (firstConnectedNodeId.equals(n.get("id").asText())) {
+                    if ("MESSAGE".equals(n.get("type").asText())) {
+                        JsonNode data = n.get("data");
+                        if (data != null && data.has("text")) {
+                            return data.get("text").asText();
+                        }
+                    }
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to parse campaign flow to extract message: {}", e.getMessage());
+        }
+        return defaultMessage != null ? defaultMessage : "";
     }
 
     @Override
@@ -97,18 +211,54 @@ public class BroadcastServiceImpl implements BroadcastService {
 
         log.info("Starting broadcast campaign {} to {} users", campaignId, targetUsers.size());
 
+        // Find if we have a visual campaign flow to run
+        String firstConnectedNodeId = null;
+        try {
+            String nodesJson = campaign.getNodes();
+            String edgesJson = campaign.getEdges();
+            if (nodesJson != null && !nodesJson.trim().isEmpty() && !"[]".equals(nodesJson)) {
+                JsonNode nodesNode = objectMapper.readTree(nodesJson);
+                JsonNode edgesNode = edgesJson != null && !edgesJson.trim().isEmpty() ? objectMapper.readTree(edgesJson) : objectMapper.createArrayNode();
+
+                String startNodeId = null;
+                for (JsonNode n : nodesNode) {
+                    if ("START_BROADCAST".equals(n.get("type").asText())) {
+                        startNodeId = n.get("id").asText();
+                        break;
+                    }
+                }
+
+                if (startNodeId != null) {
+                    for (JsonNode e : edgesNode) {
+                        if (startNodeId.equals(e.get("source").asText())) {
+                            firstConnectedNodeId = e.get("target").asText();
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to parse campaign flow for dispatching: {}", e.getMessage());
+        }
+
+        final String connectedNodeId = firstConnectedNodeId;
+
         int sent = 0;
         int failed = 0;
 
         for (int i = 0; i < targetUsers.size(); i++) {
             BotUser user = targetUsers.get(i);
             try {
-                String sanitizedText = SanitizationUtil.sanitizeForTelegram(campaign.getMessage());
-                telegramSendService.sendMessage(botId, user.getTelegramId(), sanitizedText);
+                if (connectedNodeId != null) {
+                    flowEngineService.runFlow(botId, user, connectedNodeId, campaignId);
+                } else if (campaign.getMessage() != null && !campaign.getMessage().trim().isEmpty()) {
+                    String sanitizedText = SanitizationUtil.sanitizeForTelegram(campaign.getMessage());
+                    telegramSendService.sendMessage(botId, user.getTelegramId(), sanitizedText);
+                }
                 sent++;
             } catch (Exception e) {
                 failed++;
-                log.error("Failed to send broadcast to telegramId={}: {}",
+                log.error("Failed to execute broadcast for telegramId={}: {}",
                         user.getTelegramId(), e.getMessage());
             }
 

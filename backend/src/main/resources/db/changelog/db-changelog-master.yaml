@@ -39,4 +39,7 @@ databaseChangeLog:
       file: db/changelog/changes/V019__add_avatar_public_id_to_bots.sql
   - include:
       file: db/changelog/changes/V020__add_indexes.sql
+  - include:
+      file: db/changelog/changes/V021__add_nodes_and_edges_to_broadcast_campaigns.sql
+
 

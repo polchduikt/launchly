@@ -64,6 +64,15 @@ public class BroadcastController {
                 .body(broadcastService.createCampaign(botId, userDetails.getId(), request));
     }
 
+    @PutMapping("/campaigns/{campaignId}")
+    public ResponseEntity<CampaignResponse> updateCampaign(
+            @PathVariable Long botId,
+            @PathVariable Long campaignId,
+            @Valid @RequestBody CreateCampaignRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(broadcastService.updateCampaign(botId, campaignId, userDetails.getId(), request));
+    }
+
     @PostMapping("/campaigns/{campaignId}/send")
     public ResponseEntity<CampaignResponse> sendCampaign(
             @PathVariable Long botId,

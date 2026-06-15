@@ -8,6 +8,8 @@ public interface BroadcastService {
 
     CampaignResponse createCampaign(Long botId, Long userId, CreateCampaignRequest request);
 
+    CampaignResponse updateCampaign(Long botId, Long campaignId, Long userId, CreateCampaignRequest request);
+
     List<CampaignResponse> getCampaigns(Long botId, Long userId);
 
     void sendCampaign(Long campaignId);

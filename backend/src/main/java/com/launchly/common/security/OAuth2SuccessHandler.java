@@ -36,16 +36,23 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String name = oAuth2User.getAttribute("name");
         String avatar = oAuth2User.getAttribute("picture");
 
-        User user = userRepository.findByEmail(email)
-                .orElseGet(() -> userRepository.save(User.builder()
-                        .email(email)
-                        .name(name)
-                        .avatar(avatar)
-                        .role(Role.ROLE_OWNER)
-                        .provider(Provider.GOOGLE)
-                        .active(true)
-                        .emailVerified(true)
-                        .build()));
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            user = userRepository.save(User.builder()
+                    .email(email)
+                    .name(name)
+                    .avatar(avatar)
+                    .role(Role.ROLE_OWNER)
+                    .provider(Provider.GOOGLE)
+                    .active(true)
+                    .emailVerified(true)
+                    .build());
+        } else {
+            if (avatar != null && (user.getAvatar() == null || !avatar.equals(user.getAvatar()))) {
+                user.setAvatar(avatar);
+                user = userRepository.save(user);
+            }
+        }
 
         billingService.createFreeSubscription(user.getId());
 

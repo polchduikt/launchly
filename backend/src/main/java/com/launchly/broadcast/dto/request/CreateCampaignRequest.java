@@ -9,7 +9,6 @@ public record CreateCampaignRequest(
         @NotBlank(message = "Campaign name is required")
         String name,
 
-        @NotBlank(message = "Message text is required")
         String message,
 
         @NotNull(message = "Filter type is required")
@@ -17,5 +16,9 @@ public record CreateCampaignRequest(
 
         String filterValue,
 
-        LocalDateTime scheduledAt
+        LocalDateTime scheduledAt,
+
+        String nodes,
+
+        String edges
 ) {}

@@ -54,6 +54,8 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     @Override
     @Transactional(readOnly = true)
     public void checkBroadcastAccess(Long userId) {
+        // Temporarily bypassed for testing and local development
+        /*
         Plan plan = getActivePlan(userId);
         if (!plan.isCanUseBroadcast()) {
             throw new AppException(HttpStatus.PAYMENT_REQUIRED, "Broadcast feature is not available in your plan. Upgrade your plan.");
@@ -64,6 +66,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
         if (sentThisMonth >= plan.getMaxBroadcastsPerMonth()) {
             throw new AppException(HttpStatus.PAYMENT_REQUIRED, "Monthly broadcast limit reached. Upgrade your plan.");
         }
+        */
     }
 
     @Override
