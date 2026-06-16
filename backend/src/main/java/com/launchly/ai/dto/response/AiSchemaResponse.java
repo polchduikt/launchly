@@ -1,8 +1,10 @@
 package com.launchly.ai.dto.response;
 
+import tools.jackson.databind.JsonNode;
+
 public record AiSchemaResponse(
-    Object nodes,
-    Object edges,
+    JsonNode nodes,
+    JsonNode edges,
     int requestsUsed,
     int requestsLimit
 ) {}

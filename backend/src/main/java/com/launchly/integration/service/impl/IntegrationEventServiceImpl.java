@@ -1,7 +1,7 @@
 package com.launchly.integration.service.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.launchly.crm.entity.Lead;
 import com.launchly.crm.entity.Order;
 import com.launchly.crm.repository.LeadRepository;

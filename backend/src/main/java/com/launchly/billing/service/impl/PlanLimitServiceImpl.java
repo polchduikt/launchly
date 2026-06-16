@@ -1,6 +1,7 @@
 package com.launchly.billing.service.impl;
 
 import com.launchly.billing.entity.Plan;
+import org.hibernate.Hibernate;
 import com.launchly.billing.entity.Subscription;
 import com.launchly.billing.entity.SubscriptionStatus;
 import com.launchly.billing.repository.PlanRepository;
@@ -88,19 +89,23 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     @Cacheable(value = "subscription", key = "'plan:' + #userId")
     public Plan getActivePlan(Long userId) {
-        return subscriptionRepository.findByUserId(userId)
+        Plan plan = subscriptionRepository.findByUserId(userId)
                 .filter(sub -> sub.getStatus() == SubscriptionStatus.ACTIVE || sub.getStatus() == SubscriptionStatus.TRIALING)
                 .map(Subscription::getPlan)
                 .orElseGet(() -> planRepository.findByName("FREE")
                         .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found")));
+        return (Plan) Hibernate.unproxy(plan);
     }
 
     @Override
+    @Transactional(readOnly = true)
     @Cacheable(value = "plan", key = "#planId")
     public Plan getPlan(Long planId) {
-        return planRepository.findById(planId)
+        Plan plan = planRepository.findById(planId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Plan not found"));
+        return (Plan) Hibernate.unproxy(plan);
     }
 }

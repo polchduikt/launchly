@@ -1,7 +1,7 @@
 package com.launchly.integration.mapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.launchly.integration.dto.response.IntegrationResponse;
 import com.launchly.integration.entity.Integration;
 import org.mapstruct.Mapper;
@@ -29,7 +29,7 @@ public abstract class IntegrationMapper {
         }
         try {
             return objectMapper.readTree(configStr);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return configStr;
         }
     }

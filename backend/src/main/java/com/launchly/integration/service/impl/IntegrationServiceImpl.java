@@ -1,6 +1,6 @@
 package com.launchly.integration.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.launchly.billing.service.PlanLimitService;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.repository.BotRepository;

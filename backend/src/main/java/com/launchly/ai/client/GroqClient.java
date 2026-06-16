@@ -1,7 +1,7 @@
 package com.launchly.ai.client;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.launchly.ai.dto.GroqMessage;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;

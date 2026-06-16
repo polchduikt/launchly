@@ -1,8 +1,8 @@
 package com.launchly.bot.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.repository.UserRepository;
 import com.launchly.bot.dto.request.BotCreateRequest;
@@ -331,7 +331,7 @@ public class BotServiceImpl implements BotService {
     private Object parseJson(String json) {
         try {
             return objectMapper.readValue(json, Object.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to parse JSON");
         }
     }
@@ -339,7 +339,7 @@ public class BotServiceImpl implements BotService {
     private String toJsonString(JsonNode jsonNode) {
         try {
             return objectMapper.writeValueAsString(jsonNode);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to serialize JSON");
         }
     }
