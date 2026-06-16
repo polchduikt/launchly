@@ -1,4 +1,5 @@
 import type { Node } from '@xyflow/react';
+import type { UseFormReturn } from 'react-hook-form';
 
 export type FilterType = 'ALL' | 'BY_TAG' | 'HAS_ORDERS' | 'HAS_LEADS';
 
@@ -62,4 +63,26 @@ export interface CustomNodeData {
 }
 
 export type CustomNode = Node<CustomNodeData>;
+
+export interface CreateCampaignFields {
+  name: string;
+  message: string;
+  filterType: 'ALL' | 'BY_TAG' | 'HAS_ORDERS' | 'HAS_LEADS';
+  filterValue?: string;
+  scheduledAt?: string;
+}
+
+export interface CreateBroadcastDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
+  form: UseFormReturn<CreateCampaignFields>;
+  isCreating: boolean;
+  createError: Error | null;
+  tags: TagResponse[];
+}
+
+export interface StatusBadgeProps {
+  status: string;
+}
 

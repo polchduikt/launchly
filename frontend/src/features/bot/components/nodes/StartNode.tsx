@@ -1,36 +1,57 @@
 import React from 'react';
-import { Handle, Position } from '@xyflow/react';
-import { Play, Sparkles } from 'lucide-react';
-import type { StartNodeProps } from '../../../../types/bot';
+import { Position, useEdges } from '@xyflow/react';
+import type { NodeProps, Node } from '@xyflow/react';
+import { Zap, Plus } from 'lucide-react';
+import { NodeHandle } from './NodeHandle';
+import type { CustomNodeData } from '../../../../types/bot';
 
-export const StartNode: React.FC<StartNodeProps> = ({ selected }) => {
+export const StartNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
+
   return (
     <div
-      className={`w-64 bg-white border-2 rounded-2xl p-4 shadow-sm transition-all ${
-        selected ? 'border-indigo-700 ring-2 ring-indigo-100' : 'border-slate-200'
+      className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
+        selected ? 'border-emerald-500 ring-4 ring-emerald-100' : 'border-slate-200'
       }`}
     >
-      <div className="flex items-center gap-2 mb-3">
-        <span className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-          <Play size={16} />
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/50 select-none rounded-t-[22px]">
+        <span className="text-emerald-500 shrink-0">
+          <Zap size={15} fill="currentColor" />
         </span>
-        <span className="font-bold text-xs text-slate-800 uppercase tracking-wider">Trigger</span>
+        <span className="font-extrabold text-xs text-slate-800 tracking-wider">When...</span>
       </div>
 
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-600 leading-relaxed flex gap-2">
-        <Sparkles size={14} className="text-indigo-500 shrink-0 mt-0.5" />
-        <div>
-          <p className="font-bold text-slate-900 mb-0.5">User Subscribes</p>
-          <p>Triggers when a user clicks the Start button in Telegram.</p>
+      <div className="p-3.5 space-y-3">
+        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex gap-2.5 items-start">
+          <span className="w-5 h-5 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
+            tg
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-slate-800 leading-tight">
+              User subscribes by clicking the Subscribe button
+            </p>
+            <p className="text-[10px] text-slate-400 font-semibold mt-1 uppercase">
+              Welcome Message
+            </p>
+          </div>
         </div>
+
+        <button className="w-full py-2 border border-dashed border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-indigo-600 hover:text-indigo-700 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-sm">
+          <Plus size={13} />
+          <span>New Trigger</span>
+        </button>
       </div>
 
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="then"
-        className="w-3 h-3 bg-indigo-600 border-2 border-white hover:scale-125 transition-transform"
-      />
+      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative rounded-b-[22px]">
+        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mr-2">Then</span>
+        <NodeHandle
+          type="source"
+          position={Position.Right}
+          id="then"
+          isConnected={data?._tempSourceHandle !== 'then' && edges.some((e) => e.source === id && (e.sourceHandle === 'then' || e.sourceHandle == null))}
+          padded={false}
+        />
+      </div>
     </div>
   );
 };

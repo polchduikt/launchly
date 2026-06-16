@@ -1,3 +1,5 @@
+import type { Position } from '@xyflow/react';
+
 export interface FlowSchemaResponse {
   id: number;
   version: number;
@@ -67,11 +69,18 @@ export interface InputNodeProps {
   };
 }
 
+export interface ButtonData {
+  label: string;
+  value: string;
+  actionType?: string;
+  actionTarget?: string;
+}
+
 export interface EditButtonDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  button: { label: string; value: string } | null;
-  onSave: (updated: { label: string; value: string }) => void;
+  button: ButtonData | null;
+  onSave: (updated: ButtonData) => void;
   onRemove: () => void;
 }
 
@@ -87,11 +96,6 @@ export interface LeadNodeProps {
     phone?: string;
     text?: string;
   };
-}
-
-export interface ButtonData {
-  label: string;
-  value: string;
 }
 
 export interface MessageNodeProps {
@@ -143,5 +147,14 @@ export interface BotState {
   activeBotId: number | null;
   setActiveBotId: (id: number | null) => void;
   clearBots: () => void;
+}
+
+export interface NodeHandleProps {
+  type: 'source' | 'target';
+  position: Position;
+  id?: string;
+  isConnected?: boolean;
+  className?: string;
+  padded?: boolean;
 }
 

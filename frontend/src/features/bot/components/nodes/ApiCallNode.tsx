@@ -1,40 +1,29 @@
 import React from 'react';
-import { Handle, Position } from '@xyflow/react';
+import { Position, useEdges } from '@xyflow/react';
+import type { NodeProps, Node } from '@xyflow/react';
 import { Globe } from 'lucide-react';
-import type { ApiCallNodeProps } from '../../../../types/bot';
+import { NodeHandle } from './NodeHandle';
+import type { CustomNodeData } from '../../../../types/bot';
+import { API_METHOD_COLORS } from '../../config/editorOptions';
 
-export const ApiCallNode: React.FC<ApiCallNodeProps> = ({ selected, data = {} }) => {
+export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   const url = data?.url || 'https://api.example.com/endpoint';
   const method = data?.method || 'GET';
 
-  const getMethodColor = (m: string) => {
-    switch (m.toUpperCase()) {
-      case 'GET':
-        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-      case 'POST':
-        return 'bg-blue-50 text-blue-500 border-blue-100';
-      case 'PUT':
-        return 'bg-amber-50 text-amber-600 border-amber-100';
-      case 'DELETE':
-        return 'bg-rose-50 text-rose-500 border-rose-100';
-      default:
-        return 'bg-slate-50 text-slate-500 border-slate-100';
-    }
-  };
-
   return (
     <div
-      className={`w-64 bg-white border-2 rounded-2xl p-4 shadow-sm transition-all ${
+      className={`w-64 bg-white/75 backdrop-blur-[2px] border-2 rounded-2xl p-4 shadow-sm transition-all relative overflow-visible isolate ${
         selected ? 'border-indigo-400 ring-2 ring-indigo-100' : 'border-slate-200'
       }`}
     >
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="w-3 h-3 bg-slate-400 border-2 border-white"
-      />
-
-      <div className="flex items-center gap-2 mb-3 border-b border-slate-100 pb-2">
+      <div className="relative flex items-center gap-2 mb-3 border-b border-slate-100 pb-2">
+        <NodeHandle
+          type="target"
+          position={Position.Left}
+          isConnected={edges.some((e) => e.target === id)}
+          padded={true}
+        />
         <span className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0">
           <Globe size={16} />
         </span>
@@ -50,7 +39,7 @@ export const ApiCallNode: React.FC<ApiCallNodeProps> = ({ selected, data = {} })
             <span>Request info</span>
           </div>
           <div className="flex items-center gap-2 mb-1">
-            <span className={`text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded border ${getMethodColor(method)}`}>
+            <span className={`text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded border ${API_METHOD_COLORS[method.toUpperCase()] || 'bg-slate-50 text-slate-500 border-slate-100'}`}>
               {method}
             </span>
           </div>
@@ -60,13 +49,14 @@ export const ApiCallNode: React.FC<ApiCallNodeProps> = ({ selected, data = {} })
         </div>
       </div>
 
-      <div className="flex justify-end items-center mt-3 pt-2 border-t border-slate-100">
+      <div className="flex justify-end items-center mt-3 pt-2 border-t border-slate-100 relative">
         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2">Next Step</span>
-        <Handle
+        <NodeHandle
           type="source"
           position={Position.Right}
           id="next"
-          className="w-3 h-3 bg-slate-400 border-2 border-white hover:scale-125 transition-transform"
+          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && (e.sourceHandle === 'next' || e.sourceHandle == null))}
+          padded={true}
         />
       </div>
     </div>

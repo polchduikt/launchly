@@ -1,23 +1,12 @@
 import React from 'react';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-
 import { useBroadcastBuilder } from '../hooks/useBroadcastBuilder';
 import { AudiencePanel, PickAutomationModal, TelegramPreviewModal } from '../components';
 import { NodeEditorPanel } from '../../bot/components/sidebar/NodeEditorPanel';
-
-import {
-  MessageNode,
-  InputNode,
-  ConditionNode,
-  OrderNode,
-  LeadNode,
-  ApiCallNode,
-  EndNode,
-} from '../../bot/components/nodes';
-import { StartBroadcastNode, StartAutomationBroadcastNode } from '../components/nodes';
-
-import { FLOW_BLOCKS } from '../../bot/config/flowBlocks';
+import { NODE_TYPES } from '../config/nodeTypes';
+import { BROADCAST_BLOCKS } from '../config/broadcastBlocks';
+import { ROUTES } from '../../../constants/routes';
 
 import {
   ArrowLeft,
@@ -31,23 +20,6 @@ import {
   AlertTriangle,
   Plus,
 } from 'lucide-react';
-
-const nodeTypes = {
-  START_BROADCAST: StartBroadcastNode,
-  MESSAGE: MessageNode,
-  INPUT: InputNode,
-  CONDITION: ConditionNode,
-  ORDER: OrderNode,
-  LEAD: LeadNode,
-  API_CALL: ApiCallNode,
-  END: EndNode,
-  START_AUTOMATION: StartAutomationBroadcastNode,
-};
-
-const broadcastBlocks = [
-  ...FLOW_BLOCKS,
-  { type: 'START_AUTOMATION', label: 'Start Automation', color: 'text-emerald-500 bg-emerald-50' },
-];
 
 export const BroadcastBuilderPage: React.FC = () => {
   const {
@@ -104,7 +76,7 @@ export const BroadcastBuilderPage: React.FC = () => {
         <AlertTriangle className="text-amber-500" size={48} />
         <h1 className="text-lg font-bold text-slate-800 font-sans">No active bot selected</h1>
         <button
-          onClick={() => window.location.assign('/home')}
+          onClick={() => window.location.assign(ROUTES.HOME)}
           className="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all cursor-pointer"
         >
           Select Bot
@@ -126,7 +98,7 @@ export const BroadcastBuilderPage: React.FC = () => {
       <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between z-10 select-none">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => window.location.assign('/broadcasts')}
+            onClick={() => window.location.assign(ROUTES.BROADCASTS)}
             className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all cursor-pointer"
           >
             <ArrowLeft size={16} />
@@ -268,7 +240,7 @@ export const BroadcastBuilderPage: React.FC = () => {
               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">
                 Add Flow Blocks
               </span>
-              {broadcastBlocks.map((item) => (
+              {BROADCAST_BLOCKS.map((item) => (
                 <button
                   key={item.type}
                   onClick={() => handleAddNode(item.type)}
@@ -300,7 +272,7 @@ export const BroadcastBuilderPage: React.FC = () => {
             onConnect={onConnect}
             onNodeClick={onNodeClick}
             onPaneClick={onPaneClick}
-            nodeTypes={nodeTypes}
+            nodeTypes={NODE_TYPES}
             fitView
             fitViewOptions={{ padding: 0.6 }}
             className="bg-slate-50"

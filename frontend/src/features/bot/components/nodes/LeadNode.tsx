@@ -1,26 +1,29 @@
 import React from 'react';
-import { Handle, Position } from '@xyflow/react';
+import { Position, useEdges } from '@xyflow/react';
+import type { NodeProps, Node } from '@xyflow/react';
 import { UserCheck } from 'lucide-react';
-import type { LeadNodeProps } from '../../../../types/bot';
+import { NodeHandle } from './NodeHandle';
+import type { CustomNodeData } from '../../../../types/bot';
 
-export const LeadNode: React.FC<LeadNodeProps> = ({ selected, data = {} }) => {
+export const LeadNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   const name = data?.name || '{name}';
   const email = data?.email || '{email}';
   const phone = data?.phone || '{phone}';
 
   return (
     <div
-      className={`w-64 bg-white border-2 rounded-2xl p-4 shadow-sm transition-all ${
+      className={`w-64 bg-white/75 backdrop-blur-[2px] border-2 rounded-2xl p-4 shadow-sm transition-all relative overflow-visible isolate ${
         selected ? 'border-sky-500 ring-2 ring-sky-100' : 'border-slate-200'
       }`}
     >
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="w-3 h-3 bg-slate-400 border-2 border-white"
-      />
-
-      <div className="flex items-center gap-2 mb-3 border-b border-slate-100 pb-2">
+      <div className="relative flex items-center gap-2 mb-3 border-b border-slate-100 pb-2">
+        <NodeHandle
+          type="target"
+          position={Position.Left}
+          isConnected={edges.some((e) => e.target === id)}
+          padded={true}
+        />
         <span className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
           <UserCheck size={16} />
         </span>
@@ -47,13 +50,14 @@ export const LeadNode: React.FC<LeadNodeProps> = ({ selected, data = {} }) => {
         </div>
       </div>
 
-      <div className="flex justify-end items-center mt-3 pt-2 border-t border-slate-100">
+      <div className="flex justify-end items-center mt-3 pt-2 border-t border-slate-100 relative">
         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2">Next Step</span>
-        <Handle
+        <NodeHandle
           type="source"
           position={Position.Right}
           id="next"
-          className="w-3 h-3 bg-slate-400 border-2 border-white hover:scale-125 transition-transform"
+          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && (e.sourceHandle === 'next' || e.sourceHandle == null))}
+          padded={true}
         />
       </div>
     </div>

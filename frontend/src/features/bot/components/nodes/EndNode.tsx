@@ -1,22 +1,25 @@
 import React from 'react';
-import { Handle, Position } from '@xyflow/react';
+import { Position, useEdges } from '@xyflow/react';
+import type { NodeProps, Node } from '@xyflow/react';
 import { Octagon } from 'lucide-react';
-import type { EndNodeProps } from '../../../../types/bot';
+import { NodeHandle } from './NodeHandle';
+import type { CustomNodeData } from '../../../../types/bot';
 
-export const EndNode: React.FC<EndNodeProps> = ({ selected }) => {
+export const EndNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected }) => {
+  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   return (
     <div
-      className={`w-64 bg-white border-2 rounded-2xl p-4 shadow-sm transition-all ${
+      className={`w-64 bg-white/75 backdrop-blur-[2px] border-2 rounded-2xl p-4 shadow-sm transition-all relative overflow-visible isolate ${
         selected ? 'border-slate-400 ring-2 ring-slate-100' : 'border-slate-200'
       }`}
     >
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="w-3 h-3 bg-slate-400 border-2 border-white"
-      />
-
-      <div className="flex items-center gap-2 mb-3">
+      <div className="relative flex items-center gap-2 mb-3">
+        <NodeHandle
+          type="target"
+          position={Position.Left}
+          isConnected={edges.some((e) => e.target === id)}
+          padded={true}
+        />
         <span className="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0">
           <Octagon size={16} />
         </span>

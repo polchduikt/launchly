@@ -21,7 +21,7 @@ export interface LeadResponse {
   source: string;
   status: LeadStatus;
   notes: string | null;
-  data: string | null; // custom JSON payload
+  data: string | null; 
   botUserName: string;
   botUserUsername: string | null;
   createdAt: string;
