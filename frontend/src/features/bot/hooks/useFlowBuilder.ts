@@ -8,19 +8,34 @@ import { FLOW_EDGE_DEFAULTS } from '../config/flowEdges';
 import { createDefaultNodeData } from '../config/flowBlocks';
 import { getAutoLayoutedElements } from '../utils/flowLayout';
 import { ROUTES } from '../../../constants/routes';
+const getFlowKey = (nodes: Node[], edges: Edge[]) => {
+  const cleanNodes = nodes.map(({ id, type, position, data }) => ({
+    id,
+    type,
+    position: { x: Math.round(position.x), y: Math.round(position.y) },
+    data,
+  }));
+  const cleanEdges = edges.map(({ id, source, target, sourceHandle, targetHandle }) => ({
+    id,
+    source,
+    target,
+    sourceHandle,
+    targetHandle,
+  }));
+  return JSON.stringify({ nodes: cleanNodes, edges: cleanEdges });
+};
 
 export const useFlowBuilder = () => {
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
-  const { screenToFlowPosition } = useReactFlow();
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const { screenToFlowPosition, fitView } = useReactFlow();
+  const [nodes, setNodes, onNodesChangeState] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChangeState] = useEdgesState<Edge>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [edgeType, setEdgeType] = useState<'default' | 'smoothstep'>(
     () => (localStorage.getItem('launchly_flow_edge_type') as 'default' | 'smoothstep') || 'default');
   const [saveError, setSaveError] = useState<string | null>(null);
   const saveErrorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isAddDropdownOpen, setIsAddDropdownOpen] = useState(false);
   const connectionStartRef = useRef<{ nodeId: string; handleId: string | null; handleType: string } | null>(null);
   const didConnectRef = useRef<boolean>(false);
@@ -32,6 +47,120 @@ export const useFlowBuilder = () => {
     flowPosition: { x: number; y: number };
     source: { nodeId: string; handleId: string | null; handleType: string };
   } | null>(null);
+
+  const [past, setPast] = useState<{ nodes: Node[]; edges: Edge[] }[]>([]);
+  const [future, setFuture] = useState<{ nodes: Node[]; edges: Edge[] }[]>([]);
+
+  const takeSnapshot = useCallback(() => {
+    setPast((p) => {
+      if (p.length > 0) {
+        const last = p[p.length - 1];
+        if (getFlowKey(last.nodes, last.edges) === getFlowKey(nodes, edges)) {
+          return p;
+        }
+      }
+      return [...p, { nodes, edges }];
+    });
+    setFuture([]);
+  }, [nodes, edges]);
+
+  const isTypingRef = useRef<boolean>(false);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const takeSnapshotBeforeEdit = useCallback(() => {
+    if (!isTypingRef.current) {
+      isTypingRef.current = true;
+      takeSnapshot();
+    }
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    typingTimeoutRef.current = setTimeout(() => {
+      isTypingRef.current = false;
+    }, 800);
+  }, [takeSnapshot]);
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const undo = useCallback(() => {
+    if (past.length === 0) return;
+    const previous = past[past.length - 1];
+    const newPast = past.slice(0, past.length - 1);
+
+    setPast(newPast);
+    setFuture((f) => [...f, { nodes, edges }]);
+
+    setNodes(previous.nodes);
+    setEdges(previous.edges);
+    setSelectedNodeId(null);
+  }, [past, nodes, edges, setNodes, setEdges]);
+
+  const redo = useCallback(() => {
+    if (future.length === 0) return;
+    const next = future[future.length - 1];
+    const newFuture = future.slice(0, future.length - 1);
+
+    setFuture(newFuture);
+    setPast((p) => [...p, { nodes, edges }]);
+
+    setNodes(next.nodes);
+    setEdges(next.edges);
+    setSelectedNodeId(null);
+  }, [future, nodes, edges, setNodes, setEdges]);
+
+  const onNodesChange = useCallback(
+    (changes: any) => {
+      const hasRemoval = changes.some((c: any) => c.type === 'remove');
+      if (hasRemoval) {
+        takeSnapshot();
+      }
+      onNodesChangeState(changes);
+    },
+    [onNodesChangeState, takeSnapshot]
+  );
+
+  const onEdgesChange = useCallback(
+    (changes: any) => {
+      const hasRemoval = changes.some((c: any) => c.type === 'remove');
+      if (hasRemoval) {
+        takeSnapshot();
+      }
+      onEdgesChangeState(changes);
+    },
+    [onEdgesChangeState, takeSnapshot]
+  );
+
+  const dragStartStateRef = useRef<{ nodes: Node[]; edges: Edge[] } | null>(null);
+
+  const onNodeDragStart = useCallback(() => {
+    dragStartStateRef.current = { nodes, edges };
+  }, [nodes, edges]);
+
+  const onNodeDragStop = useCallback(() => {
+    if (!dragStartStateRef.current) return;
+    const startKey = getFlowKey(dragStartStateRef.current.nodes, dragStartStateRef.current.edges);
+    const currentKey = getFlowKey(nodes, edges);
+    if (startKey !== currentKey) {
+      const startState = dragStartStateRef.current;
+      setPast((p) => {
+        if (p.length > 0) {
+          const last = p[p.length - 1];
+          if (getFlowKey(last.nodes, last.edges) === startKey) {
+            return p;
+          }
+        }
+        return [...p, startState];
+      });
+      setFuture([]);
+    }
+    dragStartStateRef.current = null;
+  }, [nodes, edges]);
 
   const triggerSaveError = (msg: string) => {
     setSaveError(msg);
@@ -79,9 +208,16 @@ export const useFlowBuilder = () => {
   const { data: schema, isLoading: isLoadingSchema } = useFlowSchemaQuery(activeBotId || 0);
   const saveMutation = useSaveFlowSchemaMutation(activeBotId || 0);
 
+  const isSchemaLoadedRef = useRef<boolean>(false);
+
   useEffect(() => {
-    if (!isLoadingSchema) {
+    isSchemaLoadedRef.current = false;
+  }, [activeBotId]);
+
+  useEffect(() => {
+    if (!isLoadingSchema && !isSchemaLoadedRef.current) {
       if (schema) {
+        isSchemaLoadedRef.current = true;
         let parsedNodes: Node[] = [];
         let parsedEdges: Edge[] = [];
 
@@ -127,7 +263,12 @@ export const useFlowBuilder = () => {
 
         setNodes(parsedNodes);
         setEdges(parsedEdges);
+
+        setTimeout(() => {
+          fitView({ maxZoom: 1, padding: 0.2 });
+        }, 50);
       } else {
+        isSchemaLoadedRef.current = true;
         setNodes([
           {
             id: 'node_start',
@@ -137,9 +278,52 @@ export const useFlowBuilder = () => {
           },
         ]);
         setEdges([]);
+
+        setTimeout(() => {
+          fitView({ maxZoom: 1, padding: 0.2 });
+        }, 50);
       }
     }
-  }, [schema, isLoadingSchema, setNodes, setEdges]);
+  }, [schema, isLoadingSchema, setNodes, setEdges, fitView, edgeType]);
+
+  const lastSavedKeyRef = useRef<string>('');
+  const isInitialLoadDoneRef = useRef<boolean>(false);
+  const [isDirty, setIsDirty] = useState(false);
+
+  useEffect(() => {
+    if (!isLoadingSchema && nodes.length > 0) {
+      if (!isInitialLoadDoneRef.current) {
+        isInitialLoadDoneRef.current = true;
+        lastSavedKeyRef.current = getFlowKey(nodes, edges);
+      }
+    }
+  }, [isLoadingSchema, nodes, edges]);
+
+  useEffect(() => {
+    if (!isInitialLoadDoneRef.current) return;
+    const currentKey = getFlowKey(nodes, edges);
+    setIsDirty(currentKey !== lastSavedKeyRef.current);
+  }, [nodes, edges]);
+
+  useEffect(() => {
+    if (!isInitialLoadDoneRef.current) return;
+
+    const currentKey = getFlowKey(nodes, edges);
+    if (currentKey === lastSavedKeyRef.current) return;
+
+    const startCount = nodes.filter((n) => n.type === 'START').length;
+    if (startCount !== 1) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      saveMutation.mutate({ nodes, edges });
+      lastSavedKeyRef.current = currentKey;
+      setIsDirty(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [nodes, edges, saveMutation, isLoadingSchema]);
 
   useEffect(() => {
     const handleEditButton = (e: Event) => {
@@ -168,6 +352,7 @@ export const useFlowBuilder = () => {
 
   const onConnect = useCallback(
     (params: Connection) => {
+      takeSnapshot();
       didConnectRef.current = true;
       let sourceHandle = params.sourceHandle;
       if (!sourceHandle) {
@@ -176,7 +361,7 @@ export const useFlowBuilder = () => {
       }
       setEdges((eds) => addEdge({ ...params, sourceHandle, ...FLOW_EDGE_DEFAULTS, type: edgeType }, eds));
     },
-    [setEdges, nodes, edgeType]
+    [setEdges, nodes, edgeType, takeSnapshot]
   );
 
   const onConnectStart = useCallback((_event: unknown, { nodeId, handleId, handleType }: { nodeId: string | null; handleId: string | null; handleType: 'source' | 'target' | null }) => {
@@ -230,6 +415,7 @@ export const useFlowBuilder = () => {
             target: targetNodeId,
             targetHandle: null,
           };
+          takeSnapshot();
           setEdges((eds) => addEdge({ ...params, ...FLOW_EDGE_DEFAULTS, type: edgeType }, eds));
           connectionStartRef.current = null;
           return;
@@ -281,6 +467,7 @@ export const useFlowBuilder = () => {
       }
     }
 
+    takeSnapshot();
     const newNodeId = `node_${type.toLowerCase()}_${Date.now()}`;
     const newNode: Node = {
       id: newNodeId,
@@ -315,16 +502,17 @@ export const useFlowBuilder = () => {
 
   const handleUpdateNodeData = useCallback(
     (nodeId: string, newData: Record<string, unknown>) => {
+      takeSnapshotBeforeEdit();
       setNodes((nds) =>
         nds.map((node) => {
           if (node.id === nodeId) {
             return { ...node, data: newData };
           }
           return node;
-          })
+        })
       );
     },
-    [setNodes]
+    [setNodes, takeSnapshotBeforeEdit]
   );
 
   const handleAddNode = (type: string) => {
@@ -336,6 +524,7 @@ export const useFlowBuilder = () => {
       }
     }
 
+    takeSnapshot();
     const id = `node_${type.toLowerCase()}_${Date.now()}`;
     const newNode: Node = {
       id,
@@ -356,12 +545,14 @@ export const useFlowBuilder = () => {
       return;
     }
 
+    takeSnapshot();
     setNodes((nds) => nds.filter((n) => n.id !== selectedNodeId));
     setEdges((eds) => eds.filter((e) => e.source !== selectedNodeId && e.target !== selectedNodeId));
     setSelectedNodeId(null);
   };
 
   const handleAutoLayout = (direction: 'LR' | 'TB') => {
+    takeSnapshot();
     const layouted = getAutoLayoutedElements(nodes, edges, direction);
     setNodes(layouted.nodes);
     setEdges(layouted.edges);
@@ -380,6 +571,8 @@ export const useFlowBuilder = () => {
       nodes,
       edges,
     });
+    lastSavedKeyRef.current = getFlowKey(nodes, edges);
+    setIsDirty(false);
   };
 
   const selectedNode = useMemo(() => {
@@ -455,6 +648,8 @@ export const useFlowBuilder = () => {
     displayEdges,
     onNodesChange,
     onEdgesChange,
+    onNodeDragStart,
+    onNodeDragStop,
     onConnect,
     onConnectStart,
     onConnectEnd,
@@ -464,8 +659,6 @@ export const useFlowBuilder = () => {
     setEdgeType,
     saveError,
     setSaveError,
-    isAiModalOpen,
-    setIsAiModalOpen,
     isAddDropdownOpen,
     setIsAddDropdownOpen,
     contextMenu,
@@ -480,5 +673,11 @@ export const useFlowBuilder = () => {
     saveMutation,
     isLoadingSchema,
     justEndedDrag,
+    undo,
+    redo,
+    canUndo: past.length > 0,
+    canRedo: future.length > 0,
+    takeSnapshot,
+    isDirty,
   };
 };

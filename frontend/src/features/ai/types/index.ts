@@ -44,7 +44,13 @@ export interface AiFlowGeneratorModalProps {
 export interface AiState {
   isOpen: boolean;
   messages: GroqMessage[];
+  activeTab: 'chat' | 'generator';
+  onGenerate: ((nodes: any[], edges: any[]) => void) | null;
+  hasExistingNodes: boolean;
   setIsOpen: (isOpen: boolean) => void;
   addMessage: (message: GroqMessage) => void;
   clearMessages: () => void;
+  setActiveTab: (tab: 'chat' | 'generator') => void;
+  setOnGenerate: (onGenerate: ((nodes: any[], edges: any[]) => void) | null) => void;
+  setHasExistingNodes: (hasExistingNodes: boolean) => void;
 }

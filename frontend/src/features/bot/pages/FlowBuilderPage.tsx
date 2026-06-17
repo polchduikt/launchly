@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {ReactFlow, Controls, Background, ReactFlowProvider, getBezierPath, getSmoothStepPath, ConnectionLineType,} from '@xyflow/react';
-import type { Node, Edge, ConnectionLineComponentProps } from '@xyflow/react';
+import type { ConnectionLineComponentProps } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../hooks/useBotsQuery';
@@ -13,9 +13,9 @@ import { FLOW_EDGE_DEFAULTS } from '../config/flowEdges';
 import { CONTEXT_MENU_OPTIONS } from '../config/contextMenuOptions';
 import { useFlowBuilder } from '../hooks/useFlowBuilder';
 import { ROUTES } from '../../../constants/routes';
-import { ArrowLeft, Loader2, Plus, Trash2, Sparkles, GitFork, Route, GitCommit } from 'lucide-react';
-import { AiFlowGeneratorModal } from '../../ai/components/AiFlowGeneratorModal';
-import { AiAssistantDrawer } from '../../ai/components/AiAssistantDrawer';
+import { ArrowLeft, Loader2, Plus, Trash2, GitFork, Route, GitCommit, Undo2, Redo2 } from 'lucide-react';
+import { useAiStore } from '../../../store/useAiStore';
+import { useEffect } from 'react';
 
 const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
   fromX,
@@ -79,6 +79,8 @@ const FlowBuilderInner: React.FC = () => {
     displayEdges,
     onNodesChange,
     onEdgesChange,
+    onNodeDragStart,
+    onNodeDragStop,
     onConnect,
     onConnectStart,
     onConnectEnd,
@@ -87,8 +89,6 @@ const FlowBuilderInner: React.FC = () => {
     edgeType,
     setEdgeType,
     saveError,
-    isAiModalOpen,
-    setIsAiModalOpen,
     isAddDropdownOpen,
     setIsAddDropdownOpen,
     contextMenu,
@@ -102,7 +102,60 @@ const FlowBuilderInner: React.FC = () => {
     selectedNode,
     saveMutation,
     justEndedDrag,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    takeSnapshot,
+    isDirty,
   } = useFlowBuilder();
+
+  const { setOnGenerate, setHasExistingNodes } = useAiStore();
+
+  useEffect(() => {
+    setOnGenerate((newNodes, newEdges) => {
+      takeSnapshot();
+      setNodes(newNodes);
+      setEdges(newEdges);
+      setSelectedNodeId(null);
+    });
+    return () => {
+      setOnGenerate(null);
+    };
+  }, [setOnGenerate, setNodes, setEdges, setSelectedNodeId, takeSnapshot]);
+
+  useEffect(() => {
+    setHasExistingNodes(nodes.length > 1 || (nodes.length === 1 && nodes[0].type !== 'START'));
+  }, [nodes, setHasExistingNodes]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement;
+      const isTyping = activeEl && (
+        activeEl.tagName === 'INPUT' || 
+        activeEl.tagName === 'TEXTAREA' || 
+        activeEl.getAttribute('contenteditable') === 'true'
+      );
+      
+      if (isTyping) return;
+
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        undo();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        redo();
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        redo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [undo, redo]);
 
   const { data: bots = [] } = useBotsQuery();
   const activeBot = bots.find((b) => b.id === activeBotId);
@@ -141,24 +194,56 @@ const FlowBuilderInner: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {saveError && (
-              <span className="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1.5 border border-rose-100 rounded-lg animate-pulse">
+              <span className="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1.5 border border-rose-100 rounded-lg animate-pulse mr-1">
                 {saveError}
               </span>
             )}
 
-            {saveMutation.isSuccess && (
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 border border-emerald-100 rounded-lg">
-                Saved successfully
-              </span>
-            )}
+            <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-3.5 py-1.5 rounded-2xl font-sans">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 min-w-[85px] justify-start select-none">
+                {isDirty || saveMutation.isPending ? (
+                  <>
+                    <Loader2 className="animate-spin text-indigo-500 shrink-0" size={14} />
+                    <span className="text-slate-400">Saving...</span>
+                  </>
+                ) : saveMutation.isError ? (
+                  <>
+                    <span className="text-rose-500 shrink-0 font-bold">✕</span>
+                    <span className="text-rose-500">Failed</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-emerald-500 shrink-0 font-bold">✓</span>
+                    <span className="text-slate-500">Saved</span>
+                  </>
+                )}
+              </div>
 
-            {saveMutation.isError && (
-              <span className="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1.5 border border-rose-100 rounded-lg">
-                An error occurred
-              </span>
-            )}
+              <div className="w-[1px] h-4 bg-slate-200" />
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={undo}
+                  disabled={!canUndo}
+                  title="Undo (Ctrl+Z)"
+                  className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:hover:text-slate-400 hover:bg-slate-200/50 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  <Undo2 size={15} />
+                </button>
+                <button
+                  onClick={redo}
+                  disabled={!canRedo}
+                  title="Redo (Ctrl+Y)"
+                  className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:hover:text-slate-400 hover:bg-slate-200/50 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  <Redo2 size={15} />
+                </button>
+              </div>
+            </div>
+
+            <div className="w-[1px] h-6 bg-slate-200 hidden sm:block" />
 
             <button
               onClick={handleSaveFlow}
@@ -190,6 +275,8 @@ const FlowBuilderInner: React.FC = () => {
               onConnect={onConnect}
               onConnectStart={onConnectStart}
               onConnectEnd={onConnectEnd}
+              onNodeDragStart={onNodeDragStart}
+              onNodeDragStop={onNodeDragStop}
               nodeTypes={NODE_TYPES}
               onNodeClick={(_, node) => setSelectedNodeId(node.id)}
               onPaneClick={() => {
@@ -261,18 +348,8 @@ const FlowBuilderInner: React.FC = () => {
                 <NodeEditorPanel node={selectedNode} onUpdateNodeData={handleUpdateNodeData} />
               )}
             </aside>
-            <div className={`absolute top-4 z-10 flex flex-col gap-3 pointer-events-auto transition-all duration-300 ease-in-out ${
-              selectedNodeId ? 'left-[336px]' : 'left-4'
-            }`}>
-              <button
-                onClick={() => setIsAiModalOpen(true)}
-                className="w-48 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white text-xs font-bold rounded-2xl border border-indigo-600 shadow-md shadow-indigo-100/30 flex items-center justify-center gap-2 transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0"
-              >
-                <Sparkles size={13} className="animate-pulse" />
-                <span>Generate with AI</span>
-              </button>
-
-              {selectedNodeId && (
+            {selectedNodeId && (
+              <div className="absolute top-4 left-[336px] z-10 flex flex-col gap-3 pointer-events-auto transition-all duration-300 ease-in-out">
                 <button
                   onClick={handleDeleteSelectedNode}
                   className="flex items-center justify-center gap-1.5 w-48 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-2xl border border-rose-100 shadow-sm transition-all cursor-pointer animate-in fade-in duration-200"
@@ -280,8 +357,8 @@ const FlowBuilderInner: React.FC = () => {
                   <Trash2 size={14} />
                   <span>Delete Block</span>
                 </button>
-              )}
-            </div>
+              </div>
+            )}
 
             <div className="absolute top-4 right-4 z-10 select-none">
               <button
@@ -366,18 +443,7 @@ const FlowBuilderInner: React.FC = () => {
               </div>
             )}
 
-            <AiFlowGeneratorModal
-              isOpen={isAiModalOpen}
-              onClose={() => setIsAiModalOpen(false)}
-              onGenerate={(newNodes: Node[], newEdges: Edge[]) => {
-                setNodes(newNodes);
-                setEdges(newEdges);
-                setSelectedNodeId(null);
-              }}
-              hasExistingNodes={nodes.length > 1 || (nodes.length === 1 && nodes[0].type !== 'START')}
-            />
 
-            <AiAssistantDrawer />
           </div>
         </div>
       </div>
