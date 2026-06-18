@@ -5,8 +5,9 @@ import {
   deleteBotApi,
   startBotApi,
   stopBotApi,
+  updateBotApi,
 } from '../api/bot';
-import type { BotCreateRequest } from '../../../types/bot';
+import type { BotCreateRequest, BotUpdateRequest } from '../../../types/bot';
 
 export const useCreateBotMutation = () => {
   const queryClient = useQueryClient();
@@ -44,6 +45,16 @@ export const useStopBotMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => stopBotApi(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bots'] });
+    },
+  });
+};
+
+export const useUpdateBotMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: BotUpdateRequest }) => updateBotApi(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bots'] });
     },

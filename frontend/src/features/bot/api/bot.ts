@@ -1,5 +1,5 @@
 import apiClient from '../../../lib/axios';
-import type { BotResponse, BotCreateRequest, BotDetailResponse, FlowSchemaResponse } from '../../../types/bot';
+import type { BotResponse, BotCreateRequest, BotDetailResponse, FlowSchemaResponse, BotUpdateRequest } from '../../../types/bot';
 
 
 export const getBotsApi = async (): Promise<BotResponse[]> => {
@@ -9,6 +9,11 @@ export const getBotsApi = async (): Promise<BotResponse[]> => {
 
 export const createBotApi = async (data: BotCreateRequest): Promise<BotResponse> => {
   const response = await apiClient.post<BotResponse>('/bots', data);
+  return response.data;
+};
+
+export const updateBotApi = async (id: number, data: BotUpdateRequest): Promise<BotResponse> => {
+  const response = await apiClient.put<BotResponse>(`/bots/${id}`, data);
   return response.data;
 };
 

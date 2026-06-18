@@ -16,6 +16,8 @@ export interface BotResponse {
   avatarPublicId: string | null;
   active: boolean;
   createdAt: string;
+  updatedAt?: string;
+  totalUsers: number;
 }
 
 export interface BotDetailResponse extends BotResponse {

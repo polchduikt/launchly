@@ -14,7 +14,7 @@ export const useBotsQuery = (enabled: boolean = true) => {
   });
 
   useEffect(() => {
-    if (query.data) {
+    if (query.data && !query.isFetching) {
       const bots = query.data;
       if (bots.length === 0) {
         if (activeBotId !== null) {
@@ -24,7 +24,7 @@ export const useBotsQuery = (enabled: boolean = true) => {
         setActiveBotId(bots[0].id);
       }
     }
-  }, [query.data, activeBotId, setActiveBotId]);
+  }, [query.data, query.isFetching, activeBotId, setActiveBotId]);
 
   return query;
 };

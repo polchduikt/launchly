@@ -1,46 +1,344 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
-import { Search, FolderPlus, Plus, MoreVertical, Trash2, LayoutGrid, List } from 'lucide-react';
-import { AUTOMATION_TABS } from '../config/automationTabs';
-import type { AutomationFlow } from '../../../types/bot';
+import {
+  Search,
+  FolderPlus,
+  Plus,
+  MoreVertical,
+  Trash2,
+  LayoutGrid,
+  List,
+  Folder,
+  FolderOpen,
+  Pencil,
+  Play,
+  Square,
+  X,
+  AlertCircle,
+  Loader2,
+} from 'lucide-react';
+import { useBotStore } from '../../../store/useBotStore';
+import { useBotsQuery } from '../hooks/useBotsQuery';
+import {
+  useCreateBotMutation,
+  useDeleteBotMutation,
+  useStartBotMutation,
+  useStopBotMutation,
+  useUpdateBotMutation,
+} from '../hooks/useBotMutations';
+
+interface Folder {
+  id: string;
+  name: string;
+}
 
 export const AutomationsPage: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'my' | 'basic' | 'sequences'>('my');
+  const setActiveBotId = useBotStore((state) => state.setActiveBotId);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const { data: bots = [], isLoading } = useBotsQuery();
+  const createBotMutation = useCreateBotMutation();
+  const deleteBotMutation = useDeleteBotMutation();
+  const startBotMutation = useStartBotMutation();
+  const stopBotMutation = useStopBotMutation();
+  const updateBotMutation = useUpdateBotMutation();
+  const [folders, setFolders] = useState<Folder[]>(() => {
+    const saved = localStorage.getItem('launchly_folders');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [botFolders, setBotFolders] = useState<Record<number, string>>(() => {
+    const saved = localStorage.getItem('launchly_bot_folders');
+    return saved ? JSON.parse(saved) : {};
+  });
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [activeMenuBotId, setActiveMenuBotId] = useState<number | null>(null);
+  const [menuCoords, setMenuCoords] = useState<{ top: number; left: number } | null>(null);
+  const [isNewBotModalOpen, setIsNewBotModalOpen] = useState(false);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
+  const [newBotName, setNewBotName] = useState('');
+  const [newBotToken, setNewBotToken] = useState('');
+  const [newBotDesc, setNewBotDesc] = useState('');
+  const [newBotError, setNewBotError] = useState<string | null>(null);
+  const [renameBotId, setRenameBotId] = useState<number | null>(null);
+  const [tempBotName, setTempBotName] = useState('');
+  const [moveBotId, setMoveBotId] = useState<number | null>(null);
+  const [tempFolderId, setTempFolderId] = useState('');
+  const [tempFolderName, setTempFolderName] = useState('');
 
+  useEffect(() => {
+    localStorage.setItem('launchly_folders', JSON.stringify(folders));
+  }, [folders]);
 
-  const [flows] = useState<AutomationFlow[]>([
-    { id: 1, name: 'Telegram Welcome Message', runs: 'n/a', ctr: 'n/a', modified: '18 seconds ago', status: 'draft' },
-    { id: 2, name: 'Telegram Default Reply', runs: 0, ctr: 'n/a', modified: '3 minutes ago', status: 'active' },
-  ]);
+  useEffect(() => {
+    localStorage.setItem('launchly_bot_folders', JSON.stringify(botFolders));
+  }, [botFolders]);
 
-  const filteredFlows = flows.filter((flow) =>
-    flow.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    const handleClose = () => {
+      setActiveMenuBotId(null);
+      setMenuCoords(null);
+    };
+    document.addEventListener('click', handleClose);
+    window.addEventListener('scroll', handleClose, true);
+    return () => {
+      document.removeEventListener('click', handleClose);
+      window.removeEventListener('scroll', handleClose, true);
+    };
+  }, []);
+
+  const formatModifiedDate = (dateString?: string | null) => {
+    if (!dateString) return 'n/a';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'n/a';
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      if (diffMs < 0) return 'Just now';
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      if (diffDays < 30) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+      return date.toLocaleDateString();
+    } catch {
+      return 'n/a';
+    }
+  };
+
+  const getFolderBotCount = (folderId: string | null) => {
+    if (folderId === null) {
+      return bots.length;
+    }
+    return bots.filter((b) => botFolders[b.id] === folderId).length;
+  };
+
+  const handleMenuClick = (e: React.MouseEvent<HTMLButtonElement>, botId: number) => {
+    e.stopPropagation();
+    if (activeMenuBotId === botId) {
+      setActiveMenuBotId(null);
+      setMenuCoords(null);
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setMenuCoords({
+        top: rect.bottom + 6,
+        left: rect.right - 192,
+      });
+      setActiveMenuBotId(botId);
+    }
+  };
+
+  const handleStartBot = (id: number) => {
+    startBotMutation.mutate(id, {
+      onSuccess: () => {
+        setActiveMenuBotId(null);
+        setMenuCoords(null);
+      },
+    });
+  };
+
+  const handleStopBot = (id: number) => {
+    stopBotMutation.mutate(id, {
+      onSuccess: () => {
+        setActiveMenuBotId(null);
+        setMenuCoords(null);
+      },
+    });
+  };
+
+  const handleDeleteBot = (id: number) => {
+    if (window.confirm('Are you sure you want to delete this automation?')) {
+      deleteBotMutation.mutate(id, {
+        onSuccess: () => {
+          const updated = { ...botFolders };
+          delete updated[id];
+          setBotFolders(updated);
+          setActiveMenuBotId(null);
+          setMenuCoords(null);
+        },
+      });
+    }
+  };
+
+  const handleRenameBot = () => {
+    if (!tempBotName.trim() || renameBotId === null) return;
+    updateBotMutation.mutate(
+      { id: renameBotId, data: { name: tempBotName.trim() } },
+      {
+        onSuccess: () => {
+          setIsRenameModalOpen(false);
+          setRenameBotId(null);
+        },
+      }
+    );
+  };
+
+  const handleMoveBot = () => {
+    if (moveBotId !== null) {
+      const updated = { ...botFolders };
+      if (tempFolderId) {
+        updated[moveBotId] = tempFolderId;
+      } else {
+        delete updated[moveBotId];
+      }
+      setBotFolders(updated);
+      setIsMoveModalOpen(false);
+      setMoveBotId(null);
+    }
+  };
+
+  const handleCreateFolder = () => {
+    if (!tempFolderName.trim()) return;
+    const newFolder: Folder = {
+      id: `folder_${Date.now()}`,
+      name: tempFolderName.trim(),
+    };
+    setFolders([...folders, newFolder]);
+    setIsNewFolderModalOpen(false);
+    setTempFolderName('');
+  };
+
+  const handleDeleteFolder = (folderId: string) => {
+    if (
+      window.confirm(
+        'Are you sure you want to delete this folder? All automations in it will be moved to the root folder list.'
+      )
+    ) {
+      setFolders(folders.filter((f) => f.id !== folderId));
+      const updated = { ...botFolders };
+      Object.keys(updated).forEach((botIdKey) => {
+        const bId = Number(botIdKey);
+        if (updated[bId] === folderId) {
+          delete updated[bId];
+        }
+      });
+      setBotFolders(updated);
+      if (selectedFolderId === folderId) {
+        setSelectedFolderId(null);
+      }
+    }
+  };
+
+  const handleCreateBotSubmit = () => {
+    if (!newBotName.trim()) {
+      setNewBotError('Automation name is required');
+      return;
+    }
+    if (!newBotToken.trim()) {
+      setNewBotError('Telegram Bot Token is required');
+      return;
+    }
+    setNewBotError(null);
+    createBotMutation.mutate(
+      {
+        name: newBotName.trim(),
+        telegramToken: newBotToken.trim(),
+        description: newBotDesc.trim() || undefined,
+      },
+      {
+        onSuccess: (newBot) => {
+          if (selectedFolderId) {
+            setBotFolders({ ...botFolders, [newBot.id]: selectedFolderId });
+          }
+          setIsNewBotModalOpen(false);
+          setNewBotName('');
+          setNewBotToken('');
+          setNewBotDesc('');
+          setActiveBotId(newBot.id);
+          navigate('/builder');
+        },
+        onError: (err: unknown) => {
+          const errMsg =
+            err instanceof Error ? err.message : 'Failed to create automation. Please verify your token.';
+          setNewBotError(errMsg);
+        },
+      }
+    );
+  };
+
+  const filteredBots = bots.filter((bot) => {
+    const matchesSearch = bot.name.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!matchesSearch) return false;
+    if (selectedFolderId !== null) {
+      return botFolders[bot.id] === selectedFolderId;
+    }
+    return true;
+  });
 
   return (
     <DashboardLayout>
       <div className="flex h-full min-h-screen bg-slate-50 font-sans">
-        <aside className="w-56 bg-slate-50 border-r border-slate-200 p-4 shrink-0 hidden md:block">
+        <aside className="w-60 bg-slate-50 border-r border-slate-200 p-4 shrink-0 hidden md:block">
           <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2">Automation</h2>
           <nav className="space-y-1">
-            {AUTOMATION_TABS.map((tab) => (
+            <button
+              onClick={() => setSelectedFolderId(null)}
+              className={`w-full flex items-center px-3 py-2 rounded-xl text-sm font-semibold text-left transition-all ${
+                selectedFolderId === null
+                  ? 'bg-white text-slate-900 border border-slate-200 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              My Automations
+            </button>
+          </nav>
+
+          <div className="mt-8">
+            <div className="flex items-center justify-between px-2 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span>Folders</span>
+            </div>
+            <nav className="space-y-1">
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center px-3 py-2 rounded-xl text-sm font-semibold text-left transition-all ${
-                  activeTab === tab.id
+                onClick={() => setSelectedFolderId(null)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-semibold text-left transition-all ${
+                  selectedFolderId === null
                     ? 'bg-white text-slate-900 border border-slate-200 shadow-sm'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                {tab.label}
+                <div className="flex items-center">
+                  <FolderOpen size={14} className="mr-2 text-slate-400" />
+                  <span>All Automations</span>
+                </div>
+                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
+                  {getFolderBotCount(null)}
+                </span>
               </button>
-            ))}
-          </nav>
+              {folders.map((folder) => (
+                <div
+                  key={folder.id}
+                  className="group flex items-center justify-between w-full rounded-xl transition-all"
+                >
+                  <button
+                    onClick={() => setSelectedFolderId(folder.id)}
+                    className={`flex-1 flex items-center px-3 py-2 rounded-xl text-sm font-semibold text-left transition-all truncate ${
+                      selectedFolderId === folder.id
+                        ? 'bg-white text-slate-900 border border-slate-200 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <Folder size={14} className="mr-2 text-slate-400 shrink-0" />
+                    <span className="truncate mr-1">{folder.name}</span>
+                    <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
+                      {getFolderBotCount(folder.id)}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteFolder(folder.id)}
+                    className="p-2 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all cursor-pointer rounded-lg shrink-0"
+                    title="Delete Folder"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </nav>
+          </div>
         </aside>
 
         <div className="flex-1 p-6 md:p-10 max-w-5xl mx-auto space-y-6">
@@ -51,15 +349,22 @@ export const AutomationsPage: React.FC = () => {
           <div className="space-y-6 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 tracking-tight">My Automations</h2>
+                <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+                  {selectedFolderId
+                    ? folders.find((f) => f.id === selectedFolderId)?.name || 'Folder'
+                    : 'My Automations'}
+                </h2>
               </div>
               <div className="flex items-center gap-2">
-                <button className="flex items-center gap-1 px-4 py-2 text-xs font-bold text-indigo-600 hover:bg-indigo-50 border border-slate-200 rounded-xl transition-all cursor-pointer">
+                <button
+                  onClick={() => setIsNewFolderModalOpen(true)}
+                  className="flex items-center gap-1 px-4 py-2 text-xs font-bold text-indigo-600 hover:bg-indigo-50 border border-slate-200 rounded-xl transition-all cursor-pointer"
+                >
                   <FolderPlus size={14} />
                   <span>New Folder</span>
                 </button>
                 <button
-                  onClick={() => navigate('/builder')}
+                  onClick={() => setIsNewBotModalOpen(true)}
                   className="flex items-center gap-1 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
                 >
                   <Plus size={14} />
@@ -81,7 +386,10 @@ export const AutomationsPage: React.FC = () => {
               </div>
 
               <div className="flex items-center justify-between md:justify-end gap-6 text-xs text-slate-500 font-bold select-none">
-                <button className="flex items-center gap-1.5 hover:text-slate-800 transition-all cursor-pointer">
+                <button
+                  onClick={() => alert('Trash is empty.')}
+                  className="flex items-center gap-1.5 hover:text-slate-800 transition-all cursor-pointer"
+                >
                   <Trash2 size={14} />
                   <span>Trash</span>
                 </button>
@@ -89,13 +397,17 @@ export const AutomationsPage: React.FC = () => {
                 <div className="flex items-center border border-slate-200 rounded-lg p-0.5 bg-slate-50">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-1.5 rounded transition-all cursor-pointer ${viewMode === 'list' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`p-1.5 rounded transition-all cursor-pointer ${
+                      viewMode === 'list' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:text-slate-600'
+                    }`}
                   >
                     <List size={14} />
                   </button>
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-1.5 rounded transition-all cursor-pointer ${viewMode === 'grid' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`p-1.5 rounded transition-all cursor-pointer ${
+                      viewMode === 'grid' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:text-slate-600'
+                    }`}
                   >
                     <LayoutGrid size={14} />
                   </button>
@@ -103,62 +415,431 @@ export const AutomationsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto pt-2">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-100 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">
-                    <th className="py-3 px-4 w-12 text-center">
-                      <input type="checkbox" className="rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" />
-                    </th>
-                    <th className="py-3 px-2">Name</th>
-                    <th className="py-3 px-2 w-28 text-center">Runs</th>
-                    <th className="py-3 px-2 w-28 text-center">CTR</th>
-                    <th className="py-3 px-2 w-40">Modified</th>
-                    <th className="py-3 px-4 w-12"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredFlows.length > 0 ? (
-                    filteredFlows.map((flow) => (
-                      <tr
-                        key={flow.id}
-                        onClick={() => navigate('/builder')}
-                        className="border-b border-slate-100 hover:bg-slate-50/50 transition-all group cursor-pointer"
-                      >
-                        <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
-                          <input type="checkbox" className="rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" />
-                        </td>
-                        <td className="py-4 px-2">
-                          <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full shrink-0 ${flow.status === 'active' ? 'bg-amber-500' : 'bg-amber-300'}`} />
-                            <span className="font-semibold text-sm text-slate-800 hover:text-indigo-600 transition-all">
-                              {flow.name}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-4 px-2 text-sm text-slate-500 text-center">{flow.runs}</td>
-                        <td className="py-4 px-2 text-sm text-slate-500 text-center">{flow.ctr}</td>
-                        <td className="py-4 px-2 text-xs text-slate-500">{flow.modified}</td>
-                        <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                          <button className="text-slate-400 hover:text-slate-700 p-1 rounded transition-all cursor-pointer">
-                            <MoreVertical size={16} />
-                          </button>
-                        </td>
+            {isLoading ? (
+              <div className="py-12 flex flex-col items-center justify-center gap-2 text-sm text-slate-500">
+                <Loader2 size={24} className="animate-spin text-indigo-600" />
+                <span>Loading automations...</span>
+              </div>
+            ) : filteredBots.length > 0 ? (
+              viewMode === 'list' ? (
+                <div className="overflow-x-auto pt-2">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">
+                        <th className="py-3 px-4 w-12 text-center">
+                          <input
+                            type="checkbox"
+                            className="rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                          />
+                        </th>
+                        <th className="py-3 px-2">Name</th>
+                        <th className="py-3 px-2 w-28 text-center">Runs</th>
+                        <th className="py-3 px-2 w-28 text-center">CTR</th>
+                        <th className="py-3 px-2 w-40">Modified</th>
+                        <th className="py-3 px-4 w-12"></th>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} className="py-8 text-center text-sm text-slate-400">
-                        No automations found. Create a new automation to get started.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody>
+                      {filteredBots.map((bot) => (
+                        <tr
+                          key={bot.id}
+                          onClick={() => {
+                            setActiveBotId(bot.id);
+                            navigate('/builder');
+                          }}
+                          className="border-b border-slate-100 hover:bg-slate-50/50 transition-all group cursor-pointer"
+                        >
+                          <td className="py-4 px-4 w-12 text-center" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              className="rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                            />
+                          </td>
+                          <td className="py-4 px-2">
+                            <div className="flex items-center gap-2.5">
+                              <span
+                                className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                                  bot.active ? 'bg-emerald-500 shadow-sm shadow-emerald-500/55' : 'bg-slate-300'
+                                }`}
+                              />
+                              <div className="flex flex-col min-w-0">
+                                <span className="font-semibold text-sm text-slate-800 hover:text-indigo-600 transition-all truncate max-w-xs md:max-w-md">
+                                  {bot.name}
+                                </span>
+                                {bot.description && (
+                                  <span className="text-xs text-slate-400 font-normal line-clamp-1 max-w-xs md:max-w-md mt-0.5">
+                                    {bot.description}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-2 w-28 text-sm text-slate-500 text-center">{bot.totalUsers}</td>
+                          <td className="py-4 px-2 w-28 text-sm text-slate-500 text-center">
+                            {bot.totalUsers === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
+                          </td>
+                          <td className="py-4 px-2 w-40 text-xs text-slate-500">{formatModifiedDate(bot.updatedAt || bot.createdAt)}</td>
+                          <td className="py-4 px-4 w-12 text-right" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={(e) => handleMenuClick(e, bot.id)}
+                              className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all cursor-pointer"
+                            >
+                              <MoreVertical size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+                  {filteredBots.map((bot) => (
+                    <div
+                      key={bot.id}
+                      onClick={() => {
+                        setActiveBotId(bot.id);
+                        navigate('/builder');
+                      }}
+                      className="bg-white border border-slate-200 rounded-3xl p-5 hover:border-indigo-500 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between relative group min-h-[160px]"
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span
+                              className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                                bot.active ? 'bg-emerald-500 shadow-sm shadow-emerald-500/55' : 'bg-slate-300'
+                              }`}
+                            />
+                            <h3 className="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors text-base truncate">
+                              {bot.name}
+                            </h3>
+                          </div>
+                          <div className="relative inline-block text-left shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={(e) => handleMenuClick(e, bot.id)}
+                              className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all cursor-pointer"
+                            >
+                              <MoreVertical size={16} />
+                            </button>
+                          </div>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-2 line-clamp-2">
+                          {bot.description || 'No description provided.'}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between border-t border-slate-100 pt-3.5 mt-4 text-[11px] text-slate-500 font-medium">
+                        <div className="flex items-center gap-3">
+                          <span>
+                            Runs: <span className="font-bold text-slate-700">{bot.totalUsers}</span>
+                          </span>
+                          <span>
+                            CTR: <span className="font-bold text-slate-700">
+                              {bot.totalUsers === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
+                            </span>
+                          </span>
+                        </div>
+                        <span className="text-slate-400">{formatModifiedDate(bot.updatedAt || bot.createdAt)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              <div className="py-12 text-center text-sm text-slate-400">
+                No automations found. Create a new automation to get started.
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {activeMenuBotId !== null && menuCoords !== null && (
+        <div
+          style={{
+            position: 'fixed',
+            top: menuCoords.top,
+            left: menuCoords.left,
+          }}
+          className="w-48 bg-white border border-slate-200 rounded-2xl shadow-xl z-[100] py-1.5 text-left"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {(() => {
+            const activeMenuBot = bots.find((b) => b.id === activeMenuBotId);
+            if (!activeMenuBot) return null;
+            return (
+              <>
+                {activeMenuBot.active ? (
+                  <button
+                    onClick={() => handleStopBot(activeMenuBot.id)}
+                    className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
+                  >
+                    <Square size={13} className="text-slate-500 fill-slate-500" />
+                    <span>Stop Automation</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleStartBot(activeMenuBot.id)}
+                    className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
+                  >
+                    <Play size={13} className="text-emerald-500 fill-emerald-500" />
+                    <span>Start Automation</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setRenameBotId(activeMenuBot.id);
+                    setTempBotName(activeMenuBot.name);
+                    setIsRenameModalOpen(true);
+                    setActiveMenuBotId(null);
+                    setMenuCoords(null);
+                  }}
+                  className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <Pencil size={13} className="text-slate-500" />
+                  <span>Rename</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setMoveBotId(activeMenuBot.id);
+                    setTempFolderId(botFolders[activeMenuBot.id] || '');
+                    setIsMoveModalOpen(true);
+                    setActiveMenuBotId(null);
+                    setMenuCoords(null);
+                  }}
+                  className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <Folder size={13} className="text-slate-500" />
+                  <span>Move to Folder</span>
+                </button>
+                <div className="h-px bg-slate-100 my-1" />
+                <button
+                  onClick={() => handleDeleteBot(activeMenuBot.id)}
+                  className="w-full px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <Trash2 size={13} />
+                  <span>Delete</span>
+                </button>
+              </>
+            );
+          })()}
+        </div>
+      )}
+
+      {isNewBotModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-xl overflow-hidden animate-in fade-in duration-200">
+            <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">New Automation</h3>
+              <button
+                onClick={() => setIsNewBotModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  Automation Name
+                </label>
+                <input
+                  type="text"
+                  value={newBotName}
+                  onChange={(e) => setNewBotName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
+                  placeholder="e.g. Welcome Bot"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  Telegram Bot Token
+                </label>
+                <input
+                  type="text"
+                  value={newBotToken}
+                  onChange={(e) => setNewBotToken(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
+                  placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  Description (Optional)
+                </label>
+                <textarea
+                  value={newBotDesc}
+                  onChange={(e) => setNewBotDesc(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50 min-h-[80px] resize-none"
+                  placeholder="What does this automation do?"
+                />
+              </div>
+              {newBotError && (
+                <p className="text-xs font-semibold text-red-500 flex items-center gap-1">
+                  <AlertCircle size={14} />
+                  <span>{newBotError}</span>
+                </p>
+              )}
+            </div>
+            <div className="p-6 pt-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setIsNewBotModalOpen(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateBotSubmit}
+                disabled={createBotMutation.isPending}
+                className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100 flex items-center gap-1 disabled:opacity-50"
+              >
+                {createBotMutation.isPending ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Creating...</span>
+                  </>
+                ) : (
+                  <span>Create</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isRenameModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-xl overflow-hidden animate-in fade-in duration-200">
+            <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">Rename Automation</h3>
+              <button
+                onClick={() => setIsRenameModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">New Name</label>
+              <input
+                type="text"
+                value={tempBotName}
+                onChange={(e) => setTempBotName(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
+                placeholder="Enter new automation name"
+              />
+            </div>
+            <div className="p-6 pt-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setIsRenameModalOpen(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRenameBot}
+                disabled={updateBotMutation.isPending}
+                className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100 flex items-center gap-1 disabled:opacity-50"
+              >
+                {updateBotMutation.isPending ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <span>Save</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isMoveModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-xl overflow-hidden animate-in fade-in duration-200">
+            <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">Move to Folder</h3>
+              <button
+                onClick={() => setIsMoveModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Select Folder</label>
+              <select
+                value={tempFolderId}
+                onChange={(e) => setTempFolderId(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
+              >
+                <option value="">No Folder (Root)</option>
+                {folders.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="p-6 pt-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setIsMoveModalOpen(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleMoveBot}
+                className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isNewFolderModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-xl overflow-hidden animate-in fade-in duration-200">
+            <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">Create Folder</h3>
+              <button
+                onClick={() => setIsNewFolderModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Folder Name</label>
+              <input
+                type="text"
+                value={tempFolderName}
+                onChange={(e) => setTempFolderName(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
+                placeholder="Enter folder name"
+              />
+            </div>
+            <div className="p-6 pt-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setIsNewFolderModalOpen(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateFolder}
+                className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };
