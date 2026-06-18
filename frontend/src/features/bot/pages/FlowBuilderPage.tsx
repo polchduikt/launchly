@@ -15,7 +15,7 @@ import { useFlowBuilder } from '../hooks/useFlowBuilder';
 import { ROUTES } from '../../../constants/routes';
 import { ArrowLeft, Loader2, Plus, Trash2, GitFork, Route, GitCommit, Undo2, Redo2 } from 'lucide-react';
 import { useAiStore } from '../../../store/useAiStore';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNodeEditor } from '../hooks/useNodeEditor';
 import { EditButtonDrawer } from '../components/sidebar/drawers/EditButtonDrawer';
 
@@ -75,6 +75,7 @@ const FlowBuilderInner: React.FC = () => {
     displayEdges,
     onNodesChange,
     onEdgesChange,
+    onSelectionChange,
     onNodeDragStart,
     onNodeDragStop,
     onConnect,
@@ -97,13 +98,15 @@ const FlowBuilderInner: React.FC = () => {
     handleSaveFlow,
     selectedNode,
     saveMutation,
-    justEndedDrag,
+    onPaneClick,
     undo,
     redo,
     canUndo,
     canRedo,
     takeSnapshot,
     isDirty,
+    copySelectedNodes,
+    pasteCopiedNodes,
   } = useFlowBuilder();
 
   const editorState = useNodeEditor(selectedNode, handleUpdateNodeData);
@@ -126,6 +129,18 @@ const FlowBuilderInner: React.FC = () => {
     setHasExistingNodes(nodes.length > 1 || (nodes.length === 1 && nodes[0].type !== 'START'));
   }, [nodes, setHasExistingNodes]);
 
+  const undoRef = useRef(undo);
+  const redoRef = useRef(redo);
+  const copyRef = useRef(copySelectedNodes);
+  const pasteRef = useRef(pasteCopiedNodes);
+
+  useEffect(() => {
+    undoRef.current = undo;
+    redoRef.current = redo;
+    copyRef.current = copySelectedNodes;
+    pasteRef.current = pasteCopiedNodes;
+  });
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeEl = document.activeElement;
@@ -137,15 +152,21 @@ const FlowBuilderInner: React.FC = () => {
       
       if (isTyping) return;
 
-      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.code === 'KeyZ') {
         e.preventDefault();
-        undo();
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        undoRef.current();
+      } else if ((e.ctrlKey || e.metaKey) && e.code === 'KeyY') {
         e.preventDefault();
-        redo();
-      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z') {
+        redoRef.current();
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === 'KeyZ') {
         e.preventDefault();
-        redo();
+        redoRef.current();
+      } else if ((e.ctrlKey || e.metaKey) && e.code === 'KeyC') {
+        e.preventDefault();
+        copyRef.current();
+      } else if ((e.ctrlKey || e.metaKey) && e.code === 'KeyV') {
+        e.preventDefault();
+        pasteRef.current();
       }
     };
 
@@ -153,7 +174,7 @@ const FlowBuilderInner: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [undo, redo]);
+  }, []);
 
   const { data: bots = [] } = useBotsQuery();
   const activeBot = bots.find((b) => b.id === activeBotId);
@@ -271,17 +292,14 @@ const FlowBuilderInner: React.FC = () => {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
+              onSelectionChange={onSelectionChange}
               onConnectStart={onConnectStart}
               onConnectEnd={onConnectEnd}
               onNodeDragStart={onNodeDragStart}
               onNodeDragStop={onNodeDragStop}
               nodeTypes={NODE_TYPES}
               onNodeClick={(_, node) => setSelectedNodeId(node.id)}
-              onPaneClick={() => {
-                if (justEndedDrag) return;
-                setSelectedNodeId(null);
-                setContextMenu(null);
-              }}
+              onPaneClick={onPaneClick}
               defaultEdgeOptions={FLOW_EDGE_DEFAULTS}
               connectionLineStyle={{
                 strokeWidth: 1.6,
@@ -294,6 +312,8 @@ const FlowBuilderInner: React.FC = () => {
               proOptions={{ hideAttribution: true }}
               className="bg-slate-50"
               zoomOnDoubleClick={false}
+              multiSelectionKeyCode="Control"
+              selectionKeyCode="Control"
             >
               <Controls
                 position="bottom-right"

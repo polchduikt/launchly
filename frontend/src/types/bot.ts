@@ -165,3 +165,13 @@ export interface EditButtonDrawerProps {
   onRemove: () => void;
 }
 
+export interface FlowBlock {
+  type: string;
+  text?: string;
+  imageUrl?: string;
+  buttons?: ButtonData[];
+}
+
+
+
+

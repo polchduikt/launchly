@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {useNodesState, useEdgesState, addEdge, useReactFlow,} from '@xyflow/react';
-import type { Connection, Edge, Node } from '@xyflow/react';
+import type { Connection, Edge, Node, NodeChange, EdgeChange } from '@xyflow/react';
 import { useBotStore } from '../../../store/useBotStore';
 import { useFlowSchemaQuery, useSaveFlowSchemaMutation } from './useFlowSchema';
 import { FLOW_EDGE_DEFAULTS } from '../config/flowEdges';
 import { createDefaultNodeData } from '../config/flowBlocks';
 import { getAutoLayoutedElements } from '../utils/flowLayout';
 import { ROUTES } from '../../../constants/routes';
+import type { ButtonData, FlowBlock } from '../../../types/bot';
+
 const getFlowKey = (nodes: Node[], edges: Edge[]) => {
   const cleanNodes = nodes.map(({ id, type, position, data }) => ({
     id,
@@ -115,8 +117,8 @@ export const useFlowBuilder = () => {
   }, [future, nodes, edges, setNodes, setEdges]);
 
   const onNodesChange = useCallback(
-    (changes: any) => {
-      const hasRemoval = changes.some((c: any) => c.type === 'remove');
+    (changes: NodeChange[]) => {
+      const hasRemoval = changes.some((c) => c.type === 'remove');
       if (hasRemoval) {
         takeSnapshot();
       }
@@ -126,8 +128,8 @@ export const useFlowBuilder = () => {
   );
 
   const onEdgesChange = useCallback(
-    (changes: any) => {
-      const hasRemoval = changes.some((c: any) => c.type === 'remove');
+    (changes: EdgeChange[]) => {
+      const hasRemoval = changes.some((c) => c.type === 'remove');
       if (hasRemoval) {
         takeSnapshot();
       }
@@ -186,14 +188,19 @@ export const useFlowBuilder = () => {
     }
   }, [activeBotId, navigate]);
 
-  useEffect(() => {
-    setNodes((nds) =>
-      nds.map((node) => ({
-        ...node,
-        selected: node.id === selectedNodeId,
-      }))
-    );
-  }, [selectedNodeId, setNodes]);
+  const onSelectionChange = useCallback(
+    ({ nodes: selectedNodes }: { nodes: Node[]; edges: Edge[] }) => {
+      if (selectedNodes.length === 0) {
+        setSelectedNodeId(null);
+      } else {
+        const isCurrentSelected = selectedNodes.some((n) => n.id === selectedNodeId);
+        if (!isCurrentSelected) {
+          setSelectedNodeId(selectedNodes[selectedNodes.length - 1].id);
+        }
+      }
+    },
+    [selectedNodeId]
+  );
 
   useEffect(() => {
     localStorage.setItem('launchly_flow_edge_type', edgeType);
@@ -225,7 +232,7 @@ export const useFlowBuilder = () => {
           const rawNodes = typeof schema.nodes === 'string' ? JSON.parse(schema.nodes) : schema.nodes;
           const rawEdges = typeof schema.edges === 'string' ? JSON.parse(schema.edges) : schema.edges;
           if (Array.isArray(rawNodes)) {
-            parsedNodes = rawNodes;
+            parsedNodes = rawNodes.map((node) => ({ ...node, selected: false }));
           }
           if (Array.isArray(rawEdges)) {
             parsedEdges = rawEdges.map((edge) => {
@@ -244,7 +251,7 @@ export const useFlowBuilder = () => {
               };
             });
           }
-        } catch (e) {
+        } catch {
           parsedNodes = [];
           parsedEdges = [];
         }
@@ -380,8 +387,8 @@ export const useFlowBuilder = () => {
         return;
       }
 
-      let clientX = 0;
-      let clientY = 0;
+      let clientX: number;
+      let clientY: number;
       if ('clientX' in event) {
         clientX = event.clientX;
         clientY = event.clientY;
@@ -451,7 +458,7 @@ export const useFlowBuilder = () => {
 
       connectionStartRef.current = null;
     },
-    [screenToFlowPosition, setEdges, nodes, edgeType]
+    [screenToFlowPosition, setEdges, nodes, edgeType, takeSnapshot]
   );
 
   const handleCreateAndConnectNode = (type: string) => {
@@ -474,6 +481,7 @@ export const useFlowBuilder = () => {
       type,
       position: flowPosition,
       data: createDefaultNodeData(type),
+      selected: true,
     };
 
     let sourceHandle = source.handleType === 'source' ? source.handleId : null;
@@ -494,7 +502,10 @@ export const useFlowBuilder = () => {
       type: edgeType,
     };
 
-    setNodes((nds) => [...nds, newNode]);
+    setNodes((nds) => [
+      ...nds.map((n) => ({ ...n, selected: false }) as Node),
+      newNode
+    ]);
     setEdges((eds) => addEdge(newEdge, eds));
     setSelectedNodeId(newNodeId);
     setContextMenu(null);
@@ -531,9 +542,13 @@ export const useFlowBuilder = () => {
       type,
       position: { x: Math.random() * 200 + 150, y: Math.random() * 200 + 100 },
       data: createDefaultNodeData(type),
+      selected: true,
     };
 
-    setNodes((nds) => [...nds, newNode]);
+    setNodes((nds) => [
+      ...nds.map((n) => ({ ...n, selected: false }) as Node),
+      newNode
+    ]);
     setSelectedNodeId(id);
   };
 
@@ -637,7 +652,82 @@ export const useFlowBuilder = () => {
     return edges;
   }, [edges, contextMenu, edgeType, nodes]);
 
-  const justEndedDrag = justEndedDragRef.current;
+  const copiedNodesRef = useRef<Node[] | null>(null);
+
+  const copySelectedNodes = useCallback(() => {
+    const selectedNodes = nodes.filter((n) => n.selected);
+    if (selectedNodes.length === 0) return;
+
+    copiedNodesRef.current = JSON.parse(JSON.stringify(selectedNodes));
+  }, [nodes]);
+
+  const pasteCopiedNodes = useCallback(() => {
+    const copiedNodes = copiedNodesRef.current;
+    if (!copiedNodes || copiedNodes.length === 0) return;
+
+    takeSnapshot();
+
+    const newNodes = copiedNodes.map((node) => {
+      const newId = `node_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      const updatedData = { ...node.data };
+      if (Array.isArray(updatedData.blocks)) {
+        const blocksList = updatedData.blocks as FlowBlock[];
+        updatedData.blocks = blocksList.map((block) => {
+          const blockClone = { ...block };
+          if (Array.isArray(blockClone.buttons)) {
+            blockClone.buttons = blockClone.buttons.map((btn) => ({
+              ...btn,
+              value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            }));
+          }
+          return blockClone;
+        });
+
+        const firstText = blocksList.find((b) => b.type === 'text');
+        const firstImage = blocksList.find((b) => b.type === 'image');
+        const allButtons: ButtonData[] = [];
+        blocksList.forEach((b) => {
+          if (Array.isArray(b.buttons)) {
+            allButtons.push(...b.buttons);
+          }
+        });
+        updatedData.text = firstText ? firstText.text : '';
+        updatedData.imageUrl = firstImage ? firstImage.imageUrl : '';
+        updatedData.buttons = allButtons;
+      } else if (Array.isArray(updatedData.buttons)) {
+        const buttonsList = updatedData.buttons as ButtonData[];
+        updatedData.buttons = buttonsList.map((btn) => ({
+          ...btn,
+          value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        }));
+      }
+
+      return {
+        ...node,
+        id: newId,
+        position: {
+          x: node.position.x + 24,
+          y: node.position.y + 24,
+        },
+        selected: true,
+        data: updatedData,
+      };
+    });
+
+    setNodes((nds) => [
+      ...nds.map((n) => ({ ...n, selected: false }) as Node),
+      ...newNodes,
+    ]);
+
+    setSelectedNodeId(newNodes[newNodes.length - 1].id);
+  }, [copiedNodesRef, takeSnapshot, setNodes, setSelectedNodeId]);
+
+  const onPaneClick = useCallback(() => {
+    if (justEndedDragRef.current) return;
+    setSelectedNodeId(null);
+    setContextMenu(null);
+  }, [setSelectedNodeId, setContextMenu]);
 
   return {
     nodes,
@@ -672,12 +762,15 @@ export const useFlowBuilder = () => {
     selectedNode,
     saveMutation,
     isLoadingSchema,
-    justEndedDrag,
+    onSelectionChange,
+    onPaneClick,
     undo,
     redo,
     canUndo: past.length > 0,
     canRedo: future.length > 0,
     takeSnapshot,
     isDirty,
+    copySelectedNodes,
+    pasteCopiedNodes,
   };
 };
