@@ -1,6 +1,4 @@
-import React from 'react';
 import type { Node } from '@xyflow/react';
-import { EditButtonDialog } from '../dialogs/EditButtonDialog';
 import { useNodeEditor } from '../../hooks/useNodeEditor';
 import { NODE_TITLES, NODE_ICONS } from '../../config/nodeDisplay';
 import { StartNodeEditor } from './editors/StartNodeEditor';
@@ -15,26 +13,19 @@ import { EndNodeEditor } from './editors/EndNodeEditor';
 interface NodeEditorPanelProps {
   node?: Node;
   onUpdateNodeData: (nodeId: string, newData: Record<string, unknown>) => void;
+  editorState?: ReturnType<typeof useNodeEditor>;
+  onSelectNode?: (nodeId: string | null) => void;
 }
 
-export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({ node, onUpdateNodeData }) => {
-  const {
-    isBtnDialogOpen,
-    setIsBtnDialogOpen,
-    editingButton,
-    isUploading,
-    showImageUrlInput,
-    setShowImageUrlInput,
-    fileInputRef,
-    data,
-    buttons,
-    handleChange,
-    handleAddButton,
-    handleOpenEditButton,
-    handleSaveButton,
-    handleRemoveButton,
-    handleFileUpload,
-  } = useNodeEditor(node, onUpdateNodeData);
+export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({ 
+  node, 
+  onUpdateNodeData, 
+  editorState: passedEditorState,
+  onSelectNode 
+}) => {
+  const localEditorState = useNodeEditor(node, onUpdateNodeData);
+  const editorState = passedEditorState || localEditorState;
+  const { data, handleChange } = editorState;
 
   if (!node) {
     return (
@@ -59,16 +50,9 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({ node, onUpdate
       case 'MESSAGE':
         return (
           <MessageNodeEditor
-            data={data}
-            buttons={buttons}
-            showImageUrlInput={showImageUrlInput}
-            isUploading={isUploading}
-            fileInputRef={fileInputRef}
-            setShowImageUrlInput={setShowImageUrlInput}
-            handleChange={handleChange}
-            handleAddButton={handleAddButton}
-            handleOpenEditButton={handleOpenEditButton}
-            handleFileUpload={handleFileUpload}
+            nodeId={node.id}
+            editorState={editorState}
+            onSelectNode={onSelectNode}
           />
         );
       case 'INPUT':
@@ -89,7 +73,7 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({ node, onUpdate
   };
 
   return (
-    <div className="h-full overflow-y-auto p-5 space-y-5 font-sans flex flex-col justify-between">
+    <div className="h-full overflow-y-auto p-5 space-y-5 font-sans flex flex-col justify-between custom-scrollbar">
       <div className="space-y-5">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
           <div className="flex items-center gap-2">
@@ -109,16 +93,6 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({ node, onUpdate
 
         {renderEditor()}
       </div>
-
-      <EditButtonDialog
-        isOpen={isBtnDialogOpen}
-        onClose={() => {
-          setIsBtnDialogOpen(false);
-        }}
-        button={editingButton}
-        onSave={handleSaveButton}
-        onRemove={handleRemoveButton}
-      />
     </div>
   );
 };

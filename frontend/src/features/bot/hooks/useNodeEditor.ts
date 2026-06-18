@@ -3,12 +3,59 @@ import type { Node } from '@xyflow/react';
 import type { CustomNodeData, ButtonData } from '../../../types/bot';
 import apiClient from '../../../lib/axios';
 
+export const getBlocks = (data: CustomNodeData): any[] => {
+  let blocks: any[] = [];
+  if (Array.isArray(data.blocks) && data.blocks.length > 0) {
+    blocks = [...data.blocks];
+  } else {
+    if (data.text || (!data.text && !data.imageUrl)) {
+      blocks.push({
+        id: 'block_text_1',
+        type: 'text',
+        text: data.text || '',
+        buttons: data.buttons || [],
+      });
+    }
+    if (data.imageUrl) {
+      blocks.push({
+        id: 'block_image_1',
+        type: 'image',
+        imageUrl: data.imageUrl,
+        buttons: blocks.length === 0 ? (data.buttons || []) : [],
+      });
+    }
+  }
+
+  const flatButtons = (data.buttons || []) as ButtonData[];
+  const allBlockButtons = blocks.flatMap((b) => b.buttons || []);
+  const missingButtons = flatButtons.filter((fb) => !allBlockButtons.some((bb) => bb.value === fb.value));
+
+  if (missingButtons.length > 0) {
+    const targetBlockIndex = blocks.findIndex((b) => b.type === 'text' || b.type === 'image');
+    if (targetBlockIndex !== -1) {
+      blocks[targetBlockIndex] = {
+        ...blocks[targetBlockIndex],
+        buttons: [...(blocks[targetBlockIndex].buttons || []), ...missingButtons],
+      };
+    } else if (blocks.length > 0) {
+      blocks[0] = {
+        ...blocks[0],
+        buttons: [...(blocks[0].buttons || []), ...missingButtons],
+      };
+    }
+  }
+
+  return blocks;
+};
+
 export const useNodeEditor = (
   node: Node | undefined,
   onUpdateNodeData: (nodeId: string, newData: Record<string, unknown>) => void
 ) => {
   const [isBtnDialogOpen, setIsBtnDialogOpen] = useState(false);
   const [editingButton, setEditingButton] = useState<ButtonData | null>(null);
+  const [editingButtonBlockId, setEditingButtonBlockId] = useState<string | null>(null);
+  const [uploadingBlockId, setUploadingBlockId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [showImageUrlInput, setShowImageUrlInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -18,6 +65,7 @@ export const useNodeEditor = (
       const customEvent = e as CustomEvent;
       if (node && customEvent.detail.nodeId === node.id) {
         setEditingButton(customEvent.detail.button);
+        setEditingButtonBlockId(null);
         setIsBtnDialogOpen(true);
       }
     };
@@ -32,39 +80,107 @@ export const useNodeEditor = (
 
   const handleChange = (key: string, value: unknown) => {
     if (!node) return;
-    onUpdateNodeData(node.id, {
+    
+    const newData = {
       ...data,
       [key]: value,
-    });
-  };
-
-  const handleAddButton = () => {
-    const currentBtns = (data.buttons || []) as ButtonData[];
-    if (currentBtns.length >= 10) return;
-    const newBtn: ButtonData = {
-      label: `Button ${currentBtns.length + 1}`,
-      value: `btn_${Date.now()}`,
     };
-    handleChange('buttons', [...currentBtns, newBtn]);
+
+    if (key === 'blocks' && Array.isArray(value)) {
+      const blocks = value as any[];
+      const firstText = blocks.find((b) => b.type === 'text');
+      const firstImage = blocks.find((b) => b.type === 'image');
+      
+      const allButtons: any[] = [];
+      blocks.forEach((b) => {
+        if (Array.isArray(b.buttons)) {
+          allButtons.push(...b.buttons);
+        }
+      });
+      
+      newData.text = firstText ? firstText.text : '';
+      newData.imageUrl = firstImage ? firstImage.imageUrl : '';
+      newData.buttons = allButtons;
+    }
+
+    onUpdateNodeData(node.id, newData);
   };
 
-  const handleOpenEditButton = (btn: ButtonData) => {
+  const handleAddButton = (blockId?: string) => {
+    if (blockId) {
+      const blocks = getBlocks(data);
+      const totalButtonsCount = blocks.reduce((sum, b) => sum + (b.buttons?.length || 0), 0);
+      if (totalButtonsCount >= 10) return;
+
+      const updatedBlocks = blocks.map((block) => {
+        if (block.id === blockId) {
+          const currentBtns = (block.buttons || []) as ButtonData[];
+          const newBtn: ButtonData = {
+            label: `Button ${currentBtns.length + 1}`,
+            value: `btn_${Date.now()}`,
+          };
+          return { ...block, buttons: [...currentBtns, newBtn] };
+        }
+        return block;
+      });
+      handleChange('blocks', updatedBlocks);
+    } else {
+      const currentBtns = (data.buttons || []) as ButtonData[];
+      if (currentBtns.length >= 10) return;
+      const newBtn: ButtonData = {
+        label: `Button ${currentBtns.length + 1}`,
+        value: `btn_${Date.now()}`,
+      };
+      handleChange('buttons', [...currentBtns, newBtn]);
+    }
+  };
+
+  const handleOpenEditButton = (btn: ButtonData, blockId?: string) => {
     setEditingButton(btn);
+    setEditingButtonBlockId(blockId || null);
     setIsBtnDialogOpen(true);
   };
 
   const handleSaveButton = (updated: ButtonData) => {
-    const currentBtns = (data.buttons || []) as ButtonData[];
-    const newBtns = currentBtns.map((b) => (b.value === editingButton?.value ? updated : b));
-    handleChange('buttons', newBtns);
+    if (editingButtonBlockId) {
+      const blocks = getBlocks(data);
+      const updatedBlocks = blocks.map((block) => {
+        if (block.id === editingButtonBlockId) {
+          const currentBtns = (block.buttons || []) as ButtonData[];
+          const newBtns = currentBtns.map((b) => (b.value === editingButton?.value ? updated : b));
+          return { ...block, buttons: newBtns };
+        }
+        return block;
+      });
+      handleChange('blocks', updatedBlocks);
+    } else {
+      const currentBtns = (data.buttons || []) as ButtonData[];
+      const newBtns = currentBtns.map((b) => (b.value === editingButton?.value ? updated : b));
+      handleChange('buttons', newBtns);
+    }
     setEditingButton(null);
+    setEditingButtonBlockId(null);
   };
 
   const handleRemoveButton = () => {
-    const currentBtns = (data.buttons || []) as ButtonData[];
-    const newBtns = currentBtns.filter((b) => b.value !== editingButton?.value);
-    handleChange('buttons', newBtns);
+    if (editingButtonBlockId) {
+      const blocks = getBlocks(data);
+      const updatedBlocks = blocks.map((block) => {
+        if (block.id === editingButtonBlockId) {
+          const currentBtns = (block.buttons || []) as ButtonData[];
+          const newBtns = currentBtns.filter((b) => b.value !== editingButton?.value);
+          return { ...block, buttons: newBtns };
+        }
+        return block;
+      });
+      handleChange('blocks', updatedBlocks);
+    } else {
+      const currentBtns = (data.buttons || []) as ButtonData[];
+      const newBtns = currentBtns.filter((b) => b.value !== editingButton?.value);
+      handleChange('buttons', newBtns);
+    }
     setEditingButton(null);
+    setEditingButtonBlockId(null);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,7 +199,19 @@ export const useNodeEditor = (
         },
       });
       const url = response.data.url;
-      handleChange('imageUrl', url);
+      if (uploadingBlockId) {
+        const blocks = getBlocks(data);
+        const updatedBlocks = blocks.map((b) => {
+          if (b.id === uploadingBlockId) {
+            return { ...b, imageUrl: url };
+          }
+          return b;
+        });
+        handleChange('blocks', updatedBlocks);
+        setUploadingBlockId(null);
+      } else {
+        handleChange('imageUrl', url);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -108,5 +236,9 @@ export const useNodeEditor = (
     handleSaveButton,
     handleRemoveButton,
     handleFileUpload,
+    editingButtonBlockId,
+    setEditingButtonBlockId,
+    uploadingBlockId,
+    setUploadingBlockId,
   };
 };

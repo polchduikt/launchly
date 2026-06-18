@@ -18,13 +18,10 @@ export const useAiAssistant = () => {
   const [inputValue, setInputValue] = useState('');
   const [description, setDescription] = useState('');
   const [confirmOverwrite, setConfirmOverwrite] = useState(false);
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
   const { data: usage, isLoading: isUsageLoading, refetch: refetchUsage } = useAiUsageQuery();
   const chatMutation = useAiChatMutation();
   const schemaMutation = useAiSchemaMutation();
-
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
@@ -39,15 +36,17 @@ export const useAiAssistant = () => {
     if (!isOpen) {
       setDescription('');
       setConfirmOverwrite(false);
-      schemaMutation.reset();
+      if (schemaMutation.status !== 'idle') {
+        schemaMutation.reset();
+      }
     }
   }, [isOpen, schemaMutation]);
 
   useEffect(() => {
-    if (!onGenerate) {
+    if (!onGenerate && activeTab !== 'chat') {
       setActiveTab('chat');
     }
-  }, [onGenerate, setActiveTab]);
+  }, [onGenerate, activeTab, setActiveTab]);
 
   const isLimitReached =
     usage && usage.requestsLimit > 0 && usage.requestsUsed >= usage.requestsLimit;

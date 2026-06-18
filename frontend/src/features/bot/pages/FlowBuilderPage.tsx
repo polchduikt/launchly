@@ -16,6 +16,8 @@ import { ROUTES } from '../../../constants/routes';
 import { ArrowLeft, Loader2, Plus, Trash2, GitFork, Route, GitCommit, Undo2, Redo2 } from 'lucide-react';
 import { useAiStore } from '../../../store/useAiStore';
 import { useEffect } from 'react';
+import { useNodeEditor } from '../hooks/useNodeEditor';
+import { EditButtonDrawer } from '../components/sidebar/drawers/EditButtonDrawer';
 
 const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
   fromX,
@@ -27,29 +29,23 @@ const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
   connectionLineStyle,
   connectionLineType,
 }) => {
-  let edgePath = '';
-
-  if (connectionLineType === 'smoothstep') {
-    const [path] = getSmoothStepPath({
-      sourceX: fromX,
-      sourceY: fromY,
-      sourcePosition: fromPosition,
-      targetX: toX,
-      targetY: toY,
-      targetPosition: toPosition,
-    });
-    edgePath = path;
-  } else {
-    const [path] = getBezierPath({
-      sourceX: fromX,
-      sourceY: fromY,
-      sourcePosition: fromPosition,
-      targetX: toX,
-      targetY: toY,
-      targetPosition: toPosition,
-    });
-    edgePath = path;
-  }
+  const edgePath = connectionLineType === 'smoothstep'
+    ? getSmoothStepPath({
+        sourceX: fromX,
+        sourceY: fromY,
+        sourcePosition: fromPosition,
+        targetX: toX,
+        targetY: toY,
+        targetPosition: toPosition,
+      })[0]
+    : getBezierPath({
+        sourceX: fromX,
+        sourceY: fromY,
+        sourcePosition: fromPosition,
+        targetX: toX,
+        targetY: toY,
+        targetPosition: toPosition,
+      })[0];
 
   return (
     <g>
@@ -109,6 +105,8 @@ const FlowBuilderInner: React.FC = () => {
     takeSnapshot,
     isDirty,
   } = useFlowBuilder();
+
+  const editorState = useNodeEditor(selectedNode, handleUpdateNodeData);
 
   const { setOnGenerate, setHasExistingNodes } = useAiStore();
 
@@ -341,12 +339,30 @@ const FlowBuilderInner: React.FC = () => {
               <Background color="#cbd5e1" gap={16} size={1} />
             </ReactFlow>
 
-            <aside className={`absolute left-0 top-0 h-full w-80 border-r border-slate-200 bg-white z-20 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 ease-in-out ${
+            <aside className={`absolute left-0 top-0 h-full w-80 border-r border-slate-200 bg-white z-20 flex flex-col justify-between overflow-visible shadow-2xl transition-all duration-300 ease-in-out ${
               selectedNodeId ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'
             }`}>
               {selectedNode && (
-                <NodeEditorPanel node={selectedNode} onUpdateNodeData={handleUpdateNodeData} />
+                <NodeEditorPanel
+                  node={selectedNode}
+                  onUpdateNodeData={handleUpdateNodeData}
+                  editorState={editorState}
+                  onSelectNode={setSelectedNodeId}
+                />
               )}
+
+              <div className={`absolute left-0 top-0 h-full w-80 border-r border-slate-200 bg-white -z-10 flex flex-col justify-between overflow-hidden shadow-xl transition-all duration-300 ease-in-out ${
+                editorState.isBtnDialogOpen ? 'translate-x-full opacity-100' : 'translate-x-0 opacity-0 pointer-events-none'
+              }`}>
+                {selectedNode && editorState.editingButton && (
+                  <EditButtonDrawer
+                    onClose={() => editorState.setIsBtnDialogOpen(false)}
+                    button={editorState.editingButton}
+                    onSave={editorState.handleSaveButton}
+                    onRemove={editorState.handleRemoveButton}
+                  />
+                )}
+              </div>
             </aside>
             {selectedNodeId && (
               <div className="absolute top-4 left-[336px] z-10 flex flex-col gap-3 pointer-events-auto transition-all duration-300 ease-in-out">

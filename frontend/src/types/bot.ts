@@ -158,3 +158,10 @@ export interface NodeHandleProps {
   padded?: boolean;
 }
 
+export interface EditButtonDrawerProps {
+  onClose: () => void;
+  button: ButtonData | null;
+  onSave: (updated: ButtonData) => void;
+  onRemove: () => void;
+}
+
