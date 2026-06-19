@@ -6,6 +6,7 @@ import { useLogoutMutation } from '../../auth/hooks/useLogoutMutation';
 import { useBotStore } from '../../../store/useBotStore';
 import { IntegrationsPanel } from '../../integration/components/IntegrationsPanel';
 import { SubscriptionsPanel } from '../../billing/components/SubscriptionsPanel';
+import { TelegramSettingsPanel } from '../components/TelegramSettingsPanel';
 import { Loader2, AlertCircle, CheckCircle2, X } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
@@ -203,6 +204,8 @@ export const SettingsPage: React.FC = () => {
             )
           ) : activeTab === 'subscriptions' ? (
             <SubscriptionsPanel />
+          ) : activeTab === 'telegram' ? (
+            <TelegramSettingsPanel />
           ) : (
             <div className="bg-white border border-slate-200 rounded-3xl shadow-sm p-12 text-center text-sm text-slate-400">
               This section is currently under development. Settings will be linked here soon.

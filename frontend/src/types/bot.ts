@@ -11,6 +11,7 @@ export interface FlowSchemaResponse {
 export interface BotResponse {
   id: number;
   name: string;
+  username?: string | null;
   description: string | null;
   avatar: string | null;
   avatarPublicId: string | null;
