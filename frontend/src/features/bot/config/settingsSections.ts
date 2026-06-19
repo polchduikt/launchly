@@ -38,10 +38,6 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
   {
     title: 'Channels',
     items: [
-      { id: 'instagram', label: 'Instagram' },
-      { id: 'whatsapp', label: 'WhatsApp' },
-      { id: 'messenger', label: 'Facebook Messenger' },
-      { id: 'sms', label: 'SMS' },
       { id: 'email', label: 'Email' },
       { id: 'telegram', label: 'Telegram' },
     ],

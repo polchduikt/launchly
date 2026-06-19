@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Zap, Users, Send, Settings } from 'lucide-react';
+import { Home, Zap, MessageSquare, Users, ShoppingCart, Send, Settings } from 'lucide-react';
 import { ROUTES } from '../../../constants/routes';
 
 export interface NavItem {
@@ -12,7 +12,9 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Home', path: ROUTES.HOME, icon: Home },
   { label: 'Automation', path: ROUTES.AUTOMATIONS, icon: Zap },
-  { label: 'CRM', path: ROUTES.CRM, icon: Users },
+  { label: 'Chat', path: ROUTES.CHAT, icon: MessageSquare },
+  { label: 'Contacts', path: ROUTES.CONTACTS, icon: Users },
+  { label: 'Orders', path: ROUTES.ORDERS, icon: ShoppingCart },
   { label: 'Broadcasts', path: ROUTES.BROADCASTS, icon: Send },
   { label: 'Settings', path: ROUTES.SETTINGS, icon: Settings },
 ];

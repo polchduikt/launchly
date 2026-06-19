@@ -67,7 +67,8 @@ export const useUpdateLeadMutation = (botId: number) => {
 export const useSendMessageMutation = (conversationId: number, botId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (content: string) => sendOwnerMessageApi(conversationId, content),
+    mutationFn: ({ content, mediaUrl, mediaType }: { content: string; mediaUrl?: string; mediaType?: string }) =>
+      sendOwnerMessageApi(conversationId, content, mediaUrl, mediaType),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', botId] });

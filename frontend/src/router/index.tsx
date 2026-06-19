@@ -15,7 +15,9 @@ const BotsConnectPage = lazy(() => import('../features/bot/pages/BotsConnectPage
 const AutomationsPage = lazy(() => import('../features/bot/pages/AutomationsPage').then(m => ({ default: m.AutomationsPage })));
 const SettingsPage = lazy(() => import('../features/bot/pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const FlowBuilderPage = lazy(() => import('../features/bot/pages/FlowBuilderPage').then(m => ({ default: m.FlowBuilderPage })));
-const CrmPage = lazy(() => import('../features/crm/pages/CrmPage').then(m => ({ default: m.CrmPage })));
+const ChatPage = lazy(() => import('../features/crm/pages/ChatPage').then(m => ({ default: m.ChatPage })));
+const ContactsPage = lazy(() => import('../features/crm/pages/ContactsPage').then(m => ({ default: m.ContactsPage })));
+const OrdersPage = lazy(() => import('../features/crm/pages/OrdersPage').then(m => ({ default: m.OrdersPage })));
 const BroadcastsPage = lazy(() => import('../features/broadcast/pages/BroadcastsPage').then(m => ({ default: m.BroadcastsPage })));
 const BroadcastBuilderPage = lazy(() => import('../features/broadcast/pages/BroadcastBuilderPage').then(m => ({ default: m.BroadcastBuilderPage })));
 const CheckoutSuccessPage = lazy(() => import('../features/billing/pages/CheckoutSuccessPage'));
@@ -47,7 +49,9 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
             <Route path={ROUTES.INTEGRATIONS} element={<SettingsPage />} />
             <Route path={ROUTES.FLOW_BUILDER} element={<FlowBuilderPage />} />
-            <Route path={ROUTES.CRM} element={<CrmPage />} />
+            <Route path={ROUTES.CHAT} element={<ChatPage />} />
+            <Route path={ROUTES.CONTACTS} element={<ContactsPage />} />
+            <Route path={ROUTES.ORDERS} element={<OrdersPage />} />
             <Route path={ROUTES.BROADCASTS} element={<BroadcastsPage />} />
             <Route path={ROUTES.BROADCAST_BUILDER} element={<BroadcastBuilderPage />} />
             <Route path={ROUTES.BILLING_SUCCESS} element={<CheckoutSuccessPage />} />

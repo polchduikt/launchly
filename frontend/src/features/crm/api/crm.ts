@@ -54,11 +54,13 @@ export const getMessagesApi = async (conversationId: number): Promise<MessageRes
 
 export const sendOwnerMessageApi = async (
   conversationId: number,
-  content: string
+  content: string,
+  mediaUrl?: string,
+  mediaType?: string
 ): Promise<MessageResponse> => {
   const response = await apiClient.post<MessageResponse>(
     `/crm/conversations/${conversationId}/messages`,
-    { content }
+    { content, mediaUrl, mediaType }
   );
   return response.data;
 };

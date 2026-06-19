@@ -13,17 +13,12 @@ export const useCrmWebSocket = (botId: number) => {
     const socket = new SockJS('/ws');
     const client = new Client({
       webSocketFactory: () => socket,
-      debug: (str) => {
-        console.debug('STOMP: ' + str);
-      },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
     });
 
-    client.onConnect = (frame) => {
-      console.log('STOMP Connected: ' + frame);
-
+    client.onConnect = () => {
       client.subscribe(`/topic/crm/${botId}/messages`, (msg) => {
         try {
           const body = JSON.parse(msg.body);

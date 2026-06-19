@@ -6,6 +6,7 @@ export interface ConversationResponse {
   botUserName: string;
   botUserUsername: string | null;
   botUserTelegramId: number;
+  botUserPhotoUrl: string | null;
   lastMessage: string | null;
   lastMessageAt: string | null;
   updatedAt: string;
@@ -35,6 +36,8 @@ export interface MessageResponse {
   conversationId: number;
   content: string;
   senderType: SenderType;
+  mediaUrl: string | null;
+  mediaType: string | null;
   createdAt: string;
 }
 
