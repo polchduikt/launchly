@@ -37,4 +37,23 @@ public class TelegramSendService {
             log.error("Failed to send message to user {} from bot {}: {}", telegramUserId, botId, e.getMessage());
         }
     }
+
+    public void sendPhoto(Long botId, Long telegramUserId, String photoUrl, String caption) {
+        TelegramClient client = botManager.getTelegramClient(botId);
+        if (client == null) {
+            log.warn("Telegram client not found for bot {}", botId);
+            return;
+        }
+        try {
+            org.telegram.telegrambots.meta.api.methods.send.SendPhoto sendPhoto = org.telegram.telegrambots.meta.api.methods.send.SendPhoto.builder()
+                    .chatId(telegramUserId.toString())
+                    .photo(new org.telegram.telegrambots.meta.api.objects.InputFile(photoUrl))
+                    .caption(caption != null ? caption : "")
+                    .build();
+            client.execute(sendPhoto);
+            log.info("Sent Telegram photo to user {} from bot {}", telegramUserId, botId);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send photo to user {} from bot {}: {}", telegramUserId, botId, e.getMessage());
+        }
+    }
 }

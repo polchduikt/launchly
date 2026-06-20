@@ -8,6 +8,7 @@ public record MessageResponse(
         Long conversationId,
         String content,
         SenderType senderType,
+        String mediaUrl,
+        String mediaType,
         LocalDateTime createdAt
 ) {}
-

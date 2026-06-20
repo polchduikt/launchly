@@ -18,6 +18,13 @@ import com.launchly.bot.telegram.TelegramBotManager;
 import com.launchly.broadcast.entity.BroadcastCampaign;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.billing.service.PlanLimitService;
+import com.launchly.common.utils.EncryptionUtil;
+import com.launchly.crm.service.CrmService;
+import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.objects.UserProfilePhotos;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+import org.telegram.telegrambots.meta.api.objects.File;
 import org.springframework.context.annotation.Lazy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,6 +51,8 @@ public class FlowEngineServiceImpl implements FlowEngineService {
     private final StringRedisTemplate redisTemplate;
     private final BroadcastCampaignRepository campaignRepository;
     private final TelegramBotManager botManager;
+    private final EncryptionUtil encryptionUtil;
+    private final CrmService crmService;
     private static final String SCHEMA_KEY = "launchly:bot:schema:%d";
     private static final Duration SCHEMA_TTL = Duration.ofMinutes(30);
 
@@ -56,7 +65,9 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                   PlanLimitService planLimitService,
                                   StringRedisTemplate redisTemplate,
                                   BroadcastCampaignRepository campaignRepository,
-                                  @Lazy TelegramBotManager botManager) {
+                                  @Lazy TelegramBotManager botManager,
+                                  EncryptionUtil encryptionUtil,
+                                  @Lazy CrmService crmService) {
         this.botRepository = botRepository;
         this.botUserRepository = botUserRepository;
         this.flowSchemaRepository = flowSchemaRepository;
@@ -66,6 +77,8 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         this.redisTemplate = redisTemplate;
         this.campaignRepository = campaignRepository;
         this.botManager = botManager;
+        this.encryptionUtil = encryptionUtil;
+        this.crmService = crmService;
         this.executors = new EnumMap<>(NodeType.class);
         nodeExecutors.forEach(e -> executors.put(e.getType(), e));
     }
@@ -85,10 +98,9 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 return;
             }
 
-            BotUser botUser = getOrCreateBotUser(bot, update, telegramUserId);
+            BotUser botUser = getOrCreateBotUser(bot, update, telegramUserId, client);
 
-            // If user sends /start, reset their state to start fresh
-            if (update.hasMessage() && update.getMessage().hasText() 
+            if (update.hasMessage() && update.getMessage().hasText()
                     && "/start".equals(update.getMessage().getText().trim())) {
                 stateService.clearActiveCampaignId(botId, telegramUserId);
                 stateService.setCurrentNodeId(botId, telegramUserId, null);
@@ -173,6 +185,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 }
 
                 String nextNodeId = executor.execute(currentNode, edges, botUser, update, client);
+                boolean isFirstIterationCallback = (iteration == 1 && update != null && update.hasCallbackQuery());
+                if (!isFirstIterationCallback && (currentNode.type() == NodeType.MESSAGE || currentNode.type() == NodeType.BUTTON)) {
+                    saveBotNodeMessage(botId, botUser, currentNode);
+                }
 
                 if (nextNodeId == null) {
                     boolean hasOutgoingEdges = edges.stream().anyMatch(e -> e.source().equals(currentNode.id()));
@@ -210,8 +226,8 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         return null;
     }
 
-    private BotUser getOrCreateBotUser(Bot bot, Update update, Long telegramUserId) {
-        return botUserRepository.findByTelegramIdAndBotId(telegramUserId, bot.getId())
+    private BotUser getOrCreateBotUser(Bot bot, Update update, Long telegramUserId, TelegramClient telegramClient) {
+        BotUser botUser = botUserRepository.findByTelegramIdAndBotId(telegramUserId, bot.getId())
                 .orElseGet(() -> {
                     planLimitService.checkBotUserLimit(bot.getId());
                     String username = null;
@@ -239,6 +255,43 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                             .build();
                     return botUserRepository.save(newUser);
                 });
+
+        if (botUser.getPhotoUrl() == null && telegramClient != null) {
+            fetchAndSetPhotoUrl(botUser, bot, telegramClient);
+        }
+
+        return botUser;
+    }
+
+    private void fetchAndSetPhotoUrl(BotUser botUser, Bot bot, TelegramClient telegramClient) {
+        try {
+            GetUserProfilePhotos getUserProfilePhotos = GetUserProfilePhotos.builder()
+                    .userId(botUser.getTelegramId())
+                    .limit(1)
+                    .build();
+            UserProfilePhotos photos = telegramClient.execute(getUserProfilePhotos);
+            if (photos != null && photos.getTotalCount() > 0 && photos.getPhotos() != null && !photos.getPhotos().isEmpty()) {
+                List<PhotoSize> photoSizes = photos.getPhotos().get(0);
+                PhotoSize largest = photoSizes.stream()
+                        .max(java.util.Comparator.comparingInt(size -> size.getWidth() * size.getHeight()))
+                        .orElse(null);
+                if (largest != null) {
+                    GetFile getFile = GetFile.builder()
+                            .fileId(largest.getFileId())
+                            .build();
+                    File file = telegramClient.execute(getFile);
+                    if (file != null && file.getFilePath() != null) {
+                        String botToken = encryptionUtil.decrypt(bot.getTelegramToken());
+                        String fileUrl = "https://api.telegram.org/file/bot" + botToken + "/" + file.getFilePath();
+                        botUser.setPhotoUrl(fileUrl);
+                        botUserRepository.save(botUser);
+                        log.debug("Fetched profile photo for user {}", botUser.getTelegramId());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not fetch profile photo for user {}: {}", botUser.getTelegramId(), e.getMessage());
+        }
     }
 
     private String resolveCurrentNodeId(Long botId, Long telegramUserId, BotUser botUser, List<FlowNode> nodes) {
@@ -381,6 +434,9 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 }
 
                 String nextNodeId = executor.execute(currentNode, edges, botUser, null, client);
+                if (currentNode.type() == NodeType.MESSAGE || currentNode.type() == NodeType.BUTTON) {
+                    saveBotNodeMessage(botId, botUser, currentNode);
+                }
 
                 if (nextNodeId == null) {
                     boolean hasOutgoingEdges = edges.stream().anyMatch(e -> e.source().equals(currentNode.id()));
@@ -404,6 +460,91 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
         } catch (Exception e) {
             log.error("Error running flow for bot {}: {}", botId, e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void saveBotNodeMessage(Long botId, BotUser botUser, FlowNode node) {
+        try {
+            Map<String, Object> data = node.data();
+            if (data == null) return;
+
+            Object blocksObj = data.get("blocks");
+            if (blocksObj instanceof java.util.List<?> blocks && !blocks.isEmpty()) {
+                for (Object blockObj : blocks) {
+                    if (blockObj instanceof Map<?,?> block) {
+                        String type = (String) block.get("type");
+                        if ("text".equals(type) || "data_collection".equals(type)) {
+                            StringBuilder text = new StringBuilder();
+                            Object t = block.get("text");
+                            if (t instanceof String s && !s.isBlank()) {
+                                text.append(s);
+                            }
+                            Object btns = block.get("buttons");
+                            if (btns instanceof java.util.List<?> btnList) {
+                                for (Object btn : btnList) {
+                                    if (btn instanceof Map<?,?> b) {
+                                        Object lbl = b.get("label");
+                                        if (lbl instanceof String l) { text.append(" [").append(l).append("]"); }
+                                    }
+                                }
+                            }
+                            if (text.length() > 0) {
+                                crmService.saveBotMessage(botId, botUser.getId(), text.toString(), null, null);
+                            }
+                        } else if ("image".equals(type)) {
+                            String imageUrl = (String) block.get("imageUrl");
+                            if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+                                StringBuilder caption = new StringBuilder();
+                                Object t = block.get("text");
+                                if (t instanceof String s && !s.isBlank()) {
+                                    caption.append(s);
+                                } else {
+                                    caption.append("📷 Photo");
+                                }
+                                Object btns = block.get("buttons");
+                                if (btns instanceof java.util.List<?> btnList) {
+                                    for (Object btn : btnList) {
+                                        if (btn instanceof Map<?,?> b) {
+                                            Object lbl = b.get("label");
+                                            if (lbl instanceof String l) { caption.append(" [").append(l).append("]"); }
+                                        }
+                                    }
+                                }
+                                crmService.saveBotMessage(botId, botUser.getId(), caption.toString(), imageUrl, "image");
+                            }
+                        }
+                    }
+                }
+            } else {
+                String text = (String) data.getOrDefault("text", "");
+                String imageUrl = (String) data.get("imageUrl");
+                List<?> buttonsList = (List<?>) data.get("buttons");
+
+                StringBuilder content = new StringBuilder();
+                if (text != null && !text.isBlank()) {
+                    content.append(text);
+                }
+                if (buttonsList != null) {
+                    for (Object btn : buttonsList) {
+                        if (btn instanceof Map<?,?> b) {
+                            Object lbl = b.get("label");
+                            if (lbl instanceof String l) { content.append(" [").append(l).append("]"); }
+                        }
+                    }
+                }
+
+                if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+                    if (content.length() == 0) {
+                        content.append("📷 Photo");
+                    }
+                    crmService.saveBotMessage(botId, botUser.getId(), content.toString(), imageUrl, "image");
+                } else if (content.length() > 0) {
+                    crmService.saveBotMessage(botId, botUser.getId(), content.toString(), null, null);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to save bot node message to CRM for bot {}: {}", botId, e.getMessage(), e);
         }
     }
 }

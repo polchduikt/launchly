@@ -43,5 +43,11 @@ databaseChangeLog:
       file: db/changelog/changes/V021__add_nodes_and_edges_to_broadcast_campaigns.sql
   - include:
       file: db/changelog/changes/V022__update_pro_price_id.sql
+  - include:
+      file: db/changelog/changes/V023__add_media_fields_to_messages.sql
+  - include:
+      file: db/changelog/changes/V024__add_username_to_bots.sql
+  - include:
+      file: db/changelog/changes/V025__update_plan_limits.sql
 
 

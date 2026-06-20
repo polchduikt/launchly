@@ -16,4 +16,8 @@ public interface BotUserTagRepository extends JpaRepository<BotUserTag, Long> {
     List<Long> findBotUserIdsByTagNameAndBotId(@Param("tagName") String tagName, @Param("botId") Long botId);
 
     void deleteByTagId(Long tagId);
+
+    void deleteByBotUserId(Long botUserId);
+
+    void deleteByBotUserIdAndTagId(Long botUserId, Long tagId);
 }

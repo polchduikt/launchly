@@ -9,6 +9,7 @@ public record ConversationResponse(
         String botUserName,
         String botUserUsername,
         Long botUserTelegramId,
+        String botUserPhotoUrl,
         String lastMessage,
         LocalDateTime lastMessageAt,
         LocalDateTime updatedAt

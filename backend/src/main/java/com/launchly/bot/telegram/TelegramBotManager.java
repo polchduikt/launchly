@@ -65,6 +65,31 @@ public class TelegramBotManager {
 
         try {
             String token = encryptionUtil.decrypt(bot.getTelegramToken());
+
+            if (bot.getUsername() == null || bot.getUsername().isBlank()) {
+                try {
+                    String url = "https://api.telegram.org/bot" + token + "/getMe";
+                    org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+                    org.springframework.http.ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
+                    if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(responseEntity.getBody());
+                        if (root.has("ok") && root.get("ok").asBoolean()) {
+                            com.fasterxml.jackson.databind.JsonNode result = root.get("result");
+                            if (result.has("username")) {
+                                bot.setUsername(result.get("username").asText());
+                            }
+                            if (result.has("first_name")) {
+                                bot.setName(result.get("first_name").asText());
+                            }
+                            botRepository.save(bot);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to fetch Telegram bot username on startup: {}", e.getMessage());
+                }
+            }
+
             TelegramClient telegramClient = new OkHttpTelegramClient(token);
             TelegramBotsLongPollingApplication pollingApp = new TelegramBotsLongPollingApplication();
             BotUpdateHandler handler = new BotUpdateHandler(

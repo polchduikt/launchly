@@ -35,6 +35,12 @@ public class Message extends BaseEntity {
     @Column(name = "sender_type", nullable = false)
     private SenderType senderType;
 
+    @Column(name = "media_url", columnDefinition = "TEXT")
+    private String mediaUrl;
+
+    @Column(name = "media_type", length = 20)
+    private String mediaType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conversation_id", nullable = false)
     private Conversation conversation;

@@ -15,6 +15,8 @@ public interface CrmService {
     OrderResponse createOrder(Long botId, Long botUserId, String items, BigDecimal totalAmount, String currency);
     LeadResponse createLead(Long botId, Long botUserId, String name, String email, String phone, String data);
     MessageResponse saveIncomingMessage(Long botId, Long botUserId, String content);
+    MessageResponse saveBotMessage(Long botId, Long botUserId, String content);
+    MessageResponse saveBotMessage(Long botId, Long botUserId, String content, String mediaUrl, String mediaType);
     List<OrderResponse> getOrdersByBot(Long botId, Long userId);
     OrderResponse updateOrder(Long orderId, OrderUpdateRequest request, Long userId);
     List<LeadResponse> getLeadsByBot(Long botId, Long userId);

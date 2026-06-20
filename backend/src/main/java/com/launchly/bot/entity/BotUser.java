@@ -40,6 +40,9 @@ public class BotUser extends BaseEntity {
 
     private String currentNodeId;
 
+    @Column(name = "photo_url")
+    private String photoUrl;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     @Builder.Default

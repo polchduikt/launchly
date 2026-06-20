@@ -8,6 +8,7 @@ import com.launchly.bot.dto.response.BotResponse;
 import com.launchly.bot.dto.response.BotStatsResponse;
 import com.launchly.bot.dto.response.BotUserResponse;
 import com.launchly.bot.dto.response.FlowSchemaResponse;
+import com.launchly.bot.dto.request.BotUserUpdateRequest;
 import java.util.List;
 
 public interface BotService {
@@ -33,4 +34,8 @@ public interface BotService {
     List<BotUserResponse> getBotUsers(Long botId, Long userId);
 
     BotStatsResponse getBotStats(Long botId, Long userId);
+
+    BotUserResponse updateBotUser(Long botId, Long botUserId, BotUserUpdateRequest request, Long userId);
+
+    void deleteBotUser(Long botId, Long botUserId, Long userId);
 }

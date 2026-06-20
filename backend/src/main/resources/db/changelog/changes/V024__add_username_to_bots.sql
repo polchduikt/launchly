@@ -1,0 +1,1 @@
+ALTER TABLE bots ADD COLUMN username VARCHAR(255);
