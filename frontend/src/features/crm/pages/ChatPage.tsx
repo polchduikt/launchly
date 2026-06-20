@@ -15,27 +15,35 @@ import { MessageArea } from '../components/MessageArea';
 import { ReplyBar } from '../components/ReplyBar';
 import { ContactInfoPanel } from '../components/ContactInfoPanel';
 import type { BottomTab } from '../types/chat';
+import { useSearchParams } from 'react-router-dom';
 
 export const ChatPage: React.FC = () => {
   const activeBotId = useBotStore((s) => s.activeBotId);
   const botId = activeBotId || 0;
   useCrmWebSocket(botId);
-
+  const [searchParams] = useSearchParams();
+  const conversationIdParam = searchParams.get('conversationId');
   const { data: conversations = [], isLoading: isConvLoading } = useConversationsQuery(botId);
   const [selectedConvId, setSelectedConvId] = useState<number | null>(null);
-  const { data: messages = [], isLoading: isMsgLoading } = useMessagesQuery(selectedConvId || 0);
 
+  useEffect(() => {
+    if (conversationIdParam) {
+      const convId = parseInt(conversationIdParam, 10);
+      if (!isNaN(convId)) {
+        setSelectedConvId(convId);
+      }
+    }
+  }, [conversationIdParam]);
+
+  const { data: messages = [], isLoading: isMsgLoading } = useMessagesQuery(selectedConvId || 0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [infoPanelOpen, setInfoPanelOpen] = useState(true);
   const [bottomTab, setBottomTab] = useState<BottomTab>('reply');
   const [typedNote, setTypedNote] = useState('');
-
   const ls = useChatLocalStorage({ conversations, selectedConvId });
   const actions = useChatActions({ selectedConvId, botId });
   const filters = useChatFilters({ conversations, favorites: ls.favorites, unreadConvIds: ls.unreadConvIds });
-
   const selectedConversation = conversations.find(c => c.id === selectedConvId) ?? null;
-
   const handleSelectConv = (id: number) => {
     setSelectedConvId(id);
     ls.markAsRead(id);

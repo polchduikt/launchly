@@ -175,6 +175,26 @@ export interface FlowBlock {
   buttons?: ButtonData[];
 }
 
+export interface BotUserResponse {
+  id: number;
+  telegramId: number;
+  username: string | null;
+  firstName: string;
+  lastName: string | null;
+  currentNodeId: string | null;
+  photoUrl: string | null;
+  metadata: string;
+  tags: string[];
+  createdAt: string;
+}
+
+export interface BotUserUpdateRequest {
+  firstName?: string;
+  lastName?: string;
+  metadata?: string;
+  tags?: string[];
+}
+
 
 
 

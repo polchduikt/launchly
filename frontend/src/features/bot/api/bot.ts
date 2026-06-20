@@ -1,5 +1,5 @@
 import apiClient from '../../../lib/axios';
-import type { BotResponse, BotCreateRequest, BotDetailResponse, FlowSchemaResponse, BotUpdateRequest } from '../../../types/bot';
+import type { BotResponse, BotCreateRequest, BotDetailResponse, FlowSchemaResponse, BotUpdateRequest, BotUserResponse, BotUserUpdateRequest } from '../../../types/bot';
 
 
 export const getBotsApi = async (): Promise<BotResponse[]> => {
@@ -51,5 +51,23 @@ export const saveFlowSchemaApi = async (
     edges,
   });
   return response.data;
+};
+
+export const getBotUsersApi = async (botId: number): Promise<BotUserResponse[]> => {
+  const response = await apiClient.get<BotUserResponse[]>(`/bots/${botId}/users`);
+  return response.data;
+};
+
+export const updateBotUserApi = async (
+  botId: number,
+  userId: number,
+  data: BotUserUpdateRequest
+): Promise<BotUserResponse> => {
+  const response = await apiClient.put<BotUserResponse>(`/bots/${botId}/users/${userId}`, data);
+  return response.data;
+};
+
+export const deleteBotUserApi = async (botId: number, userId: number): Promise<void> => {
+  await apiClient.delete(`/bots/${botId}/users/${userId}`);
 };
 

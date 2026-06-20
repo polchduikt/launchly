@@ -1,178 +1,377 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import {
-  useLeadsQuery,
-  useUpdateLeadMutation,
+  useBotUsersQuery,
+  useUpdateBotUserMutation,
+  useDeleteBotUserMutation,
+  useConversationsQuery,
 } from '../hooks/useCrmQueries';
+import { useTagsQuery } from '../../broadcast/hooks/useBroadcastQueries';
 import {
-  Loader2,
-  AlertCircle,
-  Download,
-  Users,
+  Filter,
+  Search,
+  ChevronDown,
+  Tag,
+  X,
+  Plus,
+  Pause,
+  Play,
+  Bookmark,
+  Lock,
+  Trash2,
 } from 'lucide-react';
-import type { LeadStatus } from '../../../types/crm';
-import { exportExcelApi } from '../../integration/api/integration';
+import type { BotUserResponse } from '../../../types/bot';
+import { ContactsSidebar } from '../components/ContactsSidebar';
+import { ContactsHeader } from '../components/ContactsHeader';
+import { ContactsTable } from '../components/ContactsTable';
+import { ContactDetailModal } from '../components/ContactDetailModal';
+
+interface BotUserMetadata {
+  sequences?: string[];
+  paused?: boolean;
+  unsubscribed?: boolean;
+  customFields?: Record<string, string>;
+}
 
 export const ContactsPage: React.FC = () => {
   const activeBotId = useBotStore((state) => state.activeBotId);
   const botId = activeBotId || 0;
-  const { data: leads = [], isLoading: isLeadsLoading } = useLeadsQuery(botId);
-  const updateLeadMut = useUpdateLeadMutation(botId);
 
-  const [isExportingLeads, setIsExportingLeads] = useState(false);
+  const { data: contacts = [], isLoading: isContactsLoading, refetch } = useBotUsersQuery(botId);
+  const { data: conversations = [] } = useConversationsQuery(botId);
+  const { data: tags = [] } = useTagsQuery(botId);
 
-  const handleExportExcel = async () => {
-    setIsExportingLeads(true);
+  const updateBotUserMut = useUpdateBotUserMutation(botId);
+  const deleteBotUserMut = useDeleteBotUserMutation(botId);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedContactIds, setSelectedContactIds] = useState<Set<number>>(new Set());
+  const [selectedContact, setSelectedContact] = useState<BotUserResponse | null>(null);
+  
+  const [showBulkMenu, setShowBulkMenu] = useState(false);
+  const [bulkActionType, setBulkActionType] = useState<string | null>(null);
+  const [bulkValue, setBulkValue] = useState('');
+
+  const parseMetadata = (metaStr: string | null): BotUserMetadata => {
     try {
-      const blob = await exportExcelApi(botId, 'LEADS');
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `leads_bot_${botId}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Failed to export Excel:', err);
-    } finally {
-      setIsExportingLeads(false);
+      return metaStr ? JSON.parse(metaStr) : {};
+    } catch {
+      return {};
     }
+  };
+
+  const filteredContacts = useMemo(() => {
+    return contacts.filter((c) => {
+      const fullname = `${c.firstName || ''} ${c.lastName || ''}`.toLowerCase();
+      const username = (c.username || '').toLowerCase();
+      const q = searchQuery.toLowerCase();
+      return fullname.includes(q) || username.includes(q) || String(c.telegramId).includes(q);
+    });
+  }, [contacts, searchQuery]);
+
+  const sequences = useMemo(() => {
+    const counts: Record<string, number> = { '1': 0 };
+    contacts.forEach((c) => {
+      const meta = parseMetadata(c.metadata);
+      if (meta.sequences) {
+        meta.sequences.forEach((s) => {
+          counts[s] = (counts[s] || 0) + 1;
+        });
+      }
+    });
+    return Object.entries(counts).map(([id, count]) => ({ id, count }));
+  }, [contacts]);
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedContactIds(new Set(filteredContacts.map((c) => c.id)));
+    } else {
+      setSelectedContactIds(new Set());
+    }
+  };
+
+  const handleSelectContact = (id: number, checked: boolean) => {
+    const next = new Set(selectedContactIds);
+    if (checked) {
+      next.add(id);
+    } else {
+      next.delete(id);
+    }
+    setSelectedContactIds(next);
+  };
+
+  const handleApplyBulkAction = async () => {
+    if (!bulkActionType) return;
+    const ids = Array.from(selectedContactIds);
+
+    for (const userId of ids) {
+      const c = contacts.find((x) => x.id === userId);
+      if (!c) continue;
+
+      const meta = parseMetadata(c.metadata);
+      const updatedMeta = { ...meta };
+      let updatedTags = [...(c.tags || [])];
+
+      if (bulkActionType === 'add-tag') {
+        if (bulkValue && !updatedTags.includes(bulkValue)) {
+          updatedTags.push(bulkValue);
+        }
+      } else if (bulkActionType === 'remove-tag') {
+        updatedTags = updatedTags.filter((t) => t !== bulkValue);
+      } else if (bulkActionType === 'sub-seq') {
+        const seqs = meta.sequences || [];
+        if (!seqs.includes(bulkValue)) {
+          updatedMeta.sequences = [...seqs, bulkValue];
+        }
+      } else if (bulkActionType === 'unsub-seq') {
+        const seqs = meta.sequences || [];
+        updatedMeta.sequences = seqs.filter((s) => s !== bulkValue);
+      } else if (bulkActionType === 'pause') {
+        updatedMeta.paused = true;
+      } else if (bulkActionType === 'resume') {
+        updatedMeta.paused = false;
+      } else if (bulkActionType === 'unsub-acc') {
+        updatedMeta.unsubscribed = true;
+      } else if (bulkActionType === 'delete') {
+        await deleteBotUserMut.mutateAsync(userId);
+        continue;
+      } else if (bulkActionType === 'set-field') {
+        const [fieldKey, fieldVal] = bulkValue.split(':');
+        if (fieldKey) {
+          const fields = meta.customFields || {};
+          updatedMeta.customFields = { ...fields, [fieldKey.trim()]: (fieldVal || '').trim() };
+        }
+      } else if (bulkActionType === 'clear-field') {
+        const fields = meta.customFields || {};
+        delete fields[bulkValue];
+        updatedMeta.customFields = { ...fields };
+      }
+
+      if (bulkActionType !== 'delete') {
+        await updateBotUserMut.mutateAsync({
+          userId,
+          data: {
+            metadata: JSON.stringify(updatedMeta),
+            tags: updatedTags,
+          },
+        });
+      }
+    }
+
+    setSelectedContactIds(new Set());
+    setBulkActionType(null);
+    setBulkValue('');
+    setShowBulkMenu(false);
+    refetch();
   };
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-4rem)] flex flex-col bg-slate-50 font-sans">
+      <div className="h-[calc(100vh-4rem)] flex bg-slate-50 font-sans">
+        
+        <ContactsSidebar sequences={sequences} />
 
-        <header className="bg-white border-b border-slate-200 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 shadow-sm">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Contacts</h1>
-            <p className="text-xs text-slate-400">Manage and track your leads</p>
-          </div>
-        </header>
+        <main className="flex-1 flex flex-col min-w-0 bg-slate-50 overflow-hidden">
+          
+          <ContactsHeader
+            onCreateContact={() => alert('Feature coming soon: Manual Contact Creation')}
+            onImport={() => alert('Feature coming soon: Contact Import')}
+          />
 
-        <div className="flex-1 overflow-hidden">
-          {botId === 0 ? (
-            <div className="h-full flex items-center justify-center p-8 text-center">
-              <div className="max-w-sm space-y-3">
-                <AlertCircle size={40} className="text-slate-300 mx-auto" />
-                <p className="font-bold text-slate-700">No active bot found</p>
-                <p className="text-xs text-slate-400">Please connect a bot first to view contacts.</p>
+          <div className="px-6 py-3 bg-white border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 select-none">
+            <div className="flex items-center gap-3">
+              <button className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl text-xs font-bold text-slate-600 transition-all cursor-pointer shadow-sm">
+                <Filter size={14} className="text-slate-400" />
+                <span>Filter</span>
+              </button>
+              <div className="relative w-full sm:w-64">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 focus:border-indigo-500 rounded-xl text-xs font-semibold text-slate-700 placeholder:text-slate-400 focus:outline-none transition-all"
+                />
               </div>
             </div>
-          ) : (
-            <div className="h-full overflow-y-auto p-6">
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                <div className="p-5 border-b border-slate-100 flex justify-between items-center select-none">
-                  <div className="flex items-center gap-2">
-                    <Users size={16} className="text-indigo-600" />
-                    <h2 className="font-bold text-slate-800 text-sm">Leads Contacts</h2>
+
+            <div className="flex items-center gap-3 self-end sm:self-auto">
+              <span className="text-xs font-bold text-slate-500">
+                {selectedContactIds.size} selected of {filteredContacts.length} total
+              </span>
+              <div className="relative">
+                <button
+                  onClick={() => setShowBulkMenu(!showBulkMenu)}
+                  disabled={selectedContactIds.size === 0}
+                  className="flex items-center gap-1 px-3 py-2 bg-white hover:bg-slate-50 disabled:opacity-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition-all cursor-pointer shadow-sm"
+                >
+                  <span>Bulk Actions</span>
+                  <ChevronDown size={14} className="text-slate-400" />
+                </button>
+
+                {showBulkMenu && (
+                  <div className="absolute right-0 mt-1.5 w-60 bg-white border border-slate-200 rounded-xl shadow-xl z-30 py-1.5 overflow-hidden text-xs font-bold text-slate-700">
+                    <button onClick={() => setBulkActionType('add-tag')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
+                      <Tag size={13} className="text-slate-400" /> Add Tag
+                    </button>
+                    <button onClick={() => setBulkActionType('remove-tag')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
+                      <X size={13} className="text-slate-400" /> Remove Tag
+                    </button>
+                    <button onClick={() => setBulkActionType('sub-seq')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
+                      <Plus size={13} className="text-slate-400" /> Subscribe to Sequence
+                    </button>
+                    <button onClick={() => setBulkActionType('unsub-seq')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
+                      <X size={13} className="text-slate-400" /> Unsubscribe from Sequence
+                    </button>
+                    <button onClick={() => setBulkActionType('pause')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
+                      <Pause size={13} className="text-slate-400" /> Pause Automations Forever
+                    </button>
+                    <button onClick={() => setBulkActionType('resume')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
+                      <Play size={13} className="text-slate-400" /> Resume Automations
+                    </button>
+                    <button onClick={() => setBulkActionType('set-field')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
+                      <Bookmark size={13} className="text-slate-400" /> Set User Field
+                    </button>
+                    <button onClick={() => setBulkActionType('clear-field')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
+                      <X size={13} className="text-slate-400" /> Clear User Field
+                    </button>
+                    <div className="border-t border-slate-100 my-1"></div>
+                    <button onClick={() => setBulkActionType('unsub-acc')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer text-amber-600">
+                      <Lock size={13} className="text-amber-500" /> Unsubscribe from Account
+                    </button>
+                    <button onClick={() => setBulkActionType('delete')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer text-rose-600">
+                      <Trash2 size={13} className="text-rose-500" /> Delete Contact
+                    </button>
                   </div>
-                  <button
-                    onClick={handleExportExcel}
-                    disabled={isExportingLeads || leads.length === 0}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 text-indigo-700 text-xs font-bold rounded-xl transition-all border border-indigo-100 cursor-pointer shadow-sm shadow-indigo-50/50"
+                )}
+              </div>
+            </div>
+          </div>
+
+          {bulkActionType && (
+            <div className="px-6 py-3 bg-indigo-50 border-b border-indigo-100 flex items-center justify-between gap-4 text-xs font-bold text-indigo-950 shrink-0 animation-slide-in">
+              <div className="flex items-center gap-3 flex-1">
+                <span>
+                  Bulk: {bulkActionType.replace('-', ' ').toUpperCase()} on {selectedContactIds.size} contacts
+                </span>
+                
+                {['add-tag', 'remove-tag'].includes(bulkActionType) && (
+                  <select
+                    value={bulkValue}
+                    onChange={(e) => setBulkValue(e.target.value)}
+                    className="px-2 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
                   >
-                    {isExportingLeads ? (
-                      <Loader2 className="animate-spin" size={14} />
-                    ) : (
-                      <Download size={14} />
+                    <option value="">-- Select Tag --</option>
+                    {tags.map((t) => (
+                      <option key={t.id} value={t.name}>{t.name}</option>
+                    ))}
+                    {bulkActionType === 'add-tag' && (
+                      <option value="NEW_TAG">+ New Tag (Write custom name below)</option>
                     )}
-                    <span>Export to Excel</span>
-                  </button>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider select-none">
-                        <th className="py-3 px-6">Name</th>
-                        <th className="py-3 px-6">Email</th>
-                        <th className="py-3 px-6">Phone</th>
-                        <th className="py-3 px-6">Status</th>
-                        <th className="py-3 px-6">Captured At</th>
-                        <th className="py-3 px-6">Notes</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
-                      {isLeadsLoading ? (
-                        <tr>
-                          <td colSpan={6} className="py-8 text-center">
-                            <Loader2 className="animate-spin text-indigo-600 mx-auto" size={24} />
-                          </td>
-                        </tr>
-                      ) : leads.length === 0 ? (
-                        <tr>
-                          <td colSpan={6} className="py-8 text-center text-slate-400 italic">
-                            No leads captured yet.
-                          </td>
-                        </tr>
-                      ) : (
-                        leads.map((l) => (
-                          <tr key={l.id} className="hover:bg-slate-50/50">
-                            <td className="py-4 px-6 font-bold text-slate-900">{l.name}</td>
-                            <td className="py-4 px-6">{l.email || '—'}</td>
-                            <td className="py-4 px-6">{l.phone || '—'}</td>
-                            <td className="py-4 px-6">
-                              <select
-                                value={l.status}
-                                onChange={(e) =>
-                                  updateLeadMut.mutate({
-                                    leadId: l.id,
-                                    status: e.target.value as LeadStatus,
-                                    notes: l.notes || '',
-                                  })
-                                }
-                                className={`px-2 py-1 rounded-lg border font-bold text-[10px] cursor-pointer focus:outline-none transition-all ${
-                                  l.status === 'NEW'
-                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                    : l.status === 'CONTACTED'
-                                    ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                    : l.status === 'QUALIFIED'
-                                    ? 'bg-purple-50 text-purple-700 border-purple-200'
-                                    : l.status === 'CONVERTED'
-                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                    : 'bg-slate-200 text-slate-700 border-slate-200'
-                                }`}
-                              >
-                                <option value="NEW">New</option>
-                                <option value="CONTACTED">Contacted</option>
-                                <option value="QUALIFIED">Qualified</option>
-                                <option value="CONVERTED">Converted</option>
-                                <option value="LOST">Lost</option>
-                              </select>
-                            </td>
-                            <td className="py-4 px-6 text-slate-400 text-[11px]">
-                              {new Date(l.createdAt).toLocaleDateString()}
-                            </td>
-                            <td className="py-4 px-6">
-                              <input
-                                type="text"
-                                defaultValue={l.notes || ''}
-                                onBlur={(e) => {
-                                  if (e.target.value !== (l.notes || '')) {
-                                    updateLeadMut.mutate({
-                                      leadId: l.id,
-                                      status: l.status,
-                                      notes: e.target.value,
-                                    });
-                                  }
-                                }}
-                                placeholder="Click to add notes..."
-                                className="w-full bg-transparent hover:bg-slate-100/50 focus:bg-white border border-transparent focus:border-slate-200 rounded px-2 py-1 transition-all focus:outline-none placeholder:italic"
-                              />
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                  </select>
+                )}
+
+                {['sub-seq', 'unsub-seq'].includes(bulkActionType) && (
+                  <select
+                    value={bulkValue}
+                    onChange={(e) => setBulkValue(e.target.value)}
+                    className="px-2 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
+                  >
+                    <option value="">-- Select Sequence --</option>
+                    <option value="1">Sequence 1</option>
+                  </select>
+                )}
+
+                {bulkActionType === 'add-tag' && bulkValue === 'NEW_TAG' && (
+                  <input
+                    type="text"
+                    placeholder="Enter custom tag name"
+                    onChange={(e) => setBulkValue(e.target.value)}
+                    className="px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
+                  />
+                )}
+
+                {bulkActionType === 'set-field' && (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Field name (e.g. Gender)"
+                      id="bulkFieldKey"
+                      className="px-2.5 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs w-36 focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Value (e.g. Male)"
+                      id="bulkFieldVal"
+                      className="px-2.5 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs w-36 focus:outline-none"
+                      onBlur={() => {
+                        const k = (document.getElementById('bulkFieldKey') as HTMLInputElement)?.value;
+                        const v = (document.getElementById('bulkFieldVal') as HTMLInputElement)?.value;
+                        if (k) setBulkValue(`${k}:${v}`);
+                      }}
+                    />
+                  </div>
+                )}
+
+                {bulkActionType === 'clear-field' && (
+                  <input
+                    type="text"
+                    placeholder="Field name to clear"
+                    value={bulkValue}
+                    onChange={(e) => setBulkValue(e.target.value)}
+                    className="px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
+                  />
+                )}
+
+                {['pause', 'resume', 'unsub-acc', 'delete'].includes(bulkActionType) && (
+                  <span className="text-slate-400 italic font-semibold">No value needed. Click Apply.</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleApplyBulkAction}
+                  className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer transition-all"
+                >
+                  Apply
+                </button>
+                <button
+                  onClick={() => {
+                    setBulkActionType(null);
+                    setBulkValue('');
+                  }}
+                  className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-all"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           )}
-        </div>
+
+          <ContactsTable
+            botId={botId}
+            isContactsLoading={isContactsLoading}
+            filteredContacts={filteredContacts}
+            selectedContactIds={selectedContactIds}
+            onSelectAll={handleSelectAll}
+            onSelectContact={handleSelectContact}
+            onSelectContactDetail={setSelectedContact}
+          />
+        </main>
       </div>
+
+      {selectedContact && (
+        <ContactDetailModal
+          botId={botId}
+          selectedContact={selectedContact}
+          conversations={conversations}
+          tags={tags}
+          onClose={() => setSelectedContact(null)}
+          onContactUpdated={setSelectedContact}
+          onContactDeleted={() => setSelectedContact(null)}
+        />
+      )}
     </DashboardLayout>
   );
 };

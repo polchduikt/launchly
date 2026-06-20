@@ -8,7 +8,13 @@ import {
   getMessagesApi,
   sendOwnerMessageApi,
 } from '../api/crm';
+import {
+  getBotUsersApi,
+  updateBotUserApi,
+  deleteBotUserApi,
+} from '../../bot/api/bot';
 import type { OrderStatus, LeadStatus } from '../../../types/crm';
+import type { BotUserUpdateRequest } from '../../../types/bot';
 
 export const useOrdersQuery = (botId: number, enabled: boolean = true) => {
   return useQuery({
@@ -71,6 +77,37 @@ export const useSendMessageMutation = (conversationId: number, botId: number) =>
       sendOwnerMessageApi(conversationId, content, mediaUrl, mediaType),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
+    },
+  });
+};
+
+export const useBotUsersQuery = (botId: number, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ['botUsers', botId],
+    queryFn: () => getBotUsersApi(botId),
+    enabled: enabled && botId > 0,
+  });
+};
+
+export const useUpdateBotUserMutation = (botId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, data }: { userId: number; data: BotUserUpdateRequest }) =>
+      updateBotUserApi(botId, userId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['botUsers', botId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
+    },
+  });
+};
+
+export const useDeleteBotUserMutation = (botId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: number) => deleteBotUserApi(botId, userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['botUsers', botId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
     },
   });
