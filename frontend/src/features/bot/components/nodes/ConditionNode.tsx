@@ -1,28 +1,59 @@
-import React from 'react';
-import { Position, useEdges } from '@xyflow/react';
+import React, { useState, useEffect } from 'react';
+import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { GitFork } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../types/bot';
 import { getOperatorLabel } from '../../config/editorOptions';
+import { useNodeHover } from '../../hooks/useNodeHover';
+import { NodeToolbar } from './NodeToolbar';
 
 export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+  const nodes = useNodes();
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   const variable = data?.variable || 'variable';
   const operator = data?.operator || 'equals';
   const value = data?.value || '';
 
+  const connection = useConnection();
+  const isConnecting = connection.inProgress;
+  const isSelf = isConnecting && connection.fromNode?.id === id;
+  const { showToolbar, bindHover } = useNodeHover();
+  const [isHighlighted, setIsHighlighted] = useState(false);
+
+  useEffect(() => {
+    const handleHoverEdge = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) {
+        const { source, target } = customEvent.detail;
+        setIsHighlighted(source === id || target === id);
+      } else {
+        setIsHighlighted(false);
+      }
+    };
+    window.addEventListener('flow-hover-edge', handleHoverEdge);
+    return () => {
+      window.removeEventListener('flow-hover-edge', handleHoverEdge);
+    };
+  }, [id]);
+
   return (
     <div
+      {...bindHover}
       className={`w-64 bg-white/75 backdrop-blur-[2px] border-2 rounded-2xl p-4 shadow-sm transition-all relative overflow-visible isolate ${
-        selected ? 'border-purple-400 ring-2 ring-purple-100' : 'border-slate-200'
-      }`}
+        selected 
+          ? 'border-purple-400 ring-2 ring-purple-100' 
+          : isHighlighted 
+            ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm' 
+            : 'border-slate-200'
+      } ${isSelf ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
+      {showToolbar && <NodeToolbar nodeId={id} />}
       <div className="relative flex items-center gap-2 mb-3 border-b border-slate-100 pb-2">
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id)}
+          isConnected={edges.some((e) => e.target === id && nodes.some((n) => n.id === e.source))}
           padded={true}
         />
         <span className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
@@ -45,7 +76,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
           </div>
           {operator !== 'not_empty' && operator !== 'empty' && (
             <div className="text-slate-800 bg-white border border-slate-200 px-2 py-1 rounded-lg text-center truncate">
-              {value || '(empty)'}
+               {value || '(empty)'}
             </div>
           )}
         </div>
@@ -58,7 +89,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
             type="source"
             position={Position.Right}
             id="true"
-            isConnected={data?._tempSourceHandle !== 'true' && edges.some((e) => e.source === id && e.sourceHandle === 'true')}
+            isConnected={data?._tempSourceHandle !== 'true' && edges.some((e) => e.source === id && e.sourceHandle === 'true' && nodes.some((n) => n.id === e.target))}
             padded={true}
           />
         </div>
@@ -68,7 +99,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
             type="source"
             position={Position.Right}
             id="false"
-            isConnected={data?._tempSourceHandle !== 'false' && edges.some((e) => e.source === id && e.sourceHandle === 'false')}
+            isConnected={data?._tempSourceHandle !== 'false' && edges.some((e) => e.source === id && e.sourceHandle === 'false' && nodes.some((n) => n.id === e.target))}
             padded={true}
           />
         </div>

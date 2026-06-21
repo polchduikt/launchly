@@ -36,7 +36,7 @@ export const NodeHandle: React.FC<NodeHandleProps> = ({
       className={`!rounded-full !border-[1.5px] !transition-all ${
         isTarget
           ? '!z-0 !opacity-0 !bg-transparent !border-transparent'
-          : `!z-20 hover:!scale-110 ${
+          : `!z-20 ${
               isConnected
                 ? '!bg-[#7b8794] !border-[#7b8794]'
                 : '!bg-white !border-slate-300 hover:!border-slate-400'

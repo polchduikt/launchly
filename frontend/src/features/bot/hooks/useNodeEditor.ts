@@ -31,7 +31,7 @@ export const getBlocks = (data: CustomNodeData): any[] => {
   const missingButtons = flatButtons.filter((fb) => !allBlockButtons.some((bb) => bb.value === fb.value));
 
   if (missingButtons.length > 0) {
-    const targetBlockIndex = blocks.findIndex((b) => b.type === 'text' || b.type === 'image');
+    const targetBlockIndex = blocks.findIndex((b) => b.type === 'text' || b.type === 'image' || b.type === 'file' || b.type === 'audio' || b.type === 'video');
     if (targetBlockIndex !== -1) {
       blocks[targetBlockIndex] = {
         ...blocks[targetBlockIndex],
@@ -56,16 +56,31 @@ export const useNodeEditor = (
   const [editingButton, setEditingButton] = useState<ButtonData | null>(null);
   const [editingButtonBlockId, setEditingButtonBlockId] = useState<string | null>(null);
   const [uploadingBlockId, setUploadingBlockId] = useState<string | null>(null);
+  const [isNextStepDrawerOpen, setIsNextStepDrawerOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [showImageUrlInput, setShowImageUrlInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    setIsBtnDialogOpen(false);
+    setEditingButton(null);
+    setEditingButtonBlockId(null);
+    setIsNextStepDrawerOpen(false);
+  }, [node?.id]);
+
+  useEffect(() => {
     const handleEditButtonFromNode = (e: Event) => {
       const customEvent = e as CustomEvent;
       if (node && customEvent.detail.nodeId === node.id) {
-        setEditingButton(customEvent.detail.button);
-        setEditingButtonBlockId(null);
+        const btn = customEvent.detail.button;
+        setEditingButton(btn);
+        
+        // Find parent block
+        const blocksList = getBlocks(node.data || {});
+        const parentBlock = blocksList.find((b) => 
+          ((b.buttons || []) as ButtonData[]).some((button) => button.value === btn.value)
+        );
+        setEditingButtonBlockId(parentBlock ? parentBlock.id : null);
         setIsBtnDialogOpen(true);
       }
     };
@@ -183,6 +198,8 @@ export const useNodeEditor = (
     setEditingButtonBlockId(null);
   };
 
+  const [uploadAccept, setUploadAccept] = useState('image/*');
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -203,7 +220,10 @@ export const useNodeEditor = (
         const blocks = getBlocks(data);
         const updatedBlocks = blocks.map((b) => {
           if (b.id === uploadingBlockId) {
-            return { ...b, imageUrl: url };
+            if (b.type === 'image') return { ...b, imageUrl: url };
+            if (b.type === 'file') return { ...b, fileUrl: url, fileName: file.name };
+            if (b.type === 'audio') return { ...b, audioUrl: url, fileName: file.name };
+            if (b.type === 'video') return { ...b, videoUrl: url, fileName: file.name };
           }
           return b;
         });
@@ -240,5 +260,9 @@ export const useNodeEditor = (
     setEditingButtonBlockId,
     uploadingBlockId,
     setUploadingBlockId,
+    uploadAccept,
+    setUploadAccept,
+    isNextStepDrawerOpen,
+    setIsNextStepDrawerOpen,
   };
 };

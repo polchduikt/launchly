@@ -341,6 +341,12 @@ export const useFlowBuilder = () => {
       
       const { nodeId, button } = customEvent.detail;
       setSelectedNodeId(nodeId);
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          selected: n.id === nodeId,
+        }))
+      );
       
       setTimeout(() => {
         window.dispatchEvent(
@@ -359,6 +365,10 @@ export const useFlowBuilder = () => {
 
   const onConnect = useCallback(
     (params: Connection) => {
+      if (params.source === params.target) return;
+      const targetNode = nodes.find((n) => n.id === params.target);
+      if (targetNode?.type === 'START') return;
+
       takeSnapshot();
       didConnectRef.current = true;
       let sourceHandle = params.sourceHandle;
@@ -410,7 +420,8 @@ export const useFlowBuilder = () => {
 
       if (nodeElement) {
         const targetNodeId = nodeElement.getAttribute('data-id');
-        if (targetNodeId && targetNodeId !== connectionStart.nodeId) {
+        const targetNode = nodes.find((n) => n.id === targetNodeId);
+        if (targetNodeId && targetNodeId !== connectionStart.nodeId && targetNode?.type !== 'START') {
           let sourceHandle = connectionStart.handleId;
           if (!sourceHandle) {
             const sourceNode = nodes.find((n) => n.id === connectionStart.nodeId);
@@ -525,6 +536,45 @@ export const useFlowBuilder = () => {
     },
     [setNodes, takeSnapshotBeforeEdit]
   );
+
+  const handleAddAndConnectNode = useCallback((sourceNodeId: string, type: string) => {
+    takeSnapshot();
+    const id = `node_${type.toLowerCase()}_${Date.now()}`;
+    const sourceNode = nodes.find((n) => n.id === sourceNodeId);
+    
+    const position = sourceNode 
+      ? { x: sourceNode.position.x + 350, y: sourceNode.position.y }
+      : { x: Math.random() * 200 + 150, y: Math.random() * 200 + 100 };
+
+    const newNode: Node = {
+      id,
+      type,
+      position,
+      data: createDefaultNodeData(type),
+      selected: true,
+    };
+
+    setNodes((nds) => [
+      ...nds.map((n) => ({ ...n, selected: false }) as Node),
+      newNode
+    ]);
+
+    const newEdge: Edge = {
+      ...FLOW_EDGE_DEFAULTS,
+      id: `edge_${sourceNodeId}_next_${id}`,
+      source: sourceNodeId,
+      sourceHandle: 'next',
+      target: id,
+      type: edgeType,
+    };
+    
+    setEdges((eds) => [...eds.filter(e => !(e.source === sourceNodeId && e.sourceHandle === 'next')), newEdge]);
+    setSelectedNodeId(id);
+
+    setTimeout(() => {
+      fitView({ nodes: [{ id }], duration: 300, padding: 0.5 });
+    }, 50);
+  }, [nodes, setNodes, setEdges, edgeType, takeSnapshot, fitView, setSelectedNodeId]);
 
   const handleAddNode = (type: string) => {
     if (type === 'START') {
@@ -729,6 +779,92 @@ export const useFlowBuilder = () => {
     setContextMenu(null);
   }, [setSelectedNodeId, setContextMenu]);
 
+  useEffect(() => {
+    const handleCopy = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const { nodeId } = customEvent.detail;
+      const nodeToCopy = nodes.find((n) => n.id === nodeId);
+      if (!nodeToCopy || nodeToCopy.type === 'START') return;
+
+      takeSnapshot();
+      const newId = `node_${nodeToCopy.type?.toLowerCase()}_${Date.now()}`;
+      
+      const updatedData = JSON.parse(JSON.stringify(nodeToCopy.data || {}));
+      if (Array.isArray(updatedData.blocks)) {
+        updatedData.blocks = updatedData.blocks.map((block: any) => {
+          const blockClone = { ...block };
+          if (Array.isArray(blockClone.buttons)) {
+            blockClone.buttons = blockClone.buttons.map((btn: any) => ({
+              ...btn,
+              value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            }));
+          }
+          return blockClone;
+        });
+
+        const allButtons: any[] = [];
+        updatedData.blocks.forEach((b: any) => {
+          if (Array.isArray(b.buttons)) {
+            allButtons.push(...b.buttons);
+          }
+        });
+        updatedData.buttons = allButtons;
+      } else if (Array.isArray(updatedData.buttons)) {
+        updatedData.buttons = updatedData.buttons.map((btn: any) => ({
+          ...btn,
+          value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        }));
+      }
+
+      const newNode: Node = {
+        ...nodeToCopy,
+        id: newId,
+        position: {
+          x: nodeToCopy.position.x + 50,
+          y: nodeToCopy.position.y + 50,
+        },
+        selected: true,
+        data: updatedData,
+      };
+
+      setNodes((nds) => [
+        ...nds.map((n) => ({ ...n, selected: false }) as Node),
+        newNode,
+      ]);
+      setSelectedNodeId(newId);
+    };
+
+    const handleDelete = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const { nodeId } = customEvent.detail;
+      const nodeToDelete = nodes.find((n) => n.id === nodeId);
+      if (!nodeToDelete || nodeToDelete.type === 'START') return;
+
+      takeSnapshot();
+      setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+      setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+      if (selectedNodeId === nodeId) {
+        setSelectedNodeId(null);
+      }
+    };
+
+    const handleDeleteEdge = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const { edgeId } = customEvent.detail;
+      takeSnapshot();
+      setEdges((eds) => eds.filter((edge) => edge.id !== edgeId));
+    };
+
+    window.addEventListener('flow-copy-node', handleCopy);
+    window.addEventListener('flow-delete-node', handleDelete);
+    window.addEventListener('flow-delete-edge', handleDeleteEdge);
+    return () => {
+      window.removeEventListener('flow-copy-node', handleCopy);
+      window.removeEventListener('flow-delete-node', handleDelete);
+      window.removeEventListener('flow-delete-edge', handleDeleteEdge);
+    };
+  }, [nodes, selectedNodeId, setNodes, setEdges, takeSnapshot]);
+
   return {
     nodes,
     edges,
@@ -756,6 +892,7 @@ export const useFlowBuilder = () => {
     handleCreateAndConnectNode,
     handleUpdateNodeData,
     handleAddNode,
+    handleAddAndConnectNode,
     handleDeleteSelectedNode,
     handleAutoLayout,
     handleSaveFlow,

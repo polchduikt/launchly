@@ -7,6 +7,13 @@ import { NodeEditorPanel } from '../../bot/components/sidebar/NodeEditorPanel';
 import { NODE_TYPES } from '../config/nodeTypes';
 import { BROADCAST_BLOCKS } from '../config/broadcastBlocks';
 import { ROUTES } from '../../../constants/routes';
+import { InteractiveEdge } from '../../bot/components/edges/InteractiveEdge';
+import { FLOW_EDGE_DEFAULTS } from '../../bot/config/flowEdges';
+
+const EDGE_TYPES = {
+  default: InteractiveEdge,
+  smoothstep: InteractiveEdge,
+};
 
 import {
   ArrowLeft,
@@ -27,7 +34,6 @@ export const BroadcastBuilderPage: React.FC = () => {
     campaign,
     nodes,
     edges,
-    selectedNodeId,
     campaignName,
     setCampaignName,
     isEditingName,
@@ -59,7 +65,6 @@ export const BroadcastBuilderPage: React.FC = () => {
     onPaneClick,
     handleUpdateNodeData,
     handleAddNode,
-    handleDeleteSelectedNode,
     handleSelectAutomation,
     handleAddTagCondition,
     handleRemoveCondition,
@@ -69,6 +74,13 @@ export const BroadcastBuilderPage: React.FC = () => {
     updateCampaignMut,
     sendCampaignMut,
   } = useBroadcastBuilder();
+
+  const isValidConnection = React.useCallback((connection: any) => {
+    if (connection.source === connection.target) return false;
+    const targetNode = nodes.find((n) => n.id === connection.target);
+    if (targetNode?.type === 'START_BROADCAST') return false;
+    return true;
+  }, [nodes]);
 
   if (!activeBotId) {
     return (
@@ -235,6 +247,32 @@ export const BroadcastBuilderPage: React.FC = () => {
         </aside>
 
         <div className="flex-1 relative h-full">
+          <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+            <defs>
+              <marker
+                id="arrow-grey"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="7"
+                markerHeight="7"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#7b8794" />
+              </marker>
+              <marker
+                id="arrow-indigo"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="7"
+                markerHeight="7"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1" />
+              </marker>
+            </defs>
+          </svg>
           <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 pointer-events-auto">
             <div className="bg-white/95 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-sm flex flex-col gap-1.5 select-none w-48">
               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">
@@ -254,14 +292,6 @@ export const BroadcastBuilderPage: React.FC = () => {
               ))}
             </div>
 
-            {selectedNodeId && selectedNodeId !== 'start' && (
-              <button
-                onClick={handleDeleteSelectedNode}
-                className="w-48 flex items-center justify-center gap-2 px-3 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-2xl text-rose-600 text-xs font-bold transition-all shadow-sm shadow-rose-50 pointer-events-auto cursor-pointer animate-in fade-in duration-200"
-              >
-                <span>Delete Block</span>
-              </button>
-            )}
           </div>
 
           <ReactFlow
@@ -273,6 +303,13 @@ export const BroadcastBuilderPage: React.FC = () => {
             onNodeClick={onNodeClick}
             onPaneClick={onPaneClick}
             nodeTypes={NODE_TYPES}
+            edgeTypes={EDGE_TYPES}
+            isValidConnection={isValidConnection}
+            defaultEdgeOptions={FLOW_EDGE_DEFAULTS}
+            connectionLineStyle={{
+              strokeWidth: 2.2,
+              stroke: '#7b8794',
+            }}
             fitView
             fitViewOptions={{ padding: 0.6 }}
             className="bg-slate-50"

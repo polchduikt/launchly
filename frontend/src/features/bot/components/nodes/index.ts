@@ -6,3 +6,4 @@ export { ApiCallNode } from './ApiCallNode';
 export { LeadNode } from './LeadNode';
 export { OrderNode } from './OrderNode';
 export { EndNode } from './EndNode';
+export { NodeToolbar } from './NodeToolbar';

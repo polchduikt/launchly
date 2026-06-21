@@ -147,6 +147,92 @@ export const useBroadcastBuilder = () => {
     );
   }, [setNodes]);
 
+  useEffect(() => {
+    const handleCopy = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const { nodeId } = customEvent.detail;
+      if (nodeId === 'start' || nodeId === 'node_start') return;
+      const nodeToCopy = nodes.find((n) => n.id === nodeId);
+      if (!nodeToCopy) return;
+
+      const newId = `node_${nodeToCopy.type?.toLowerCase()}_${Date.now()}`;
+      const updatedData = JSON.parse(JSON.stringify(nodeToCopy.data || {}));
+      
+      if (Array.isArray(updatedData.blocks)) {
+        updatedData.blocks = updatedData.blocks.map((block: any) => {
+          const blockClone = { ...block };
+          if (Array.isArray(blockClone.buttons)) {
+            blockClone.buttons = blockClone.buttons.map((btn: any) => ({
+              ...btn,
+              value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            }));
+          }
+          return blockClone;
+        });
+
+        const allButtons: any[] = [];
+        updatedData.blocks.forEach((b: any) => {
+          if (Array.isArray(b.buttons)) {
+            allButtons.push(...b.buttons);
+          }
+        });
+        updatedData.buttons = allButtons;
+      } else if (Array.isArray(updatedData.buttons)) {
+        updatedData.buttons = updatedData.buttons.map((btn: any) => ({
+          ...btn,
+          value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        }));
+      }
+
+      const newNode = {
+        ...nodeToCopy,
+        id: newId,
+        position: {
+          x: nodeToCopy.position.x + 50,
+          y: nodeToCopy.position.y + 50,
+        },
+        selected: true,
+        data: updatedData,
+      };
+
+      setNodes((nds) => [
+        ...nds.map((n) => ({ ...n, selected: false })),
+        newNode,
+      ]);
+      setSelectedNodeId(newId);
+      setIsDirty(true);
+    };
+
+    const handleDelete = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const { nodeId } = customEvent.detail;
+      if (nodeId === 'start' || nodeId === 'node_start') return;
+
+      setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+      setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+      if (selectedNodeId === nodeId) {
+        setSelectedNodeId(null);
+      }
+      setIsDirty(true);
+    };
+
+    const handleDeleteEdge = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const { edgeId } = customEvent.detail;
+      setEdges((eds) => eds.filter((edge) => edge.id !== edgeId));
+      setIsDirty(true);
+    };
+
+    window.addEventListener('flow-copy-node', handleCopy);
+    window.addEventListener('flow-delete-node', handleDelete);
+    window.addEventListener('flow-delete-edge', handleDeleteEdge);
+    return () => {
+      window.removeEventListener('flow-copy-node', handleCopy);
+      window.removeEventListener('flow-delete-node', handleDelete);
+      window.removeEventListener('flow-delete-edge', handleDeleteEdge);
+    };
+  }, [nodes, selectedNodeId, setNodes, setEdges, setIsDirty]);
+
   const handleNodesChange = useCallback(
     (changes: NodeChange[]) => {
       onNodesChange(changes);
@@ -165,10 +251,14 @@ export const useBroadcastBuilder = () => {
 
   const onConnect = useCallback(
     (params: Connection) => {
+      if (params.source === params.target) return;
+      const targetNode = nodes.find((n) => n.id === params.target);
+      if (targetNode?.type === 'START_BROADCAST') return;
+
       setEdges((eds) => addEdge({ ...params, type: 'default' }, eds));
       setIsDirty(true);
     },
-    [setEdges]
+    [setEdges, nodes]
   );
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: { id: string }) => {

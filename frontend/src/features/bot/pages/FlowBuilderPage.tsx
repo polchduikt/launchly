@@ -10,14 +10,21 @@ import { FLOW_BLOCKS } from '../config/flowBlocks';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { NODE_TYPES } from '../config/nodeTypes';
 import { FLOW_EDGE_DEFAULTS } from '../config/flowEdges';
+import { InteractiveEdge } from '../components/edges/InteractiveEdge';
+
+const EDGE_TYPES = {
+  default: InteractiveEdge,
+  smoothstep: InteractiveEdge,
+};
 import { CONTEXT_MENU_OPTIONS } from '../config/contextMenuOptions';
 import { useFlowBuilder } from '../hooks/useFlowBuilder';
 import { ROUTES } from '../../../constants/routes';
-import { ArrowLeft, Loader2, Plus, Trash2, GitFork, Route, GitCommit, Undo2, Redo2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, GitFork, Route, GitCommit, Undo2, Redo2 } from 'lucide-react';
 import { useAiStore } from '../../../store/useAiStore';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useNodeEditor } from '../hooks/useNodeEditor';
 import { EditButtonDrawer } from '../components/sidebar/drawers/EditButtonDrawer';
+import { ChooseNextStepDrawer } from '../components/sidebar/drawers/ChooseNextStepDrawer';
 
 const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
   fromX,
@@ -52,11 +59,11 @@ const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
       <path
         fill="none"
         stroke="#7b8794"
-        strokeWidth={1.6}
+        strokeWidth={2.2}
         d={edgePath}
         style={{
           ...connectionLineStyle,
-          markerEnd: 'url(#custom-connection-arrow)',
+          markerEnd: 'url(#arrow-grey)',
         }}
       />
     </g>
@@ -93,7 +100,7 @@ const FlowBuilderInner: React.FC = () => {
     handleCreateAndConnectNode,
     handleUpdateNodeData,
     handleAddNode,
-    handleDeleteSelectedNode,
+    handleAddAndConnectNode,
     handleAutoLayout,
     handleSaveFlow,
     selectedNode,
@@ -110,6 +117,16 @@ const FlowBuilderInner: React.FC = () => {
   } = useFlowBuilder();
 
   const editorState = useNodeEditor(selectedNode, handleUpdateNodeData);
+
+  const isValidConnection = useCallback(
+    (connection: any) => {
+      if (connection.source === connection.target) return false;
+      const targetNode = nodes.find((n) => n.id === connection.target);
+      if (targetNode?.type === 'START') return false;
+      return true;
+    },
+    [nodes]
+  );
 
   const { setOnGenerate, setHasExistingNodes } = useAiStore();
 
@@ -185,15 +202,26 @@ const FlowBuilderInner: React.FC = () => {
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>
         <defs>
           <marker
-            id="custom-connection-arrow"
+            id="arrow-grey"
             viewBox="0 0 10 10"
             refX="8"
             refY="5"
-            markerWidth="6"
-            markerHeight="6"
+            markerWidth="7"
+            markerHeight="7"
             orient="auto-start-reverse"
           >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#7b8794" />
+          </marker>
+          <marker
+            id="arrow-indigo"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="7"
+            markerHeight="7"
+            orient="auto-start-reverse"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1" />
           </marker>
         </defs>
       </svg>
@@ -298,11 +326,13 @@ const FlowBuilderInner: React.FC = () => {
               onNodeDragStart={onNodeDragStart}
               onNodeDragStop={onNodeDragStop}
               nodeTypes={NODE_TYPES}
+              edgeTypes={EDGE_TYPES}
               onNodeClick={(_, node) => setSelectedNodeId(node.id)}
               onPaneClick={onPaneClick}
+              isValidConnection={isValidConnection}
               defaultEdgeOptions={FLOW_EDGE_DEFAULTS}
               connectionLineStyle={{
-                strokeWidth: 1.6,
+                strokeWidth: 2.2,
                 stroke: '#7b8794',
               }}
               connectionLineComponent={CustomConnectionLine}
@@ -372,9 +402,9 @@ const FlowBuilderInner: React.FC = () => {
               )}
 
               <div className={`absolute left-0 top-0 h-full w-80 border-r border-slate-200 bg-white -z-10 flex flex-col justify-between overflow-hidden shadow-xl transition-all duration-300 ease-in-out ${
-                editorState.isBtnDialogOpen ? 'translate-x-full opacity-100' : 'translate-x-0 opacity-0 pointer-events-none'
+                (editorState.isBtnDialogOpen || editorState.isNextStepDrawerOpen) ? 'translate-x-full opacity-100' : 'translate-x-0 opacity-0 pointer-events-none'
               }`}>
-                {selectedNode && editorState.editingButton && (
+                {selectedNode && editorState.isBtnDialogOpen && editorState.editingButton && (
                   <EditButtonDrawer
                     onClose={() => editorState.setIsBtnDialogOpen(false)}
                     button={editorState.editingButton}
@@ -382,19 +412,14 @@ const FlowBuilderInner: React.FC = () => {
                     onRemove={editorState.handleRemoveButton}
                   />
                 )}
+                {selectedNode && editorState.isNextStepDrawerOpen && (
+                  <ChooseNextStepDrawer
+                    onClose={() => editorState.setIsNextStepDrawerOpen(false)}
+                    onSelectStep={(type) => handleAddAndConnectNode(selectedNode.id, type)}
+                  />
+                )}
               </div>
             </aside>
-            {selectedNodeId && (
-              <div className="absolute top-4 left-[336px] z-10 flex flex-col gap-3 pointer-events-auto transition-all duration-300 ease-in-out">
-                <button
-                  onClick={handleDeleteSelectedNode}
-                  className="flex items-center justify-center gap-1.5 w-48 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-2xl border border-rose-100 shadow-sm transition-all cursor-pointer animate-in fade-in duration-200"
-                >
-                  <Trash2 size={14} />
-                  <span>Delete Block</span>
-                </button>
-              </div>
-            )}
 
             <div className="absolute top-4 right-4 z-10 select-none">
               <button

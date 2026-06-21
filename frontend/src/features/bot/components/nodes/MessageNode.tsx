@@ -1,25 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { Handle, Position, useReactFlow, useEdges, useUpdateNodeInternals } from '@xyflow/react';
+import { Handle, Position, useReactFlow, useEdges, useUpdateNodeInternals, useConnection, useNodes } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
-import { Send, Plus } from 'lucide-react';
+import { Send, Plus, Image as ImageIcon, Paperclip, Volume2, Video, Clock, Database } from 'lucide-react';
 import type { ButtonData, CustomNodeData } from '../../../../types/bot';
 import { NodeHandle } from './NodeHandle';
+import { getBlocks } from '../../hooks/useNodeEditor';
+import { useNodeHover } from '../../hooks/useNodeHover';
+import { NodeToolbar } from './NodeToolbar';
 
 export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const { setNodes } = useReactFlow();
+  const nodes = useNodes();
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   const updateNodeInternals = useUpdateNodeInternals();
-  const text = data?.text || '';
-  const imageUrl = data?.imageUrl || '';
   const buttons = (data?.buttons || []) as ButtonData[];
+  const blocks = getBlocks(data);
   const [activeButtonValue, setActiveButtonValue] = useState<string | null>(null);
+  const connection = useConnection();
+  const isConnecting = connection.inProgress;
+  const isSelf = isConnecting && connection.fromNode?.id === id;
+  const { showToolbar, bindHover } = useNodeHover();
+  const [isHighlighted, setIsHighlighted] = useState(false);
+
+  useEffect(() => {
+    const handleHoverEdge = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) {
+        const { source, target } = customEvent.detail;
+        setIsHighlighted(source === id || target === id);
+      } else {
+        setIsHighlighted(false);
+      }
+    };
+    window.addEventListener('flow-hover-edge', handleHoverEdge);
+    return () => {
+      window.removeEventListener('flow-hover-edge', handleHoverEdge);
+    };
+  }, [id]);
+
   const buttonsSerialized = JSON.stringify(buttons);
   useEffect(() => {
     updateNodeInternals(id);
   }, [id, buttonsSerialized, updateNodeInternals]);
   useEffect(() => {
     if (!selected) {
-      setActiveButtonValue(null);
+      setTimeout(() => {
+        setActiveButtonValue(null);
+      }, 0);
     }
   }, [selected]);
 
@@ -70,15 +97,21 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
 
   return (
     <div
+      {...bindHover}
       className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
-        selected ? 'border-emerald-500 ring-4 ring-emerald-100' : 'border-slate-200 hover:border-slate-300'
-      }`}
+        selected 
+          ? 'border-emerald-500 ring-4 ring-emerald-100' 
+          : isHighlighted 
+            ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm' 
+            : 'border-slate-200 hover:border-slate-300'
+      } ${isSelf ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
+      {showToolbar && <NodeToolbar nodeId={id} />}
       <div className="relative flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/50 select-none rounded-t-[22px]">
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id)}
+          isConnected={edges.some((e) => e.target === id && nodes.some((n) => n.id === e.source))}
         />
         <span className="w-7 h-7 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center shrink-0">
           <Send size={14} />
@@ -94,57 +127,123 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
       </div>
 
       <div className="p-3.5 space-y-3">
-        {imageUrl ? (
-          <div className="rounded-2xl overflow-hidden border border-slate-200/60 max-h-40 flex items-center justify-center bg-slate-50 relative group">
-            <img src={imageUrl} alt="Attachment" className="w-full h-full object-cover select-none" />
-          </div>
-        ) : null}
-
-        {text ? (
-          <div className="bg-slate-50 border border-slate-150 rounded-2xl p-3 text-xs text-slate-800 leading-relaxed break-words whitespace-pre-wrap font-medium">
-            {text}
+        {blocks.length === 0 ? (
+          <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-xs text-slate-400 italic text-center select-none">
+            Empty Message Node. Click to edit.
           </div>
         ) : (
-          !imageUrl && (
-            <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-xs text-slate-400 italic text-center select-none">
-              Empty Message Node. Click to add text or image.
-            </div>
-          )
-        )}
-
-        {buttons.length > 0 && (
-          <div className="space-y-2 pt-1 nodrag">
-            {buttons.map((btn, idx) => {
-              const isActive = activeButtonValue === btn.value;
+          <div className="space-y-3">
+            {blocks.map((block, bIdx) => {
+              const blockBtns = (block.buttons || []) as ButtonData[];
               return (
-                <div
-                  key={btn.value + idx}
-                  onClick={(e) => handleButtonClick(e, btn)}
-                  className={`relative border py-2.5 pl-4 pr-10 rounded-2xl text-left text-xs font-bold transition-all cursor-pointer shadow-sm select-none ${
-                    isActive
-                      ? 'bg-emerald-50/40 border-emerald-500 text-emerald-700 font-extrabold'
-                      : 'bg-white hover:bg-slate-50 border-slate-250 text-slate-700 hover:border-slate-350'
-                  }`}
-                >
-                  <span>{btn.label}</span>
-                  <Handle
-                    type="source"
-                    position={Position.Right}
-                    id={btn.value}
-                    style={{
-                      position: 'absolute',
-                      left: 'calc(100% - 26px)',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      width: '10px',
-                      height: '10px',
-                    }}
-                    className={`!rounded-full !border-[1.5px] !transition-all hover:!scale-110 !z-20 ${
-                      data?._tempSourceHandle !== btn.value && edges.some((e) => e.source === id && e.sourceHandle === btn.value)
-                        ? '!bg-[#7b8794] !border-[#7b8794]'
-                        : '!bg-white !border-slate-300 hover:!border-slate-400'
-                    }`}
-                  />
+                <div key={block.id || bIdx} className="space-y-2">
+                  {block.type === 'text' && (
+                    block.text ? (
+                      <div className="bg-slate-50 border border-slate-150 rounded-2xl p-3 text-xs text-slate-800 leading-relaxed break-words whitespace-pre-wrap font-medium">
+                        {block.text}
+                      </div>
+                    ) : (
+                      <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-400 italic text-center bg-slate-50/20">
+                        Add a text
+                      </div>
+                    )
+                  )}
+
+                  {block.type === 'image' && (
+                    block.imageUrl ? (
+                      <div className="rounded-2xl overflow-hidden border border-slate-200/60 max-h-40 flex items-center justify-center bg-slate-50 relative group">
+                        <img src={block.imageUrl} alt="Attachment" className="w-full h-full object-cover select-none" />
+                      </div>
+                    ) : (
+                      <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-400 italic text-center flex items-center justify-center gap-1.5 bg-slate-50/20">
+                        <ImageIcon size={14} className="text-slate-400" />
+                        <span>Image</span>
+                      </div>
+                    )
+                  )}
+
+                  {block.type === 'file' && (
+                    <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-500 bg-slate-50/20 flex flex-col items-center justify-center gap-1.5">
+                      <Paperclip size={14} className="text-slate-400" />
+                      <span className="truncate max-w-full text-center">
+                        {block.fileUrl ? (block.fileName || 'File uploaded') : 'File'}
+                      </span>
+                    </div>
+                  )}
+
+                  {block.type === 'audio' && (
+                    <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-500 bg-slate-50/20 flex flex-col items-center justify-center gap-1.5">
+                      <Volume2 size={14} className="text-slate-400" />
+                      <span className="truncate max-w-full text-center">
+                        {block.audioUrl ? 'Audio snippet' : 'Audio'}
+                      </span>
+                    </div>
+                  )}
+
+                  {block.type === 'video' && (
+                    <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-500 bg-slate-50/20 flex flex-col items-center justify-center gap-1.5">
+                      <Video size={14} className="text-slate-400" />
+                      <span className="truncate max-w-full text-center">
+                        {block.videoUrl ? 'Video clip' : 'Video'}
+                      </span>
+                    </div>
+                  )}
+
+                  {block.type === 'delay' && (
+                    <div className="border border-dashed border-slate-250 rounded-2xl p-2.5 text-[10px] font-bold text-slate-500 bg-slate-50/10 flex items-center justify-center gap-1.5">
+                      <Clock size={12} className="text-cyan-500" />
+                      <span>Delay: {block.delaySeconds || 3}s</span>
+                    </div>
+                  )}
+
+                  {block.type === 'data_collection' && (
+                    <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-550 bg-slate-50/20 flex flex-col gap-1">
+                      <div className="flex items-center gap-1.5 justify-center">
+                        <Database size={13} className="text-blue-500" />
+                        <span className="font-bold text-slate-700">Collect: {block.variableName || 'variable'}</span>
+                      </div>
+                      {block.text && <p className="text-[10px] text-slate-400 italic text-center truncate">{block.text}</p>}
+                    </div>
+                  )}
+
+                  {blockBtns.length > 0 && (
+                    <div className="space-y-2 pt-1 nodrag">
+                      {blockBtns.map((btn, btnIdx) => {
+                        const isActive = activeButtonValue === btn.value;
+                        return (
+                          <div
+                            key={btn.value + btnIdx}
+                            onClick={(e) => handleButtonClick(e, btn)}
+                            className={`relative border py-2.5 pl-4 pr-10 rounded-2xl text-left text-xs font-bold transition-all cursor-pointer shadow-sm select-none ${
+                              isActive
+                                ? 'bg-emerald-50/40 border-emerald-500 text-emerald-700 font-extrabold'
+                                : 'bg-white hover:bg-slate-50 border-slate-250 text-slate-700 hover:border-slate-350'
+                            }`}
+                          >
+                            <span>{btn.label}</span>
+                            <Handle
+                              type="source"
+                              position={Position.Right}
+                              id={btn.value}
+                              style={{
+                                position: 'absolute',
+                                left: 'calc(100% - 26px)',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                width: '10px',
+                                height: '10px',
+                              }}
+                              className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
+                                data?._tempSourceHandle !== btn.value && edges.some((e) => e.source === id && e.sourceHandle === btn.value && nodes.some((n) => n.id === e.target))
+                                  ? '!bg-[#7b8794] !border-[#7b8794]'
+                                  : '!bg-white !border-slate-300 hover:!border-slate-400'
+                              }`}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -154,7 +253,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
         <button
           onClick={handleAddButtonInNode}
           disabled={buttons.length >= 10}
-          className="w-full py-2 border border-dashed border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 nodrag shadow-sm"
+          className="w-full py-2 border border-dashed border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 nodrag shadow-sm"
         >
           <Plus size={13} />
           <span>Add Button</span>
@@ -167,7 +266,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
           type="source"
           position={Position.Right}
           id="next"
-          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && (e.sourceHandle === 'next' || e.sourceHandle == null))}
+          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && nodes.some((n) => n.id === e.target))}
           padded={false}
         />
       </div>

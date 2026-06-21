@@ -13,7 +13,11 @@ import {
   ArrowUp, 
   ArrowDown, 
   Copy,
-  ArrowRight
+  ArrowRight,
+  Paperclip,
+  Volume2,
+  Video,
+  MoreHorizontal
 } from 'lucide-react';
 import { useEdges, useReactFlow } from '@xyflow/react';
 import type { ButtonData } from '../../../../../types/bot';
@@ -40,7 +44,23 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
     handleFileUpload,
     uploadingBlockId,
     setUploadingBlockId,
+    uploadAccept,
+    setUploadAccept,
+    setIsNextStepDrawerOpen,
   } = editorState;
+
+  const [isMoreOpen, setIsMoreOpen] = React.useState(false);
+  const moreContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreContainerRef.current && !moreContainerRef.current.contains(event.target as Node)) {
+        setIsMoreOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const { setNodes, fitView } = useReactFlow();
   const edges = useEdges();
@@ -61,7 +81,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
     }
   };
 
-  const addBlock = (type: 'text' | 'image' | 'delay' | 'data_collection') => {
+  const addBlock = (type: 'text' | 'image' | 'delay' | 'data_collection' | 'file' | 'audio' | 'video') => {
     const newBlock: any = {
       id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type,
@@ -77,6 +97,16 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
     } else if (type === 'data_collection') {
       newBlock.text = '';
       newBlock.variableName = '';
+    } else if (type === 'file') {
+      newBlock.fileUrl = '';
+      newBlock.fileName = '';
+      newBlock.buttons = [];
+    } else if (type === 'audio') {
+      newBlock.audioUrl = '';
+      newBlock.buttons = [];
+    } else if (type === 'video') {
+      newBlock.videoUrl = '';
+      newBlock.buttons = [];
     }
     handleChange('blocks', [...blocks, newBlock]);
   };
@@ -139,7 +169,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
       <input
         type="file"
         ref={fileInputRef}
-        accept="image/*"
+        accept={uploadAccept}
         onChange={handleFileUpload}
         className="hidden"
       />
@@ -160,12 +190,18 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                     {block.type === 'image' && <ImageIcon size={13} className="text-indigo-500" />}
                     {block.type === 'delay' && <Clock size={13} className="text-cyan-500" />}
                     {block.type === 'data_collection' && <Database size={13} className="text-blue-500" />}
+                    {block.type === 'file' && <Paperclip size={13} className="text-slate-500" />}
+                    {block.type === 'audio' && <Volume2 size={13} className="text-violet-500" />}
+                    {block.type === 'video' && <Video size={13} className="text-rose-500" />}
                   </span>
                   <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">
                     {block.type === 'text' && 'Text block'}
                     {block.type === 'image' && 'Image block'}
                     {block.type === 'delay' && 'Delay block'}
                     {block.type === 'data_collection' && 'Data collection'}
+                    {block.type === 'file' && 'File block'}
+                    {block.type === 'audio' && 'Audio block'}
+                    {block.type === 'video' && 'Video block'}
                   </span>
                 </div>
 
@@ -427,6 +463,308 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                   </div>
                 </div>
               )}
+              {block.type === 'file' && (
+                <div className="p-4 space-y-3">
+                  {block.fileUrl ? (
+                    <div className="relative rounded-2xl p-4 border border-slate-200 bg-slate-50 flex items-center justify-between group/file">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Paperclip size={16} className="text-slate-400 shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-700 truncate">{block.fileName || 'Uploaded file'}</p>
+                          <p className="text-[10px] text-slate-400 truncate font-semibold">{block.fileUrl}</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => updateBlockContent(block.id, { fileUrl: '', fileName: '' })}
+                        className="p-1.5 bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 rounded-xl transition-all cursor-pointer shadow-sm border border-slate-100 shrink-0"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUploadAccept('*/*');
+                            setUploadingBlockId(block.id);
+                            setTimeout(() => {
+                              fileInputRef.current?.click();
+                            }, 50);
+                          }}
+                          disabled={isUploadingThisBlock}
+                          className="flex-1 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                        >
+                          {isUploadingThisBlock ? (
+                            <Loader2 size={13} className="animate-spin text-slate-400" />
+                          ) : (
+                            <Paperclip size={13} className="text-slate-500" />
+                          )}
+                          <span>Upload File</span>
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Or paste file URL link..."
+                        value={block.fileUrl || ''}
+                        onChange={(e) => updateBlockContent(block.id, { fileUrl: e.target.value })}
+                        className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
+                      />
+                    </div>
+                  )}
+
+                  <div className="pt-2 bg-white space-y-2 border-t border-slate-100">
+                    {blockBtns.length > 0 && (
+                      <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                        {blockBtns.map((btn, bIdx) => {
+                          const edge = edges.find((e) => e.source === nodeId && e.sourceHandle === btn.value);
+                          const isConnected = !!edge;
+                          const targetNodeId = edge?.target;
+
+                          return (
+                            <div
+                              key={btn.value + bIdx}
+                              onClick={() => handleOpenEditButton(btn, block.id)}
+                              className="flex justify-between items-center bg-white border border-slate-150 p-2.5 rounded-xl text-xs font-bold text-slate-700 shadow-sm hover:border-slate-350 cursor-pointer transition-all"
+                            >
+                              <span className="truncate flex-1 pr-4">{btn.label}</span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isConnected && targetNodeId) {
+                                    handleJumpToNode(targetNodeId);
+                                  }
+                                }}
+                                className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 ${
+                                  isConnected
+                                    ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-250 cursor-pointer'
+                                    : 'border border-slate-300 text-slate-300 cursor-default'
+                                }`}
+                              >
+                                {isConnected ? (
+                                  <ArrowRight size={11} className="stroke-[2.5]" />
+                                ) : null}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleAddButton(block.id)}
+                      className="w-full py-2 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 text-xs font-bold rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <Plus size={13} />
+                      <span>Add Button</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {block.type === 'audio' && (
+                <div className="p-4 space-y-3">
+                  {block.audioUrl ? (
+                    <div className="space-y-2.5 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Audio Preview</span>
+                        <button
+                          type="button"
+                          onClick={() => updateBlockContent(block.id, { audioUrl: '' })}
+                          className="p-1.5 bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 rounded-xl transition-all cursor-pointer shadow-sm border border-slate-100"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                      <audio controls className="w-full h-8" src={block.audioUrl} />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUploadAccept('audio/*');
+                            setUploadingBlockId(block.id);
+                            setTimeout(() => {
+                              fileInputRef.current?.click();
+                            }, 50);
+                          }}
+                          disabled={isUploadingThisBlock}
+                          className="flex-1 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                        >
+                          {isUploadingThisBlock ? (
+                            <Loader2 size={13} className="animate-spin text-slate-400" />
+                          ) : (
+                            <Volume2 size={13} className="text-violet-500" />
+                          )}
+                          <span>Upload File</span>
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Or paste audio URL link..."
+                        value={block.audioUrl || ''}
+                        onChange={(e) => updateBlockContent(block.id, { audioUrl: e.target.value })}
+                        className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
+                      />
+                    </div>
+                  )}
+
+                  <div className="pt-2 bg-white space-y-2 border-t border-slate-100">
+                    {blockBtns.length > 0 && (
+                      <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                        {blockBtns.map((btn, bIdx) => {
+                          const edge = edges.find((e) => e.source === nodeId && e.sourceHandle === btn.value);
+                          const isConnected = !!edge;
+                          const targetNodeId = edge?.target;
+
+                          return (
+                            <div
+                              key={btn.value + bIdx}
+                              onClick={() => handleOpenEditButton(btn, block.id)}
+                              className="flex justify-between items-center bg-white border border-slate-150 p-2.5 rounded-xl text-xs font-bold text-slate-700 shadow-sm hover:border-slate-350 cursor-pointer transition-all"
+                            >
+                              <span className="truncate flex-1 pr-4">{btn.label}</span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isConnected && targetNodeId) {
+                                    handleJumpToNode(targetNodeId);
+                                  }
+                                }}
+                                className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 ${
+                                  isConnected
+                                    ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-250 cursor-pointer'
+                                    : 'border border-slate-300 text-slate-300 cursor-default'
+                                }`}
+                              >
+                                {isConnected ? (
+                                  <ArrowRight size={11} className="stroke-[2.5]" />
+                                ) : null}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleAddButton(block.id)}
+                      className="w-full py-2 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 text-xs font-bold rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <Plus size={13} />
+                      <span>Add Button</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {block.type === 'video' && (
+                <div className="p-4 space-y-3">
+                  {block.videoUrl ? (
+                    <div className="space-y-2.5 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Video Preview</span>
+                        <button
+                          type="button"
+                          onClick={() => updateBlockContent(block.id, { videoUrl: '' })}
+                          className="p-1.5 bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 rounded-xl transition-all cursor-pointer shadow-sm border border-slate-100"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                      <video controls className="w-full max-h-40 rounded-xl bg-black" src={block.videoUrl} />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUploadAccept('video/*');
+                            setUploadingBlockId(block.id);
+                            setTimeout(() => {
+                              fileInputRef.current?.click();
+                            }, 50);
+                          }}
+                          disabled={isUploadingThisBlock}
+                          className="flex-1 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                        >
+                          {isUploadingThisBlock ? (
+                            <Loader2 size={13} className="animate-spin text-slate-400" />
+                          ) : (
+                            <Video size={13} className="text-rose-500" />
+                          )}
+                          <span>Upload File</span>
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Or paste video URL link..."
+                        value={block.videoUrl || ''}
+                        onChange={(e) => updateBlockContent(block.id, { videoUrl: e.target.value })}
+                        className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
+                      />
+                    </div>
+                  )}
+
+                  <div className="pt-2 bg-white space-y-2 border-t border-slate-100">
+                    {blockBtns.length > 0 && (
+                      <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                        {blockBtns.map((btn, bIdx) => {
+                          const edge = edges.find((e) => e.source === nodeId && e.sourceHandle === btn.value);
+                          const isConnected = !!edge;
+                          const targetNodeId = edge?.target;
+
+                          return (
+                            <div
+                              key={btn.value + bIdx}
+                              onClick={() => handleOpenEditButton(btn, block.id)}
+                              className="flex justify-between items-center bg-white border border-slate-150 p-2.5 rounded-xl text-xs font-bold text-slate-700 shadow-sm hover:border-slate-350 cursor-pointer transition-all"
+                            >
+                              <span className="truncate flex-1 pr-4">{btn.label}</span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isConnected && targetNodeId) {
+                                    handleJumpToNode(targetNodeId);
+                                  }
+                                }}
+                                className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 ${
+                                  isConnected
+                                    ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-250 cursor-pointer'
+                                    : 'border border-slate-300 text-slate-300 cursor-default'
+                                }`}
+                              >
+                                {isConnected ? (
+                                  <ArrowRight size={11} className="stroke-[2.5]" />
+                                ) : null}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleAddButton(block.id)}
+                      className="w-full py-2 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 text-xs font-bold rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <Plus size={13} />
+                      <span>Add Button</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -503,11 +841,92 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
               PRO
             </span>
           </button>
+
+          <div ref={moreContainerRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setIsMoreOpen(!isMoreOpen)}
+              className="w-full flex items-center justify-between px-3.5 py-3 bg-white hover:bg-slate-50/50 border border-dashed border-slate-200 hover:border-slate-350 rounded-2xl cursor-pointer transition-all shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-slate-500 shrink-0">
+                  <MoreHorizontal size={16} />
+                </span>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-slate-800">More</p>
+                  <p className="text-[10px] text-slate-400 font-semibold leading-normal">View all available options</p>
+                </div>
+              </div>
+            </button>
+
+            {isMoreOpen && (
+              <div className="absolute bottom-full left-0 right-0 mb-2 p-2 bg-white border border-slate-200 rounded-3xl shadow-xl z-50 space-y-2 border-dashed animate-in slide-in-from-bottom-2 duration-150">
+                <button
+                  type="button"
+                  onClick={() => {
+                    addBlock('file');
+                    setIsMoreOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white hover:bg-slate-50 border border-dashed border-slate-150 hover:border-slate-300 rounded-2xl cursor-pointer transition-all text-left"
+                >
+                  <div className="flex items-center gap-3 text-left">
+                    <span className="text-slate-500 shrink-0">
+                      <Paperclip size={16} />
+                    </span>
+                    <div className="text-left">
+                      <p className="text-xs font-bold text-slate-800">File</p>
+                      <p className="text-[10px] text-slate-400 font-semibold leading-normal">Add files to the message</p>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    addBlock('audio');
+                    setIsMoreOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white hover:bg-slate-50 border border-dashed border-slate-150 hover:border-slate-300 rounded-2xl cursor-pointer transition-all text-left"
+                >
+                  <div className="flex items-center gap-3 text-left">
+                    <span className="text-slate-500 shrink-0">
+                      <Volume2 size={16} />
+                    </span>
+                    <div className="text-left">
+                      <p className="text-xs font-bold text-slate-800">Audio</p>
+                      <p className="text-[10px] text-slate-400 font-semibold leading-normal">Send voice snippets in chat</p>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    addBlock('video');
+                    setIsMoreOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white hover:bg-slate-50 border border-dashed border-slate-150 hover:border-slate-300 rounded-2xl cursor-pointer transition-all text-left"
+                >
+                  <div className="flex items-center gap-3 text-left">
+                    <span className="text-slate-500 shrink-0">
+                      <Video size={16} />
+                    </span>
+                    <div className="text-left">
+                      <p className="text-xs font-bold text-slate-800">Video</p>
+                      <p className="text-[10px] text-slate-400 font-semibold leading-normal">Share video in chat</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="space-y-2.5 pt-2">
-        <button type="button" className="w-full py-2.5 bg-white hover:bg-indigo-50/30 border border-indigo-200 hover:border-indigo-450 text-indigo-650 hover:text-indigo-700 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm select-none">
+        <button
+          type="button"
+          onClick={() => setIsNextStepDrawerOpen(true)}
+          className="w-full py-2.5 bg-white hover:bg-indigo-50/30 border border-indigo-200 hover:border-indigo-450 text-indigo-650 hover:text-indigo-700 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm select-none"
+        >
           Choose Next Step
         </button>
       </div>
