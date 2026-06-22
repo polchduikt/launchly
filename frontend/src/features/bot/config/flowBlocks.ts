@@ -8,6 +8,7 @@ export const FLOW_BLOCKS: FlowBlockConfig[] = [
   { type: 'MESSAGE', label: 'Send Message', color: 'text-sky-500 bg-sky-50' },
   { type: 'INPUT', label: 'Input Prompt', color: 'text-amber-500 bg-amber-50' },
   { type: 'CONDITION', label: 'Condition Rule', color: 'text-purple-700 bg-purple-50' },
+  { type: 'ACTION', label: 'Actions', color: 'text-amber-600 bg-amber-50' },
   { type: 'ORDER', label: 'Create Order', color: 'text-emerald-500 bg-emerald-50' },
   { type: 'LEAD', label: 'CRM Lead Capture', color: 'text-sky-500 bg-sky-50' },
   { type: 'API_CALL', label: 'API Integration', color: 'text-indigo-500 bg-indigo-50' },
@@ -22,6 +23,8 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
       return { text: 'Please enter a value:', variableName: 'input_var' };
     case 'CONDITION':
       return { variable: 'user_input', operator: 'equals', value: 'Yes' };
+    case 'ACTION':
+      return { actions: [] };
     case 'ORDER':
       return { productName: 'Product Name', price: '100', currency: 'UAH' };
     case 'LEAD':
@@ -32,3 +35,4 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
       return {};
   }
 };
+

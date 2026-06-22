@@ -77,6 +77,7 @@ export interface ButtonData {
   value: string;
   actionType?: string;
   actionTarget?: string;
+  row?: string;
 }
 
 export interface EditButtonDialogProps {

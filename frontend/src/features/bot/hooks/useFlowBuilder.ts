@@ -412,11 +412,23 @@ export const useFlowBuilder = () => {
         return;
       }
 
-      const actualTarget = document.elementFromPoint(clientX, clientY);
+      const elementsUnderPoint = typeof document.elementsFromPoint === 'function'
+        ? document.elementsFromPoint(clientX, clientY)
+        : [];
 
-      const nodeElement = actualTarget && typeof actualTarget.closest === 'function'
-        ? actualTarget.closest('.react-flow__node')
-        : null;
+      let nodeElement: Element | null = null;
+      let isHandle = false;
+
+      for (const el of elementsUnderPoint) {
+        if (el.classList.contains('react-flow__handle') || el.closest('.react-flow__handle')) {
+          isHandle = true;
+        }
+        const closestNode = el.closest('.react-flow__node');
+        if (closestNode) {
+          nodeElement = closestNode;
+          break;
+        }
+      }
 
       if (nodeElement) {
         const targetNodeId = nodeElement.getAttribute('data-id');
@@ -435,14 +447,10 @@ export const useFlowBuilder = () => {
           };
           takeSnapshot();
           setEdges((eds) => addEdge({ ...params, ...FLOW_EDGE_DEFAULTS, type: edgeType }, eds));
-          connectionStartRef.current = null;
-          return;
         }
+        connectionStartRef.current = null;
+        return;
       }
-
-      const isHandle = actualTarget && typeof actualTarget.closest === 'function'
-        ? actualTarget.classList.contains('react-flow__handle') || actualTarget.closest('.react-flow__handle')
-        : false;
 
       if (!isHandle) {
         const targetScreenX = Math.min(clientX, window.innerWidth - 240) - 8;

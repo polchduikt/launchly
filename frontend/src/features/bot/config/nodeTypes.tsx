@@ -9,6 +9,7 @@ import {
   LeadNode,
   ApiCallNode,
   EndNode,
+  ActionNode,
 } from '../components/nodes';
 
 export const TempNode: React.FC = () => {
@@ -33,5 +34,7 @@ export const NODE_TYPES = {
   LEAD: LeadNode,
   API_CALL: ApiCallNode,
   END: EndNode,
+  ACTION: ActionNode,
   TEMP: TempNode,
 };
+

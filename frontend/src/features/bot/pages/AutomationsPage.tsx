@@ -268,6 +268,10 @@ export const AutomationsPage: React.FC = () => {
       return botFolders[bot.id] === selectedFolderId;
     }
     return true;
+  }).sort((a, b) => {
+    const timeA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+    const timeB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+    return timeB - timeA;
   });
 
   return (

@@ -4,7 +4,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import logoL from '../../assets/logo-l.png';
 import { NAV_ITEMS } from './config/navItems';
 import type { DashboardLayoutProps } from '../../types/shared';
-import { Sparkles, HelpCircle } from 'lucide-react';
+import { Sparkles, HelpCircle, BookOpen, Users, Briefcase, Lightbulb, ClipboardList, FileText } from 'lucide-react';
 import { useAiStore } from '../../store/useAiStore';
 import { AiAssistantDrawer } from '../../features/ai/components/AiAssistantDrawer';
 import { useBotStore } from '../../store/useBotStore';
@@ -21,13 +21,18 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const { setIsOpen } = useAiStore();
   const [showPricing, setShowPricing] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showHelpMenu, setShowHelpMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const helpMenuRef = useRef<HTMLDivElement>(null);
   const activeBotId = useBotStore((state) => state.activeBotId);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
         setShowProfileMenu(false);
+      }
+      if (helpMenuRef.current && !helpMenuRef.current.contains(event.target as Node)) {
+        setShowHelpMenu(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside, true);
@@ -118,7 +123,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-extrabold text-slate-800 truncate leading-snug">{user.name}</p>
                     <div className="flex items-center gap-1 mt-0.5 group cursor-pointer">
-                      <p className="text-[10px] text-slate-400 font-bold truncate max-w-[150px]">{user.email || 'brawl1267@gmail.com'}</p>
+                      <p className="text-[10px] text-slate-400 font-bold truncate max-w-[150px]">{user.email || 'Account email unavailable'}</p>
                       <svg className="w-2.5 h-2.5 text-slate-400 group-hover:text-slate-650 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                       </svg>
@@ -186,12 +191,103 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             )}
           </div>
 
-          <button
-            title="Help & Resources"
-            className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-          >
-            <HelpCircle size={20} />
-          </button>
+          <div ref={helpMenuRef} className="relative">
+            <button
+              onClick={() => setShowHelpMenu(!showHelpMenu)}
+              title="Help & Resources"
+              className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+            >
+              <HelpCircle size={20} />
+            </button>
+
+            {showHelpMenu && (
+              <div className="absolute left-14 bottom-[-10px] w-64 bg-white border border-slate-200 rounded-3xl shadow-2xl z-50 p-4 space-y-3 animate-in slide-in-from-left-2 duration-150 text-left">
+                <div className="absolute left-[-6px] bottom-[20px] w-2.5 h-2.5 bg-white border-l border-b border-slate-200 rotate-45"></div>
+
+                <div className="space-y-1.5 pb-2 border-b border-slate-100">
+                  <a
+                    href="https://knowledgebase.launchly.so"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
+                  >
+                    <BookOpen size={16} className="text-slate-400 shrink-0" />
+                    Knowledge base
+                  </a>
+                  <a
+                    href="https://community.launchly.so"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
+                  >
+                    <Users size={16} className="text-slate-400 shrink-0" />
+                    Ask the Community
+                  </a>
+                  <a
+                    href="https://agencies.launchly.so"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
+                  >
+                    <Briefcase size={16} className="text-slate-400 shrink-0" />
+                    Hire an Agency
+                  </a>
+                  <a
+                    href="https://ideas.launchly.so"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
+                  >
+                    <Lightbulb size={16} className="text-slate-400 shrink-0" />
+                    Share an Idea
+                  </a>
+                  <a
+                    href="https://changelog.launchly.so"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
+                  >
+                    <ClipboardList size={16} className="text-slate-400 shrink-0" />
+                    Launchly Changelog
+                  </a>
+                  <a
+                    href="https://blog.launchly.so"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
+                  >
+                    <FileText size={16} className="text-slate-400 shrink-0" />
+                    Launchly Blog
+                  </a>
+                </div>
+
+                <div className="space-y-1.5 pt-1">
+                  <a
+                    href="https://launchly.so/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block px-2.5 py-1 text-xs font-bold text-slate-600 hover:text-indigo-650 transition-colors text-left"
+                  >
+                    Terms of service
+                  </a>
+                  <a
+                    href="https://launchly.so/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block px-2.5 py-1 text-xs font-bold text-slate-600 hover:text-indigo-650 transition-colors text-left"
+                  >
+                    Privacy policy
+                  </a>
+                  <button
+                    onClick={() => console.log('Privacy settings clicked')}
+                    className="w-full px-2.5 py-1 text-xs font-bold text-slate-600 hover:text-indigo-650 transition-colors text-left cursor-pointer"
+                  >
+                    Privacy settings
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="w-8 border-t border-slate-200" />
 

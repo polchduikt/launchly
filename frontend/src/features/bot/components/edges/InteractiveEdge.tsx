@@ -11,52 +11,84 @@ export const InteractiveEdge: React.FC<EdgeProps> = ({
   sourcePosition,
   targetPosition,
   style = {},
-  type, // 'default' or 'smoothstep'
+  type, 
   source,
   target,
 }) => {
   const [showDelete, setShowDelete] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isHighlighted, setIsHighlighted] = useState(false);
+  const deleteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const enterTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { screenToFlowPosition } = useReactFlow();
   const [deletePos, setDeletePos] = useState<{ x: number; y: number } | null>(null);
 
   const handleMouseEnter = (event: React.MouseEvent) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
+    if (deleteTimeoutRef.current) {
+      clearTimeout(deleteTimeoutRef.current);
+      deleteTimeoutRef.current = null;
     }
-    
-    if (!showDelete) {
-      const pos = screenToFlowPosition({ x: event.clientX, y: event.clientY });
-      setDeletePos(pos);
-      setShowDelete(true);
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+      highlightTimeoutRef.current = null;
     }
 
+    setIsHighlighted(true);
     window.dispatchEvent(
       new CustomEvent('flow-hover-edge', {
         detail: { edgeId: id, source, target },
       })
     );
-  };
 
-  const handleMouseEnterButton = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
+    if (!showDelete && !enterTimeoutRef.current) {
+      const clientX = event.clientX;
+      const clientY = event.clientY;
+      enterTimeoutRef.current = setTimeout(() => {
+        const pos = screenToFlowPosition({ x: clientX, y: clientY });
+        setDeletePos(pos);
+        setShowDelete(true);
+        enterTimeoutRef.current = null;
+      }, 45);
     }
   };
 
+  const handleMouseEnterButton = () => {
+    if (deleteTimeoutRef.current) {
+      clearTimeout(deleteTimeoutRef.current);
+      deleteTimeoutRef.current = null;
+    }
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+      highlightTimeoutRef.current = null;
+    }
+    setIsHighlighted(true);
+  };
+
   const handleMouseLeave = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      setShowDelete(false);
+    if (enterTimeoutRef.current) {
+      clearTimeout(enterTimeoutRef.current);
+      enterTimeoutRef.current = null;
+    }
+
+    if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+    highlightTimeoutRef.current = setTimeout(() => {
+      setIsHighlighted(false);
       window.dispatchEvent(new CustomEvent('flow-hover-edge', { detail: null }));
+      highlightTimeoutRef.current = null;
+    }, 50);
+
+    if (deleteTimeoutRef.current) clearTimeout(deleteTimeoutRef.current);
+    deleteTimeoutRef.current = setTimeout(() => {
+      setShowDelete(false);
+      deleteTimeoutRef.current = null;
     }, 300);
   };
 
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (deleteTimeoutRef.current) clearTimeout(deleteTimeoutRef.current);
+      if (enterTimeoutRef.current) clearTimeout(enterTimeoutRef.current);
+      if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
     };
   }, []);
 
@@ -130,10 +162,10 @@ export const InteractiveEdge: React.FC<EdgeProps> = ({
         fill="none"
         style={{
           ...style,
-          stroke: showDelete ? '#6366f1' : (style.stroke || '#7b8794'),
+          stroke: isHighlighted ? '#6366f1' : (style.stroke || '#7b8794'),
         }}
         strokeWidth={style.strokeWidth || 1.6}
-        markerEnd={showDelete ? `url(#arrow-indigo-${id})` : `url(#arrow-grey-${id})`}
+        markerEnd={isHighlighted ? `url(#arrow-indigo-${id})` : `url(#arrow-grey-${id})`}
         className="react-flow__edge-path transition-colors duration-155"
       />
 

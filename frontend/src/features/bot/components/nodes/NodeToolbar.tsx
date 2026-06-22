@@ -12,7 +12,7 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = ({ nodeId, onMouseEnter, 
     <div
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className="absolute top-[-44px] left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-2xl shadow-lg animate-in fade-in slide-in-from-bottom-1 duration-150"
+      className="absolute top-[-50px] left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-2xl shadow-lg animate-in fade-in slide-in-from-bottom-1 duration-150"
     >
       <button
         onClick={(e) => {

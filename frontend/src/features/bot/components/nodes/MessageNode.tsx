@@ -95,6 +95,16 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
     window.dispatchEvent(editEvent);
   };
 
+  const groupButtonsByRow = (btns: ButtonData[]) => {
+    const groups: Record<string, ButtonData[]> = {};
+    btns.forEach((btn) => {
+      const r = btn.row ?? '0';
+      if (!groups[r]) groups[r] = [];
+      groups[r].push(btn);
+    });
+    return groups;
+  };
+
   return (
     <div
       {...bindHover}
@@ -206,7 +216,66 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
                     </div>
                   )}
 
-                  {blockBtns.length > 0 && (
+                  {block.type === 'telegram_menu' && (
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex flex-col gap-2">
+                      <div className="text-center text-xs font-bold text-slate-500 pb-1.5 border-b border-slate-200/55">
+                        Telegram Menu
+                      </div>
+                      {(() => {
+                        const groups = groupButtonsByRow(blockBtns);
+                        const sortedRowKeys = Object.keys(groups).sort((a, b) => Number(a) - Number(b));
+
+                        return (
+                          <div className="space-y-2 pt-1 nodrag">
+                            {sortedRowKeys.map((rowKey) => {
+                              const rowBtns = groups[rowKey];
+                              return (
+                                <div key={rowKey} className="flex gap-2 w-full">
+                                  {rowBtns.map((btn, btnIdx) => {
+                                    const isActive = activeButtonValue === btn.value;
+                                    return (
+                                      <div
+                                        key={btn.value + btnIdx}
+                                        onClick={(e) => handleButtonClick(e, btn)}
+                                        className={`relative border py-1.5 px-3 pr-7 rounded-xl text-left text-xs font-semibold transition-all cursor-pointer shadow-sm select-none flex-1 truncate ${
+                                          isActive
+                                            ? 'bg-emerald-50/40 border-emerald-500 text-emerald-700 font-extrabold'
+                                            : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-350'
+                                        }`}
+                                        title={btn.label}
+                                      >
+                                        <span className="block truncate w-full">{btn.label}</span>
+                                        <Handle
+                                          type="source"
+                                          position={Position.Right}
+                                          id={btn.value}
+                                          style={{
+                                            position: 'absolute',
+                                            right: '8px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            width: '9px',
+                                            height: '9px',
+                                          }}
+                                          className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
+                                            data?._tempSourceHandle !== btn.value && edges.some((e) => e.source === id && e.sourceHandle === btn.value && nodes.some((n) => n.id === e.target))
+                                              ? '!bg-[#7b8794] !border-[#7b8794]'
+                                              : '!bg-white !border-slate-300 hover:!border-slate-400'
+                                          }`}
+                                        />
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
+                  {block.type !== 'telegram_menu' && blockBtns.length > 0 && (
                     <div className="space-y-2 pt-1 nodrag">
                       {blockBtns.map((btn, btnIdx) => {
                         const isActive = activeButtonValue === btn.value;

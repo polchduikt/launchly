@@ -9,6 +9,7 @@ import { OrderNodeEditor } from './editors/OrderNodeEditor';
 import { LeadNodeEditor } from './editors/LeadNodeEditor';
 import { ApiCallNodeEditor } from './editors/ApiCallNodeEditor';
 import { EndNodeEditor } from './editors/EndNodeEditor';
+import { ActionNodeEditor } from './editors/ActionNodeEditor';
 
 interface NodeEditorPanelProps {
   node?: Node;
@@ -65,6 +66,8 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
         return <LeadNodeEditor data={data} handleChange={handleChange} />;
       case 'API_CALL':
         return <ApiCallNodeEditor data={data} handleChange={handleChange} />;
+      case 'ACTION':
+        return <ActionNodeEditor data={data} handleChange={handleChange} editorState={editorState} />;
       case 'END':
         return <EndNodeEditor />;
       default:
@@ -73,9 +76,9 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
   };
 
   return (
-    <div className="h-full overflow-y-auto p-5 space-y-5 font-sans flex flex-col justify-between custom-scrollbar">
-      <div className="space-y-5">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+    <div className="h-full overflow-y-auto p-5 font-sans flex flex-col custom-scrollbar">
+      <div className="flex-1 flex flex-col gap-5">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 shrink-0">
           <div className="flex items-center gap-2">
             <span className="w-8 h-8 rounded-lg bg-slate-50 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200">
               {renderIcon()}
@@ -91,7 +94,9 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
           </div>
         </div>
 
-        {renderEditor()}
+        <div className="flex-1 flex flex-col min-h-0">
+          {renderEditor()}
+        </div>
       </div>
     </div>
   );

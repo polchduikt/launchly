@@ -4,6 +4,8 @@ export interface GoogleSheetsConfig {
   spreadsheetId: string;
   sheetName: string;
   dataType: 'ORDERS' | 'LEADS';
+  email?: string;
+  accountName?: string;
 }
 
 export interface WebhookConfig {

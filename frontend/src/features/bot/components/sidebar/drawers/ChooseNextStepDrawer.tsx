@@ -7,7 +7,8 @@ import {
   ShoppingCart, 
   UserPlus, 
   Code, 
-  Power 
+  Power,
+  Sliders
 } from 'lucide-react';
 
 interface ChooseNextStepDrawerProps {
@@ -36,6 +37,13 @@ const STEP_OPTIONS = [
     description: 'Filter flows using conditional rules',
     icon: GitFork,
     color: 'text-purple-600 bg-purple-50 border-purple-100',
+  },
+  {
+    type: 'ACTION',
+    label: 'Actions',
+    description: 'Perform tag actions, custom fields and Google Sheets operations',
+    icon: Sliders,
+    color: 'text-amber-600 bg-amber-50 border-amber-100',
   },
   {
     type: 'ORDER',

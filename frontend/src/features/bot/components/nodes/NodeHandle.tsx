@@ -20,7 +20,7 @@ export const NodeHandle: React.FC<NodeHandleProps> = ({
   };
 
   if (position === Position.Left) {
-    style.left = padded ? '-18px' : '-2px';
+    style.left = isTarget ? '2px' : (padded ? '-18px' : '-2px');
     style.transform = 'translateY(-50%)';
   } else if (position === Position.Right) {
     style.right = padded ? '-21px' : '-5px';
