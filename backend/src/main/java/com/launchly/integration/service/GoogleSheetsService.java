@@ -2,6 +2,7 @@ package com.launchly.integration.service;
 
 import com.launchly.integration.entity.Integration;
 import java.util.List;
+import java.util.Map;
 
 public interface GoogleSheetsService {
 
@@ -9,7 +10,14 @@ public interface GoogleSheetsService {
 
     Long authenticate(String stateToken, String code);
 
-    void appendRow(Integration integration, List<Object> values);
+    void appendRow(Integration integration, String spreadsheetId, String sheetName, List<Object> values);
 
     void refreshTokenIfNeeded(Integration integration);
+
+    List<Map<String, String>> getSpreadsheets(Long botId);
+
+    List<String> getWorksheets(Long botId, String spreadsheetId);
+
+    List<String> getHeaders(Long botId, String spreadsheetId, String worksheetName);
 }
+

@@ -26,6 +26,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +64,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                 .claim("botId", botId)
                 .claim("userId", userId)
                 .issuedAt(new java.util.Date())
-                .expiration(new java.util.Date(System.currentTimeMillis() + 300000)) // 5 minutes
+                .expiration(new java.util.Date(System.currentTimeMillis() + 300000))
                 .signWith(getSigningKey())
                 .compact();
 
@@ -71,7 +72,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                 "?client_id=" + URLEncoder.encode(googleClientId, StandardCharsets.UTF_8) +
                 "&redirect_uri=" + URLEncoder.encode(googleRedirectUri, StandardCharsets.UTF_8) +
                 "&response_type=code" +
-                "&scope=" + URLEncoder.encode("https://www.googleapis.com/auth/spreadsheets", StandardCharsets.UTF_8) +
+                "&scope=" + URLEncoder.encode("openid email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/userinfo.email", StandardCharsets.UTF_8) +
                 "&access_type=offline" +
                 "&prompt=consent" +
                 "&state=" + URLEncoder.encode(stateToken, StandardCharsets.UTF_8);
@@ -121,7 +122,31 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             JsonNode tokenResponse = objectMapper.readTree(response.body());
             String accessToken = tokenResponse.path("access_token").asText();
             String refreshToken = tokenResponse.path("refresh_token").asText(null);
+            String idToken = tokenResponse.path("id_token").asText(null);
             long expiresIn = tokenResponse.path("expires_in").asLong(3599);
+
+            String email = extractEmailFromIdToken(idToken);
+            try {
+                HttpRequest userInfoReq = HttpRequest.newBuilder()
+                        .uri(URI.create("https://openidconnect.googleapis.com/v1/userinfo"))
+                        .header("Authorization", "Bearer " + accessToken)
+                        .GET()
+                        .build();
+                HttpResponse<String> userInfoResp = httpClient.send(userInfoReq, HttpResponse.BodyHandlers.ofString());
+                if (userInfoResp.statusCode() == 200) {
+                    if (email == null) {
+                        JsonNode userInfo = objectMapper.readTree(userInfoResp.body());
+                        String fetchedEmail = userInfo.path("email").asText(null);
+                        if (fetchedEmail != null && !fetchedEmail.isBlank()) {
+                            email = fetchedEmail;
+                        }
+                    }
+                } else {
+                    log.warn("Failed to fetch Google user info. Status: {}, Body: {}", userInfoResp.statusCode(), userInfoResp.body());
+                }
+            } catch (Exception e) {
+                log.warn("Failed to fetch Google user info: {}", e.getMessage());
+            }
 
             Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
                     .orElseGet(() -> Integration.builder()
@@ -136,6 +161,14 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                 integration.setGoogleRefreshToken(encryptionUtil.encrypt(refreshToken));
             }
             integration.setGoogleTokenExpiresAt(LocalDateTime.now().plusSeconds(expiresIn));
+            Map<String, String> config = new HashMap<>();
+            copyConfigValue(integration.getConfig(), config, "spreadsheetId");
+            copyConfigValue(integration.getConfig(), config, "sheetName");
+            copyConfigValue(integration.getConfig(), config, "dataType");
+            if (email != null) {
+                config.put("email", email);
+            }
+            integration.setConfig(objectMapper.writeValueAsString(config));
 
             integrationRepository.save(integration);
             log.info("Successfully configured Google Sheets integration for bot {}", botId);
@@ -146,6 +179,39 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         } catch (Exception e) {
             log.error("Google Sheets OAuth token exchange error: {}", e.getMessage(), e);
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Google token exchange failed");
+        }
+    }
+
+    private String extractEmailFromIdToken(String idToken) {
+        if (idToken == null || idToken.isBlank()) {
+            return null;
+        }
+        try {
+            String[] parts = idToken.split("\\.");
+            if (parts.length < 2) {
+                return null;
+            }
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+            JsonNode claims = objectMapper.readTree(payload);
+            String email = claims.path("email").asText(null);
+            return email != null && !email.isBlank() ? email : null;
+        } catch (Exception e) {
+            log.warn("Failed to extract email from Google ID token: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    private void copyConfigValue(String configStr, Map<String, String> target, String key) {
+        if (configStr == null || configStr.isBlank()) {
+            return;
+        }
+        try {
+            String value = objectMapper.readTree(configStr).path(key).asText(null);
+            if (value != null && !value.isBlank()) {
+                target.put(key, value);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to read Google Sheets config key {}: {}", key, e.getMessage());
         }
     }
 
@@ -207,24 +273,28 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
     @Override
     @Transactional
-    public void appendRow(Integration integration, List<Object> values) {
+    public void appendRow(Integration integration, String spreadsheetId, String sheetName, List<Object> values) {
         refreshTokenIfNeeded(integration);
 
-        String configStr = integration.getConfig();
-        String spreadsheetId = null;
-        String sheetName = "Sheet1";
+        String activeSpreadsheetId = spreadsheetId;
+        String activeSheetName = sheetName != null && !sheetName.trim().isEmpty() ? sheetName : "Sheet1";
 
-        if (configStr != null) {
-            try {
-                JsonNode configObj = objectMapper.readTree(configStr);
-                spreadsheetId = configObj.path("spreadsheetId").asText(null);
-                sheetName = configObj.path("sheetName").asText("Sheet1");
-            } catch (Exception e) {
-                log.error("Failed to parse config JSON for integration {}: {}", integration.getId(), e.getMessage());
+        if (activeSpreadsheetId == null || activeSpreadsheetId.trim().isEmpty()) {
+            String configStr = integration.getConfig();
+            if (configStr != null) {
+                try {
+                    JsonNode configObj = objectMapper.readTree(configStr);
+                    activeSpreadsheetId = configObj.path("spreadsheetId").asText(null);
+                    if (sheetName == null || sheetName.trim().isEmpty()) {
+                        activeSheetName = configObj.path("sheetName").asText("Sheet1");
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to parse config JSON for integration {}: {}", integration.getId(), e.getMessage());
+                }
             }
         }
 
-        if (spreadsheetId == null || spreadsheetId.trim().isEmpty()) {
+        if (activeSpreadsheetId == null || activeSpreadsheetId.trim().isEmpty()) {
             log.warn("Integration {} missing spreadsheetId. Skipping append.", integration.getId());
             return;
         }
@@ -233,14 +303,14 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             String decryptedAccessToken = encryptionUtil.decrypt(integration.getGoogleAccessToken());
 
             Map<String, Object> bodyMap = new HashMap<>();
-            bodyMap.put("range", sheetName);
+            bodyMap.put("range", activeSheetName);
             bodyMap.put("majorDimension", "ROWS");
             bodyMap.put("values", List.of(values));
 
             String requestBody = objectMapper.writeValueAsString(bodyMap);
-            String encodedSheetName = URLEncoder.encode(sheetName, StandardCharsets.UTF_8);
+            String encodedSheetName = URLEncoder.encode(activeSheetName, StandardCharsets.UTF_8);
 
-            String url = "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheetId +
+            String url = "https://sheets.googleapis.com/v4/spreadsheets/" + activeSpreadsheetId +
                     "/values/" + encodedSheetName + ":append?valueInputOption=USER_ENTERED";
 
             HttpRequest request = HttpRequest.newBuilder()
@@ -255,11 +325,143 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             if (response.statusCode() != 200) {
                 log.error("Failed to append row to Google Sheets. Status: {}, Body: {}", response.statusCode(), response.body());
             } else {
-                log.info("Successfully appended row to Google Sheet {} for integration {}", sheetName, integration.getId());
+                log.info("Successfully appended row to Google Sheet {} for integration {}", activeSheetName, integration.getId());
             }
 
         } catch (Exception e) {
             log.error("Error writing to Google Sheets in integration {}: {}", integration.getId(), e.getMessage(), e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<Map<String, String>> getSpreadsheets(Long botId) {
+        Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
+        refreshTokenIfNeeded(integration);
+
+        try {
+            String decryptedAccessToken = encryptionUtil.decrypt(integration.getGoogleAccessToken());
+            String url = "https://www.googleapis.com/drive/v3/files" +
+                    "?q=mimeType%3D%27application%2Fvnd.google-apps.spreadsheet%27%20and%20trashed%3Dfalse" +
+                    "&pageSize=100" +
+                    "&fields=files(id%2Cname)";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + decryptedAccessToken)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                log.error("Failed to fetch spreadsheets from Google Drive. Status: {}, Body: {}", response.statusCode(), response.body());
+                if (response.body().contains("\"reason\": \"SERVICE_DISABLED\"")) {
+                    throw new AppException(HttpStatus.BAD_REQUEST, "Enable Google Drive API in your Google Cloud project, then reconnect Google Sheets.");
+                }
+                if (response.statusCode() == 401 || response.statusCode() == 403) {
+                    throw new AppException(HttpStatus.BAD_REQUEST, "Reconnect Google Sheets to grant Drive access for listing spreadsheets.");
+                }
+                throw new AppException(HttpStatus.BAD_REQUEST, "Failed to load Google spreadsheets.");
+            }
+
+            JsonNode responseJson = objectMapper.readTree(response.body());
+            JsonNode filesNode = responseJson.path("files");
+            List<Map<String, String>> spreadsheets = new java.util.ArrayList<>();
+            if (filesNode.isArray()) {
+                for (JsonNode file : filesNode) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("id", file.path("id").asText());
+                    map.put("name", file.path("name").asText());
+                    spreadsheets.add(map);
+                }
+            }
+            return spreadsheets;
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error fetching spreadsheets for bot {}: {}", botId, e.getMessage(), e);
+            return List.of();
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<String> getWorksheets(Long botId, String spreadsheetId) {
+        Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
+        refreshTokenIfNeeded(integration);
+
+        try {
+            String decryptedAccessToken = encryptionUtil.decrypt(integration.getGoogleAccessToken());
+            String url = "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheetId;
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + decryptedAccessToken)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                log.error("Failed to fetch sheets metadata. Status: {}, Body: {}", response.statusCode(), response.body());
+                return List.of();
+            }
+
+            JsonNode responseJson = objectMapper.readTree(response.body());
+            JsonNode sheetsNode = responseJson.path("sheets");
+            List<String> sheets = new java.util.ArrayList<>();
+            if (sheetsNode.isArray()) {
+                for (JsonNode sheet : sheetsNode) {
+                    String title = sheet.path("properties").path("title").asText();
+                    if (!title.isEmpty()) {
+                        sheets.add(title);
+                    }
+                }
+            }
+            return sheets;
+        } catch (Exception e) {
+            log.error("Error fetching worksheets for spreadsheet {}: {}", spreadsheetId, e.getMessage(), e);
+            return List.of();
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<String> getHeaders(Long botId, String spreadsheetId, String worksheetName) {
+        Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
+        refreshTokenIfNeeded(integration);
+
+        try {
+            String decryptedAccessToken = encryptionUtil.decrypt(integration.getGoogleAccessToken());
+            String encodedSheetName = URLEncoder.encode(worksheetName, StandardCharsets.UTF_8);
+            String url = "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheetId + "/values/" + encodedSheetName + "!1:1";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + decryptedAccessToken)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                log.error("Failed to fetch sheet headers. Status: {}, Body: {}", response.statusCode(), response.body());
+                return List.of();
+            }
+
+            JsonNode responseJson = objectMapper.readTree(response.body());
+            JsonNode valuesNode = responseJson.path("values");
+            List<String> headers = new java.util.ArrayList<>();
+            if (valuesNode.isArray() && valuesNode.size() > 0) {
+                JsonNode firstRow = valuesNode.get(0);
+                if (firstRow.isArray()) {
+                    for (JsonNode cell : firstRow) {
+                        headers.add(cell.asText());
+                    }
+                }
+            }
+            return headers;
+        } catch (Exception e) {
+            log.error("Error fetching headers for sheet {} in spreadsheet {}: {}", worksheetName, spreadsheetId, e.getMessage(), e);
+            return List.of();
         }
     }
 }

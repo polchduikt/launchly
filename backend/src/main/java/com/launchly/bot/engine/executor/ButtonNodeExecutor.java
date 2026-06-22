@@ -50,14 +50,31 @@ public class ButtonNodeExecutor implements NodeExecutor {
         String chatId = botUser.getTelegramId().toString();
 
         List<InlineKeyboardRow> rows = new ArrayList<>();
+        InlineKeyboardRow currentRow = null;
+        String lastRowStr = null;
+
         for (Map<String, String> button : buttons) {
             String label = button.getOrDefault("label", "Button");
             String value = button.getOrDefault("value", label);
+            String rowStr = button.get("row");
+            
             InlineKeyboardButton btn = InlineKeyboardButton.builder()
                     .text(label)
                     .callbackData(value)
                     .build();
-            rows.add(new InlineKeyboardRow(btn));
+
+            if (rowStr != null && !rowStr.trim().isEmpty()) {
+                if (currentRow == null || !rowStr.equals(lastRowStr)) {
+                    currentRow = new InlineKeyboardRow();
+                    rows.add(currentRow);
+                    lastRowStr = rowStr;
+                }
+                currentRow.add(btn);
+            } else {
+                currentRow = new InlineKeyboardRow(btn);
+                rows.add(currentRow);
+                lastRowStr = null;
+            }
         }
 
         try {

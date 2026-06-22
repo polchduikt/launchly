@@ -9,7 +9,9 @@ public enum NodeType {
     ORDER,
     LEAD,
     API_CALL,
+    ACTION,
     END,
     START_BROADCAST,
     START_AUTOMATION
 }
+

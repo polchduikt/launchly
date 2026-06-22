@@ -95,4 +95,25 @@ public class IntegrationController {
         Long botId = googleSheetsService.authenticate(state, code);
         response.sendRedirect(frontendUri + "?botId=" + botId + "&googleAuth=success");
     }
+
+    @GetMapping("/google/spreadsheets")
+    public ResponseEntity<List<java.util.Map<String, String>>> getSpreadsheets(@RequestParam Long botId,
+                                                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(googleSheetsService.getSpreadsheets(botId));
+    }
+
+    @GetMapping("/google/spreadsheets/{spreadsheetId}/worksheets")
+    public ResponseEntity<List<String>> getWorksheets(@PathVariable String spreadsheetId,
+                                                      @RequestParam Long botId,
+                                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(googleSheetsService.getWorksheets(botId, spreadsheetId));
+    }
+
+    @GetMapping("/google/spreadsheets/{spreadsheetId}/values/{worksheetName}/headers")
+    public ResponseEntity<List<String>> getHeaders(@PathVariable String spreadsheetId,
+                                                   @PathVariable String worksheetName,
+                                                   @RequestParam Long botId,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(googleSheetsService.getHeaders(botId, spreadsheetId, worksheetName));
+    }
 }

@@ -28,6 +28,9 @@ import com.launchly.bot.telegram.TelegramBotManager;
 import com.launchly.common.utils.EncryptionUtil;
 import com.launchly.crm.service.CrmService;
 import com.launchly.crm.websocket.CrmWebSocketService;
+import com.cloudinary.Cloudinary;
+import org.springframework.web.client.RestTemplate;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -55,7 +58,8 @@ public class CrmServiceImpl implements CrmService {
     private final IntegrationEventService integrationEventService;
     private final TelegramBotManager botManager;
     private final EncryptionUtil encryptionUtil;
-
+    private final Cloudinary cloudinary;
+ 
     @Autowired
     public CrmServiceImpl(OrderRepository orderRepository,
                           LeadRepository leadRepository,
@@ -68,7 +72,8 @@ public class CrmServiceImpl implements CrmService {
                           TelegramSendService telegramSendService,
                           IntegrationEventService integrationEventService,
                           @Lazy TelegramBotManager botManager,
-                          EncryptionUtil encryptionUtil) {
+                          EncryptionUtil encryptionUtil,
+                          Cloudinary cloudinary) {
         this.orderRepository = orderRepository;
         this.leadRepository = leadRepository;
         this.conversationRepository = conversationRepository;
@@ -81,6 +86,7 @@ public class CrmServiceImpl implements CrmService {
         this.integrationEventService = integrationEventService;
         this.botManager = botManager;
         this.encryptionUtil = encryptionUtil;
+        this.cloudinary = cloudinary;
     }
 
     @Override
@@ -343,7 +349,7 @@ public class CrmServiceImpl implements CrmService {
 
     private ConversationResponse toConversationResponse(Conversation conversation) {
         BotUser botUser = conversation.getBotUser();
-        if (botUser.getPhotoUrl() == null) {
+        if (botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith("https://api.telegram.org/")) {
             fetchAndSetPhotoUrl(botUser);
         }
         String botUserName = botUser.getFirstName() + (botUser.getLastName() != null ? " " + botUser.getLastName() : "");
@@ -400,7 +406,24 @@ public class CrmServiceImpl implements CrmService {
                         }
                         String botToken = encryptionUtil.decrypt(bot.getTelegramToken());
                         String fileUrl = "https://api.telegram.org/file/bot" + botToken + "/" + file.getFilePath();
-                        botUser.setPhotoUrl(fileUrl);
+                        try {
+                            RestTemplate restTemplate = new RestTemplate();
+                            byte[] fileBytes = restTemplate.getForObject(fileUrl, byte[].class);
+                            if (fileBytes != null && fileBytes.length > 0) {
+                                Map<String, Object> params = Map.of(
+                                    "folder", "launchly/" + bot.getUser().getId() + "/contacts",
+                                    "transformation", "c_limit,w_400,h_400,q_auto,f_auto"
+                                );
+                                Map<?, ?> result = cloudinary.uploader().upload(fileBytes, params);
+                                String secureUrl = (String) result.get("secure_url");
+                                botUser.setPhotoUrl(secureUrl);
+                            } else {
+                                botUser.setPhotoUrl(fileUrl);
+                            }
+                        } catch (Exception uploadEx) {
+                            log.warn("Failed to upload profile photo to Cloudinary: {}", uploadEx.getMessage());
+                            botUser.setPhotoUrl(fileUrl);
+                        }
                         botUserRepository.save(botUser);
                         log.debug("Fetched profile photo for user {}", botUser.getTelegramId());
                     }

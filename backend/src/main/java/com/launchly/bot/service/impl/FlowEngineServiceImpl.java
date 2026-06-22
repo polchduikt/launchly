@@ -23,6 +23,8 @@ import com.launchly.crm.service.CrmService;
 import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.objects.UserProfilePhotos;
+import com.cloudinary.Cloudinary;
+import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.springframework.context.annotation.Lazy;
@@ -53,6 +55,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
     private final TelegramBotManager botManager;
     private final EncryptionUtil encryptionUtil;
     private final CrmService crmService;
+    private final Cloudinary cloudinary;
     private static final String SCHEMA_KEY = "launchly:bot:schema:%d";
     private static final Duration SCHEMA_TTL = Duration.ofMinutes(30);
 
@@ -67,7 +70,8 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                   BroadcastCampaignRepository campaignRepository,
                                   @Lazy TelegramBotManager botManager,
                                   EncryptionUtil encryptionUtil,
-                                  @Lazy CrmService crmService) {
+                                  @Lazy CrmService crmService,
+                                  Cloudinary cloudinary) {
         this.botRepository = botRepository;
         this.botUserRepository = botUserRepository;
         this.flowSchemaRepository = flowSchemaRepository;
@@ -79,6 +83,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         this.botManager = botManager;
         this.encryptionUtil = encryptionUtil;
         this.crmService = crmService;
+        this.cloudinary = cloudinary;
         this.executors = new EnumMap<>(NodeType.class);
         nodeExecutors.forEach(e -> executors.put(e.getType(), e));
     }
@@ -256,7 +261,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                     return botUserRepository.save(newUser);
                 });
 
-        if (botUser.getPhotoUrl() == null && telegramClient != null) {
+        if ((botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith("https://api.telegram.org/")) && telegramClient != null) {
             fetchAndSetPhotoUrl(botUser, bot, telegramClient);
         }
 
@@ -283,7 +288,24 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                     if (file != null && file.getFilePath() != null) {
                         String botToken = encryptionUtil.decrypt(bot.getTelegramToken());
                         String fileUrl = "https://api.telegram.org/file/bot" + botToken + "/" + file.getFilePath();
-                        botUser.setPhotoUrl(fileUrl);
+                        try {
+                            RestTemplate restTemplate = new RestTemplate();
+                            byte[] fileBytes = restTemplate.getForObject(fileUrl, byte[].class);
+                            if (fileBytes != null && fileBytes.length > 0) {
+                                Map<String, Object> params = Map.of(
+                                    "folder", "launchly/" + bot.getUser().getId() + "/contacts",
+                                    "transformation", "c_limit,w_400,h_400,q_auto,f_auto"
+                                );
+                                Map<?, ?> result = cloudinary.uploader().upload(fileBytes, params);
+                                String secureUrl = (String) result.get("secure_url");
+                                botUser.setPhotoUrl(secureUrl);
+                            } else {
+                                botUser.setPhotoUrl(fileUrl);
+                            }
+                        } catch (Exception uploadEx) {
+                            log.warn("Failed to upload profile photo to Cloudinary: {}", uploadEx.getMessage());
+                            botUser.setPhotoUrl(fileUrl);
+                        }
                         botUserRepository.save(botUser);
                         log.debug("Fetched profile photo for user {}", botUser.getTelegramId());
                     }

@@ -35,7 +35,7 @@ public class MediaServiceImpl implements MediaService {
         }
 
         if (file.getSize() > maxFileSize) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "File too large. Max 5MB");
+            throw new AppException(HttpStatus.BAD_REQUEST, "File too large. Max " + (maxFileSize / 1024 / 1024) + "MB");
         }
 
         String contentType = file.getContentType();
@@ -47,10 +47,28 @@ public class MediaServiceImpl implements MediaService {
             throw new AppException(HttpStatus.BAD_REQUEST, "Invalid folder name");
         }
 
-        Map<String, Object> params = Map.of(
-                "folder", "launchly/" + userId + "/" + folder,
-                "transformation", "c_limit,w_1200,h_1200,q_auto,f_auto"
-        );
+        String resourceType;
+        if (contentType != null && contentType.startsWith("image/")) {
+            resourceType = "image";
+        } else if (contentType != null && (contentType.startsWith("video/") || contentType.startsWith("audio/"))) {
+            resourceType = "video";
+        } else {
+            resourceType = "raw";
+        }
+
+        Map<String, Object> params;
+        if ("image".equals(resourceType)) {
+            params = Map.of(
+                    "folder", "launchly/" + userId + "/" + folder,
+                    "transformation", "c_limit,w_1200,h_1200,q_auto,f_auto",
+                    "resource_type", "image"
+            );
+        } else {
+            params = Map.of(
+                    "folder", "launchly/" + userId + "/" + folder,
+                    "resource_type", resourceType
+            );
+        }
         try {
             Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(), params);
 

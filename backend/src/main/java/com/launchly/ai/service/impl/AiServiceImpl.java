@@ -45,7 +45,7 @@ public class AiServiceImpl implements AiService {
 
     private static final String SCHEMA_SYSTEM_PROMPT = """
             You are a Launchly bot flow generator. Generate a valid JSON flow schema.
-            Available node types: START, MESSAGE, BUTTON, INPUT, CONDITION, ORDER, LEAD, TAG, END
+            Available node types: START, MESSAGE, BUTTON, INPUT, CONDITION, ORDER, LEAD, ACTION, END
             Rules:
             - Exactly one START node
             - Every node must have unique id (use UUID format)

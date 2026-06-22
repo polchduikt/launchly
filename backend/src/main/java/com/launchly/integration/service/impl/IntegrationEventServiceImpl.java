@@ -116,8 +116,7 @@ public class IntegrationEventServiceImpl implements IntegrationEventService {
                     customerName,
                     order.getCreatedAt() != null ? order.getCreatedAt().format(DATE_FORMATTER) : ""
             );
-
-            googleSheetsService.appendRow(integration, row);
+            googleSheetsService.appendRow(integration, null, null, row);
         }
     }
 
@@ -141,8 +140,7 @@ public class IntegrationEventServiceImpl implements IntegrationEventService {
                     lead.getBotUser() != null && lead.getBotUser().getTelegramId() != null ? lead.getBotUser().getTelegramId() : 0L,
                     lead.getCreatedAt() != null ? lead.getCreatedAt().format(DATE_FORMATTER) : ""
             );
-
-            googleSheetsService.appendRow(integration, row);
+            googleSheetsService.appendRow(integration, null, null, row);
         }
     }
 
