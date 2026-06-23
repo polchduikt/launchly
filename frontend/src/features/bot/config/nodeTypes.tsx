@@ -10,6 +10,7 @@ import {
   ApiCallNode,
   EndNode,
   ActionNode,
+  SmartDelayNode,
 } from '../components/nodes';
 
 export const TempNode: React.FC = () => {
@@ -35,6 +36,7 @@ export const NODE_TYPES = {
   API_CALL: ApiCallNode,
   END: EndNode,
   ACTION: ActionNode,
+  SMART_DELAY: SmartDelayNode,
   TEMP: TempNode,
 };
 

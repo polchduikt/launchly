@@ -10,6 +10,7 @@ import { LeadNodeEditor } from './editors/LeadNodeEditor';
 import { ApiCallNodeEditor } from './editors/ApiCallNodeEditor';
 import { EndNodeEditor } from './editors/EndNodeEditor';
 import { ActionNodeEditor } from './editors/ActionNodeEditor';
+import { SmartDelayNodeEditor } from './editors/SmartDelayNodeEditor';
 
 interface NodeEditorPanelProps {
   node?: Node;
@@ -68,6 +69,8 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
         return <ApiCallNodeEditor data={data} handleChange={handleChange} />;
       case 'ACTION':
         return <ActionNodeEditor data={data} handleChange={handleChange} editorState={editorState} />;
+      case 'SMART_DELAY':
+        return <SmartDelayNodeEditor data={data} handleChange={handleChange} editorState={editorState} />;
       case 'END':
         return <EndNodeEditor />;
       default:

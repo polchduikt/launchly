@@ -8,7 +8,8 @@ import {
   UserPlus, 
   Code, 
   Power,
-  Sliders
+  Sliders,
+  Clock
 } from 'lucide-react';
 
 interface ChooseNextStepDrawerProps {
@@ -65,6 +66,13 @@ const STEP_OPTIONS = [
     description: 'Execute external JSON webhook API requests',
     icon: Code,
     color: 'text-indigo-500 bg-indigo-50 border-indigo-100',
+  },
+  {
+    type: 'SMART_DELAY',
+    label: 'Smart Delay',
+    description: 'Pause automation flow for a duration or date',
+    icon: Clock,
+    color: 'text-rose-500 bg-rose-50 border-rose-100',
   },
   {
     type: 'END',

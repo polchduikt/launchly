@@ -7,5 +7,6 @@ export { LeadNode } from './LeadNode';
 export { OrderNode } from './OrderNode';
 export { EndNode } from './EndNode';
 export { ActionNode } from './ActionNode';
+export { SmartDelayNode } from './SmartDelayNode';
 export { NodeToolbar } from './NodeToolbar';
 
