@@ -12,6 +12,7 @@ public enum NodeType {
     ACTION,
     END,
     START_BROADCAST,
-    START_AUTOMATION
+    START_AUTOMATION,
+    SMART_DELAY
 }
 
