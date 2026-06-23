@@ -1,7 +1,6 @@
 package com.launchly.bot.engine.model;
 
 import com.launchly.bot.entity.NodeType;
-
 import java.util.Map;
 
 public record FlowNode(

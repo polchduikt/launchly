@@ -13,6 +13,8 @@ public enum NodeType {
     END,
     START_BROADCAST,
     START_AUTOMATION,
-    SMART_DELAY
+    SMART_DELAY,
+    RANDOMIZER,
+    COMMENT
 }
 
