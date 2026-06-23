@@ -11,6 +11,8 @@ import {
   EndNode,
   ActionNode,
   SmartDelayNode,
+  RandomizerNode,
+  CommentNode,
 } from '../components/nodes';
 
 export const TempNode: React.FC = () => {
@@ -37,6 +39,8 @@ export const NODE_TYPES = {
   END: EndNode,
   ACTION: ActionNode,
   SMART_DELAY: SmartDelayNode,
+  RANDOMIZER: RandomizerNode,
+  COMMENT: CommentNode,
   TEMP: TempNode,
 };
 

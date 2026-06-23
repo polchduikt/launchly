@@ -9,6 +9,7 @@ export const NodeHandle: React.FC<NodeHandleProps> = ({
   isConnected = false,
   className = '',
   padded = false,
+  style: passedStyle,
 }) => {
   const isTarget = type === 'target';
 
@@ -27,15 +28,15 @@ export const NodeHandle: React.FC<NodeHandleProps> = ({
     style.transform = 'translateY(-50%)';
   }
 
-  const hasBgOverride = className.includes('!bg-');
-  const hasBorderOverride = className.includes('!border-');
+  const hasBgOverride = className.includes('!bg-') || !!(passedStyle && passedStyle.backgroundColor);
+  const hasBorderOverride = className.includes('!border-') || !!(passedStyle && passedStyle.borderColor);
 
   return (
     <Handle
       type={type}
       position={position}
       id={id}
-      style={style}
+      style={{ ...style, ...passedStyle }}
       className={`!rounded-full !border-[1.5px] !transition-all ${
         isTarget
           ? '!z-0 !opacity-0 !bg-transparent !border-transparent'

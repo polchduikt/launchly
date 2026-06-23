@@ -42,13 +42,36 @@ export const useFlowBuilder = () => {
   const connectionStartRef = useRef<{ nodeId: string; handleId: string | null; handleType: string } | null>(null);
   const didConnectRef = useRef<boolean>(false);
   const justEndedDragRef = useRef<boolean>(false);
-  const [contextMenu, setContextMenu] = useState<{
+  const tempRemovedEdgeRef = useRef<Edge | null>(null);
+
+  const restoreTempRemovedEdge = useCallback(() => {
+    if (tempRemovedEdgeRef.current) {
+      const edgeToRestore = tempRemovedEdgeRef.current;
+      tempRemovedEdgeRef.current = null;
+      setEdges((eds) => {
+        if (eds.some((e) => e.id === edgeToRestore.id)) return eds;
+        return [...eds, edgeToRestore];
+      });
+    }
+  }, [setEdges]);
+
+  const [contextMenuState, setContextMenuState] = useState<{
     isOpen: boolean;
     x: number;
     y: number;
     flowPosition: { x: number; y: number };
     source: { nodeId: string; handleId: string | null; handleType: string };
   } | null>(null);
+
+  const setContextMenu = useCallback((val: typeof contextMenuState) => {
+    setContextMenuState(val);
+    if (val === null) {
+      restoreTempRemovedEdge();
+    }
+  }, [restoreTempRemovedEdge]);
+
+  const contextMenu = contextMenuState;
+
 
   const [past, setPast] = useState<{ nodes: Node[]; edges: Edge[] }[]>([]);
   const [future, setFuture] = useState<{ nodes: Node[]; edges: Edge[] }[]>([]);
@@ -376,7 +399,11 @@ export const useFlowBuilder = () => {
         const sourceNode = nodes.find((n) => n.id === params.source);
         sourceHandle = sourceNode?.type === 'START' ? 'then' : 'next';
       }
-      setEdges((eds) => addEdge({ ...params, sourceHandle, ...FLOW_EDGE_DEFAULTS, type: edgeType }, eds));
+      tempRemovedEdgeRef.current = null;
+      setEdges((eds) => {
+        const filtered = eds.filter((e) => !(e.source === params.source && e.sourceHandle === sourceHandle));
+        return addEdge({ ...params, sourceHandle, ...FLOW_EDGE_DEFAULTS, type: edgeType }, filtered);
+      });
     },
     [setEdges, nodes, edgeType, takeSnapshot]
   );
@@ -385,7 +412,24 @@ export const useFlowBuilder = () => {
     if (!nodeId || !handleType) return;
     connectionStartRef.current = { nodeId, handleId, handleType };
     didConnectRef.current = false;
-  }, []);
+
+    if (tempRemovedEdgeRef.current) {
+      restoreTempRemovedEdge();
+    }
+
+    if (handleType === 'source') {
+      let sourceHandle = handleId;
+      if (!sourceHandle) {
+        const sourceNode = nodes.find((n) => n.id === nodeId);
+        sourceHandle = sourceNode?.type === 'START' ? 'then' : 'next';
+      }
+      const existingEdge = edges.find((e) => e.source === nodeId && e.sourceHandle === sourceHandle);
+      if (existingEdge) {
+        tempRemovedEdgeRef.current = existingEdge;
+        setEdges((eds) => eds.filter((e) => e.id !== existingEdge.id));
+      }
+    }
+  }, [nodes, edges, setEdges, restoreTempRemovedEdge]);
 
   const onConnectEnd = useCallback(
     (event: MouseEvent | TouchEvent) => {
@@ -446,7 +490,13 @@ export const useFlowBuilder = () => {
             targetHandle: null,
           };
           takeSnapshot();
-          setEdges((eds) => addEdge({ ...params, ...FLOW_EDGE_DEFAULTS, type: edgeType }, eds));
+          tempRemovedEdgeRef.current = null;
+          setEdges((eds) => {
+            const filtered = eds.filter((e) => !(e.source === params.source && e.sourceHandle === sourceHandle));
+            return addEdge({ ...params, ...FLOW_EDGE_DEFAULTS, type: edgeType }, filtered);
+          });
+        } else {
+          restoreTempRemovedEdge();
         }
         connectionStartRef.current = null;
         return;
@@ -473,11 +523,13 @@ export const useFlowBuilder = () => {
           flowPosition: position,
           source: connectionStart,
         });
+      } else {
+        restoreTempRemovedEdge();
       }
 
       connectionStartRef.current = null;
     },
-    [screenToFlowPosition, setEdges, nodes, edgeType, takeSnapshot]
+    [screenToFlowPosition, setEdges, nodes, edgeType, takeSnapshot, setContextMenu, restoreTempRemovedEdge]
   );
 
   const handleCreateAndConnectNode = (type: string) => {
@@ -521,11 +573,15 @@ export const useFlowBuilder = () => {
       type: edgeType,
     };
 
+    tempRemovedEdgeRef.current = null;
     setNodes((nds) => [
       ...nds.map((n) => ({ ...n, selected: false }) as Node),
       newNode
     ]);
-    setEdges((eds) => addEdge(newEdge, eds));
+    setEdges((eds) => {
+      const filtered = eds.filter((e) => !(e.source === newEdge.source && e.sourceHandle === newEdge.sourceHandle));
+      return addEdge(newEdge, filtered);
+    });
     setSelectedNodeId(newNodeId);
     setContextMenu(null);
   };

@@ -11,6 +11,9 @@ import { ApiCallNodeEditor } from './editors/ApiCallNodeEditor';
 import { EndNodeEditor } from './editors/EndNodeEditor';
 import { ActionNodeEditor } from './editors/ActionNodeEditor';
 import { SmartDelayNodeEditor } from './editors/SmartDelayNodeEditor';
+import { RandomizerNodeEditor } from './editors/RandomizerNodeEditor';
+import { CommentNodeEditor } from './editors/CommentNodeEditor';
+
 
 interface NodeEditorPanelProps {
   node?: Node;
@@ -71,12 +74,17 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
         return <ActionNodeEditor data={data} handleChange={handleChange} editorState={editorState} />;
       case 'SMART_DELAY':
         return <SmartDelayNodeEditor data={data} handleChange={handleChange} editorState={editorState} />;
+      case 'RANDOMIZER':
+        return <RandomizerNodeEditor nodeId={node.id} data={data} handleChange={handleChange} editorState={editorState} />;
+      case 'COMMENT':
+        return <CommentNodeEditor data={data} handleChange={handleChange} />;
       case 'END':
         return <EndNodeEditor />;
       default:
         return null;
     }
   };
+
 
   return (
     <div className="h-full overflow-y-auto p-5 font-sans flex flex-col custom-scrollbar">

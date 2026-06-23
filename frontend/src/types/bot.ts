@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import type { Position } from '@xyflow/react';
 
 export interface FlowSchemaResponse {
@@ -144,6 +145,10 @@ export interface CustomNodeData {
   headers?: Array<{ key: string; value: string }>;
   body?: string;
   automationName?: string;
+  pickEveryTime?: boolean;
+  variations?: Array<{ id: string; label: string; percentage: number; color: string; }>;
+  noteSize?: 'S' | 'M' | 'L';
+  fontSize?: 'S' | 'L';
   [key: string]: unknown;
 }
 
@@ -160,6 +165,7 @@ export interface NodeHandleProps {
   isConnected?: boolean;
   className?: string;
   padded?: boolean;
+  style?: CSSProperties;
 }
 
 export interface EditButtonDrawerProps {

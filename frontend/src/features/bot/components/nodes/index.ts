@@ -8,5 +8,8 @@ export { OrderNode } from './OrderNode';
 export { EndNode } from './EndNode';
 export { ActionNode } from './ActionNode';
 export { SmartDelayNode } from './SmartDelayNode';
+export { RandomizerNode } from './RandomizerNode';
 export { NodeToolbar } from './NodeToolbar';
+export { CommentNode } from './CommentNode';
+
 

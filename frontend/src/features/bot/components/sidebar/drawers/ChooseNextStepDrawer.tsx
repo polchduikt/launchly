@@ -9,7 +9,9 @@ import {
   Code, 
   Power,
   Sliders,
-  Clock
+  Clock,
+  Shuffle,
+  StickyNote,
 } from 'lucide-react';
 
 interface ChooseNextStepDrawerProps {
@@ -73,6 +75,20 @@ const STEP_OPTIONS = [
     description: 'Pause automation flow for a duration or date',
     icon: Clock,
     color: 'text-rose-500 bg-rose-50 border-rose-100',
+  },
+  {
+    type: 'RANDOMIZER',
+    label: 'Randomizer',
+    description: 'Split traffic randomly into multiple paths',
+    icon: Shuffle,
+    color: 'text-purple-650 bg-purple-50 border-purple-100',
+  },
+  {
+    type: 'COMMENT',
+    label: 'Comment',
+    description: 'Add a static text note on the canvas',
+    icon: StickyNote,
+    color: 'text-amber-500 bg-amber-50 border-amber-100',
   },
   {
     type: 'END',

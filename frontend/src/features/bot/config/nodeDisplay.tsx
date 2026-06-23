@@ -10,6 +10,8 @@ import {
   Grid,
   Sliders,
   Clock,
+  Shuffle,
+  StickyNote,
 } from 'lucide-react';
 
 export const NODE_TITLES: Record<string, string> = {
@@ -23,6 +25,8 @@ export const NODE_TITLES: Record<string, string> = {
   ACTION: 'Actions',
   END: 'End Session',
   SMART_DELAY: 'Smart Delay',
+  RANDOMIZER: 'Randomizer',
+  COMMENT: 'Comment',
 };
 
 export const NODE_ICONS: Record<string, React.ReactNode> = {
@@ -36,4 +40,6 @@ export const NODE_ICONS: Record<string, React.ReactNode> = {
   ACTION: <Sliders size={16} className="text-amber-600" />,
   END: <Grid size={16} className="text-slate-500" />,
   SMART_DELAY: <Clock size={16} className="text-rose-400" />,
+  RANDOMIZER: <Shuffle size={16} className="text-purple-500" />,
+  COMMENT: <StickyNote size={16} className="text-amber-500" />,
 };
