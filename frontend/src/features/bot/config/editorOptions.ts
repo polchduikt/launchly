@@ -4,11 +4,13 @@ export interface SelectionOption {
 }
 
 export const CONDITION_OPERATORS: SelectionOption[] = [
-  { value: 'EQUALS', label: 'Equals' },
-  { value: 'NOT_EQUALS', label: 'Not Equals' },
-  { value: 'GREATER_THAN', label: 'Greater Than' },
-  { value: 'LESS_THAN', label: 'Less Than' },
-  { value: 'CONTAINS', label: 'Contains' },
+  { value: 'is', label: 'is' },
+  { value: 'isn_t', label: "isn't" },
+  { value: 'has_any_value', label: 'has any value' },
+  { value: 'contains', label: 'contains' },
+  { value: 'doesn_t_contain', label: "doesn't contain" },
+  { value: 'begins_with', label: 'begins with' },
+  { value: 'is_unknown', label: 'is unknown' },
 ];
 
 export const ORDER_CURRENCIES: SelectionOption[] = [
@@ -33,16 +35,24 @@ export const API_METHOD_COLORS: Record<string, string> = {
 
 export const getOperatorLabel = (op: string): string => {
   switch (op.toLowerCase()) {
+    case 'is':
     case 'equals':
-      return 'equals';
+      return 'is';
+    case 'isn_t':
     case 'not_equals':
-      return 'does not equal';
+      return "isn't";
+    case 'has_any_value':
+    case 'not_empty':
+      return 'has any value';
     case 'contains':
       return 'contains';
-    case 'not_empty':
-      return 'is set';
+    case 'doesn_t_contain':
+      return "doesn't contain";
+    case 'begins_with':
+      return 'begins with';
+    case 'is_unknown':
     case 'empty':
-      return 'is not set';
+      return 'is unknown';
     default:
       return op;
   }

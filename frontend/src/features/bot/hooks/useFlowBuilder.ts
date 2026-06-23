@@ -545,7 +545,7 @@ export const useFlowBuilder = () => {
     [setNodes, takeSnapshotBeforeEdit]
   );
 
-  const handleAddAndConnectNode = useCallback((sourceNodeId: string, type: string) => {
+  const handleAddAndConnectNode = useCallback((sourceNodeId: string, type: string, sourceHandle?: string) => {
     takeSnapshot();
     const id = `node_${type.toLowerCase()}_${Date.now()}`;
     const sourceNode = nodes.find((n) => n.id === sourceNodeId);
@@ -567,16 +567,18 @@ export const useFlowBuilder = () => {
       newNode
     ]);
 
+    const actualSourceHandle = sourceHandle || (sourceNode?.type === 'START' ? 'then' : 'next');
+
     const newEdge: Edge = {
       ...FLOW_EDGE_DEFAULTS,
-      id: `edge_${sourceNodeId}_next_${id}`,
+      id: `edge_${sourceNodeId}_${actualSourceHandle}_${id}`,
       source: sourceNodeId,
-      sourceHandle: 'next',
+      sourceHandle: actualSourceHandle,
       target: id,
       type: edgeType,
     };
     
-    setEdges((eds) => [...eds.filter(e => !(e.source === sourceNodeId && e.sourceHandle === 'next')), newEdge]);
+    setEdges((eds) => [...eds.filter(e => !(e.source === sourceNodeId && e.sourceHandle === actualSourceHandle)), newEdge]);
     setSelectedNodeId(id);
 
     setTimeout(() => {

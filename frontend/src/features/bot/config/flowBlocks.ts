@@ -22,7 +22,15 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
     case 'INPUT':
       return { text: 'Please enter a value:', variableName: 'input_var' };
     case 'CONDITION':
-      return { variable: 'user_input', operator: 'equals', value: 'Yes' };
+      return {
+        branches: [
+          {
+            id: 'branch_0',
+            matchType: 'all',
+            conditions: []
+          }
+        ]
+      };
     case 'ACTION':
       return { actions: [] };
     case 'ORDER':

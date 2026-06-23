@@ -57,6 +57,7 @@ export const useNodeEditor = (
   const [editingButtonBlockId, setEditingButtonBlockId] = useState<string | null>(null);
   const [uploadingBlockId, setUploadingBlockId] = useState<string | null>(null);
   const [isNextStepDrawerOpen, setIsNextStepDrawerOpen] = useState(false);
+  const [nextStepSourceHandle, setNextStepSourceHandle] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [showImageUrlInput, setShowImageUrlInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -66,6 +67,7 @@ export const useNodeEditor = (
     setEditingButton(null);
     setEditingButtonBlockId(null);
     setIsNextStepDrawerOpen(false);
+    setNextStepSourceHandle(null);
   }, [node?.id]);
 
   useEffect(() => {
@@ -264,5 +266,7 @@ export const useNodeEditor = (
     setUploadAccept,
     isNextStepDrawerOpen,
     setIsNextStepDrawerOpen,
+    nextStepSourceHandle,
+    setNextStepSourceHandle,
   };
 };

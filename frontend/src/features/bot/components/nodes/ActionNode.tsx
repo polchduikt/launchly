@@ -153,7 +153,7 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
         </div>
       </div>
 
-      <div className="p-4 space-y-3 bg-white rounded-b-[22px]">
+      <div className="p-4 space-y-3 bg-white">
         <div className="space-y-3">
           {actions.length === 0 ? (
             <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-center text-[11px] text-slate-400 font-medium select-none italic bg-slate-50/50">
@@ -174,16 +174,16 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
             </div>
           )}
         </div>
+      </div>
 
-        <div className="flex justify-end items-center mt-3 pt-2.5 border-t border-slate-100 relative">
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">Next Step</span>
-          <NodeHandle
-            type="source"
-            position={Position.Right}
-            id="next"
-            isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && nodes.some((n) => n.id === e.target))}
-          />
-        </div>
+      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative rounded-b-[22px]">
+        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">Next Step</span>
+        <NodeHandle
+          type="source"
+          position={Position.Right}
+          id="next"
+          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && nodes.some((n) => n.id === e.target))}
+        />
       </div>
     </div>
   );

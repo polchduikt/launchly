@@ -59,7 +59,7 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
       case 'INPUT':
         return <InputNodeEditor data={data} handleChange={handleChange} />;
       case 'CONDITION':
-        return <ConditionNodeEditor data={data} handleChange={handleChange} />;
+        return <ConditionNodeEditor data={data} handleChange={handleChange} editorState={editorState} />;
       case 'ORDER':
         return <OrderNodeEditor data={data} handleChange={handleChange} />;
       case 'LEAD':

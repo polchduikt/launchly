@@ -27,6 +27,9 @@ export const NodeHandle: React.FC<NodeHandleProps> = ({
     style.transform = 'translateY(-50%)';
   }
 
+  const hasBgOverride = className.includes('!bg-');
+  const hasBorderOverride = className.includes('!border-');
+
   return (
     <Handle
       type={type}
@@ -38,8 +41,8 @@ export const NodeHandle: React.FC<NodeHandleProps> = ({
           ? '!z-0 !opacity-0 !bg-transparent !border-transparent'
           : `!z-20 ${
               isConnected
-                ? '!bg-[#7b8794] !border-[#7b8794]'
-                : '!bg-white !border-slate-300 hover:!border-slate-400'
+                ? `${hasBgOverride ? '' : '!bg-[#7b8794]'} ${hasBorderOverride ? '' : '!border-[#7b8794]'}`
+                : `${hasBgOverride ? '' : '!bg-white'} ${hasBorderOverride ? '' : '!border-slate-300 hover:!border-slate-400'}`
             }`
       } ${className}`}
     />

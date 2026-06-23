@@ -414,8 +414,20 @@ const FlowBuilderInner: React.FC = () => {
                 )}
                 {selectedNode && editorState.isNextStepDrawerOpen && (
                   <ChooseNextStepDrawer
-                    onClose={() => editorState.setIsNextStepDrawerOpen(false)}
-                    onSelectStep={(type) => handleAddAndConnectNode(selectedNode.id, type)}
+                    onClose={() => {
+                      editorState.setIsNextStepDrawerOpen(false);
+                      if (editorState.setNextStepSourceHandle) {
+                        editorState.setNextStepSourceHandle(null);
+                      }
+                    }}
+                    onSelectStep={(type) => {
+                      const handleId = editorState.nextStepSourceHandle || 'next';
+                      handleAddAndConnectNode(selectedNode.id, type, handleId);
+                      editorState.setIsNextStepDrawerOpen(false);
+                      if (editorState.setNextStepSourceHandle) {
+                        editorState.setNextStepSourceHandle(null);
+                      }
+                    }}
                   />
                 )}
               </div>
