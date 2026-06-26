@@ -35,12 +35,10 @@ import com.launchly.broadcast.entity.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -362,9 +360,6 @@ public class BotServiceImpl implements BotService {
         if (!botUser.getBot().getId().equals(bot.getId())) {
             throw new AppException(HttpStatus.FORBIDDEN, "Access denied to this contact");
         }
-
-        // DB level cascade ON DELETE CASCADE automatically deletes child rows in bot_user_tags,
-        // conversations, messages, leads, and orders.
         botUserRepository.delete(botUser);
     }
 

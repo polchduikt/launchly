@@ -90,6 +90,17 @@ public class TelegramBotManager {
                 }
             }
 
+            try {
+                String deleteWebhookUrl = "https://api.telegram.org/bot" + token + "/deleteWebhook?drop_pending_updates=false";
+                org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+                restTemplate.getForEntity(deleteWebhookUrl, String.class);
+                Thread.sleep(500);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            } catch (Exception e) {
+                log.warn("Failed to call deleteWebhook before polling for bot {}: {}", bot.getId(), e.getMessage());
+            }
+
             TelegramClient telegramClient = new OkHttpTelegramClient(token);
             TelegramBotsLongPollingApplication pollingApp = new TelegramBotsLongPollingApplication();
             BotUpdateHandler handler = new BotUpdateHandler(
@@ -109,7 +120,10 @@ public class TelegramBotManager {
         if (app != null) {
             try {
                 app.close();
+                Thread.sleep(500);
                 log.info("Unregistered bot {}", botId);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 log.error("Error closing bot {}: {}", botId, e.getMessage());
             }

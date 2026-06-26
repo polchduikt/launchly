@@ -6,30 +6,30 @@ import org.springframework.stereotype.Component;
 import java.net.http.HttpClient;
 
 @Component
-public class GroqClient extends OpenAiCompatibleAiClient {
+public class CerebrasClient extends OpenAiCompatibleAiClient {
 
-    @Value("${groq.api-key:}")
+    @Value("${cerebras.api-key:}")
     private String apiKey;
 
-    @Value("${groq.base-url:https://api.groq.com/openai/v1}")
+    @Value("${cerebras.base-url:https://api.cerebras.ai/v1}")
     private String baseUrl;
 
-    @Value("${groq.model:llama-3.3-70b-versatile}")
+    @Value("${cerebras.model:gpt-oss-120b}")
     private String model;
 
-    @Value("${groq.max-tokens:8192}")
+    @Value("${cerebras.max-tokens:8192}")
     private int maxTokens;
 
-    @Value("${groq.temperature:0.7}")
+    @Value("${cerebras.temperature:0.7}")
     private double temperature;
 
-    public GroqClient(HttpClient httpClient, ObjectMapper objectMapper) {
+    public CerebrasClient(HttpClient httpClient, ObjectMapper objectMapper) {
         super(httpClient, objectMapper);
     }
 
     @Override
     public String name() {
-        return "groq";
+        return "cerebras";
     }
 
     @Override

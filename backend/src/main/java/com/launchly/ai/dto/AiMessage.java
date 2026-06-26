@@ -1,6 +1,6 @@
 package com.launchly.ai.dto;
 
-public record GroqMessage(
+public record AiMessage(
     String role,
     String content
 ) {}

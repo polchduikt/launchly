@@ -34,10 +34,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import java.time.Duration;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -278,7 +275,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             if (photos != null && photos.getTotalCount() > 0 && photos.getPhotos() != null && !photos.getPhotos().isEmpty()) {
                 List<PhotoSize> photoSizes = photos.getPhotos().get(0);
                 PhotoSize largest = photoSizes.stream()
-                        .max(java.util.Comparator.comparingInt(size -> size.getWidth() * size.getHeight()))
+                        .max(Comparator.comparingInt(size -> size.getWidth() * size.getHeight()))
                         .orElse(null);
                 if (largest != null) {
                     GetFile getFile = GetFile.builder()
@@ -492,7 +489,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             if (data == null) return;
 
             Object blocksObj = data.get("blocks");
-            if (blocksObj instanceof java.util.List<?> blocks && !blocks.isEmpty()) {
+            if (blocksObj instanceof List<?> blocks && !blocks.isEmpty()) {
                 for (Object blockObj : blocks) {
                     if (blockObj instanceof Map<?,?> block) {
                         String type = (String) block.get("type");
@@ -503,7 +500,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                 text.append(s);
                             }
                             Object btns = block.get("buttons");
-                            if (btns instanceof java.util.List<?> btnList) {
+                            if (btns instanceof List<?> btnList) {
                                 for (Object btn : btnList) {
                                     if (btn instanceof Map<?,?> b) {
                                         Object lbl = b.get("label");
@@ -525,7 +522,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                     caption.append("📷 Photo");
                                 }
                                 Object btns = block.get("buttons");
-                                if (btns instanceof java.util.List<?> btnList) {
+                                if (btns instanceof List<?> btnList) {
                                     for (Object btn : btnList) {
                                         if (btn instanceof Map<?,?> b) {
                                             Object lbl = b.get("label");

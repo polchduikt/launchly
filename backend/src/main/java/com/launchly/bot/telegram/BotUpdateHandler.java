@@ -51,7 +51,6 @@ public class BotUpdateHandler implements LongPollingSingleThreadUpdateConsumer {
                 telegramUserId = callbackQuery.getFrom().getId();
                 String data = callbackQuery.getData();
 
-                // Try to find the button label in the original message's inline keyboard
                 String label = null;
                 if (callbackQuery.getMessage() instanceof org.telegram.telegrambots.meta.api.objects.message.Message origMsg) {
                     if (origMsg.hasReplyMarkup()) {
@@ -70,7 +69,6 @@ public class BotUpdateHandler implements LongPollingSingleThreadUpdateConsumer {
                     }
                 }
 
-                // If label was not found, fallback to callback data text
                 if (label == null || label.isBlank()) {
                     label = data;
                 }

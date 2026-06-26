@@ -9,7 +9,6 @@ import com.launchly.billing.repository.SubscriptionRepository;
 import com.launchly.billing.service.PlanLimitService;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotUserRepository;
-import com.launchly.broadcast.entity.CampaignStatus;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor

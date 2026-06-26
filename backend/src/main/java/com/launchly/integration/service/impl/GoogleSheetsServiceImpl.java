@@ -26,10 +26,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -63,8 +60,8 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         String stateToken = Jwts.builder()
                 .claim("botId", botId)
                 .claim("userId", userId)
-                .issuedAt(new java.util.Date())
-                .expiration(new java.util.Date(System.currentTimeMillis() + 300000))
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 300000))
                 .signWith(getSigningKey())
                 .compact();
 
@@ -324,6 +321,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
             if (response.statusCode() != 200) {
                 log.error("Failed to append row to Google Sheets. Status: {}, Body: {}", response.statusCode(), response.body());
+                throw new AppException(HttpStatus.BAD_REQUEST, "Failed to append row to Google Sheets.");
             } else {
                 log.info("Successfully appended row to Google Sheet {} for integration {}", activeSheetName, integration.getId());
             }
@@ -366,7 +364,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
             JsonNode responseJson = objectMapper.readTree(response.body());
             JsonNode filesNode = responseJson.path("files");
-            List<Map<String, String>> spreadsheets = new java.util.ArrayList<>();
+            List<Map<String, String>> spreadsheets = new ArrayList<>();
             if (filesNode.isArray()) {
                 for (JsonNode file : filesNode) {
                     Map<String, String> map = new HashMap<>();
@@ -408,7 +406,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
             JsonNode responseJson = objectMapper.readTree(response.body());
             JsonNode sheetsNode = responseJson.path("sheets");
-            List<String> sheets = new java.util.ArrayList<>();
+            List<String> sheets = new ArrayList<>();
             if (sheetsNode.isArray()) {
                 for (JsonNode sheet : sheetsNode) {
                     String title = sheet.path("properties").path("title").asText();
@@ -449,7 +447,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
             JsonNode responseJson = objectMapper.readTree(response.body());
             JsonNode valuesNode = responseJson.path("values");
-            List<String> headers = new java.util.ArrayList<>();
+            List<String> headers = new ArrayList<>();
             if (valuesNode.isArray() && valuesNode.size() > 0) {
                 JsonNode firstRow = valuesNode.get(0);
                 if (firstRow.isArray()) {

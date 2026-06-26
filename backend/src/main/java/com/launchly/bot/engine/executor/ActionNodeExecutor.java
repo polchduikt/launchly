@@ -148,31 +148,38 @@ public class ActionNodeExecutor implements NodeExecutor {
                             List<Map<String, String>> mappings = (List<Map<String, String>>) action.get("columnMappings");
 
                             if (spreadsheetId != null && !spreadsheetId.isEmpty()) {
+                                String activeSpreadsheetId = resolveSpreadsheetId(botId, spreadsheetId);
                                 String activeSheetName = sheetName != null && !sheetName.trim().isEmpty() ? sheetName.trim() : "Sheet1";
-                                List<String> headers = googleSheetsService.getHeaders(botId, spreadsheetId, activeSheetName);
+                                List<String> headers = googleSheetsService.getHeaders(botId, activeSpreadsheetId, activeSheetName);
                                 List<Object> values = new ArrayList<>();
+                                boolean hasMappings = mappings != null && !mappings.isEmpty();
                                 if (headers != null && !headers.isEmpty()) {
-                                    for (String header : headers) {
+                                    for (int headerIndex = 0; headerIndex < headers.size(); headerIndex++) {
+                                        String header = headers.get(headerIndex);
                                         String resolvedVal = "";
-                                        if (mappings != null) {
+                                        if (hasMappings) {
                                             for (Map<String, String> m : mappings) {
                                                 if (header.equals(m.get("column"))) {
                                                     resolvedVal = resolveValue(m.get("value"), sessionData, botUser);
                                                     break;
                                                 }
                                             }
+                                        } else if (headerIndex == 0) {
+                                            resolvedVal = resolveValue("{{username}}", sessionData, botUser);
                                         }
                                         values.add(resolvedVal);
                                     }
                                 } else {
-                                    if (mappings != null) {
+                                    if (hasMappings) {
                                         values = mappings.stream()
                                                 .map(m -> resolveValue(m.get("value"), sessionData, botUser))
                                                 .collect(Collectors.toList());
+                                    } else {
+                                        values.add(resolveValue("{{username}}", sessionData, botUser));
                                     }
                                 }
-                                googleSheetsService.appendRow(integration, spreadsheetId, activeSheetName, values);
-                                log.info("Inserted row into Google Sheets spreadsheet={} sheet={} for bot user {}", spreadsheetId, activeSheetName, telegramUserId);
+                                googleSheetsService.appendRow(integration, activeSpreadsheetId, activeSheetName, values);
+                                log.info("Inserted row into Google Sheets spreadsheet={} sheet={} for bot user {}", activeSpreadsheetId, activeSheetName, telegramUserId);
                             }
                             break;
                         }
@@ -197,6 +204,28 @@ public class ActionNodeExecutor implements NodeExecutor {
                 .findFirst()
                 .map(FlowEdge::target)
                 .orElse(null);
+    }
+
+    private String resolveSpreadsheetId(Long botId, String spreadsheetIdOrName) {
+        String value = spreadsheetIdOrName != null ? spreadsheetIdOrName.trim() : "";
+        if (value.isEmpty()) {
+            return value;
+        }
+
+        try {
+            List<Map<String, String>> spreadsheets = googleSheetsService.getSpreadsheets(botId);
+            for (Map<String, String> spreadsheet : spreadsheets) {
+                String id = spreadsheet.get("id");
+                String name = spreadsheet.get("name");
+                if (value.equals(id) || (name != null && value.equalsIgnoreCase(name.trim()))) {
+                    return id;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to resolve spreadsheet '{}' by name for bot {}: {}", value, botId, e.getMessage());
+        }
+
+        return value;
     }
 
     private String resolveValue(String text, Map<String, String> variables, BotUser botUser) {

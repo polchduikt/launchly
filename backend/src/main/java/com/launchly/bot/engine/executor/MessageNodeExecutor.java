@@ -19,7 +19,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import com.launchly.common.utils.SanitizationUtil;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -226,7 +230,7 @@ public class MessageNodeExecutor implements NodeExecutor {
                         if (fileName == null || fileName.trim().isEmpty()) {
                             fileName = extractFileName(blockFileUrl);
                         }
-                        try (java.io.InputStream stream = openUrlStream(blockFileUrl)) {
+                        try (InputStream stream = openUrlStream(blockFileUrl)) {
                             SendDocument sendDocument = SendDocument.builder()
                                     .chatId(chatId)
                                     .document(new InputFile(stream, fileName))
@@ -271,7 +275,7 @@ public class MessageNodeExecutor implements NodeExecutor {
                                 fileName += ".mp3";
                             }
                         }
-                        try (java.io.InputStream stream = openUrlStream(blockAudioUrl)) {
+                        try (InputStream stream = openUrlStream(blockAudioUrl)) {
                             SendAudio sendAudio = SendAudio.builder()
                                     .chatId(chatId)
                                     .audio(new InputFile(stream, fileName))
@@ -316,7 +320,7 @@ public class MessageNodeExecutor implements NodeExecutor {
                                 fileName += ".mp4";
                             }
                         }
-                        try (java.io.InputStream stream = openUrlStream(blockVideoUrl)) {
+                        try (InputStream stream = openUrlStream(blockVideoUrl)) {
                             SendVideo sendVideo = SendVideo.builder()
                                     .chatId(chatId)
                                     .video(new InputFile(stream, fileName))
@@ -455,9 +459,9 @@ public class MessageNodeExecutor implements NodeExecutor {
         return "file";
     }
 
-    private java.io.InputStream openUrlStream(String urlString) throws java.io.IOException {
-        java.net.URL url = java.net.URI.create(urlString).toURL();
-        java.net.URLConnection connection = url.openConnection();
+    private InputStream openUrlStream(String urlString) throws IOException {
+        URL url = URI.create(urlString).toURL();
+        URLConnection connection = url.openConnection();
         connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
         return connection.getInputStream();
     }

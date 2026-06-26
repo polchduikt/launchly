@@ -25,7 +25,6 @@ public class AiUsageServiceImpl implements AiUsageService {
     private final AiUsageRepository aiUsageRepository;
     private final UserRepository userRepository;
     private final StringRedisTemplate redisTemplate;
-
     private static final String AI_USAGE_KEY = "launchly:ai:usage:%d:%s";
     private static final Duration AI_USAGE_TTL = Duration.ofHours(25);
     private static final int FREE_PLAN_LIMIT = 20;
@@ -71,7 +70,7 @@ public class AiUsageServiceImpl implements AiUsageService {
                     .orElse(0);
             redisTemplate.opsForValue().set(key, String.valueOf(used), AI_USAGE_TTL);
         }
-        int limit = "FREE".equalsIgnoreCase(plan.getName()) ? FREE_PLAN_LIMIT : -1; // -1 = безліміт
+        int limit = "FREE".equalsIgnoreCase(plan.getName()) ? FREE_PLAN_LIMIT : -1;
         return new AiUsageResponse(used, limit, LocalDate.now().plusDays(1).atStartOfDay().toString());
     }
 }
