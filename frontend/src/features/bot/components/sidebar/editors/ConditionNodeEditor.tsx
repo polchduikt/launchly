@@ -1,16 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, X, Type, Search } from 'lucide-react';
-import type { CustomNodeData } from '../../../../../types/bot';
+import { Plus, X } from 'lucide-react';
+import type { ConditionNodeEditorProps, ConditionBranch } from '../../../../../types/bot';
 import { CONDITION_OPERATORS, getOperatorLabel } from '../../../config/editorOptions';
 import { FieldVariableSelector } from './FieldVariableSelector';
 import { useBotStore } from '../../../../../store/useBotStore';
 import { useTagsQuery } from '../../../../broadcast/hooks/useBroadcastQueries';
 
-interface ConditionNodeEditorProps {
-  data: CustomNodeData;
-  handleChange: (key: string, value: unknown) => void;
-  editorState?: any;
+interface EditorStateLocal {
+  setIsNextStepDrawerOpen: (open: boolean) => void;
+  setNextStepSourceHandle: (handle: string | null) => void;
 }
 
 export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, handleChange, editorState }) => {
@@ -19,25 +18,27 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
 
   const [userFields, setUserFields] = useState<Array<{ name: string; type: string; description: string }>>([]);
 
-  useEffect(() => {
+  const [prevBotId, setPrevBotId] = useState<number | null>(null);
+  if (activeBotId !== prevBotId) {
+    setPrevBotId(activeBotId);
+    let loaded = [
+      { name: 'Kr', type: 'Text', description: 'User credit count' },
+      { name: 'Рыба', type: 'Text', description: 'Favorite fish type' }
+    ];
     if (activeBotId) {
       const stored = localStorage.getItem(`launchly_custom_fields_${activeBotId}`);
       if (stored) {
         try {
-          setUserFields(JSON.parse(stored));
+          loaded = JSON.parse(stored);
         } catch (e) {
           console.error(e);
         }
       } else {
-        const defaults = [
-          { name: 'Kr', type: 'Text', description: 'User credit count' },
-          { name: 'Рыба', type: 'Text', description: 'Favorite fish type' }
-        ];
-        setUserFields(defaults);
-        localStorage.setItem(`launchly_custom_fields_${activeBotId}`, JSON.stringify(defaults));
+        localStorage.setItem(`launchly_custom_fields_${activeBotId}`, JSON.stringify(loaded));
       }
     }
-  }, [activeBotId]);
+    setUserFields(loaded);
+  }
 
   const customFields = useMemo(() => {
     return userFields.map(f => f.name);
@@ -53,13 +54,15 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
   };
 
   const rawBranches = data?.branches;
-  const branches = Array.isArray(rawBranches)
+  const branches = (Array.isArray(rawBranches)
     ? rawBranches
     : (data?.variable
         ? [{ id: 'branch_0', matchType: 'all', conditions: [{ id: 'legacy', variable: data.variable, operator: data.operator, value: data.value, caseSensitive: false }] }]
-        : [{ id: 'branch_0', matchType: 'all', conditions: [] }]);
+        : [{ id: 'branch_0', matchType: 'all', conditions: [] }])) as ConditionBranch[];
 
-  const updateBranches = (newBranches: any[]) => {
+  type ConditionItem = NonNullable<ConditionBranch['conditions']>[number] & { caseSensitive?: boolean };
+
+  const updateBranches = (newBranches: ConditionBranch[]) => {
     handleChange('branches', newBranches);
   };
 
@@ -72,7 +75,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
   };
 
   const addCondition = (branchId: string) => {
-    const newCond = {
+    const newCond: ConditionItem = {
       id: `cond_${Date.now()}`,
       variable: '',
       operator: 'is',
@@ -92,7 +95,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
       if (b.id === branchId) {
         return {
           ...b,
-          conditions: (b.conditions || []).filter((c: any) => c.id !== condId)
+          conditions: (b.conditions || []).filter((c: ConditionItem) => c.id !== condId)
         };
       }
       return b;
@@ -103,12 +106,12 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
     }
   };
 
-  const updateConditionField = (branchId: string, condId: string, key: string, val: any) => {
+  const updateConditionField = (branchId: string, condId: string, key: string, val: unknown) => {
     const updated = branches.map((b) => {
       if (b.id === branchId) {
         return {
           ...b,
-          conditions: (b.conditions || []).map((c: any) =>
+          conditions: (b.conditions || []).map((c: ConditionItem) =>
             c.id === condId ? { ...c, [key]: val } : c
           )
         };
@@ -155,7 +158,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
     if (!popoverState) return null;
     const branch = branches.find((b) => b.id === popoverState.branchId);
     if (!branch) return null;
-    return (branch.conditions || []).find((c: any) => c.id === popoverState.condId);
+    return (branch.conditions || []).find((c: ConditionItem) => c.id === popoverState.condId) as ConditionItem | undefined;
   }, [popoverState, branches]);
 
   return (
@@ -167,7 +170,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
             {branches.length > 1 && (
               <button
                 type="button"
-                onClick={() => removeBranch(branch.id)}
+                onClick={() => removeBranch(branch.id!)}
                 className="absolute right-3 top-3 p-1 text-slate-400 hover:text-slate-650 hover:bg-slate-100 rounded-lg cursor-pointer transition-all"
               >
                 <X size={14} />
@@ -179,7 +182,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                 <span>Does the contact match</span>
                 <button
                   type="button"
-                  onClick={() => toggleMatchType(branch.id, branch.matchType)}
+                  onClick={() => toggleMatchType(branch.id!, branch.matchType || 'all')}
                   className="text-indigo-650 hover:text-indigo-700 underline underline-offset-2 decoration-dotted font-black cursor-pointer bg-transparent border-none p-0"
                 >
                   {branch.matchType === 'all' ? 'all of the following conditions?' : 'any of the following conditions?'}
@@ -187,7 +190,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
               </div>
 
               <div className="space-y-2.5 mt-3">
-                {conds.map((cond: any, cIdx: number) => (
+                {conds.map((cond: ConditionItem, cIdx: number) => (
                   <div key={cond.id || cIdx} className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl p-2.5 shadow-sm relative pr-10">
                     <FieldVariableSelector
                       mode="variable"
@@ -202,12 +205,12 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                           {cond.variable ? (cond.variable.charAt(0).toUpperCase() + cond.variable.slice(1).replace(/_/g, ' ')) : 'Select Field'}
                         </button>
                       }
-                      onSelect={(val) => updateConditionField(branch.id, cond.id, 'variable', val)}
+                      onSelect={(val) => updateConditionField(branch.id!, cond.id!, 'variable', val)}
                     />
 
                     <button
                       type="button"
-                      onClick={(e) => openPopover(e, branch.id, cond.id)}
+                      onClick={(e) => openPopover(e, branch.id!, cond.id!)}
                       className="px-2 py-1 text-[11px] font-bold text-indigo-650 hover:text-indigo-750 underline underline-offset-2 decoration-dashed bg-transparent cursor-pointer border-none"
                     >
                       {getOperatorLabel(cond.operator || 'is')}
@@ -216,7 +219,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                     {cond.operator !== 'has_any_value' && cond.operator !== 'not_empty' && cond.operator !== 'is_unknown' && cond.operator !== 'empty' && (
                       <button
                         type="button"
-                        onClick={(e) => openPopover(e, branch.id, cond.id)}
+                        onClick={(e) => openPopover(e, branch.id!, cond.id!)}
                         className="px-2.5 py-1 text-[11px] font-bold text-slate-650 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg cursor-pointer max-w-[80px] truncate"
                       >
                         {cond.value || '(empty)'}
@@ -225,7 +228,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
 
                     <button
                       type="button"
-                      onClick={() => removeCondition(branch.id, cond.id)}
+                      onClick={() => removeCondition(branch.id!, cond.id!)}
                       className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-450 hover:text-slate-650 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
                     >
                       <X size={13} />
@@ -238,7 +241,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
             <div className="pt-2">
               <button
                 type="button"
-                onClick={() => addCondition(branch.id)}
+                onClick={() => addCondition(branch.id!)}
                 className="w-full py-2.5 bg-white hover:bg-teal-50/30 border border-dashed border-teal-200 hover:border-teal-400 text-teal-650 hover:text-teal-700 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 select-none shadow-xs"
               >
                 <Plus size={13} />
@@ -252,8 +255,8 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                 type="button"
                 onClick={() => {
                   if (editorState) {
-                    editorState.setNextStepSourceHandle(`branch_${idx}`);
-                    editorState.setIsNextStepDrawerOpen(true);
+                    (editorState as EditorStateLocal).setNextStepSourceHandle(`branch_${idx}`);
+                    (editorState as EditorStateLocal).setIsNextStepDrawerOpen(true);
                   }
                 }}
                 className="w-full py-2.5 bg-white hover:bg-blue-50/20 border border-dashed border-blue-200 hover:border-blue-400 text-blue-600 hover:text-blue-700 text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"
@@ -285,8 +288,8 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
           type="button"
           onClick={() => {
             if (editorState) {
-              editorState.setNextStepSourceHandle('fallback');
-              editorState.setIsNextStepDrawerOpen(true);
+              (editorState as EditorStateLocal).setNextStepSourceHandle('fallback');
+              (editorState as EditorStateLocal).setIsNextStepDrawerOpen(true);
             }
           }}
           className="w-full py-2.5 bg-white hover:bg-blue-50/20 border border-dashed border-blue-200 hover:border-blue-400 text-blue-600 hover:text-blue-700 text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"

@@ -245,24 +245,26 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
                                         title={btn.label}
                                       >
                                         <span className="block truncate w-full">{btn.label}</span>
-                                        <Handle
-                                          type="source"
-                                          position={Position.Right}
-                                          id={btn.value}
-                                          style={{
-                                            position: 'absolute',
-                                            right: '8px',
-                                            top: '50%',
-                                            transform: 'translateY(-50%)',
-                                            width: '9px',
-                                            height: '9px',
-                                          }}
-                                          className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
-                                            data?._tempSourceHandle !== btn.value && edges.some((e) => e.source === id && e.sourceHandle === btn.value && nodes.some((n) => n.id === e.target))
-                                              ? '!bg-[#7b8794] !border-[#7b8794]'
-                                              : '!bg-white !border-slate-300 hover:!border-slate-400'
-                                          }`}
-                                        />
+                                        {btn.actionType !== 'URL' && btn.actionType !== 'BUY' && (
+                                          <Handle
+                                            type="source"
+                                            position={Position.Right}
+                                            id={btn.value}
+                                            style={{
+                                              position: 'absolute',
+                                              right: '8px',
+                                              top: '50%',
+                                              transform: 'translateY(-50%)',
+                                              width: '9px',
+                                              height: '9px',
+                                            }}
+                                            className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
+                                              data?._tempSourceHandle !== btn.value && edges.some((e) => e.source === id && e.sourceHandle === btn.value && nodes.some((n) => n.id === e.target))
+                                                ? '!bg-[#7b8794] !border-[#7b8794]'
+                                                : '!bg-white !border-slate-300 hover:!border-slate-400'
+                                            }`}
+                                          />
+                                        )}
                                       </div>
                                     );
                                   })}
@@ -290,24 +292,26 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
                             }`}
                           >
                             <span>{btn.label}</span>
-                            <Handle
-                              type="source"
-                              position={Position.Right}
-                              id={btn.value}
-                              style={{
-                                position: 'absolute',
-                                left: 'calc(100% - 26px)',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                width: '10px',
-                                height: '10px',
-                              }}
-                              className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
-                                data?._tempSourceHandle !== btn.value && edges.some((e) => e.source === id && e.sourceHandle === btn.value && nodes.some((n) => n.id === e.target))
-                                  ? '!bg-[#7b8794] !border-[#7b8794]'
-                                  : '!bg-white !border-slate-300 hover:!border-slate-400'
-                              }`}
-                            />
+                            {btn.actionType !== 'URL' && btn.actionType !== 'BUY' && (
+                              <Handle
+                                type="source"
+                                position={Position.Right}
+                                id={btn.value}
+                                style={{
+                                  position: 'absolute',
+                                  left: 'calc(100% - 26px)',
+                                  top: '50%',
+                                  transform: 'translateY(-50%)',
+                                  width: '10px',
+                                  height: '10px',
+                                }}
+                                className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
+                                  data?._tempSourceHandle !== btn.value && edges.some((e) => e.source === id && e.sourceHandle === btn.value && nodes.some((n) => n.id === e.target))
+                                    ? '!bg-[#7b8794] !border-[#7b8794]'
+                                    : '!bg-white !border-slate-300 hover:!border-slate-400'
+                                }`}
+                              />
+                            )}
                           </div>
                         );
                       })}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {ReactFlow, Controls, Background, ReactFlowProvider, getBezierPath, getSmoothStepPath, ConnectionLineType,} from '@xyflow/react';
-import type { ConnectionLineComponentProps } from '@xyflow/react';
+import type { ConnectionLineComponentProps, Connection } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../hooks/useBotsQuery';
@@ -9,13 +9,7 @@ import { NodeEditorPanel } from '../components/sidebar/NodeEditorPanel';
 import { FLOW_BLOCKS } from '../config/flowBlocks';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { NODE_TYPES } from '../config/nodeTypes';
-import { FLOW_EDGE_DEFAULTS } from '../config/flowEdges';
-import { InteractiveEdge } from '../components/edges/InteractiveEdge';
-
-const EDGE_TYPES = {
-  default: InteractiveEdge,
-  smoothstep: InteractiveEdge,
-};
+import { FLOW_EDGE_DEFAULTS, EDGE_TYPES } from '../config/flowEdges';
 import { CONTEXT_MENU_OPTIONS } from '../config/contextMenuOptions';
 import { useFlowBuilder } from '../hooks/useFlowBuilder';
 import { ROUTES } from '../../../constants/routes';
@@ -76,6 +70,7 @@ const FlowBuilderInner: React.FC = () => {
 
   const {
     nodes,
+    edges,
     setNodes,
     setEdges,
     displayNodes,
@@ -116,10 +111,26 @@ const FlowBuilderInner: React.FC = () => {
     pasteCopiedNodes,
   } = useFlowBuilder();
 
-  const editorState = useNodeEditor(selectedNode, handleUpdateNodeData);
+  const editorState = useNodeEditor(
+    selectedNode,
+    handleUpdateNodeData,
+    (sourceNodeId, type, sourceHandle) => {
+      const existingEdge = edges.find(
+        (e) => e.source === sourceNodeId && e.sourceHandle === sourceHandle
+      );
+      if (existingEdge) {
+        const targetNode = nodes.find((n) => n.id === existingEdge.target);
+        if (targetNode?.type === type) {
+          return;
+        }
+      }
+      handleAddAndConnectNode(sourceNodeId, type, sourceHandle);
+    }
+  );
+
 
   const isValidConnection = useCallback(
-    (connection: any) => {
+    (connection: Connection | { source: string; target: string; sourceHandle?: string | null }) => {
       if (connection.source === connection.target) return false;
       const targetNode = nodes.find((n) => n.id === connection.target);
       if (targetNode?.type === 'START') return false;
@@ -410,6 +421,12 @@ const FlowBuilderInner: React.FC = () => {
                     button={editorState.editingButton}
                     onSave={editorState.handleSaveButton}
                     onRemove={editorState.handleRemoveButton}
+                    edges={edges}
+                    nodes={nodes}
+                    nodeId={selectedNode.id}
+                    onUnlinkConnection={(btnValue) => {
+                      setEdges((eds) => eds.filter((e) => !(e.source === selectedNode.id && e.sourceHandle === btnValue)));
+                    }}
                   />
                 )}
                 {selectedNode && editorState.isNextStepDrawerOpen && (

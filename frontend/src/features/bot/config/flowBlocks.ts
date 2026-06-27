@@ -10,7 +10,7 @@ export const FLOW_BLOCKS: FlowBlockConfig[] = [
   { type: 'CONDITION', label: 'Condition Rule', color: 'text-purple-700 bg-purple-50' },
   { type: 'ACTION', label: 'Actions', color: 'text-amber-600 bg-amber-50' },
   { type: 'ORDER', label: 'Create Order', color: 'text-emerald-500 bg-emerald-50' },
-  { type: 'LEAD', label: 'CRM Lead Capture', color: 'text-sky-500 bg-sky-50' },
+
   { type: 'API_CALL', label: 'API Integration', color: 'text-indigo-500 bg-indigo-50' },
   { type: 'SMART_DELAY', label: 'Smart Delay', color: 'text-rose-500 bg-rose-50' },
   { type: 'RANDOMIZER', label: 'Randomizer', color: 'text-purple-600 bg-purple-50' },

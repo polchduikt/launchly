@@ -10,7 +10,6 @@ import { NodeToolbar } from './NodeToolbar';
 export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const nodes = useNodes();
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
-
   const connection = useConnection();
   const isConnecting = connection.inProgress;
   const isSelf = isConnecting && connection.fromNode?.id === id;
@@ -41,7 +40,7 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white/95 border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
         selected
           ? 'border-indigo-500 ring-4 ring-indigo-500/10'
           : isHighlighted
@@ -51,7 +50,7 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 
-      <div className="relative flex items-center gap-2 bg-[#EBE5FB] border-b border-[#dbd1f7]/65 rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-[#EBE5FB]/75 border-b border-[#dbd1f7]/65 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
@@ -70,7 +69,7 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
         </div>
       </div>
 
-      <div className="bg-white rounded-b-[22px] divide-y divide-slate-100/70">
+      <div className="rounded-b-[22px] divide-y divide-slate-100/70">
         {variations.map((v) => {
           const isVarConnected = edges.some(
             (e) => e.source === id && e.sourceHandle === v.id && nodes.some((n) => n.id === e.target)

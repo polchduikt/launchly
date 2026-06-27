@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { Position } from '@xyflow/react';
+import type { Position, Node, Edge } from '@xyflow/react';
 
 export interface FlowSchemaResponse {
   id: number;
@@ -79,7 +79,11 @@ export interface ButtonData {
   actionType?: string;
   actionTarget?: string;
   row?: string;
+  productName?: string;
+  price?: string;
+  currency?: string;
 }
+
 
 export interface EditButtonDialogProps {
   isOpen: boolean;
@@ -173,12 +177,24 @@ export interface EditButtonDrawerProps {
   button: ButtonData | null;
   onSave: (updated: ButtonData) => void;
   onRemove: () => void;
+  edges?: Edge[];
+  nodes?: Node[];
+  nodeId?: string;
+  onUnlinkConnection?: (btnValue: string) => void;
 }
 
 export interface FlowBlock {
+  [key: string]: unknown;
+  id?: string;
   type: string;
   text?: string;
   imageUrl?: string;
+  fileUrl?: string;
+  fileName?: string;
+  audioUrl?: string;
+  videoUrl?: string;
+  delaySeconds?: number;
+  variableName?: string;
   buttons?: ButtonData[];
 }
 
@@ -201,6 +217,107 @@ export interface BotUserUpdateRequest {
   metadata?: string;
   tags?: string[];
 }
+
+export interface ActionItem {
+  type: string;
+  tagId?: string;
+  tagName?: string;
+  fieldName?: string;
+  fieldValue?: string;
+  spreadsheetId?: string;
+  sheetName?: string;
+  columnMappings?: Array<{ column: string; value: string }>;
+}
+
+export type ConditionBranch = {
+  id?: string;
+  matchType?: string;
+  conditions?: Array<{
+    id?: string;
+    variable?: string;
+    operator?: string;
+    value?: string;
+    caseSensitive?: boolean;
+  }>;
+};
+
+export interface EditorState {
+  setIsNextStepDrawerOpen: (open: boolean) => void;
+  setNextStepSourceHandle: (handle: string | null) => void;
+}
+
+export interface ConditionNodeEditorProps {
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+}
+
+export interface RandomizerNodeEditorProps {
+  nodeId: string;
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+}
+
+export interface SmartDelayNodeEditorProps {
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+}
+
+export interface ActionNodeEditorProps {
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+}
+
+export interface ChooseNextStepDrawerProps {
+  onClose: () => void;
+  onSelectStep: (type: string) => void;
+}
+
+export interface GoogleSheetsConfigModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  sheetsAction: ActionItem;
+  isGoogleSheetsConnected: boolean;
+  isLoadingSpreadsheets: boolean;
+  spreadsheets: { id: string; name: string }[];
+  spreadsheetsError: string;
+  isLoadingWorksheets: boolean;
+  worksheets: string[];
+  worksheetsError: string;
+  isLoadingHeaders: boolean;
+  headers: string[];
+  tags: Array<{ id: number | string; name: string }>;
+  customFields: string[];
+  handleSpreadsheetChange: (id: string) => void;
+  handleWorksheetChange: (name: string) => void;
+  handleRefreshHeaders: () => void;
+  handleMappingValueChange: (header: string, val: string) => void;
+  handleSaveSheetsConfig: () => void;
+  handleReconnectGoogleSheets: () => void;
+}
+
+export interface SetUserFieldPopoverProps {
+  fieldName: string;
+  fieldValue: string;
+  userFields: Array<{ name: string; type: string; description: string }>;
+  tags: Array<{ id: number | string; name: string }>;
+  onClose: () => void;
+  onSave: (fields: { fieldName?: string; fieldValue?: string }) => void;
+  onCreateNewField: () => void;
+  hideValue?: boolean;
+}
+
+export interface TagSearchSelectProps {
+  tagName: string;
+  tags: Array<{ id: number | string; name: string }>;
+  onChange: (tag: { id: number | string; name: string }) => void;
+  onCreateTag: () => void;
+}
+
+
 
 
 

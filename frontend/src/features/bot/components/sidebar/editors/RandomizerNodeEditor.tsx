@@ -1,25 +1,13 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useEdges, useNodes } from '@xyflow/react';
-import { Info, Shuffle, ChevronDown, Plus, Trash2 } from 'lucide-react';
-import type { CustomNodeData } from '../../../../../types/bot';
+import { Plus, Trash2 } from 'lucide-react';
+import type { RandomizerNodeEditorProps } from '../../../../../types/bot';
+import { VARIATION_COLORS } from '../../../config/constants';
 
-interface RandomizerNodeEditorProps {
-  nodeId: string;
-  data: CustomNodeData;
-  handleChange: (key: string, value: unknown) => void;
-  editorState?: any;
+interface EditorStateLocal {
+  setIsNextStepDrawerOpen: (open: boolean) => void;
+  setNextStepSourceHandle: (handle: string | null) => void;
 }
-
-const VARIATION_COLORS = [
-  '#7C3AED',
-  '#B45309',
-  '#A21CAF',
-  '#0F766E',
-  '#1D4ED8',
-  '#BE123C',
-  '#047857',
-  '#4338CA',
-];
 
 export const RandomizerNodeEditor: React.FC<RandomizerNodeEditorProps> = ({
   nodeId,
@@ -38,7 +26,7 @@ export const RandomizerNodeEditor: React.FC<RandomizerNodeEditorProps> = ({
 
   const totalAssigned = variations.reduce((sum, v) => sum + v.percentage, 0);
 
-  const distributeEqually = (vars: any[]) => {
+  const distributeEqually = <T extends { percentage: number }>(vars: T[]): T[] => {
     const count = vars.length;
     if (count === 0) return vars;
     const base = Math.floor(100 / count);
@@ -254,8 +242,8 @@ export const RandomizerNodeEditor: React.FC<RandomizerNodeEditorProps> = ({
                 type="button"
                 onClick={() => {
                   if (editorState) {
-                    editorState.setNextStepSourceHandle(v.id);
-                    editorState.setIsNextStepDrawerOpen(true);
+                    (editorState as EditorStateLocal).setNextStepSourceHandle(v.id);
+                    (editorState as EditorStateLocal).setIsNextStepDrawerOpen(true);
                   }
                 }}
                 className={`w-full py-2.5 border border-dashed rounded-xl text-xs font-bold transition-all cursor-pointer text-center select-none shadow-2xs ${

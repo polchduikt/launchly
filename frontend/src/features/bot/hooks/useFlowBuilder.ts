@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {useNodesState, useEdgesState, addEdge, useReactFlow,} from '@xyflow/react';
+import { useNodesState, useEdgesState, addEdge, useReactFlow } from '@xyflow/react';
 import type { Connection, Edge, Node, NodeChange, EdgeChange } from '@xyflow/react';
 import { useBotStore } from '../../../store/useBotStore';
 import { useFlowSchemaQuery, useSaveFlowSchemaMutation } from './useFlowSchema';
@@ -9,23 +9,9 @@ import { createDefaultNodeData } from '../config/flowBlocks';
 import { getAutoLayoutedElements } from '../utils/flowLayout';
 import { ROUTES } from '../../../constants/routes';
 import type { ButtonData, FlowBlock } from '../../../types/bot';
-
-const getFlowKey = (nodes: Node[], edges: Edge[]) => {
-  const cleanNodes = nodes.map(({ id, type, position, data }) => ({
-    id,
-    type,
-    position: { x: Math.round(position.x), y: Math.round(position.y) },
-    data,
-  }));
-  const cleanEdges = edges.map(({ id, source, target, sourceHandle, targetHandle }) => ({
-    id,
-    source,
-    target,
-    sourceHandle,
-    targetHandle,
-  }));
-  return JSON.stringify({ nodes: cleanNodes, edges: cleanEdges });
-};
+import { getFlowKey, getNodesAfterRemovingEdges } from '../utils/flowHelpers';
+import { useFlowHistory } from './useFlowHistory';
+import { useFlowAutoSave } from './useFlowAutoSave';
 
 export const useFlowBuilder = () => {
   const navigate = useNavigate();
@@ -34,6 +20,27 @@ export const useFlowBuilder = () => {
   const [nodes, setNodes, onNodesChangeState] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChangeState] = useEdgesState<Edge>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  const {
+    past,
+    future,
+    setPast,
+    setFuture,
+    undo,
+    redo,
+    takeSnapshot,
+    takeSnapshotBeforeEdit,
+  } = useFlowHistory(nodes, edges, setNodes, setEdges, setSelectedNodeId);
+
+  const { data: schema, isLoading: isLoadingSchema } = useFlowSchemaQuery(activeBotId || 0);
+  const saveMutation = useSaveFlowSchemaMutation(activeBotId || 0);
+
+  const {
+    isDirty,
+    setIsDirty,
+    lastSavedKeyRef,
+  } = useFlowAutoSave(activeBotId, nodes, edges, isLoadingSchema, saveMutation);
+
   const [edgeType, setEdgeType] = useState<'default' | 'smoothstep'>(
     () => (localStorage.getItem('launchly_flow_edge_type') as 'default' | 'smoothstep') || 'default');
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -72,95 +79,6 @@ export const useFlowBuilder = () => {
 
   const contextMenu = contextMenuState;
 
-
-  const [past, setPast] = useState<{ nodes: Node[]; edges: Edge[] }[]>([]);
-  const [future, setFuture] = useState<{ nodes: Node[]; edges: Edge[] }[]>([]);
-
-  const takeSnapshot = useCallback(() => {
-    setPast((p) => {
-      if (p.length > 0) {
-        const last = p[p.length - 1];
-        if (getFlowKey(last.nodes, last.edges) === getFlowKey(nodes, edges)) {
-          return p;
-        }
-      }
-      return [...p, { nodes, edges }];
-    });
-    setFuture([]);
-  }, [nodes, edges]);
-
-  const isTypingRef = useRef<boolean>(false);
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const takeSnapshotBeforeEdit = useCallback(() => {
-    if (!isTypingRef.current) {
-      isTypingRef.current = true;
-      takeSnapshot();
-    }
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-    typingTimeoutRef.current = setTimeout(() => {
-      isTypingRef.current = false;
-    }, 800);
-  }, [takeSnapshot]);
-
-  useEffect(() => {
-    return () => {
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const undo = useCallback(() => {
-    if (past.length === 0) return;
-    const previous = past[past.length - 1];
-    const newPast = past.slice(0, past.length - 1);
-
-    setPast(newPast);
-    setFuture((f) => [...f, { nodes, edges }]);
-
-    setNodes(previous.nodes);
-    setEdges(previous.edges);
-    setSelectedNodeId(null);
-  }, [past, nodes, edges, setNodes, setEdges]);
-
-  const redo = useCallback(() => {
-    if (future.length === 0) return;
-    const next = future[future.length - 1];
-    const newFuture = future.slice(0, future.length - 1);
-
-    setFuture(newFuture);
-    setPast((p) => [...p, { nodes, edges }]);
-
-    setNodes(next.nodes);
-    setEdges(next.edges);
-    setSelectedNodeId(null);
-  }, [future, nodes, edges, setNodes, setEdges]);
-
-  const onNodesChange = useCallback(
-    (changes: NodeChange[]) => {
-      const hasRemoval = changes.some((c) => c.type === 'remove');
-      if (hasRemoval) {
-        takeSnapshot();
-      }
-      onNodesChangeState(changes);
-    },
-    [onNodesChangeState, takeSnapshot]
-  );
-
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange[]) => {
-      const hasRemoval = changes.some((c) => c.type === 'remove');
-      if (hasRemoval) {
-        takeSnapshot();
-      }
-      onEdgesChangeState(changes);
-    },
-    [onEdgesChangeState, takeSnapshot]
-  );
-
   const dragStartStateRef = useRef<{ nodes: Node[]; edges: Edge[] } | null>(null);
 
   const onNodeDragStart = useCallback(() => {
@@ -185,7 +103,7 @@ export const useFlowBuilder = () => {
       setFuture([]);
     }
     dragStartStateRef.current = null;
-  }, [nodes, edges]);
+  }, [nodes, edges, setPast, setFuture]);
 
   const triggerSaveError = (msg: string) => {
     setSaveError(msg);
@@ -225,6 +143,35 @@ export const useFlowBuilder = () => {
     [selectedNodeId]
   );
 
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      const hasRemoval = changes.some((c) => c.type === 'remove');
+      if (hasRemoval) {
+        takeSnapshot();
+      }
+      onNodesChangeState(changes);
+    },
+    [onNodesChangeState, takeSnapshot]
+  );
+
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) => {
+      const hasRemoval = changes.some((c) => c.type === 'remove');
+      if (hasRemoval) {
+        takeSnapshot();
+        const removedEdgeIds = changes
+          .filter((c) => c.type === 'remove')
+          .map((c) => (c as { id: string }).id);
+        const removedEdges = edges.filter((e) => removedEdgeIds.includes(e.id));
+        const nextNodes = getNodesAfterRemovingEdges(nodes, removedEdges);
+        setNodes(nextNodes);
+      }
+      onEdgesChangeState(changes);
+    },
+    [edges, nodes, setNodes, onEdgesChangeState, takeSnapshot]
+  );
+
+
   useEffect(() => {
     localStorage.setItem('launchly_flow_edge_type', edgeType);
     setEdges((eds) =>
@@ -234,9 +181,6 @@ export const useFlowBuilder = () => {
       }))
     );
   }, [edgeType, setEdges]);
-
-  const { data: schema, isLoading: isLoadingSchema } = useFlowSchemaQuery(activeBotId || 0);
-  const saveMutation = useSaveFlowSchemaMutation(activeBotId || 0);
 
   const isSchemaLoadedRef = useRef<boolean>(false);
 
@@ -315,45 +259,6 @@ export const useFlowBuilder = () => {
       }
     }
   }, [schema, isLoadingSchema, setNodes, setEdges, fitView, edgeType]);
-
-  const lastSavedKeyRef = useRef<string>('');
-  const isInitialLoadDoneRef = useRef<boolean>(false);
-  const [isDirty, setIsDirty] = useState(false);
-
-  useEffect(() => {
-    if (!isLoadingSchema && nodes.length > 0) {
-      if (!isInitialLoadDoneRef.current) {
-        isInitialLoadDoneRef.current = true;
-        lastSavedKeyRef.current = getFlowKey(nodes, edges);
-      }
-    }
-  }, [isLoadingSchema, nodes, edges]);
-
-  useEffect(() => {
-    if (!isInitialLoadDoneRef.current) return;
-    const currentKey = getFlowKey(nodes, edges);
-    setIsDirty(currentKey !== lastSavedKeyRef.current);
-  }, [nodes, edges]);
-
-  useEffect(() => {
-    if (!isInitialLoadDoneRef.current) return;
-
-    const currentKey = getFlowKey(nodes, edges);
-    if (currentKey === lastSavedKeyRef.current) return;
-
-    const startCount = nodes.filter((n) => n.type === 'START').length;
-    if (startCount !== 1) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      saveMutation.mutate({ nodes, edges });
-      lastSavedKeyRef.current = currentKey;
-      setIsDirty(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [nodes, edges, saveMutation, isLoadingSchema]);
 
   useEffect(() => {
     const handleEditButton = (e: Event) => {
@@ -677,7 +582,12 @@ export const useFlowBuilder = () => {
     }
 
     takeSnapshot();
-    setNodes((nds) => nds.filter((n) => n.id !== selectedNodeId));
+    const removedEdges = edges.filter((e) => e.source === selectedNodeId || e.target === selectedNodeId);
+    const nextNodes = getNodesAfterRemovingEdges(
+      nodes.filter((n) => n.id !== selectedNodeId),
+      removedEdges
+    );
+    setNodes(nextNodes);
     setEdges((eds) => eds.filter((e) => e.source !== selectedNodeId && e.target !== selectedNodeId));
     setSelectedNodeId(null);
   };
@@ -792,7 +702,7 @@ export const useFlowBuilder = () => {
         updatedData.blocks = blocksList.map((block) => {
           const blockClone = { ...block };
           if (Array.isArray(blockClone.buttons)) {
-            blockClone.buttons = blockClone.buttons.map((btn) => ({
+            blockClone.buttons = blockClone.buttons.map((btn: ButtonData) => ({
               ...btn,
               value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
             }));
@@ -805,7 +715,7 @@ export const useFlowBuilder = () => {
         const allButtons: ButtonData[] = [];
         blocksList.forEach((b) => {
           if (Array.isArray(b.buttons)) {
-            allButtons.push(...b.buttons);
+            allButtons.push(...(b.buttons as ButtonData[]));
           }
         });
         updatedData.text = firstText ? firstText.text : '';
@@ -813,7 +723,7 @@ export const useFlowBuilder = () => {
         updatedData.buttons = allButtons;
       } else if (Array.isArray(updatedData.buttons)) {
         const buttonsList = updatedData.buttons as ButtonData[];
-        updatedData.buttons = buttonsList.map((btn) => ({
+        updatedData.buttons = buttonsList.map((btn: ButtonData) => ({
           ...btn,
           value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
         }));
@@ -857,10 +767,10 @@ export const useFlowBuilder = () => {
       
       const updatedData = JSON.parse(JSON.stringify(nodeToCopy.data || {}));
       if (Array.isArray(updatedData.blocks)) {
-        updatedData.blocks = updatedData.blocks.map((block: any) => {
+        updatedData.blocks = (updatedData.blocks as Record<string, unknown>[]).map((block) => {
           const blockClone = { ...block };
           if (Array.isArray(blockClone.buttons)) {
-            blockClone.buttons = blockClone.buttons.map((btn: any) => ({
+            blockClone.buttons = (blockClone.buttons as ButtonData[]).map((btn) => ({
               ...btn,
               value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
             }));
@@ -868,15 +778,15 @@ export const useFlowBuilder = () => {
           return blockClone;
         });
 
-        const allButtons: any[] = [];
-        updatedData.blocks.forEach((b: any) => {
+        const allButtons: ButtonData[] = [];
+        (updatedData.blocks as Record<string, unknown>[]).forEach((b) => {
           if (Array.isArray(b.buttons)) {
-            allButtons.push(...b.buttons);
+            allButtons.push(...(b.buttons as ButtonData[]));
           }
         });
         updatedData.buttons = allButtons;
       } else if (Array.isArray(updatedData.buttons)) {
-        updatedData.buttons = updatedData.buttons.map((btn: any) => ({
+        updatedData.buttons = (updatedData.buttons as ButtonData[]).map((btn) => ({
           ...btn,
           value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
         }));

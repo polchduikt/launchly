@@ -3,20 +3,9 @@ import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Sliders } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
-import type { CustomNodeData } from '../../../../types/bot';
+import type { CustomNodeData, ActionItem } from '../../../../types/bot';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
-
-interface ActionItem {
-  type: string;
-  tagId?: string;
-  tagName?: string;
-  fieldName?: string;
-  fieldValue?: string;
-  spreadsheetId?: string;
-  sheetName?: string;
-  columnMappings?: Array<{ column: string; value: string }>;
-}
 
 export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const nodes = useNodes();
@@ -123,7 +112,7 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white/95 border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
         selected
           ? 'border-indigo-500 ring-4 ring-indigo-500/10'
           : isHighlighted
@@ -134,7 +123,7 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
       {showToolbar && <NodeToolbar nodeId={id} />}
       
       
-      <div className="relative flex items-center gap-2 bg-[#FFF1A8] border-b border-[#eed796]/60 rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-[#FFF1A8]/75 border-b border-[#eed796]/60 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
@@ -153,7 +142,7 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
         </div>
       </div>
 
-      <div className="p-4 space-y-3 bg-white">
+      <div className="p-4 space-y-3">
         <div className="space-y-3">
           {actions.length === 0 ? (
             <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-center text-[11px] text-slate-400 font-medium select-none italic bg-slate-50/50">

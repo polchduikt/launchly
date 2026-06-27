@@ -1,12 +1,18 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import type { ActionItem, ActionNodeEditorProps } from '../../../../../types/bot';
 
-import type { CustomNodeData } from '../../../../../types/bot';
+interface EditorStateLocal {
+  setIsNextStepDrawerOpen: (open: boolean) => void;
+  setNextStepSourceHandle: (handle: string | null) => void;
+}
 import { useBotStore } from '../../../../../store/useBotStore';
 import { useAuthStore } from '../../../../../store/useAuthStore';
 import { useTagsQuery, useCreateTagMutation } from '../../../../broadcast/hooks/useBroadcastQueries';
 import { useIntegrationsQuery } from '../../../../integration/hooks/useIntegrationQueries';
-import { FieldVariableSelector } from './FieldVariableSelector';
+import { TagSearchSelect } from './TagSearchSelect';
+import { SetUserFieldPopover } from './SetUserFieldPopover';
+import { GoogleSheetsConfigModal } from './GoogleSheetsConfigModal';
 import {
   Plus,
   Trash2,
@@ -16,276 +22,10 @@ import {
   CheckSquare,
   FileSpreadsheet,
   X,
-  Info,
-  RefreshCw,
-  AlertTriangle,
-    MessageSquare,
+  MessageSquare,
   Search
 } from 'lucide-react';
 
-interface ActionItem {
-  type: string;
-  tagId?: string;
-  tagName?: string;
-  fieldName?: string;
-  fieldValue?: string;
-  spreadsheetId?: string;
-  sheetName?: string;
-  columnMappings?: Array<{ column: string; value: string }>;
-}
-
-const TagSearchSelect: React.FC<{
-  tagName: string;
-  tags: any[];
-  onChange: (tag: any) => void;
-  onCreateTag: () => void;
-}> = ({ tagName, tags, onChange, onCreateTag }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState('');
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    if (isOpen) {
-      document.addEventListener('mousedown', handleOutsideClick);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-    };
-  }, [isOpen]);
-
-  const filteredTags = tags.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
-
-  return (
-    <div className="relative w-full" ref={dropdownRef}>
-      <input
-        type="text"
-        placeholder="Select or search tag..."
-        value={isOpen ? search : (tagName || '')}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setIsOpen(true);
-        }}
-        onFocus={() => setIsOpen(true)}
-        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-400 text-xs font-bold bg-white"
-      />
-      {isOpen && (
-        <div className="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-1 max-h-48 overflow-y-auto custom-scrollbar flex flex-col gap-0.5">
-          <button
-            type="button"
-            onClick={() => {
-              onCreateTag();
-              setIsOpen(false);
-            }}
-            className="w-full text-left px-2.5 py-1.5 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 rounded-lg text-xs font-extrabold flex items-center gap-1 transition-all cursor-pointer"
-          >
-            <Plus size={12} />
-            <span>Create new tag...</span>
-          </button>
-
-          {filteredTags.map((tag) => (
-            <button
-              key={tag.id}
-              type="button"
-              onClick={() => {
-                onChange(tag);
-                setIsOpen(false);
-                setSearch('');
-              }}
-              className="w-full text-left px-2.5 py-1.5 hover:bg-slate-50 rounded-lg text-xs font-bold text-slate-700 transition-all cursor-pointer"
-            >
-              {tag.name}
-            </button>
-          ))}
-          {filteredTags.length === 0 && search.trim() !== '' && (
-            <button
-              type="button"
-              onClick={() => {
-                onCreateTag();
-                setIsOpen(false);
-              }}
-              className="w-full text-left px-2.5 py-1.5 text-slate-400 italic text-xs font-semibold cursor-pointer"
-            >
-              No tag matches "{search}". Create it?
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
-
-
-
-interface SetUserFieldPopoverProps {
-  fieldName: string;
-  fieldValue: string;
-  userFields: Array<{ name: string; type: string; description: string }>;
-  tags: any[];
-  onClose: () => void;
-  onSave: (fields: { fieldName?: string; fieldValue?: string }) => void;
-  onCreateNewField: () => void;
-  hideValue?: boolean;
-}
-
-const SetUserFieldPopover: React.FC<SetUserFieldPopoverProps> = ({
-  fieldName,
-  fieldValue,
-  userFields,
-  tags,
-  onClose,
-  onSave,
-  onCreateNewField,
-  hideValue = false
-}) => {
-  const [isFieldDropdownOpen, setIsFieldDropdownOpen] = useState(false);
-  const [tempValue, setTempValue] = useState(fieldValue);
-  const popoverRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        if (!hideValue) {
-          onSave({ fieldValue: tempValue });
-        }
-        onClose();
-      }
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-    };
-  }, [tempValue, onSave, onClose, hideValue]);
-
-  const selectedField = userFields.find(f => f.name === fieldName);
-  const selectedType = selectedField?.type || 'Text';
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'Number': return <span className="text-[10px] font-extrabold text-blue-500 bg-blue-50 px-1 py-0.5 rounded border border-blue-100 shrink-0 select-none">#</span>;
-      case 'Boolean': return <span className="text-[10px] font-extrabold text-emerald-500 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-100 shrink-0 select-none">Y/N</span>;
-      default: return <span className="text-[10px] font-extrabold text-purple-500 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100 shrink-0 select-none">T</span>;
-    }
-  };
-
-  const customFieldsNames = userFields.map(f => f.name);
-
-  return (
-    <div
-      ref={popoverRef}
-      className="absolute left-0 mt-1 bg-white border border-slate-200 rounded-2xl p-4 shadow-xl w-72 flex flex-col gap-3.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-slate-800"
-    >
-      
-      <div className="space-y-1.5 relative">
-        <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider select-none">
-          User Field
-        </label>
-        <div
-          onClick={() => setIsFieldDropdownOpen(!isFieldDropdownOpen)}
-          className="w-full px-3 py-2 border border-slate-200 rounded-xl hover:border-slate-350 bg-white flex items-center justify-between cursor-pointer transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            {fieldName ? (
-              <>
-                {getTypeIcon(selectedType)}
-                <span className="text-xs font-bold text-slate-700">{fieldName}</span>
-              </>
-            ) : (
-              <span className="text-xs text-slate-400 font-semibold select-none">Select Field</span>
-            )}
-          </div>
-          <ChevronDown size={14} className="text-slate-400" />
-        </div>
-
-        {isFieldDropdownOpen && (
-          <div
-            ref={dropdownRef}
-            className="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-1 max-h-48 overflow-y-auto custom-scrollbar flex flex-col gap-0.5"
-          >
-            <button
-              type="button"
-              onClick={() => {
-                onCreateNewField();
-                setIsFieldDropdownOpen(false);
-              }}
-              className="w-full text-left px-2.5 py-1.5 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 rounded-lg text-xs font-extrabold flex items-center gap-1 transition-all cursor-pointer"
-            >
-              <Plus size={12} />
-              <span>Create New User Field</span>
-            </button>
-
-            {userFields.map((field) => (
-              <button
-                key={field.name}
-                type="button"
-                onClick={() => {
-                  onSave({ fieldName: field.name });
-                  setIsFieldDropdownOpen(false);
-                }}
-                className="w-full text-left px-2.5 py-1.5 hover:bg-slate-50 rounded-lg text-xs font-bold text-slate-700 flex items-center gap-2 transition-all cursor-pointer"
-              >
-                {getTypeIcon(field.type)}
-                <span>{field.name}</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      
-      {!hideValue && (
-        <div className="space-y-1.5">
-          <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider select-none">
-            Value
-          </label>
-          <div className="relative flex items-center">
-            <input
-              type="text"
-              value={tempValue}
-              onChange={(e) => setTempValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  onSave({ fieldValue: tempValue });
-                  onClose();
-                }
-              }}
-              placeholder="Enter value or variable"
-              className="w-full pl-3 pr-10 py-2 border border-slate-200 focus:outline-none focus:border-indigo-400 text-xs font-bold rounded-xl bg-white"
-            />
-            <div className="absolute right-2 flex items-center gap-1.5">
-              {tempValue && (
-                <button
-                  type="button"
-                  onClick={() => setTempValue('')}
-                  className="p-0.5 text-slate-400 hover:text-slate-600 rounded cursor-pointer"
-                >
-                  <X size={12} />
-                </button>
-              )}
-                            <FieldVariableSelector
-                mode="variable"
-                tags={tags}
-                customFields={customFieldsNames}
-                onSelect={(selectedVar) => setTempValue(selectedVar)}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-interface ActionNodeEditorProps {
-  data: CustomNodeData;
-  handleChange: (key: string, value: unknown) => void;
-  editorState?: any;
-}
 
 export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handleChange, editorState }) => {
   const activeBotId = useBotStore((state) => state.activeBotId);
@@ -295,25 +35,27 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
 
   const [userFields, setUserFields] = useState<Array<{ name: string; type: string; description: string }>>([]);
 
-  useEffect(() => {
+  const [prevBotId, setPrevBotId] = useState<number | null>(null);
+  if (activeBotId !== prevBotId) {
+    setPrevBotId(activeBotId);
+    let loaded = [
+      { name: 'Kr', type: 'Text', description: 'User credit count' },
+      { name: 'Рыба', type: 'Text', description: 'Favorite fish type' }
+    ];
     if (activeBotId) {
       const stored = localStorage.getItem(`launchly_custom_fields_${activeBotId}`);
       if (stored) {
         try {
-          setUserFields(JSON.parse(stored));
+          loaded = JSON.parse(stored);
         } catch (e) {
           console.error('Failed to parse stored user fields', e);
         }
       } else {
-        const defaults = [
-          { name: 'Kr', type: 'Text', description: 'User credit count' },
-          { name: 'Рыба', type: 'Text', description: 'Favorite fish type' }
-        ];
-        setUserFields(defaults);
-        localStorage.setItem(`launchly_custom_fields_${activeBotId}`, JSON.stringify(defaults));
+        localStorage.setItem(`launchly_custom_fields_${activeBotId}`, JSON.stringify(loaded));
       }
     }
-  }, [activeBotId]);
+    setUserFields(loaded);
+  }
 
   const customFields = useMemo(() => {
     return userFields.map(f => f.name);
@@ -376,6 +118,14 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
   const [isLoadingHeaders, setIsLoadingHeaders] = useState(false);
   const [spreadsheetsError, setSpreadsheetsError] = useState('');
   const [worksheetsError, setWorksheetsError] = useState('');
+
+  const resolveSpreadsheetSelection = (value: string, availableSpreadsheets: { id: string; name: string }[]) => {
+    const trimmedValue = value.trim();
+    const matched = availableSpreadsheets.find((sheet) =>
+      sheet.id === trimmedValue || sheet.name.trim().toLowerCase() === trimmedValue.toLowerCase()
+    );
+    return matched?.id || value;
+  };
 
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
   const [newTagName, setNewTagName] = useState('');
@@ -443,6 +193,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
       if (res.ok) {
         const result = await res.json();
         setSpreadsheets(result);
+        return result as { id: string; name: string }[];
       } else {
         const error = await res.json().catch(() => null);
         setSpreadsheets([]);
@@ -460,6 +211,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
     } finally {
       setIsLoadingSpreadsheets(false);
     }
+    return [];
   };
 
   const fetchWorksheets = async (spreadsheetId: string) => {
@@ -507,16 +259,20 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
     return [];
   };
 
-  const handleOpenSheetsConfigModal = (index: number) => {
+  const handleOpenSheetsConfigModal = async (index: number) => {
     const action = actions[index];
     setEditingActionIndex(index);
     setSheetsAction({ ...action });
     setIsSheetsModalOpen(true);
-    fetchSpreadsheets();
+    const loadedSpreadsheets = await fetchSpreadsheets();
     if (action.spreadsheetId) {
-      fetchWorksheets(action.spreadsheetId);
+      const resolvedSpreadsheetId = resolveSpreadsheetSelection(action.spreadsheetId, loadedSpreadsheets);
+      if (resolvedSpreadsheetId !== action.spreadsheetId) {
+        setSheetsAction((prev) => prev ? { ...prev, spreadsheetId: resolvedSpreadsheetId } : null);
+      }
+      fetchWorksheets(resolvedSpreadsheetId);
       if (action.sheetName) {
-        fetchHeaders(action.spreadsheetId, action.sheetName).then((fetchedHeaders) => {
+        fetchHeaders(resolvedSpreadsheetId, action.sheetName).then((fetchedHeaders) => {
           setHeaders(fetchedHeaders);
         });
       }
@@ -596,7 +352,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
     };
 
     const stored = localStorage.getItem(`launchly_custom_fields_${activeBotId}`);
-    let fieldsList = [];
+    let fieldsList: Array<{ name: string; type: string; description: string }> = [];
     if (stored) {
       try {
         fieldsList = JSON.parse(stored);
@@ -604,7 +360,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
         console.error(e);
       }
     }
-    const updated = [...fieldsList.filter((f: any) => f.name !== newField.name), newField];
+    const updated = [...fieldsList.filter((f) => f.name !== newField.name), newField];
     localStorage.setItem(`launchly_custom_fields_${activeBotId}`, JSON.stringify(updated));
 
     setUserFields(updated);
@@ -869,9 +625,9 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
           <span>+ Action</span>
         </button>
 
-        {editorState && (
+        {!!editorState && (
           <button
-            onClick={() => editorState.setIsNextStepDrawerOpen(true)}
+            onClick={() => (editorState as EditorStateLocal).setIsNextStepDrawerOpen(true)}
             className="w-full py-2.5 border border-[#407BFF] hover:bg-blue-50/10 text-[#407BFF] hover:text-[#2d6ae5] text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-xs"
           >
             <span>Choose Next Step</span>
@@ -1166,261 +922,28 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
       ), document.body)}
 
       
-                  {isSheetsModalOpen && sheetsAction && createPortal((
-        <div 
-          onClick={() => setIsSheetsModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/20 p-4 animate-in fade-in duration-200"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white border border-slate-200 rounded-lg shadow-2xl w-full max-w-[900px] h-[720px] max-h-[95vh] flex flex-col animate-in zoom-in-95 duration-200 overflow-hidden"
-          >
-            
-            <div className="relative border-b border-slate-100 px-8 py-3 text-center">
-              <button
-                onClick={() => setIsSheetsModalOpen(false)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-slate-100 rounded-md text-slate-400 hover:text-slate-700 transition-all cursor-pointer"
-              >
-                <X size={16} />
-              </button>
-              <h3 className="text-base font-extrabold text-slate-800 tracking-tight">
-                Edit Google Sheets Actions
-              </h3>
-            </div>
-
-                        <div className="flex-1 overflow-y-auto custom-scrollbar px-8 py-6 space-y-5 pb-6">
-              <div className="flex flex-col items-center text-center gap-3">
-                <div className="w-20 h-20 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-sm text-emerald-600">
-                  <FileSpreadsheet size={48} />
-                </div>
-                <div>
-                  <p className="text-sm font-extrabold text-slate-800">
-                    Google Sheets Actions: Insert Row
-                  </p>
-                  <p className="text-xs text-slate-500 font-medium mt-1">
-                    Send Launchly data to Google Sheets.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-            
-            {!isGoogleSheetsConnected && (
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3 text-[11px] text-amber-800 leading-relaxed font-semibold">
-                <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
-                <div>
-                  Google Sheets integration is not connected or active. Please connect your account in{' '}
-                  <a href="/settings" className="text-indigo-650 font-bold hover:underline">
-                    Settings
-                  </a>{' '}
-                  first.
-                </div>
-              </div>
-            )}
-
-                        
-            <div className="bg-slate-50 border border-slate-150 rounded-2xl p-4 flex gap-3 text-[11px] text-slate-500 leading-relaxed font-medium select-none">
-              <Info size={16} className="text-indigo-500 shrink-0 mt-0.5" />
-              <div>
-                The first row of the table is used for your column titles. You could easily match Launchly contact data with your columns by titles names.{' '}
-                <a href="https://google.com" target="_blank" rel="noopener noreferrer" className="text-indigo-650 font-bold hover:underline">
-                  Help
-                </a>
-              </div>
-            </div>
-
-            
-            <div className="space-y-4">
-              
-              <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Spreadsheet
-                </label>
-                <div className="relative">
-                  <select
-                    value={sheetsAction.spreadsheetId || ''}
-                    onChange={(e) => handleSpreadsheetChange(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white appearance-none cursor-pointer"
-                  >
-                    <option value="">
-                      {isLoadingSpreadsheets ? 'Loading spreadsheets...' : '-- Select Spreadsheet --'}
-                    </option>
-                    {spreadsheets.map((sheet) => (
-                      <option key={sheet.id} value={sheet.id}>
-                        {sheet.name}
-                      </option>
-                    ))}
-                  </select>
-                  {isLoadingSpreadsheets && (
-                    <div className="absolute right-10 top-1/2 -translate-y-1/2">
-                      <RefreshCw size={14} className="animate-spin text-slate-400" />
-                    </div>
-                  )}
-                  <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-slate-400">
-                    <ChevronDown size={16} />
-                  </div>
-                </div>
-                {spreadsheetsError && (
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-amber-800">
-                    <div>{spreadsheetsError}</div>
-                    <button
-                      type="button"
-                      onClick={handleReconnectGoogleSheets}
-                      className="mt-2 rounded-md bg-amber-100 px-3 py-1.5 text-[11px] font-extrabold text-amber-900 transition-colors hover:bg-amber-200"
-                    >
-                      Reconnect Google Sheets
-                    </button>
-                  </div>
-                )}
-                {!spreadsheetsError && !isLoadingSpreadsheets && spreadsheets.length === 0 && (
-                  <div className="rounded-xl border border-slate-150 bg-slate-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-slate-500">
-                    No spreadsheets found in this Google account.
-                  </div>
-                )}
-              </div>
-
-              
-              <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Worksheet
-                </label>
-                <div className="relative">
-                  <select
-                    value={sheetsAction.sheetName || ''}
-                    disabled={!sheetsAction.spreadsheetId}
-                    onChange={(e) => handleWorksheetChange(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white disabled:opacity-50 appearance-none cursor-pointer"
-                  >
-                    <option value="">
-                      {isLoadingWorksheets ? 'Loading worksheets...' : '-- Select Worksheet --'}
-                    </option>
-                    {worksheets.map((sheet) => (
-                      <option key={sheet} value={sheet}>
-                        {sheet}
-                      </option>
-                    ))}
-                  </select>
-                  {isLoadingWorksheets && (
-                    <div className="absolute right-10 top-1/2 -translate-y-1/2">
-                      <RefreshCw size={14} className="animate-spin text-slate-400" />
-                    </div>
-                  )}
-                  <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-slate-400">
-                    <ChevronDown size={16} />
-                  </div>
-                </div>
-                {worksheetsError && (
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-amber-800">
-                    {worksheetsError}
-                  </div>
-                )}
-              </div>
-
-              
-              {sheetsAction.spreadsheetId && sheetsAction.sheetName && (
-                <div className="space-y-3.5 pt-2 border-t border-slate-100">
-                                    <div className="grid grid-cols-[1fr_20px_1fr] gap-3 items-center select-none text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
-                    <div>Launchly Data</div>
-                    <div></div>
-                    <div className="flex items-center justify-between">
-                      <span>Google Column Titles</span>
-                      <button
-                        type="button"
-                        onClick={handleRefreshHeaders}
-                        disabled={isLoadingHeaders}
-                        className="text-[#407BFF] hover:underline font-bold text-[10px] lowercase tracking-normal flex items-center gap-0.5 cursor-pointer normal-case"
-                      >
-                        {isLoadingHeaders && <RefreshCw size={10} className="animate-spin" />}
-                        <span>Refresh</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {isLoadingHeaders ? (
-                    <div className="py-8 text-center text-xs text-slate-400 font-bold">
-                      Loading column headers...
-                    </div>
-                  ) : headers.length === 0 ? (
-                    <div className="py-8 text-center text-xs text-slate-400 italic">
-                      No headers found. Make sure your spreadsheet's first row has columns.
-                    </div>
-                  ) : (
-                    <div className="space-y-2.5">
-                      {headers.map((header, hIdx) => {
-                        const currentMapping = (sheetsAction.columnMappings || []).find((m) => m.column === header);
-                        const val = currentMapping ? currentMapping.value : '';
-                        return (
-                          <div key={hIdx} className="grid grid-cols-[1fr_20px_1fr] gap-3 items-center relative">
-                            
-                            <div className="relative flex items-center">
-                              <span className="absolute left-3.5 text-slate-400 text-xs font-extrabold select-none">T</span>
-                              <input
-                                type="text"
-                                value={val}
-                                onChange={(e) => handleMappingValueChange(header, e.target.value)}
-                                placeholder="Type or insert variable"
-                                className="w-full pl-8 pr-16 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white"
-                              />
-                              
-                              <div className="absolute right-2 flex items-center gap-1">
-                                {val && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleMappingValueChange(header, '')}
-                                    className="p-1 text-slate-350 hover:text-rose-500 rounded-md transition-colors"
-                                  >
-                                    <X size={12} />
-                                  </button>
-                                )}
-                                                                <FieldVariableSelector
-                                  mode="variable"
-                                  tags={tags}
-                                  customFields={customFields}
-                                  position="top"
-                                  onSelect={(selectedVar) => handleMappingValueChange(header, selectedVar)}
-                                />
-                              </div>
-                            </div>
-
-                            
-                            <span className="text-slate-300 font-extrabold select-none">-&gt;</span>
-
-                            
-                            <div className="w-full px-4 py-2.5 bg-slate-100 border border-slate-150 rounded-md text-xs font-extrabold text-slate-700 select-none truncate">
-                              {header}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            </div>
-            </div>
-
-            
-            <div className="flex justify-between gap-3 px-8 py-4 border-t border-slate-100 bg-white">
-              <button
-                type="button"
-                onClick={() => setIsSheetsModalOpen(false)}
-                className="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-extrabold rounded-md transition-all cursor-pointer select-none"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={!sheetsAction.spreadsheetId || !sheetsAction.sheetName}
-                onClick={handleSaveSheetsConfig}
-                className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:opacity-55 disabled:cursor-not-allowed text-white text-xs font-extrabold rounded-md transition-all cursor-pointer shadow shadow-blue-100 select-none"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      ), document.body)}
+      <GoogleSheetsConfigModal
+        isOpen={isSheetsModalOpen}
+        onClose={() => setIsSheetsModalOpen(false)}
+        sheetsAction={sheetsAction!}
+        isGoogleSheetsConnected={isGoogleSheetsConnected}
+        isLoadingSpreadsheets={isLoadingSpreadsheets}
+        spreadsheets={spreadsheets}
+        spreadsheetsError={spreadsheetsError}
+        isLoadingWorksheets={isLoadingWorksheets}
+        worksheets={worksheets}
+        worksheetsError={worksheetsError}
+        isLoadingHeaders={isLoadingHeaders}
+        headers={headers}
+        tags={tags}
+        customFields={customFields}
+        handleSpreadsheetChange={handleSpreadsheetChange}
+        handleWorksheetChange={handleWorksheetChange}
+        handleRefreshHeaders={handleRefreshHeaders}
+        handleMappingValueChange={handleMappingValueChange}
+        handleSaveSheetsConfig={handleSaveSheetsConfig}
+        handleReconnectGoogleSheets={handleReconnectGoogleSheets}
+      />
 
                   
       {isTagModalOpen && createPortal((

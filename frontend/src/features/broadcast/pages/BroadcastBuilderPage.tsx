@@ -7,13 +7,7 @@ import { NodeEditorPanel } from '../../bot/components/sidebar/NodeEditorPanel';
 import { NODE_TYPES } from '../config/nodeTypes';
 import { BROADCAST_BLOCKS } from '../config/broadcastBlocks';
 import { ROUTES } from '../../../constants/routes';
-import { InteractiveEdge } from '../../bot/components/edges/InteractiveEdge';
-import { FLOW_EDGE_DEFAULTS } from '../../bot/config/flowEdges';
-
-const EDGE_TYPES = {
-  default: InteractiveEdge,
-  smoothstep: InteractiveEdge,
-};
+import { FLOW_EDGE_DEFAULTS, EDGE_TYPES } from '../../bot/config/flowEdges';
 
 import {
   ArrowLeft,

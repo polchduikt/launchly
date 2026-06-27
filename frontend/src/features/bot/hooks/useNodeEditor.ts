@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Node } from '@xyflow/react';
-import type { CustomNodeData, ButtonData } from '../../../types/bot';
+import type { CustomNodeData, ButtonData, FlowBlock } from '../../../types/bot';
 import apiClient from '../../../lib/axios';
 
-export const getBlocks = (data: CustomNodeData): any[] => {
-  let blocks: any[] = [];
+export const getBlocks = (data: CustomNodeData): FlowBlock[] => {
+  let blocks: FlowBlock[] = [];
   if (Array.isArray(data.blocks) && data.blocks.length > 0) {
-    blocks = [...data.blocks];
+    blocks = [...data.blocks] as FlowBlock[];
   } else {
     if (data.text || (!data.text && !data.imageUrl)) {
       blocks.push({
@@ -27,7 +27,7 @@ export const getBlocks = (data: CustomNodeData): any[] => {
   }
 
   const flatButtons = (data.buttons || []) as ButtonData[];
-  const allBlockButtons = blocks.flatMap((b) => b.buttons || []);
+  const allBlockButtons = blocks.flatMap((b) => (b.buttons as ButtonData[]) || []);
   const missingButtons = flatButtons.filter((fb) => !allBlockButtons.some((bb) => bb.value === fb.value));
 
   if (missingButtons.length > 0) {
@@ -35,12 +35,12 @@ export const getBlocks = (data: CustomNodeData): any[] => {
     if (targetBlockIndex !== -1) {
       blocks[targetBlockIndex] = {
         ...blocks[targetBlockIndex],
-        buttons: [...(blocks[targetBlockIndex].buttons || []), ...missingButtons],
+        buttons: [...((blocks[targetBlockIndex].buttons as ButtonData[]) || []), ...missingButtons],
       };
     } else if (blocks.length > 0) {
       blocks[0] = {
         ...blocks[0],
-        buttons: [...(blocks[0].buttons || []), ...missingButtons],
+        buttons: [...((blocks[0].buttons as ButtonData[]) || []), ...missingButtons],
       };
     }
   }
@@ -48,9 +48,31 @@ export const getBlocks = (data: CustomNodeData): any[] => {
   return blocks;
 };
 
+const mapActionToNodeType = (actionType?: string): string | null => {
+  switch (actionType) {
+    case 'TELEGRAM':
+      return 'MESSAGE';
+    case 'AI_STEP':
+      return 'API_CALL';
+    case 'CONDITION':
+      return 'CONDITION';
+    case 'RANDOM':
+      return 'RANDOMIZER';
+    case 'DELAY':
+      return 'SMART_DELAY';
+    case 'AUTOMATION':
+      return 'MESSAGE';
+    case 'ACTIONS':
+      return 'ACTION';
+    default:
+      return null;
+  }
+};
+
 export const useNodeEditor = (
   node: Node | undefined,
-  onUpdateNodeData: (nodeId: string, newData: Record<string, unknown>) => void
+  onUpdateNodeData: (nodeId: string, newData: Record<string, unknown>) => void,
+  onAddAndConnectNode?: (sourceNodeId: string, type: string, sourceHandle: string) => void
 ) => {
   const [isBtnDialogOpen, setIsBtnDialogOpen] = useState(false);
   const [editingButton, setEditingButton] = useState<ButtonData | null>(null);
@@ -62,13 +84,16 @@ export const useNodeEditor = (
   const [showImageUrlInput, setShowImageUrlInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
+  const [prevNodeId, setPrevNodeId] = useState<string | null>(null);
+  const currentNodeId = node?.id || null;
+  if (currentNodeId !== prevNodeId) {
+    setPrevNodeId(currentNodeId);
     setIsBtnDialogOpen(false);
     setEditingButton(null);
     setEditingButtonBlockId(null);
     setIsNextStepDrawerOpen(false);
     setNextStepSourceHandle(null);
-  }, [node?.id]);
+  }
 
   useEffect(() => {
     const handleEditButtonFromNode = (e: Event) => {
@@ -76,13 +101,11 @@ export const useNodeEditor = (
       if (node && customEvent.detail.nodeId === node.id) {
         const btn = customEvent.detail.button;
         setEditingButton(btn);
-        
-        // Find parent block
         const blocksList = getBlocks(node.data || {});
         const parentBlock = blocksList.find((b) => 
           ((b.buttons || []) as ButtonData[]).some((button) => button.value === btn.value)
         );
-        setEditingButtonBlockId(parentBlock ? parentBlock.id : null);
+        setEditingButtonBlockId(parentBlock ? (parentBlock.id as string) : null);
         setIsBtnDialogOpen(true);
       }
     };
@@ -104,19 +127,19 @@ export const useNodeEditor = (
     };
 
     if (key === 'blocks' && Array.isArray(value)) {
-      const blocks = value as any[];
+      const blocks = value as FlowBlock[];
       const firstText = blocks.find((b) => b.type === 'text');
       const firstImage = blocks.find((b) => b.type === 'image');
       
-      const allButtons: any[] = [];
+      const allButtons: ButtonData[] = [];
       blocks.forEach((b) => {
         if (Array.isArray(b.buttons)) {
-          allButtons.push(...b.buttons);
+          allButtons.push(...(b.buttons as ButtonData[]));
         }
       });
       
-      newData.text = firstText ? firstText.text : '';
-      newData.imageUrl = firstImage ? firstImage.imageUrl : '';
+      newData.text = firstText ? (firstText.text as string) : '';
+      newData.imageUrl = firstImage ? (firstImage.imageUrl as string) : '';
       newData.buttons = allButtons;
     }
 
@@ -177,6 +200,11 @@ export const useNodeEditor = (
     }
     setEditingButton(null);
     setEditingButtonBlockId(null);
+
+    const mappedType = mapActionToNodeType(updated.actionType);
+    if (mappedType && node && onAddAndConnectNode) {
+      onAddAndConnectNode(node.id, mappedType, updated.value);
+    }
   };
 
   const handleRemoveButton = () => {

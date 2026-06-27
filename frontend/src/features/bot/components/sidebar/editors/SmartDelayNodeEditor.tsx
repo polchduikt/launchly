@@ -1,18 +1,17 @@
 import React, { useEffect } from 'react';
 import { Info, Clock, Calendar, ChevronDown } from 'lucide-react';
-import type { CustomNodeData } from '../../../../../types/bot';
+import type { SmartDelayNodeEditorProps } from '../../../../../types/bot';
 
-interface SmartDelayNodeEditorProps {
-  data: CustomNodeData;
-  handleChange: (key: string, value: unknown) => void;
-  editorState?: any;
+interface EditorStateLocal {
+  setIsNextStepDrawerOpen: (open: boolean) => void;
+  setNextStepSourceHandle: (handle: string | null) => void;
 }
 
 export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data, handleChange, editorState }) => {
-  const mode = data.mode || 'duration';
-  const waitAmount = data.waitAmount || 12;
-  const waitUnit = data.waitUnit || 'Hours';
-  const dateTime = data.dateTime || '';
+  const mode = typeof data.mode === 'string' ? data.mode : 'duration';
+  const waitAmount = typeof data.waitAmount === 'number' || typeof data.waitAmount === 'string' ? data.waitAmount : 12;
+  const waitUnit = typeof data.waitUnit === 'string' ? data.waitUnit : 'Hours';
+  const dateTime = typeof data.dateTime === 'string' ? data.dateTime : '';
   const sendWithinSpecificHours = !!data.sendWithinSpecificHours;
 
   const getTomorrowDateTimeString = () => {
@@ -36,7 +35,7 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
     const trimmed = stateVal.trim();
     const match = trimmed.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
     if (match) {
-      const [_, month, day, year, hours, minutes] = match;
+      const [, month, day, year, hours, minutes] = match;
       return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
     try {
@@ -49,7 +48,9 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
         const minutes = String(d.getMinutes()).padStart(2, '0');
         return `${year}-${month}-${day}T${hours}:${minutes}`;
       }
-    } catch (e) {}
+    } catch {
+      // ignore parsing error
+    }
     return '';
   };
 
@@ -58,7 +59,7 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
     const trimmed = inputVal.trim();
     const match = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
     if (match) {
-      const [_, year, month, day, hours, minutes] = match;
+      const [, year, month, day, hours, minutes] = match;
       return `${month}/${day}/${year} ${hours}:${minutes}`;
     }
     return '';
@@ -186,8 +187,8 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
           type="button"
           onClick={() => {
             if (editorState) {
-              editorState.setNextStepSourceHandle('next');
-              editorState.setIsNextStepDrawerOpen(true);
+              (editorState as EditorStateLocal).setNextStepSourceHandle('next');
+              (editorState as EditorStateLocal).setIsNextStepDrawerOpen(true);
             }
           }}
           className="w-full py-3.5 bg-white hover:bg-orange-50/10 border border-dashed border-orange-200 hover:border-orange-400 text-[#C2410C] hover:text-[#A34226] text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"

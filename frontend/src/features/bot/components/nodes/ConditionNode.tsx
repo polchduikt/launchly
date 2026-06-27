@@ -3,7 +3,7 @@ import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Filter } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
-import type { CustomNodeData } from '../../../../types/bot';
+import type { CustomNodeData, ConditionBranch } from '../../../../types/bot';
 import { getOperatorLabel } from '../../config/editorOptions';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
@@ -35,7 +35,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
   }, [id]);
 
   const rawBranches = data?.branches;
-  const branches = Array.isArray(rawBranches)
+  const branches: ConditionBranch[] = Array.isArray(rawBranches)
     ? rawBranches
     : (data?.variable
         ? [{ id: 'branch_0', matchType: 'all', conditions: [{ id: 'legacy', variable: data.variable, operator: data.operator, value: data.value }] }]
@@ -44,7 +44,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white/95 border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
         selected
           ? 'border-indigo-500 ring-4 ring-indigo-500/10'
           : isHighlighted
@@ -54,7 +54,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 
-      <div className="relative flex items-center gap-2 bg-[#C6F8ED] border-b border-[#A1F0DC]/60 rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-[#C6F8ED]/75 border-b border-[#A1F0DC]/60 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
@@ -73,9 +73,9 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
         </div>
       </div>
 
-      <div className="p-4 space-y-4 bg-white rounded-b-[22px]">
+      <div className="p-4 space-y-4 rounded-b-[22px]">
         <div className="space-y-3">
-          {branches.map((branch, idx) => {
+          {branches.map((branch: ConditionBranch, idx: number) => {
             const conds = Array.isArray(branch.conditions) ? branch.conditions : [];
             return (
               <div key={branch.id || idx} className="relative">
@@ -85,7 +85,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
                   </div>
                 ) : (
                   <div className="space-y-2 bg-slate-50/75 border border-slate-150 rounded-xl p-2.5 pr-6">
-                    {conds.map((cond, cIdx) => {
+                    {conds.map((cond, cIdx: number) => {
                       const displayVar = cond.variable
                         ? (cond.variable.charAt(0).toUpperCase() + cond.variable.slice(1).replace(/_/g, ' '))
                         : 'Select Field';

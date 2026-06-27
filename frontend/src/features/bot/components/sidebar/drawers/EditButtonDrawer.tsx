@@ -1,30 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Trash2, Send, Sparkles, Globe, CreditCard, Zap, GitFork, Shuffle, Clock, Play } from 'lucide-react';
 import type { EditButtonDrawerProps } from '../../../../../types/bot';
+import type { Node, Edge } from '@xyflow/react';
+import { NODE_TITLES } from '../../../config/nodeDisplay';
 
 export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   onClose,
   button,
   onSave,
   onRemove,
+  edges = [],
+  nodes = [],
+  nodeId,
+  onUnlinkConnection,
 }) => {
   const [label, setLabel] = useState('');
-  const [actionType, setActionType] = useState('TELEGRAM');
+  const [actionType, setActionType] = useState('');
   const [actionTarget, setActionTarget] = useState('');
+  const [productName, setProductName] = useState('');
+  const [price, setPrice] = useState('');
+  const [currency, setCurrency] = useState('UAH');
 
-  useEffect(() => {
-    if (button) {
-      setLabel(button.label || '');
-      setActionType(button.actionType || 'TELEGRAM');
-      setActionTarget(button.actionTarget || '');
-    } else {
-      setLabel('');
-      setActionType('TELEGRAM');
-      setActionTarget('');
-    }
-  }, [button]);
+  const [prevButtonValue, setPrevButtonValue] = useState<string | null>(null);
+  if (button && button.value !== prevButtonValue) {
+    setPrevButtonValue(button.value);
+    setLabel(button.label || '');
+    setActionType(button.actionType || '');
+    setActionTarget(button.actionTarget || '');
+    setProductName(button.productName || '');
+    setPrice(button.price || '');
+    setCurrency(button.currency || 'UAH');
+  }
+
+  const typedEdges = edges as Edge[];
+  const typedNodes = nodes as Node[];
 
   if (!button) return null;
+
+  const connectionEdge = typedEdges.find(
+    (e) => e.source === nodeId && e.sourceHandle === button.value
+  );
+  const targetNode = connectionEdge
+    ? typedNodes.find((n) => n.id === connectionEdge.target)
+    : null;
+
+  const getTargetNodeDisplayName = (tn: Node) => {
+    const typedNodesFiltered = typedNodes.filter((n) => n.type === tn.type);
+    const idx = typedNodesFiltered.findIndex((n) => n.id === tn.id);
+    const baseTitle = NODE_TITLES[tn.type || ''] || tn.type || '';
+    return idx !== -1 ? `${baseTitle} #${idx + 1}` : baseTitle;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +60,9 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
       label: label.trim(),
       actionType,
       actionTarget: actionType === 'URL' ? actionTarget.trim() : '',
+      productName: actionType === 'BUY' ? productName.trim() : '',
+      price: actionType === 'BUY' ? price.trim() : '',
+      currency: actionType === 'BUY' ? currency : 'UAH',
     });
     onClose();
   };
@@ -87,36 +115,73 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
               When this button is pressed
             </label>
-            <div className="space-y-1 bg-slate-50/20 border border-slate-100 rounded-2xl p-1.5">
-              {actionOptions.map((opt) => {
-                const IconComponent = opt.icon;
-                const isSelected = actionType === opt.type;
-                return (
-                  <button
-                    key={opt.type}
-                    type="button"
-                    onClick={() => setActionType(opt.type)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-all border cursor-pointer select-none group ${
-                      isSelected
-                        ? 'border-indigo-500 bg-indigo-50/40 text-indigo-900 font-bold'
-                        : 'border-transparent hover:bg-slate-50 text-slate-700 hover:border-slate-200'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${opt.color}`}>
-                        <IconComponent size={13} />
-                      </span>
-                      <span className="text-[11px] font-semibold">{opt.label}</span>
+            {targetNode ? (() => {
+              const matchedOpt = actionOptions.find((o) => o.type === actionType);
+              const IconComponent = matchedOpt?.icon || Send;
+              const optColorClass = matchedOpt?.color || 'text-sky-500 bg-sky-50';
+              const optLabel = matchedOpt?.label || 'Telegram';
+              const targetNodeTitle = getTargetNodeDisplayName(targetNode);
+              return (
+                <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-2xl animate-fade-in select-none">
+                  <div className="flex items-center gap-3">
+                    <span className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${optColorClass}`}>
+                      <IconComponent size={14} />
+                    </span>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">
+                        {optLabel}
+                      </p>
+                      <p className="text-xs font-bold text-slate-800 mt-1">
+                        {targetNodeTitle}
+                      </p>
                     </div>
-                    {opt.pro && (
-                      <span className="text-[8px] font-extrabold bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded uppercase tracking-wider">
-                        PRO
-                      </span>
-                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onUnlinkConnection && button) {
+                        onUnlinkConnection(button.value);
+                      }
+                      setActionType('');
+                    }}
+                    className="p-1.5 hover:bg-slate-200/60 text-slate-450 hover:text-slate-700 rounded-xl transition-all cursor-pointer border border-transparent hover:border-slate-300/40"
+                  >
+                    <X size={15} />
                   </button>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })() : (
+              <div className="space-y-1 bg-slate-50/20 border border-slate-100 rounded-2xl p-1.5">
+                {actionOptions.map((opt) => {
+                  const IconComponent = opt.icon;
+                  const isSelected = actionType === opt.type;
+                  return (
+                    <button
+                      key={opt.type}
+                      type="button"
+                      onClick={() => setActionType(opt.type)}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-all border cursor-pointer select-none group ${
+                        isSelected
+                          ? 'border-indigo-500 bg-indigo-50/40 text-indigo-900 font-bold'
+                          : 'border-transparent hover:bg-slate-50 text-slate-700 hover:border-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${opt.color}`}>
+                          <IconComponent size={13} />
+                        </span>
+                        <span className="text-[11px] font-semibold">{opt.label}</span>
+                      </div>
+                      {opt.pro && (
+                        <span className="text-[8px] font-extrabold bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                          PRO
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {actionType === 'URL' && (
@@ -132,6 +197,54 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                 placeholder="e.g. https://yoursite.com"
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold transition-all bg-slate-50/20"
               />
+            </div>
+          )}
+
+          {actionType === 'BUY' && (
+            <div className="animate-fade-in space-y-4">
+              <div>
+                <label htmlFor="prodName" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                  Product Name
+                </label>
+                <input
+                  id="prodName"
+                  type="text"
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                  placeholder="e.g. Premium Course"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold transition-all bg-slate-50/20"
+                />
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label htmlFor="prodPrice" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                    Price
+                  </label>
+                  <input
+                    id="prodPrice"
+                    type="text"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="e.g. 100"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold transition-all bg-slate-50/20"
+                  />
+                </div>
+                <div className="w-24">
+                  <label htmlFor="prodCurrency" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                    Currency
+                  </label>
+                  <select
+                    id="prodCurrency"
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold transition-all bg-slate-50/20 cursor-pointer"
+                  >
+                    <option value="UAH">UAH</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                  </select>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -158,12 +271,17 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
               Cancel
             </button>
             <button
-              type="submit"
-              disabled={!label.trim() || (actionType === 'URL' && !actionTarget.trim())}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-[11px] font-bold rounded-xl transition-all shadow shadow-indigo-150 cursor-pointer disabled:cursor-not-allowed"
-            >
-              Done
-            </button>
+               type="submit"
+               disabled={
+                 !label.trim() ||
+                 !actionType ||
+                 (actionType === 'URL' && !actionTarget.trim()) ||
+                 (actionType === 'BUY' && (!productName.trim() || !price.trim()))
+               }
+               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-[11px] font-bold rounded-xl transition-all shadow shadow-indigo-150 cursor-pointer disabled:cursor-not-allowed"
+             >
+               Done
+             </button>
           </div>
         </div>
       </form>

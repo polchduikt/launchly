@@ -1,4 +1,5 @@
 import { MarkerType } from '@xyflow/react';
+import { InteractiveEdge } from '../components/edges/InteractiveEdge';
 
 export const FLOW_EDGE_DEFAULTS = {
   type: 'default',
@@ -13,3 +14,9 @@ export const FLOW_EDGE_DEFAULTS = {
     stroke: '#7b8794',
   },
 };
+
+export const EDGE_TYPES = {
+  default: InteractiveEdge,
+  smoothstep: InteractiveEdge,
+};
+

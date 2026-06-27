@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 interface Tag {
-  id: number;
+  id: number | string;
   name: string;
   botId?: number;
 }

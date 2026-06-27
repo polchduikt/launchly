@@ -33,10 +33,10 @@ export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
     };
   }, [id]);
 
-  const mode = data?.mode || 'duration';
-  const waitAmount = data?.waitAmount || 12;
-  const waitUnit = data?.waitUnit || 'Hours';
-  const dateTimeStr = data?.dateTime || '';
+  const mode = typeof data?.mode === 'string' ? data.mode : 'duration';
+  const waitAmount = typeof data?.waitAmount === 'number' || typeof data?.waitAmount === 'string' ? data.waitAmount : 12;
+  const waitUnit = typeof data?.waitUnit === 'string' ? data.waitUnit : 'Hours';
+  const dateTimeStr = typeof data?.dateTime === 'string' ? data.dateTime : '';
 
   const formatDateTime = (dateStr: string) => {
     if (!dateStr) return 'specific date';
@@ -73,7 +73,7 @@ export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white/95 border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
         selected
           ? 'border-indigo-500 ring-4 ring-indigo-500/10'
           : isHighlighted
@@ -83,7 +83,7 @@ export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 
-      <div className="relative flex items-center gap-2 bg-[#F9CBBF] border-b border-[#f0a99c]/60 rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-[#F9CBBF]/75 border-b border-[#f0a99c]/60 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
@@ -102,7 +102,7 @@ export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
         </div>
       </div>
 
-      <div className="p-4 bg-white">
+      <div className="p-4">
         {mode === 'date' ? (
           <div className="space-y-1 select-none">
             <p className="text-xs font-extrabold text-slate-800 leading-normal">Wait Until</p>

@@ -13,13 +13,18 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     title: 'Main',
     items: [
       { id: 'general', label: 'General' },
-      { id: 'fields', label: 'User Fields' },
-      { id: 'tags', label: 'Tags' },
       { id: 'integrations', label: 'Integrations' },
       { id: 'notifications', label: 'Notifications' },
       { id: 'members', label: 'Team Members' },
       { id: 'logs', label: 'Logs' },
       { id: 'display', label: 'Display' },
+    ],
+  },
+  {
+    title: 'Audience',
+    items: [
+      { id: 'fields', label: 'User Fields' },
+      { id: 'tags', label: 'Tags' },
     ],
   },
   {
