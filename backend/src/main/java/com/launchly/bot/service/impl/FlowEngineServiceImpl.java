@@ -20,6 +20,7 @@ import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.billing.service.PlanLimitService;
 import com.launchly.common.utils.EncryptionUtil;
 import com.launchly.crm.service.CrmService;
+import com.launchly.analytics.service.AnalyticsService;
 import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.objects.UserProfilePhotos;
@@ -53,6 +54,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
     private final EncryptionUtil encryptionUtil;
     private final CrmService crmService;
     private final Cloudinary cloudinary;
+    private final AnalyticsService analyticsService;
     private static final String SCHEMA_KEY = "launchly:bot:schema:%d";
     private static final Duration SCHEMA_TTL = Duration.ofMinutes(30);
 
@@ -68,7 +70,8 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                   @Lazy TelegramBotManager botManager,
                                   EncryptionUtil encryptionUtil,
                                   @Lazy CrmService crmService,
-                                  Cloudinary cloudinary) {
+                                  Cloudinary cloudinary,
+                                  AnalyticsService analyticsService) {
         this.botRepository = botRepository;
         this.botUserRepository = botUserRepository;
         this.flowSchemaRepository = flowSchemaRepository;
@@ -81,6 +84,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         this.encryptionUtil = encryptionUtil;
         this.crmService = crmService;
         this.cloudinary = cloudinary;
+        this.analyticsService = analyticsService;
         this.executors = new EnumMap<>(NodeType.class);
         nodeExecutors.forEach(e -> executors.put(e.getType(), e));
     }
@@ -101,6 +105,13 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
 
             BotUser botUser = getOrCreateBotUser(bot, update, telegramUserId, client);
+
+            analyticsService.logEvent(botId, botUser, com.launchly.analytics.entity.AnalyticsEventType.USER_ACTIVITY, update.hasCallbackQuery() ? "CALLBACK" : "MESSAGE");
+            if (update.hasCallbackQuery()) {
+                String callbackData = update.getCallbackQuery().getData();
+                String buttonLabel = resolveButtonLabel(botId, callbackData);
+                analyticsService.logEvent(botId, botUser, com.launchly.analytics.entity.AnalyticsEventType.CLICK, buttonLabel);
+            }
 
             if (update.hasMessage() && update.getMessage().hasText()
                     && "/start".equals(update.getMessage().getText().trim())) {
@@ -565,5 +576,58 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         } catch (Exception e) {
             log.warn("Failed to save bot node message to CRM for bot {}: {}", botId, e.getMessage(), e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private String resolveButtonLabel(Long botId, String callbackData) {
+        if (callbackData == null) {
+            return "Unknown Button";
+        }
+        try {
+            FlowSchema schema = getSchema(botId);
+            if (schema != null && schema.getNodes() != null) {
+                List<FlowNode> nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+                for (FlowNode node : nodes) {
+                    Map<String, Object> data = node.data();
+                    if (data == null) continue;
+
+                    // 1. Check top-level buttons
+                    List<?> topLevelButtons = (List<?>) data.get("buttons");
+                    if (topLevelButtons != null) {
+                        for (Object btnObj : topLevelButtons) {
+                            if (btnObj instanceof Map) {
+                                Map<String, Object> btn = (Map<String, Object>) btnObj;
+                                if (callbackData.equals(btn.get("value"))) {
+                                    Object label = btn.get("label");
+                                    return label != null ? label.toString() : callbackData;
+                                }
+                            }
+                        }
+                    }
+
+                    // 2. Check block-level buttons
+                    List<Map<String, Object>> blocks = (List<Map<String, Object>>) data.get("blocks");
+                    if (blocks != null) {
+                        for (Map<String, Object> block : blocks) {
+                            List<?> blockButtons = (List<?>) block.get("buttons");
+                            if (blockButtons != null) {
+                                for (Object btnObj : blockButtons) {
+                                    if (btnObj instanceof Map) {
+                                        Map<String, Object> btn = (Map<String, Object>) btnObj;
+                                        if (callbackData.equals(btn.get("value"))) {
+                                            Object label = btn.get("label");
+                                            return label != null ? label.toString() : callbackData;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to resolve button label for callback data {} in bot {}: {}", callbackData, botId, e.getMessage());
+        }
+        return callbackData;
     }
 }

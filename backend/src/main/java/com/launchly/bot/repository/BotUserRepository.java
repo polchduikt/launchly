@@ -13,5 +13,7 @@ public interface BotUserRepository extends JpaRepository<BotUser, Long> {
 
     long countByBotId(Long botId);
 
+    long countByBotIdIn(List<Long> botIds);
+
     List<BotUser> findByCurrentNodeIdIsNotNull();
 }
