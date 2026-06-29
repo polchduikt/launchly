@@ -3,10 +3,7 @@ import { Handle, Position } from '@xyflow/react';
 import {
   StartNode,
   MessageNode,
-  InputNode,
   ConditionNode,
-  OrderNode,
-  LeadNode,
   ApiCallNode,
   EndNode,
   ActionNode,
@@ -31,10 +28,7 @@ export const TempNode: React.FC = () => {
 export const NODE_TYPES = {
   START: StartNode,
   MESSAGE: MessageNode,
-  INPUT: InputNode,
   CONDITION: ConditionNode,
-  ORDER: OrderNode,
-  LEAD: LeadNode,
   API_CALL: ApiCallNode,
   END: EndNode,
   ACTION: ActionNode,

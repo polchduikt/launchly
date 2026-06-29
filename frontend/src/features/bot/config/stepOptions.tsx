@@ -1,9 +1,7 @@
 import {
   MessageSquare,
-  Type,
   GitFork,
   Sliders,
-  ShoppingCart,
   Code,
   Clock,
   Shuffle,
@@ -20,13 +18,6 @@ export const STEP_OPTIONS = [
     color: 'text-sky-500 bg-sky-50 border-sky-100',
   },
   {
-    type: 'INPUT',
-    label: 'Input Prompt',
-    description: 'Capture user text responses as variables',
-    icon: Type,
-    color: 'text-amber-500 bg-amber-50 border-amber-100',
-  },
-  {
     type: 'CONDITION',
     label: 'Condition Rule',
     description: 'Filter flows using conditional rules',
@@ -39,13 +30,6 @@ export const STEP_OPTIONS = [
     description: 'Perform tag actions, custom fields and Google Sheets operations',
     icon: Sliders,
     color: 'text-amber-600 bg-amber-50 border-amber-100',
-  },
-  {
-    type: 'ORDER',
-    label: 'Create Order',
-    description: 'Generate customizable user checkout orders',
-    icon: ShoppingCart,
-    color: 'text-emerald-500 bg-emerald-50 border-emerald-100',
   },
   {
     type: 'API_CALL',

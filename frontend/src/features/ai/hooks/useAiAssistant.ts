@@ -214,12 +214,12 @@ export const useAiAssistant = () => {
       setConfirmOverwrite(false);
       schemaMutation.reset();
     } catch {
-      // ignore mutation errors
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       handleSend();
     }
   };

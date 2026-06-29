@@ -11,12 +11,14 @@ const RegisterPage = lazy(() => import('../features/auth/pages/RegisterPage'));
 const OAuth2Callback = lazy(() => import('../features/auth/pages/OAuth2Callback'));
 const LandingPage = lazy(() => import('../features/dashboard/pages/LandingPage').then(m => ({ default: m.LandingPage })));
 const DashboardPage = lazy(() => import('../features/dashboard/pages/DashboardPage'));
+const DashboardStatsPage = lazy(() => import('../features/dashboard/pages/DashboardStatsPage').then(m => ({ default: m.DashboardStatsPage })));
 const BotsConnectPage = lazy(() => import('../features/bot/pages/BotsConnectPage').then(m => ({ default: m.BotsConnectPage })));
 const AutomationsPage = lazy(() => import('../features/bot/pages/AutomationsPage').then(m => ({ default: m.AutomationsPage })));
 const SettingsPage = lazy(() => import('../features/bot/pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const FlowBuilderPage = lazy(() => import('../features/bot/pages/FlowBuilderPage').then(m => ({ default: m.FlowBuilderPage })));
 const ChatPage = lazy(() => import('../features/crm/pages/ChatPage').then(m => ({ default: m.ChatPage })));
 const ContactsPage = lazy(() => import('../features/crm/pages/ContactsPage').then(m => ({ default: m.ContactsPage })));
+const AiPage = lazy(() => import('../features/ai/pages/AiPage'));
 const OrdersPage = lazy(() => import('../features/crm/pages/OrdersPage').then(m => ({ default: m.OrdersPage })));
 const BroadcastsPage = lazy(() => import('../features/broadcast/pages/BroadcastsPage').then(m => ({ default: m.BroadcastsPage })));
 const BroadcastBuilderPage = lazy(() => import('../features/broadcast/pages/BroadcastBuilderPage').then(m => ({ default: m.BroadcastBuilderPage })));
@@ -44,6 +46,7 @@ export const AppRouter: React.FC = () => {
 
           <Route element={<PrivateRoute />}>
             <Route path={ROUTES.HOME} element={<DashboardPage />} />
+            <Route path={ROUTES.DASHBOARD} element={<DashboardStatsPage />} />
             <Route path={ROUTES.CONNECT_BOT} element={<BotsConnectPage />} />
             <Route path={ROUTES.AUTOMATIONS} element={<AutomationsPage />} />
             <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
@@ -51,6 +54,7 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.FLOW_BUILDER} element={<FlowBuilderPage />} />
             <Route path={ROUTES.CHAT} element={<ChatPage />} />
             <Route path={ROUTES.CONTACTS} element={<ContactsPage />} />
+            <Route path={ROUTES.AI} element={<AiPage />} />
             <Route path={ROUTES.ORDERS} element={<OrdersPage />} />
             <Route path={ROUTES.BROADCASTS} element={<BroadcastsPage />} />
             <Route path={ROUTES.BROADCAST_BUILDER} element={<BroadcastBuilderPage />} />

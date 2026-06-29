@@ -3,10 +3,7 @@ import { useNodeEditor } from '../../hooks/useNodeEditor';
 import { NODE_TITLES, NODE_ICONS } from '../../config/nodeDisplay';
 import { StartNodeEditor } from './editors/StartNodeEditor';
 import { MessageNodeEditor } from './editors/MessageNodeEditor';
-import { InputNodeEditor } from './editors/InputNodeEditor';
 import { ConditionNodeEditor } from './editors/ConditionNodeEditor';
-import { OrderNodeEditor } from './editors/OrderNodeEditor';
-import { LeadNodeEditor } from './editors/LeadNodeEditor';
 import { ApiCallNodeEditor } from './editors/ApiCallNodeEditor';
 import { EndNodeEditor } from './editors/EndNodeEditor';
 import { ActionNodeEditor } from './editors/ActionNodeEditor';
@@ -60,14 +57,8 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
             onSelectNode={onSelectNode}
           />
         );
-      case 'INPUT':
-        return <InputNodeEditor data={data} handleChange={handleChange} />;
       case 'CONDITION':
         return <ConditionNodeEditor data={data} handleChange={handleChange} editorState={editorState} />;
-      case 'ORDER':
-        return <OrderNodeEditor data={data} handleChange={handleChange} />;
-      case 'LEAD':
-        return <LeadNodeEditor data={data} handleChange={handleChange} />;
       case 'API_CALL':
         return <ApiCallNodeEditor data={data} handleChange={handleChange} />;
       case 'ACTION':

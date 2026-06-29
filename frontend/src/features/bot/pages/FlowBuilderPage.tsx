@@ -13,12 +13,13 @@ import { FLOW_EDGE_DEFAULTS, EDGE_TYPES } from '../config/flowEdges';
 import { CONTEXT_MENU_OPTIONS } from '../config/contextMenuOptions';
 import { useFlowBuilder } from '../hooks/useFlowBuilder';
 import { ROUTES } from '../../../constants/routes';
-import { ArrowLeft, Loader2, Plus, GitFork, Route, GitCommit, Undo2, Redo2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, GitFork, Route, GitCommit, Undo2, Redo2, Sparkles } from 'lucide-react';
 import { useAiStore } from '../../../store/useAiStore';
 import { useEffect, useRef, useCallback } from 'react';
 import { useNodeEditor } from '../hooks/useNodeEditor';
 import { EditButtonDrawer } from '../components/sidebar/drawers/EditButtonDrawer';
 import { ChooseNextStepDrawer } from '../components/sidebar/drawers/ChooseNextStepDrawer';
+import { AiAssistantDrawer } from '../../../features/ai/components/AiAssistantDrawer';
 
 const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
   fromX,
@@ -304,6 +305,18 @@ const FlowBuilderInner: React.FC = () => {
             <div className="w-[1px] h-6 bg-slate-200 hidden sm:block" />
 
             <button
+              onClick={() => {
+                useAiStore.getState().setIsOpen(true);
+                useAiStore.getState().setActiveTab('generator');
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 text-xs font-bold rounded-xl transition-all border border-indigo-100 cursor-pointer shadow-3xs"
+              title="Generate flow with AI"
+            >
+              <Sparkles size={14} className="animate-pulse" />
+              <span>AI Gen</span>
+            </button>
+
+            <button
               onClick={handleSaveFlow}
               disabled={saveMutation.isPending}
               className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-all shadow shadow-indigo-100 cursor-pointer"
@@ -537,6 +550,7 @@ const FlowBuilderInner: React.FC = () => {
           </div>
         </div>
       </div>
+      <AiAssistantDrawer />
     </DashboardLayout>
   );
 };

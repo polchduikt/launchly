@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useAiAssistant } from '../hooks/useAiAssistant';
 import { QUICK_QUESTIONS, AI_FLOW_TEMPLATES } from '../config';
 import { Sparkles, X, Send, Bot, User, Loader2, RefreshCw, AlertCircle, AlertTriangle } from 'lucide-react';
@@ -9,7 +9,6 @@ export const AiAssistantDrawer: React.FC = () => {
     setIsOpen,
     messages,
     activeTab,
-    setActiveTab,
     onGenerate,
     inputValue,
     setInputValue,
@@ -30,6 +29,15 @@ export const AiAssistantDrawer: React.FC = () => {
     handleQuickQuestion,
   } = useAiAssistant();
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [inputValue]);
+
   if (!isOpen) return null;
 
   return (
@@ -47,7 +55,9 @@ export const AiAssistantDrawer: React.FC = () => {
                 <Sparkles size={18} className="animate-pulse" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-800">Launchly AI Copilot</h3>
+                <h3 className="text-sm font-bold text-slate-800">
+                  {onGenerate ? 'Launchly AI Flow Generator' : 'Launchly AI Copilot'}
+                </h3>
                 <p className="text-[10px] text-slate-400 font-semibold">Online • Powered by Groq</p>
               </div>
             </div>
@@ -58,31 +68,6 @@ export const AiAssistantDrawer: React.FC = () => {
               <X size={16} />
             </button>
           </div>
-
-          {onGenerate && (
-            <div className="flex bg-slate-100 p-1 rounded-xl select-none">
-              <button
-                onClick={() => setActiveTab('chat')}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  activeTab === 'chat'
-                    ? 'bg-white text-slate-800 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                AI Assistant
-              </button>
-              <button
-                onClick={() => setActiveTab('generator')}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  activeTab === 'generator'
-                    ? 'bg-white text-slate-800 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                AI Flow Generator
-              </button>
-            </div>
-          )}
 
           <div className="bg-slate-50 border border-slate-200/60 p-2.5 rounded-xl text-xs">
             {isUsageLoading ? (
@@ -147,7 +132,7 @@ export const AiAssistantDrawer: React.FC = () => {
         </header>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-          {activeTab === 'chat' ? (
+          {activeTab === 'chat' && !onGenerate ? (
             <>
               {messages.map((msg, index) => {
                 const isAI = msg.role === 'assistant';
@@ -160,7 +145,7 @@ export const AiAssistantDrawer: React.FC = () => {
                       className={`w-7 h-7 rounded-full shrink-0 flex items-center justify-center border text-xs shadow-sm ${
                         isAI
                           ? 'bg-indigo-50 border-indigo-100 text-indigo-600'
-                          : 'bg-white border-slate-200 text-slate-600'
+                          : 'bg-slate-100 border-slate-200 text-slate-600'
                       }`}
                     >
                       {isAI ? <Bot size={14} /> : <User size={14} />}
@@ -170,10 +155,10 @@ export const AiAssistantDrawer: React.FC = () => {
                       className={`p-3 rounded-2xl text-xs leading-relaxed break-words shadow-sm border ${
                         isAI
                           ? 'bg-white border-slate-200/80 text-slate-700 rounded-tl-none'
-                          : 'bg-indigo-600 border-indigo-700 text-white rounded-tr-none'
+                          : 'bg-slate-100 border-slate-200/80 text-slate-800 rounded-tr-none'
                       }`}
                     >
-                      {msg.content}
+                      <span className="break-all">{msg.content}</span>
                     </div>
                   </div>
                 );
@@ -317,9 +302,10 @@ export const AiAssistantDrawer: React.FC = () => {
 
         {activeTab === 'chat' ? (
           <footer className="bg-white border-t border-slate-200 p-4 shrink-0">
-            <div className="flex gap-2 relative items-center">
-              <input
-                type="text"
+            <div className="flex gap-2 items-end bg-slate-50 border border-slate-200/80 rounded-xl p-2 w-full">
+              <textarea
+                ref={textareaRef}
+                rows={1}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -329,12 +315,12 @@ export const AiAssistantDrawer: React.FC = () => {
                     ? 'Daily request limit reached'
                     : 'Ask Launchly AI something...'
                 }
-                className="flex-1 bg-slate-50 disabled:bg-slate-100 border border-slate-200/80 rounded-xl px-4 py-3 pr-10 text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-400"
+                className="flex-1 bg-transparent pl-2 py-1.5 text-xs font-medium focus:outline-none resize-none max-h-32 overflow-y-auto leading-relaxed placeholder:text-slate-400 disabled:opacity-55 disabled:cursor-not-allowed"
               />
               <button
                 onClick={() => handleSend()}
                 disabled={isLimitReached || chatMutation.isPending || !inputValue.trim()}
-                className="absolute right-2 p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 text-white disabled:text-slate-400 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
+                className="p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 text-white disabled:text-slate-400 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center shrink-0 mb-0.5"
               >
                 <Send size={12} />
               </button>

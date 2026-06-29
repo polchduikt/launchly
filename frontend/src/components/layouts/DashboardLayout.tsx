@@ -4,9 +4,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import logoL from '../../assets/logo-l.png';
 import { NAV_ITEMS } from './config/navItems';
 import type { DashboardLayoutProps } from '../../types/shared';
-import { Sparkles, HelpCircle, BookOpen, Users, Briefcase, Lightbulb, ClipboardList, FileText } from 'lucide-react';
-import { useAiStore } from '../../store/useAiStore';
-import { AiAssistantDrawer } from '../../features/ai/components/AiAssistantDrawer';
+import { HelpCircle, BookOpen, Users, Briefcase, Lightbulb, ClipboardList, FileText } from 'lucide-react';
 import { useBotStore } from '../../store/useBotStore';
 import { useBotUsersQuery } from '../../features/crm/hooks/useCrmQueries';
 import { useSubscriptionQuery } from '../../features/billing/hooks/useBillingQueries';
@@ -18,7 +16,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
-  const { setIsOpen } = useAiStore();
   const [showPricing, setShowPricing] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showHelpMenu, setShowHelpMenu] = useState(false);
@@ -335,18 +332,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           {children}
         </div>
       </main>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-12 h-12 bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-200/50 hover:shadow-xl hover:shadow-indigo-300/60 hover:-translate-y-0.5 transition-all cursor-pointer z-40 group border border-indigo-500/20"
-        title="AI Assistant"
-      >
-        <Sparkles size={18} className="group-hover:rotate-12 transition-transform duration-300" />
-        <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
-        </span>
-      </button>
-      <AiAssistantDrawer />
       <PricingModal isOpen={showPricing} onClose={() => setShowPricing(false)} />
     </div>
   );
