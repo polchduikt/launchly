@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Plus, 
   Trash2, 
@@ -19,11 +19,18 @@ import {
   Video,
   MoreHorizontal,
   Grid,
-  HelpCircle
+  HelpCircle,
+  X,
+  MessageSquare
 } from 'lucide-react';
 import { useEdges, useReactFlow } from '@xyflow/react';
 import type { ButtonData } from '../../../../../types/bot';
 import { useNodeEditor, getBlocks } from '../../../hooks/useNodeEditor';
+import { useBotStore } from '../../../../../store/useBotStore';
+import { useTagsQuery } from '../../../../broadcast/hooks/useBroadcastQueries';
+import { FieldVariableSelector } from './FieldVariableSelector';
+import emojiData from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 
 interface MessageNodeEditorProps {
   nodeId: string;
@@ -269,6 +276,240 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
     handleChange('blocks', updated);
   };
 
+  const activeBotId = useBotStore((state) => state.activeBotId);
+  const { data: tags = [] } = useTagsQuery(activeBotId || 0);
+  const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+  const [activeLinkBlockId, setActiveLinkBlockId] = useState<string | null>(null);
+  const [activeEmojiBlockId, setActiveEmojiBlockId] = useState<string | null>(null);
+  const [linkStep, setLinkStep] = useState<'select' | 'form'>('select');
+  const [linkUrl, setLinkUrl] = useState('');
+  const [linkText, setLinkText] = useState('');
+  const [linkHasActions, setLinkHasActions] = useState(false);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!activeBlockId) return;
+      const activeEl = document.getElementById(`block-container-${activeBlockId}`);
+      if (activeEl && !activeEl.contains(e.target as Node)) {
+        const clickedPortal = (e.target as Element).closest('.rounded-2xl.shadow-xl.flex');
+        if (clickedPortal) return;
+        
+        setActiveBlockId(null);
+        setActiveLinkBlockId(null);
+        setActiveEmojiBlockId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [activeBlockId]);
+
+  React.useEffect(() => {
+    blocks.forEach((block) => {
+      if (block.type === 'text') {
+        const el = document.getElementById(`contenteditable-block-${block.id}`);
+        if (el && activeBlockId !== block.id) {
+          const currentText = htmlToText(el.innerHTML);
+          if (currentText !== (block.text || '')) {
+            el.innerHTML = textToHtml(block.text || '');
+          }
+        }
+      }
+    });
+  }, [blocks, activeBlockId]);
+
+  const customFields = useMemo(() => {
+    if (!activeBotId) return ['last_order_product', 'last_order_price', 'phone', 'email'];
+    const stored = localStorage.getItem(`launchly_custom_fields_${activeBotId}`);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          return parsed.map((f: any) => f.name);
+        }
+      } catch (e) {
+        console.error('Failed to parse custom fields', e);
+      }
+    }
+    return ['last_order_product', 'last_order_price', 'phone', 'email'];
+  }, [activeBotId]);
+
+  const lastSelectionRangeRef = React.useRef<Range | null>(null);
+  const editingLinkElementRef = React.useRef<HTMLElement | null>(null);
+
+  const saveSelectionRange = (blockId: string) => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      const el = document.getElementById(`contenteditable-block-${blockId}`);
+      if (el && el.contains(range.commonAncestorContainer)) {
+        lastSelectionRangeRef.current = range.cloneRange();
+      }
+    }
+  };
+
+  const handleContentEditableClick = (e: React.MouseEvent, blockId: string) => {
+    const target = e.target as HTMLElement;
+    if (target && target.getAttribute('data-type') === 'link') {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const url = target.getAttribute('data-url') || '';
+      const text = target.innerText || '';
+      
+      editingLinkElementRef.current = target;
+      
+      setLinkText(text);
+      setLinkUrl(url);
+      setLinkStep('form');
+      setActiveLinkBlockId(blockId);
+      setActiveEmojiBlockId(null);
+    }
+  };
+
+  const handleOpenLinkPopover = (blockId: string) => {
+    editingLinkElementRef.current = null;
+    setActiveLinkBlockId(blockId);
+    setActiveEmojiBlockId(null);
+    setLinkUrl('');
+    setLinkText('');
+    setLinkHasActions(false);
+    setLinkStep('select');
+  };
+
+  const textToHtml = (text: string) => {
+    if (!text) return '';
+    let escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    const varRegex = /\{\{\{?(.*?)\}?\}\}/g;
+    escaped = escaped.replace(varRegex, (_match, p1) => {
+      const rawName = p1.trim();
+      let displayName = rawName;
+      if (rawName === 'first_name') displayName = 'First Name';
+      else if (rawName === 'last_name') displayName = 'Last Name';
+      else if (rawName === 'phone') displayName = 'Phone';
+      else if (rawName === 'email') displayName = 'Email';
+      else if (rawName === 'telegram_username') displayName = 'Telegram Username';
+      else if (rawName === 'telegram_user_id') displayName = 'Telegram User ID';
+      else if (rawName === 'contact_id') displayName = 'Contact Id';
+      else if (rawName === 'subscribed') displayName = 'Subscribed';
+
+      return `<span class="inline-flex items-center bg-blue-600 text-white rounded px-1.5 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline" contenteditable="false" data-type="variable" data-val="${rawName}">${displayName}</span>`;
+    });
+
+    const mdLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+    escaped = escaped.replace(mdLinkRegex, (_match, p1, p2) => {
+      return `<span class="text-blue-600 font-bold hover:underline cursor-pointer" contenteditable="false" data-type="link" data-url="${p2}">${p1}</span>`;
+    });
+
+    return escaped;
+  };
+
+  const htmlToText = (html: string) => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+
+    const parseNode = (node: Node): string => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return node.nodeValue || '';
+      }
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as HTMLElement;
+        if (el.getAttribute('data-type') === 'variable') {
+          const val = el.getAttribute('data-val') || '';
+          return `{{${val}}}`;
+        }
+        if (el.getAttribute('data-type') === 'link') {
+          const url = el.getAttribute('data-url') || '';
+          const text = el.innerText || '';
+          return `[${text}](${url})`;
+        }
+        if (el.tagName === 'BR') {
+          return '\n';
+        }
+        if (el.tagName === 'DIV' || el.tagName === 'P') {
+          let childText = '';
+          for (let i = 0; i < el.childNodes.length; i++) {
+            childText += parseNode(el.childNodes[i]);
+          }
+          return '\n' + childText;
+        }
+        
+        let childText = '';
+        for (let i = 0; i < el.childNodes.length; i++) {
+          childText += parseNode(el.childNodes[i]);
+        }
+        return childText;
+      }
+      return '';
+    };
+
+    let text = '';
+    for (let i = 0; i < tempDiv.childNodes.length; i++) {
+      text += parseNode(tempDiv.childNodes[i]);
+    }
+    return text.replace(/^\n/, '');
+  };
+
+  const handleContentEditableInput = (blockId: string) => {
+    const el = document.getElementById(`contenteditable-block-${blockId}`);
+    if (el) {
+      const text = htmlToText(el.innerHTML);
+      updateBlockContent(blockId, { text });
+    }
+  };
+
+  const insertHtmlAtCursor = (html: string, blockId: string) => {
+    const el = document.getElementById(`contenteditable-block-${blockId}`);
+    if (!el) return;
+    el.focus();
+    
+    const sel = window.getSelection();
+    if (sel) {
+      sel.removeAllRanges();
+      if (lastSelectionRangeRef.current) {
+        sel.addRange(lastSelectionRangeRef.current);
+      }
+    }
+
+    if (sel && sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      if (el.contains(range.commonAncestorContainer)) {
+        range.deleteContents();
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const frag = document.createDocumentFragment();
+        let node;
+        let lastNode;
+        while ((node = tempDiv.firstChild)) {
+          lastNode = frag.appendChild(node);
+        }
+        range.insertNode(frag);
+        
+        if (lastNode) {
+          range.setStartAfter(lastNode);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      } else {
+        el.innerHTML += html;
+      }
+    } else {
+      el.innerHTML += html;
+    }
+    
+    const text = htmlToText(el.innerHTML);
+    updateBlockContent(blockId, { text });
+    
+    saveSelectionRange(blockId);
+  };
+
   return (
     <div className="space-y-4 select-none">
       <input
@@ -286,7 +527,10 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
           return (
             <div 
               key={block.id} 
-              className="border border-dashed border-slate-200 rounded-3xl bg-white shadow-sm overflow-hidden flex flex-col group/block transition-all hover:border-slate-350 hover:shadow-md"
+              id={`block-container-${block.id || ''}`}
+              className={`border border-dashed border-slate-200 rounded-3xl bg-white shadow-sm flex flex-col group/block transition-all hover:border-slate-350 hover:shadow-md relative ${
+                activeBlockId === block.id ? 'z-40' : 'overflow-hidden'
+              }`}
             >
               <div className="bg-slate-50/70 border-b border-slate-100 px-4 py-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -348,7 +592,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => deleteBlock(block.id)}
+                    onClick={() => deleteBlock(block.id || '')}
                     className="p-1 hover:bg-rose-50 rounded transition-colors text-slate-400 hover:text-rose-600"
                   >
                     <Trash2 size={12} className="stroke-[2.5]" />
@@ -358,30 +602,248 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
 
               {block.type === 'text' && (
                 <div className="flex flex-col">
-                  <div className="bg-slate-50/20 p-4 pb-2 relative flex flex-col min-h-[110px]">
-                    <textarea
-                      rows={3}
-                      value={block.text || ''}
-                      onChange={(e) => updateBlockContent(block.id, { text: e.target.value })}
-                      placeholder="Enter your text..."
-                      maxLength={2000}
-                      className="w-full text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none bg-transparent resize-none border-0 p-0 leading-relaxed"
+                  <div 
+                    className="bg-slate-50/20 p-4 pb-2 relative flex flex-col min-h-[110px]"
+                    onFocus={() => setActiveBlockId(block.id || '')}
+                  >
+                    <div
+                      id={`contenteditable-block-${block.id || ''}`}
+                      contentEditable
+                      onInput={() => handleContentEditableInput(block.id || '')}
+                      onKeyUp={() => saveSelectionRange(block.id || '')}
+                      onMouseUp={() => saveSelectionRange(block.id || '')}
+                      onFocus={() => {
+                        setActiveBlockId(block.id || '');
+                      }}
+                      onClick={(e) => handleContentEditableClick(e, block.id || '')}
+                      data-placeholder="Enter your text..."
+                      className="w-full text-xs font-semibold text-slate-800 focus:outline-none bg-transparent min-h-[80px] cursor-text break-words outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 empty:before:pointer-events-none"
                     />
-                    <div className="absolute bottom-2.5 right-3 bg-slate-900 text-slate-200 px-2.5 py-1.5 rounded-xl flex items-center gap-2 shadow-md">
-                      <button type="button" className="hover:text-white transition-colors">
-                        <LinkIcon size={12} className="stroke-[2.5]" />
-                      </button>
-                      <button type="button" className="hover:text-white transition-colors">
-                        <Smile size={12} className="stroke-[2.5]" />
-                      </button>
-                      <button type="button" className="hover:text-white transition-colors">
-                        <Parentheses size={12} className="stroke-[2.5]" />
-                      </button>
-                      <div className="w-[1px] h-3.5 bg-slate-700/60 my-0.5" />
-                      <span className="text-[10px] font-extrabold tracking-wider text-slate-300">
-                        {2000 - (block.text || '').length}
-                      </span>
-                    </div>
+                    
+                    {activeBlockId === block.id && (
+                      <div className="absolute bottom-2.5 right-3 bg-slate-900 text-slate-200 px-2.5 py-1.5 rounded-xl flex items-center gap-2 shadow-md z-50">
+                        <button
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => handleOpenLinkPopover(block.id || '')}
+                          className="hover:text-white transition-colors cursor-pointer"
+                        >
+                          <LinkIcon size={12} className="stroke-[2.5]" />
+                        </button>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => {
+                            setActiveEmojiBlockId(block.id || '');
+                            setActiveLinkBlockId(null);
+                          }}
+                          className="hover:text-white transition-colors cursor-pointer"
+                        >
+                          <Smile size={12} className="stroke-[2.5]" />
+                        </button>
+                        <FieldVariableSelector
+                          onSelect={(val) => {
+                            const displayName = val === 'first_name' ? 'First Name'
+                                              : val === 'last_name' ? 'Last Name'
+                                              : val === 'phone' ? 'Phone'
+                                              : val === 'email' ? 'Email'
+                                              : val === 'telegram_username' ? 'Telegram Username'
+                                              : val === 'telegram_user_id' ? 'Telegram User ID'
+                                              : val === 'contact_id' ? 'Contact Id'
+                                              : val === 'subscribed' ? 'Subscribed'
+                                              : val;
+                            const html = `<span class="inline-flex items-center bg-blue-600 text-white rounded px-1.5 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline" contenteditable="false" data-type="variable" data-val="${val}">${displayName}</span>`;
+                            insertHtmlAtCursor(html, block.id || '');
+                            setActiveLinkBlockId(null);
+                            setActiveEmojiBlockId(null);
+                          }}
+                          customFields={customFields}
+                          tags={tags}
+                          mode="variable"
+                          position="bottom"
+                          trigger={
+                            <button
+                              type="button"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => {
+                                setActiveLinkBlockId(null);
+                                setActiveEmojiBlockId(null);
+                              }}
+                              className="hover:text-white transition-colors cursor-pointer flex items-center"
+                              title="Variables"
+                            >
+                              <Parentheses size={12} className="stroke-[2.5]" />
+                            </button>
+                          }
+                        />
+                        <div className="w-[1px] h-3.5 bg-slate-700/60 my-0.5" />
+                        <span className="text-[10px] font-extrabold tracking-wider text-slate-300">
+                          {2000 - (block.text || '').length}
+                        </span>
+                      </div>
+                    )}
+
+                    {activeLinkBlockId === block.id && (
+                      <div className="absolute top-full mt-2 left-3 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 w-72 text-slate-800 space-y-3 text-left before:content-[''] before:absolute before:bottom-full before:left-10 before:border-[6px] before:border-transparent before:border-b-white">
+                        <div className="flex justify-between items-center pb-1">
+                          <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
+                            When This Link is Clicked
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setActiveLinkBlockId(null)}
+                            className="text-slate-400 hover:text-slate-655 cursor-pointer"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+
+                        {linkStep === 'select' ? (
+                          <div className="space-y-2">
+                            <button
+                              type="button"
+                              onClick={() => setLinkStep('form')}
+                              className="flex items-center gap-2.5 w-full p-3 border border-indigo-100 hover:bg-indigo-50/20 rounded-xl text-xs font-bold text-indigo-700 transition-colors text-left cursor-pointer"
+                            >
+                              <LinkIcon size={14} />
+                              <span>Open website</span>
+                            </button>
+                            <button
+                              type="button"
+                              disabled
+                              className="flex items-center gap-2.5 w-full p-3 border border-slate-100 bg-slate-50/50 text-slate-400 rounded-xl text-xs font-bold text-left cursor-not-allowed opacity-60"
+                            >
+                              <MessageSquare size={14} />
+                              <span>Open Messenger</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between bg-indigo-50/40 border border-indigo-100/60 rounded-xl px-3 py-2 text-xs text-indigo-750 font-bold">
+                              <div className="flex items-center gap-2">
+                                <LinkIcon size={12} />
+                                <span>Open website</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setLinkStep('select')}
+                                className="text-indigo-400 hover:text-indigo-650 cursor-pointer"
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">
+                                Website URL
+                              </label>
+                              <input
+                                type="text"
+                                value={linkUrl}
+                                onChange={(e) => setLinkUrl(e.target.value)}
+                                placeholder="https://yourwebsite.com"
+                                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-400 bg-white text-slate-800"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">
+                                Link text
+                              </label>
+                              <input
+                                type="text"
+                                value={linkText}
+                                onChange={(e) => setLinkText(e.target.value)}
+                                placeholder="Enter link text"
+                                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-400 bg-white text-slate-800"
+                              />
+                            </div>
+
+                            <div className="flex items-start justify-between py-1">
+                              <div className="space-y-0.5">
+                                <span className="text-[11px] font-bold text-slate-700 block">
+                                  Additional actions
+                                </span>
+                                <span className="text-[9px] text-slate-400 block leading-tight max-w-[180px]">
+                                  E.g. you can add a tag on a button click.
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setLinkHasActions(!linkHasActions)}
+                                className={`w-8 h-4 rounded-full transition-all relative cursor-pointer ${
+                                  linkHasActions ? 'bg-indigo-650' : 'bg-slate-200'
+                                }`}
+                              >
+                                <span
+                                  className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.25 transition-all shadow-3xs ${
+                                    linkHasActions ? 'right-0.25' : 'left-0.25'
+                                  }`}
+                                />
+                              </button>
+                            </div>
+
+                            <div className="flex gap-2 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (editingLinkElementRef.current) {
+                                    const parent = editingLinkElementRef.current.parentNode;
+                                    if (parent) {
+                                      const textNode = document.createTextNode(editingLinkElementRef.current.innerText);
+                                      parent.replaceChild(textNode, editingLinkElementRef.current);
+                                    }
+                                    editingLinkElementRef.current = null;
+                                    handleContentEditableInput(block.id || '');
+                                  }
+                                  setActiveLinkBlockId(null);
+                                }}
+                                className="flex-1 px-3 py-2 border border-slate-200 hover:bg-slate-50 text-slate-550 rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+                              >
+                                Delete
+                              </button>
+                              <button
+                                type="button"
+                                disabled={!linkUrl.trim()}
+                                onClick={() => {
+                                  if (editingLinkElementRef.current) {
+                                    editingLinkElementRef.current.setAttribute('data-url', linkUrl.trim());
+                                    editingLinkElementRef.current.innerText = linkText.trim() || linkUrl.trim();
+                                    editingLinkElementRef.current = null;
+                                    handleContentEditableInput(block.id || '');
+                                  } else {
+                                    const html = `<span class="text-blue-600 font-bold hover:underline cursor-pointer" contenteditable="false" data-type="link" data-url="${linkUrl.trim()}">${linkText.trim() || linkUrl.trim()}</span>`;
+                                    insertHtmlAtCursor(html, block.id || '');
+                                  }
+                                  setActiveLinkBlockId(null);
+                                }}
+                                className="flex-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-100 disabled:text-slate-400 text-white rounded-xl text-xs font-bold transition-all cursor-pointer text-center disabled:cursor-not-allowed"
+                              >
+                                Done
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {activeEmojiBlockId === block.id && (
+                      <div 
+                        onMouseDown={(e) => e.preventDefault()}
+                        className="absolute top-full mt-2 right-3 z-50 shadow-xl rounded-2xl overflow-hidden border border-slate-200 bg-white origin-top-right scale-[0.82] before:content-[''] before:absolute before:bottom-full before:right-6 before:border-[6px] before:border-transparent before:border-b-white"
+                      >
+                        <Picker
+                          data={emojiData}
+                          onEmojiSelect={(emoji: any) => {
+                            insertHtmlAtCursor(emoji.native, block.id || '');
+                            setActiveEmojiBlockId(null);
+                          }}
+                          theme="light"
+                          previewPosition="none"
+                          skinTonePosition="none"
+                          perLine={8}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="p-3 bg-white space-y-2 border-t border-slate-100">

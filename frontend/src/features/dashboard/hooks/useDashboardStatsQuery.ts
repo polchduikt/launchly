@@ -5,6 +5,6 @@ export const useDashboardStatsQuery = (botId: number, days: number = 7, enabled:
   return useQuery({
     queryKey: ['dashboard-stats', botId, days],
     queryFn: () => getDashboardStatsApi(botId, days),
-    enabled: enabled && botId > 0,
+    enabled: enabled && botId >= 0,
   });
 };
