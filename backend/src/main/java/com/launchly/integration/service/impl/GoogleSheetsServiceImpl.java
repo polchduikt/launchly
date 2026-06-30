@@ -462,4 +462,85 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             return List.of();
         }
     }
+
+    @Override
+    @Transactional
+    public List<List<Object>> getSheetValues(Long botId, String spreadsheetId, String worksheetName) {
+        Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
+        refreshTokenIfNeeded(integration);
+
+        try {
+            String decryptedAccessToken = encryptionUtil.decrypt(integration.getGoogleAccessToken());
+            String encodedSheetName = URLEncoder.encode(worksheetName, StandardCharsets.UTF_8);
+            String url = "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheetId + "/values/" + encodedSheetName + "!A:Z";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + decryptedAccessToken)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                log.error("Failed to fetch sheet values. Status: {}, Body: {}", response.statusCode(), response.body());
+                return List.of();
+            }
+
+            JsonNode responseJson = objectMapper.readTree(response.body());
+            JsonNode valuesNode = responseJson.path("values");
+            List<List<Object>> rowList = new ArrayList<>();
+            if (valuesNode.isArray()) {
+                for (JsonNode rowNode : valuesNode) {
+                    List<Object> row = new ArrayList<>();
+                    if (rowNode.isArray()) {
+                        for (JsonNode cell : rowNode) {
+                            row.add(cell.asText());
+                        }
+                    }
+                    rowList.add(row);
+                }
+            }
+            return rowList;
+        } catch (Exception e) {
+            log.error("Error fetching values for sheet {} in spreadsheet {}: {}", worksheetName, spreadsheetId, e.getMessage(), e);
+            return List.of();
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateCell(Long botId, String spreadsheetId, String worksheetName, String cellReference, Object value) {
+        Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
+        refreshTokenIfNeeded(integration);
+
+        try {
+            String decryptedAccessToken = encryptionUtil.decrypt(integration.getGoogleAccessToken());
+            String fullRange = worksheetName + "!" + cellReference;
+            String encodedRange = URLEncoder.encode(fullRange, StandardCharsets.UTF_8);
+            String url = "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheetId + 
+                    "/values/" + encodedRange + "?valueInputOption=USER_ENTERED";
+
+            Map<String, Object> bodyMap = new HashMap<>();
+            bodyMap.put("range", fullRange);
+            bodyMap.put("majorDimension", "ROWS");
+            bodyMap.put("values", List.of(List.of(value != null ? value : "")));
+
+            String requestBody = objectMapper.writeValueAsString(bodyMap);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + decryptedAccessToken)
+                    .header("Content-Type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                log.error("Failed to update cell {}. Status: {}, Body: {}", fullRange, response.statusCode(), response.body());
+            }
+        } catch (Exception e) {
+            log.error("Error updating cell {} in spreadsheet {}: {}", cellReference, spreadsheetId, e.getMessage(), e);
+        }
+    }
 }

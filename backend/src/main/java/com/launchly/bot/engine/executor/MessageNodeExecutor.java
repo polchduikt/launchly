@@ -32,6 +32,8 @@ import java.util.regex.Pattern;
 import com.launchly.bot.service.BotDialogStateService;
 import lombok.RequiredArgsConstructor;
 import tools.jackson.databind.ObjectMapper;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import com.launchly.bot.engine.model.DataCollectionState;
 
 @Slf4j
 @Component
@@ -39,6 +41,8 @@ import tools.jackson.databind.ObjectMapper;
 public class MessageNodeExecutor implements NodeExecutor {
 
     private final BotDialogStateService stateService;
+    private final StringRedisTemplate redisTemplate;
+    private final ObjectMapper objectMapper;
 
     @Override
     public NodeType getType() {
@@ -207,24 +211,47 @@ public class MessageNodeExecutor implements NodeExecutor {
 
                 } else if ("data_collection".equals(type)) {
                     String blockText = (String) block.getOrDefault("text", "");
-                    if (blockText == null || blockText.trim().isEmpty()) {
-                        blockIdx++;
-                        continue;
+                    if (blockText != null && !blockText.trim().isEmpty()) {
+                        String resolvedText = resolvePlaceholders(blockText, sessionData, botUser);
+                        String escapedText = escapeHtml(resolvedText);
+                        String htmlText = convertMarkdownLinksToHtml(escapedText);
+
+                        try {
+                            SendMessage message = SendMessage.builder()
+                                    .chatId(chatId)
+                                    .text(htmlText)
+                                    .parseMode("HTML")
+                                    .build();
+                            client.execute(message);
+                        } catch (TelegramApiException e) {
+                            log.error("Failed to send data collection question in node {}: {}", node.id(), e.getMessage());
+                        }
                     }
-                    String resolvedText = resolvePlaceholders(blockText, sessionData, botUser);
-                    String escapedText = escapeHtml(resolvedText);
-                    String htmlText = convertMarkdownLinksToHtml(escapedText);
 
                     try {
-                        SendMessage message = SendMessage.builder()
-                                .chatId(chatId)
-                                .text(htmlText)
-                                .parseMode("HTML")
+                        String replyType = (String) block.getOrDefault("replyType", "Text");
+                        String variableName = (String) block.getOrDefault("variableName", "");
+                        Object expObj = block.get("expirationMinutes");
+                        int expirationMinutes = expObj instanceof Number ? ((Number) expObj).intValue() : 30;
+                        Object retryObj = block.get("retryCount");
+                        int retryCount = retryObj instanceof Number ? ((Number) retryObj).intValue() : 3;
+
+                        DataCollectionState state = DataCollectionState.builder()
+                                .nodeId(node.id())
+                                .blockId((String) block.get("id"))
+                                .replyType(replyType)
+                                .saveToField(variableName)
+                                .retryCount(retryCount)
+                                .expiresAt(System.currentTimeMillis() + (expirationMinutes * 60 * 1000L))
                                 .build();
-                        client.execute(message);
-                    } catch (TelegramApiException e) {
-                        log.error("Failed to send data collection question in node {}: {}", node.id(), e.getMessage());
+
+                        String dcKey = "launchly:bot:data_collection:" + botUser.getBot().getId() + ":" + botUser.getTelegramId();
+                        redisTemplate.opsForValue().set(dcKey, objectMapper.writeValueAsString(state));
+                    } catch (Exception e) {
+                        log.error("Failed to save data collection state: {}", e.getMessage(), e);
                     }
+
+                    return null;
                 } else if ("file".equals(type)) {
                     String blockFileUrl = (String) block.get("fileUrl");
                     if (blockFileUrl == null || blockFileUrl.trim().isEmpty()) {

@@ -5,6 +5,8 @@ import tools.jackson.databind.ObjectMapper;
 import com.launchly.bot.engine.executor.NodeExecutor;
 import com.launchly.bot.engine.model.FlowEdge;
 import com.launchly.bot.engine.model.FlowNode;
+import com.launchly.bot.engine.model.DataCollectionState;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.entity.FlowSchema;
@@ -153,6 +155,54 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 return;
             }
 
+            String dcKey = "launchly:bot:data_collection:" + botId + ":" + telegramUserId;
+            String dcStateStr = redisTemplate.opsForValue().get(dcKey);
+            if (dcStateStr != null && !dcStateStr.trim().isEmpty()) {
+                DataCollectionState dcState = objectMapper.readValue(dcStateStr, DataCollectionState.class);
+                if (System.currentTimeMillis() > dcState.getExpiresAt()) {
+                    redisTemplate.delete(dcKey);
+                    String timeoutNodeId = findTargetNodeId(edges, dcState.getNodeId(), "timeout");
+                    if (timeoutNodeId == null) {
+                        timeoutNodeId = findTargetNodeId(edges, dcState.getNodeId(), "next");
+                    }
+                    stateService.setCurrentNodeId(botId, telegramUserId, timeoutNodeId);
+                    botUser.setCurrentNodeId(timeoutNodeId);
+                    botUser = botUserRepository.save(botUser);
+                } else if (update.hasMessage() && update.getMessage().hasText()) {
+                    String text = update.getMessage().getText().trim();
+                    boolean isValid = validateInput(text, dcState.getReplyType());
+                    if (isValid) {
+                        saveCustomField(botUser, dcState.getSaveToField(), text);
+                        redisTemplate.delete(dcKey);
+                        String successNodeId = findTargetNodeId(edges, dcState.getNodeId(), "reply");
+                        if (successNodeId == null) {
+                            successNodeId = findTargetNodeId(edges, dcState.getNodeId(), "next");
+                        }
+                        stateService.setCurrentNodeId(botId, telegramUserId, successNodeId);
+                        botUser.setCurrentNodeId(successNodeId);
+                        botUser = botUserRepository.save(botUser);
+                    } else {
+                        int retriesLeft = dcState.getRetryCount() - 1;
+                        if (retriesLeft >= 0) {
+                            dcState.setRetryCount(retriesLeft);
+                            redisTemplate.opsForValue().set(dcKey, objectMapper.writeValueAsString(dcState));
+                            sendValidationErrorMessage(telegramUserId.toString(), dcState.getReplyType(), client);
+                            return;
+                        } else {
+                            redisTemplate.delete(dcKey);
+                            String timeoutNodeId = findTargetNodeId(edges, dcState.getNodeId(), "timeout");
+                            if (timeoutNodeId == null) {
+                                timeoutNodeId = findTargetNodeId(edges, dcState.getNodeId(), "next");
+                            }
+                            stateService.setCurrentNodeId(botId, telegramUserId, timeoutNodeId);
+                            botUser.setCurrentNodeId(timeoutNodeId);
+                            botUser = botUserRepository.save(botUser);
+                        }
+                    }
+                } else {
+                    return;
+                }
+            }
             String currentNodeId = resolveCurrentNodeId(botId, telegramUserId, botUser, nodes);
 
             int maxIterations = 50;
@@ -591,7 +641,6 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                     Map<String, Object> data = node.data();
                     if (data == null) continue;
 
-                    // 1. Check top-level buttons
                     List<?> topLevelButtons = (List<?>) data.get("buttons");
                     if (topLevelButtons != null) {
                         for (Object btnObj : topLevelButtons) {
@@ -605,7 +654,6 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                         }
                     }
 
-                    // 2. Check block-level buttons
                     List<Map<String, Object>> blocks = (List<Map<String, Object>>) data.get("blocks");
                     if (blocks != null) {
                         for (Map<String, Object> block : blocks) {
@@ -629,5 +677,68 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             log.warn("Failed to resolve button label for callback data {} in bot {}: {}", callbackData, botId, e.getMessage());
         }
         return callbackData;
+    }
+
+    private boolean validateInput(String text, String replyType) {
+        if (text == null || text.trim().isEmpty()) return false;
+        if ("Number".equalsIgnoreCase(replyType)) {
+            return text.matches("-?\\d+(\\.\\d+)?");
+        }
+        if ("Email".equalsIgnoreCase(replyType)) {
+            return text.matches("^[A-Za-z0-9+_.-]+@(.+)$");
+        }
+        if ("Phone".equalsIgnoreCase(replyType)) {
+            return text.matches("^\\+?[0-9\\s\\-\\(\\)]+$");
+        }
+        return true;
+    }
+
+    private void sendValidationErrorMessage(String chatId, String replyType, TelegramClient client) {
+        String msgText = "Некоректний формат. Будь ласка, введіть дійсні дані.";
+        if ("Email".equalsIgnoreCase(replyType)) {
+            msgText = "Будь ласка, введіть коректну адресу електронної пошти (наприклад: name@example.com).";
+        } else if ("Phone".equalsIgnoreCase(replyType)) {
+            msgText = "Будь ласка, введіть коректний номер телефону (наприклад: +380123456789).";
+        } else if ("Number".equalsIgnoreCase(replyType)) {
+            msgText = "Будь ласка, введіть число.";
+        }
+        try {
+            SendMessage message = SendMessage.builder()
+                    .chatId(chatId)
+                    .text(msgText)
+                    .build();
+            client.execute(message);
+        } catch (Exception e) {
+            log.error("Failed to send validation error message: {}", e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void saveCustomField(BotUser botUser, String fieldName, String fieldValue) {
+        if (fieldName == null || fieldName.trim().isEmpty()) return;
+        try {
+            Map<String, Object> metaMap = new HashMap<>();
+            if (botUser.getMetadata() != null && !botUser.getMetadata().trim().isEmpty()) {
+                metaMap = objectMapper.readValue(botUser.getMetadata(), Map.class);
+            }
+            Map<String, Object> customFields = (Map<String, Object>) metaMap.get("customFields");
+            if (customFields == null) {
+                customFields = new HashMap<>();
+            }
+            customFields.put(fieldName, fieldValue);
+            metaMap.put("customFields", customFields);
+            botUser.setMetadata(objectMapper.writeValueAsString(metaMap));
+            botUserRepository.save(botUser);
+        } catch (Exception e) {
+            log.error("Failed to save custom field: {}", e.getMessage(), e);
+        }
+    }
+
+    private String findTargetNodeId(List<FlowEdge> edges, String sourceNodeId, String sourceHandle) {
+        return edges.stream()
+                .filter(e -> e.source().equals(sourceNodeId) && sourceHandle.equals(e.sourceHandle()))
+                .findFirst()
+                .map(FlowEdge::target)
+                .orElse(null);
     }
 }

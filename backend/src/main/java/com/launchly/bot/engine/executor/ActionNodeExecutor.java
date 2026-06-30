@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import tools.jackson.databind.ObjectMapper;
 
@@ -184,9 +186,137 @@ public class ActionNodeExecutor implements NodeExecutor {
                             break;
                         }
 
-                        case "GS_GET_ROW":
+                        case "GS_GET_ROW": {
+                            Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS).orElse(null);
+                            if (integration == null) {
+                                log.warn("Skipping Google Sheets get row: no GOOGLE_SHEETS integration configured for bot {}", botId);
+                                break;
+                            }
+                            String spreadsheetId = (String) action.get("spreadsheetId");
+                            String sheetName = (String) action.get("sheetName");
+                            String lookupColumn = (String) action.get("lookupColumn");
+                            String lookupValue = (String) action.get("lookupValue");
+                            List<Map<String, String>> mappings = (List<Map<String, String>>) action.get("columnMappings");
+
+                            if (spreadsheetId != null && !spreadsheetId.isEmpty() && lookupColumn != null && !lookupColumn.isEmpty()) {
+                                String activeSpreadsheetId = resolveSpreadsheetId(botId, spreadsheetId);
+                                String activeSheetName = sheetName != null && !sheetName.trim().isEmpty() ? sheetName.trim() : "Sheet1";
+                                String resolvedLookupVal = resolveValue(lookupValue, sessionData, botUser).trim();
+
+                                List<List<Object>> sheetValues = googleSheetsService.getSheetValues(botId, activeSpreadsheetId, activeSheetName);
+                                if (sheetValues != null && !sheetValues.isEmpty()) {
+                                    List<Object> headers = sheetValues.get(0);
+                                    int lookupColIdx = -1;
+                                    for (int i = 0; i < headers.size(); i++) {
+                                        if (lookupColumn.equalsIgnoreCase(String.valueOf(headers.get(i)).trim())) {
+                                            lookupColIdx = i;
+                                            break;
+                                        }
+                                    }
+
+                                    if (lookupColIdx != -1) {
+                                        for (int rowIndex = 1; rowIndex < sheetValues.size(); rowIndex++) {
+                                            List<Object> row = sheetValues.get(rowIndex);
+                                            if (row.size() > lookupColIdx) {
+                                                String cellVal = String.valueOf(row.get(lookupColIdx)).trim();
+                                                if (cellVal.equalsIgnoreCase(resolvedLookupVal)) {
+                                                    log.info("Found matching row at index {} in Google Sheets for bot user {}", rowIndex, telegramUserId);
+                                                    if (mappings != null) {
+                                                        for (Map<String, String> m : mappings) {
+                                                            String targetGoogleCol = m.get("column");
+                                                            String targetLaunchlyField = m.get("value");
+                                                            if (targetGoogleCol != null && targetLaunchlyField != null) {
+                                                                int targetColIdx = -1;
+                                                                for (int hIdx = 0; hIdx < headers.size(); hIdx++) {
+                                                                    if (targetGoogleCol.equalsIgnoreCase(String.valueOf(headers.get(hIdx)).trim())) {
+                                                                        targetColIdx = hIdx;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                if (targetColIdx != -1 && row.size() > targetColIdx) {
+                                                                    String targetValue = String.valueOf(row.get(targetColIdx)).trim();
+                                                                    setContactField(botUser, botId, telegramUserId, targetLaunchlyField, targetValue, sessionData);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        log.warn("Lookup column '{}' not found in spreadsheet {} headers", lookupColumn, activeSpreadsheetId);
+                                    }
+                                }
+                            }
+                            break;
+                        }
+
                         case "GS_UPDATE_ROW": {
-                            log.info("Executed Google Sheets action: {}. (Simulated execution)", type);
+                            Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS).orElse(null);
+                            if (integration == null) {
+                                log.warn("Skipping Google Sheets update row: no GOOGLE_SHEETS integration configured for bot {}", botId);
+                                break;
+                            }
+                            String spreadsheetId = (String) action.get("spreadsheetId");
+                            String sheetName = (String) action.get("sheetName");
+                            String lookupColumn = (String) action.get("lookupColumn");
+                            String lookupValue = (String) action.get("lookupValue");
+                            List<Map<String, String>> mappings = (List<Map<String, String>>) action.get("columnMappings");
+
+                            if (spreadsheetId != null && !spreadsheetId.isEmpty() && lookupColumn != null && !lookupColumn.isEmpty()) {
+                                String activeSpreadsheetId = resolveSpreadsheetId(botId, spreadsheetId);
+                                String activeSheetName = sheetName != null && !sheetName.trim().isEmpty() ? sheetName.trim() : "Sheet1";
+                                String resolvedLookupVal = resolveValue(lookupValue, sessionData, botUser).trim();
+
+                                List<List<Object>> sheetValues = googleSheetsService.getSheetValues(botId, activeSpreadsheetId, activeSheetName);
+                                if (sheetValues != null && !sheetValues.isEmpty()) {
+                                    List<Object> headers = sheetValues.get(0);
+                                    int lookupColIdx = -1;
+                                    for (int i = 0; i < headers.size(); i++) {
+                                        if (lookupColumn.equalsIgnoreCase(String.valueOf(headers.get(i)).trim())) {
+                                            lookupColIdx = i;
+                                            break;
+                                        }
+                                    }
+
+                                    if (lookupColIdx != -1) {
+                                        for (int rowIndex = 1; rowIndex < sheetValues.size(); rowIndex++) {
+                                            List<Object> row = sheetValues.get(rowIndex);
+                                            if (row.size() > lookupColIdx) {
+                                                String cellVal = String.valueOf(row.get(lookupColIdx)).trim();
+                                                if (cellVal.equalsIgnoreCase(resolvedLookupVal)) {
+                                                    log.info("Updating matching row at index {} in Google Sheets for bot user {}", rowIndex, telegramUserId);
+                                                    if (mappings != null) {
+                                                        for (Map<String, String> m : mappings) {
+                                                            String targetGoogleCol = m.get("column");
+                                                            String targetValueExpr = m.get("value");
+                                                            if (targetGoogleCol != null && targetValueExpr != null && !targetValueExpr.trim().isEmpty()) {
+                                                                int targetColIdx = -1;
+                                                                for (int hIdx = 0; hIdx < headers.size(); hIdx++) {
+                                                                    if (targetGoogleCol.equalsIgnoreCase(String.valueOf(headers.get(hIdx)).trim())) {
+                                                                        targetColIdx = hIdx;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                if (targetColIdx != -1) {
+                                                                    String resolvedVal = resolveValue(targetValueExpr, sessionData, botUser);
+                                                                    String colLetter = getColumnLetter(targetColIdx);
+                                                                    String cellRef = colLetter + (rowIndex + 1);
+                                                                    googleSheetsService.updateCell(botId, activeSpreadsheetId, activeSheetName, cellRef, resolvedVal);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        log.warn("Lookup column '{}' not found in spreadsheet {} headers", lookupColumn, activeSpreadsheetId);
+                                    }
+                                }
+                            }
                             break;
                         }
 
@@ -229,6 +359,22 @@ public class ActionNodeExecutor implements NodeExecutor {
     }
 
     private String resolveValue(String text, Map<String, String> variables, BotUser botUser) {
+        if (text == null) return "";
+        String trimmed = text.trim();
+
+        if (trimmed.contains("+")) {
+            String[] parts = trimmed.split("\\+");
+            List<String> resolvedParts = new ArrayList<>();
+            for (String part : parts) {
+                resolvedParts.add(resolveSingleValue(part.trim(), variables, botUser));
+            }
+            return String.join("_", resolvedParts);
+        }
+
+        return resolveSingleValue(trimmed, variables, botUser);
+    }
+
+    private String resolveSingleValue(String text, Map<String, String> variables, BotUser botUser) {
         if (text == null) return "";
         String trimmed = text.trim();
 
@@ -295,23 +441,51 @@ public class ActionNodeExecutor implements NodeExecutor {
         return resolvePlaceholders(text, variables, botUser);
     }
 
+    private String replacePlaceholder(String text, String placeholderName, String value) {
+        if (text == null || placeholderName == null) return text;
+        String resolvedVal = value != null ? value : "";
+        try {
+            return text.replaceAll("(?i)" + Pattern.quote("{{" + placeholderName + "}}"),
+                                   Matcher.quoteReplacement(resolvedVal));
+        } catch (Exception e) {
+            return text.replace("{{" + placeholderName + "}}", resolvedVal)
+                       .replace("{{" + placeholderName.toLowerCase() + "}}", resolvedVal);
+        }
+    }
+
     private String resolvePlaceholders(String text, Map<String, String> variables, BotUser botUser) {
         if (text == null) return "";
         String result = text;
-        result = result.replace("{{first_name}}", botUser.getFirstName() != null ? botUser.getFirstName() : "");
-        result = result.replace("{{last_name}}", botUser.getLastName() != null ? botUser.getLastName() : "");
-        result = result.replace("{{username}}", botUser.getUsername() != null ? botUser.getUsername() : "");
-        result = result.replace("{{telegram_username}}", botUser.getUsername() != null ? botUser.getUsername() : "");
-        result = result.replace("{{telegram_user_id}}", botUser.getTelegramId() != null ? String.valueOf(botUser.getTelegramId()) : "");
-        result = result.replace("{{contact_id}}", botUser.getId() != null ? String.valueOf(botUser.getId()) : "");
-        result = result.replace("{{phone}}", variables.getOrDefault("phone", ""));
-        result = result.replace("{{email}}", variables.getOrDefault("email", ""));
-        result = result.replace("{{subscribed}}", variables.getOrDefault("telegram_opt_in", "false"));
-        result = result.replace("{{last_reply_type}}", variables.getOrDefault("last_reply_type", "text"));
 
-        for (Map.Entry<String, String> entry : variables.entrySet()) {
-            result = result.replace("{{" + entry.getKey() + "}}", entry.getValue() != null ? entry.getValue() : "");
-        }
+        result = replacePlaceholder(result, "First Name", botUser.getFirstName());
+        result = replacePlaceholder(result, "first_name", botUser.getFirstName());
+
+        result = replacePlaceholder(result, "Last Name", botUser.getLastName());
+        result = replacePlaceholder(result, "last_name", botUser.getLastName());
+
+        result = replacePlaceholder(result, "Telegram Username", botUser.getUsername());
+        result = replacePlaceholder(result, "telegram_username", botUser.getUsername());
+        result = replacePlaceholder(result, "username", botUser.getUsername());
+
+        result = replacePlaceholder(result, "Telegram User ID", botUser.getTelegramId() != null ? String.valueOf(botUser.getTelegramId()) : null);
+        result = replacePlaceholder(result, "telegram_user_id", botUser.getTelegramId() != null ? String.valueOf(botUser.getTelegramId()) : null);
+
+        result = replacePlaceholder(result, "Contact ID", botUser.getId() != null ? String.valueOf(botUser.getId()) : null);
+        result = replacePlaceholder(result, "Contact Id", botUser.getId() != null ? String.valueOf(botUser.getId()) : null);
+        result = replacePlaceholder(result, "contact_id", botUser.getId() != null ? String.valueOf(botUser.getId()) : null);
+
+        result = replacePlaceholder(result, "Phone", variables.get("phone"));
+        result = replacePlaceholder(result, "phone", variables.get("phone"));
+
+        result = replacePlaceholder(result, "Email", variables.get("email"));
+        result = replacePlaceholder(result, "email", variables.get("email"));
+
+        result = replacePlaceholder(result, "Subscribed", variables.get("telegram_opt_in"));
+        result = replacePlaceholder(result, "telegram_opt_in", variables.get("telegram_opt_in"));
+        result = replacePlaceholder(result, "Opted-in for Telegram", variables.get("telegram_opt_in"));
+
+        result = replacePlaceholder(result, "Last Reply Type", variables.get("last_reply_type"));
+        result = replacePlaceholder(result, "last_reply_type", variables.get("last_reply_type"));
 
         try {
             if (botUser.getMetadata() != null && !botUser.getMetadata().trim().isEmpty()) {
@@ -321,7 +495,7 @@ public class ActionNodeExecutor implements NodeExecutor {
                 if (customFields != null) {
                     for (Map.Entry<String, Object> entry : customFields.entrySet()) {
                         String valStr = entry.getValue() != null ? String.valueOf(entry.getValue()) : "";
-                        result = result.replace("{{" + entry.getKey() + "}}", valStr);
+                        result = replacePlaceholder(result, entry.getKey(), valStr);
                     }
                 }
             }
@@ -334,9 +508,9 @@ public class ActionNodeExecutor implements NodeExecutor {
             for (Tag t : allTags) {
                 boolean hasTag = botUserTagRepository.existsByBotUserIdAndTagId(botUser.getId(), t.getId());
                 String val = String.valueOf(hasTag);
-                result = result.replace("{{tag:" + t.getName() + "}}", val);
-                result = result.replace("{{tag." + t.getName() + "}}", val);
-                result = result.replace("{{" + t.getName() + "}}", val);
+                result = replacePlaceholder(result, "tag:" + t.getName(), val);
+                result = replacePlaceholder(result, "tag." + t.getName(), val);
+                result = replacePlaceholder(result, t.getName(), val);
             }
         } catch (Exception e) {
             log.error("Error replacing tag placeholders for user {}: {}", botUser.getId(), e.getMessage());
@@ -392,5 +566,38 @@ public class ActionNodeExecutor implements NodeExecutor {
         } catch (Exception e) {
             log.error("Failed to update contact metadata field: {}", e.getMessage(), e);
         }
+    }
+
+    private void setContactField(BotUser botUser, Long botId, Long telegramUserId, String fieldName, String value, Map<String, String> sessionData) {
+        String trimmed = fieldName.trim();
+        if (trimmed.equalsIgnoreCase("first_name") || trimmed.equalsIgnoreCase("First Name")) {
+            botUser.setFirstName(value);
+            botUserRepository.save(botUser);
+        } else if (trimmed.equalsIgnoreCase("last_name") || trimmed.equalsIgnoreCase("Last Name")) {
+            botUser.setLastName(value);
+            botUserRepository.save(botUser);
+        } else if (trimmed.equalsIgnoreCase("username") || trimmed.equalsIgnoreCase("telegram_username") || trimmed.equalsIgnoreCase("Telegram Username")) {
+            botUser.setUsername(value);
+            botUserRepository.save(botUser);
+        } else if (trimmed.equalsIgnoreCase("phone") || trimmed.equalsIgnoreCase("Phone")) {
+            stateService.setSessionData(botId, telegramUserId, "phone", value);
+            updateContactMetadataField(botUser, "phone", value);
+        } else if (trimmed.equalsIgnoreCase("email") || trimmed.equalsIgnoreCase("Email")) {
+            stateService.setSessionData(botId, telegramUserId, "email", value);
+            updateContactMetadataField(botUser, "email", value);
+        } else {
+            stateService.setSessionData(botId, telegramUserId, trimmed, value);
+            updateContactCustomField(botUser, trimmed, value);
+        }
+    }
+
+    private String getColumnLetter(int colIndex) {
+        StringBuilder sb = new StringBuilder();
+        int temp = colIndex;
+        while (temp >= 0) {
+            sb.insert(0, (char) ('A' + (temp % 26)));
+            temp = (temp / 26) - 1;
+        }
+        return sb.toString();
     }
 }

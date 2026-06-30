@@ -19,5 +19,9 @@ public interface GoogleSheetsService {
     List<String> getWorksheets(Long botId, String spreadsheetId);
 
     List<String> getHeaders(Long botId, String spreadsheetId, String worksheetName);
+
+    List<List<Object>> getSheetValues(Long botId, String spreadsheetId, String worksheetName);
+
+    void updateCell(Long botId, String spreadsheetId, String worksheetName, String cellReference, Object value);
 }
 
