@@ -4,6 +4,19 @@ import type { EditButtonDrawerProps } from '../../../../../types/bot';
 import type { Node, Edge } from '@xyflow/react';
 import { NODE_TITLES } from '../../../config/nodeDisplay';
 
+const mapNodeTypeToActionType = (nodeType?: string): string => {
+  switch (nodeType) {
+    case 'MessageNode': return 'TELEGRAM';
+    case 'AiNode': return 'AI_STEP';
+    case 'ActionNode': return 'ACTIONS';
+    case 'ConditionNode': return 'CONDITION';
+    case 'RandomNode': return 'RANDOM';
+    case 'DelayNode': return 'DELAY';
+    case 'StartAutomationNode': return 'AUTOMATION';
+    default: return 'TELEGRAM';
+  }
+};
+
 export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   onClose,
   button,
@@ -25,7 +38,19 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   if (button && button.value !== prevButtonValue) {
     setPrevButtonValue(button.value);
     setLabel(button.label || '');
-    setActionType(button.actionType || '');
+    const connectionEdge = (edges as Edge[]).find(
+      (e) => e.source === nodeId && e.sourceHandle === button.value
+    );
+    const targetNode = connectionEdge
+      ? (nodes as Node[]).find((n) => n.id === connectionEdge.target)
+      : null;
+      
+    let initialActionType = button.actionType || '';
+    if (!initialActionType && targetNode) {
+      initialActionType = mapNodeTypeToActionType(targetNode.type);
+    }
+    
+    setActionType(initialActionType);
     setActionTarget(button.actionTarget || '');
     setProductName(button.productName || '');
     setPrice(button.price || '');
@@ -274,7 +299,6 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                type="submit"
                disabled={
                  !label.trim() ||
-                 !actionType ||
                  (actionType === 'URL' && !actionTarget.trim()) ||
                  (actionType === 'BUY' && (!productName.trim() || !price.trim()))
                }

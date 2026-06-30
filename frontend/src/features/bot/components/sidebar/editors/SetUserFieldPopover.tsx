@@ -140,7 +140,11 @@ export const SetUserFieldPopover: React.FC<SetUserFieldPopoverProps> = ({
                 mode="variable"
                 tags={tags}
                 customFields={customFieldsNames}
-                onSelect={(selectedVar) => setTempValue(selectedVar)}
+                onSelect={(selectedVar) => {
+                  const currentVal = tempValue || '';
+                  const newVal = currentVal.trim() === '' ? selectedVar : `${currentVal} + ${selectedVar}`;
+                  setTempValue(newVal);
+                }}
               />
             </div>
           </div>

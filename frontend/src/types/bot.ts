@@ -227,6 +227,8 @@ export interface ActionItem {
   spreadsheetId?: string;
   sheetName?: string;
   columnMappings?: Array<{ column: string; value: string }>;
+  lookupColumn?: string;
+  lookupValue?: string;
 }
 
 export type ConditionBranch = {
@@ -297,6 +299,8 @@ export interface GoogleSheetsConfigModalProps {
   handleMappingValueChange: (header: string, val: string) => void;
   handleSaveSheetsConfig: () => void;
   handleReconnectGoogleSheets: () => void;
+  handleLookupColumnChange: (lookupColumn: string) => void;
+  handleLookupValueChange: (lookupValue: string) => void;
 }
 
 export interface SetUserFieldPopoverProps {

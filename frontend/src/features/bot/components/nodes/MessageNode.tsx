@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Handle, Position, useReactFlow, useEdges, useUpdateNodeInternals, useConnection, useNodes } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
-import { Send, Plus, Image as ImageIcon, Paperclip, Volume2, Video, Clock, Database } from 'lucide-react';
+import { Send, Plus, Image as ImageIcon, Paperclip, Volume2, Video, Clock, Database, MessageSquare, Zap, AlertCircle } from 'lucide-react';
 import type { ButtonData, CustomNodeData } from '../../../../types/bot';
 import { NodeHandle } from './NodeHandle';
 import { getBlocks } from '../../hooks/useNodeEditor';
@@ -38,10 +38,11 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
     };
   }, [id]);
 
+  const hasDataCollection = blocks.some((b) => b.type === 'data_collection');
   const buttonsSerialized = JSON.stringify(buttons);
   useEffect(() => {
     updateNodeInternals(id);
-  }, [id, buttonsSerialized, updateNodeInternals]);
+  }, [id, buttonsSerialized, hasDataCollection, updateNodeInternals]);
   useEffect(() => {
     if (!selected) {
       setTimeout(() => {
@@ -322,12 +323,16 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
                   )}
 
                   {block.type === 'data_collection' && (
-                    <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-550 bg-slate-50/20 flex flex-col gap-1">
-                      <div className="flex items-center gap-1.5 justify-center">
-                        <Database size={13} className="text-blue-500" />
-                        <span className="font-bold text-slate-700">Collect: {block.variableName || 'variable'}</span>
+                    <div className="space-y-2">
+                      {block.text && (
+                        <div className="bg-slate-100/60 border border-slate-200/40 rounded-2xl px-4 py-2.5 text-xs text-slate-800 font-medium">
+                          {block.text}
+                        </div>
+                      )}
+                      <div className="bg-indigo-50/50 border border-indigo-150 rounded-2xl px-4 py-2.5 text-[11px] font-bold text-indigo-700 flex items-center gap-2 animate-pulse justify-center">
+                        <MessageSquare size={13} className="text-indigo-500 shrink-0" />
+                        <span>Waiting for {block.replyType || 'Text'} from contact...</span>
                       </div>
-                      {block.text && <p className="text-[10px] text-slate-400 italic text-center truncate">{block.text}</p>}
                     </div>
                   )}
 
@@ -447,6 +452,37 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
           <span>Add Button</span>
         </button>
       </div>
+
+      {hasDataCollection && (
+        <>
+          <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative">
+            <div className="flex items-center gap-1 mr-2 text-[9px] font-extrabold text-amber-650 uppercase tracking-wider">
+              <Zap size={10} className="text-amber-500 shrink-0" />
+              <span>Action on reply</span>
+            </div>
+            <NodeHandle
+              type="source"
+              position={Position.Right}
+              id="reply"
+              isConnected={edges.some((e) => e.source === id && e.sourceHandle === 'reply')}
+              padded={false}
+            />
+          </div>
+          <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative">
+            <div className="flex items-center gap-1 mr-2 text-[9px] font-extrabold text-rose-600 uppercase tracking-wider">
+              <AlertCircle size={10} className="text-rose-500 shrink-0" />
+              <span>If contact has not responded</span>
+            </div>
+            <NodeHandle
+              type="source"
+              position={Position.Right}
+              id="timeout"
+              isConnected={edges.some((e) => e.source === id && e.sourceHandle === 'timeout')}
+              padded={false}
+            />
+          </div>
+        </>
+      )}
 
       <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative rounded-b-[22px]">
         <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mr-2">Next Step</span>

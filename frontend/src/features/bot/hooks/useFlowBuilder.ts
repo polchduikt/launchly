@@ -12,7 +12,7 @@ import type { ButtonData, FlowBlock } from '../../../types/bot';
 import { getFlowKey, getNodesAfterRemovingEdges } from '../utils/flowHelpers';
 import { useFlowHistory } from './useFlowHistory';
 import { useFlowAutoSave } from './useFlowAutoSave';
-
+import { getBlocks } from './useNodeEditor';
 export const useFlowBuilder = () => {
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
@@ -679,13 +679,20 @@ export const useFlowBuilder = () => {
   }, [edges, contextMenu, edgeType, nodes]);
 
   const copiedNodesRef = useRef<Node[] | null>(null);
+  const copiedEdgesRef = useRef<Edge[] | null>(null);
 
   const copySelectedNodes = useCallback(() => {
     const selectedNodes = nodes.filter((n) => n.selected);
     if (selectedNodes.length === 0) return;
 
     copiedNodesRef.current = JSON.parse(JSON.stringify(selectedNodes));
-  }, [nodes]);
+
+    const selectedNodeIds = new Set(selectedNodes.map((n) => n.id));
+    const internalEdges = edges.filter(
+      (e) => selectedNodeIds.has(e.source) && selectedNodeIds.has(e.target)
+    );
+    copiedEdgesRef.current = JSON.parse(JSON.stringify(internalEdges));
+  }, [nodes, edges]);
 
   const pasteCopiedNodes = useCallback(() => {
     const copiedNodes = copiedNodesRef.current;
@@ -693,41 +700,44 @@ export const useFlowBuilder = () => {
 
     takeSnapshot();
 
+    const nodeIdMap: Record<string, string> = {};
+    const buttonValueMap: Record<string, string> = {};
+
     const newNodes = copiedNodes.map((node) => {
       const newId = `node_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      nodeIdMap[node.id] = newId;
 
       const updatedData = { ...node.data };
-      if (Array.isArray(updatedData.blocks)) {
-        const blocksList = updatedData.blocks as FlowBlock[];
-        updatedData.blocks = blocksList.map((block) => {
-          const blockClone = { ...block };
-          if (Array.isArray(blockClone.buttons)) {
-            blockClone.buttons = blockClone.buttons.map((btn: ButtonData) => ({
-              ...btn,
-              value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-            }));
-          }
-          return blockClone;
-        });
+      const blocksList = getBlocks(updatedData);
+      const updatedBlocks = blocksList.map((block) => {
+        const blockClone = { ...block };
+        if (Array.isArray(blockClone.buttons)) {
+          blockClone.buttons = blockClone.buttons.map((btn: ButtonData) => {
+            const newValue = `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+            if (btn.value) {
+              buttonValueMap[btn.value] = newValue;
+            }
+            return { ...btn, value: newValue };
+          });
+        }
+        return blockClone;
+      });
 
-        const firstText = blocksList.find((b) => b.type === 'text');
-        const firstImage = blocksList.find((b) => b.type === 'image');
-        const allButtons: ButtonData[] = [];
-        blocksList.forEach((b) => {
-          if (Array.isArray(b.buttons)) {
-            allButtons.push(...(b.buttons as ButtonData[]));
-          }
-        });
-        updatedData.text = firstText ? firstText.text : '';
-        updatedData.imageUrl = firstImage ? firstImage.imageUrl : '';
-        updatedData.buttons = allButtons;
-      } else if (Array.isArray(updatedData.buttons)) {
-        const buttonsList = updatedData.buttons as ButtonData[];
-        updatedData.buttons = buttonsList.map((btn: ButtonData) => ({
-          ...btn,
-          value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-        }));
+      if (updatedData.blocks || blocksList.length > 1 || (blocksList[0] && blocksList[0].id !== 'default_text')) {
+        updatedData.blocks = updatedBlocks;
       }
+
+      const firstText = updatedBlocks.find((b) => b.type === 'text');
+      const firstImage = updatedBlocks.find((b) => b.type === 'image');
+      const allButtons: ButtonData[] = [];
+      updatedBlocks.forEach((b) => {
+        if (Array.isArray(b.buttons)) {
+          allButtons.push(...(b.buttons as ButtonData[]));
+        }
+      });
+      updatedData.text = firstText ? firstText.text : (updatedData.text || '');
+      updatedData.imageUrl = firstImage ? firstImage.imageUrl : (updatedData.imageUrl || '');
+      updatedData.buttons = allButtons;
 
       return {
         ...node,
@@ -741,13 +751,36 @@ export const useFlowBuilder = () => {
       };
     });
 
+    const copiedEdges = copiedEdgesRef.current || [];
+    const newEdges = copiedEdges.map((edge) => {
+      const newEdgeId = `edge_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const source = nodeIdMap[edge.source];
+      const target = nodeIdMap[edge.target];
+      const sourceHandle = edge.sourceHandle && buttonValueMap[edge.sourceHandle]
+        ? (buttonValueMap[edge.sourceHandle] as string)
+        : edge.sourceHandle;
+
+      return {
+        ...edge,
+        id: newEdgeId,
+        source,
+        target,
+        sourceHandle,
+      };
+    });
+
     setNodes((nds) => [
       ...nds.map((n) => ({ ...n, selected: false }) as Node),
       ...newNodes,
     ]);
 
+    setEdges((eds) => [
+      ...eds,
+      ...newEdges,
+    ]);
+
     setSelectedNodeId(newNodes[newNodes.length - 1].id);
-  }, [copiedNodesRef, takeSnapshot, setNodes, setSelectedNodeId]);
+  }, [copiedNodesRef, copiedEdgesRef, takeSnapshot, setNodes, setEdges, setSelectedNodeId]);
 
   const onPaneClick = useCallback(() => {
     if (justEndedDragRef.current) return;
@@ -766,31 +799,29 @@ export const useFlowBuilder = () => {
       const newId = `node_${nodeToCopy.type?.toLowerCase()}_${Date.now()}`;
       
       const updatedData = JSON.parse(JSON.stringify(nodeToCopy.data || {}));
-      if (Array.isArray(updatedData.blocks)) {
-        updatedData.blocks = (updatedData.blocks as Record<string, unknown>[]).map((block) => {
-          const blockClone = { ...block };
-          if (Array.isArray(blockClone.buttons)) {
-            blockClone.buttons = (blockClone.buttons as ButtonData[]).map((btn) => ({
-              ...btn,
-              value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-            }));
-          }
-          return blockClone;
-        });
+      const blocksList = getBlocks(updatedData);
+      const updatedBlocks = blocksList.map((block) => {
+        const blockClone = { ...block };
+        if (Array.isArray(blockClone.buttons)) {
+          blockClone.buttons = blockClone.buttons.map((btn: ButtonData) => ({
+            ...btn,
+            value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+          }));
+        }
+        return blockClone;
+      });
 
-        const allButtons: ButtonData[] = [];
-        (updatedData.blocks as Record<string, unknown>[]).forEach((b) => {
-          if (Array.isArray(b.buttons)) {
-            allButtons.push(...(b.buttons as ButtonData[]));
-          }
-        });
-        updatedData.buttons = allButtons;
-      } else if (Array.isArray(updatedData.buttons)) {
-        updatedData.buttons = (updatedData.buttons as ButtonData[]).map((btn) => ({
-          ...btn,
-          value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-        }));
+      if (updatedData.blocks || blocksList.length > 1 || (blocksList[0] && blocksList[0].id !== 'default_text')) {
+        updatedData.blocks = updatedBlocks;
       }
+
+      const allButtons: ButtonData[] = [];
+      updatedBlocks.forEach((b) => {
+        if (Array.isArray(b.buttons)) {
+          allButtons.push(...(b.buttons as ButtonData[]));
+        }
+      });
+      updatedData.buttons = allButtons;
 
       const newNode: Node = {
         ...nodeToCopy,

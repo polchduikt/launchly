@@ -15,11 +15,13 @@ import { useFlowBuilder } from '../hooks/useFlowBuilder';
 import { ROUTES } from '../../../constants/routes';
 import { ArrowLeft, Loader2, Plus, GitFork, Route, GitCommit, Undo2, Redo2, Sparkles } from 'lucide-react';
 import { useAiStore } from '../../../store/useAiStore';
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNodeEditor } from '../hooks/useNodeEditor';
 import { EditButtonDrawer } from '../components/sidebar/drawers/EditButtonDrawer';
 import { ChooseNextStepDrawer } from '../components/sidebar/drawers/ChooseNextStepDrawer';
 import { AiAssistantDrawer } from '../../../features/ai/components/AiAssistantDrawer';
+import { EditDataCollectionDrawer } from '../components/sidebar/drawers/EditDataCollectionDrawer';
+import { useTagsQuery } from '../../broadcast/hooks/useBroadcastQueries';
 
 const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
   fromX,
@@ -68,6 +70,22 @@ const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
 const FlowBuilderInner: React.FC = () => {
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
+  const { data: tags = [] } = useTagsQuery(activeBotId || 0);
+  const customFields = useMemo(() => {
+    if (!activeBotId) return ['last_order_product', 'last_order_price', 'phone', 'email'];
+    const stored = localStorage.getItem(`launchly_custom_fields_${activeBotId}`);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          return parsed.map((f: any) => f.name);
+        }
+      } catch (e) {
+        console.error('Failed to parse custom fields', e);
+      }
+    }
+    return ['last_order_product', 'last_order_price', 'phone', 'email'];
+  }, [activeBotId]);
 
   const {
     nodes,
@@ -426,8 +444,45 @@ const FlowBuilderInner: React.FC = () => {
               )}
 
               <div className={`absolute left-0 top-0 h-full w-80 border-r border-slate-200 bg-white -z-10 flex flex-col justify-between overflow-hidden shadow-xl transition-all duration-300 ease-in-out ${
-                (editorState.isBtnDialogOpen || editorState.isNextStepDrawerOpen) ? 'translate-x-full opacity-100' : 'translate-x-0 opacity-0 pointer-events-none'
+                (editorState.isBtnDialogOpen || editorState.isNextStepDrawerOpen || editorState.isDataCollectionDrawerOpen) ? 'translate-x-full opacity-100' : 'translate-x-0 opacity-0 pointer-events-none'
               }`}>
+                {selectedNode && editorState.isDataCollectionDrawerOpen && editorState.editingDataCollectionBlock && (
+                  <EditDataCollectionDrawer
+                    onClose={() => editorState.setIsDataCollectionDrawerOpen(false)}
+                    block={editorState.editingDataCollectionBlock}
+                    onSave={editorState.handleSaveDataCollection}
+                    onRemove={() => {
+                      if (editorState.editingDataCollectionBlock) {
+                        const blockId = editorState.editingDataCollectionBlock.id;
+                        const blocks = (selectedNode.data.blocks || []) as FlowBlock[];
+                        const updated = blocks.filter((b) => b.id !== blockId);
+                        handleUpdateNodeData(selectedNode.id, {
+                          ...selectedNode.data,
+                          blocks: updated
+                        });
+                        setEdges((eds) => eds.filter((e) => !(e.source === selectedNode.id && (e.sourceHandle === 'reply' || e.sourceHandle === 'timeout'))));
+                      }
+                      editorState.setIsDataCollectionDrawerOpen(false);
+                    }}
+                    edges={edges}
+                    nodes={nodes}
+                    nodeId={selectedNode.id}
+                    onUnlinkConnection={(handleId) => {
+                      setEdges((eds) => eds.filter((e) => !(e.source === selectedNode.id && e.sourceHandle === handleId)));
+                    }}
+                    onAddAndConnectNode={(sourceNodeId, type, sourceHandle) => {
+                      handleAddAndConnectNode(sourceNodeId, type, sourceHandle);
+                    }}
+                    onOpenNextStepDrawer={(sourceHandle) => {
+                      if (editorState.setNextStepSourceHandle) {
+                        editorState.setNextStepSourceHandle(sourceHandle);
+                      }
+                      editorState.setIsNextStepDrawerOpen(true);
+                    }}
+                    customFields={customFields}
+                    tags={tags}
+                  />
+                )}
                 {selectedNode && editorState.isBtnDialogOpen && editorState.editingButton && (
                   <EditButtonDrawer
                     onClose={() => editorState.setIsBtnDialogOpen(false)}

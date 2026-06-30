@@ -1025,23 +1025,31 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                 <div className="p-4 space-y-3">
                   <div>
                     <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Question to ask</label>
-                    <input
-                      type="text"
+                    <textarea
                       value={block.text || ''}
                       onChange={(e) => updateBlockContent(block.id, { text: e.target.value })}
                       placeholder="e.g. What is your email address?"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
+                      rows={2}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20 resize-none"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Save answer to custom variable</label>
-                    <input
-                      type="text"
-                      value={block.variableName || ''}
-                      onChange={(e) => updateBlockContent(block.id, { variableName: e.target.value })}
-                      placeholder="e.g. user_email"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
-                    />
+                  
+                  <div className="pt-1.5 flex flex-col items-center select-none nodrag">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (editorState.handleOpenEditDataCollection) {
+                          editorState.handleOpenEditDataCollection(block);
+                        }
+                      }}
+                      className="px-4 py-2 bg-indigo-50/30 hover:bg-indigo-50 border border-dashed border-indigo-400 text-indigo-700 text-[11px] font-extrabold rounded-2xl transition-all cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
+                    >
+                      <Database size={12} />
+                      <span>Contact's reply: {block.replyType || 'Text'}</span>
+                    </button>
+                    <span className="text-[9px] font-semibold text-slate-400 mt-2 block text-center leading-normal">
+                      Note: Automation pauses until contact replies
+                    </span>
                   </div>
                 </div>
               )}

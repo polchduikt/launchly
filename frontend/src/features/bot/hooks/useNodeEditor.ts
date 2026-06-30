@@ -84,6 +84,9 @@ export const useNodeEditor = (
   const [showImageUrlInput, setShowImageUrlInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [isDataCollectionDrawerOpen, setIsDataCollectionDrawerOpen] = useState(false);
+  const [editingDataCollectionBlock, setEditingDataCollectionBlock] = useState<FlowBlock | null>(null);
+
   const [prevNodeId, setPrevNodeId] = useState<string | null>(null);
   const currentNodeId = node?.id || null;
   if (currentNodeId !== prevNodeId) {
@@ -93,6 +96,8 @@ export const useNodeEditor = (
     setEditingButtonBlockId(null);
     setIsNextStepDrawerOpen(false);
     setNextStepSourceHandle(null);
+    setIsDataCollectionDrawerOpen(false);
+    setEditingDataCollectionBlock(null);
   }
 
   useEffect(() => {
@@ -269,6 +274,19 @@ export const useNodeEditor = (
     }
   };
 
+  const handleOpenEditDataCollection = (block: FlowBlock) => {
+    setEditingDataCollectionBlock(block);
+    setIsDataCollectionDrawerOpen(true);
+  };
+
+  const handleSaveDataCollection = (updated: FlowBlock) => {
+    const blocks = getBlocks(data);
+    const updatedBlocks = blocks.map((b) => (b.id === editingDataCollectionBlock?.id ? updated : b));
+    handleChange('blocks', updatedBlocks);
+    setIsDataCollectionDrawerOpen(false);
+    setEditingDataCollectionBlock(null);
+  };
+
   return {
     isBtnDialogOpen,
     setIsBtnDialogOpen,
@@ -296,5 +314,11 @@ export const useNodeEditor = (
     setIsNextStepDrawerOpen,
     nextStepSourceHandle,
     setNextStepSourceHandle,
+    isDataCollectionDrawerOpen,
+    setIsDataCollectionDrawerOpen,
+    editingDataCollectionBlock,
+    setEditingDataCollectionBlock,
+    handleOpenEditDataCollection,
+    handleSaveDataCollection,
   };
 };

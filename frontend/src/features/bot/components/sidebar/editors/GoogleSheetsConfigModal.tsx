@@ -25,6 +25,8 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
   handleMappingValueChange,
   handleSaveSheetsConfig,
   handleReconnectGoogleSheets,
+  handleLookupColumnChange,
+  handleLookupValueChange,
 }) => {
   if (!isOpen || !sheetsAction) return null;
 
@@ -56,10 +58,14 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
             </div>
             <div>
               <p className="text-sm font-extrabold text-slate-800">
-                Google Sheets Actions: Insert Row
+                {sheetsAction.type === 'GS_INSERT_ROW' ? 'Google Sheets Actions: Insert Row'
+                  : sheetsAction.type === 'GS_GET_ROW' ? 'Google Sheets Actions: Get Row by Value'
+                  : 'Google Sheets Actions: Update Row'}
               </p>
               <p className="text-xs text-slate-500 font-medium mt-1">
-                Send Launchly data to Google Sheets.
+                {sheetsAction.type === 'GS_INSERT_ROW' ? 'Send Launchly data to Google Sheets.'
+                  : sheetsAction.type === 'GS_GET_ROW' ? 'Return Google Sheets data to Launchly.'
+                  : 'Update Google Sheets with Launchly data.'}
               </p>
             </div>
           </div>
@@ -173,12 +179,81 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
               </div>
 
               {sheetsAction.spreadsheetId && sheetsAction.sheetName && (
-                <div className="space-y-3.5 pt-2 border-t border-slate-100">
+                <div className="space-y-4 pt-2 border-t border-slate-100">
+                  {(sheetsAction.type === 'GS_GET_ROW' || sheetsAction.type === 'GS_UPDATE_ROW') && (
+                    <div className="grid grid-cols-2 gap-4 pb-2 border-b border-slate-100">
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          Lookup Column
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={sheetsAction.lookupColumn || ''}
+                            onChange={(e) => handleLookupColumnChange(e.target.value)}
+                            className="w-full px-4 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white appearance-none cursor-pointer"
+                          >
+                            <option value="">-- Select Lookup Column --</option>
+                            {headers.map((header) => (
+                              <option key={header} value={header}>
+                                {header}
+                              </option>
+                            ))}
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-slate-400">
+                            <ChevronDown size={16} />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          Lookup Value
+                        </label>
+                        <div className="relative flex items-center">
+                          <span className="absolute left-3.5 text-slate-400 text-xs font-extrabold select-none">T</span>
+                          <input
+                            type="text"
+                            value={sheetsAction.lookupValue || ''}
+                            onChange={(e) => handleLookupValueChange(e.target.value)}
+                            placeholder="Type value or insert variable"
+                            className="w-full pl-8 pr-16 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white"
+                          />
+                          <div className="absolute right-2 flex items-center gap-1">
+                            {sheetsAction.lookupValue && (
+                              <button
+                                type="button"
+                                onClick={() => handleLookupValueChange('')}
+                                className="p-1 text-slate-350 hover:text-rose-500 rounded-md transition-colors"
+                              >
+                                <X size={12} />
+                              </button>
+                            )}
+                            <FieldVariableSelector
+                              mode="variable"
+                              tags={tags}
+                              customFields={customFields}
+                              position="bottom"
+                              onSelect={(selectedVar) => {
+                                const currentVal = sheetsAction.lookupValue || '';
+                                const newVal = currentVal.trim() === '' ? selectedVar : `${currentVal} + ${selectedVar}`;
+                                handleLookupValueChange(newVal);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-[1fr_20px_1fr] gap-3 items-center select-none text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
-                    <div>Launchly Data</div>
+                    <div>
+                      {sheetsAction.type === 'GS_GET_ROW' ? 'Google Column Titles' : 'Launchly Data'}
+                    </div>
                     <div></div>
                     <div className="flex items-center justify-between">
-                      <span>Google Column Titles</span>
+                      <span>
+                        {sheetsAction.type === 'GS_GET_ROW' ? 'Save into Launchly Field' : 'Google Column Titles'}
+                      </span>
                       <button
                         type="button"
                         onClick={handleRefreshHeaders}
@@ -204,45 +279,94 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
                       {headers.map((header, hIdx) => {
                         const currentMapping = (sheetsAction.columnMappings || []).find((m) => m.column === header);
                         const val = currentMapping ? currentMapping.value : '';
-                        return (
-                          <div key={hIdx} className="grid grid-cols-[1fr_20px_1fr] gap-3 items-center relative">
-                            <div className="relative flex items-center">
-                              <span className="absolute left-3.5 text-slate-400 text-xs font-extrabold select-none">T</span>
-                              <input
-                                type="text"
-                                value={val}
-                                onChange={(e) => handleMappingValueChange(header, e.target.value)}
-                                placeholder="Type or insert variable"
-                                className="w-full pl-8 pr-16 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white"
-                              />
+                        
+                        if (sheetsAction.type === 'GS_GET_ROW') {
+                          return (
+                            <div key={hIdx} className="grid grid-cols-[1fr_20px_1fr] gap-3 items-center relative">
+                              <div className="w-full px-4 py-2.5 bg-slate-100 border border-slate-150 rounded-md text-xs font-extrabold text-slate-700 select-none truncate">
+                                {header}
+                              </div>
 
-                              <div className="absolute right-2 flex items-center gap-1">
-                                {val && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleMappingValueChange(header, '')}
-                                    className="p-1 text-slate-350 hover:text-rose-500 rounded-md transition-colors"
-                                  >
-                                    <X size={12} />
-                                  </button>
-                                )}
-                                <FieldVariableSelector
-                                  mode="variable"
-                                  tags={tags}
-                                  customFields={customFields}
-                                  position="top"
-                                  onSelect={(selectedVar) => handleMappingValueChange(header, selectedVar)}
-                                />
+                              <span className="text-slate-300 font-extrabold select-none">-&gt;</span>
+
+                              <div className="relative">
+                                <select
+                                  value={val}
+                                  onChange={(e) => handleMappingValueChange(header, e.target.value)}
+                                  className="w-full px-4 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white cursor-pointer appearance-none"
+                                >
+                                  <option value="">-- Don't map --</option>
+                                  <optgroup label="System Fields">
+                                    <option value="first_name">First Name</option>
+                                    <option value="last_name">Last Name</option>
+                                    <option value="username">Telegram Username</option>
+                                    <option value="phone">Phone</option>
+                                    <option value="email">Email</option>
+                                    <option value="telegram_user_id">Telegram User ID</option>
+                                    <option value="contact_id">Contact ID</option>
+                                    <option value="subscribed">Subscribed</option>
+                                  </optgroup>
+                                  {customFields && customFields.length > 0 && (
+                                    <optgroup label="Custom User Fields">
+                                      {customFields.map((cf) => (
+                                        <option key={cf} value={cf}>
+                                          {cf}
+                                        </option>
+                                      ))}
+                                    </optgroup>
+                                  )}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-slate-400">
+                                  <ChevronDown size={16} />
+                                </div>
                               </div>
                             </div>
+                          );
+                        } else {
+                          return (
+                            <div key={hIdx} className="grid grid-cols-[1fr_20px_1fr] gap-3 items-center relative">
+                              <div className="relative flex items-center">
+                                <span className="absolute left-3.5 text-slate-400 text-xs font-extrabold select-none">T</span>
+                                <input
+                                  type="text"
+                                  value={val}
+                                  onChange={(e) => handleMappingValueChange(header, e.target.value)}
+                                  placeholder="Type or insert variable"
+                                  className="w-full pl-8 pr-16 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white"
+                                />
 
-                            <span className="text-slate-300 font-extrabold select-none">-&gt;</span>
+                                <div className="absolute right-2 flex items-center gap-1">
+                                  {val && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleMappingValueChange(header, '')}
+                                      className="p-1 text-slate-350 hover:text-rose-500 rounded-md transition-colors"
+                                    >
+                                      <X size={12} />
+                                    </button>
+                                  )}
+                                  <FieldVariableSelector
+                                    mode="variable"
+                                    tags={tags}
+                                    customFields={customFields}
+                                    position="top"
+                                    onSelect={(selectedVar) => {
+                                      const currentVal = val || '';
+                                      const newVal = currentVal.trim() === '' ? selectedVar : `${currentVal} + ${selectedVar}`;
+                                      handleMappingValueChange(header, newVal);
+                                    }}
+                                  />
+                                </div>
+                              </div>
 
-                            <div className="w-full px-4 py-2.5 bg-slate-100 border border-slate-150 rounded-md text-xs font-extrabold text-slate-700 select-none truncate">
-                              {header}
+                              <span className="text-slate-300 font-extrabold select-none">-&gt;</span>
+
+                              <div className="w-full px-4 py-2.5 bg-slate-100 border border-slate-150 rounded-md text-xs font-extrabold text-slate-700 select-none truncate">
+                                {header}
+                              </div>
                             </div>
-                          </div>
-                        );
+                          );
+                        }
                       })}
                     </div>
                   )}

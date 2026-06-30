@@ -23,7 +23,9 @@ import {
   FileSpreadsheet,
   X,
   MessageSquare,
-  Search
+  Search,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 
 
@@ -169,6 +171,33 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
       setExpandedIndex(updated.length > 0 ? 0 : null);
     } else if (expandedIndex !== null && expandedIndex > index) {
       setExpandedIndex(expandedIndex - 1);
+    }
+  };
+  const handleMoveActionUp = (index: number) => {
+    if (index <= 0) return;
+    const updated = [...actions];
+    const temp = updated[index];
+    updated[index] = updated[index - 1];
+    updated[index - 1] = temp;
+    updateActions(updated);
+    if (expandedIndex === index) {
+      setExpandedIndex(index - 1);
+    } else if (expandedIndex === index - 1) {
+      setExpandedIndex(index);
+    }
+  };
+
+  const handleMoveActionDown = (index: number) => {
+    if (index >= actions.length - 1) return;
+    const updated = [...actions];
+    const temp = updated[index];
+    updated[index] = updated[index + 1];
+    updated[index + 1] = temp;
+    updateActions(updated);
+    if (expandedIndex === index) {
+      setExpandedIndex(index + 1);
+    } else if (expandedIndex === index + 1) {
+      setExpandedIndex(index);
     }
   };
 
@@ -332,6 +361,14 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
     });
   };
 
+  const handleLookupColumnChange = (lookupColumn: string) => {
+    setSheetsAction((prev) => prev ? { ...prev, lookupColumn } : null);
+  };
+
+  const handleLookupValueChange = (lookupValue: string) => {
+    setSheetsAction((prev) => prev ? { ...prev, lookupValue } : null);
+  };
+
   const handleSaveSheetsConfig = () => {
     if (editingActionIndex !== null && sheetsAction) {
       handleModifyAction(editingActionIndex, sheetsAction);
@@ -475,13 +512,33 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                     </div>
                     
                     
-                    <button
-                      type="button"
-                      onClick={(e) => handleRemoveAction(index, e)}
-                      className="p-1 text-slate-450 hover:text-rose-600 rounded-md hover:bg-slate-50 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer absolute right-0 top-0 z-10"
-                    >
-                      <Trash2 size={13} />
-                    </button>
+                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 absolute right-0 top-0 z-10">
+                      {index > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleMoveActionUp(index)}
+                          className="p-1 text-slate-450 hover:text-slate-700 rounded-md hover:bg-slate-50 transition-colors cursor-pointer"
+                        >
+                          <ArrowUp size={13} />
+                        </button>
+                      )}
+                      {index < actions.length - 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleMoveActionDown(index)}
+                          className="p-1 text-slate-450 hover:text-slate-700 rounded-md hover:bg-slate-50 transition-colors cursor-pointer"
+                        >
+                          <ArrowDown size={13} />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => handleRemoveAction(index, e)}
+                        className="p-1 text-slate-450 hover:text-rose-600 rounded-md hover:bg-slate-50 transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </div>
 
                   
@@ -943,6 +1000,8 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
         handleMappingValueChange={handleMappingValueChange}
         handleSaveSheetsConfig={handleSaveSheetsConfig}
         handleReconnectGoogleSheets={handleReconnectGoogleSheets}
+        handleLookupColumnChange={handleLookupColumnChange}
+        handleLookupValueChange={handleLookupValueChange}
       />
 
                   
