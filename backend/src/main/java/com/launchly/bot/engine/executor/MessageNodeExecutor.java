@@ -27,10 +27,18 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.launchly.bot.service.BotDialogStateService;
+import lombok.RequiredArgsConstructor;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class MessageNodeExecutor implements NodeExecutor {
+
+    private final BotDialogStateService stateService;
 
     @Override
     public NodeType getType() {
@@ -116,6 +124,7 @@ public class MessageNodeExecutor implements NodeExecutor {
         }
 
         if (blocks != null && !blocks.isEmpty()) {
+            Map<String, String> sessionData = stateService.getSessionData(botUser.getBot().getId(), botUser.getTelegramId());
             int blockIdx = 0;
             for (Map<String, Object> block : blocks) {
                 String type = (String) block.get("type");
@@ -130,7 +139,9 @@ public class MessageNodeExecutor implements NodeExecutor {
                         blockIdx++;
                         continue;
                     }
-                    String sanitized = SanitizationUtil.sanitizeForTelegram(blockText);
+                    String resolvedText = resolvePlaceholders(blockText, sessionData, botUser);
+                    String escapedText = escapeHtml(resolvedText);
+                    String htmlText = convertMarkdownLinksToHtml(escapedText);
 
                     List<?> blockButtons = (List<?>) block.get("buttons");
                     if (blockIdx == lastSendableIdx && menuButtons != null && !menuButtons.isEmpty()) {
@@ -142,7 +153,8 @@ public class MessageNodeExecutor implements NodeExecutor {
                     try {
                         SendMessage message = SendMessage.builder()
                                 .chatId(chatId)
-                                .text(sanitized)
+                                .text(htmlText)
+                                .parseMode("HTML")
                                 .replyMarkup(markup)
                                 .build();
                         client.execute(message);
@@ -199,12 +211,15 @@ public class MessageNodeExecutor implements NodeExecutor {
                         blockIdx++;
                         continue;
                     }
-                    String sanitized = SanitizationUtil.sanitizeForTelegram(blockText);
+                    String resolvedText = resolvePlaceholders(blockText, sessionData, botUser);
+                    String escapedText = escapeHtml(resolvedText);
+                    String htmlText = convertMarkdownLinksToHtml(escapedText);
 
                     try {
                         SendMessage message = SendMessage.builder()
                                 .chatId(chatId)
-                                .text(sanitized)
+                                .text(htmlText)
+                                .parseMode("HTML")
                                 .build();
                         client.execute(message);
                     } catch (TelegramApiException e) {
@@ -464,5 +479,100 @@ public class MessageNodeExecutor implements NodeExecutor {
         URLConnection connection = url.openConnection();
         connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
         return connection.getInputStream();
+    }
+
+    private String resolvePlaceholders(String text, Map<String, String> variables, BotUser botUser) {
+        if (text == null) return "";
+        String result = text;
+
+        Pattern pattern = Pattern.compile("\\{\\{\\s*(.*?)\\s*\\}\\}");
+        Matcher matcher = pattern.matcher(result);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            String rawName = matcher.group(1).trim();
+            String replacement = "";
+            if (rawName.equalsIgnoreCase("first_name") || rawName.equalsIgnoreCase("First Name")) {
+                replacement = botUser.getFirstName() != null ? botUser.getFirstName() : "";
+            } else if (rawName.equalsIgnoreCase("last_name") || rawName.equalsIgnoreCase("Last Name")) {
+                replacement = botUser.getLastName() != null ? botUser.getLastName() : "";
+            } else if (rawName.equalsIgnoreCase("username") || rawName.equalsIgnoreCase("telegram_username") || rawName.equalsIgnoreCase("Telegram Username")) {
+                String username = botUser.getUsername();
+                if (username != null && !username.trim().isEmpty()) {
+                    replacement = username.startsWith("@") ? username : "@" + username;
+                } else {
+                    replacement = "";
+                }
+            } else if (rawName.equalsIgnoreCase("telegram_user_id") || rawName.equalsIgnoreCase("Telegram User ID")) {
+                replacement = botUser.getTelegramId() != null ? String.valueOf(botUser.getTelegramId()) : "";
+            } else if (rawName.equalsIgnoreCase("contact_id") || rawName.equalsIgnoreCase("Contact Id")) {
+                replacement = botUser.getId() != null ? String.valueOf(botUser.getId()) : "";
+            } else if (rawName.equalsIgnoreCase("phone") || rawName.equalsIgnoreCase("Phone")) {
+                replacement = variables.getOrDefault("phone", "");
+            } else if (rawName.equalsIgnoreCase("email") || rawName.equalsIgnoreCase("Email")) {
+                replacement = variables.getOrDefault("email", "");
+            } else if (rawName.equalsIgnoreCase("subscribed") || rawName.equalsIgnoreCase("Subscribed")) {
+                replacement = variables.getOrDefault("telegram_opt_in", "false");
+            } else if (rawName.equalsIgnoreCase("last_reply_type") || rawName.equalsIgnoreCase("Last Reply Type")) {
+                replacement = variables.getOrDefault("last_reply_type", "text");
+            } else {
+                boolean found = false;
+                for (Map.Entry<String, String> entry : variables.entrySet()) {
+                    if (entry.getKey().equalsIgnoreCase(rawName)) {
+                        replacement = entry.getValue() != null ? entry.getValue() : "";
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    try {
+                        if (botUser.getMetadata() != null && !botUser.getMetadata().trim().isEmpty()) {
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            Map<String, Object> metaMap = objectMapper.readValue(botUser.getMetadata(), Map.class);
+                            Map<String, Object> customFields = (Map<String, Object>) metaMap.get("customFields");
+                            if (customFields != null) {
+                                for (Map.Entry<String, Object> entry : customFields.entrySet()) {
+                                    if (entry.getKey().equalsIgnoreCase(rawName)) {
+                                        replacement = entry.getValue() != null ? String.valueOf(entry.getValue()) : "";
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                }
+                if (!found) {
+                    replacement = matcher.group(0);
+                }
+            }
+            matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
+    private String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;");
+    }
+
+    private String convertMarkdownLinksToHtml(String text) {
+        if (text == null) return "";
+        Pattern pattern = Pattern.compile("\\[([^\\]]+)\\]\\(([^\\s)]+)\\)");
+        Matcher matcher = pattern.matcher(text);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            String linkText = matcher.group(1);
+            String url = matcher.group(2).trim();
+            if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("tg://")) {
+                url = "https://" + url;
+            }
+            String htmlLink = "<a href=\"" + url + "\">" + linkText + "</a>";
+            matcher.appendReplacement(sb, Matcher.quoteReplacement(htmlLink));
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 }
