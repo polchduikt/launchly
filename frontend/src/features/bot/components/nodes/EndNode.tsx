@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Octagon } from 'lucide-react';
@@ -12,7 +12,15 @@ export const EndNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selecte
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   const connection = useConnection();
   const isConnecting = connection.inProgress;
-  const isSelf = isConnecting && connection.fromNode?.id === id;
+  const isGrayedOut = useMemo(() => {
+    if (!isConnecting) return false;
+    if (connection.fromNode?.id === id) return true;
+    const sourceHandleId = connection.fromHandle?.id;
+    if (sourceHandleId === 'reply') {
+      return true;
+    }
+    return false;
+  }, [isConnecting, connection, id]);
   const { showToolbar, bindHover } = useNodeHover();
   const [isHighlighted, setIsHighlighted] = useState(false);
 
@@ -41,7 +49,7 @@ export const EndNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selecte
           : isHighlighted 
             ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm' 
             : 'border-slate-200'
-      } ${isSelf ? 'opacity-40 grayscale pointer-events-none' : ''}`}
+      } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
       <div className="relative flex items-center gap-2 mb-3">

@@ -22,6 +22,7 @@ import { ChooseNextStepDrawer } from '../components/sidebar/drawers/ChooseNextSt
 import { AiAssistantDrawer } from '../../../features/ai/components/AiAssistantDrawer';
 import { EditDataCollectionDrawer } from '../components/sidebar/drawers/EditDataCollectionDrawer';
 import { useTagsQuery } from '../../broadcast/hooks/useBroadcastQueries';
+import type {FlowBlock} from "../../../types/bot.ts";
 
 const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
   fromX,
@@ -128,7 +129,20 @@ const FlowBuilderInner: React.FC = () => {
     isDirty,
     copySelectedNodes,
     pasteCopiedNodes,
+    isValidConnection,
   } = useFlowBuilder();
+
+  const filteredContextMenuOptions = useMemo(() => {
+    if (!contextMenu) return CONTEXT_MENU_OPTIONS;
+    const handleId = contextMenu.source.handleId;
+    if (handleId === 'reply') {
+      return CONTEXT_MENU_OPTIONS.filter((opt) => opt.type === 'ACTION');
+    }
+    if (handleId === 'timeout') {
+      return CONTEXT_MENU_OPTIONS.filter((opt) => opt.type !== 'ACTION');
+    }
+    return CONTEXT_MENU_OPTIONS;
+  }, [contextMenu]);
 
   const editorState = useNodeEditor(
     selectedNode,
@@ -145,17 +159,6 @@ const FlowBuilderInner: React.FC = () => {
       }
       handleAddAndConnectNode(sourceNodeId, type, sourceHandle);
     }
-  );
-
-
-  const isValidConnection = useCallback(
-    (connection: Connection | { source: string; target: string; sourceHandle?: string | null }) => {
-      if (connection.source === connection.target) return false;
-      const targetNode = nodes.find((n) => n.id === connection.target);
-      if (targetNode?.type === 'START') return false;
-      return true;
-    },
-    [nodes]
   );
 
   const { setOnGenerate, setHasExistingNodes } = useAiStore();
@@ -446,11 +449,29 @@ const FlowBuilderInner: React.FC = () => {
               <div className={`absolute left-0 top-0 h-full w-80 border-r border-slate-200 bg-white -z-10 flex flex-col justify-between overflow-hidden shadow-xl transition-all duration-300 ease-in-out ${
                 (editorState.isBtnDialogOpen || editorState.isNextStepDrawerOpen || editorState.isDataCollectionDrawerOpen) ? 'translate-x-full opacity-100' : 'translate-x-0 opacity-0 pointer-events-none'
               }`}>
-                {selectedNode && editorState.isDataCollectionDrawerOpen && editorState.editingDataCollectionBlock && (
+                {selectedNode && editorState.isNextStepDrawerOpen ? (
+                  <ChooseNextStepDrawer
+                    onClose={() => {
+                      editorState.setIsNextStepDrawerOpen(false);
+                      if (editorState.setNextStepSourceHandle) {
+                        editorState.setNextStepSourceHandle(null);
+                      }
+                    }}
+                    onSelectStep={(type) => {
+                      const handleId = editorState.nextStepSourceHandle || 'next';
+                      handleAddAndConnectNode(selectedNode.id, type, handleId);
+                      editorState.setIsNextStepDrawerOpen(false);
+                      if (editorState.setNextStepSourceHandle) {
+                        editorState.setNextStepSourceHandle(null);
+                      }
+                    }}
+                    isNested={editorState.isDataCollectionDrawerOpen || editorState.isBtnDialogOpen}
+                  />
+                ) : selectedNode && editorState.isDataCollectionDrawerOpen && editorState.editingDataCollectionBlock ? (
                   <EditDataCollectionDrawer
                     onClose={() => editorState.setIsDataCollectionDrawerOpen(false)}
                     block={editorState.editingDataCollectionBlock}
-                    onSave={editorState.handleSaveDataCollection}
+                    onSave={editorState.handleUpdateDataCollection}
                     onRemove={() => {
                       if (editorState.editingDataCollectionBlock) {
                         const blockId = editorState.editingDataCollectionBlock.id;
@@ -482,8 +503,7 @@ const FlowBuilderInner: React.FC = () => {
                     customFields={customFields}
                     tags={tags}
                   />
-                )}
-                {selectedNode && editorState.isBtnDialogOpen && editorState.editingButton && (
+                ) : selectedNode && editorState.isBtnDialogOpen && editorState.editingButton ? (
                   <EditButtonDrawer
                     onClose={() => editorState.setIsBtnDialogOpen(false)}
                     button={editorState.editingButton}
@@ -496,25 +516,7 @@ const FlowBuilderInner: React.FC = () => {
                       setEdges((eds) => eds.filter((e) => !(e.source === selectedNode.id && e.sourceHandle === btnValue)));
                     }}
                   />
-                )}
-                {selectedNode && editorState.isNextStepDrawerOpen && (
-                  <ChooseNextStepDrawer
-                    onClose={() => {
-                      editorState.setIsNextStepDrawerOpen(false);
-                      if (editorState.setNextStepSourceHandle) {
-                        editorState.setNextStepSourceHandle(null);
-                      }
-                    }}
-                    onSelectStep={(type) => {
-                      const handleId = editorState.nextStepSourceHandle || 'next';
-                      handleAddAndConnectNode(selectedNode.id, type, handleId);
-                      editorState.setIsNextStepDrawerOpen(false);
-                      if (editorState.setNextStepSourceHandle) {
-                        editorState.setNextStepSourceHandle(null);
-                      }
-                    }}
-                  />
-                )}
+                ) : null}
               </div>
             </aside>
 
@@ -571,7 +573,7 @@ const FlowBuilderInner: React.FC = () => {
                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 px-3 pt-1 select-none">
                     Connect to:
                   </span>
-                  {CONTEXT_MENU_OPTIONS.map((opt, idx) => (
+                  {filteredContextMenuOptions.map((opt, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleCreateAndConnectNode(opt.type)}

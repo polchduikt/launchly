@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Globe } from 'lucide-react';
@@ -16,7 +16,15 @@ export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
 
   const connection = useConnection();
   const isConnecting = connection.inProgress;
-  const isSelf = isConnecting && connection.fromNode?.id === id;
+  const isGrayedOut = useMemo(() => {
+    if (!isConnecting) return false;
+    if (connection.fromNode?.id === id) return true;
+    const sourceHandleId = connection.fromHandle?.id;
+    if (sourceHandleId === 'reply') {
+      return true;
+    }
+    return false;
+  }, [isConnecting, connection, id]);
   const { showToolbar, bindHover } = useNodeHover();
   const [isHighlighted, setIsHighlighted] = useState(false);
 
@@ -45,7 +53,7 @@ export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
           : isHighlighted 
             ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm' 
             : 'border-slate-200'
-      } ${isSelf ? 'opacity-40 grayscale pointer-events-none' : ''}`}
+      } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
       <div className="relative flex items-center gap-2 mb-3 border-b border-slate-100 pb-2">

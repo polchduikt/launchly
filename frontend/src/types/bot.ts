@@ -276,6 +276,7 @@ export interface ActionNodeEditorProps {
 export interface ChooseNextStepDrawerProps {
   onClose: () => void;
   onSelectStep: (type: string) => void;
+  isNested?: boolean;
 }
 
 export interface GoogleSheetsConfigModalProps {

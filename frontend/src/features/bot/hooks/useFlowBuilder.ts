@@ -20,6 +20,22 @@ export const useFlowBuilder = () => {
   const [nodes, setNodes, onNodesChangeState] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChangeState] = useEdgesState<Edge>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleHover = (e: Event) => {
+      const customEvent = e as CustomEvent<{ edgeId: string; source: string; target: string } | null>;
+      if (customEvent.detail) {
+        setHoveredEdgeId(customEvent.detail.edgeId);
+      } else {
+        setHoveredEdgeId(null);
+      }
+    };
+    window.addEventListener('flow-hover-edge', handleHover);
+    return () => {
+      window.removeEventListener('flow-hover-edge', handleHover);
+    };
+  }, []);
 
   const {
     past,
@@ -291,12 +307,27 @@ export const useFlowBuilder = () => {
     };
   }, []);
 
+  const isValidConnection = useCallback(
+    (connection: Connection | { source: string; target: string; sourceHandle?: string | null }) => {
+      if (connection.source === connection.target) return false;
+      const targetNode = nodes.find((n) => n.id === connection.target);
+      if (targetNode?.type === 'START') return false;
+      
+      if (connection.sourceHandle === 'reply') {
+        return targetNode?.type === 'ACTION';
+      }
+      if (connection.sourceHandle === 'timeout') {
+        return targetNode?.type !== 'ACTION';
+      }
+      
+      return true;
+    },
+    [nodes]
+  );
+
   const onConnect = useCallback(
     (params: Connection) => {
-      if (params.source === params.target) return;
-      const targetNode = nodes.find((n) => n.id === params.target);
-      if (targetNode?.type === 'START') return;
-
+      if (!isValidConnection(params)) return;
       takeSnapshot();
       didConnectRef.current = true;
       let sourceHandle = params.sourceHandle;
@@ -310,7 +341,7 @@ export const useFlowBuilder = () => {
         return addEdge({ ...params, sourceHandle, ...FLOW_EDGE_DEFAULTS, type: edgeType }, filtered);
       });
     },
-    [setEdges, nodes, edgeType, takeSnapshot]
+    [setEdges, nodes, edgeType, takeSnapshot, isValidConnection]
   );
 
   const onConnectStart = useCallback((_event: unknown, { nodeId, handleId, handleType }: { nodeId: string | null; handleId: string | null; handleType: 'source' | 'target' | null }) => {
@@ -394,6 +425,11 @@ export const useFlowBuilder = () => {
             target: targetNodeId,
             targetHandle: null,
           };
+          if (!isValidConnection(params)) {
+            restoreTempRemovedEdge();
+            connectionStartRef.current = null;
+            return;
+          }
           takeSnapshot();
           tempRemovedEdgeRef.current = null;
           setEdges((eds) => {
@@ -656,6 +692,15 @@ export const useFlowBuilder = () => {
   }, [nodes, contextMenu]);
 
   const displayEdges = useMemo(() => {
+    let resultEdges = edges;
+    if (hoveredEdgeId) {
+      resultEdges = edges.map((edge) => {
+        if (edge.id === hoveredEdgeId) {
+          return { ...edge, zIndex: 1000 };
+        }
+        return edge;
+      });
+    }
     if (contextMenu) {
       const { source } = contextMenu;
       let sourceHandle = source.handleType === 'source' ? source.handleId : null;
@@ -673,10 +718,10 @@ export const useFlowBuilder = () => {
         type: edgeType,
         selectable: false,
       };
-      return [...edges, tempEdge];
+      return [...resultEdges, tempEdge];
     }
-    return edges;
-  }, [edges, contextMenu, edgeType, nodes]);
+    return resultEdges;
+  }, [edges, contextMenu, edgeType, nodes, hoveredEdgeId]);
 
   const copiedNodesRef = useRef<Node[] | null>(null);
   const copiedEdgesRef = useRef<Edge[] | null>(null);
@@ -916,5 +961,6 @@ export const useFlowBuilder = () => {
     isDirty,
     copySelectedNodes,
     pasteCopiedNodes,
+    isValidConnection,
   };
 };

@@ -287,6 +287,13 @@ export const useNodeEditor = (
     setEditingDataCollectionBlock(null);
   };
 
+  const handleUpdateDataCollection = (updated: FlowBlock) => {
+    const blocks = getBlocks(data);
+    const updatedBlocks = blocks.map((b) => (b.id === updated.id ? updated : b));
+    handleChange('blocks', updatedBlocks);
+    setEditingDataCollectionBlock(updated);
+  };
+
   return {
     isBtnDialogOpen,
     setIsBtnDialogOpen,
@@ -320,5 +327,6 @@ export const useNodeEditor = (
     setEditingDataCollectionBlock,
     handleOpenEditDataCollection,
     handleSaveDataCollection,
+    handleUpdateDataCollection,
   };
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Shuffle } from 'lucide-react';
@@ -12,7 +12,15 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   const connection = useConnection();
   const isConnecting = connection.inProgress;
-  const isSelf = isConnecting && connection.fromNode?.id === id;
+  const isGrayedOut = useMemo(() => {
+    if (!isConnecting) return false;
+    if (connection.fromNode?.id === id) return true;
+    const sourceHandleId = connection.fromHandle?.id;
+    if (sourceHandleId === 'reply') {
+      return true;
+    }
+    return false;
+  }, [isConnecting, connection, id]);
   const { showToolbar, bindHover } = useNodeHover();
   const [isHighlighted, setIsHighlighted] = useState(false);
 
@@ -45,8 +53,8 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
           ? 'border-indigo-500 ring-4 ring-indigo-500/10'
           : isHighlighted
             ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm'
-            : 'border-slate-200 hover:border-slate-350'
-      } ${isSelf ? 'opacity-40 grayscale pointer-events-none' : ''}`}
+            : 'border-slate-200 hover:border-slate-355'
+      } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 

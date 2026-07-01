@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Sliders } from 'lucide-react';
@@ -14,7 +14,18 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
 
   const connection = useConnection();
   const isConnecting = connection.inProgress;
-  const isSelf = isConnecting && connection.fromNode?.id === id;
+  const isGrayedOut = useMemo(() => {
+    if (!isConnecting) return false;
+    if (connection.fromNode?.id === id) return true;
+    const sourceHandleId = connection.fromHandle?.id;
+    if (sourceHandleId === 'reply') {
+      return false;
+    }
+    if (sourceHandleId === 'timeout') {
+      return true;
+    }
+    return false;
+  }, [isConnecting, connection, id]);
   const { showToolbar, bindHover } = useNodeHover();
   const [isHighlighted, setIsHighlighted] = useState(false);
 
@@ -40,20 +51,16 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
         return `Add Tag: ${action.tagName || 'Tag'}`;
       case 'REMOVE_TAG':
         return `Remove Tag: ${action.tagName || 'Tag'}`;
-      case 'SET_USER_FIELD':
-        return `Set Field: ${action.fieldName || 'field'} = ${action.fieldValue || ''}`;
-      case 'CLEAR_USER_FIELD':
-        return `Clear Field: ${action.fieldName || 'field'}`;
-      case 'TELEGRAM_SUBSCRIBE':
-        return 'Subscribe to Telegram';
-      case 'TELEGRAM_UNSUBSCRIBE':
-        return 'Unsubscribe Telegram';
-      case 'GS_INSERT_ROW':
-        return `GS: Insert Row into "${action.sheetName || 'Sheet'}"`;
-      case 'GS_GET_ROW':
-        return `GS: Get Row from "${action.sheetName || 'Sheet'}"`;
-      case 'GS_UPDATE_ROW':
-        return `GS: Update Row in "${action.sheetName || 'Sheet'}"`;
+      case 'SET_FIELD':
+        return `Set Field: ${action.fieldName || 'Field'}`;
+      case 'REMOVE_FIELD':
+        return `Remove Field: ${action.fieldName || 'Field'}`;
+      case 'SHEETS_INSERT':
+        return 'Sheets: Insert Row';
+      case 'SHEETS_UPDATE':
+        return 'Sheets: Update Row';
+      case 'API_REQUEST':
+        return `API: ${action.apiMethod || 'GET'} ${action.apiUrl || ''}`;
       default:
         return 'Unknown Action';
     }
@@ -118,7 +125,7 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
           : isHighlighted
             ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm'
             : 'border-slate-200 hover:border-slate-350'
-      } ${isSelf ? 'opacity-40 grayscale pointer-events-none' : ''}`}
+      } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
       
