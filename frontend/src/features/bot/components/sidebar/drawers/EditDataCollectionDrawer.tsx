@@ -82,7 +82,7 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-5 pb-24 space-y-5 custom-scrollbar">
         <div>
           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
             Reply Type

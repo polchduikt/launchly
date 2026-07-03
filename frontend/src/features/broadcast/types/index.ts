@@ -1,5 +1,6 @@
 import type { Node } from '@xyflow/react';
 import type { UseFormReturn } from 'react-hook-form';
+import type { BotResponse } from '../../../types/bot';
 
 export type FilterType = 'ALL' | 'BY_TAG' | 'HAS_ORDERS' | 'HAS_LEADS';
 
@@ -80,6 +81,7 @@ export interface CreateBroadcastDialogProps {
   isCreating: boolean;
   createError: Error | null;
   tags: TagResponse[];
+  bots: BotResponse[];
 }
 
 export interface StatusBadgeProps {

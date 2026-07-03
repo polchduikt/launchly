@@ -3,13 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useBotStore } from '../../../store/useBotStore';
 import { ROUTES } from '../../../constants/routes';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
+import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 import {
   useCampaignsQuery,
   useTagsQuery,
   useSendCampaignMutation,
+  useDeleteCampaignMutation,
+  useCancelScheduleMutation,
 } from '../hooks/useBroadcastQueries';
 import { useCreateBroadcastForm } from '../hooks/useCreateBroadcastForm';
-import { StatusBadge, CreateBroadcastDialog } from '../components';
+import { StatusBadge, CreateBroadcastDialog, EditBroadcastDialog } from '../components';
+import type { CampaignResponse } from '../types';
 import { getFilterText } from '../utils/filterText';
 import {
   Bell,
@@ -18,6 +22,9 @@ import {
   Loader2,
   Filter,
   Play,
+  Trash2,
+  Pencil,
+  CalendarX,
 } from 'lucide-react';
 
 export const BroadcastsPage: React.FC = () => {
@@ -25,16 +32,30 @@ export const BroadcastsPage: React.FC = () => {
   const activeBotId = useBotStore((state) => state.activeBotId);
   const botId = activeBotId || 0;
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState<CampaignResponse | null>(null);
   const { data: campaigns = [], isLoading: isCampaignsLoading } = useCampaignsQuery(botId);
   const { data: tags = [] } = useTagsQuery(botId);
+  const { data: bots = [] } = useBotsQuery();
   const sendCampaignMut = useSendCampaignMutation(botId);
   const { form, onSubmit, isPending: isCreating, error: createError } = useCreateBroadcastForm(
     botId,
     () => setIsCreateOpen(false)
   );
+  const deleteCampaignMut = useDeleteCampaignMutation(botId);
+  const cancelScheduleMut = useCancelScheduleMutation(botId);
   const handleSendNow = (campaignId: number, name: string) => {
     if (window.confirm(`Are you sure you want to send the broadcast "${name}" now?`)) {
       sendCampaignMut.mutate(campaignId);
+    }
+  };
+  const handleDeleteCampaign = (campaignId: number, name: string) => {
+    if (window.confirm(`Are you sure you want to delete the broadcast "${name}"?`)) {
+      deleteCampaignMut.mutate(campaignId);
+    }
+  };
+  const handleCancelSchedule = (campaignId: number, name: string) => {
+    if (window.confirm(`Cancel the scheduled broadcast "${name}"? It will revert to Draft.`)) {
+      cancelScheduleMut.mutate(campaignId);
     }
   };
 
@@ -153,7 +174,9 @@ export const BroadcastsPage: React.FC = () => {
                       </td>
                       <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
                         <div className="text-xs text-slate-550 font-bold mb-1.5">
-                          {camp.sentCount} / {camp.totalCount} sent
+                          {camp.status === 'SCHEDULED' && camp.sentCount === 0 && camp.totalCount === 0
+                            ? '— pending —'
+                            : `${camp.sentCount} / ${camp.totalCount} sent`}
                         </div>
                         <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                           <div
@@ -161,11 +184,15 @@ export const BroadcastsPage: React.FC = () => {
                               camp.status === 'FAILED'
                                 ? 'bg-rose-500'
                                 : camp.status === 'IN_PROGRESS'
-                                ? 'bg-amber-500'
+                                ? 'bg-amber-400 animate-pulse'
+                                : camp.status === 'SCHEDULED'
+                                ? 'bg-slate-300'
                                 : 'bg-emerald-500'
                             }`}
                             style={{
-                              width: `${camp.totalCount > 0 ? (camp.sentCount / camp.totalCount) * 100 : 0}%`,
+                              width: camp.status === 'SCHEDULED' && camp.sentCount === 0 && camp.totalCount === 0
+                                ? '100%'
+                                : `${camp.totalCount > 0 ? (camp.sentCount / camp.totalCount) * 100 : 0}%`,
                             }}
                           />
                         </div>
@@ -179,27 +206,47 @@ export const BroadcastsPage: React.FC = () => {
                         })}
                       </td>
                       <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        {camp.status === 'DRAFT' && (
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => navigate(ROUTES.BROADCAST_BUILDER.replace(':id', String(camp.id)))}
-                              className="px-3 py-1.5 text-xs font-bold text-indigo-600 hover:bg-indigo-50 border border-indigo-200 rounded-xl transition-all cursor-pointer"
-                            >
-                              Edit Flow
-                            </button>
-                            <button
-                              onClick={() => handleSendNow(camp.id, camp.name)}
-                              disabled={sendCampaignMut.isPending}
-                              className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-emerald-100"
-                            >
-                              <Play size={10} className="fill-current" />
-                              Send Now
-                            </button>
-                          </div>
-                        )}
-                        {camp.status === 'IN_PROGRESS' && (
-                          <Loader2 size={16} className="animate-spin text-slate-400 ml-auto" />
-                        )}
+                        <div className="flex items-center justify-end gap-1.5">
+                          {camp.status === 'IN_PROGRESS' ? (
+                            <Loader2 size={16} className="animate-spin text-slate-400 shrink-0" />
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleSendNow(camp.id, camp.name)}
+                                disabled={sendCampaignMut.isPending}
+                                title="Send Now"
+                                className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border border-transparent hover:border-emerald-100 rounded-xl transition-all cursor-pointer shrink-0"
+                              >
+                                <Play size={14} className="fill-current" />
+                              </button>
+                              <button
+                                onClick={() => setEditingCampaign(camp)}
+                                title="Edit Broadcast"
+                                className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 rounded-xl transition-all cursor-pointer shrink-0"
+                              >
+                                <Pencil size={14} />
+                              </button>
+                              {camp.status === 'SCHEDULED' && (
+                                <button
+                                  onClick={() => handleCancelSchedule(camp.id, camp.name)}
+                                  disabled={cancelScheduleMut.isPending}
+                                  title="Cancel Schedule"
+                                  className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-transparent hover:border-amber-100 rounded-xl transition-all cursor-pointer shrink-0"
+                                >
+                                  <CalendarX size={14} />
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDeleteCampaign(camp.id, camp.name)}
+                                disabled={deleteCampaignMut.isPending}
+                                title="Delete Broadcast"
+                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 rounded-xl transition-all cursor-pointer shrink-0"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -217,6 +264,14 @@ export const BroadcastsPage: React.FC = () => {
           isCreating={isCreating}
           createError={createError}
           tags={tags}
+          bots={bots}
+        />
+        <EditBroadcastDialog
+          isOpen={editingCampaign !== null}
+          onClose={() => setEditingCampaign(null)}
+          campaign={editingCampaign}
+          bots={bots}
+          botId={botId}
         />
       </div>
     </DashboardLayout>

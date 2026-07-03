@@ -13,7 +13,9 @@ import { FLOW_EDGE_DEFAULTS, EDGE_TYPES } from '../config/flowEdges';
 import { CONTEXT_MENU_OPTIONS } from '../config/contextMenuOptions';
 import { useFlowBuilder } from '../hooks/useFlowBuilder';
 import { ROUTES } from '../../../constants/routes';
-import { ArrowLeft, Loader2, Plus, GitFork, Route, GitCommit, Undo2, Redo2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, GitFork, Route, GitCommit, Undo2, Redo2, Sparkles, Eye } from 'lucide-react';
+import { useState } from 'react';
+import { FlowPreviewPanel } from '../../../components/shared/FlowPreviewPanel';
 import { useAiStore } from '../../../store/useAiStore';
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNodeEditor } from '../hooks/useNodeEditor';
@@ -131,6 +133,8 @@ const FlowBuilderInner: React.FC = () => {
     pasteCopiedNodes,
     isValidConnection,
   } = useFlowBuilder();
+
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const filteredContextMenuOptions = useMemo(() => {
     if (!contextMenu) return CONTEXT_MENU_OPTIONS;
@@ -324,6 +328,19 @@ const FlowBuilderInner: React.FC = () => {
             </div>
 
             <div className="w-[1px] h-6 bg-slate-200 hidden sm:block" />
+
+            <button
+              onClick={() => setIsPreviewOpen((v) => !v)}
+              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all border cursor-pointer shadow-3xs ${
+                isPreviewOpen
+                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                  : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
+              }`}
+              title="Preview flow"
+            >
+              <Eye size={14} />
+              <span>{isPreviewOpen ? 'Close Preview' : 'Preview'}</span>
+            </button>
 
             <button
               onClick={() => {
@@ -608,6 +625,13 @@ const FlowBuilderInner: React.FC = () => {
         </div>
       </div>
       <AiAssistantDrawer />
+      <FlowPreviewPanel
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        nodes={nodes}
+        edges={edges}
+        startNodeType="START"
+      />
     </DashboardLayout>
   );
 };

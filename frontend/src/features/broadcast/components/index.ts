@@ -4,3 +4,4 @@ export * from './TelegramPreviewModal';
 export * from './nodes';
 export * from './StatusBadge';
 export * from './CreateBroadcastDialog';
+export * from './EditBroadcastDialog';

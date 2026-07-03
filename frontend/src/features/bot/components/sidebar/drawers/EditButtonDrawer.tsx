@@ -113,7 +113,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar flex flex-col justify-between">
+      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 pb-24 space-y-5 custom-scrollbar flex flex-col justify-between">
         <div className="space-y-5">
           <div>
             <label htmlFor="btnLabel" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">

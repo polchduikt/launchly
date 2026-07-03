@@ -20,7 +20,7 @@ export const ChooseNextStepDrawer: React.FC<ChooseNextStepDrawerProps> = ({ onCl
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-3.5 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-5 pb-24 space-y-3.5 custom-scrollbar">
         {STEP_OPTIONS.map((opt) => {
           const Icon = opt.icon;
           return (

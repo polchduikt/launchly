@@ -78,7 +78,7 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
 
 
   return (
-    <div className="h-full overflow-y-auto p-5 font-sans flex flex-col custom-scrollbar">
+    <div className="h-full overflow-y-auto p-5 pb-24 font-sans flex flex-col custom-scrollbar">
       <div className="flex-1 flex flex-col gap-5">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 shrink-0">
           <div className="flex items-center gap-2">

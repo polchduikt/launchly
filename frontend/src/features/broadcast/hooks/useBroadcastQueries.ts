@@ -7,6 +7,8 @@ import {
   getTagsApi,
   createTagApi,
   deleteTagApi,
+  deleteCampaignApi,
+  cancelScheduleApi,
 } from '../api/broadcast';
 import type { CreateCampaignRequest, CreateTagRequest } from '../types';
 
@@ -15,6 +17,14 @@ export const useCampaignsQuery = (botId: number, enabled: boolean = true) => {
     queryKey: ['campaigns', botId],
     queryFn: () => getCampaignsApi(botId),
     enabled: enabled && botId > 0,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return false;
+      const hasActive = data.some(
+        (c) => c.status === 'IN_PROGRESS' || c.status === 'SCHEDULED'
+      );
+      return hasActive ? 3000 : false;
+    },
   });
 };
 
@@ -73,6 +83,26 @@ export const useDeleteTagMutation = (botId: number) => {
     mutationFn: (tagId: number) => deleteTagApi(botId, tagId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tags', botId] });
+    },
+  });
+};
+
+export const useDeleteCampaignMutation = (botId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (campaignId: number) => deleteCampaignApi(botId, campaignId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', botId] });
+    },
+  });
+};
+
+export const useCancelScheduleMutation = (botId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (campaignId: number) => cancelScheduleApi(botId, campaignId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', botId] });
     },
   });
 };

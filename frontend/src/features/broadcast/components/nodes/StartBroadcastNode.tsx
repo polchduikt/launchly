@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Handle, Position, useConnection, useEdges, useNodes } from '@xyflow/react';
+import { Position, useConnection, useEdges, useNodes } from '@xyflow/react';
 import { Send } from 'lucide-react';
+import { NodeHandle } from '../../../bot/components/nodes/NodeHandle';
 
 export const StartBroadcastNode: React.FC = () => {
   const connection = useConnection();
@@ -42,13 +43,11 @@ export const StartBroadcastNode: React.FC = () => {
       <div className="bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs font-bold text-slate-600 text-center">
         You send a Broadcast
       </div>
-      <Handle
+      <NodeHandle
         type="source"
         position={Position.Right}
         id="then"
-        className={`w-2.5 h-2.5 border-2 border-white transition-all ${
-          isConnected ? '!bg-[#7b8794]' : '!bg-indigo-600'
-        }`}
+        isConnected={isConnected}
       />
     </div>
   );

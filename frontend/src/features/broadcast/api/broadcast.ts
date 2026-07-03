@@ -57,3 +57,17 @@ export const createTagApi = async (
 export const deleteTagApi = async (botId: number, tagId: number): Promise<void> => {
   await apiClient.delete(`/broadcast/bots/${botId}/tags/${tagId}`);
 };
+
+export const deleteCampaignApi = async (botId: number, campaignId: number): Promise<void> => {
+  await apiClient.delete(`/broadcast/bots/${botId}/campaigns/${campaignId}`);
+};
+
+export const cancelScheduleApi = async (
+  botId: number,
+  campaignId: number
+): Promise<CampaignResponse> => {
+  const response = await apiClient.delete<CampaignResponse>(
+    `/broadcast/bots/${botId}/campaigns/${campaignId}/schedule`
+  );
+  return response.data;
+};
