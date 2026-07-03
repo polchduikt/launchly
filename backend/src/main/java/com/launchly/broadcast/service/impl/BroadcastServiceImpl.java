@@ -100,10 +100,6 @@ public class BroadcastServiceImpl implements BroadcastService {
             throw new AppException(HttpStatus.BAD_REQUEST, "Campaign does not belong to this bot");
         }
 
-        if (campaign.getStatus() == CampaignStatus.IN_PROGRESS
-                || campaign.getStatus() == CampaignStatus.COMPLETED) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Cannot update campaign that is already " + campaign.getStatus());
-        }
 
         String messageText = extractFirstMessageText(request.nodes(), request.edges(), request.message());
 
@@ -115,10 +111,12 @@ public class BroadcastServiceImpl implements BroadcastService {
         campaign.setNodes(request.nodes() != null ? request.nodes() : "[]");
         campaign.setEdges(request.edges() != null ? request.edges() : "[]");
 
-        if (request.scheduledAt() != null) {
-            campaign.setStatus(CampaignStatus.SCHEDULED);
-        } else if (campaign.getStatus() == CampaignStatus.SCHEDULED) {
-            campaign.setStatus(CampaignStatus.DRAFT);
+        if (campaign.getStatus() == CampaignStatus.DRAFT || campaign.getStatus() == CampaignStatus.SCHEDULED) {
+            if (request.scheduledAt() != null) {
+                campaign.setStatus(CampaignStatus.SCHEDULED);
+            } else {
+                campaign.setStatus(CampaignStatus.DRAFT);
+            }
         }
 
         campaign = campaignRepository.save(campaign);
@@ -191,9 +189,8 @@ public class BroadcastServiceImpl implements BroadcastService {
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
 
-        if (campaign.getStatus() == CampaignStatus.IN_PROGRESS
-                || campaign.getStatus() == CampaignStatus.COMPLETED) {
-            log.warn("Campaign {} is already {} — skipping", campaignId, campaign.getStatus());
+        if (campaign.getStatus() == CampaignStatus.IN_PROGRESS) {
+            log.warn("Campaign {} is already IN_PROGRESS — skipping", campaignId);
             return;
         }
 
@@ -203,10 +200,11 @@ public class BroadcastServiceImpl implements BroadcastService {
         );
 
         campaign.setStatus(CampaignStatus.IN_PROGRESS);
-        campaign.setTotalCount(targetUsers.size());
-        campaign.setSentCount(0);
-        campaign.setFailedCount(0);
+        campaign.setTotalCount(campaign.getTotalCount() + targetUsers.size());
         campaignRepository.save(campaign);
+
+        int previousSent = campaign.getSentCount();
+        int previousFailed = campaign.getFailedCount();
 
         log.info("Starting broadcast campaign {} to {} users", campaignId, targetUsers.size());
         String firstConnectedNodeId = null;
@@ -270,15 +268,18 @@ public class BroadcastServiceImpl implements BroadcastService {
             }
         }
 
-        campaign.setSentCount(sent);
-        campaign.setFailedCount(failed);
-        campaign.setStatus(failed == targetUsers.size() && !targetUsers.isEmpty()
+        campaign.setSentCount(previousSent + sent);
+        campaign.setFailedCount(previousFailed + failed);
+        int totalSent = previousSent + sent;
+        int totalFailed = previousFailed + failed;
+        int totalCount = campaign.getTotalCount();
+        campaign.setStatus(totalFailed == totalCount && totalCount > 0
                 ? CampaignStatus.FAILED
                 : CampaignStatus.COMPLETED);
         campaignRepository.save(campaign);
 
         log.info("Broadcast campaign {} completed: sent={}, failed={}, total={}",
-                campaignId, sent, failed, targetUsers.size());
+                campaignId, totalSent, totalFailed, totalCount);
     }
 
     @Override
@@ -289,15 +290,46 @@ public class BroadcastServiceImpl implements BroadcastService {
 
         validateBotOwnership(campaign.getBot().getId(), userId);
 
-        if (campaign.getStatus() == CampaignStatus.IN_PROGRESS
-                || campaign.getStatus() == CampaignStatus.COMPLETED) {
+        if (campaign.getStatus() == CampaignStatus.IN_PROGRESS) {
             throw new AppException(HttpStatus.BAD_REQUEST,
-                    "Campaign is already " + campaign.getStatus());
+                    "Campaign is already IN_PROGRESS, please wait for it to complete.");
         }
 
         CampaignResponse response = broadcastMapper.toCampaignResponse(campaign);
         sendCampaign(campaignId);
         return response;
+    }
+
+    @Override
+    @Transactional
+    public CampaignResponse cancelSchedule(Long campaignId, Long userId) {
+        BroadcastCampaign campaign = campaignRepository.findById(campaignId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
+
+        validateBotOwnership(campaign.getBot().getId(), userId);
+
+        if (campaign.getStatus() != CampaignStatus.SCHEDULED) {
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Campaign is not in SCHEDULED state.");
+        }
+
+        campaign.setStatus(CampaignStatus.DRAFT);
+        campaign.setScheduledAt(null);
+        campaignRepository.save(campaign);
+        log.info("Cancelled schedule for campaignId={} userId={}", campaignId, userId);
+        return broadcastMapper.toCampaignResponse(campaign);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCampaign(Long campaignId, Long userId) {
+        BroadcastCampaign campaign = campaignRepository.findById(campaignId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
+
+        validateBotOwnership(campaign.getBot().getId(), userId);
+
+        campaignRepository.delete(campaign);
+        log.info("Deleted campaignId={} for userId={}", campaignId, userId);
     }
 
     private Bot validateBotOwnership(Long botId, Long userId) {

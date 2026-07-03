@@ -15,4 +15,8 @@ public interface BroadcastService {
     void sendCampaign(Long campaignId);
 
     CampaignResponse sendNow(Long campaignId, Long userId);
+
+    CampaignResponse cancelSchedule(Long campaignId, Long userId);
+
+    void deleteCampaign(Long campaignId, Long userId);
 }

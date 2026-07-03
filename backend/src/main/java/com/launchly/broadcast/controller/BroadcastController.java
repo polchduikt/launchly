@@ -80,4 +80,21 @@ public class BroadcastController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(broadcastService.sendNow(campaignId, userDetails.getId()));
     }
+
+    @DeleteMapping("/campaigns/{campaignId}/schedule")
+    public ResponseEntity<CampaignResponse> cancelSchedule(
+            @PathVariable Long botId,
+            @PathVariable Long campaignId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(broadcastService.cancelSchedule(campaignId, userDetails.getId()));
+    }
+
+    @DeleteMapping("/campaigns/{campaignId}")
+    public ResponseEntity<Void> deleteCampaign(
+            @PathVariable Long botId,
+            @PathVariable Long campaignId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        broadcastService.deleteCampaign(campaignId, userDetails.getId());
+        return ResponseEntity.noContent().build();
+    }
 }
