@@ -39,7 +39,58 @@ export const AutomationsPage: React.FC = () => {
   const setActiveBotId = useBotStore((state) => state.setActiveBotId);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [selectedBotIds, setSelectedBotIds] = useState<Set<number>>(new Set());
   const { data: bots = [], isLoading } = useBotsQuery();
+
+  const handleToggleSelectBot = (botId: number) => {
+    setSelectedBotIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(botId)) {
+        next.delete(botId);
+      } else {
+        next.add(botId);
+      }
+      return next;
+    });
+  };
+
+  const handleToggleSelectAll = () => {
+    setSelectedBotIds((prev) => {
+      const allSelected = filteredBots.length > 0 && filteredBots.every((b) => prev.has(b.id));
+      if (allSelected) {
+        const next = new Set(prev);
+        filteredBots.forEach((b) => next.delete(b.id));
+        return next;
+      } else {
+        const next = new Set(prev);
+        filteredBots.forEach((b) => next.add(b.id));
+        return next;
+      }
+    });
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedBotIds.size === 0) {
+      alert('No automations selected.');
+      return;
+    }
+    if (window.confirm(`Are you sure you want to delete the ${selectedBotIds.size} selected automation(s)?`)) {
+      const ids = Array.from(selectedBotIds);
+      ids.forEach((id) => {
+        deleteBotMutation.mutate(id, {
+          onSuccess: () => {
+            setBotFolders((prev) => {
+              const updated = { ...prev };
+              delete updated[id];
+              return updated;
+            });
+          }
+        });
+      });
+      setSelectedBotIds(new Set());
+    }
+  };
+
   const createBotMutation = useCreateBotMutation();
   const deleteBotMutation = useDeleteBotMutation();
   const startBotMutation = useStartBotMutation();
@@ -436,10 +487,14 @@ export const AutomationsPage: React.FC = () => {
 
               <div className="flex items-center justify-between md:justify-end gap-6 text-xs text-slate-500 font-bold select-none">
                 <button
-                  onClick={() => alert('Trash is empty.')}
-                  className="flex items-center gap-1.5 hover:text-slate-800 transition-all cursor-pointer"
+                  onClick={handleBulkDelete}
+                  className={`flex items-center gap-1.5 transition-all cursor-pointer ${
+                    selectedBotIds.size > 0 
+                      ? 'text-red-600 hover:text-red-700 font-bold' 
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={14} className={selectedBotIds.size > 0 ? 'text-red-500' : ''} />
                   <span>Trash</span>
                 </button>
                 <div className="h-4 w-px bg-slate-200 hidden md:block" />
@@ -478,6 +533,8 @@ export const AutomationsPage: React.FC = () => {
                         <th className="py-3 px-4 w-12 text-center">
                           <input
                             type="checkbox"
+                            checked={filteredBots.length > 0 && filteredBots.every((b) => selectedBotIds.has(b.id))}
+                            onChange={handleToggleSelectAll}
                             className="rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
                           />
                         </th>
@@ -501,6 +558,8 @@ export const AutomationsPage: React.FC = () => {
                           <td className="py-4 px-4 w-12 text-center" onClick={(e) => e.stopPropagation()}>
                             <input
                               type="checkbox"
+                              checked={selectedBotIds.has(bot.id)}
+                              onChange={() => handleToggleSelectBot(bot.id)}
                               className="rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
                             />
                           </td>

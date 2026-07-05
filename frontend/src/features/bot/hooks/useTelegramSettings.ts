@@ -16,7 +16,8 @@ export interface BotTelegramSettingsState {
 }
 
 export const useTelegramSettings = () => {
-  const { data: bots = [], isLoading } = useBotsQuery();
+  const { data: botsData = [], isLoading } = useBotsQuery();
+  const bots = botsData.filter((b) => b.hasTelegramToken);
 
   const startBotMutation = useStartBotMutation();
   const stopBotMutation = useStopBotMutation();

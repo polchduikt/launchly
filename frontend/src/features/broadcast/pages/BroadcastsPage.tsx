@@ -30,12 +30,17 @@ import {
 export const BroadcastsPage: React.FC = () => {
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
-  const botId = activeBotId || 0;
+  const { data: bots = [] } = useBotsQuery();
+
+  const realBot = bots.find((b) => b.hasTelegramToken) || bots[0];
+  const botId = activeBotId && bots.find((b) => b.id === activeBotId)?.hasTelegramToken 
+    ? activeBotId 
+    : (realBot?.id || 0);
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<CampaignResponse | null>(null);
   const { data: campaigns = [], isLoading: isCampaignsLoading } = useCampaignsQuery(botId);
   const { data: tags = [] } = useTagsQuery(botId);
-  const { data: bots = [] } = useBotsQuery();
   const sendCampaignMut = useSendCampaignMutation(botId);
   const { form, onSubmit, isPending: isCreating, error: createError } = useCreateBroadcastForm(
     botId,

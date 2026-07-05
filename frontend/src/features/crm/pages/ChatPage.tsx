@@ -17,9 +17,17 @@ import { ContactInfoPanel } from '../components/ContactInfoPanel';
 import type { BottomTab } from '../types/chat';
 import { useSearchParams } from 'react-router-dom';
 
+import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
+
 export const ChatPage: React.FC = () => {
   const activeBotId = useBotStore((s) => s.activeBotId);
-  const botId = activeBotId || 0;
+  const { data: bots = [] } = useBotsQuery();
+
+  const realBot = bots.find((b) => b.hasTelegramToken) || bots[0];
+  const botId = activeBotId && bots.find((b) => b.id === activeBotId)?.hasTelegramToken 
+    ? activeBotId 
+    : (realBot?.id || 0);
+
   useCrmWebSocket(botId);
   const [searchParams] = useSearchParams();
   const conversationIdParam = searchParams.get('conversationId');

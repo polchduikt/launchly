@@ -97,15 +97,48 @@ function getNodeInfo(node: Node): NodeInfo {
 
   if (t === 'MESSAGE' || t === 'SEND_MESSAGE') {
     const blocks = getBlocks(d);
-    const hasDataCollection = blocks.some((b) => b.type === 'data_collection');
-    if (hasDataCollection) {
-      return { kind: 'input', text: (d?.text as string) || 'Please enter a value:' };
+    let resolvedText = '';
+    let resolvedImageUrl: string | undefined = undefined;
+    let resolvedButtons: ButtonData[] = [];
+    let isInput = false;
+    let inputPrompt = 'Please enter a value:';
+
+    blocks.forEach((block) => {
+      if (block.type === 'text') {
+        if (block.text) {
+          if (resolvedText) resolvedText += '\n\n';
+          resolvedText += block.text;
+        }
+        if (Array.isArray(block.buttons)) {
+          resolvedButtons = [...resolvedButtons, ...block.buttons];
+        }
+      } else if (block.type === 'image') {
+        if (block.imageUrl) {
+          resolvedImageUrl = block.imageUrl;
+        }
+        if (Array.isArray(block.buttons)) {
+          resolvedButtons = [...resolvedButtons, ...block.buttons];
+        }
+      } else if (block.type === 'data_collection') {
+        isInput = true;
+        if (block.text) {
+          inputPrompt = block.text;
+        }
+      } else if (block.type === 'telegram_menu') {
+        if (Array.isArray(block.buttons)) {
+          resolvedButtons = [...resolvedButtons, ...block.buttons];
+        }
+      }
+    });
+
+    if (isInput) {
+      return { kind: 'input', text: inputPrompt };
     }
     return {
       kind: 'message',
-      text: (d?.text as string) || '',
-      imageUrl: d?.imageUrl as string | undefined,
-      buttons: (d?.buttons as ButtonData[]) || [],
+      text: resolvedText || (d?.text as string) || '',
+      imageUrl: resolvedImageUrl || (d?.imageUrl as string | undefined),
+      buttons: resolvedButtons.length > 0 ? resolvedButtons : ((d?.buttons as ButtonData[]) || []),
     };
   }
   if (t === 'DATA_COLLECTION') {
