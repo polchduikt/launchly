@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueries } from '@tanstack/react-query';
 import { useBotStore } from '../../../store/useBotStore';
 import { ROUTES } from '../../../constants/routes';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
@@ -11,6 +12,7 @@ import {
   useDeleteCampaignMutation,
   useCancelScheduleMutation,
 } from '../hooks/useBroadcastQueries';
+import { getCampaignsApi } from '../api/broadcast';
 import { useCreateBroadcastForm } from '../hooks/useCreateBroadcastForm';
 import { StatusBadge, CreateBroadcastDialog, EditBroadcastDialog } from '../components';
 import type { CampaignResponse } from '../types';
@@ -32,39 +34,52 @@ export const BroadcastsPage: React.FC = () => {
   const activeBotId = useBotStore((state) => state.activeBotId);
   const { data: bots = [] } = useBotsQuery();
 
-  const realBot = bots.find((b) => b.hasTelegramToken) || bots[0];
-  const botId = activeBotId && bots.find((b) => b.id === activeBotId)?.hasTelegramToken 
-    ? activeBotId 
-    : (realBot?.id || 0);
+  const botId = activeBotId || (bots[0]?.id || 0);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<CampaignResponse | null>(null);
-  const { data: campaigns = [], isLoading: isCampaignsLoading } = useCampaignsQuery(botId);
+
+  const campaignQueries = useQueries({
+    queries: bots.map((bot) => ({
+      queryKey: ['campaigns', bot.id],
+      queryFn: () => getCampaignsApi(bot.id),
+      enabled: bots.length > 0,
+    })),
+  });
+
+  const campaigns = useMemo(() => {
+    return campaignQueries
+      .flatMap((q) => q.data || [])
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [campaignQueries]);
+
+  const isCampaignsLoading = campaignQueries.some((q) => q.isLoading);
   const { data: tags = [] } = useTagsQuery(botId);
-  const sendCampaignMut = useSendCampaignMutation(botId);
+  const sendCampaignMut = useSendCampaignMutation();
   const { form, onSubmit, isPending: isCreating, error: createError } = useCreateBroadcastForm(
     botId,
     () => setIsCreateOpen(false)
   );
-  const deleteCampaignMut = useDeleteCampaignMutation(botId);
-  const cancelScheduleMut = useCancelScheduleMutation(botId);
-  const handleSendNow = (campaignId: number, name: string) => {
+  const deleteCampaignMut = useDeleteCampaignMutation();
+  const cancelScheduleMut = useCancelScheduleMutation();
+
+  const handleSendNow = (campaignId: number, targetBotId: number, name: string) => {
     if (window.confirm(`Are you sure you want to send the broadcast "${name}" now?`)) {
-      sendCampaignMut.mutate(campaignId);
+      sendCampaignMut.mutate({ botId: targetBotId, campaignId });
     }
   };
-  const handleDeleteCampaign = (campaignId: number, name: string) => {
+  const handleDeleteCampaign = (campaignId: number, targetBotId: number, name: string) => {
     if (window.confirm(`Are you sure you want to delete the broadcast "${name}"?`)) {
-      deleteCampaignMut.mutate(campaignId);
+      deleteCampaignMut.mutate({ botId: targetBotId, campaignId });
     }
   };
-  const handleCancelSchedule = (campaignId: number, name: string) => {
+  const handleCancelSchedule = (campaignId: number, targetBotId: number, name: string) => {
     if (window.confirm(`Cancel the scheduled broadcast "${name}"? It will revert to Draft.`)) {
-      cancelScheduleMut.mutate(campaignId);
+      cancelScheduleMut.mutate({ botId: targetBotId, campaignId });
     }
   };
 
-  if (!activeBotId) {
+  if (bots.length === 0) {
     return (
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center min-h-[70vh] p-8 max-w-md mx-auto text-center space-y-6">
@@ -72,13 +87,13 @@ export const BroadcastsPage: React.FC = () => {
             <Bell size={28} />
           </div>
           <div className="space-y-2">
-            <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">Select a Bot first</h1>
-            <p className="text-sm text-slate-550">
-              Please select or connect a Telegram bot in the dashboard home page to manage campaigns.
+            <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">Connect a Bot first</h1>
+            <p className="text-sm text-slate-555">
+              Please connect a Telegram bot in the dashboard home page to manage campaigns.
             </p>
           </div>
           <button
-            onClick={() => navigate(ROUTES.HOME)}
+            onClick={() => navigate('/')}
             className="px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-100 cursor-pointer"
           >
             Go to Home
@@ -128,7 +143,7 @@ export const BroadcastsPage: React.FC = () => {
             </div>
 
             <h2 className="text-lg font-bold text-slate-900 tracking-tight mb-2">Create your first Broadcast</h2>
-            <p className="text-sm text-slate-500 max-w-md mx-auto mb-6 leading-relaxed">
+            <p className="text-sm text-slate-550 max-w-md mx-auto mb-6 leading-relaxed">
               Engage your contacts by sending your Broadcasts immediately or scheduling it on a particular date and time.
             </p>
 
@@ -146,6 +161,7 @@ export const BroadcastsPage: React.FC = () => {
                 <thead>
                   <tr className="border-b border-slate-100 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">
                     <th className="py-3 px-4">Campaign Name</th>
+                    <th className="py-3 px-4">Automation</th>
                     <th className="py-3 px-4">Target Audience</th>
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4 w-44 text-center">Delivery Progress</th>
@@ -154,107 +170,113 @@ export const BroadcastsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {campaigns.map((camp) => (
-                    <tr
-                      key={camp.id}
-                      onClick={() => navigate(ROUTES.BROADCAST_BUILDER.replace(':id', String(camp.id)))}
-                      className="hover:bg-slate-50/50 transition-all cursor-pointer group"
-                    >
-                      <td className="py-4 px-4">
-                        <div className="font-semibold text-sm text-slate-800 group-hover:text-indigo-600 transition-all">
-                          {camp.name}
-                        </div>
-                        <div className="text-xs text-slate-400 truncate max-w-xs mt-0.5">
-                          {camp.message}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-sm text-slate-500 font-medium">
-                        <span className="flex items-center gap-1.5">
-                          <Filter size={12} className="text-slate-400" />
-                          {getFilterText(camp.filterType, camp.filterValue)}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <StatusBadge status={camp.status} />
-                      </td>
-                      <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
-                        <div className="text-xs text-slate-550 font-bold mb-1.5">
-                          {camp.status === 'SCHEDULED' && camp.sentCount === 0 && camp.totalCount === 0
-                            ? '— pending —'
-                            : `${camp.sentCount} / ${camp.totalCount} sent`}
-                        </div>
-                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${
-                              camp.status === 'FAILED'
-                                ? 'bg-rose-500'
-                                : camp.status === 'IN_PROGRESS'
-                                ? 'bg-amber-400 animate-pulse'
-                                : camp.status === 'SCHEDULED'
-                                ? 'bg-slate-300'
-                                : 'bg-emerald-500'
-                            }`}
-                            style={{
-                              width: camp.status === 'SCHEDULED' && camp.sentCount === 0 && camp.totalCount === 0
-                                ? '100%'
-                                : `${camp.totalCount > 0 ? (camp.sentCount / camp.totalCount) * 100 : 0}%`,
-                            }}
-                          />
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-xs text-slate-500 font-medium">
-                        {new Date(camp.createdAt).toLocaleDateString(undefined, {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </td>
-                      <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1.5">
-                          {camp.status === 'IN_PROGRESS' ? (
-                            <Loader2 size={16} className="animate-spin text-slate-400 shrink-0" />
-                          ) : (
-                            <>
-                              <button
-                                onClick={() => handleSendNow(camp.id, camp.name)}
-                                disabled={sendCampaignMut.isPending}
-                                title="Send Now"
-                                className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border border-transparent hover:border-emerald-100 rounded-xl transition-all cursor-pointer shrink-0"
-                              >
-                                <Play size={14} className="fill-current" />
-                              </button>
-                              <button
-                                onClick={() => setEditingCampaign(camp)}
-                                title="Edit Broadcast"
-                                className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 rounded-xl transition-all cursor-pointer shrink-0"
-                              >
-                                <Pencil size={14} />
-                              </button>
-                              {camp.status === 'SCHEDULED' && (
+                  {campaigns.map((camp) => {
+                    const campaignBot = bots.find((b) => b.id === camp.botId);
+                    return (
+                      <tr
+                        key={camp.id}
+                        onClick={() => navigate(ROUTES.BROADCAST_BUILDER.replace(':id', String(camp.id)))}
+                        className="hover:bg-slate-50/50 transition-all cursor-pointer group"
+                      >
+                        <td className="py-4 px-4">
+                          <div className="font-semibold text-sm text-slate-800 group-hover:text-indigo-600 transition-all">
+                            {camp.name}
+                          </div>
+                          <div className="text-xs text-slate-400 truncate max-w-xs mt-0.5">
+                            {camp.message}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-xs font-bold text-slate-550">
+                          {campaignBot ? campaignBot.name : '—'}
+                        </td>
+                        <td className="py-4 px-4 text-sm text-slate-500 font-medium">
+                          <span className="flex items-center gap-1.5">
+                            <Filter size={12} className="text-slate-400" />
+                            {getFilterText(camp.filterType, camp.filterValue)}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <StatusBadge status={camp.status} />
+                        </td>
+                        <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                          <div className="text-xs text-slate-550 font-bold mb-1.5">
+                            {camp.status === 'SCHEDULED' && camp.sentCount === 0 && camp.totalCount === 0
+                              ? '— pending —'
+                              : `${camp.sentCount} / ${camp.totalCount} sent`}
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                camp.status === 'FAILED'
+                                  ? 'bg-rose-500'
+                                  : camp.status === 'IN_PROGRESS'
+                                  ? 'bg-amber-400 animate-pulse'
+                                  : camp.status === 'SCHEDULED'
+                                  ? 'bg-slate-300'
+                                  : 'bg-emerald-500'
+                              }`}
+                              style={{
+                                width: camp.status === 'SCHEDULED' && camp.sentCount === 0 && camp.totalCount === 0
+                                  ? '100%'
+                                  : `${camp.totalCount > 0 ? (camp.sentCount / camp.totalCount) * 100 : 0}%`,
+                              }}
+                            />
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-xs text-slate-500 font-medium">
+                          {new Date(camp.createdAt).toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </td>
+                        <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1.5">
+                            {camp.status === 'IN_PROGRESS' ? (
+                              <Loader2 size={16} className="animate-spin text-slate-400 shrink-0" />
+                            ) : (
+                              <>
                                 <button
-                                  onClick={() => handleCancelSchedule(camp.id, camp.name)}
-                                  disabled={cancelScheduleMut.isPending}
-                                  title="Cancel Schedule"
-                                  className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-transparent hover:border-amber-100 rounded-xl transition-all cursor-pointer shrink-0"
+                                  onClick={() => handleSendNow(camp.id, camp.botId, camp.name)}
+                                  disabled={sendCampaignMut.isPending}
+                                  title="Send Now"
+                                  className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border border-transparent hover:border-emerald-100 rounded-xl transition-all cursor-pointer shrink-0"
                                 >
-                                  <CalendarX size={14} />
+                                  <Play size={14} className="fill-current" />
                                 </button>
-                              )}
-                              <button
-                                onClick={() => handleDeleteCampaign(camp.id, camp.name)}
-                                disabled={deleteCampaignMut.isPending}
-                                title="Delete Broadcast"
-                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 rounded-xl transition-all cursor-pointer shrink-0"
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                                <button
+                                  onClick={() => setEditingCampaign(camp)}
+                                  title="Edit Broadcast"
+                                  className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 rounded-xl transition-all cursor-pointer shrink-0"
+                                >
+                                  <Pencil size={14} />
+                                </button>
+                                {camp.status === 'SCHEDULED' && (
+                                  <button
+                                    onClick={() => handleCancelSchedule(camp.id, camp.botId, camp.name)}
+                                    disabled={cancelScheduleMut.isPending}
+                                    title="Cancel Schedule"
+                                    className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-transparent hover:border-amber-100 rounded-xl transition-all cursor-pointer shrink-0"
+                                  >
+                                    <CalendarX size={14} />
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleDeleteCampaign(camp.id, camp.botId, camp.name)}
+                                  disabled={deleteCampaignMut.isPending}
+                                  title="Delete Broadcast"
+                                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 rounded-xl transition-all cursor-pointer shrink-0"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -276,7 +298,7 @@ export const BroadcastsPage: React.FC = () => {
           onClose={() => setEditingCampaign(null)}
           campaign={editingCampaign}
           bots={bots}
-          botId={botId}
+          botId={editingCampaign?.botId || botId}
         />
       </div>
     </DashboardLayout>

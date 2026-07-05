@@ -18,5 +18,7 @@ export const ROUTES = {
   INTEGRATIONS: '/integrations',
   BILLING_SUCCESS: '/billing/success',
   BILLING_CANCEL: '/billing/cancel',
+  BLOG: '/blog',
+  BLOG_DETAIL: '/blog/:id',
 };
 

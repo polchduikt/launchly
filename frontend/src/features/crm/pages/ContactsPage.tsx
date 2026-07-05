@@ -40,10 +40,7 @@ export const ContactsPage: React.FC = () => {
   const activeBotId = useBotStore((state) => state.activeBotId);
   const { data: bots = [] } = useBotsQuery();
 
-  const realBot = bots.find((b) => b.hasTelegramToken) || bots[0];
-  const botId = activeBotId && bots.find((b) => b.id === activeBotId)?.hasTelegramToken 
-    ? activeBotId 
-    : (realBot?.id || 0);
+  const botId = activeBotId || (bots[0]?.id || 0);
 
   const { data: contacts = [], isLoading: isContactsLoading, refetch } = useBotUsersQuery(botId);
   const { data: conversations = [] } = useConversationsQuery(botId);

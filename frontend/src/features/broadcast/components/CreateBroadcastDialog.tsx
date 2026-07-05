@@ -16,10 +16,12 @@ export const CreateBroadcastDialog: React.FC<CreateBroadcastDialogProps> = ({
 
   if (!isOpen) return null;
 
+  const connectedBots = bots.filter((b) => b.hasTelegramToken);
+
   const selectedAutomationCount =
     selectedAutomation === 'ALL'
-      ? bots.reduce((acc, b) => acc + (b.totalUsers || 0), 0)
-      : bots.find((b) => String(b.id) === selectedAutomation)?.totalUsers || 0;
+      ? connectedBots.reduce((acc, b) => acc + (b.totalUsers || 0), 0)
+      : connectedBots.find((b) => String(b.id) === selectedAutomation)?.totalUsers || 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
@@ -60,16 +62,16 @@ export const CreateBroadcastDialog: React.FC<CreateBroadcastDialogProps> = ({
             <select
               value={selectedAutomation}
               onChange={(e) => setSelectedAutomation(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all bg-white font-semibold text-slate-850"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all bg-white font-semibold text-slate-855"
             >
               <option value="ALL">All Automations</option>
-              {bots.map((b) => (
+              {connectedBots.map((b) => (
                 <option key={b.id} value={String(b.id)}>
                   {b.name}
                 </option>
               ))}
             </select>
-            <div className="flex items-center gap-1.5 px-3 py-2 bg-indigo-50/40 border border-indigo-100/50 rounded-xl text-xs font-semibold text-indigo-650 mt-1">
+            <div className="flex items-center gap-1.5 px-3 py-2 bg-indigo-50/40 border border-indigo-100/50 rounded-xl text-xs font-semibold text-indigo-655 mt-1">
               <User size={13} className="text-indigo-500" />
               <span>
                 {selectedAutomationCount} subscriber{selectedAutomationCount !== 1 ? 's' : ''} of this automation will receive the broadcast

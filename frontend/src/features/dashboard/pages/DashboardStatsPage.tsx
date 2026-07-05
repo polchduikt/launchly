@@ -16,8 +16,7 @@ import {
 } from 'lucide-react';
 
 export const DashboardStatsPage: React.FC = () => {
-  const activeBotId = useBotStore((state) => state.activeBotId);
-  const [selectedBotId, setSelectedBotId] = useState<number>(() => activeBotId || 0);
+  const [selectedBotId, setSelectedBotId] = useState<number>(0);
   const [days, setDays] = useState<number>(7);
   const [isBotSelectorOpen, setIsBotSelectorOpen] = useState(false);
   const { data: bots = [] } = useBotsQuery();
@@ -217,7 +216,8 @@ export const DashboardStatsPage: React.FC = () => {
     );
   };
 
-  const hasNoBots = bots.length === 0;
+  const connectedBots = bots.filter((b) => b.hasTelegramToken);
+  const hasNoBots = connectedBots.length === 0;
 
   return (
     <DashboardLayout>
@@ -257,7 +257,7 @@ export const DashboardStatsPage: React.FC = () => {
                   All Automation
                 </button>
                 
-                {bots.map((bot) => (
+                {connectedBots.map((bot) => (
                   <button
                     key={bot.id}
                     onClick={() => handleBotChange(bot.id)}

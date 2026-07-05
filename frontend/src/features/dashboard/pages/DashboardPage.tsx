@@ -10,6 +10,8 @@ import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 import { createBotApi, saveFlowSchemaApi } from '../../bot/api/bot';
 import { TEMPLATES_DATA } from '../config/templatesData';
 import type { FlowTemplate } from '../config/templatesData';
+import { BLOG_ARTICLES } from '../config/blogData';
+import { useBlogArticlesQuery } from '../hooks/useBlogQueries';
 import { 
   Sparkles, 
   Calendar, 
@@ -108,6 +110,7 @@ const DashboardPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { isLoading: isLoadingRequire, hasBots } = useRequireBots();
   const { data: bots = [], isLoading: isLoadingBots } = useBotsQuery();
+  const { data: blogArticles = BLOG_ARTICLES } = useBlogArticlesQuery();
   const user = useAuthStore((state) => state.user);
   const [selectedTemplate, setSelectedTemplate] = useState<FlowTemplate | null>(null);
   const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false);
@@ -229,23 +232,23 @@ const DashboardPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-10">
+      <div className="p-6 md:p-10 max-w-[1300px] mx-auto space-y-12">
         
-        <div className="space-y-1">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+        <div className="space-y-1.5">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
             Hello, {displayName}!
           </h1>
-          <div className="text-xs font-semibold text-slate-500">
+          <div className="text-xs font-medium text-slate-500">
             {totalContacts} {totalContacts === 1 ? 'contact' : 'contacts'}
           </div>
         </div>
 
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Start here</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Start here</h2>
             <button 
               onClick={() => setIsTemplatesModalOpen(true)}
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1 cursor-pointer"
+              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1 cursor-pointer"
             >
               <span>Explore all Templates</span>
             </button>
@@ -260,16 +263,52 @@ const DashboardPage: React.FC = () => {
                     setSelectedTemplate(tmpl);
                     setIsOpenedFromList(false);
                   }}
-                  className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all rounded-2xl p-6 flex flex-col justify-between group cursor-pointer min-h-[170px]"
+                  className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all rounded-3xl p-6 flex flex-col justify-between group cursor-pointer min-h-[190px]"
                 >
                   <div className="space-y-3">
-                    <h3 className="font-bold text-slate-850 text-sm leading-snug group-hover:text-indigo-600 transition-colors">
+                    <h3 className="font-medium text-slate-700 text-sm md:text-base leading-snug group-hover:text-indigo-600 transition-colors">
                       {tmpl.title}
                     </h3>
                   </div>
-                  <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                  <div className="mt-5 pt-5 border-t border-slate-100 flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
                     <Workflow size={11} />
                     <span>{tmpl.type}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Latest from Blog</h2>
+            <button 
+              onClick={() => navigate('/blog')}
+              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <span>View all Articles</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {blogArticles.slice(0, 3).map((article) => {
+              return (
+                <div
+                  key={article.id}
+                  onClick={() => navigate(`/blog/${article.id}`)}
+                  className="bg-white border border-slate-100 hover:border-slate-200 hover:shadow-xl transition-all duration-300 rounded-[24px] overflow-hidden flex flex-col group cursor-pointer"
+                >
+                  <div className="aspect-[16/10] w-full overflow-hidden bg-slate-50 relative">
+                    <img
+                      src={article.coverImage}
+                      alt={article.title}
+                      className="w-full h-full object-cover group-hover:scale-[1.025] transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="p-6 flex-1 flex flex-col justify-between">
+                    <h3 className="font-semibold text-slate-800 text-sm md:text-base leading-snug group-hover:text-indigo-650 transition-colors line-clamp-3">
+                      {article.title}
+                    </h3>
                   </div>
                 </div>
               );

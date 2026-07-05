@@ -39,10 +39,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   }, []);
 
   const { data: bots = [] } = useBotsQuery(true);
-  const realBot = bots.find((b) => b.hasTelegramToken) || bots[0];
-  const targetBotId = activeBotId && bots.find((b) => b.id === activeBotId)?.hasTelegramToken 
-    ? activeBotId 
-    : (realBot?.id || 0);
+  const targetBotId = activeBotId || (bots[0]?.id || 0);
   const { data: contacts = [] } = useBotUsersQuery(targetBotId, !!targetBotId);
   const { data: subscription } = useSubscriptionQuery();
   if (!user) return null;

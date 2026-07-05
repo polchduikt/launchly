@@ -57,12 +57,18 @@ export const useUpdateCampaignMutation = (botId: number) => {
   });
 };
 
-export const useSendCampaignMutation = (botId: number) => {
+export const useSendCampaignMutation = (botId?: number) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (campaignId: number) => sendCampaignApi(botId, campaignId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns', botId] });
+    mutationFn: (params: number | { botId: number; campaignId: number }) => {
+      if (typeof params === 'number') {
+        return sendCampaignApi(botId || 0, params);
+      }
+      return sendCampaignApi(params.botId, params.campaignId);
+    },
+    onSuccess: (_, params) => {
+      const targetBotId = typeof params === 'number' ? botId : params.botId;
+      queryClient.invalidateQueries({ queryKey: ['campaigns', targetBotId] });
     },
   });
 };
@@ -87,22 +93,34 @@ export const useDeleteTagMutation = (botId: number) => {
   });
 };
 
-export const useDeleteCampaignMutation = (botId: number) => {
+export const useDeleteCampaignMutation = (botId?: number) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (campaignId: number) => deleteCampaignApi(botId, campaignId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns', botId] });
+    mutationFn: (params: number | { botId: number; campaignId: number }) => {
+      if (typeof params === 'number') {
+        return deleteCampaignApi(botId || 0, params);
+      }
+      return deleteCampaignApi(params.botId, params.campaignId);
+    },
+    onSuccess: (_, params) => {
+      const targetBotId = typeof params === 'number' ? botId : params.botId;
+      queryClient.invalidateQueries({ queryKey: ['campaigns', targetBotId] });
     },
   });
 };
 
-export const useCancelScheduleMutation = (botId: number) => {
+export const useCancelScheduleMutation = (botId?: number) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (campaignId: number) => cancelScheduleApi(botId, campaignId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns', botId] });
+    mutationFn: (params: number | { botId: number; campaignId: number }) => {
+      if (typeof params === 'number') {
+        return cancelScheduleApi(botId || 0, params);
+      }
+      return cancelScheduleApi(params.botId, params.campaignId);
+    },
+    onSuccess: (_, params) => {
+      const targetBotId = typeof params === 'number' ? botId : params.botId;
+      queryClient.invalidateQueries({ queryKey: ['campaigns', targetBotId] });
     },
   });
 };

@@ -34,10 +34,12 @@ export const EditBroadcastDialog: React.FC<EditBroadcastDialogProps> = ({
 
   if (!isOpen || !campaign) return null;
 
+  const connectedBots = bots.filter((b) => b.hasTelegramToken);
+
   const selectedAutomationCount =
     selectedAutomation === 'ALL'
-      ? bots.reduce((acc, b) => acc + (b.totalUsers || 0), 0)
-      : bots.find((b) => String(b.id) === selectedAutomation)?.totalUsers || 0;
+      ? connectedBots.reduce((acc, b) => acc + (b.totalUsers || 0), 0)
+      : connectedBots.find((b) => String(b.id) === selectedAutomation)?.totalUsers || 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +72,7 @@ export const EditBroadcastDialog: React.FC<EditBroadcastDialogProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"
+            className="text-slate-400 hover:text-slate-655 p-1.5 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -102,7 +104,7 @@ export const EditBroadcastDialog: React.FC<EditBroadcastDialogProps> = ({
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all bg-white font-semibold text-slate-800"
             >
               <option value="ALL">All Automations</option>
-              {bots.map((b) => (
+              {connectedBots.map((b) => (
                 <option key={b.id} value={String(b.id)}>
                   {b.name}
                 </option>

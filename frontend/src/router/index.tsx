@@ -24,6 +24,8 @@ const BroadcastsPage = lazy(() => import('../features/broadcast/pages/Broadcasts
 const BroadcastBuilderPage = lazy(() => import('../features/broadcast/pages/BroadcastBuilderPage').then(m => ({ default: m.BroadcastBuilderPage })));
 const CheckoutSuccessPage = lazy(() => import('../features/billing/pages/CheckoutSuccessPage'));
 const CheckoutCancelPage = lazy(() => import('../features/billing/pages/CheckoutCancelPage'));
+const BlogPage = lazy(() => import('../features/dashboard/pages/BlogPage'));
+const BlogDetailPage = lazy(() => import('../features/dashboard/pages/BlogDetailPage'));
 
 const LoadingSpinner = () => (
   <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -37,6 +39,8 @@ export const AppRouter: React.FC = () => {
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path={ROUTES.LANDING} element={<LandingPage />} />
+          <Route path={ROUTES.BLOG} element={<BlogPage />} />
+          <Route path={ROUTES.BLOG_DETAIL} element={<BlogDetailPage />} />
 
           <Route element={<PublicRoute />}>
             <Route path={ROUTES.LOGIN} element={<AuthLayout><LoginPage /></AuthLayout>} />

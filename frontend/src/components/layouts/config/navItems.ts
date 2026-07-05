@@ -1,5 +1,4 @@
-import React from 'react';
-import { Home, BarChart2, Zap, MessageSquare, Users, Sparkles, Send, Settings } from 'lucide-react';
+import { Home, BarChart2, Zap, MessageSquare, Users, Sparkles, Send, Settings, BookOpen } from 'lucide-react';
 import { ROUTES } from '../../../constants/routes';
 
 export interface NavItem {
