@@ -311,11 +311,25 @@ public class BotServiceImpl implements BotService {
 
         bot.setUpdatedAt(LocalDateTime.now());
         if (!bot.isActive()) {
+            boolean hasRealToken = false;
             try {
-                telegramBotManager.registerBot(bot);
-                bot.setActive(true);
+                if (bot.getTelegramToken() != null && !bot.getTelegramToken().isBlank()) {
+                    String decrypted = encryptionUtil.decrypt(bot.getTelegramToken());
+                    if (decrypted != null && !decrypted.isBlank() && 
+                        !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decrypted)) {
+                        hasRealToken = true;
+                    }
+                }
             } catch (Exception e) {
-                log.error("Failed to register bot: {}", e.getMessage(), e);
+            }
+
+            if (hasRealToken) {
+                try {
+                    telegramBotManager.registerBot(bot);
+                    bot.setActive(true);
+                } catch (Exception e) {
+                    log.error("Failed to register bot: {}", e.getMessage(), e);
+                }
             }
         }
         botRepository.save(bot);
@@ -563,6 +577,15 @@ public class BotServiceImpl implements BotService {
         if (bot == null) return null;
         BotResponse response = botMapper.toBotResponse(bot);
         long totalUsers = botUserRepository.countByBotId(bot.getId());
+        
+        boolean hasToken = false;
+        try {
+            String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
+            hasToken = decryptedToken != null && !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decryptedToken);
+        } catch (Exception e) {
+            log.error("Failed to decrypt token for bot id={}", bot.getId(), e);
+        }
+
         return new BotResponse(
                 response.id(),
                 response.name(),
@@ -573,7 +596,8 @@ public class BotServiceImpl implements BotService {
                 response.active(),
                 response.createdAt(),
                 response.updatedAt(),
-                totalUsers
+                totalUsers,
+                hasToken
         );
     }
 }

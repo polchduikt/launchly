@@ -51,5 +51,7 @@ databaseChangeLog:
       file: db/changelog/changes/V025__update_plan_limits.sql
   - include:
       file: db/changelog/changes/V026__create_analytics_events_table.sql
+  - include:
+      file: db/changelog/changes/V027__create_blog_articles_table.sql
 
 
