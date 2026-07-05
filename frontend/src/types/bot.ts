@@ -30,13 +30,15 @@ export interface BotDetailResponse extends BotResponse {
 export interface BotCreateRequest {
   name: string;
   description?: string;
-  telegramToken: string;
+  telegramToken?: string;
+  copyTokenFromBotId?: number;
 }
 
 export interface BotUpdateRequest {
   name: string;
   description?: string;
   telegramToken?: string;
+  copyTokenFromBotId?: number;
 }
 
 export interface AutomationFlow {

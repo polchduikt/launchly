@@ -7,8 +7,9 @@ import {
   SmartDelayNode,
   RandomizerNode,
   CommentNode,
+  StartAutomationNode,
 } from '../../bot/components/nodes';
-import { StartBroadcastNode, StartAutomationBroadcastNode } from '../components/nodes';
+import { StartBroadcastNode } from '../components/nodes';
 
 export const NODE_TYPES = {
   START_BROADCAST: StartBroadcastNode,
@@ -23,5 +24,5 @@ export const NODE_TYPES = {
   SMART_DELAY: SmartDelayNode,
   RANDOMIZER: RandomizerNode,
   COMMENT: CommentNode,
-  START_AUTOMATION: StartAutomationBroadcastNode,
+  START_AUTOMATION: StartAutomationNode,
 };

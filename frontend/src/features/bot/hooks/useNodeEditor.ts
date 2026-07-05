@@ -62,6 +62,8 @@ const mapActionToNodeType = (actionType?: string): string | null => {
       return 'SMART_DELAY';
     case 'AUTOMATION':
       return 'MESSAGE';
+    case 'START_AUTOMATION':
+      return 'START_AUTOMATION';
     case 'ACTIONS':
       return 'ACTION';
     default:
@@ -123,16 +125,39 @@ export const useNodeEditor = (
   const data = (node?.data || {}) as CustomNodeData;
   const buttons = (data.buttons || []) as ButtonData[];
 
-  const handleChange = (key: string, value: unknown) => {
+  const handleChange = (keyOrUpdates: string | Record<string, any>, value?: any) => {
     if (!node) return;
     
-    const newData = {
-      ...data,
-      [key]: value,
-    };
+    let newData: Record<string, any>;
+    if (typeof keyOrUpdates === 'string') {
+      newData = {
+        ...data,
+        [keyOrUpdates]: value,
+      };
+    } else {
+      newData = {
+        ...data,
+        ...keyOrUpdates,
+      };
+    }
 
-    if (key === 'blocks' && Array.isArray(value)) {
+    if (typeof keyOrUpdates === 'string' && keyOrUpdates === 'blocks' && Array.isArray(value)) {
       const blocks = value as FlowBlock[];
+      const firstText = blocks.find((b) => b.type === 'text');
+      const firstImage = blocks.find((b) => b.type === 'image');
+      
+      const allButtons: ButtonData[] = [];
+      blocks.forEach((b) => {
+        if (Array.isArray(b.buttons)) {
+          allButtons.push(...(b.buttons as ButtonData[]));
+        }
+      });
+      
+      newData.text = firstText ? (firstText.text as string) : '';
+      newData.imageUrl = firstImage ? (firstImage.imageUrl as string) : '';
+      newData.buttons = allButtons;
+    } else if (typeof keyOrUpdates === 'object' && keyOrUpdates !== null && 'blocks' in keyOrUpdates && Array.isArray(keyOrUpdates.blocks)) {
+      const blocks = keyOrUpdates.blocks as FlowBlock[];
       const firstText = blocks.find((b) => b.type === 'text');
       const firstImage = blocks.find((b) => b.type === 'image');
       

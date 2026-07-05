@@ -10,6 +10,7 @@ import { ActionNodeEditor } from './editors/ActionNodeEditor';
 import { SmartDelayNodeEditor } from './editors/SmartDelayNodeEditor';
 import { RandomizerNodeEditor } from './editors/RandomizerNodeEditor';
 import { CommentNodeEditor } from './editors/CommentNodeEditor';
+import { StartAutomationNodeEditor } from './editors/StartAutomationNodeEditor';
 
 
 interface NodeEditorPanelProps {
@@ -69,6 +70,8 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
         return <RandomizerNodeEditor nodeId={node.id} data={data} handleChange={handleChange} editorState={editorState} />;
       case 'COMMENT':
         return <CommentNodeEditor data={data} handleChange={handleChange} />;
+      case 'START_AUTOMATION':
+        return <StartAutomationNodeEditor node={node} data={data} handleChange={handleChange} editorState={editorState} />;
       case 'END':
         return <EndNodeEditor />;
       default:

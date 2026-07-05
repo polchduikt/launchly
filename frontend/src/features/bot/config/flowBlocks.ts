@@ -12,6 +12,7 @@ export const FLOW_BLOCKS: FlowBlockConfig[] = [
   { type: 'API_CALL', label: 'API Integration', color: 'text-indigo-500 bg-indigo-50' },
   { type: 'SMART_DELAY', label: 'Smart Delay', color: 'text-rose-500 bg-rose-50' },
   { type: 'RANDOMIZER', label: 'Randomizer', color: 'text-purple-600 bg-purple-50' },
+  { type: 'START_AUTOMATION', label: 'Start Automation', color: 'text-lime-600 bg-lime-50' },
   { type: 'COMMENT', label: 'Comment', color: 'text-amber-500 bg-amber-50' },
   { type: 'END', label: 'End Session', color: 'text-slate-500 bg-slate-50' },
 ];
@@ -55,6 +56,11 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
         text: 'Write a comment...',
         noteSize: 'M',
         fontSize: 'S'
+      };
+    case 'START_AUTOMATION':
+      return {
+        targetBotId: null,
+        targetBotName: ''
       };
     default:
       return {};

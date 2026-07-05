@@ -19,6 +19,7 @@ import { getAutoLayoutedElements } from '../../bot/utils/flowLayout';
 import { FLOW_EDGE_DEFAULTS } from '../../bot/config/flowEdges';
 import { ROUTES } from '../../../constants/routes';
 import type { ButtonData, FlowBlock } from '../../../types/bot';
+import { createDefaultNodeData } from '../../bot/config/flowBlocks';
 
 const resolveFilter = (conditions: AudienceCondition[]) => {
   let filterType: FilterType = 'ALL';
@@ -751,7 +752,7 @@ export const useBroadcastBuilder = () => {
       id,
       type,
       position: flowPosition,
-      data: {},
+      data: getBroadcastDefaultNodeData(type),
       selected: true,
     };
 
@@ -866,101 +867,33 @@ export const useBroadcastBuilder = () => {
     );
   };
 
-  const handleAddNode = (type: string) => {
-    const id = `node_${type.toLowerCase()}_${Date.now()}`;
-    let newNode: CustomNode;
-
-    if (type === 'MESSAGE') {
-      newNode = {
-        id,
-        type: 'MESSAGE',
-        position: { x: Math.random() * 100 + 350, y: Math.random() * 100 + 150 },
-        data: { text: 'Hello! Enter your text here.', buttons: [] },
-      };
-    } else if (type === 'INPUT') {
-      newNode = {
-        id,
-        type: 'INPUT',
-        position: { x: Math.random() * 100 + 350, y: Math.random() * 100 + 150 },
-        data: { text: 'Please enter a value:', variableName: 'input_var' },
-      };
-    } else if (type === 'CONDITION') {
-      newNode = {
-        id,
-        type: 'CONDITION',
-        position: { x: Math.random() * 100 + 350, y: Math.random() * 100 + 150 },
-        data: { variable: 'user_input', operator: 'equals', value: 'Yes' },
-      };
-    } else if (type === 'ORDER') {
-      newNode = {
-        id,
-        type: 'ORDER',
-        position: { x: Math.random() * 100 + 350, y: Math.random() * 100 + 150 },
-        data: { productName: 'Product Name', price: '100', currency: 'UAH' },
-      };
-    } else if (type === 'LEAD') {
-      newNode = {
-        id,
-        type: 'LEAD',
-        position: { x: Math.random() * 100 + 350, y: Math.random() * 100 + 150 },
-        data: { name: 'user_name', email: 'user_email', phone: 'user_phone' },
-      };
-    } else if (type === 'API_CALL') {
-      newNode = {
-        id,
-        type: 'API_CALL',
-        position: { x: Math.random() * 100 + 350, y: Math.random() * 100 + 150 },
-        data: { url: 'https://api.example.com/endpoint', method: 'GET' },
-      };
-    } else if (type === 'ACTION') {
-      newNode = {
-        id,
-        type: 'ACTION',
-        position: { x: Math.random() * 100 + 350, y: Math.random() * 100 + 150 },
-        data: { actions: [] },
-      };
-    } else if (type === 'SMART_DELAY') {
-      newNode = {
-        id,
-        type: 'SMART_DELAY',
-        position: { x: Math.random() * 100 + 350, y: Math.random() * 100 + 150 },
-        data: { mode: 'duration', waitAmount: 12, waitUnit: 'Hours' },
-      };
-    } else if (type === 'RANDOMIZER') {
-      newNode = {
-        id,
-        type: 'RANDOMIZER',
-        position: { x: Math.random() * 100 + 350, y: Math.random() * 100 + 150 },
-        data: { variations: [
-          { id: 'variation_0', label: 'A', percentage: 50, color: '#7C3AED' },
-          { id: 'variation_1', label: 'B', percentage: 50, color: '#B45309' }
-        ] },
-      };
-    } else if (type === 'COMMENT') {
-      newNode = {
-        id,
-        type: 'COMMENT',
-        position: { x: Math.random() * 100 + 350, y: Math.random() * 100 + 150 },
-        data: { text: 'Type a comment...' },
-      };
-    } else if (type === 'END') {
-      newNode = {
-        id,
-        type: 'END',
-        position: { x: Math.random() * 100 + 350, y: Math.random() * 100 + 150 },
-        data: {},
-      };
-    } else {
-      newNode = {
-        id,
-        type: 'START_AUTOMATION',
-        position: { x: Math.random() * 100 + 350, y: Math.random() * 100 + 150 },
-        data: {
-          automationName: '',
-          onSelectClick: () => setIsPickOpen(true),
-        },
-      };
+  const getBroadcastDefaultNodeData = (type: string): Record<string, any> => {
+    switch (type) {
+      case 'INPUT':
+        return { text: 'Please enter a value:', variableName: 'input_var' };
+      case 'ORDER':
+        return { productName: 'Product Name', price: '100', currency: 'UAH' };
+      case 'LEAD':
+        return { name: 'user_name', email: 'user_email', phone: 'user_phone' };
+      default:
+        return createDefaultNodeData(type);
     }
+  };
+
+  const handleAddNode = (type: string) => {
+    takeSnapshot();
+    const id = `node_${type.toLowerCase()}_${Date.now()}`;
+    const viewportCenter = screenToFlowPosition({
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+    });
+
+    const newNode: CustomNode = {
+      id,
+      type,
+      position: viewportCenter,
+      data: getBroadcastDefaultNodeData(type),
+    };
 
     setNodes((nds) => [...nds, newNode]);
     setSelectedNodeId(id);
@@ -979,7 +912,7 @@ export const useBroadcastBuilder = () => {
         id,
         type,
         position,
-        data: {},
+        data: getBroadcastDefaultNodeData(type),
       };
 
       const newEdge: Edge = {

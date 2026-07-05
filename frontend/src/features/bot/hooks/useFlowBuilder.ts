@@ -594,10 +594,15 @@ export const useFlowBuilder = () => {
 
     takeSnapshot();
     const id = `node_${type.toLowerCase()}_${Date.now()}`;
+    const viewportCenter = screenToFlowPosition({
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+    });
+
     const newNode: Node = {
       id,
       type,
-      position: { x: Math.random() * 200 + 150, y: Math.random() * 200 + 100 },
+      position: viewportCenter,
       data: createDefaultNodeData(type),
       selected: true,
     };

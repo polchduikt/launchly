@@ -6,7 +6,8 @@ import {
   Clock,
   Shuffle,
   StickyNote,
-  Power
+  Power,
+  SquareArrowRight
 } from 'lucide-react';
 
 export const STEP_OPTIONS = [
@@ -51,6 +52,13 @@ export const STEP_OPTIONS = [
     description: 'Split traffic randomly into multiple paths',
     icon: Shuffle,
     color: 'text-purple-650 bg-purple-50 border-purple-100',
+  },
+  {
+    type: 'START_AUTOMATION',
+    label: 'Start Automation',
+    description: 'Trigger another automation flow and then continue',
+    icon: SquareArrowRight,
+    color: 'text-lime-600 bg-lime-50 border-lime-100',
   },
   {
     type: 'COMMENT',

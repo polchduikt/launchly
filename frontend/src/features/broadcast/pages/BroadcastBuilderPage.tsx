@@ -11,7 +11,7 @@ import {
 import type { ConnectionLineComponentProps } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useBroadcastBuilder } from '../hooks/useBroadcastBuilder';
-import { AudiencePanel, PickAutomationModal } from '../components';
+import { AudiencePanel } from '../components';
 import { FlowPreviewPanel } from '../../../components/shared/FlowPreviewPanel';
 import { NodeEditorPanel } from '../../bot/components/sidebar/NodeEditorPanel';
 import { EditButtonDrawer } from '../../bot/components/sidebar/drawers/EditButtonDrawer';
@@ -198,10 +198,6 @@ const BroadcastBuilderInner: React.FC = () => {
     setIsAudienceOpen,
     isPreviewOpen,
     setIsPreviewOpen,
-    isPickOpen,
-    setIsPickOpen,
-    searchQuery,
-    setSearchQuery,
     conditions,
     setConditions,
     isConditionDropdownOpen,
@@ -226,7 +222,6 @@ const BroadcastBuilderInner: React.FC = () => {
     handleAddNode,
     handleAddAndConnectNode,
     handleDeleteSelectedNode,
-    handleSelectAutomation,
     handleAddTagCondition,
     handleRemoveCondition,
     handleSaveDraft,
@@ -707,42 +702,7 @@ const BroadcastBuilderInner: React.FC = () => {
             selectedNodeId ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'
           }`}>
             {activeNode && (
-              activeNode.type === 'START_AUTOMATION' ? (
-                <div className="p-6 space-y-6 font-sans">
-                  <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                    <span className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0 border border-slate-200 shadow-sm">
-                      <Grid size={20} />
-                    </span>
-                    <div>
-                      <h2 className="font-extrabold text-sm text-slate-800 uppercase tracking-wider block">
-                        Start Automation
-                      </h2>
-                      <span className="text-[10px] text-slate-400 font-semibold uppercase">Node Settings</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <p className="text-xs text-slate-550 leading-relaxed font-medium">
-                      Trigger an existing bot automation flow when the subscriber reaches this step.
-                    </p>
-                    {activeNode.data.automationName ? (
-                      <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-xs text-emerald-700 font-extrabold text-center">
-                        {activeNode.data.automationName}
-                      </div>
-                    ) : (
-                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-400 italic text-center">
-                        No automation selected
-                      </div>
-                    )}
-                    <button
-                      onClick={() => setIsPickOpen(true)}
-                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow shadow-indigo-100 cursor-pointer"
-                    >
-                      Choose Automation
-                    </button>
-                  </div>
-                </div>
-              ) : activeNode.type === 'START_BROADCAST' ? (
+              activeNode.type === 'START_BROADCAST' ? (
                 <div className="p-6 space-y-6 font-sans">
                   <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                     <span className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100 shadow-sm">
@@ -869,14 +829,6 @@ const BroadcastBuilderInner: React.FC = () => {
           orders={orders}
         />
       </div>
-
-      <PickAutomationModal
-        isPickOpen={isPickOpen}
-        setIsPickOpen={setIsPickOpen}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        handleSelectAutomation={handleSelectAutomation}
-      />
 
       <FlowPreviewPanel
         isOpen={isPreviewOpen}

@@ -17,6 +17,7 @@ import {
   X,
   AlertCircle,
   Loader2,
+  ChevronDown,
 } from 'lucide-react';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../hooks/useBotsQuery';
@@ -56,15 +57,22 @@ export const AutomationsPage: React.FC = () => {
   const [activeMenuBotId, setActiveMenuBotId] = useState<number | null>(null);
   const [menuCoords, setMenuCoords] = useState<{ top: number; left: number } | null>(null);
   const [isNewBotModalOpen, setIsNewBotModalOpen] = useState(false);
-  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isBotSelectOpen, setIsBotSelectOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
   const [newBotName, setNewBotName] = useState('');
+  const [selectedBotOption, setSelectedBotOption] = useState<string>('nobot');
   const [newBotToken, setNewBotToken] = useState('');
   const [newBotDesc, setNewBotDesc] = useState('');
   const [newBotError, setNewBotError] = useState<string | null>(null);
-  const [renameBotId, setRenameBotId] = useState<number | null>(null);
-  const [tempBotName, setTempBotName] = useState('');
+  const [editBotId, setEditBotId] = useState<number | null>(null);
+  const [editBotName, setEditBotName] = useState('');
+  const [editBotDesc, setEditBotDesc] = useState('');
+  const [editBotOption, setEditBotOption] = useState<string>('keep');
+  const [editBotToken, setEditBotToken] = useState('');
+  const [isEditBotSelectOpen, setIsEditBotSelectOpen] = useState(false);
+  const [editBotError, setEditBotError] = useState<string | null>(null);
   const [moveBotId, setMoveBotId] = useState<number | null>(null);
   const [tempFolderId, setTempFolderId] = useState('');
   const [tempFolderName, setTempFolderName] = useState('');
@@ -165,14 +173,43 @@ export const AutomationsPage: React.FC = () => {
     }
   };
 
-  const handleRenameBot = () => {
-    if (!tempBotName.trim() || renameBotId === null) return;
+  const handleEditBot = () => {
+    if (!editBotName.trim() || editBotId === null) return;
+    if (editBotOption === 'new' && !editBotToken.trim()) {
+      setEditBotError('Telegram Bot Token is required');
+      return;
+    }
+    setEditBotError(null);
+
+    const token = editBotOption === 'new' ? editBotToken.trim() : (editBotOption === 'nobot' ? '0000000000:dummyTokenPlaceholderForNoBotConfig' : undefined);
+    const copyTokenFromBotId = (editBotOption !== 'new' && editBotOption !== 'nobot' && editBotOption !== 'keep')
+      ? Number(editBotOption)
+      : undefined;
+
     updateBotMutation.mutate(
-      { id: renameBotId, data: { name: tempBotName.trim() } },
+      {
+        id: editBotId,
+        data: {
+          name: editBotName.trim(),
+          description: editBotDesc.trim() || undefined,
+          telegramToken: token,
+          copyTokenFromBotId,
+        }
+      },
       {
         onSuccess: () => {
-          setIsRenameModalOpen(false);
-          setRenameBotId(null);
+          setIsEditModalOpen(false);
+          setEditBotId(null);
+          setEditBotName('');
+          setEditBotDesc('');
+          setEditBotOption('keep');
+          setEditBotToken('');
+          setIsEditBotSelectOpen(false);
+        },
+        onError: (err: unknown) => {
+          const errMsg =
+            err instanceof Error ? err.message : 'Failed to update automation. Please verify your token.';
+          setEditBotError(errMsg);
         },
       }
     );
@@ -229,15 +266,22 @@ export const AutomationsPage: React.FC = () => {
       setNewBotError('Automation name is required');
       return;
     }
-    if (!newBotToken.trim()) {
+    if (selectedBotOption === 'new' && !newBotToken.trim()) {
       setNewBotError('Telegram Bot Token is required');
       return;
     }
     setNewBotError(null);
+
+    const token = selectedBotOption === 'new' ? newBotToken.trim() : undefined;
+    const copyTokenFromBotId = (selectedBotOption !== 'new' && selectedBotOption !== 'nobot')
+      ? Number(selectedBotOption)
+      : undefined;
+
     createBotMutation.mutate(
       {
         name: newBotName.trim(),
-        telegramToken: newBotToken.trim(),
+        telegramToken: token,
+        copyTokenFromBotId,
         description: newBotDesc.trim() || undefined,
       },
       {
@@ -247,6 +291,7 @@ export const AutomationsPage: React.FC = () => {
           }
           setIsNewBotModalOpen(false);
           setNewBotName('');
+          setSelectedBotOption('nobot');
           setNewBotToken('');
           setNewBotDesc('');
           setActiveBotId(newBot.id);
@@ -593,16 +638,19 @@ export const AutomationsPage: React.FC = () => {
                 )}
                 <button
                   onClick={() => {
-                    setRenameBotId(activeMenuBot.id);
-                    setTempBotName(activeMenuBot.name);
-                    setIsRenameModalOpen(true);
+                    setEditBotId(activeMenuBot.id);
+                    setEditBotName(activeMenuBot.name);
+                    setEditBotDesc(activeMenuBot.description || '');
+                    setEditBotOption(activeMenuBot.username ? 'current' : 'nobot');
+                    setEditBotToken('');
+                    setIsEditModalOpen(true);
                     setActiveMenuBotId(null);
                     setMenuCoords(null);
                   }}
                   className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
                 >
                   <Pencil size={13} className="text-slate-500" />
-                  <span>Rename</span>
+                  <span>Edit</span>
                 </button>
                 <button
                   onClick={() => {
@@ -633,7 +681,7 @@ export const AutomationsPage: React.FC = () => {
 
       {isNewBotModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-xl overflow-hidden animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-xl animate-in fade-in duration-200">
             <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900">New Automation</h3>
               <button
@@ -656,18 +704,108 @@ export const AutomationsPage: React.FC = () => {
                   placeholder="e.g. Welcome Bot"
                 />
               </div>
-              <div>
+              <div className="relative">
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-                  Telegram Bot Token
+                  Telegram Bot Connection
                 </label>
-                <input
-                  type="text"
-                  value={newBotToken}
-                  onChange={(e) => setNewBotToken(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
-                  placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
-                />
+                <button
+                  type="button"
+                  onClick={() => setIsBotSelectOpen(!isBotSelectOpen)}
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50 text-left font-sans cursor-pointer hover:bg-slate-100/50 transition-colors"
+                >
+                  <span className="text-slate-800 font-semibold">
+                    {(() => {
+                      if (selectedBotOption === 'nobot') return 'Without bot';
+                      if (selectedBotOption === 'new') return 'Connect new bot';
+                      const selectedBot = bots.find(b => String(b.id) === selectedBotOption);
+                      if (selectedBot) {
+                        return `${selectedBot.name} ${selectedBot.username ? `@${selectedBot.username}` : ''}`;
+                      }
+                      return 'Without bot';
+                    })()}
+                  </span>
+                  <ChevronDown size={16} className={`text-slate-500 transition-transform ${isBotSelectOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isBotSelectOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setIsBotSelectOpen(false)}
+                    />
+                    <div className="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-lg z-20 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-150 py-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedBotOption('nobot');
+                          setNewBotError(null);
+                          setIsBotSelectOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between ${selectedBotOption === 'nobot' ? 'bg-indigo-50/50 text-indigo-600 font-bold' : 'text-slate-700 font-medium'}`}
+                      >
+                        <span>Without bot</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedBotOption('new');
+                          setNewBotError(null);
+                          setIsBotSelectOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between ${selectedBotOption === 'new' ? 'bg-indigo-50/50 text-indigo-600 font-bold' : 'text-slate-700 font-medium'}`}
+                      >
+                        <span>Connect new bot</span>
+                      </button>
+
+                      {(() => {
+                        const existingRealBots = bots.filter((b) => b.username && b.username.trim() !== '');
+                        if (existingRealBots.length === 0) return null;
+                        return (
+                          <>
+                            <div className="border-t border-slate-100 my-1" />
+                            <div className="px-4 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              Use existing bot token
+                            </div>
+                            {existingRealBots.map((b) => (
+                              <button
+                                key={b.id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedBotOption(String(b.id));
+                                  setNewBotError(null);
+                                  setIsBotSelectOpen(false);
+                                }}
+                                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between ${selectedBotOption === String(b.id) ? 'bg-indigo-50/50 text-indigo-600 font-bold' : 'text-slate-700 font-medium'}`}
+                              >
+                                <div className="flex flex-col">
+                                  <span className="text-slate-800 font-semibold">{b.name}</span>
+                                  {b.username && (
+                                    <span className="text-[11px] text-slate-500 font-medium">@{b.username}</span>
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </>
+                )}
               </div>
+              {selectedBotOption === 'new' && (
+                <div className="animate-in slide-in-from-top-1 duration-150">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                    Telegram Bot Token
+                  </label>
+                  <input
+                    type="text"
+                    value={newBotToken}
+                    onChange={(e) => setNewBotToken(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
+                    placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                  />
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
                   Description (Optional)
@@ -686,7 +824,7 @@ export const AutomationsPage: React.FC = () => {
                 </p>
               )}
             </div>
-            <div className="p-6 pt-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+            <div className="p-6 pt-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2 rounded-b-3xl">
               <button
                 onClick={() => setIsNewBotModalOpen(false)}
                 className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
@@ -712,37 +850,183 @@ export const AutomationsPage: React.FC = () => {
         </div>
       )}
 
-      {isRenameModalOpen && (
+      {isEditModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-xl overflow-hidden animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-xl animate-in fade-in duration-200">
             <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900">Rename Automation</h3>
+              <h3 className="text-lg font-bold text-slate-900">Edit Automation</h3>
               <button
-                onClick={() => setIsRenameModalOpen(false)}
+                onClick={() => setIsEditModalOpen(false)}
                 className="text-slate-400 hover:text-slate-600 transition-colors"
               >
                 <X size={18} />
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">New Name</label>
-              <input
-                type="text"
-                value={tempBotName}
-                onChange={(e) => setTempBotName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
-                placeholder="Enter new automation name"
-              />
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  Automation Name
+                </label>
+                <input
+                  type="text"
+                  value={editBotName}
+                  onChange={(e) => setEditBotName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
+                  placeholder="Enter automation name"
+                />
+              </div>
+              <div className="relative">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  Telegram Bot Connection
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsEditBotSelectOpen(!isEditBotSelectOpen)}
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50 text-left font-sans cursor-pointer hover:bg-slate-100/50 transition-colors"
+                >
+                  <span className="text-slate-800 font-semibold">
+                    {(() => {
+                      if (editBotOption === 'current') {
+                        const currentBot = bots.find(b => b.id === editBotId);
+                        return currentBot ? `${currentBot.name} ${currentBot.username ? `@${currentBot.username}` : ''}` : 'Connected bot';
+                      }
+                      if (editBotOption === 'nobot') return 'Without bot';
+                      if (editBotOption === 'new') return 'Connect new bot';
+                      const selectedBot = bots.find(b => String(b.id) === editBotOption);
+                      if (selectedBot) {
+                        return `${selectedBot.name} ${selectedBot.username ? `@${selectedBot.username}` : ''}`;
+                      }
+                      return 'Without bot';
+                    })()}
+                  </span>
+                  <ChevronDown size={16} className={`text-slate-500 transition-transform ${isEditBotSelectOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isEditBotSelectOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setIsEditBotSelectOpen(false)}
+                    />
+                    <div className="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-lg z-20 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-150 py-1.5">
+                      {(() => {
+                        const currentBot = bots.find((b) => b.id === editBotId);
+                        if (currentBot && currentBot.username) {
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditBotOption('current');
+                                setEditBotError(null);
+                                setIsEditBotSelectOpen(false);
+                              }}
+                              className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between ${editBotOption === 'current' ? 'bg-indigo-50/50 text-indigo-600 font-bold' : 'text-slate-700 font-medium'}`}
+                            >
+                              <span>{currentBot.name} @{currentBot.username}</span>
+                            </button>
+                          );
+                        }
+                        return null;
+                      })()}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditBotOption('nobot');
+                          setEditBotError(null);
+                          setIsEditBotSelectOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between ${editBotOption === 'nobot' ? 'bg-indigo-50/50 text-indigo-600 font-bold' : 'text-slate-700 font-medium'}`}
+                      >
+                        <span>Without bot</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditBotOption('new');
+                          setEditBotError(null);
+                          setIsEditBotSelectOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between ${editBotOption === 'new' ? 'bg-indigo-50/50 text-indigo-600 font-bold' : 'text-slate-700 font-medium'}`}
+                      >
+                        <span>Connect new bot</span>
+                      </button>
+
+                      {(() => {
+                        const existingRealBots = bots.filter((b) => b.id !== editBotId && b.username);
+                        if (existingRealBots.length === 0) return null;
+                        return (
+                          <>
+                            <div className="border-t border-slate-100 my-1" />
+                            <div className="px-4 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              Use existing bot token
+                            </div>
+                            {existingRealBots.map((b) => (
+                              <button
+                                key={b.id}
+                                type="button"
+                                onClick={() => {
+                                  setEditBotOption(String(b.id));
+                                  setEditBotError(null);
+                                  setIsEditBotSelectOpen(false);
+                                }}
+                                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between ${editBotOption === String(b.id) ? 'bg-indigo-50/50 text-indigo-600 font-bold' : 'text-slate-700 font-medium'}`}
+                              >
+                                <div className="flex flex-col">
+                                  <span className="text-slate-800 font-semibold">{b.name}</span>
+                                  {b.username && (
+                                    <span className="text-[11px] text-slate-500 font-medium">@{b.username}</span>
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </>
+                )}
+              </div>
+              {editBotOption === 'new' && (
+                <div className="animate-in slide-in-from-top-1 duration-150">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                    Telegram Bot Token
+                  </label>
+                  <input
+                    type="text"
+                    value={editBotToken}
+                    onChange={(e) => setEditBotToken(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
+                    placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  Description (Optional)
+                </label>
+                <textarea
+                  value={editBotDesc}
+                  onChange={(e) => setEditBotDesc(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50 min-h-[80px] resize-none"
+                  placeholder="What does this automation do?"
+                />
+              </div>
+              {editBotError && (
+                <p className="text-xs font-semibold text-red-500 flex items-center gap-1">
+                  <AlertCircle size={14} />
+                  <span>{editBotError}</span>
+                </p>
+              )}
             </div>
-            <div className="p-6 pt-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+            <div className="p-6 pt-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2 rounded-b-3xl">
               <button
-                onClick={() => setIsRenameModalOpen(false)}
+                onClick={() => setIsEditModalOpen(false)}
                 className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
-                onClick={handleRenameBot}
+                onClick={handleEditBot}
                 disabled={updateBotMutation.isPending}
                 className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100 flex items-center gap-1 disabled:opacity-50"
               >
