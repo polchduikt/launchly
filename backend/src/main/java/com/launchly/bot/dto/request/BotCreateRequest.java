@@ -10,7 +10,8 @@ public record BotCreateRequest(
 
         String description,
 
-        @NotBlank(message = "Telegram token is required")
         @ValidTelegramToken
-        String telegramToken
+        String telegramToken,
+
+        Long copyTokenFromBotId
 ) {}

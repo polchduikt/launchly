@@ -119,18 +119,39 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                     && "/start".equals(update.getMessage().getText().trim())) {
                 stateService.clearActiveCampaignId(botId, telegramUserId);
                 stateService.setCurrentNodeId(botId, telegramUserId, null);
+                clearCallStack(botId, telegramUserId);
+                setExecutingBotId(botId, telegramUserId, botId);
                 botUser.setCurrentNodeId(null);
                 botUser = botUserRepository.save(botUser);
             }
 
-            Long campaignId = stateService.getActiveCampaignId(botId, telegramUserId).orElse(null);
+            Long executingBotId = getExecutingBotId(botId, telegramUserId);
             List<FlowNode> nodes;
             List<FlowEdge> edges;
-            if (campaignId != null) {
-                BroadcastCampaign campaign = campaignRepository.findById(campaignId).orElse(null);
-                if (campaign != null) {
-                    nodes = objectMapper.readValue(campaign.getNodes(), new TypeReference<>() {});
-                    edges = objectMapper.readValue(campaign.getEdges(), new TypeReference<>() {});
+            if (!executingBotId.equals(botId)) {
+                FlowSchema schema = getSchema(executingBotId);
+                if (schema == null) {
+                    log.warn("No flow schema found for executing bot {}", executingBotId);
+                    return;
+                }
+                nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+                edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+            } else {
+                Long campaignId = stateService.getActiveCampaignId(botId, telegramUserId).orElse(null);
+                if (campaignId != null) {
+                    BroadcastCampaign campaign = campaignRepository.findById(campaignId).orElse(null);
+                    if (campaign != null) {
+                        nodes = objectMapper.readValue(campaign.getNodes(), new TypeReference<>() {});
+                        edges = objectMapper.readValue(campaign.getEdges(), new TypeReference<>() {});
+                    } else {
+                        FlowSchema schema = getSchema(botId);
+                        if (schema == null) {
+                            log.warn("No flow schema found for bot {}", botId);
+                            return;
+                        }
+                        nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+                        edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+                    }
                 } else {
                     FlowSchema schema = getSchema(botId);
                     if (schema == null) {
@@ -140,18 +161,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                     nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
                     edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
                 }
-            } else {
-                FlowSchema schema = getSchema(botId);
-                if (schema == null) {
-                    log.warn("No flow schema found for bot {}", botId);
-                    return;
-                }
-                nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-                edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
             }
 
             if (nodes.isEmpty()) {
-                log.warn("Empty flow schema for bot {}", botId);
+                log.warn("Empty flow schema for bot {}", executingBotId);
                 return;
             }
 
@@ -221,24 +234,54 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 }
 
                 if (currentNode.type() == NodeType.START_AUTOMATION) {
-                    stateService.clearActiveCampaignId(botId, telegramUserId);
-                    botUser.setCurrentNodeId(null);
-                    botUserRepository.save(botUser);
-
-                    FlowSchema schema = getSchema(botId);
-                    if (schema != null) {
-                        List<FlowNode> botNodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-                        String botStartNodeId = botNodes.stream()
-                                .filter(n -> n.type() == NodeType.START)
-                                .findFirst()
-                                .map(FlowNode::id)
-                                .orElse(null);
-
-                        if (botStartNodeId != null) {
-                            runFlow(botId, botUser, botStartNodeId, null);
+                    Object targetIdObj = currentNode.data().get("targetBotId");
+                    Long targetBotId = null;
+                    if (targetIdObj instanceof Number) {
+                        targetBotId = ((Number) targetIdObj).longValue();
+                    } else if (targetIdObj instanceof String) {
+                        try {
+                            targetBotId = Long.parseLong((String) targetIdObj);
+                        } catch (NumberFormatException e) {
                         }
                     }
-                    break;
+
+                    String returnNodeId = findTargetNodeId(edges, currentNodeId, "next");
+
+                    if (targetBotId != null && !targetBotId.equals(executingBotId)) {
+                        Long campaignId = stateService.getActiveCampaignId(botId, telegramUserId).orElse(null);
+                        CallStackFrame frame = new CallStackFrame(executingBotId, returnNodeId, campaignId);
+                        pushCallStack(botId, telegramUserId, frame);
+
+                        executingBotId = targetBotId;
+                        setExecutingBotId(botId, telegramUserId, executingBotId);
+                        stateService.clearActiveCampaignId(botId, telegramUserId);
+
+                        FlowSchema schema = getSchema(executingBotId);
+                        if (schema != null) {
+                            nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+                            edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+
+                            String botStartNodeId = nodes.stream()
+                                    .filter(n -> n.type() == NodeType.START)
+                                    .findFirst()
+                                    .map(FlowNode::id)
+                                    .orElse(null);
+
+                            if (botStartNodeId != null) {
+                                currentNodeId = botStartNodeId;
+                                stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
+                                botUser.setCurrentNodeId(currentNodeId);
+                                botUser = botUserRepository.save(botUser);
+                                continue;
+                            }
+                        }
+                    }
+
+                    currentNodeId = returnNodeId;
+                    stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
+                    botUser.setCurrentNodeId(currentNodeId);
+                    botUser = botUserRepository.save(botUser);
+                    continue;
                 }
 
                 NodeExecutor executor = executors.get(currentNode.type());
@@ -254,24 +297,63 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 }
 
                 if (nextNodeId == null) {
-                    boolean hasOutgoingEdges = edges.stream().anyMatch(e -> e.source().equals(currentNode.id()));
-                    if (currentNode.type() == NodeType.END || !hasOutgoingEdges) {
-                        stateService.clearActiveCampaignId(botId, telegramUserId);
-                        stateService.setCurrentNodeId(botId, telegramUserId, null);
-                        botUser.setCurrentNodeId(null);
-                        botUserRepository.save(botUser);
+                    CallStackFrame poppedFrame = popCallStack(botId, telegramUserId);
+                    if (poppedFrame != null) {
+                        executingBotId = poppedFrame.getExecutingBotId();
+                        setExecutingBotId(botId, telegramUserId, executingBotId);
+
+                        if (!executingBotId.equals(botId)) {
+                            FlowSchema schema = getSchema(executingBotId);
+                            if (schema != null) {
+                                nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+                                edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+                            }
+                        } else {
+                            Long campaignId = poppedFrame.getCampaignId();
+                            if (campaignId != null) {
+                                stateService.setActiveCampaignId(botId, telegramUserId, campaignId);
+                                BroadcastCampaign campaign = campaignRepository.findById(campaignId).orElse(null);
+                                if (campaign != null) {
+                                    nodes = objectMapper.readValue(campaign.getNodes(), new TypeReference<>() {});
+                                    edges = objectMapper.readValue(campaign.getEdges(), new TypeReference<>() {});
+                                } else {
+                                    FlowSchema schema = getSchema(botId);
+                                    if (schema != null) {
+                                        nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+                                        edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+                                    }
+                                }
+                            } else {
+                                stateService.clearActiveCampaignId(botId, telegramUserId);
+                                FlowSchema schema = getSchema(botId);
+                                if (schema != null) {
+                                    nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+                                    edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+                                }
+                            }
+                        }
+
+                        nextNodeId = poppedFrame.getReturnNodeId();
                     } else {
-                        stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
-                        botUser.setCurrentNodeId(currentNodeId);
-                        botUserRepository.save(botUser);
+                        boolean hasOutgoingEdges = edges.stream().anyMatch(e -> e.source().equals(currentNode.id()));
+                        if (currentNode.type() == NodeType.END || !hasOutgoingEdges) {
+                            stateService.clearActiveCampaignId(botId, telegramUserId);
+                            stateService.setCurrentNodeId(botId, telegramUserId, null);
+                            botUser.setCurrentNodeId(null);
+                            botUserRepository.save(botUser);
+                        } else {
+                            stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
+                            botUser.setCurrentNodeId(currentNodeId);
+                            botUserRepository.save(botUser);
+                        }
+                        break;
                     }
-                    break;
                 }
 
                 currentNodeId = nextNodeId;
                 stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
                 botUser.setCurrentNodeId(currentNodeId);
-                botUserRepository.save(botUser);
+                botUser = botUserRepository.save(botUser);
             }
 
         } catch (Exception e) {
@@ -445,6 +527,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 return;
             }
 
+            clearCallStack(botId, telegramUserId);
+            setExecutingBotId(botId, telegramUserId, botId);
+            Long executingBotId = botId;
+
             if (campaignId != null) {
                 stateService.setActiveCampaignId(botId, telegramUserId, campaignId);
             } else {
@@ -487,24 +573,54 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 }
 
                 if (currentNode.type() == NodeType.START_AUTOMATION) {
-                    stateService.clearActiveCampaignId(botId, telegramUserId);
-                    botUser.setCurrentNodeId(null);
-                    botUserRepository.save(botUser);
-
-                    FlowSchema schema = getSchema(botId);
-                    if (schema != null) {
-                        List<FlowNode> botNodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-                        String botStartNodeId = botNodes.stream()
-                                .filter(n -> n.type() == NodeType.START)
-                                .findFirst()
-                                .map(FlowNode::id)
-                                .orElse(null);
-
-                        if (botStartNodeId != null) {
-                            runFlow(botId, botUser, botStartNodeId, null);
+                    Object targetIdObj = currentNode.data().get("targetBotId");
+                    Long targetBotId = null;
+                    if (targetIdObj instanceof Number) {
+                        targetBotId = ((Number) targetIdObj).longValue();
+                    } else if (targetIdObj instanceof String) {
+                        try {
+                            targetBotId = Long.parseLong((String) targetIdObj);
+                        } catch (NumberFormatException e) {
                         }
                     }
-                    break;
+
+                    String returnNodeId = findTargetNodeId(edges, currentNodeId, "next");
+
+                    if (targetBotId != null && !targetBotId.equals(executingBotId)) {
+                        Long currentCampaignId = stateService.getActiveCampaignId(botId, telegramUserId).orElse(null);
+                        CallStackFrame frame = new CallStackFrame(executingBotId, returnNodeId, currentCampaignId);
+                        pushCallStack(botId, telegramUserId, frame);
+
+                        executingBotId = targetBotId;
+                        setExecutingBotId(botId, telegramUserId, executingBotId);
+                        stateService.clearActiveCampaignId(botId, telegramUserId);
+
+                        FlowSchema schema = getSchema(executingBotId);
+                        if (schema != null) {
+                            nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+                            edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+
+                            String botStartNodeId = nodes.stream()
+                                    .filter(n -> n.type() == NodeType.START)
+                                    .findFirst()
+                                    .map(FlowNode::id)
+                                    .orElse(null);
+
+                            if (botStartNodeId != null) {
+                                currentNodeId = botStartNodeId;
+                                stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
+                                botUser.setCurrentNodeId(currentNodeId);
+                                botUser = botUserRepository.save(botUser);
+                                continue;
+                            }
+                        }
+                    }
+
+                    currentNodeId = returnNodeId;
+                    stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
+                    botUser.setCurrentNodeId(currentNodeId);
+                    botUser = botUserRepository.save(botUser);
+                    continue;
                 }
 
                 NodeExecutor executor = executors.get(currentNode.type());
@@ -519,24 +635,63 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 }
 
                 if (nextNodeId == null) {
-                    boolean hasOutgoingEdges = edges.stream().anyMatch(e -> e.source().equals(currentNode.id()));
-                    if (currentNode.type() == NodeType.END || !hasOutgoingEdges) {
-                        stateService.clearActiveCampaignId(botId, telegramUserId);
-                        stateService.setCurrentNodeId(botId, telegramUserId, null);
-                        botUser.setCurrentNodeId(null);
-                        botUserRepository.save(botUser);
+                    CallStackFrame poppedFrame = popCallStack(botId, telegramUserId);
+                    if (poppedFrame != null) {
+                        executingBotId = poppedFrame.getExecutingBotId();
+                        setExecutingBotId(botId, telegramUserId, executingBotId);
+
+                        if (!executingBotId.equals(botId)) {
+                            FlowSchema schema = getSchema(executingBotId);
+                            if (schema != null) {
+                                nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+                                edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+                            }
+                        } else {
+                            Long originalCampaignId = poppedFrame.getCampaignId();
+                            if (originalCampaignId != null) {
+                                stateService.setActiveCampaignId(botId, telegramUserId, originalCampaignId);
+                                BroadcastCampaign campaign = campaignRepository.findById(originalCampaignId).orElse(null);
+                                if (campaign != null) {
+                                    nodes = objectMapper.readValue(campaign.getNodes(), new TypeReference<>() {});
+                                    edges = objectMapper.readValue(campaign.getEdges(), new TypeReference<>() {});
+                                } else {
+                                    FlowSchema schema = getSchema(botId);
+                                    if (schema != null) {
+                                        nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+                                        edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+                                    }
+                                }
+                            } else {
+                                stateService.clearActiveCampaignId(botId, telegramUserId);
+                                FlowSchema schema = getSchema(botId);
+                                if (schema != null) {
+                                    nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+                                    edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+                                }
+                            }
+                        }
+
+                        nextNodeId = poppedFrame.getReturnNodeId();
                     } else {
-                        stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
-                        botUser.setCurrentNodeId(currentNodeId);
-                        botUserRepository.save(botUser);
+                        boolean hasOutgoingEdges = edges.stream().anyMatch(e -> e.source().equals(currentNode.id()));
+                        if (currentNode.type() == NodeType.END || !hasOutgoingEdges) {
+                            stateService.clearActiveCampaignId(botId, telegramUserId);
+                            stateService.setCurrentNodeId(botId, telegramUserId, null);
+                            botUser.setCurrentNodeId(null);
+                            botUserRepository.save(botUser);
+                        } else {
+                            stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
+                            botUser.setCurrentNodeId(currentNodeId);
+                            botUserRepository.save(botUser);
+                        }
+                        break;
                     }
-                    break;
                 }
 
                 currentNodeId = nextNodeId;
                 stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
                 botUser.setCurrentNodeId(currentNodeId);
-                botUserRepository.save(botUser);
+                botUser = botUserRepository.save(botUser);
             }
         } catch (Exception e) {
             log.error("Error running flow for bot {}: {}", botId, e.getMessage(), e);
@@ -740,5 +895,86 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 .findFirst()
                 .map(FlowEdge::target)
                 .orElse(null);
+    }
+
+    private static class CallStackFrame {
+        private Long executingBotId;
+        private String returnNodeId;
+        private Long campaignId;
+
+        public CallStackFrame() {}
+        public CallStackFrame(Long executingBotId, String returnNodeId, Long campaignId) {
+            this.executingBotId = executingBotId;
+            this.returnNodeId = returnNodeId;
+            this.campaignId = campaignId;
+        }
+
+        public Long getExecutingBotId() { return executingBotId; }
+        public void setExecutingBotId(Long executingBotId) { this.executingBotId = executingBotId; }
+        public String getReturnNodeId() { return returnNodeId; }
+        public void setReturnNodeId(String returnNodeId) { this.returnNodeId = returnNodeId; }
+        public Long getCampaignId() { return campaignId; }
+        public void setCampaignId(Long campaignId) { this.campaignId = campaignId; }
+    }
+
+    private void pushCallStack(Long originalBotId, Long telegramUserId, CallStackFrame frame) {
+        try {
+            String key = "launchly:bot:callstack:" + originalBotId + ":" + telegramUserId;
+            String json = objectMapper.writeValueAsString(frame);
+            redisTemplate.opsForList().rightPush(key, json);
+            redisTemplate.expire(key, Duration.ofHours(24));
+        } catch (Exception e) {
+            log.error("Failed to push to call stack: {}", e.getMessage(), e);
+        }
+    }
+
+    private CallStackFrame popCallStack(Long originalBotId, Long telegramUserId) {
+        try {
+            String key = "launchly:bot:callstack:" + originalBotId + ":" + telegramUserId;
+            String json = redisTemplate.opsForList().rightPop(key);
+            if (json == null || json.trim().isEmpty()) {
+                return null;
+            }
+            return objectMapper.readValue(json, CallStackFrame.class);
+        } catch (Exception e) {
+            log.error("Failed to pop from call stack: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private void clearCallStack(Long originalBotId, Long telegramUserId) {
+        try {
+            String key = "launchly:bot:callstack:" + originalBotId + ":" + telegramUserId;
+            redisTemplate.delete(key);
+        } catch (Exception e) {
+            log.error("Failed to clear call stack: {}", e.getMessage(), e);
+        }
+    }
+
+    private Long getExecutingBotId(Long originalBotId, Long telegramUserId) {
+        try {
+            String key = "launchly:bot:executing_bot:" + originalBotId + ":" + telegramUserId;
+            String val = redisTemplate.opsForValue().get(key);
+            if (val == null || val.trim().isEmpty()) {
+                return originalBotId;
+            }
+            return Long.parseLong(val);
+        } catch (Exception e) {
+            log.error("Failed to get executing bot id: {}", e.getMessage(), e);
+            return originalBotId;
+        }
+    }
+
+    private void setExecutingBotId(Long originalBotId, Long telegramUserId, Long executingBotId) {
+        try {
+            String key = "launchly:bot:executing_bot:" + originalBotId + ":" + telegramUserId;
+            if (executingBotId == null || executingBotId.equals(originalBotId)) {
+                redisTemplate.delete(key);
+            } else {
+                redisTemplate.opsForValue().set(key, executingBotId.toString(), Duration.ofHours(24));
+            }
+        } catch (Exception e) {
+            log.error("Failed to set executing bot id: {}", e.getMessage(), e);
+        }
     }
 }

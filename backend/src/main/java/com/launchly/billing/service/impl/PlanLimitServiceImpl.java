@@ -1,5 +1,7 @@
 package com.launchly.billing.service.impl;
 
+import com.launchly.bot.entity.Bot;
+import com.launchly.common.utils.EncryptionUtil;
 import com.launchly.billing.entity.Plan;
 import org.hibernate.Hibernate;
 import com.launchly.billing.entity.Subscription;
@@ -16,6 +18,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,13 +30,44 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     private final BotRepository botRepository;
     private final BotUserRepository botUserRepository;
     private final BroadcastCampaignRepository broadcastCampaignRepository;
+    private final EncryptionUtil encryptionUtil;
 
     @Override
     @Transactional(readOnly = true)
-    public void checkBotLimit(Long userId) {
+    public void checkBotLimit(Long userId, String newTelegramToken) {
         Plan plan = getActivePlan(userId);
-        long currentBots = botRepository.countByUserId(userId);
-        if (currentBots >= plan.getMaxBots()) {
+        
+        List<Bot> userBots = botRepository.findAllByUserId(userId);
+        boolean tokenAlreadyExists = false;
+        if (newTelegramToken != null && !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(newTelegramToken)) {
+            for (com.launchly.bot.entity.Bot b : userBots) {
+                try {
+                    String decrypted = encryptionUtil.decrypt(b.getTelegramToken());
+                    if (newTelegramToken.equals(decrypted)) {
+                        tokenAlreadyExists = true;
+                        break;
+                    }
+                } catch (Exception e) {
+                }
+            }
+        }
+
+        if (tokenAlreadyExists) {
+            return;
+        }
+        long distinctRealTokensCount = userBots.stream()
+                .map(b -> {
+                    try {
+                        return encryptionUtil.decrypt(b.getTelegramToken());
+                    } catch (Exception e) {
+                        return b.getTelegramToken();
+                    }
+                })
+                .filter(token -> !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(token))
+                .distinct()
+                .count();
+
+        if (distinctRealTokensCount >= plan.getMaxBots()) {
             throw new AppException(HttpStatus.PAYMENT_REQUIRED, "Bot limit reached. Upgrade your plan.");
         }
     }
@@ -91,7 +126,15 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     @Cacheable(value = "subscription", key = "'plan:' + #userId")
     public Plan getActivePlan(Long userId) {
         Plan plan = subscriptionRepository.findByUserId(userId)
-                .filter(sub -> sub.getStatus() == SubscriptionStatus.ACTIVE || sub.getStatus() == SubscriptionStatus.TRIALING)
+                .filter(sub -> {
+                    if (sub.getStatus() == SubscriptionStatus.ACTIVE || sub.getStatus() == SubscriptionStatus.TRIALING) {
+                        return true;
+                    }
+                    if (sub.getStatus() == SubscriptionStatus.CANCELLED && sub.isCancelAtPeriodEnd() && sub.getCurrentPeriodEnd() != null) {
+                        return sub.getCurrentPeriodEnd().isAfter(LocalDateTime.now());
+                    }
+                    return false;
+                })
                 .map(Subscription::getPlan)
                 .orElseGet(() -> planRepository.findByName("FREE")
                         .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found")));

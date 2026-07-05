@@ -20,6 +20,10 @@ public class StartAutomationNodeExecutor implements NodeExecutor {
     @Override
     public String execute(FlowNode node, List<FlowEdge> edges, BotUser botUser,
                           Update update, TelegramClient client) {
-        return null;
+        return edges.stream()
+                .filter(e -> e.source().equals(node.id()) && "next".equals(e.sourceHandle()))
+                .findFirst()
+                .map(FlowEdge::target)
+                .orElse(null);
     }
 }

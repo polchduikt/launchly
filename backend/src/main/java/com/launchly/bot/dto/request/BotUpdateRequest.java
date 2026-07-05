@@ -5,5 +5,6 @@ public record BotUpdateRequest(
         String description,
         String avatar,
         String avatarPublicId,
-        String telegramToken
+        String telegramToken,
+        Long copyTokenFromBotId
 ) {}

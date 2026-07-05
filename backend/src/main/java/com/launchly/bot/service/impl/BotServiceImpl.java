@@ -43,6 +43,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -67,12 +68,25 @@ public class BotServiceImpl implements BotService {
     @Transactional
     @CacheEvict(value = "bots", key = "#userId")
     public BotResponse createBot(BotCreateRequest request, Long userId) {
-        planLimitService.checkBotLimit(userId);
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
 
-        String encryptedToken = encryptionUtil.encrypt(request.telegramToken());
+        String rawToken = request.telegramToken();
+        if (request.copyTokenFromBotId() != null) {
+            Bot sourceBot = findBotByIdAndUser(request.copyTokenFromBotId(), userId);
+            rawToken = encryptionUtil.decrypt(sourceBot.getTelegramToken());
+        }
+
+        boolean isDummy = (rawToken == null || rawToken.trim().isEmpty() || "0000000000:dummyTokenPlaceholderForNoBotConfig".equals(rawToken));
+        if (!isDummy) {
+            planLimitService.checkBotLimit(userId, rawToken);
+        }
+
+        if (rawToken == null || rawToken.trim().isEmpty()) {
+            rawToken = "0000000000:dummyTokenPlaceholderForNoBotConfig";
+        }
+
+        String encryptedToken = encryptionUtil.encrypt(rawToken);
 
         Bot bot = Bot.builder()
                 .name(request.name())
@@ -83,8 +97,11 @@ public class BotServiceImpl implements BotService {
 
         bot = botRepository.save(bot);
 
-        updateBotTelegramInfo(bot, request.telegramToken());
-        bot = botRepository.save(bot);
+        if (!"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(rawToken)) {
+            releaseTokenFromOtherBots(rawToken, userId, bot.getId());
+            updateBotTelegramInfo(bot, rawToken);
+            bot = botRepository.save(bot);
+        }
 
         FlowSchema schema = FlowSchema.builder()
                 .bot(bot)
@@ -99,7 +116,7 @@ public class BotServiceImpl implements BotService {
     public List<BotResponse> getBotsByUser(Long userId) {
         return botRepository.findAllByUserId(userId).stream()
                 .map(this::toBotResponseWithStats)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -134,9 +151,31 @@ public class BotServiceImpl implements BotService {
         if (request.name() != null) {
             bot.setName(request.name());
         }
-        if (request.telegramToken() != null) {
-            bot.setTelegramToken(encryptionUtil.encrypt(request.telegramToken()));
-            updateBotTelegramInfo(bot, request.telegramToken());
+        String rawToken = request.telegramToken();
+        if (request.copyTokenFromBotId() != null) {
+            Bot sourceBot = findBotByIdAndUser(request.copyTokenFromBotId(), userId);
+            rawToken = encryptionUtil.decrypt(sourceBot.getTelegramToken());
+        }
+
+        if (rawToken != null) {
+            String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
+            boolean wasDummy = "0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decryptedToken);
+            boolean isNewReal = !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(rawToken);
+
+            if (wasDummy && isNewReal) {
+                planLimitService.checkBotLimit(userId, rawToken);
+            }
+
+            if (isNewReal) {
+                releaseTokenFromOtherBots(rawToken, userId, bot.getId());
+            }
+
+            bot.setTelegramToken(encryptionUtil.encrypt(rawToken));
+            if (!"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(rawToken)) {
+                updateBotTelegramInfo(bot, rawToken);
+            } else {
+                bot.setUsername(null);
+            }
         }
         if (request.description() != null) {
             bot.setDescription(request.description());
@@ -180,6 +219,25 @@ public class BotServiceImpl implements BotService {
 
         if (bot.isActive()) {
             throw new AppException(HttpStatus.CONFLICT, "Bot is already running");
+        }
+
+        String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
+        if ("0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decryptedToken)) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Please configure a valid Telegram token in settings before starting the automation.");
+        }
+
+        List<Bot> activeBotsList = botRepository.findAllByActiveTrue();
+        for (Bot activeBot : activeBotsList) {
+            if (!activeBot.getId().equals(bot.getId())) {
+                String activeToken = encryptionUtil.decrypt(activeBot.getTelegramToken());
+                if (decryptedToken.equals(activeToken)) {
+                    telegramBotManager.unregisterBot(activeBot.getId());
+                    activeBot.setActive(false);
+                    botRepository.save(activeBot);
+                    log.info("Automatically deactivated bot id={} ('{}') because its token was assigned to bot id={} ('{}')",
+                            activeBot.getId(), activeBot.getName(), bot.getId(), bot.getName());
+                }
+            }
         }
 
         telegramBotManager.registerBot(bot);
@@ -470,6 +528,34 @@ public class BotServiceImpl implements BotService {
             }
         } catch (Exception e) {
             log.warn("Failed to fetch Telegram bot info: {}", e.getMessage());
+        }
+    }
+
+    private void releaseTokenFromOtherBots(String token, Long userId, Long currentBotId) {
+        if (token == null || "0000000000:dummyTokenPlaceholderForNoBotConfig".equals(token)) {
+            return;
+        }
+
+        List<Bot> userBots = botRepository.findAllByUserId(userId);
+        for (Bot otherBot : userBots) {
+            if (!otherBot.getId().equals(currentBotId)) {
+                try {
+                    String decrypted = encryptionUtil.decrypt(otherBot.getTelegramToken());
+                    if (token.equals(decrypted)) {
+                        if (otherBot.isActive()) {
+                            telegramBotManager.unregisterBot(otherBot.getId());
+                            otherBot.setActive(false);
+                        }
+                        otherBot.setTelegramToken(encryptionUtil.encrypt("0000000000:dummyTokenPlaceholderForNoBotConfig"));
+                        otherBot.setUsername(null);
+                        botRepository.save(otherBot);
+                        log.info("Reassigned token to bot id={}. Automatically reset bot id={} ('{}') to Without bot (inactive)",
+                                currentBotId, otherBot.getId(), otherBot.getName());
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to release token from other bot id={}: {}", otherBot.getId(), e.getMessage());
+                }
+            }
         }
     }
 
