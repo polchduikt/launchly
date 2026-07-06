@@ -8,8 +8,12 @@ import { IntegrationsPanel } from '../../integration/components/IntegrationsPane
 import { SubscriptionsPanel } from '../../billing/components/SubscriptionsPanel';
 import { TelegramSettingsPanel } from '../components/TelegramSettingsPanel';
 import { PaymentsPanel } from '../../billing/components/PaymentsPanel';
-import { useTagsQuery, useCreateTagMutation, useDeleteTagMutation } from '../../broadcast/hooks/useBroadcastQueries';
-import { Loader2, AlertCircle, CheckCircle2, X, Search, Plus, Trash2 } from 'lucide-react';
+import { NotificationsPanel } from '../components/NotificationsPanel';
+import { TeamMembersPanel } from '../components/TeamMembersPanel';
+import { DisplayPanel } from '../components/DisplayPanel';
+import { UserFieldsPanel } from '../components/UserFieldsPanel';
+import { TagsSettingsPanel } from '../components/TagsSettingsPanel';
+import { Loader2, AlertCircle, CheckCircle2, X } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
   const location = useLocation();
@@ -23,96 +27,6 @@ export const SettingsPage: React.FC = () => {
   const [timeZone, setTimeZone] = useState('UTC+07:00');
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const logoutMutation = useLogoutMutation();
-  const { data: tags = [], refetch: refetchTags } = useTagsQuery(activeBotId || 0);
-  const createTagMutation = useCreateTagMutation(activeBotId || 0);
-  const deleteTagMutation = useDeleteTagMutation(activeBotId || 0);
-  const [userFields, setUserFields] = useState<{ name: string; type: string; description: string }[]>([]);
-  const [fieldsSearch, setFieldsSearch] = useState('');
-  const [tagsSearch, setTagsSearch] = useState('');
-  const [isFieldModalOpen, setIsFieldModalOpen] = useState(false);
-  const [isTagModalOpen, setIsTagModalOpen] = useState(false);
-  const [newFieldName, setNewFieldName] = useState('');
-  const [newFieldType, setNewFieldType] = useState('Text');
-  const [newFieldDesc, setNewFieldDesc] = useState('');
-  const [newTagName, setNewTagName] = useState('');
-  const [newTagFolder, setNewTagFolder] = useState('Tags');
-
-  useEffect(() => {
-    if (activeBotId) {
-      const stored = localStorage.getItem(`launchly_custom_fields_${activeBotId}`);
-      if (stored) {
-        try {
-          setUserFields(JSON.parse(stored));
-        } catch (e) {
-          console.error('Failed to parse stored user fields', e);
-        }
-      } else {
-        const defaults = [
-          { name: 'Kr', type: 'Text', description: 'User credit count' },
-          { name: 'Рыба', type: 'Text', description: 'Favorite fish type' }
-        ];
-        setUserFields(defaults);
-        localStorage.setItem(`launchly_custom_fields_${activeBotId}`, JSON.stringify(defaults));
-      }
-    }
-  }, [activeBotId]);
-
-  const handleCreateField = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFieldName.trim() || !activeBotId) return;
-
-    const newField = {
-      name: newFieldName.trim(),
-      type: newFieldType,
-      description: newFieldDesc.trim()
-    };
-
-    const updated = [...userFields.filter(f => f.name !== newField.name), newField];
-    setUserFields(updated);
-    localStorage.setItem(`launchly_custom_fields_${activeBotId}`, JSON.stringify(updated));
-
-    setIsFieldModalOpen(false);
-    setNewFieldName('');
-    setNewFieldDesc('');
-    setNewFieldType('Text');
-  };
-
-  const handleDeleteField = (name: string) => {
-    if (!activeBotId) return;
-    const updated = userFields.filter(f => f.name !== name);
-    setUserFields(updated);
-    localStorage.setItem(`launchly_custom_fields_${activeBotId}`, JSON.stringify(updated));
-  };
-
-  const handleCreateTag = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTagName.trim() || !activeBotId) return;
-    
-    let formattedName = newTagName.trim();
-    if (newTagFolder.trim() && newTagFolder.trim() !== 'Tags') {
-      formattedName = `${newTagFolder.trim()}/${newTagName.trim()}`;
-    }
-
-    try {
-      await createTagMutation.mutateAsync({ name: formattedName });
-      setIsTagModalOpen(false);
-      setNewTagName('');
-      setNewTagFolder('Tags');
-      refetchTags();
-    } catch (err) {
-      console.error('Failed to create tag', err);
-    }
-  };
-
-  const handleDeleteTag = async (tagId: number) => {
-    if (!activeBotId) return;
-    try {
-      await deleteTagMutation.mutateAsync(tagId);
-      refetchTags();
-    } catch (err) {
-      console.error('Failed to delete tag', err);
-    }
-  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -295,150 +209,9 @@ export const SettingsPage: React.FC = () => {
               </div>
             </div>
           ) : activeTab === 'fields' ? (
-            <div className="space-y-6">
-              <div className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 md:p-8 space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-extrabold text-slate-800 tracking-tight">User Fields</h2>
-                    <p className="text-xs text-slate-500 mt-0.5">Manage custom user fields to collect and store contact details.</p>
-                  </div>
-                  <button
-                    onClick={() => setIsFieldModalOpen(true)}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100 flex items-center gap-1.5"
-                  >
-                    <Plus size={14} />
-                    <span>New User Field</span>
-                  </button>
-                </div>
-
-                <div className="relative max-w-sm">
-                  <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={fieldsSearch}
-                    onChange={(e) => setFieldsSearch(e.target.value)}
-                    placeholder="Search by User Field name"
-                    className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-400 font-semibold bg-slate-50/20"
-                  />
-                </div>
-
-                <div className="border border-slate-150 rounded-2xl overflow-hidden shadow-xs">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-150 text-slate-500 font-bold uppercase tracking-wider">
-                        <th className="px-5 py-3 select-none">Name</th>
-                        <th className="px-5 py-3 select-none">Type</th>
-                        <th className="px-5 py-3 select-none">Description</th>
-                        <th className="px-5 py-3 text-right select-none">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
-                      {userFields
-                        .filter(f => f.name.toLowerCase().includes(fieldsSearch.toLowerCase()))
-                        .map((field) => (
-                          <tr key={field.name} className="hover:bg-slate-50/30 transition-colors">
-                            <td className="px-5 py-3.5 font-bold text-slate-700">{field.name}</td>
-                            <td className="px-5 py-3.5">
-                              <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-600 rounded-md font-bold text-[10px]">
-                                {field.type}
-                              </span>
-                            </td>
-                            <td className="px-5 py-3.5 text-slate-400 font-medium">{field.description || '-'}</td>
-                            <td className="px-5 py-3.5 text-right">
-                              <button
-                                onClick={() => handleDeleteField(field.name)}
-                                className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg cursor-pointer transition-all"
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      {userFields.filter(f => f.name.toLowerCase().includes(fieldsSearch.toLowerCase())).length === 0 && (
-                        <tr>
-                          <td colSpan={4} className="text-center py-10 text-slate-400 italic">No custom user fields found</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            <UserFieldsPanel />
           ) : activeTab === 'tags' ? (
-            <div className="space-y-6">
-              <div className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 md:p-8 space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-extrabold text-slate-800 tracking-tight">Tags</h2>
-                    <p className="text-xs text-slate-500 mt-0.5">Label contacts to categorize, segment, and filter your audience.</p>
-                  </div>
-                  <button
-                    onClick={() => setIsTagModalOpen(true)}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100 flex items-center gap-1.5"
-                  >
-                    <Plus size={14} />
-                    <span>New Tag</span>
-                  </button>
-                </div>
-
-                <div className="relative max-w-sm">
-                  <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={tagsSearch}
-                    onChange={(e) => setTagsSearch(e.target.value)}
-                    placeholder="Search by tag name"
-                    className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-400 font-semibold bg-slate-50/20"
-                  />
-                </div>
-
-                <div className="border border-slate-150 rounded-2xl overflow-hidden shadow-xs">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-150 text-slate-500 font-bold uppercase tracking-wider">
-                        <th className="px-5 py-3 select-none">Name</th>
-                        <th className="px-5 py-3 select-none">Folder</th>
-                        <th className="px-5 py-3 text-right select-none">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
-                      {tags
-                        .filter(t => t.name.toLowerCase().includes(tagsSearch.toLowerCase()))
-                        .map((tag) => {
-                          const parts = tag.name.split('/');
-                          const hasFolder = parts.length > 1;
-                          const folderName = hasFolder ? parts[0] : 'Tags';
-                          const tagNameOnly = hasFolder ? parts.slice(1).join('/') : tag.name;
-                          return (
-                            <tr key={tag.id} className="hover:bg-slate-50/30 transition-colors">
-                              <td className="px-5 py-3.5 font-bold text-slate-700">{tagNameOnly}</td>
-                              <td className="px-5 py-3.5">
-                                <span className="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-600 rounded-md font-bold text-[10px]">
-                                  {folderName}
-                                </span>
-                              </td>
-                              <td className="px-5 py-3.5 text-right">
-                                <button
-                                  onClick={() => handleDeleteTag(tag.id)}
-                                  disabled={deleteTagMutation.isPending}
-                                  className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg cursor-pointer transition-all disabled:opacity-50"
-                                >
-                                  <Trash2 size={14} />
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      {tags.filter(t => t.name.toLowerCase().includes(tagsSearch.toLowerCase())).length === 0 && (
-                        <tr>
-                          <td colSpan={3} className="text-center py-10 text-slate-400 italic">No tags found</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            <TagsSettingsPanel />
           ) : activeTab === 'integrations' ? (
             activeBotId ? (
               <IntegrationsPanel botId={activeBotId} />
@@ -453,6 +226,12 @@ export const SettingsPage: React.FC = () => {
             <SubscriptionsPanel />
           ) : activeTab === 'payments' ? (
             <PaymentsPanel />
+          ) : activeTab === 'notifications' ? (
+            <NotificationsPanel />
+          ) : activeTab === 'members' ? (
+            <TeamMembersPanel />
+          ) : activeTab === 'display' ? (
+            <DisplayPanel />
           ) : activeTab === 'telegram' ? (
             <TelegramSettingsPanel />
           ) : (
@@ -462,154 +241,6 @@ export const SettingsPage: React.FC = () => {
           )}
         </div>
       </div>
-
-      
-      {isFieldModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleCreateField} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
-                Create New User Field
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsFieldModalOpen(false)}
-                className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700 transition-all cursor-pointer"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="space-y-3.5">
-              <div>
-                <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Field Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newFieldName}
-                  onChange={(e) => setNewFieldName(e.target.value)}
-                  placeholder="e.g. favorite_color"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
-                />
-              </div>
-              <div>
-                <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Type
-                </label>
-                <select
-                  value={newFieldType}
-                  onChange={(e) => setNewFieldType(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-white"
-                >
-                  <option value="Text">Text</option>
-                  <option value="Number">Number</option>
-                  <option value="Date">Date</option>
-                  <option value="Boolean">Boolean</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Description (optional)
-                </label>
-                <input
-                  type="text"
-                  value={newFieldDesc}
-                  onChange={(e) => setNewFieldDesc(e.target.value)}
-                  placeholder="e.g. Stores customer's favorite color"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-2.5 justify-end pt-2 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setIsFieldModalOpen(false)}
-                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold rounded-xl transition-all cursor-pointer shadow shadow-indigo-100"
-              >
-                Create Field
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      
-      {isTagModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleCreateTag} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-extrabold text-[#222] uppercase tracking-wide">
-                Create tag
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsTagModalOpen(false)}
-                className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700 transition-all cursor-pointer"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="text-xs text-slate-500 leading-normal mb-1">
-              A tag is simply a label used to describe an identifying characteristic about a contact so you can sort and organize your audience. Tags allow you to segment your contacts.
-            </div>
-
-            <div className="space-y-3.5">
-              <div>
-                <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newTagName}
-                  onChange={(e) => setNewTagName(e.target.value)}
-                  placeholder="Enter tag name"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
-                />
-              </div>
-              <div>
-                <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Folder
-                </label>
-                <input
-                  type="text"
-                  value={newTagFolder}
-                  onChange={(e) => setNewTagFolder(e.target.value)}
-                  placeholder="Tags"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-2.5 justify-end pt-2 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setIsTagModalOpen(false)}
-                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-750 text-xs font-extrabold rounded-xl transition-all cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={!newTagName.trim() || createTagMutation.isPending}
-                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-55 text-white text-xs font-extrabold rounded-xl transition-all cursor-pointer shadow shadow-indigo-100"
-              >
-                {createTagMutation.isPending ? 'Creating...' : 'Create'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
     </DashboardLayout>
   );
 };

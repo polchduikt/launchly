@@ -16,7 +16,6 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
       { id: 'integrations', label: 'Integrations' },
       { id: 'notifications', label: 'Notifications' },
       { id: 'members', label: 'Team Members' },
-      { id: 'logs', label: 'Logs' },
       { id: 'display', label: 'Display' },
     ],
   },
@@ -35,16 +34,8 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     ],
   },
   {
-    title: 'Inbox',
-    items: [
-      { id: 'live-chat', label: 'Live Chat Behavior' },
-      { id: 'assignment', label: 'Auto-Assignment' },
-    ],
-  },
-  {
     title: 'Channels',
     items: [
-      { id: 'email', label: 'Email' },
       { id: 'telegram', label: 'Telegram' },
     ],
   },
