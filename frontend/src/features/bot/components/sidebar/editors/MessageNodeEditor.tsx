@@ -861,6 +861,11 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                               className="flex justify-between items-center bg-white border border-slate-150 p-2.5 rounded-xl text-xs font-bold text-slate-700 shadow-sm hover:border-slate-350 cursor-pointer transition-all animate-in fade-in"
                             >
                               <span className="truncate flex-1 pr-4">{btn.label}</span>
+                              {btn.actionType === 'BUY' && (
+                                <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-250 flex items-center justify-center font-black text-[9px] shrink-0 mr-1.5 select-none leading-none">
+                                  $
+                                </span>
+                              )}
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -968,6 +973,11 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                               className="flex justify-between items-center bg-white border border-slate-150 p-2.5 rounded-xl text-xs font-bold text-slate-700 shadow-sm hover:border-slate-350 cursor-pointer transition-all"
                             >
                               <span className="truncate flex-1 pr-4">{btn.label}</span>
+                              {btn.actionType === 'BUY' && (
+                                <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-250 flex items-center justify-center font-black text-[9px] shrink-0 mr-1.5 select-none leading-none">
+                                  $
+                                </span>
+                              )}
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -1120,6 +1130,11 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                               className="flex justify-between items-center bg-white border border-slate-150 p-2.5 rounded-xl text-xs font-bold text-slate-700 shadow-sm hover:border-slate-350 cursor-pointer transition-all"
                             >
                               <span className="truncate flex-1 pr-4">{btn.label}</span>
+                              {btn.actionType === 'BUY' && (
+                                <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-250 flex items-center justify-center font-black text-[9px] shrink-0 mr-1.5 select-none leading-none">
+                                  $
+                                </span>
+                              )}
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -1220,6 +1235,11 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                               className="flex justify-between items-center bg-white border border-slate-150 p-2.5 rounded-xl text-xs font-bold text-slate-700 shadow-sm hover:border-slate-350 cursor-pointer transition-all"
                             >
                               <span className="truncate flex-1 pr-4">{btn.label}</span>
+                              {btn.actionType === 'BUY' && (
+                                <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-250 flex items-center justify-center font-black text-[9px] shrink-0 mr-1.5 select-none leading-none">
+                                  $
+                                </span>
+                              )}
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -1320,6 +1340,11 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                               className="flex justify-between items-center bg-white border border-slate-150 p-2.5 rounded-xl text-xs font-bold text-slate-700 shadow-sm hover:border-slate-350 cursor-pointer transition-all"
                             >
                               <span className="truncate flex-1 pr-4">{btn.label}</span>
+                              {btn.actionType === 'BUY' && (
+                                <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-250 flex items-center justify-center font-black text-[9px] shrink-0 mr-1.5 select-none leading-none">
+                                  $
+                                </span>
+                              )}
                               <button
                                 type="button"
                                 onClick={(e) => {

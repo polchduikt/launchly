@@ -372,7 +372,14 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
                                         }`}
                                         title={btn.label}
                                       >
-                                        <span className="block truncate w-full">{btn.label}</span>
+                                        <div className="flex items-center justify-between gap-1 w-full">
+                                          <span className="block truncate flex-1">{btn.label}</span>
+                                          {btn.actionType === 'BUY' && (
+                                            <span className="w-4.5 h-4.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-black text-[9px] shrink-0 ml-1 select-none leading-none">
+                                              $
+                                            </span>
+                                          )}
+                                        </div>
                                         {btn.actionType !== 'URL' && btn.actionType !== 'BUY' && (
                                           <Handle
                                             type="source"
@@ -413,13 +420,18 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
                           <div
                             key={btn.value + btnIdx}
                             onClick={(e) => handleButtonClick(e, btn)}
-                            className={`relative border py-2.5 pl-4 pr-10 rounded-2xl text-left text-xs font-bold transition-all cursor-pointer shadow-sm select-none ${
+                            className={`relative border py-2.5 pl-4 pr-10 rounded-2xl text-left text-xs font-bold transition-all cursor-pointer shadow-sm select-none flex items-center justify-between gap-1 ${
                               isActive
                                 ? 'bg-emerald-50/40 border-emerald-500 text-emerald-700 font-extrabold'
                                 : 'bg-white hover:bg-slate-50 border-slate-250 text-slate-700 hover:border-slate-350'
                             }`}
                           >
-                            <span>{btn.label}</span>
+                            <span className="truncate flex-1">{btn.label}</span>
+                            {btn.actionType === 'BUY' && (
+                              <span className="w-4.5 h-4.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-black text-[9px] shrink-0 mr-1.5 select-none leading-none">
+                                $
+                              </span>
+                            )}
                             {btn.actionType !== 'URL' && btn.actionType !== 'BUY' && (
                               <Handle
                                 type="source"

@@ -7,6 +7,7 @@ import { useBotStore } from '../../../store/useBotStore';
 import { IntegrationsPanel } from '../../integration/components/IntegrationsPanel';
 import { SubscriptionsPanel } from '../../billing/components/SubscriptionsPanel';
 import { TelegramSettingsPanel } from '../components/TelegramSettingsPanel';
+import { PaymentsPanel } from '../../billing/components/PaymentsPanel';
 import { useTagsQuery, useCreateTagMutation, useDeleteTagMutation } from '../../broadcast/hooks/useBroadcastQueries';
 import { Loader2, AlertCircle, CheckCircle2, X, Search, Plus, Trash2 } from 'lucide-react';
 
@@ -14,8 +15,10 @@ export const SettingsPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
+  const params = new URLSearchParams(location.search);
+  const tabParam = params.get('tab');
   const [activeTab, setActiveTab] = useState(
-    location.pathname === '/integrations' ? 'integrations' : 'general'
+    tabParam || (location.pathname === '/integrations' ? 'integrations' : 'general')
   );
   const [timeZone, setTimeZone] = useState('UTC+07:00');
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
@@ -116,10 +119,16 @@ export const SettingsPage: React.FC = () => {
     if (params.get('googleAuth') === 'success') {
       setShowSuccessBanner(true);
       setActiveTab('integrations');
-      navigate(location.pathname, { replace: true });
-    }
-    if (location.pathname === '/integrations') {
-      setActiveTab('integrations');
+      navigate('/settings?tab=integrations', { replace: true });
+    } else {
+      const tabParam = params.get('tab');
+      if (tabParam) {
+        setActiveTab(tabParam);
+      } else if (location.pathname === '/integrations') {
+        setActiveTab('integrations');
+      } else {
+        setActiveTab('general');
+      }
     }
   }, [location.pathname, location.search, navigate]);
 
@@ -141,7 +150,10 @@ export const SettingsPage: React.FC = () => {
                   {section.items.map((item) => (
                     <button
                       key={item.id}
-                      onClick={() => setActiveTab(item.id)}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        navigate(`/settings?tab=${item.id}`, { replace: true });
+                      }}
                       className={`w-full flex items-center px-3 py-1.5 rounded-lg text-xs font-bold text-left transition-all ${
                         activeTab === item.id
                           ? 'bg-white text-slate-900 border border-slate-200 shadow-sm'
@@ -157,7 +169,7 @@ export const SettingsPage: React.FC = () => {
           </div>
         </aside>
 
-        <div className="flex-1 p-6 md:p-10 max-w-5xl mx-auto space-y-6">
+        <div className="flex-1 p-6 md:p-10 max-w-7xl mx-auto space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-slate-200">
             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Settings</h1>
           </div>
@@ -439,6 +451,8 @@ export const SettingsPage: React.FC = () => {
             )
           ) : activeTab === 'subscriptions' ? (
             <SubscriptionsPanel />
+          ) : activeTab === 'payments' ? (
+            <PaymentsPanel />
           ) : activeTab === 'telegram' ? (
             <TelegramSettingsPanel />
           ) : (

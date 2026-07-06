@@ -31,8 +31,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     title: 'Billing',
     items: [
       { id: 'subscriptions', label: 'Subscriptions' },
-      { id: 'invoices', label: 'Invoices' },
-      { id: 'payment', label: 'Payment Details' },
+      { id: 'payments', label: 'Payments' },
     ],
   },
   {
