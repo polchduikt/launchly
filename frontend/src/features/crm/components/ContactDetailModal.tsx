@@ -242,18 +242,8 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
             </div>
 
             <div className="flex items-center gap-2 text-slate-500">
-              <Clock size={15} className="text-slate-400" />
-              <span>Contact Time: Unknown</span>
-            </div>
-
-            <div className="flex items-center gap-2 text-slate-500">
               <span className="font-mono bg-slate-100 text-[10px] text-slate-500 px-1.5 py-0.5 rounded">ID</span>
               <span>{selectedContact.telegramId}</span>
-            </div>
-
-            <div className="flex items-center gap-2 text-slate-500">
-              <Send size={14} className="text-indigo-500 rotate-45" />
-              <span>Opted-In for Telegram</span>
             </div>
 
             {selectedContact.username && (
@@ -414,12 +404,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
             </div>
           </div>
 
-          <div className="space-y-1.5 select-none">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Opted In through</span>
-            <span className="inline-block px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100">
-              Telegram
-            </span>
-          </div>
+
 
           <div className="space-y-3">
             <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block border-b border-slate-100 pb-1">System Fields</span>

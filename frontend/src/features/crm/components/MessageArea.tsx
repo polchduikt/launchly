@@ -29,10 +29,33 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
   onButtonClick,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const prevConvIdRef = useRef<number | null>(null);
+
+  const scrollToBottom = (behavior: 'auto' | 'smooth' = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (!conversation) return;
+    prevConvIdRef.current = conversation.id;
+
+    const behavior = 'smooth';
+    
+    scrollToBottom(behavior);
+
+    // Repeat scroll after small delays to ensure layout settles
+    const t1 = setTimeout(() => scrollToBottom(behavior), 50);
+    const t2 = setTimeout(() => scrollToBottom(behavior), 150);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [messages, conversation?.id]);
+
+  const handleImageLoad = () => {
+    scrollToBottom('smooth');
+  };
 
   const groupedMessages = useMemo(() => {
     const groups: { date: string; msgs: MessageResponse[] }[] = [];
@@ -106,6 +129,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
                   userAvatar={<UserAvatar name={conversation.botUserName} photoUrl={conversation.botUserPhotoUrl} size={28} />}
                   allMessages={messages}
                   onButtonClick={onButtonClick}
+                  onImageLoad={handleImageLoad}
                 />
               ))}
             </div>

@@ -728,33 +728,72 @@ export const useFlowBuilder = () => {
     return resultEdges;
   }, [edges, contextMenu, edgeType, nodes, hoveredEdgeId]);
 
-  const copiedNodesRef = useRef<Node[] | null>(null);
-  const copiedEdgesRef = useRef<Edge[] | null>(null);
-
   const copySelectedNodes = useCallback(() => {
     const selectedNodes = nodes.filter((n) => n.selected);
     if (selectedNodes.length === 0) return;
-
-    copiedNodesRef.current = JSON.parse(JSON.stringify(selectedNodes));
 
     const selectedNodeIds = new Set(selectedNodes.map((n) => n.id));
     const internalEdges = edges.filter(
       (e) => selectedNodeIds.has(e.source) && selectedNodeIds.has(e.target)
     );
-    copiedEdgesRef.current = JSON.parse(JSON.stringify(internalEdges));
+
+    const clipboardData = {
+      nodes: selectedNodes,
+      edges: internalEdges
+    };
+    localStorage.setItem('launchly_flow_clipboard', JSON.stringify(clipboardData));
   }, [nodes, edges]);
 
   const pasteCopiedNodes = useCallback(() => {
-    const copiedNodes = copiedNodesRef.current;
-    if (!copiedNodes || copiedNodes.length === 0) return;
+    const clipboardStr = localStorage.getItem('launchly_flow_clipboard');
+    if (!clipboardStr) return;
+
+    let copiedNodes: Node[] = [];
+    let copiedEdges: Edge[] = [];
+    try {
+      const parsed = JSON.parse(clipboardStr);
+      copiedNodes = parsed.nodes || [];
+      copiedEdges = parsed.edges || [];
+    } catch (err) {
+      console.error('Failed to parse clipboard data', err);
+      return;
+    }
+    if (copiedNodes.length === 0) return;
 
     takeSnapshot();
+
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const flowCenter = screenToFlowPosition({ x: centerX, y: centerY });
+
+    const validNodes = copiedNodes.filter(n => n.type !== 'START');
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    validNodes.forEach((node) => {
+      if (node.position) {
+        if (node.position.x < minX) minX = node.position.x;
+        if (node.position.x > maxX) maxX = node.position.x;
+        if (node.position.y < minY) minY = node.position.y;
+        if (node.position.y > maxY) maxY = node.position.y;
+      }
+    });
+
+    const groupCenterX = minX !== Infinity ? (minX + maxX) / 2 : 0;
+    const groupCenterY = minY !== Infinity ? (minY + maxY) / 2 : 0;
+
+    const offsetX = minX !== Infinity ? (flowCenter.x - groupCenterX) : 24;
+    const offsetY = minY !== Infinity ? (flowCenter.y - groupCenterY) : 24;
 
     const nodeIdMap: Record<string, string> = {};
     const buttonValueMap: Record<string, string> = {};
 
     const newNodes = copiedNodes.map((node) => {
-      const newId = `node_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      if (node.type === 'START') return null;
+
+      const newId = `node_${node.type?.toLowerCase() || 'msg'}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       nodeIdMap[node.id] = newId;
 
       const updatedData = { ...node.data };
@@ -793,19 +832,22 @@ export const useFlowBuilder = () => {
         ...node,
         id: newId,
         position: {
-          x: node.position.x + 24,
-          y: node.position.y + 24,
+          x: node.position.x + offsetX,
+          y: node.position.y + offsetY,
         },
         selected: true,
         data: updatedData,
       };
-    });
+    }).filter(Boolean) as Node[];
 
-    const copiedEdges = copiedEdgesRef.current || [];
+    if (newNodes.length === 0) return;
+
     const newEdges = copiedEdges.map((edge) => {
-      const newEdgeId = `edge_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const source = nodeIdMap[edge.source];
       const target = nodeIdMap[edge.target];
+      if (!source || !target) return null;
+
+      const newEdgeId = `edge_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const sourceHandle = edge.sourceHandle && buttonValueMap[edge.sourceHandle]
         ? (buttonValueMap[edge.sourceHandle] as string)
         : edge.sourceHandle;
@@ -817,7 +859,7 @@ export const useFlowBuilder = () => {
         target,
         sourceHandle,
       };
-    });
+    }).filter(Boolean) as Edge[];
 
     setNodes((nds) => [
       ...nds.map((n) => ({ ...n, selected: false }) as Node),
@@ -830,7 +872,7 @@ export const useFlowBuilder = () => {
     ]);
 
     setSelectedNodeId(newNodes[newNodes.length - 1].id);
-  }, [copiedNodesRef, copiedEdgesRef, takeSnapshot, setNodes, setEdges, setSelectedNodeId]);
+  }, [takeSnapshot, setNodes, setEdges, setSelectedNodeId]);
 
   const onPaneClick = useCallback(() => {
     if (justEndedDragRef.current) return;

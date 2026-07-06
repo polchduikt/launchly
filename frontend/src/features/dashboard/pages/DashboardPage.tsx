@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -27,33 +27,136 @@ import {
   BookOpen
 } from 'lucide-react';
 
+const parseButtons = (text: string) => {
+  const regex = /\[\s*([^\]]+?)\s*\]/g;
+  const buttons: string[] = [];
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    buttons.push(match[1].trim());
+  }
+  const cleanText = text.replace(/\[\s*([^\]]+?)\s*\]/g, '').trim();
+  return { cleanText, buttons };
+};
+
 const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
   const [visibleMessages, setVisibleMessages] = useState<any[]>([]);
+  const [isWaitingInput, setIsWaitingInput] = useState(false);
+  const [activeButtons, setActiveButtons] = useState<string[]>([]);
+  const [clickedButton, setClickedButton] = useState<string | null>(null);
   const [key, setKey] = useState(0);
 
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const timeoutsRef = useRef<number[]>([]);
+  const nextIndexRef = useRef(1);
+
+  const messages = template.phonePreview.messages || [];
+
+  const addTimeout = (fn: () => void, delay: number) => {
+    const id = setTimeout(fn, delay);
+    timeoutsRef.current.push(id as any);
+  };
+
+  const clearTimeouts = () => {
+    timeoutsRef.current.forEach((id) => clearTimeout(id));
+    timeoutsRef.current = [];
+  };
+
   useEffect(() => {
-    const messages = template.phonePreview.messages || [];
-    if (messages.length > 0) {
-      setVisibleMessages([messages[0]]);
-    } else {
-      setVisibleMessages([]);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [visibleMessages, isWaitingInput]);
+
+  const playStep = (msgIndex: number, currentVisible: any[]) => {
+    nextIndexRef.current = msgIndex;
+    if (msgIndex >= messages.length) {
+      addTimeout(() => {
+        setKey((k) => k + 1);
+      }, 3500);
+      return;
     }
 
-    let index = 1;
-    const interval = setInterval(() => {
-      if (index < messages.length) {
-        const nextMsg = messages[index];
-        if (nextMsg) {
-          setVisibleMessages((prev) => [...prev, nextMsg]);
-        }
-        index++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 1200);
+    const msg = messages[msgIndex];
+    const { cleanText, buttons } = parseButtons(msg.text);
 
-    return () => clearInterval(interval);
+    const nextVisible = [...currentVisible, { ...msg, text: cleanText }];
+    setVisibleMessages(nextVisible);
+
+    if (buttons.length > 0) {
+      setIsWaitingInput(true);
+      setActiveButtons(buttons);
+      setClickedButton(null);
+
+      const btnToClick = buttons[0];
+      addTimeout(() => {
+        setClickedButton(btnToClick);
+
+        addTimeout(() => {
+          const userReply = {
+            id: `user_${Date.now()}`,
+            text: btnToClick,
+            isUser: true,
+          };
+          const updatedVisible = [...nextVisible, userReply];
+          setVisibleMessages(updatedVisible);
+          setIsWaitingInput(false);
+          setActiveButtons([]);
+          setClickedButton(null);
+
+          addTimeout(() => {
+            playStep(msgIndex + 1, updatedVisible);
+          }, 900);
+        }, 350);
+      }, 1800);
+    } else {
+      setIsWaitingInput(false);
+      setActiveButtons([]);
+      setClickedButton(null);
+
+      addTimeout(() => {
+        playStep(msgIndex + 1, nextVisible);
+      }, 1500);
+    }
+  };
+
+  useEffect(() => {
+    clearTimeouts();
+    setVisibleMessages([]);
+    setIsWaitingInput(false);
+    setActiveButtons([]);
+    setClickedButton(null);
+    nextIndexRef.current = 1;
+
+    if (messages.length === 0) return;
+
+    playStep(0, []);
+
+    return () => clearTimeouts();
   }, [template, key]);
+
+  const handleButtonClick = (btnLabel: string) => {
+    if (clickedButton) return;
+    clearTimeouts();
+    setClickedButton(btnLabel);
+
+    const userReply = {
+      id: `user_${Date.now()}`,
+      text: btnLabel,
+      isUser: true,
+    };
+    const nextVisible = [...visibleMessages, userReply];
+    setVisibleMessages(nextVisible);
+
+    addTimeout(() => {
+      setIsWaitingInput(false);
+      setActiveButtons([]);
+      setClickedButton(null);
+
+      addTimeout(() => {
+        playStep(nextIndexRef.current + 1, nextVisible);
+      }, 900);
+    }, 350);
+  };
 
   return (
     <div className="w-[280px] bg-slate-900 border-[8px] border-slate-950 rounded-[38px] shadow-2xl p-4 aspect-[9/18] flex flex-col relative overflow-hidden select-none shrink-0">
@@ -80,7 +183,7 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-4 space-y-3 relative scrollbar-none">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto py-4 space-y-4 relative scrollbar-none">
         <div
           className="absolute inset-0 bg-slate-950 opacity-15 pointer-events-none" 
           style={{ 
@@ -91,12 +194,43 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
              
         {visibleMessages.map((msg, idx) => {
           if (!msg || !msg.text) return null;
+          const isUser = msg.isUser;
+          const isLastMessage = idx === visibleMessages.length - 1;
+          const showButtonsForThisMsg = isLastMessage && isWaitingInput && activeButtons.length > 0;
+
           return (
-            <div key={idx} className="flex flex-col animate-in slide-in-from-bottom-2 duration-300 relative z-10">
-              <div className="max-w-[90%] bg-slate-800 border border-slate-700/50 text-slate-200 text-xs rounded-2xl rounded-tl-sm px-3.5 py-2.5 whitespace-pre-wrap leading-relaxed shadow-sm">
+            <div key={msg.id || idx} className={`flex flex-col animate-in slide-in-from-bottom-2 duration-300 relative z-10 ${isUser ? 'items-end' : 'items-start'}`}>
+              <div className={`max-w-[85%] text-xs px-3.5 py-2.5 whitespace-pre-wrap leading-relaxed shadow-sm rounded-2xl ${
+                isUser 
+                  ? 'bg-indigo-600 border border-indigo-500 text-white rounded-tr-sm' 
+                  : 'bg-slate-800 border border-slate-700/50 text-slate-200 rounded-tl-sm'
+              }`}>
                 {msg.text}
               </div>
-              <span className="text-[8px] text-slate-500 font-bold mt-1 ml-1.5 uppercase">10:00 AM</span>
+
+              {showButtonsForThisMsg && (
+                <div className="flex flex-col gap-1.5 mt-2 w-[85%]">
+                  {activeButtons.map((btnLabel) => {
+                    const isClicked = clickedButton === btnLabel;
+                    return (
+                      <button
+                        key={btnLabel}
+                        onClick={() => handleButtonClick(btnLabel)}
+                        disabled={clickedButton !== null}
+                        className={`w-full py-2 px-3 text-center text-xs font-bold rounded-xl border transition-all cursor-pointer select-none ${
+                          isClicked
+                            ? 'bg-indigo-600 border-indigo-500 text-white scale-[0.98]'
+                            : 'bg-slate-800/40 border-slate-700 hover:border-slate-500 text-slate-300 hover:text-slate-100 hover:bg-slate-800/80 active:scale-[0.98]'
+                        }`}
+                      >
+                        {btnLabel}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <span className="text-[8px] text-slate-500 font-bold mt-1.5 px-1 uppercase">10:00 AM</span>
             </div>
           );
         })}

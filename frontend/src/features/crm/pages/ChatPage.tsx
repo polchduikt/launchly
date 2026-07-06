@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
-import { useConversationsQuery, useMessagesQuery } from '../hooks/useCrmQueries';
+import { useConversationsQuery, useMessagesQuery, useBotUsersQuery } from '../hooks/useCrmQueries';
 import { useCrmWebSocket } from '../hooks/useCrmWebSocket';
 import { useChatLocalStorage } from '../hooks/useChatLocalStorage';
 import { useChatActions } from '../hooks/useChatActions';
@@ -29,6 +29,7 @@ export const ChatPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const conversationIdParam = searchParams.get('conversationId');
   const { data: conversations = [], isLoading: isConvLoading } = useConversationsQuery(botId);
+  const { data: botUsers = [] } = useBotUsersQuery(botId);
   const [selectedConvId, setSelectedConvId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export const ChatPage: React.FC = () => {
   const actions = useChatActions({ selectedConvId, botId });
   const filters = useChatFilters({ conversations, favorites: ls.favorites, unreadConvIds: ls.unreadConvIds });
   const selectedConversation = conversations.find(c => c.id === selectedConvId) ?? null;
+  const currentBotUser = botUsers.find(u => u.telegramId === selectedConversation?.botUserTelegramId);
   const handleSelectConv = (id: number) => {
     setSelectedConvId(id);
     ls.markAsRead(id);
@@ -174,17 +176,12 @@ export const ChatPage: React.FC = () => {
 
           {selectedConversation && (
             <ContactInfoPanel
+              botId={botId}
               conversation={selectedConversation}
+              botUser={currentBotUser}
               isOpen={infoPanelOpen}
               onClose={() => setInfoPanelOpen(false)}
               onOpen={() => setInfoPanelOpen(true)}
-              contactTags={ls.contactTags[selectedConvId!] || []}
-              showAddTag={ls.showAddTag}
-              onShowAddTag={ls.setShowAddTag}
-              newTagName={ls.newTagName}
-              onNewTagNameChange={ls.setNewTagName}
-              onAddTag={ls.addTag}
-              onRemoveTag={ls.removeTag}
             />
           )}
         </div>

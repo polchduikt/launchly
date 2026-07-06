@@ -37,20 +37,44 @@ export const useChatLocalStorage = ({
   useEffect(() => { lsSet(LS_UNREAD, unreadConvIds); }, [unreadConvIds]);
   useEffect(() => { lsSet(LS_LAST_SEEN, lastSeenAt); }, [lastSeenAt]);
 
+  const parseIsoDate = (dateStr: string) => {
+    if (!dateStr) return 0;
+    const hasTimezone = dateStr.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(dateStr);
+    const normalized = hasTimezone ? dateStr : `${dateStr}Z`;
+    return new Date(normalized).getTime();
+  };
+
   useEffect(() => {
     conversations.forEach(c => {
       if (c.id !== selectedConvId && c.lastMessageAt) {
         const seen = lastSeenAt[c.id];
-        if (!seen || new Date(c.lastMessageAt).getTime() > new Date(seen).getTime()) {
+        if (!seen || parseIsoDate(c.lastMessageAt) > parseIsoDate(seen)) {
           setUnreadConvIds(prev => prev.includes(c.id) ? prev : [...prev, c.id]);
         }
       }
     });
-  }, [conversations]);
+  }, [conversations, selectedConvId]);
+
+  useEffect(() => {
+    if (selectedConvId) {
+      const conv = conversations.find(c => c.id === selectedConvId);
+      if (conv && conv.lastMessageAt) {
+        const seen = lastSeenAt[selectedConvId];
+        const lastMsgTime = parseIsoDate(conv.lastMessageAt);
+        const seenTime = seen ? parseIsoDate(seen) : 0;
+        if (lastMsgTime > seenTime) {
+          setLastSeenAt(prev => ({ ...prev, [selectedConvId]: conv.lastMessageAt }));
+          setUnreadConvIds(prev => prev.filter(uid => uid !== selectedConvId));
+        }
+      }
+    }
+  }, [conversations, selectedConvId]);
 
   const markAsRead = (convId: number) => {
     setUnreadConvIds(prev => prev.filter(uid => uid !== convId));
-    setLastSeenAt(prev => ({ ...prev, [convId]: new Date().toISOString() }));
+    const conv = conversations.find(c => c.id === convId);
+    const timestamp = conv?.lastMessageAt || new Date().toISOString();
+    setLastSeenAt(prev => ({ ...prev, [convId]: timestamp }));
   };
 
   const toggleFavorite = (convId: number) =>

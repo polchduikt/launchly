@@ -7,7 +7,7 @@ export const useAiStore = create<AiState>((set) => ({
     {
       role: 'assistant',
       content:
-        'Hello! I am your Launchly AI Assistant. 🧠 I can help you design bot flows, explain how different nodes work, configure CRM settings, or set up Google Sheets integration. How can I help you today?',
+        'Hello! I am your Launchly AI Assistant. I can help you design bot flows, explain how different nodes work, configure CRM settings, or set up Google Sheets integration. How can I help you today?',
     },
   ],
   activeTab: 'chat',
@@ -21,7 +21,7 @@ export const useAiStore = create<AiState>((set) => ({
         {
           role: 'assistant',
           content:
-            'Hello! I am your Launchly AI Assistant. 🧠 I can help you design bot flows, explain how different nodes work, configure CRM settings, or set up Google Sheets integration. How can I help you today?',
+            'Hello! I am your Launchly AI Assistant. I can help you design bot flows, explain how different nodes work, configure CRM settings, or set up Google Sheets integration. How can I help you today?',
         },
       ],
     }),
