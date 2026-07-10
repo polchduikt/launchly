@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
+import { Position, useEdges, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Globe } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -9,7 +9,6 @@ import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 
 export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const nodes = useNodes();
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   const url = data?.url || 'https://api.example.com/endpoint';
   const method = data?.method || 'GET';
@@ -60,7 +59,7 @@ export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && nodes.some((n) => n.id === e.source))}
+          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
           padded={true}
         />
         <span className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0">
@@ -94,10 +93,11 @@ export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
           type="source"
           position={Position.Right}
           id="next"
-          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && nodes.some((n) => n.id === e.target))}
+          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && e.target !== 'temp_menu_node')}
           padded={true}
         />
       </div>
     </div>
   );
 };
+ApiCallNode.displayName = 'ApiCallNode';

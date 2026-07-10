@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
+import { Position, useEdges, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Clock } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -8,7 +8,6 @@ import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 
 export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const nodes = useNodes();
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
 
   const connection = useConnection();
@@ -46,7 +45,8 @@ export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
   const waitUnit = typeof data?.waitUnit === 'string' ? data.waitUnit : 'Hours';
   const dateTimeStr = typeof data?.dateTime === 'string' ? data.dateTime : '';
 
-  const formatDateTime = (dateStr: string) => {
+  const formattedDateTime = useMemo(() => {
+    const dateStr = dateTimeStr;
     if (!dateStr) return 'specific date';
     try {
       const parts = dateStr.trim().split(/\s+/);
@@ -62,10 +62,8 @@ export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
       if (timeSplit.length < 2) return dateStr;
       const hr = Number(timeSplit[0]);
       const min = Number(timeSplit[1]);
-
       const date = new Date(y, m, d, hr, min);
       if (isNaN(date.getTime())) return dateStr;
-
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const monthName = months[date.getMonth()];
       const day = date.getDate();
@@ -76,7 +74,7 @@ export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
     } catch (e) {
       return dateStr;
     }
-  };
+  }, [dateTimeStr]);
 
   return (
     <div
@@ -95,7 +93,7 @@ export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && nodes.some((n) => n.id === e.source))}
+          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-rose-100/60 text-[#C2410C] flex items-center justify-center shrink-0">
           <Clock size={13} strokeWidth={2.5} />
@@ -114,7 +112,7 @@ export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
         {mode === 'date' ? (
           <div className="space-y-1 select-none">
             <p className="text-xs font-extrabold text-slate-800 leading-normal">Wait Until</p>
-            <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">{formatDateTime(dateTimeStr)}</p>
+            <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">{formattedDateTime}</p>
           </div>
         ) : (
           <div className="text-xs text-slate-650 leading-relaxed font-semibold select-none">
@@ -129,9 +127,10 @@ export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
           type="source"
           position={Position.Right}
           id="next"
-          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && nodes.some((n) => n.id === e.target))}
+          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && e.target !== 'temp_menu_node')}
         />
       </div>
     </div>
   );
 };
+SmartDelayNode.displayName = 'SmartDelayNode';

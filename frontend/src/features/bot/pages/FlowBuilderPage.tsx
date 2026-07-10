@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {ReactFlow, Controls, Background, ReactFlowProvider, getBezierPath, getSmoothStepPath, ConnectionLineType,} from '@xyflow/react';
-import type { ConnectionLineComponentProps, Connection } from '@xyflow/react';
+import type { ConnectionLineComponentProps } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../hooks/useBotsQuery';
@@ -17,7 +17,8 @@ import { ArrowLeft, Loader2, Plus, GitFork, Route, GitCommit, Undo2, Redo2, Spar
 import { useState } from 'react';
 import { FlowPreviewPanel } from '../../../components/shared/FlowPreviewPanel';
 import { useAiStore } from '../../../store/useAiStore';
-import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNodeEditor } from '../hooks/useNodeEditor';
 import { EditButtonDrawer } from '../components/sidebar/drawers/EditButtonDrawer';
 import { ChooseNextStepDrawer } from '../components/sidebar/drawers/ChooseNextStepDrawer';
@@ -25,6 +26,7 @@ import { AiAssistantDrawer } from '../../../features/ai/components/AiAssistantDr
 import { EditDataCollectionDrawer } from '../components/sidebar/drawers/EditDataCollectionDrawer';
 import { useTagsQuery } from '../../broadcast/hooks/useBroadcastQueries';
 import type {FlowBlock} from "../../../types/bot.ts";
+import { useFlowCollaboration } from '../hooks/useFlowCollaboration';
 
 const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
   fromX,
@@ -90,11 +92,15 @@ const FlowBuilderInner: React.FC = () => {
     return ['last_order_product', 'last_order_price', 'phone', 'email'];
   }, [activeBotId]);
 
+  const isLocalChangeRef = useRef(false);
+
   const {
     nodes,
     edges,
     setNodes,
     setEdges,
+    setNodesRemote,
+    setEdgesRemote,
     displayNodes,
     displayEdges,
     onNodesChange,
@@ -132,9 +138,72 @@ const FlowBuilderInner: React.FC = () => {
     copySelectedNodes,
     pasteCopiedNodes,
     isValidConnection,
-  } = useFlowBuilder();
+  } = useFlowBuilder(isLocalChangeRef);
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const currentUser = useAuthStore((state) => state.user);
+  const {
+    collaborators,
+    activeAction,
+    updateLocalAction,
+    publishNodeMove,
+    publishNodeMoveForce,
+    setDragging,
+  } = useFlowCollaboration(activeBotId || 0, nodes, edges, setNodesRemote, setEdgesRemote, 'flow', isLocalChangeRef);
+
+  const handleNodeDragStart = useCallback((_evt: React.MouseEvent, node: { id: string }) => {
+    onNodeDragStart();
+    setDragging(true);
+    updateLocalAction(`${currentUser?.name || 'Someone'} is dragging...`, node.id);
+  }, [onNodeDragStart, updateLocalAction, currentUser, setDragging]);
+
+  const handleNodeDrag = useCallback((_evt: React.MouseEvent, node: { id: string; position: { x: number; y: number } }) => {
+    publishNodeMove(node.id, node.position);
+  }, [publishNodeMove]);
+
+  const handleNodeDragStop = useCallback((_evt: React.MouseEvent, node: { id: string; position: { x: number; y: number } }) => {
+    onNodeDragStop();
+    publishNodeMoveForce(node.id, node.position);
+    setDragging(false);
+    updateLocalAction(null, null);
+  }, [onNodeDragStop, updateLocalAction, setDragging, publishNodeMoveForce]);
+
+  useEffect(() => {
+    if (selectedNodeId) {
+      const selectedNodeObj = nodes.find((n) => n.id === selectedNodeId);
+      const nodeName = (selectedNodeObj?.data?.label as string) || selectedNodeObj?.type || 'block';
+      updateLocalAction(
+        `${currentUser?.name || 'Someone'} is editing ${nodeName}...`,
+        selectedNodeId
+      );
+    } else {
+      updateLocalAction(null, null);
+    }
+  }, [selectedNodeId, currentUser, updateLocalAction]);
+  const nodesWithCollaborators = useMemo(() => {
+    const collaboratorMap = new Map(collaborators.map(c => [c.editingNodeId, c]));
+    let hasChanges = false;
+    
+    const result = displayNodes.map((node) => {
+      const activeCollab = collaboratorMap.get(node.id);
+      if (activeCollab) {
+        hasChanges = true;
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            _collaborator: {
+              name: activeCollab.name,
+              avatar: activeCollab.avatar,
+            },
+          },
+        };
+      }
+      return node;
+    });
+    
+    return hasChanges ? result : displayNodes;
+  }, [displayNodes, collaborators]);
 
   const filteredContextMenuOptions = useMemo(() => {
     if (!contextMenu) return CONTEXT_MENU_OPTIONS;
@@ -195,8 +264,14 @@ const FlowBuilderInner: React.FC = () => {
     pasteRef.current = pasteCopiedNodes;
   });
 
+  const { data: bots = [] } = useBotsQuery();
+  const activeBot = bots.find((b) => b.id === activeBotId);
+  const isBotLive = activeBot?.active ?? false;
+  const isViewer = activeBot?.role === 'Viewer';
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isViewer) return;
       const activeEl = document.activeElement;
       const isTyping = activeEl && (
         activeEl.tagName === 'INPUT' || 
@@ -228,11 +303,7 @@ const FlowBuilderInner: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
-
-  const { data: bots = [] } = useBotsQuery();
-  const activeBot = bots.find((b) => b.id === activeBotId);
-  const isBotLive = activeBot?.active ?? false;
+  }, [isViewer]);
 
   return (
     <DashboardLayout>
@@ -285,6 +356,37 @@ const FlowBuilderInner: React.FC = () => {
               </span>
             )}
 
+            {activeAction && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-50 border border-indigo-150 rounded-2xl text-[10px] text-indigo-700 font-extrabold shadow-3xs animate-in slide-in-from-right-2 duration-300 max-w-[240px] truncate select-none">
+                <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping" />
+                <span className="truncate">{activeAction}</span>
+              </div>
+            )}
+
+            <div className="flex items-center -space-x-1.5 select-none relative group">
+              <img
+                src={currentUser?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80"}
+                alt={currentUser?.name || "Me"}
+                title={`${currentUser?.name || "Me"} (You)`}
+                className="w-6 h-6 rounded-full border-2 border-white object-cover shadow-sm ring-1 ring-slate-100"
+              />
+              {collaborators.map((c) => (
+                <div key={c.userId} className="relative">
+                  <img
+                    src={c.avatar || "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&h=80"}
+                    alt={c.name}
+                    title={`${c.name} (Online)`}
+                    className={`w-6 h-6 rounded-full border-2 border-white object-cover shadow-sm ring-1 ring-slate-100 transition-all ${
+                      c.action ? 'ring-2 ring-indigo-500 ring-offset-1 scale-105' : ''
+                    }`}
+                  />
+                  {c.action && (
+                    <span className="absolute bottom-0 right-0 w-2 h-2 bg-indigo-500 rounded-full border border-white animate-ping" />
+                  )}
+                </div>
+              ))}
+            </div>
+
             <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-3.5 py-1.5 rounded-2xl font-sans">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 min-w-[85px] justify-start select-none">
                 {isDirty || saveMutation.isPending ? (
@@ -310,7 +412,7 @@ const FlowBuilderInner: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={undo}
-                  disabled={!canUndo}
+                  disabled={isViewer || !canUndo}
                   title="Undo (Ctrl+Z)"
                   className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:hover:text-slate-400 hover:bg-slate-200/50 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
                 >
@@ -318,7 +420,7 @@ const FlowBuilderInner: React.FC = () => {
                 </button>
                 <button
                   onClick={redo}
-                  disabled={!canRedo}
+                  disabled={isViewer || !canRedo}
                   title="Redo (Ctrl+Y)"
                   className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:hover:text-slate-400 hover:bg-slate-200/50 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
                 >
@@ -342,55 +444,60 @@ const FlowBuilderInner: React.FC = () => {
               <span>{isPreviewOpen ? 'Close Preview' : 'Preview'}</span>
             </button>
 
-            <button
-              onClick={() => {
-                useAiStore.getState().setIsOpen(true);
-                useAiStore.getState().setActiveTab('generator');
-              }}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 text-xs font-bold rounded-xl transition-all border border-indigo-100 cursor-pointer shadow-3xs"
-              title="Generate flow with AI"
-            >
-              <Sparkles size={14} className="animate-pulse" />
-              <span>AI Gen</span>
-            </button>
+            {!isViewer && (
+              <button
+                onClick={() => {
+                  useAiStore.getState().setIsOpen(true);
+                  useAiStore.getState().setActiveTab('generator');
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 text-xs font-bold rounded-xl transition-all border border-indigo-100 cursor-pointer shadow-3xs"
+                title="Generate flow with AI"
+              >
+                <Sparkles size={14} className="animate-pulse" />
+                <span>AI Gen</span>
+              </button>
+            )}
 
-            <button
-              onClick={handleSaveFlow}
-              disabled={saveMutation.isPending}
-              className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-all shadow shadow-indigo-100 cursor-pointer"
-            >
-              {saveMutation.isPending ? (
-                <>
-                  <Loader2 className="animate-spin" size={14} />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isBotLive ? 'bg-emerald-400' : 'bg-slate-400'}`} />
-                  <span>Set Live</span>
-                </>
-              )}
-            </button>
+            {!isViewer && (
+              <button
+                onClick={handleSaveFlow}
+                disabled={saveMutation.isPending}
+                className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-all shadow shadow-indigo-100 cursor-pointer"
+              >
+                {saveMutation.isPending ? (
+                  <>
+                    <Loader2 className="animate-spin" size={14} />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isBotLive ? 'bg-emerald-400' : 'bg-slate-400'}`} />
+                    <span>Set Live</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </header>
 
         <div className="flex-1 flex overflow-hidden relative">
           <div className="flex-1 relative h-full">
             <ReactFlow
-              nodes={displayNodes}
+              nodes={nodesWithCollaborators}
               edges={displayEdges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
+              onNodesChange={isViewer ? undefined : onNodesChange}
+              onEdgesChange={isViewer ? undefined : onEdgesChange}
+              onConnect={isViewer ? undefined : onConnect}
               onSelectionChange={onSelectionChange}
-              onConnectStart={onConnectStart}
-              onConnectEnd={onConnectEnd}
-              onNodeDragStart={onNodeDragStart}
-              onNodeDragStop={onNodeDragStop}
+              onConnectStart={isViewer ? undefined : onConnectStart}
+              onConnectEnd={isViewer ? undefined : onConnectEnd}
+              onNodeDragStart={isViewer ? undefined : handleNodeDragStart}
+              onNodeDrag={isViewer ? undefined : handleNodeDrag}
+              onNodeDragStop={isViewer ? undefined : handleNodeDragStop}
               nodeTypes={NODE_TYPES}
               edgeTypes={EDGE_TYPES}
-              onNodeClick={(_, node) => setSelectedNodeId(node.id)}
-              onPaneClick={onPaneClick}
+              onNodeClick={isViewer ? undefined : (_, node) => setSelectedNodeId(node.id)}
+              onPaneClick={isViewer ? undefined : onPaneClick}
               isValidConnection={isValidConnection}
               defaultEdgeOptions={FLOW_EDGE_DEFAULTS}
               connectionLineStyle={{
@@ -399,6 +506,10 @@ const FlowBuilderInner: React.FC = () => {
               }}
               connectionLineComponent={CustomConnectionLine}
               connectionLineType={edgeType === 'default' ? ConnectionLineType.Bezier : ConnectionLineType.SmoothStep}
+              nodesDraggable={!isViewer}
+              nodesConnectable={!isViewer}
+              elementsSelectable={!isViewer}
+              deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
               fitView
               fitViewOptions={{ maxZoom: 1, padding: 0.2 }}
               proOptions={{ hideAttribution: true }}
@@ -406,6 +517,8 @@ const FlowBuilderInner: React.FC = () => {
               zoomOnDoubleClick={false}
               multiSelectionKeyCode="Control"
               selectionKeyCode="Control"
+              onlyRenderVisibleElements={nodes.length > 20}
+              renderToPortal={nodes.length > 30}
             >
               <Controls
                 position="bottom-right"
@@ -537,42 +650,44 @@ const FlowBuilderInner: React.FC = () => {
               </div>
             </aside>
 
-            <div className="absolute top-4 right-4 z-10 select-none">
-              <button
-                onClick={() => setIsAddDropdownOpen(!isAddDropdownOpen)}
-                className="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white flex items-center justify-center shadow-lg transition-all border border-indigo-500 cursor-pointer"
-              >
-                <Plus size={24} className={`transition-transform duration-200 ${isAddDropdownOpen ? 'rotate-45' : ''}`} />
-              </button>
-              {isAddDropdownOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setIsAddDropdownOpen(false)}
-                  />
-                  <div className="absolute right-0 mt-2.5 w-52 bg-white/95 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">
-                      Add Standalone Node
-                    </span>
-                    {FLOW_BLOCKS.map((item) => (
-                      <button
-                        key={item.type}
-                        onClick={() => {
-                          handleAddNode(item.type);
-                          setIsAddDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-slate-50 border border-transparent hover:border-slate-200 rounded-xl text-left text-xs font-semibold text-slate-700 transition-all cursor-pointer group"
-                      >
-                        <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${item.color}`}>
-                          <Plus size={12} className="group-hover:scale-110 transition-transform" />
-                        </span>
-                        <span>{item.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+            {!isViewer && (
+              <div className="absolute top-4 right-4 z-10 select-none">
+                <button
+                  onClick={() => setIsAddDropdownOpen(!isAddDropdownOpen)}
+                  className="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white flex items-center justify-center shadow-lg transition-all border border-indigo-500 cursor-pointer"
+                >
+                  <Plus size={24} className={`transition-transform duration-200 ${isAddDropdownOpen ? 'rotate-45' : ''}`} />
+                </button>
+                {isAddDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setIsAddDropdownOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2.5 w-52 bg-white/95 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">
+                        Add Standalone Node
+                      </span>
+                      {FLOW_BLOCKS.map((item) => (
+                        <button
+                          key={item.type}
+                          onClick={() => {
+                            handleAddNode(item.type);
+                            setIsAddDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-slate-50 border border-transparent hover:border-slate-200 rounded-xl text-left text-xs font-semibold text-slate-700 transition-all cursor-pointer group"
+                        >
+                          <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${item.color}`}>
+                            <Plus size={12} className="group-hover:scale-110 transition-transform" />
+                          </span>
+                          <span>{item.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
 
             {contextMenu && (
               <div

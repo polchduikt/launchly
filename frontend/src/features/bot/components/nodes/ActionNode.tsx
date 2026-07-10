@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
+import { Position, useEdges, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Sliders } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -8,7 +8,6 @@ import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 
 export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const nodes = useNodes();
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   const actions = (data?.actions || []) as ActionItem[];
 
@@ -134,7 +133,7 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && nodes.some((n) => n.id === e.source))}
+          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-amber-100/60 text-[#a87f18] flex items-center justify-center shrink-0">
           <Sliders size={13} strokeWidth={2.5} />
@@ -178,9 +177,10 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
           type="source"
           position={Position.Right}
           id="next"
-          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && nodes.some((n) => n.id === e.target))}
+          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && e.target !== 'temp_menu_node')}
         />
       </div>
     </div>
   );
 };
+ActionNode.displayName = 'ActionNode';

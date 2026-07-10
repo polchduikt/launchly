@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { useDashboardStatsQuery } from '../hooks/useDashboardStatsQuery';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
@@ -21,6 +20,15 @@ export const DashboardStatsPage: React.FC = () => {
   const [isBotSelectorOpen, setIsBotSelectorOpen] = useState(false);
   const { data: bots = [] } = useBotsQuery();
   const { data: stats, isLoading, error } = useDashboardStatsQuery(selectedBotId, days, true);
+
+  const connectedBots = React.useMemo(() => bots.filter((b) => b.hasTelegramToken), [bots]);
+
+  React.useEffect(() => {
+    if (connectedBots.length === 1 && selectedBotId === 0) {
+      setSelectedBotId(connectedBots[0].id);
+    }
+  }, [connectedBots, selectedBotId]);
+
   const handlePeriodChange = (val: number) => {
     setDays(val);
   };
@@ -34,7 +42,7 @@ export const DashboardStatsPage: React.FC = () => {
 
     const rawData = stats.dailyStats || [];
     const today = new Date();
-    const data = [];
+    const data: { date: string; activeUsers: number; clicks: number }[] = [];
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(today.getDate() - i);
@@ -216,8 +224,8 @@ export const DashboardStatsPage: React.FC = () => {
     );
   };
 
-  const connectedBots = bots.filter((b) => b.hasTelegramToken);
   const hasNoBots = connectedBots.length === 0;
+  const isMultipleBots = connectedBots.length > 1;
 
   return (
     <DashboardLayout>
@@ -230,49 +238,57 @@ export const DashboardStatsPage: React.FC = () => {
             </h1>
             <p className="text-xs text-slate-400">Real-time statistics and interaction metrics for your active chatbot</p>
           </div>
-          <div className="relative">
-            <button
-              onClick={() => setIsBotSelectorOpen(!isBotSelectorOpen)}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-slate-350 rounded-xl text-slate-800 text-xs font-bold transition-all shadow-3xs cursor-pointer select-none min-w-[180px] justify-between"
-            >
-              <div className="flex items-center gap-2 truncate">
-                <MessageSquare size={14} className="text-indigo-500 shrink-0" />
-                <span className="truncate">
-                  {selectedBotId === 0 ? 'All Automation' : (currentBot ? currentBot.name : 'Select Bot')}
-                </span>
-              </div>
-              <ChevronDown size={14} className="text-slate-400 shrink-0" />
-            </button>
+          {connectedBots.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={() => {
+                  if (isMultipleBots) {
+                    setIsBotSelectorOpen(!isBotSelectorOpen);
+                  }
+                }}
+                className={`flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-800 text-xs font-bold transition-all shadow-3xs select-none min-w-[180px] justify-between ${
+                  isMultipleBots ? 'hover:border-slate-350 cursor-pointer' : 'cursor-default'
+                }`}
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <MessageSquare size={14} className="text-indigo-500 shrink-0" />
+                  <span className="truncate">
+                    {selectedBotId === 0 ? 'All Automation' : (currentBot ? currentBot.name : 'Select Bot')}
+                  </span>
+                </div>
+                {isMultipleBots && <ChevronDown size={14} className="text-slate-400 shrink-0" />}
+              </button>
 
-            {isBotSelectorOpen && (
-              <div className="absolute right-0 mt-1.5 w-60 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-35 max-h-60 overflow-y-auto">
-                <button
-                  onClick={() => handleBotChange(0)}
-                  className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors cursor-pointer block truncate ${
-                    selectedBotId === 0
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-slate-655 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  All Automation
-                </button>
-                
-                {connectedBots.map((bot) => (
+              {isBotSelectorOpen && isMultipleBots && (
+                <div className="absolute right-0 mt-1.5 w-60 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-35 max-h-60 overflow-y-auto">
                   <button
-                    key={bot.id}
-                    onClick={() => handleBotChange(bot.id)}
+                    onClick={() => handleBotChange(0)}
                     className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors cursor-pointer block truncate ${
-                      bot.id === selectedBotId
+                      selectedBotId === 0
                         ? 'bg-indigo-50 text-indigo-700'
                         : 'text-slate-655 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
-                    {bot.name}
+                    All Automation
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
+                  
+                  {connectedBots.map((bot) => (
+                    <button
+                      key={bot.id}
+                      onClick={() => handleBotChange(bot.id)}
+                      className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors cursor-pointer block truncate ${
+                        bot.id === selectedBotId
+                          ? 'bg-indigo-50 text-indigo-700'
+                          : 'text-slate-655 hover:bg-slate-50 hover:text-slate-900'
+                      }`}
+                    >
+                      {bot.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </header>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">

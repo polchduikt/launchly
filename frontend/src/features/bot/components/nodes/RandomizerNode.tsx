@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
+import { Position, useEdges, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Shuffle } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -8,7 +8,6 @@ import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 
 export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const nodes = useNodes();
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   const connection = useConnection();
   const isConnecting = connection.inProgress;
@@ -62,7 +61,7 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && nodes.some((n) => n.id === e.source))}
+          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-purple-100/70 text-[#6D28D9] flex items-center justify-center shrink-0">
           <Shuffle size={13} strokeWidth={2.5} />
@@ -80,7 +79,7 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
       <div className="rounded-b-[22px] divide-y divide-slate-100/70">
         {variations.map((v) => {
           const isVarConnected = edges.some(
-            (e) => e.source === id && e.sourceHandle === v.id && nodes.some((n) => n.id === e.target)
+          (e) => e.source === id && e.sourceHandle === v.id && e.target !== 'temp_menu_node'
           );
 
           return (
@@ -110,3 +109,4 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
     </div>
   );
 };
+RandomizerNode.displayName = 'RandomizerNode';

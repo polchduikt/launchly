@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
+import { Position, useEdges, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Filter } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -9,7 +9,6 @@ import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 
 export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const nodes = useNodes();
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
 
   const connection = useConnection();
@@ -66,7 +65,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && nodes.some((n) => n.id === e.source))}
+          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-teal-100/60 text-[#0F766E] flex items-center justify-center shrink-0">
           <Filter size={13} strokeWidth={2.5} />
@@ -117,7 +116,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
                   </div>
                 )}
                 {(() => {
-                  const isBranchConnected = data?._tempSourceHandle !== `branch_${idx}` && edges.some((e) => e.source === id && e.sourceHandle === `branch_${idx}` && nodes.some((n) => n.id === e.target));
+                  const isBranchConnected = data?._tempSourceHandle !== `branch_${idx}` && edges.some((e) => e.source === id && e.sourceHandle === `branch_${idx}` && e.target !== 'temp_menu_node');
                   return (
                     <NodeHandle
                       type="source"
@@ -138,7 +137,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
             The contact doesn't match any of these conditions
           </div>
           {(() => {
-            const isFallbackConnected = data?._tempSourceHandle !== 'fallback' && edges.some((e) => e.source === id && e.sourceHandle === 'fallback' && nodes.some((n) => n.id === e.target));
+            const isFallbackConnected = data?._tempSourceHandle !== 'fallback' && edges.some((e) => e.source === id && e.sourceHandle === 'fallback' && e.target !== 'temp_menu_node');
             return (
               <NodeHandle
                 type="source"
@@ -154,3 +153,4 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
     </div>
   );
 };
+ConditionNode.displayName = 'ConditionNode';

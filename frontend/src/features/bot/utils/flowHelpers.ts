@@ -2,6 +2,13 @@ import type { Node, Edge } from '@xyflow/react';
 import type { ButtonData, FlowBlock } from '../../../types/bot';
 
 export const getFlowKey = (nodes: Node[], edges: Edge[]) => {
+  // For large flows, use a lightweight key based on counts and IDs instead of full serialization
+  if (nodes.length > 50) {
+    const nodeSummary = nodes.map(n => `${n.id}:${n.type}:${Math.round(n.position.x)},${Math.round(n.position.y)}:${JSON.stringify(n.data).length}`).join('|');
+    const edgeSummary = edges.map(e => `${e.source}->${e.target}`).join('|');
+    return `${nodes.length}:${edges.length}:${nodeSummary}:${edgeSummary}`;
+  }
+  
   const cleanNodes = nodes.map(({ id, type, position, data }) => ({
     id,
     type,

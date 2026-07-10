@@ -10,6 +10,12 @@ import { useBotUsersQuery } from '../../features/crm/hooks/useCrmQueries';
 import { useSubscriptionQuery } from '../../features/billing/hooks/useBillingQueries';
 import { PricingModal } from '../../features/billing/components/PricingModal';
 import { useBotsQuery } from '../../features/bot/hooks/useBotsQuery';
+import {
+  getMyPendingInvitationsApi,
+  acceptInvitationApi,
+  declineInvitationApi
+} from '../../features/bot/api/teamApi';
+import type { TeamMemberResponse } from '../../features/bot/api/teamApi';
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
@@ -18,10 +24,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const logout = useAuthStore((state) => state.logout);
   const [showPricing, setShowPricing] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [pendingInvites, setPendingInvites] = useState<TeamMemberResponse[]>([]);
   const [showHelpMenu, setShowHelpMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const helpMenuRef = useRef<HTMLDivElement>(null);
   const activeBotId = useBotStore((state) => state.activeBotId);
+
+  const fetchPendingInvites = async () => {
+    try {
+      const data = await getMyPendingInvitationsApi();
+      setPendingInvites(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -33,12 +49,35 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       }
     };
     document.addEventListener('mousedown', handleClickOutside, true);
+    fetchPendingInvites();
     return () => {
       document.removeEventListener('mousedown', handleClickOutside, true);
     };
   }, []);
 
-  const { data: bots = [] } = useBotsQuery(true);
+  const botsQuery = useBotsQuery(true);
+  const bots = botsQuery.data || [];
+  const refetchBots = botsQuery.refetch;
+
+  const handleAcceptInvite = async (inviteId: number) => {
+    try {
+      await acceptInvitationApi(inviteId);
+      setPendingInvites((prev) => prev.filter((i) => i.id !== inviteId));
+      refetchBots();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeclineInvite = async (inviteId: number) => {
+    try {
+      await declineInvitationApi(inviteId);
+      setPendingInvites((prev) => prev.filter((i) => i.id !== inviteId));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const targetBotId = activeBotId || (bots[0]?.id || 0);
   const { data: contacts = [] } = useBotUsersQuery(targetBotId, !!targetBotId);
   const { data: subscription } = useSubscriptionQuery();
@@ -328,6 +367,27 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         </div>
       </aside>
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        {pendingInvites.map((invite) => (
+          <div key={invite.id} className="bg-indigo-600 text-white px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 z-40 select-none animate-in slide-in-from-top duration-300 shrink-0 text-left">
+            <div className="flex items-center gap-2 text-xs font-bold">
+              <span>You have been invited to join the workspace <strong className="text-white underline">{invite.name}</strong> as <strong className="text-white uppercase">{invite.role}</strong>!</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleAcceptInvite(invite.id)}
+                className="px-4 py-1.5 bg-white hover:bg-slate-50 text-indigo-700 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm"
+              >
+                Accept Invite
+              </button>
+              <button
+                onClick={() => handleDeclineInvite(invite.id)}
+                className="px-4 py-1.5 bg-indigo-700/50 hover:bg-indigo-700/80 text-white border border-indigo-500 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Decline
+              </button>
+            </div>
+          </div>
+        ))}
         <div className="flex-1 overflow-y-auto focus:outline-none">
           {children}
         </div>

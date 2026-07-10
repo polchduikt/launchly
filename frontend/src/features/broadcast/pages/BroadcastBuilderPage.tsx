@@ -11,6 +11,7 @@ import {
 import type { ConnectionLineComponentProps } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useBroadcastBuilder } from '../hooks/useBroadcastBuilder';
+import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 import { AudiencePanel } from '../components';
 import { FlowPreviewPanel } from '../../../components/shared/FlowPreviewPanel';
 import { NodeEditorPanel } from '../../bot/components/sidebar/NodeEditorPanel';
@@ -25,6 +26,7 @@ import { BROADCAST_BLOCKS } from '../config/broadcastBlocks';
 import { ROUTES } from '../../../constants/routes';
 import { FLOW_EDGE_DEFAULTS, EDGE_TYPES } from '../../bot/config/flowEdges';
 import type { FlowBlock } from '../../../types/bot';
+import { useFlowCollaboration } from '../../bot/hooks/useFlowCollaboration';
 
 const BROADCAST_CONTEXT_MENU_OPTIONS = [
   { type: 'MESSAGE', label: '+ Telegram', isPro: false, isAi: false },
@@ -39,11 +41,9 @@ const BROADCAST_CONTEXT_MENU_OPTIONS = [
 import {
   ArrowLeft,
   Loader2,
-  CheckCircle,
   Eye,
   Edit2,
   Check,
-  Grid,
   Send,
   AlertTriangle,
   Plus,
@@ -54,6 +54,7 @@ import {
   Undo2,
   Redo2,
 } from 'lucide-react';
+import { useAuthStore } from '../../../store/useAuthStore';
 
 const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
   fromX,
@@ -176,6 +177,8 @@ const ControlsStyles: React.FC = React.memo(() => (
 ));
 
 const BroadcastBuilderInner: React.FC = () => {
+  const isLocalChangeRef = React.useRef(false);
+
   const {
     activeBotId,
     campaign,
@@ -183,6 +186,8 @@ const BroadcastBuilderInner: React.FC = () => {
     setNodes,
     edges,
     setEdges,
+    setNodesRemote,
+    setEdgesRemote,
     displayNodes,
     displayEdges,
     selectedNodeId,
@@ -191,7 +196,6 @@ const BroadcastBuilderInner: React.FC = () => {
     setCampaignName,
     isEditingName,
     setIsEditingName,
-    messageText,
     isDirty,
     setIsDirty,
     isAudienceOpen,
@@ -221,10 +225,8 @@ const BroadcastBuilderInner: React.FC = () => {
     handleUpdateNodeData,
     handleAddNode,
     handleAddAndConnectNode,
-    handleDeleteSelectedNode,
     handleAddTagCondition,
     handleRemoveCondition,
-    handleSaveDraft,
     handleSendCampaign,
     handleScheduleCampaign,
     getAudienceCount,
@@ -242,10 +244,71 @@ const BroadcastBuilderInner: React.FC = () => {
     setContextMenu,
     handleCreateAndConnectNode,
     onSelectionChange,
-  } = useBroadcastBuilder();
+  } = useBroadcastBuilder(isLocalChangeRef);
+
+  const { data: bots = [] } = useBotsQuery();
+  const activeBot = bots.find((b) => b.id === activeBotId);
+  const isViewer = activeBot?.role === 'Viewer';
 
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isAddDropdownOpen, setIsAddDropdownOpen] = useState(false);
+
+  const currentUser = useAuthStore((state) => state.user);
+  const {
+    collaborators,
+    activeAction,
+    updateLocalAction,
+    publishNodeMove,
+    publishNodeMoveForce,
+    setDragging,
+  } = useFlowCollaboration(activeBotId || 0, nodes, edges, setNodesRemote, setEdgesRemote, 'broadcast', isLocalChangeRef);
+
+  const handleNodeDragStart = React.useCallback((_evt: React.MouseEvent, node: { id: string }) => {
+    if (onNodeDragStart) onNodeDragStart();
+    setDragging(true);
+    updateLocalAction(`${currentUser?.name || 'Someone'} is dragging...`, node.id);
+  }, [onNodeDragStart, updateLocalAction, currentUser, setDragging]);
+
+  const handleNodeDrag = React.useCallback((_evt: React.MouseEvent, node: { id: string; position: { x: number; y: number } }) => {
+    publishNodeMove(node.id, node.position);
+  }, [publishNodeMove]);
+
+  const handleNodeDragStop = React.useCallback((_evt: React.MouseEvent, node: { id: string; position: { x: number; y: number } }) => {
+    if (onNodeDragStop) onNodeDragStop();
+    publishNodeMoveForce(node.id, node.position);
+    setDragging(false);
+    updateLocalAction(null, null);
+  }, [onNodeDragStop, updateLocalAction, setDragging, publishNodeMoveForce]);
+  React.useEffect(() => {
+    if (selectedNodeId) {
+      const selectedNodeObj = nodes.find((n) => n.id === selectedNodeId);
+      const nodeName = selectedNodeObj?.data?.label || selectedNodeObj?.type || 'block';
+      updateLocalAction(
+        `${currentUser?.name || 'Someone'} is editing ${nodeName}...`,
+        selectedNodeId
+      );
+    } else {
+      updateLocalAction(null, null);
+    }
+  }, [selectedNodeId, nodes, currentUser, updateLocalAction]);
+  const nodesWithCollaborators = React.useMemo(() => {
+    return displayNodes.map((node) => {
+      const activeCollab = collaborators.find((c) => c.editingNodeId === node.id);
+      if (activeCollab) {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            _collaborator: {
+              name: activeCollab.name,
+              avatar: activeCollab.avatar,
+            },
+          },
+        };
+      }
+      return node;
+    });
+  }, [displayNodes, collaborators]);
 
   const customFields = React.useMemo(() => {
     if (!activeBotId) return ['last_order_product', 'last_order_price', 'phone', 'email'];
@@ -328,6 +391,7 @@ const BroadcastBuilderInner: React.FC = () => {
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isViewer) return;
       const activeEl = document.activeElement;
       const isTyping = activeEl && (
         activeEl.tagName === 'INPUT' || 
@@ -359,7 +423,7 @@ const BroadcastBuilderInner: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [isViewer]);
 
   if (!activeBotId) {
     return (
@@ -439,6 +503,37 @@ const BroadcastBuilderInner: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          {activeAction && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-50 border border-indigo-150 rounded-2xl text-[10px] text-indigo-700 font-extrabold shadow-3xs animate-in slide-in-from-right-2 duration-300 max-w-[240px] truncate select-none">
+              <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping" />
+              <span className="truncate">{activeAction}</span>
+            </div>
+          )}
+
+          <div className="flex items-center -space-x-1.5 select-none relative group">
+            <img
+              src={currentUser?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80"}
+              alt={currentUser?.name || "Me"}
+              title={`${currentUser?.name || "Me"} (You)`}
+              className="w-6 h-6 rounded-full border-2 border-white object-cover shadow-sm ring-1 ring-slate-100"
+            />
+            {collaborators.map((c) => (
+              <div key={c.userId} className="relative">
+                <img
+                  src={c.avatar || "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&h=80"}
+                  alt={c.name}
+                  title={`${c.name} (Online)`}
+                  className={`w-6 h-6 rounded-full border-2 border-white object-cover shadow-sm ring-1 ring-slate-100 transition-all ${
+                    c.action ? 'ring-2 ring-indigo-500 ring-offset-1 scale-105' : ''
+                  }`}
+                />
+                {c.action && (
+                  <span className="absolute bottom-0 right-0 w-2 h-2 bg-indigo-500 rounded-full border border-white animate-ping" />
+                )}
+              </div>
+            ))}
+          </div>
+
           <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-3.5 py-1.5 rounded-2xl font-sans">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 min-w-[85px] justify-start select-none">
               {isDirty || updateCampaignMut.isPending ? (
@@ -471,7 +566,7 @@ const BroadcastBuilderInner: React.FC = () => {
             <div className="flex items-center gap-1.5">
               <button
                 onClick={undo}
-                disabled={!canUndo}
+                disabled={isViewer || !canUndo}
                 title="Undo (Ctrl+Z)"
                 className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:hover:text-slate-400 hover:bg-slate-200/50 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
               >
@@ -479,7 +574,7 @@ const BroadcastBuilderInner: React.FC = () => {
               </button>
               <button
                 onClick={redo}
-                disabled={!canRedo}
+                disabled={isViewer || !canRedo}
                 title="Redo (Ctrl+Y)"
                 className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:hover:text-slate-400 hover:bg-slate-200/50 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
               >
@@ -502,29 +597,31 @@ const BroadcastBuilderInner: React.FC = () => {
             <span>{isPreviewOpen ? 'Close Preview' : 'Preview'}</span>
           </button>
 
-          <div className="flex items-center gap-2 select-none">
-            <button
-              onClick={handleSendCampaign}
-              disabled={sendCampaignMut.isPending || updateCampaignMut.isPending}
-              className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-750 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
-            >
-              {sendCampaignMut.isPending ? (
-                <Loader2 size={12} className="animate-spin" />
-              ) : (
-                <Send size={12} />
-              )}
-              <span>Send Now</span>
-            </button>
+          {!isViewer && (
+            <div className="flex items-center gap-2 select-none">
+              <button
+                onClick={handleSendCampaign}
+                disabled={sendCampaignMut.isPending || updateCampaignMut.isPending}
+                className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-750 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
+              >
+                {sendCampaignMut.isPending ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : (
+                  <Send size={12} />
+                )}
+                <span>Send Now</span>
+              </button>
 
-            <button
-              onClick={() => setIsScheduleModalOpen(true)}
-              disabled={sendCampaignMut.isPending || updateCampaignMut.isPending}
-              title="Schedule Broadcast"
-              className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-800 rounded-xl transition-all cursor-pointer flex items-center justify-center animate-pulse animate-duration-1000"
-            >
-              <Clock size={14} />
-            </button>
-          </div>
+              <button
+                onClick={() => setIsScheduleModalOpen(true)}
+                disabled={sendCampaignMut.isPending || updateCampaignMut.isPending}
+                title="Schedule Broadcast"
+                className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-800 rounded-xl transition-all cursor-pointer flex items-center justify-center animate-pulse animate-duration-1000"
+              >
+                <Clock size={14} />
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -556,56 +653,59 @@ const BroadcastBuilderInner: React.FC = () => {
               </marker>
             </defs>
           </svg>
-          <div className="absolute top-4 right-4 z-10 select-none">
-            <button
-              onClick={() => setIsAddDropdownOpen(!isAddDropdownOpen)}
-              className="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white flex items-center justify-center shadow-lg transition-all border border-indigo-500 cursor-pointer"
-            >
-              <Plus size={24} className={`transition-transform duration-200 ${isAddDropdownOpen ? 'rotate-45' : ''}`} />
-            </button>
-            {isAddDropdownOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setIsAddDropdownOpen(false)}
-                />
-                <div className="absolute right-0 mt-2.5 w-52 bg-white/95 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">
-                    Add Standalone Node
-                  </span>
-                  {BROADCAST_BLOCKS.map((item) => (
-                    <button
-                      key={item.type}
-                      onClick={() => {
-                        handleAddNode(item.type);
-                        setIsAddDropdownOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-slate-50 border border-transparent hover:border-slate-200 rounded-xl text-left text-xs font-semibold text-slate-700 transition-all cursor-pointer group"
-                    >
-                      <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${item.color}`}>
-                        <Plus size={12} className="group-hover:scale-110 transition-transform" />
-                      </span>
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+          {!isViewer && (
+            <div className="absolute top-4 right-4 z-10 select-none">
+              <button
+                onClick={() => setIsAddDropdownOpen(!isAddDropdownOpen)}
+                className="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white flex items-center justify-center shadow-lg transition-all border border-indigo-500 cursor-pointer"
+              >
+                <Plus size={24} className={`transition-transform duration-200 ${isAddDropdownOpen ? 'rotate-45' : ''}`} />
+              </button>
+              {isAddDropdownOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setIsAddDropdownOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2.5 w-52 bg-white/95 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">
+                      Add Standalone Node
+                    </span>
+                    {BROADCAST_BLOCKS.map((item) => (
+                      <button
+                        key={item.type}
+                        onClick={() => {
+                          handleAddNode(item.type);
+                          setIsAddDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-slate-50 border border-transparent hover:border-slate-200 rounded-xl text-left text-xs font-semibold text-slate-700 transition-all cursor-pointer group"
+                      >
+                        <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${item.color}`}>
+                          <Plus size={12} className="group-hover:scale-110 transition-transform" />
+                        </span>
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           <ReactFlow
-            nodes={displayNodes}
+            nodes={nodesWithCollaborators}
             edges={displayEdges}
-            onNodesChange={handleNodesChange}
-            onEdgesChange={handleEdgesChange}
-            onConnect={onConnect}
-            onConnectStart={onConnectStart}
-            onConnectEnd={onConnectEnd}
-            onNodeClick={onNodeClick}
-            onPaneClick={onPaneClick}
+            onNodesChange={isViewer ? undefined : handleNodesChange}
+            onEdgesChange={isViewer ? undefined : handleEdgesChange}
+            onConnect={isViewer ? undefined : onConnect}
+            onConnectStart={isViewer ? undefined : onConnectStart}
+            onConnectEnd={isViewer ? undefined : onConnectEnd}
+            onNodeClick={isViewer ? undefined : onNodeClick}
+            onPaneClick={isViewer ? undefined : onPaneClick}
             onSelectionChange={onSelectionChange}
-            onNodeDragStart={onNodeDragStart}
-            onNodeDragStop={onNodeDragStop}
+            onNodeDragStart={isViewer ? undefined : handleNodeDragStart}
+            onNodeDrag={isViewer ? undefined : handleNodeDrag}
+            onNodeDragStop={isViewer ? undefined : handleNodeDragStop}
             nodeTypes={NODE_TYPES}
             edgeTypes={EDGE_TYPES}
             isValidConnection={isValidConnection}
@@ -616,6 +716,10 @@ const BroadcastBuilderInner: React.FC = () => {
               strokeWidth: 2.2,
               stroke: '#7b8794',
             }}
+            nodesDraggable={!isViewer}
+            nodesConnectable={!isViewer}
+            elementsSelectable={!isViewer}
+            deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
             fitView
             fitViewOptions={{ padding: 0.6 }}
             className="bg-slate-50"

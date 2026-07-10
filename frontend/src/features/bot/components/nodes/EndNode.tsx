@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
+import { Position, useEdges, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Octagon } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -8,7 +8,6 @@ import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 
 export const EndNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected }) => {
-  const nodes = useNodes();
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   const connection = useConnection();
   const isConnecting = connection.inProgress;
@@ -56,7 +55,7 @@ export const EndNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selecte
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && nodes.some((n) => n.id === e.source))}
+          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
           padded={true}
         />
         <span className="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0">
@@ -74,3 +73,4 @@ export const EndNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selecte
     </div>
   );
 };
+EndNode.displayName = 'EndNode';

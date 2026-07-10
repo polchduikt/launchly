@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection, useNodes, useReactFlow } from '@xyflow/react';
+import { Position, useEdges, useConnection, useReactFlow } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { SquareArrowRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +10,6 @@ import { NodeToolbar } from './NodeToolbar';
 import { useBotStore } from '../../../../store/useBotStore';
 
 export const StartAutomationNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const nodes = useNodes();
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   const navigate = useNavigate();
   const setActiveBotId = useBotStore((state) => state.setActiveBotId);
@@ -99,7 +98,7 @@ export const StartAutomationNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && nodes.some((n) => n.id === e.source))}
+          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-lime-100/60 text-lime-700 flex items-center justify-center shrink-0">
           <SquareArrowRight size={13} strokeWidth={2.5} />
@@ -156,9 +155,10 @@ export const StartAutomationNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({
           type="source"
           position={Position.Right}
           id="next"
-          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && nodes.some((n) => n.id === e.target))}
+          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && e.target !== 'temp_menu_node')}
         />
       </div>
     </div>
   );
 };
+StartAutomationNode.displayName = 'StartAutomationNode';

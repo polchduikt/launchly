@@ -21,6 +21,7 @@ export interface BotResponse {
   updatedAt?: string;
   totalUsers: number;
   hasTelegramToken: boolean;
+  role?: string | null;
 }
 
 export interface BotDetailResponse extends BotResponse {

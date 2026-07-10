@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, type MutableRefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNodesState, useEdgesState, addEdge, useReactFlow } from '@xyflow/react';
 import type { Connection, Edge, Node, NodeChange, EdgeChange } from '@xyflow/react';
@@ -13,14 +13,37 @@ import { getFlowKey, getNodesAfterRemovingEdges } from '../utils/flowHelpers';
 import { useFlowHistory } from './useFlowHistory';
 import { useFlowAutoSave } from './useFlowAutoSave';
 import { getBlocks } from './useNodeEditor';
-export const useFlowBuilder = () => {
+export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => {
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
   const { screenToFlowPosition, fitView } = useReactFlow();
-  const [nodes, setNodes, onNodesChangeState] = useNodesState<Node>([]);
-  const [edges, setEdges, onEdgesChangeState] = useEdgesState<Edge>([]);
+  const [nodes, setNodesRaw, onNodesChangeState] = useNodesState<Node>([]);
+  const [edges, setEdgesRaw, onEdgesChangeState] = useEdgesState<Edge>([]);
+
+  const setNodes = useCallback((update: any) => {
+    if (isLocalChangeRef) {
+      isLocalChangeRef.current = true;
+    }
+    setNodesRaw(update);
+  }, [setNodesRaw, isLocalChangeRef]);
+
+  const setEdges = useCallback((update: any) => {
+    if (isLocalChangeRef) {
+      isLocalChangeRef.current = true;
+    }
+    setEdgesRaw(update);
+  }, [setEdgesRaw, isLocalChangeRef]);
+
+  const startBatch = useCallback(() => {
+    isBatchOperationRef.current = true;
+  }, []);
+
+  const endBatch = useCallback(() => {
+    isBatchOperationRef.current = false;
+  }, []);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
+  const isBatchOperationRef = useRef<boolean>(false);
 
   useEffect(() => {
     const handleHover = (e: Event) => {
@@ -55,7 +78,7 @@ export const useFlowBuilder = () => {
     isDirty,
     setIsDirty,
     lastSavedKeyRef,
-  } = useFlowAutoSave(activeBotId, nodes, edges, isLoadingSchema, saveMutation);
+  } = useFlowAutoSave(activeBotId, nodes, edges, isLoadingSchema, saveMutation, isLocalChangeRef);
 
   const [edgeType, setEdgeType] = useState<'default' | 'smoothstep'>(
     () => (localStorage.getItem('launchly_flow_edge_type') as 'default' | 'smoothstep') || 'default');
@@ -161,17 +184,28 @@ export const useFlowBuilder = () => {
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
+      if (isLocalChangeRef) {
+        const hasStructuralChange = changes.some(
+          (c) => c.type !== 'position' && c.type !== 'dimensions' && c.type !== 'select'
+        );
+        if (hasStructuralChange) {
+          isLocalChangeRef.current = true;
+        }
+      }
       const hasRemoval = changes.some((c) => c.type === 'remove');
       if (hasRemoval) {
         takeSnapshot();
       }
       onNodesChangeState(changes);
     },
-    [onNodesChangeState, takeSnapshot]
+    [onNodesChangeState, takeSnapshot, isLocalChangeRef]
   );
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
+      if (isLocalChangeRef) {
+        isLocalChangeRef.current = true;
+      }
       const hasRemoval = changes.some((c) => c.type === 'remove');
       if (hasRemoval) {
         takeSnapshot();
@@ -184,7 +218,7 @@ export const useFlowBuilder = () => {
       }
       onEdgesChangeState(changes);
     },
-    [edges, nodes, setNodes, onEdgesChangeState, takeSnapshot]
+    [edges, nodes, setNodes, onEdgesChangeState, takeSnapshot, isLocalChangeRef]
   );
 
 
@@ -635,9 +669,13 @@ export const useFlowBuilder = () => {
 
   const handleAutoLayout = (direction: 'LR' | 'TB') => {
     takeSnapshot();
+    startBatch();
     const layouted = getAutoLayoutedElements(nodes, edges, direction);
     setNodes(layouted.nodes);
     setEdges(layouted.edges);
+    setTimeout(() => {
+      endBatch();
+    }, 0);
   };
 
   const handleSaveFlow = () => {
@@ -969,6 +1007,8 @@ export const useFlowBuilder = () => {
     edges,
     setNodes,
     setEdges,
+    setNodesRemote: setNodesRaw,
+    setEdgesRemote: setEdgesRaw,
     displayNodes,
     displayEdges,
     onNodesChange,
@@ -995,6 +1035,8 @@ export const useFlowBuilder = () => {
     handleDeleteSelectedNode,
     handleAutoLayout,
     handleSaveFlow,
+    startBatch,
+    endBatch,
     selectedNode,
     saveMutation,
     isLoadingSchema,

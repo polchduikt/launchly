@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, type MutableRefObject } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useNodesState, useEdgesState, addEdge, useReactFlow } from '@xyflow/react';
 import type { Edge, Node, Connection, NodeChange, EdgeChange } from '@xyflow/react';
@@ -41,15 +41,29 @@ const resolveFilter = (conditions: AudienceCondition[]) => {
   return { filterType, filterValue };
 };
 
-export const useBroadcastBuilder = () => {
+export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => {
   const { id: campaignIdStr } = useParams<{ id: string }>();
   const campaignId = parseInt(campaignIdStr || '0', 10);
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
   const botId = activeBotId || 0;
   const { screenToFlowPosition, fitView } = useReactFlow();
-  const [nodes, setNodes, onNodesChangeState] = useNodesState<CustomNode>([]);
-  const [edges, setEdges, onEdgesChangeState] = useEdgesState<Edge>([]);
+  const [nodes, setNodesRaw, onNodesChangeState] = useNodesState<CustomNode>([]);
+  const [edges, setEdgesRaw, onEdgesChangeState] = useEdgesState<Edge>([]);
+
+  const setNodes = useCallback((update: any) => {
+    if (isLocalChangeRef) {
+      isLocalChangeRef.current = true;
+    }
+    setNodesRaw(update);
+  }, [setNodesRaw, isLocalChangeRef]);
+
+  const setEdges = useCallback((update: any) => {
+    if (isLocalChangeRef) {
+      isLocalChangeRef.current = true;
+    }
+    setEdgesRaw(update);
+  }, [setEdgesRaw, isLocalChangeRef]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const [campaignName, setCampaignName] = useState('');
@@ -419,14 +433,24 @@ export const useBroadcastBuilder = () => {
   useEffect(() => {
     if (!isInitialLoadDoneRef.current) return;
     const currentKey = `${getFlowKey(nodes, edges)}|${campaignName}|${JSON.stringify(conditions)}`;
+    if (currentKey === lastSavedKeyRef.current) return;
+    if (isLocalChangeRef && !isLocalChangeRef.current) {
+      lastSavedKeyRef.current = currentKey;
+      setIsDirty(false);
+      return;
+    }
+
     setIsDirty(currentKey !== lastSavedKeyRef.current);
-  }, [nodes, edges, campaignName, conditions]);
+  }, [nodes, edges, campaignName, conditions, isLocalChangeRef]);
 
   useEffect(() => {
     if (!isInitialLoadDoneRef.current) return;
 
     const currentKey = `${getFlowKey(nodes, edges)}|${campaignName}|${JSON.stringify(conditions)}`;
     if (currentKey === lastSavedKeyRef.current) return;
+    if (isLocalChangeRef && !isLocalChangeRef.current) {
+      return;
+    }
 
     const timer = setTimeout(() => {
       const { filterType, filterValue } = resolveFilter(conditions);
@@ -480,7 +504,7 @@ export const useBroadcastBuilder = () => {
 
       takeSnapshot();
       const newId = `node_${nodeToCopy.type?.toLowerCase()}_${Date.now()}`;
-      
+
       const updatedData = JSON.parse(JSON.stringify(nodeToCopy.data || {}));
       const blocksList = getBlocks(updatedData);
       const updatedBlocks = blocksList.map((block) => {
@@ -567,7 +591,7 @@ export const useBroadcastBuilder = () => {
           selected: n.id === nodeId,
         }))
       );
-      
+
       setTimeout(() => {
         window.dispatchEvent(
           new CustomEvent('edit-flow-button', {
@@ -757,7 +781,7 @@ export const useBroadcastBuilder = () => {
       if (!isHandle) {
         const targetScreenX = Math.min(clientX, window.innerWidth - 240) - 8;
         const targetScreenY = Math.min(clientY, window.innerHeight - 360) + 150;
-        
+
         const position = screenToFlowPosition({
           x: targetScreenX,
           y: targetScreenY,
@@ -1157,6 +1181,8 @@ export const useBroadcastBuilder = () => {
     setNodes,
     edges,
     setEdges,
+    setNodesRemote: setNodesRaw,
+    setEdgesRemote: setEdgesRaw,
     displayNodes,
     displayEdges,
     selectedNodeId,

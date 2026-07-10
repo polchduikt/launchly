@@ -556,12 +556,14 @@ export const AutomationsPage: React.FC = () => {
                           className="border-b border-slate-100 hover:bg-slate-50/50 transition-all group cursor-pointer"
                         >
                           <td className="py-4 px-4 w-12 text-center" onClick={(e) => e.stopPropagation()}>
-                            <input
-                              type="checkbox"
-                              checked={selectedBotIds.has(bot.id)}
-                              onChange={() => handleToggleSelectBot(bot.id)}
-                              className="rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
-                            />
+                            {bot.role !== 'Viewer' && (
+                              <input
+                                type="checkbox"
+                                checked={selectedBotIds.has(bot.id)}
+                                onChange={() => handleToggleSelectBot(bot.id)}
+                                className="rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                              />
+                            )}
                           </td>
                           <td className="py-4 px-2">
                             <div className="flex items-center gap-2.5">
@@ -588,12 +590,14 @@ export const AutomationsPage: React.FC = () => {
                           </td>
                           <td className="py-4 px-2 w-40 text-xs text-slate-500">{formatModifiedDate(bot.updatedAt || bot.createdAt)}</td>
                           <td className="py-4 px-4 w-12 text-right" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={(e) => handleMenuClick(e, bot.id)}
-                              className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all cursor-pointer"
-                            >
-                              <MoreVertical size={16} />
-                            </button>
+                            {bot.role !== 'Viewer' && (
+                              <button
+                                onClick={(e) => handleMenuClick(e, bot.id)}
+                                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all cursor-pointer"
+                              >
+                                <MoreVertical size={16} />
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -623,14 +627,16 @@ export const AutomationsPage: React.FC = () => {
                               {bot.name}
                             </h3>
                           </div>
-                          <div className="relative inline-block text-left shrink-0" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={(e) => handleMenuClick(e, bot.id)}
-                              className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all cursor-pointer"
-                            >
-                              <MoreVertical size={16} />
-                            </button>
-                          </div>
+                          {bot.role !== 'Viewer' && (
+                            <div className="relative inline-block text-left shrink-0" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={(e) => handleMenuClick(e, bot.id)}
+                                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all cursor-pointer"
+                              >
+                                <MoreVertical size={16} />
+                              </button>
+                            </div>
+                          )}
                         </div>
                         <p className="text-xs text-slate-400 mt-2 line-clamp-2">
                           {bot.description || 'No description provided.'}

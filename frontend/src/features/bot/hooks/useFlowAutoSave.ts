@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import {useState, useEffect, useRef, type MutableRefObject, useCallback} from 'react';
 import type { Node, Edge } from '@xyflow/react';
 import { getFlowKey } from '../utils/flowHelpers';
 
@@ -7,11 +7,19 @@ export const useFlowAutoSave = (
   nodes: Node[],
   edges: Edge[],
   isLoadingSchema: boolean,
-  saveMutation: { mutate: (variables: { nodes: Node[]; edges: Edge[] }) => void }
+  saveMutation: { mutate: (variables: { nodes: Node[]; edges: Edge[] }) => void },
+  isLocalChangeRef?: MutableRefObject<boolean>
 ) => {
   const lastSavedKeyRef = useRef<string>('');
   const isInitialLoadDoneRef = useRef<boolean>(false);
   const [isDirty, setIsDirty] = useState(false);
+  
+  const getDebounceDelay = useCallback(() => {
+    const totalElements = nodes.length + edges.length;
+    if (totalElements > 100) return 3000;
+    if (totalElements > 50) return 2000;
+    return 1500;
+  }, [nodes.length, edges.length]);
 
   useEffect(() => {
     isInitialLoadDoneRef.current = false;
@@ -22,21 +30,36 @@ export const useFlowAutoSave = (
       if (!isInitialLoadDoneRef.current) {
         isInitialLoadDoneRef.current = true;
         lastSavedKeyRef.current = getFlowKey(nodes, edges);
+        if (isLocalChangeRef) {
+          isLocalChangeRef.current = false;
+        }
       }
     }
-  }, [isLoadingSchema, nodes, edges]);
-
-  useEffect(() => {
-    if (!isInitialLoadDoneRef.current) return;
-    const currentKey = getFlowKey(nodes, edges);
-    setIsDirty(currentKey !== lastSavedKeyRef.current);
-  }, [nodes, edges]);
+  }, [isLoadingSchema, nodes, edges, isLocalChangeRef]);
 
   useEffect(() => {
     if (!isInitialLoadDoneRef.current) return;
 
     const currentKey = getFlowKey(nodes, edges);
     if (currentKey === lastSavedKeyRef.current) return;
+    if (isLocalChangeRef && !isLocalChangeRef.current) {
+      lastSavedKeyRef.current = currentKey;
+      setIsDirty(false);
+      return;
+    }
+
+    setIsDirty(true);
+  }, [nodes, edges, isLocalChangeRef]);
+
+  useEffect(() => {
+    if (!isInitialLoadDoneRef.current) return;
+
+    const currentKey = getFlowKey(nodes, edges);
+    if (currentKey === lastSavedKeyRef.current) return;
+
+    if (isLocalChangeRef && !isLocalChangeRef.current) {
+      return;
+    }
 
     const startCount = nodes.filter((n) => n.type === 'START').length;
     if (startCount !== 1) {
@@ -47,10 +70,13 @@ export const useFlowAutoSave = (
       saveMutation.mutate({ nodes, edges });
       lastSavedKeyRef.current = currentKey;
       setIsDirty(false);
-    }, 1500);
+      if (isLocalChangeRef) {
+        isLocalChangeRef.current = false;
+      }
+    }, getDebounceDelay());
 
     return () => clearTimeout(timer);
-  }, [nodes, edges, saveMutation, isLoadingSchema]);
+  }, [nodes, edges, saveMutation, isLoadingSchema, isLocalChangeRef, getDebounceDelay]);
 
   return {
     isDirty,
@@ -59,3 +85,4 @@ export const useFlowAutoSave = (
     isInitialLoadDoneRef,
   };
 };
+

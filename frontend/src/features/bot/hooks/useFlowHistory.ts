@@ -2,6 +2,10 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import type { Node, Edge } from '@xyflow/react';
 import { getFlowKey } from '../utils/flowHelpers';
 
+const getFastFlowSignature = (nodes: Node[], edges: Edge[]): string => {
+  return `${nodes.length}:${edges.length}:${nodes.map(n => n.id + ':' + n.type).join('|')}:${edges.map(e => e.id).join('|')}`;
+};
+
 export const useFlowHistory = (
   nodes: Node[],
   edges: Edge[],
@@ -16,7 +20,7 @@ export const useFlowHistory = (
     setPast((p) => {
       if (p.length > 0) {
         const last = p[p.length - 1];
-        if (getFlowKey(last.nodes, last.edges) === getFlowKey(nodes, edges)) {
+        if (getFastFlowSignature(last.nodes, last.edges) === getFastFlowSignature(nodes, edges)) {
           return p;
         }
       }

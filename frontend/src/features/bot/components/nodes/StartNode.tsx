@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Position, useEdges, useConnection, useNodes } from '@xyflow/react';
+import { Position, useEdges, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Zap, Plus } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../types/bot';
 
 export const StartNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const nodes = useNodes();
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
   const connection = useConnection();
   const isConnecting = connection.inProgress;
@@ -72,10 +71,11 @@ export const StartNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
           type="source"
           position={Position.Right}
           id="then"
-          isConnected={data?._tempSourceHandle !== 'then' && edges.some((e) => e.source === id && e.sourceHandle === 'then' && nodes.some((n) => n.id === e.target))}
+          isConnected={data?._tempSourceHandle !== 'then' && edges.some((e) => e.source === id && e.sourceHandle === 'then' && e.target !== 'temp_menu_node')}
           padded={false}
         />
       </div>
     </div>
   );
 };
+StartNode.displayName = 'StartNode';
