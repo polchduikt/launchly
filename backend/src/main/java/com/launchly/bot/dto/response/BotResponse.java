@@ -13,5 +13,6 @@ public record BotResponse(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         long totalUsers,
-        boolean hasTelegramToken
+        boolean hasTelegramToken,
+        String role
 ) {}

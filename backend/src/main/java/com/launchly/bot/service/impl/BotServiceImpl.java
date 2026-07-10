@@ -1,5 +1,6 @@
 package com.launchly.bot.service.impl;
 
+import com.launchly.common.security.CustomUserDetails;
 import org.springframework.web.client.RestTemplate;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -15,9 +16,11 @@ import com.launchly.bot.dto.response.BotStatsResponse;
 import com.launchly.bot.dto.response.BotUserResponse;
 import com.launchly.bot.dto.response.FlowSchemaResponse;
 import com.launchly.bot.entity.Bot;
+import com.launchly.bot.entity.BotMember;
 import com.launchly.bot.entity.FlowSchema;
 import com.launchly.bot.mapper.BotMapper;
 import com.launchly.bot.repository.BotRepository;
+import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
 import com.launchly.bot.service.BotService;
@@ -40,6 +43,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +68,7 @@ public class BotServiceImpl implements BotService {
     private final StringRedisTemplate redisTemplate;
     private final BotUserTagRepository botUserTagRepository;
     private final TagRepository tagRepository;
+    private final BotMemberRepository botMemberRepository;
 
     @Override
     @Transactional
@@ -114,7 +120,24 @@ public class BotServiceImpl implements BotService {
     @Override
     @Transactional(readOnly = true)
     public List<BotResponse> getBotsByUser(Long userId) {
-        return botRepository.findAllByUserId(userId).stream()
+        List<Bot> ownedBots = botRepository.findAllByUserId(userId);
+        List<BotMember> memberships = botMemberRepository.findByUserId(userId);
+        List<Bot> memberBots = new ArrayList<>();
+
+        for (BotMember bm : memberships) {
+            User owner = bm.getBot().getUser();
+            List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
+            memberBots.addAll(ownerBots);
+        }
+
+        List<Bot> allBots = new ArrayList<>(ownedBots);
+        for (Bot b : memberBots) {
+            if (allBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
+                allBots.add(b);
+            }
+        }
+
+        return allBots.stream()
                 .map(this::toBotResponseWithStats)
                 .collect(Collectors.toList());
     }
@@ -147,6 +170,7 @@ public class BotServiceImpl implements BotService {
     @CacheEvict(value = "bots", key = "#userId")
     public BotResponse updateBot(Long id, BotUpdateRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
+        validateWriteAccess(bot, userId);
 
         if (request.name() != null) {
             bot.setName(request.name());
@@ -204,6 +228,7 @@ public class BotServiceImpl implements BotService {
     @CacheEvict(value = "bots", key = "#userId")
     public void deleteBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
+        validateWriteAccess(bot, userId);
 
         if (bot.isActive()) {
             telegramBotManager.unregisterBot(bot.getId());
@@ -216,6 +241,7 @@ public class BotServiceImpl implements BotService {
     @CacheEvict(value = "bots", key = "#userId")
     public BotResponse startBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
+        validateWriteAccess(bot, userId);
 
         if (bot.isActive()) {
             throw new AppException(HttpStatus.CONFLICT, "Bot is already running");
@@ -260,6 +286,7 @@ public class BotServiceImpl implements BotService {
     @CacheEvict(value = "bots", key = "#userId")
     public BotResponse stopBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
+        validateWriteAccess(bot, userId);
 
         if (!bot.isActive()) {
             throw new AppException(HttpStatus.CONFLICT, "Bot is not running");
@@ -294,6 +321,7 @@ public class BotServiceImpl implements BotService {
     @Transactional
     public FlowSchemaResponse saveFlowSchema(Long botId, FlowSchemaRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
+        validateWriteAccess(bot, userId);
 
         JsonNode nodesNode = objectMapper.valueToTree(request.nodes());
         JsonNode edgesNode = objectMapper.valueToTree(request.edges());
@@ -366,6 +394,7 @@ public class BotServiceImpl implements BotService {
     @Transactional
     public BotUserResponse updateBotUser(Long botId, Long botUserId, BotUserUpdateRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
+        validateWriteAccess(bot, userId);
         BotUser botUser = botUserRepository.findById(botUserId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Contact not found"));
 
@@ -426,6 +455,7 @@ public class BotServiceImpl implements BotService {
     @Transactional
     public void deleteBotUser(Long botId, Long botUserId, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
+        validateWriteAccess(bot, userId);
         BotUser botUser = botUserRepository.findById(botUserId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Contact not found"));
 
@@ -573,6 +603,13 @@ public class BotServiceImpl implements BotService {
         }
     }
 
+    private Optional<BotMember> getWorkspaceMembership(Bot bot, Long userId) {
+        if (bot.getUser().getId().equals(userId)) {
+            return Optional.empty();
+        }
+        return botMemberRepository.findWorkspaceMemberships(bot.getId(), userId).stream().findFirst();
+    }
+
     private BotResponse toBotResponseWithStats(Bot bot) {
         if (bot == null) return null;
         BotResponse response = botMapper.toBotResponse(bot);
@@ -586,6 +623,21 @@ public class BotServiceImpl implements BotService {
             log.error("Failed to decrypt token for bot id={}", bot.getId(), e);
         }
 
+        String role = "Owner";
+        try {
+            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof CustomUserDetails userDetails) {
+                Long currentUserId = userDetails.getId();
+                if (!bot.getUser().getId().equals(currentUserId)) {
+                    role = getWorkspaceMembership(bot, currentUserId)
+                            .map(BotMember::getRole)
+                            .orElse("Viewer");
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to determine member role in toBotResponseWithStats", e);
+        }
+
         return new BotResponse(
                 response.id(),
                 response.name(),
@@ -597,7 +649,18 @@ public class BotServiceImpl implements BotService {
                 response.createdAt(),
                 response.updatedAt(),
                 totalUsers,
-                hasToken
+                hasToken,
+                role
         );
+    }
+
+    private void validateWriteAccess(Bot bot, Long userId) {
+        if (!bot.getUser().getId().equals(userId)) {
+            BotMember member = getWorkspaceMembership(bot, userId)
+                    .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Access denied"));
+            if ("Viewer".equalsIgnoreCase(member.getRole())) {
+                throw new AppException(HttpStatus.FORBIDDEN, "Viewer role cannot modify this bot workspace");
+            }
+        }
     }
 }

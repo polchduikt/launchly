@@ -23,6 +23,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.launchly.bot.repository.BotMemberRepository;
+import com.launchly.bot.entity.BotMember;
+import com.launchly.auth.entity.User;
 
 @Slf4j
 @Service
@@ -33,6 +36,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final BotRepository botRepository;
     private final BotUserRepository botUserRepository;
     private final FlowSchemaRepository flowSchemaRepository;
+    private final BotMemberRepository botMemberRepository;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -76,7 +80,18 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         List<Object[]> rawButtons = new ArrayList<>();
 
         if (botId == 0) {
-            List<Bot> userBots = botRepository.findAllByUserId(userId);
+            List<Bot> userBots = new ArrayList<>(botRepository.findAllByUserId(userId));
+            List<BotMember> memberships = botMemberRepository.findByUserId(userId);
+            for (BotMember bm : memberships) {
+                User owner = bm.getBot().getUser();
+                List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
+                for (Bot b : ownerBots) {
+                    if (userBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
+                        userBots.add(b);
+                    }
+                }
+            }
+
             if (userBots.isEmpty()) {
                 return new DashboardStatsResponse(0L, 0L, 0L, 0L, new ArrayList<>(), new ArrayList<>());
             }
@@ -90,18 +105,27 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             rawDaily = analyticsEventRepository.getDailyActivityStatsForBots(botIds, startActivityDate);
             rawButtons = analyticsEventRepository.getTopClickedButtonsForBots(botIds, startActivityDate, 10);
         } else {
-            Bot bot = botRepository.findById(botId)
-                    .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+            Bot bot = botRepository.findByIdAndUserId(botId, userId)
+                    .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Access denied to bot analytics"));
 
-            if (!bot.getUser().getId().equals(userId)) {
-                throw new AppException(HttpStatus.FORBIDDEN, "Access denied to bot analytics");
-            }
             botIds.add(botId);
 
             totalSubscribers = botUserRepository.countByBotId(botId);
             activeUsers24h = analyticsEventRepository.countActiveUsersByBotIdAndCreatedAtAfter(botId, start24h);
             clicksCount30d = analyticsEventRepository.countClicksByBotIdAndCreatedAtAfter(botId, startClicks30d);
-            activeAutomations = botRepository.findAllByUserId(userId).stream()
+
+            List<Bot> userBots = new ArrayList<>(botRepository.findAllByUserId(userId));
+            List<BotMember> memberships = botMemberRepository.findByUserId(userId);
+            for (BotMember bm : memberships) {
+                User owner = bm.getBot().getUser();
+                List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
+                for (Bot b : ownerBots) {
+                    if (userBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
+                        userBots.add(b);
+                    }
+                }
+            }
+            activeAutomations = userBots.stream()
                     .filter(Bot::isActive)
                     .count();
 

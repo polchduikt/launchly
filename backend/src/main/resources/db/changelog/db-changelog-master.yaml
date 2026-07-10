@@ -53,5 +53,7 @@ databaseChangeLog:
       file: db/changelog/changes/V026__create_analytics_events_table.sql
   - include:
       file: db/changelog/changes/V027__create_blog_articles_table.sql
+  - include:
+      file: db/changelog/changes/V028__create_bot_members_table.sql
 
 

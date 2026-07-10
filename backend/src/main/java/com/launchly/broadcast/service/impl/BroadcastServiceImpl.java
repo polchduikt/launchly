@@ -25,6 +25,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import com.launchly.bot.repository.BotMemberRepository;
+import com.launchly.bot.entity.BotMember;
 
 @Service
 @Slf4j
@@ -40,6 +42,7 @@ public class BroadcastServiceImpl implements BroadcastService {
     private final PlanLimitService planLimitService;
     private final ObjectMapper objectMapper;
     private final FlowEngineService flowEngineService;
+    private final BotMemberRepository botMemberRepository;
 
     public BroadcastServiceImpl(BroadcastCampaignRepository campaignRepository,
                                 BotRepository botRepository,
@@ -48,7 +51,8 @@ public class BroadcastServiceImpl implements BroadcastService {
                                 BroadcastMapper broadcastMapper,
                                 PlanLimitService planLimitService,
                                 ObjectMapper objectMapper,
-                                @Lazy FlowEngineService flowEngineService) {
+                                @Lazy FlowEngineService flowEngineService,
+                                BotMemberRepository botMemberRepository) {
         this.campaignRepository = campaignRepository;
         this.botRepository = botRepository;
         this.broadcastFilterService = broadcastFilterService;
@@ -57,12 +61,14 @@ public class BroadcastServiceImpl implements BroadcastService {
         this.planLimitService = planLimitService;
         this.objectMapper = objectMapper;
         this.flowEngineService = flowEngineService;
+        this.botMemberRepository = botMemberRepository;
     }
 
     @Override
     @Transactional
     public CampaignResponse createCampaign(Long botId, Long userId, CreateCampaignRequest request) {
         planLimitService.checkBroadcastAccess(userId);
+        validateWriteAccess(botId, userId);
         Bot bot = validateBotOwnership(botId, userId);
 
         CampaignStatus initialStatus = request.scheduledAt() != null
@@ -92,6 +98,7 @@ public class BroadcastServiceImpl implements BroadcastService {
     @Override
     @Transactional
     public CampaignResponse updateCampaign(Long botId, Long campaignId, Long userId, CreateCampaignRequest request) {
+        validateWriteAccess(botId, userId);
         validateBotOwnership(botId, userId);
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
@@ -288,7 +295,7 @@ public class BroadcastServiceImpl implements BroadcastService {
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
 
-        validateBotOwnership(campaign.getBot().getId(), userId);
+        validateWriteAccess(campaign.getBot().getId(), userId);
 
         if (campaign.getStatus() == CampaignStatus.IN_PROGRESS) {
             throw new AppException(HttpStatus.BAD_REQUEST,
@@ -306,7 +313,7 @@ public class BroadcastServiceImpl implements BroadcastService {
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
 
-        validateBotOwnership(campaign.getBot().getId(), userId);
+        validateWriteAccess(campaign.getBot().getId(), userId);
 
         if (campaign.getStatus() != CampaignStatus.SCHEDULED) {
             throw new AppException(HttpStatus.BAD_REQUEST,
@@ -326,7 +333,7 @@ public class BroadcastServiceImpl implements BroadcastService {
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
 
-        validateBotOwnership(campaign.getBot().getId(), userId);
+        validateWriteAccess(campaign.getBot().getId(), userId);
 
         campaignRepository.delete(campaign);
         log.info("Deleted campaignId={} for userId={}", campaignId, userId);
@@ -335,5 +342,16 @@ public class BroadcastServiceImpl implements BroadcastService {
     private Bot validateBotOwnership(Long botId, Long userId) {
         return botRepository.findByIdAndUserId(botId, userId)
                 .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Bot not found or access denied"));
+    }
+
+    private void validateWriteAccess(Long botId, Long userId) {
+        Bot bot = validateBotOwnership(botId, userId);
+        if (!bot.getUser().getId().equals(userId)) {
+            BotMember member = botMemberRepository.findWorkspaceMemberships(botId, userId).stream().findFirst()
+                    .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Access denied"));
+            if ("Viewer".equalsIgnoreCase(member.getRole())) {
+                throw new AppException(HttpStatus.FORBIDDEN, "Viewer role cannot modify campaigns");
+            }
+        }
     }
 }
