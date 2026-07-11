@@ -363,29 +363,33 @@ const FlowBuilderInner: React.FC = () => {
               </div>
             )}
 
-            <div className="flex items-center -space-x-1.5 select-none relative group">
-              <img
-                src={currentUser?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80"}
-                alt={currentUser?.name || "Me"}
-                title={`${currentUser?.name || "Me"} (You)`}
-                className="w-6 h-6 rounded-full border-2 border-white object-cover shadow-sm ring-1 ring-slate-100"
-              />
-              {collaborators.map((c) => (
-                <div key={c.userId} className="relative">
-                  <img
-                    src={c.avatar || "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&h=80"}
-                    alt={c.name}
-                    title={`${c.name} (Online)`}
-                    className={`w-6 h-6 rounded-full border-2 border-white object-cover shadow-sm ring-1 ring-slate-100 transition-all ${
-                      c.action ? 'ring-2 ring-indigo-500 ring-offset-1 scale-105' : ''
-                    }`}
-                  />
-                  {c.action && (
-                    <span className="absolute bottom-0 right-0 w-2 h-2 bg-indigo-500 rounded-full border border-white animate-ping" />
-                  )}
-                </div>
-              ))}
-            </div>
+
+            {collaborators.length > 0 && (
+              <div className="flex items-center -space-x-1.5 select-none relative group">
+                <img
+                  src={currentUser?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80"}
+                  alt={currentUser?.name || "Me"}
+                  title={`${currentUser?.name || "Me"} (You)`}
+                  className="w-6 h-6 rounded-full border-2 border-white object-cover shadow-sm ring-1 ring-slate-100"
+                />
+                {collaborators.map((c) => (
+                  <div key={c.userId} className="relative">
+                    <img
+                      src={c.avatar || "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&h=80"}
+                      alt={c.name}
+                      title={`${c.name} (Online)`}
+                      className={`w-6 h-6 rounded-full border-2 border-white object-cover shadow-sm ring-1 ring-slate-100 transition-all ${
+                        c.action ? 'ring-2 ring-indigo-500 ring-offset-1 scale-105' : ''
+                      }`}
+                    />
+                    {c.action && (
+                      <span className="absolute bottom-0 right-0 w-2 h-2 bg-indigo-500 rounded-full border border-white animate-ping" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
 
             <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-3.5 py-1.5 rounded-2xl font-sans">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 min-w-[85px] justify-start select-none">
