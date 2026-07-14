@@ -32,8 +32,8 @@ export interface TelegramStatusResponse {
   user: UserResponse | null;
 }
 
-export const createTelegramSessionApi = async (): Promise<TelegramSessionResponse> => {
-  const response = await apiClient.post<TelegramSessionResponse>('/auth/telegram/session');
+export const createTelegramSessionApi = async (isSubscription: boolean = false): Promise<TelegramSessionResponse> => {
+  const response = await apiClient.post<TelegramSessionResponse>(`/auth/telegram/session?isSubscription=${isSubscription}`);
   return response.data;
 };
 
@@ -44,5 +44,22 @@ export const checkTelegramSessionStatusApi = async (token: string): Promise<Tele
 
 export const unlinkTelegramApi = async (): Promise<void> => {
   await apiClient.post('/auth/telegram/unlink');
+};
+
+export interface UpdateNotificationsRequest {
+  notifyEmail: boolean;
+  notifyTelegram: boolean;
+  notificationEmail: string | null;
+  statsNotificationsEnabled: boolean;
+  statsDayOfWeek: string;
+  statsHour: number;
+  statsDaysRange: number;
+  statsNotifyEmail: boolean;
+  statsNotifyTelegram: boolean;
+}
+
+export const updateNotificationsApi = async (data: UpdateNotificationsRequest): Promise<UserResponse> => {
+  const response = await apiClient.put<UserResponse>('/notifications/settings', data);
+  return response.data;
 };
 

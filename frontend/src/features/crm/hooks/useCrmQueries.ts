@@ -5,6 +5,8 @@ import {
   getLeadsApi,
   updateLeadApi,
   getConversationsApi,
+  getConversationApi,
+  getAllConversationsApi,
   getMessagesApi,
   sendOwnerMessageApi,
 } from '../api/crm';
@@ -37,6 +39,22 @@ export const useConversationsQuery = (botId: number, enabled: boolean = true) =>
     queryKey: ['conversations', botId],
     queryFn: () => getConversationsApi(botId),
     enabled: enabled && botId > 0,
+  });
+};
+
+export const useConversationQuery = (conversationId: number, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ['conversation', conversationId],
+    queryFn: () => getConversationApi(conversationId),
+    enabled: enabled && conversationId > 0,
+  });
+};
+
+export const useAllConversationsQuery = (enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ['conversations', 'all'],
+    queryFn: () => getAllConversationsApi(),
+    enabled: enabled,
   });
 };
 
@@ -78,6 +96,7 @@ export const useSendMessageMutation = (conversationId: number, botId: number) =>
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
     },
   });
 };
@@ -98,6 +117,7 @@ export const useUpdateBotUserMutation = (botId: number) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['botUsers', botId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
     },
   });
 };
@@ -109,6 +129,7 @@ export const useDeleteBotUserMutation = (botId: number) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['botUsers', botId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
     },
   });
 };

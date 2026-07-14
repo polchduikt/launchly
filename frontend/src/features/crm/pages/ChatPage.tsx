@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
-import { useConversationsQuery, useMessagesQuery, useBotUsersQuery } from '../hooks/useCrmQueries';
+import { useConversationsQuery, useConversationQuery, useAllConversationsQuery, useMessagesQuery, useBotUsersQuery } from '../hooks/useCrmQueries';
 import { useCrmWebSocket } from '../hooks/useCrmWebSocket';
 import { useChatLocalStorage } from '../hooks/useChatLocalStorage';
 import { useChatActions } from '../hooks/useChatActions';
@@ -20,26 +20,42 @@ import { useSearchParams } from 'react-router-dom';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 
 export const ChatPage: React.FC = () => {
-  const activeBotId = useBotStore((s) => s.activeBotId);
+  const { activeBotId, setActiveBotId } = useBotStore();
   const { data: bots = [] } = useBotsQuery();
 
   const botId = activeBotId || (bots[0]?.id || 0);
 
-  useCrmWebSocket(botId);
   const [searchParams] = useSearchParams();
   const conversationIdParam = searchParams.get('conversationId');
-  const { data: conversations = [], isLoading: isConvLoading } = useConversationsQuery(botId);
-  const { data: botUsers = [] } = useBotUsersQuery(botId);
+  const parsedConvId = conversationIdParam ? parseInt(conversationIdParam, 10) : 0;
+
+  const { data: targetConversation } = useConversationQuery(
+    parsedConvId,
+    !!parsedConvId
+  );
+
+  const { data: conversations = [], isLoading: isConvLoading } = useAllConversationsQuery();
   const [selectedConvId, setSelectedConvId] = useState<number | null>(null);
 
+  const selectedConversation = conversations.find(c => c.id === selectedConvId) ?? null;
+  const currentBotId = selectedConversation?.botId || botId;
+
+  useCrmWebSocket(currentBotId);
+  const { data: botUsers = [] } = useBotUsersQuery(currentBotId);
+
   useEffect(() => {
-    if (conversationIdParam) {
+    if (targetConversation && targetConversation.botId) {
+      if (activeBotId !== targetConversation.botId) {
+        setActiveBotId(targetConversation.botId);
+      }
+      setSelectedConvId(targetConversation.id);
+    } else if (conversationIdParam) {
       const convId = parseInt(conversationIdParam, 10);
       if (!isNaN(convId)) {
         setSelectedConvId(convId);
       }
     }
-  }, [conversationIdParam]);
+  }, [targetConversation, conversationIdParam, activeBotId, setActiveBotId]);
 
   const { data: messages = [], isLoading: isMsgLoading } = useMessagesQuery(selectedConvId || 0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -47,9 +63,8 @@ export const ChatPage: React.FC = () => {
   const [bottomTab, setBottomTab] = useState<BottomTab>('reply');
   const [typedNote, setTypedNote] = useState('');
   const ls = useChatLocalStorage({ conversations, selectedConvId });
-  const actions = useChatActions({ selectedConvId, botId });
+  const actions = useChatActions({ selectedConvId, botId: currentBotId });
   const filters = useChatFilters({ conversations, favorites: ls.favorites, unreadConvIds: ls.unreadConvIds });
-  const selectedConversation = conversations.find(c => c.id === selectedConvId) ?? null;
   const currentBotUser = botUsers.find(u => u.telegramId === selectedConversation?.botUserTelegramId);
   const handleSelectConv = (id: number) => {
     setSelectedConvId(id);

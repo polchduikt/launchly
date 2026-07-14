@@ -47,6 +47,16 @@ export const getConversationsApi = async (botId: number): Promise<ConversationRe
   return response.data;
 };
 
+export const getConversationApi = async (conversationId: number): Promise<ConversationResponse> => {
+  const response = await apiClient.get<ConversationResponse>(`/crm/conversations/${conversationId}`);
+  return response.data;
+};
+
+export const getAllConversationsApi = async (): Promise<ConversationResponse[]> => {
+  const response = await apiClient.get<ConversationResponse[]>(`/crm/conversations`);
+  return response.data;
+};
+
 export const getMessagesApi = async (conversationId: number): Promise<MessageResponse[]> => {
   const response = await apiClient.get<MessageResponse[]>(`/crm/conversations/${conversationId}/messages`);
   return response.data;

@@ -8,9 +8,10 @@ interface TelegramLoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  isSubscription?: boolean;
 }
 
-export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({ isOpen, onClose, onSuccess }) => {
+export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({ isOpen, onClose, onSuccess, isSubscription = false }) => {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   
@@ -27,7 +28,7 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({ isOpen, 
     setError(null);
     setStatus('PENDING');
     try {
-      const response = await createTelegramSessionApi();
+      const response = await createTelegramSessionApi(isSubscription);
       setToken(response.token);
       setBotUsername(response.botUsername);
     } catch (err: any) {

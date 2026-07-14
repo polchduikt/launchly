@@ -6,6 +6,17 @@ export interface User {
   role: string;
   telegramUserId: number | null;
   telegramUsername: string | null;
+  telegramName: string | null;
+  telegramPhotoUrl: string | null;
+  notifyEmail: boolean;
+  notifyTelegram: boolean;
+  notificationEmail: string | null;
+  statsNotificationsEnabled: boolean;
+  statsDayOfWeek: string;
+  statsHour: number;
+  statsDaysRange: number;
+  statsNotifyEmail: boolean;
+  statsNotifyTelegram: boolean;
 }
 
 export interface LoginRequest {

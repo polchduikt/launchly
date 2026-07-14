@@ -10,6 +10,8 @@ export interface ConversationResponse {
   lastMessage: string | null;
   lastMessageAt: string | null;
   updatedAt: string;
+  botId: number;
+  botName: string;
 }
 
 export type LeadStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'CONVERTED' | 'LOST';

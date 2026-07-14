@@ -55,7 +55,14 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                   <span className={`text-[13px] truncate ${isUnrd ? 'font-bold text-slate-900' : 'font-semibold text-slate-800'}`}>{c.botUserName}</span>
                   <span className="text-[10px] text-slate-400 shrink-0 ml-1">{timeAgo(c.lastMessageAt)}</span>
                 </div>
-                <p className={`text-[12px] truncate mt-0.5 ${isUnrd ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>{c.lastMessage || 'No messages'}</p>
+                <div className="flex justify-between items-center mt-0.5">
+                  <p className={`text-[12px] truncate ${isUnrd ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>{c.lastMessage || 'No messages'}</p>
+                  {c.botName && (
+                    <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded shrink-0 font-medium ml-1">
+                      {c.botName}
+                    </span>
+                  )}
+                </div>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); onToggleFavorite(c.id); }}

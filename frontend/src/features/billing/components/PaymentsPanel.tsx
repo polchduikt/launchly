@@ -193,7 +193,7 @@ export const PaymentsPanel: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-10">
       {notification && (
         <div className={`fixed top-4 right-4 z-[9999] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border animate-in slide-in-from-top-4 duration-300 ${
           notification.type === 'success' 

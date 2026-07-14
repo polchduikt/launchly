@@ -69,8 +69,8 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex h-full min-h-screen bg-slate-50 font-sans">
-        <aside className="w-60 bg-slate-50 border-r border-slate-200 p-4 shrink-0 hidden md:block overflow-y-auto max-h-screen pb-20">
+      <div className="flex h-full min-h-screen bg-slate-50 font-sans md:pl-60">
+        <aside className="w-60 bg-slate-50 border-r border-slate-200 p-4 shrink-0 hidden md:block fixed left-16 top-0 bottom-0 overflow-y-auto pb-10 z-20">
           <div className="space-y-6">
             {SETTINGS_SECTIONS.map((section) => (
               <div key={section.title}>
