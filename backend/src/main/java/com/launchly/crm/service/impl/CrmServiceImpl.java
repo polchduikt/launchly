@@ -30,6 +30,8 @@ import com.launchly.crm.service.CrmService;
 import com.launchly.crm.websocket.CrmWebSocketService;
 import com.cloudinary.Cloudinary;
 import org.springframework.web.client.RestTemplate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,7 @@ public class CrmServiceImpl implements CrmService {
     private final TelegramBotManager botManager;
     private final EncryptionUtil encryptionUtil;
     private final Cloudinary cloudinary;
+    private final com.launchly.notification.service.NotificationService notificationService;
  
     @Autowired
     public CrmServiceImpl(OrderRepository orderRepository,
@@ -73,7 +76,8 @@ public class CrmServiceImpl implements CrmService {
                           IntegrationEventService integrationEventService,
                           @Lazy TelegramBotManager botManager,
                           EncryptionUtil encryptionUtil,
-                          Cloudinary cloudinary) {
+                          Cloudinary cloudinary,
+                          com.launchly.notification.service.NotificationService notificationService) {
         this.orderRepository = orderRepository;
         this.leadRepository = leadRepository;
         this.conversationRepository = conversationRepository;
@@ -87,6 +91,7 @@ public class CrmServiceImpl implements CrmService {
         this.botManager = botManager;
         this.encryptionUtil = encryptionUtil;
         this.cloudinary = cloudinary;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -240,6 +245,15 @@ public class CrmServiceImpl implements CrmService {
     }
 
     @Override
+    @Transactional
+    public List<ConversationResponse> getAllConversations(Long userId) {
+        List<Conversation> conversations = conversationRepository.findByBotUserIdOrderByUpdatedAtDesc(userId);
+        return conversations.stream()
+                .map(this::toConversationResponse)
+                .toList();
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<MessageResponse> getMessages(Long conversationId, Long userId) {
         Conversation conversation = conversationRepository.findById(conversationId)
@@ -262,6 +276,16 @@ public class CrmServiceImpl implements CrmService {
         message = messageRepository.save(message);
         MessageResponse response = crmMapper.toMessageResponse(message);
         webSocketService.notifyNewMessage(botId, response);
+
+        try {
+            com.launchly.auth.entity.User botOwner = conversation.getBot().getUser();
+            if (botOwner != null) {
+                notificationService.sendNewMessageNotification(botOwner, conversation, content);
+            }
+        } catch (Exception e) {
+            log.error("Failed to send incoming message notification", e);
+        }
+
         return response;
     }
 
@@ -356,7 +380,7 @@ public class CrmServiceImpl implements CrmService {
 
         Message last = messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(conversation.getId()).orElse(null);
         String lastMessage = null;
-        java.time.LocalDateTime lastMessageAt = null;
+        LocalDateTime lastMessageAt = null;
         if (last != null) {
             lastMessage = last.getContent();
             lastMessageAt = last.getCreatedAt();
@@ -371,7 +395,9 @@ public class CrmServiceImpl implements CrmService {
                 botUser.getPhotoUrl(),
                 lastMessage,
                 lastMessageAt,
-                conversation.getUpdatedAt()
+                conversation.getUpdatedAt(),
+                conversation.getBot().getId(),
+                conversation.getBot().getName()
         );
     }
 
@@ -389,9 +415,9 @@ public class CrmServiceImpl implements CrmService {
                             .build();
             org.telegram.telegrambots.meta.api.objects.UserProfilePhotos photos = telegramClient.execute(getUserProfilePhotos);
             if (photos != null && photos.getTotalCount() > 0 && photos.getPhotos() != null && !photos.getPhotos().isEmpty()) {
-                java.util.List<org.telegram.telegrambots.meta.api.objects.PhotoSize> photoSizes = photos.getPhotos().get(0);
+                List<org.telegram.telegrambots.meta.api.objects.PhotoSize> photoSizes = photos.getPhotos().get(0);
                 org.telegram.telegrambots.meta.api.objects.PhotoSize largest = photoSizes.stream()
-                        .max(java.util.Comparator.comparingInt(size -> size.getWidth() * size.getHeight()))
+                        .max(Comparator.comparingInt(size -> size.getWidth() * size.getHeight()))
                         .orElse(null);
                 if (largest != null) {
                     org.telegram.telegrambots.meta.api.methods.GetFile getFile =
@@ -432,6 +458,15 @@ public class CrmServiceImpl implements CrmService {
         } catch (Exception e) {
             log.warn("Could not fetch profile photo for user {}: {}", botUser.getTelegramId(), e.getMessage());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ConversationResponse getConversation(Long conversationId, Long userId) {
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Conversation not found"));
+        verifyBotOwnership(conversation.getBot().getId(), userId);
+        return toConversationResponse(conversation);
     }
 
     private void verifyBotOwnership(Long botId, Long userId) {

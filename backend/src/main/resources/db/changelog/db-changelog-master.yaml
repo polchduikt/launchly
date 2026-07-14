@@ -57,5 +57,9 @@ databaseChangeLog:
       file: db/changelog/changes/V028__create_bot_members_table.sql
   - include:
       file: db/changelog/changes/V029__add_telegram_auth.sql
+  - include:
+      file: db/changelog/changes/V030__add_telegram_notifications.sql
+  - include:
+      file: db/changelog/changes/V031__add_stats_notifications.sql
 
 

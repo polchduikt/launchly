@@ -19,11 +19,11 @@ public interface AuthService {
 
     UserResponse getCurrentUser(String email);
 
-    TelegramSessionResponse createTelegramSession(String currentEmail);
+    TelegramSessionResponse createTelegramSession(String currentEmail, boolean isSubscription);
 
     TelegramStatusResponse checkTelegramSessionStatus(String token);
 
     void unlinkTelegram(String currentEmail);
 
-    void handleTelegramAuth(String token, Long telegramUserId, String telegramUsername);
+    boolean handleTelegramAuth(String token, Long telegramUserId, String telegramUsername, String telegramName, String telegramPhotoUrl);
 }

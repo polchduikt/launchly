@@ -7,5 +7,16 @@ public record UserResponse(
         String avatar,
         String role,
         Long telegramUserId,
-        String telegramUsername
+        String telegramUsername,
+        String telegramName,
+        String telegramPhotoUrl,
+        boolean notifyEmail,
+        boolean notifyTelegram,
+        String notificationEmail,
+        boolean statsNotificationsEnabled,
+        String statsDayOfWeek,
+        int statsHour,
+        int statsDaysRange,
+        boolean statsNotifyEmail,
+        boolean statsNotifyTelegram
 ) {}

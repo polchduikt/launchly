@@ -12,5 +12,7 @@ public record ConversationResponse(
         String botUserPhotoUrl,
         String lastMessage,
         LocalDateTime lastMessageAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        Long botId,
+        String botName
 ) {}

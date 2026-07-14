@@ -66,6 +66,19 @@ public class CrmController {
         return ResponseEntity.ok(crmService.getConversationsByBot(botId, userDetails.getId()));
     }
 
+    @GetMapping("/conversations")
+    public ResponseEntity<List<ConversationResponse>> getAllConversations(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(crmService.getAllConversations(userDetails.getId()));
+    }
+
+    @GetMapping("/conversations/{conversationId}")
+    public ResponseEntity<ConversationResponse> getConversation(
+            @PathVariable Long conversationId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(crmService.getConversation(conversationId, userDetails.getId()));
+    }
+
     @GetMapping("/conversations/{conversationId}/messages")
     public ResponseEntity<List<MessageResponse>> getMessages(
             @PathVariable Long conversationId,

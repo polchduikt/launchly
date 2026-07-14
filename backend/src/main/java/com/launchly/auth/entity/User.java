@@ -54,4 +54,45 @@ public class User extends BaseEntity {
 
     @Column(name = "telegram_username")
     private String telegramUsername;
+
+    @Column(name = "telegram_name")
+    private String telegramName;
+
+    @Column(name = "telegram_photo_url")
+    private String telegramPhotoUrl;
+
+    @Column(name = "notify_email", nullable = false)
+    @Builder.Default
+    private boolean notifyEmail = true;
+
+    @Column(name = "notify_telegram", nullable = false)
+    @Builder.Default
+    private boolean notifyTelegram = false;
+
+    @Column(name = "notification_email")
+    private String notificationEmail;
+
+    @Column(name = "stats_notifications_enabled", nullable = false)
+    @Builder.Default
+    private boolean statsNotificationsEnabled = false;
+
+    @Column(name = "stats_day_of_week")
+    @Builder.Default
+    private String statsDayOfWeek = "SATURDAY";
+
+    @Column(name = "stats_hour")
+    @Builder.Default
+    private int statsHour = 10;
+
+    @Column(name = "stats_days_range")
+    @Builder.Default
+    private int statsDaysRange = 5;
+
+    @Column(name = "stats_notify_email", nullable = false)
+    @Builder.Default
+    private boolean statsNotifyEmail = true;
+
+    @Column(name = "stats_notify_telegram", nullable = false)
+    @Builder.Default
+    private boolean statsNotifyTelegram = false;
 }

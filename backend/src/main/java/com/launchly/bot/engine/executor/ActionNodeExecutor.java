@@ -3,6 +3,7 @@ package com.launchly.bot.engine.executor;
 import com.launchly.bot.engine.model.FlowEdge;
 import com.launchly.bot.engine.model.FlowNode;
 import com.launchly.bot.entity.BotUser;
+import com.launchly.auth.entity.User;
 import com.launchly.bot.entity.NodeType;
 import com.launchly.bot.service.BotDialogStateService;
 import com.launchly.bot.repository.BotUserRepository;
@@ -14,6 +15,7 @@ import com.launchly.integration.entity.Integration;
 import com.launchly.integration.entity.IntegrationType;
 import com.launchly.integration.repository.IntegrationRepository;
 import com.launchly.integration.service.GoogleSheetsService;
+import com.launchly.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -39,6 +41,7 @@ public class ActionNodeExecutor implements NodeExecutor {
     private final BotUserTagRepository botUserTagRepository;
     private final IntegrationRepository integrationRepository;
     private final GoogleSheetsService googleSheetsService;
+    private final NotificationService notificationService;
 
     @Override
     public NodeType getType() {
@@ -316,6 +319,17 @@ public class ActionNodeExecutor implements NodeExecutor {
                                         log.warn("Lookup column '{}' not found in spreadsheet {} headers", lookupColumn, activeSpreadsheetId);
                                     }
                                 }
+                            }
+                            break;
+                        }
+
+                        case "NOTIFY_ASSIGNEES":
+                        case "NOTIFY_ASSIGNEE": {
+                            User botOwner = botUser.getBot().getUser();
+                            if (botOwner != null) {
+                                notificationService.sendAssignmentNotification(botOwner, botUser);
+                            } else {
+                                log.warn("Cannot send assignee notification: bot owner is null");
                             }
                             break;
                         }

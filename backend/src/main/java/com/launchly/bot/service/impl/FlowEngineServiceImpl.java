@@ -37,12 +37,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import org.springframework.beans.factory.annotation.Value;
 import java.time.Duration;
 import java.util.*;
 
 @Slf4j
 @Service
 public class FlowEngineServiceImpl implements FlowEngineService {
+
+    @Value("${telegram.system-bot-token:}")
+    private String systemBotToken;
 
     private final BotRepository botRepository;
     private final BotUserRepository botUserRepository;
@@ -1010,9 +1014,44 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 String telegramUsername = update.getMessage().getFrom().getUserName();
                 Long telegramUserId = update.getMessage().getFrom().getId();
                 
-                authService.handleTelegramAuth(token, telegramUserId, telegramUsername);
+                String telegramName = update.getMessage().getFrom().getFirstName();
+                if (update.getMessage().getFrom().getLastName() != null) {
+                    telegramName += " " + update.getMessage().getFrom().getLastName();
+                }
 
-                sendSystemBotMessage(chatId, "Hi! You successfully signed up/logged in with Telegram. Thank you! You can now return to the website.", client);
+                String telegramPhotoUrl = null;
+                try {
+                    GetUserProfilePhotos getUserProfilePhotos = GetUserProfilePhotos.builder()
+                            .userId(telegramUserId)
+                            .limit(1)
+                            .build();
+                    UserProfilePhotos photos = client.execute(getUserProfilePhotos);
+                    if (photos != null && photos.getTotalCount() > 0 && photos.getPhotos() != null && !photos.getPhotos().isEmpty()) {
+                        List<PhotoSize> photoSizes = photos.getPhotos().get(0);
+                        PhotoSize largest = photoSizes.stream()
+                                .max(Comparator.comparingInt(size -> size.getWidth() * size.getHeight()))
+                                .orElse(null);
+                        if (largest != null) {
+                            GetFile getFile = GetFile.builder()
+                                    .fileId(largest.getFileId())
+                                    .build();
+                            File file = client.execute(getFile);
+                            if (file != null && file.getFilePath() != null) {
+                                telegramPhotoUrl = "https://api.telegram.org/file/bot" + systemBotToken + "/" + file.getFilePath();
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    log.warn("Failed to fetch profile photo for telegram auth: {}", ex.getMessage());
+                }
+
+                boolean isSubscription = authService.handleTelegramAuth(token, telegramUserId, telegramUsername, telegramName, telegramPhotoUrl);
+
+                if (isSubscription) {
+                    sendSystemBotMessage(chatId, "You are successfully opted-in. Now you are able to receive 'Launchly Official' bot notifications.\nIf you want to stop notifications in Telegram you have to opt-out.\nVisit 'My Telegram for Notifications' section in Settings -> Notifications.", client);
+                } else {
+                    sendSystemBotMessage(chatId, "Hi! You successfully signed up/logged in with Telegram. Thank you! You can now return to the website.", client);
+                }
             } catch (Exception e) {
                 log.error("Failed to process system bot auth: {}", e.getMessage());
                 sendSystemBotMessage(chatId, "Failed to authorize: " + e.getMessage(), client);

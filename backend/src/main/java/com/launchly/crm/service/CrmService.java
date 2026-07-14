@@ -22,6 +22,8 @@ public interface CrmService {
     List<LeadResponse> getLeadsByBot(Long botId, Long userId);
     LeadResponse updateLead(Long leadId, LeadUpdateRequest request, Long userId);
     List<ConversationResponse> getConversationsByBot(Long botId, Long userId);
+    List<ConversationResponse> getAllConversations(Long userId);
+    ConversationResponse getConversation(Long conversationId, Long userId);
     List<MessageResponse> getMessages(Long conversationId, Long userId);
     MessageResponse sendOwnerMessage(Long conversationId, SendMessageRequest request, Long userId);
 }

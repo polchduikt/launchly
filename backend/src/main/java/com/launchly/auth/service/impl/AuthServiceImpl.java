@@ -104,9 +104,10 @@ public class AuthServiceImpl implements AuthService {
         return authMapper.toUserResponse(user);
     }
 
+
     @Override
     @Transactional
-    public TelegramSessionResponse createTelegramSession(String currentEmail) {
+    public TelegramSessionResponse createTelegramSession(String currentEmail, boolean isSubscription) {
         String token = UUID.randomUUID().toString();
         
         User user = null;
@@ -118,6 +119,7 @@ public class AuthServiceImpl implements AuthService {
                 .token(token)
                 .status(AuthSessionStatus.PENDING)
                 .user(user)
+                .isSubscription(isSubscription)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusMinutes(5))
                 .build();
@@ -167,7 +169,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void handleTelegramAuth(String token, Long telegramUserId, String telegramUsername) {
+    public boolean handleTelegramAuth(String token, Long telegramUserId, String telegramUsername, String telegramName, String telegramPhotoUrl) {
         TelegramAuthSession session = telegramAuthSessionRepository.findByToken(token)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Auth session not found"));
 
@@ -185,6 +187,8 @@ public class AuthServiceImpl implements AuthService {
         if (user != null) {
             user.setTelegramUserId(telegramUserId);
             user.setTelegramUsername(telegramUsername);
+            user.setTelegramName(telegramName);
+            user.setTelegramPhotoUrl(telegramPhotoUrl);
             user = userRepository.save(user);
         } else {
             user = userRepository.findByTelegramUserId(telegramUserId).orElse(null);
@@ -194,7 +198,7 @@ public class AuthServiceImpl implements AuthService {
                 if (userRepository.existsByEmail(email)) {
                     user = userRepository.findByEmail(email).get();
                 } else {
-                    String name = telegramUsername != null ? telegramUsername : "Telegram User " + telegramUserId;
+                    String name = telegramName != null ? telegramName : (telegramUsername != null ? telegramUsername : "Telegram User " + telegramUserId);
                     user = User.builder()
                             .email(email)
                             .name(name)
@@ -204,10 +208,20 @@ public class AuthServiceImpl implements AuthService {
                             .emailVerified(true)
                             .telegramUserId(telegramUserId)
                             .telegramUsername(telegramUsername)
+                            .telegramName(telegramName)
+                            .telegramPhotoUrl(telegramPhotoUrl)
                             .build();
                     user = userRepository.save(user);
                     billingService.createFreeSubscription(user.getId());
                 }
+            } else {
+                if (telegramName != null) {
+                    user.setTelegramName(telegramName);
+                }
+                if (telegramPhotoUrl != null) {
+                    user.setTelegramPhotoUrl(telegramPhotoUrl);
+                }
+                user = userRepository.save(user);
             }
         }
 
@@ -217,9 +231,12 @@ public class AuthServiceImpl implements AuthService {
         session.setUser(user);
         session.setTelegramUserId(telegramUserId);
         session.setTelegramUsername(telegramUsername);
+        session.setTelegramName(telegramName);
+        session.setTelegramPhotoUrl(telegramPhotoUrl);
         session.setJwtAccessToken(accessToken);
         session.setJwtRefreshToken(refreshToken);
         session.setStatus(AuthSessionStatus.SUCCESS);
         telegramAuthSessionRepository.save(session);
+        return session.isSubscription();
     }
 }

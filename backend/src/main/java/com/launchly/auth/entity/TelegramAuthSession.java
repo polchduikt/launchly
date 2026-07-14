@@ -38,6 +38,12 @@ public class TelegramAuthSession {
     @Column(name = "telegram_username")
     private String telegramUsername;
 
+    @Column(name = "telegram_name")
+    private String telegramName;
+
+    @Column(name = "telegram_photo_url")
+    private String telegramPhotoUrl;
+
     @Column(name = "jwt_access_token")
     private String jwtAccessToken;
 
@@ -47,6 +53,10 @@ public class TelegramAuthSession {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AuthSessionStatus status;
+
+    @Column(name = "is_subscription", nullable = false)
+    @Builder.Default
+    private boolean isSubscription = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

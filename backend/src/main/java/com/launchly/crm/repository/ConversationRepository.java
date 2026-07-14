@@ -9,5 +9,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
 
     List<Conversation> findByBotIdOrderByUpdatedAtDesc(Long botId);
 
+    List<Conversation> findByBotUserIdOrderByUpdatedAtDesc(Long userId);
+
     Optional<Conversation> findByBotIdAndBotUserId(Long botId, Long botUserId);
 }
