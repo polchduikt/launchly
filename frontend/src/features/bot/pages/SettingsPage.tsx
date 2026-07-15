@@ -122,50 +122,6 @@ export const SettingsPage: React.FC = () => {
 
           {activeTab === 'general' ? (
             <div className="bg-white border border-slate-200 rounded-3xl shadow-sm divide-y divide-slate-100 overflow-hidden">
-              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
-                <div className="w-full md:w-1/3">
-                  <h3 className="font-bold text-sm text-slate-800">Connected Accounts</h3>
-                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                    Connect alternative sign-in options to have backup access to your account.
-                  </p>
-                </div>
-                <div className="w-full md:w-2/3 flex flex-col gap-4">
-                  <div className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-100 rounded-2xl w-full md:max-w-md">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 flex items-center justify-center bg-blue-50 text-blue-500 rounded-xl shrink-0">
-                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.18-.08-.04-.19-.01-.27.01-.12.02-2.03 1.28-5.73 3.77-.54.37-1.03.55-1.47.54-.48-.01-1.4-.27-2.08-.49-.83-.27-1.5-.42-1.44-.89.03-.24.37-.49 1.03-.74 4.05-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.64-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.16-.03.22z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-800">Telegram</h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">
-                          {user?.telegramUserId ? (
-                            <>Connected as <strong className="text-slate-600">@{user.telegramUsername || user.telegramUserId}</strong></>
-                          ) : (
-                            'Not connected'
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                    {user?.telegramUserId ? (
-                      <button
-                        onClick={handleUnlinkTelegram}
-                        className="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 text-[10px] font-bold rounded-xl transition-all cursor-pointer"
-                      >
-                        Disconnect
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setIsTelegramOpen(true)}
-                        className="px-3.5 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-[10px] font-bold rounded-xl transition-all cursor-pointer shadow-sm shadow-blue-100"
-                      >
-                        Connect
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
                 <div className="w-full md:w-1/3">
@@ -276,7 +232,7 @@ export const SettingsPage: React.FC = () => {
             <TagsSettingsPanel />
           ) : activeTab === 'integrations' ? (
             activeBotId ? (
-              <IntegrationsPanel botId={activeBotId} />
+              <IntegrationsPanel botId={activeBotId} onOpenPricing={() => setShowPricing(true)} />
             ) : (
               <div className="bg-white border border-slate-200 rounded-3xl p-8 text-center max-w-md mx-auto space-y-4 shadow-sm select-none">
                 <AlertCircle size={40} className="text-slate-300 mx-auto" />

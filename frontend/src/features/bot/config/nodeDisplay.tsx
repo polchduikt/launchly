@@ -23,6 +23,7 @@ export const NODE_TITLES: Record<string, string> = {
   RANDOMIZER: 'Randomizer',
   START_AUTOMATION: 'Start Automation',
   COMMENT: 'Comment',
+  AI: 'AI Step',
 };
 
 export const NODE_ICONS: Record<string, React.ReactNode> = {
@@ -36,4 +37,5 @@ export const NODE_ICONS: Record<string, React.ReactNode> = {
   RANDOMIZER: <Shuffle size={16} className="text-purple-500" />,
   START_AUTOMATION: <SquareArrowRight size={16} className="text-lime-600" />,
   COMMENT: <StickyNote size={16} className="text-amber-500" />,
+  AI: <Sparkles size={16} className="text-emerald-600" />,
 };

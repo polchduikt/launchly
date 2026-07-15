@@ -14,6 +14,7 @@ export const FLOW_BLOCKS: FlowBlockConfig[] = [
   { type: 'RANDOMIZER', label: 'Randomizer', color: 'text-purple-600 bg-purple-50' },
   { type: 'START_AUTOMATION', label: 'Start Automation', color: 'text-lime-600 bg-lime-50' },
   { type: 'COMMENT', label: 'Comment', color: 'text-amber-500 bg-amber-50' },
+  { type: 'AI', label: 'AI Step', color: 'text-emerald-600 bg-emerald-50' },
   { type: 'END', label: 'End Session', color: 'text-slate-500 bg-slate-50' },
 ];
 
@@ -61,6 +62,13 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
       return {
         targetBotId: null,
         targetBotName: ''
+      };
+    case 'AI':
+      return {
+        prompt: '',
+        context: '',
+        generated: false,
+        tasks: []
       };
     default:
       return {};

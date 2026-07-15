@@ -3,7 +3,7 @@ import {
   useDeleteIntegrationMutation,
 } from '../hooks/useIntegrationQueries';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { FileSpreadsheet } from 'lucide-react';
+import { SiGooglesheets } from '@icons-pack/react-simple-icons';
 import type { IntegrationResponse } from '../types';
 
 interface GoogleSheetsCardProps {
@@ -58,8 +58,8 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
       
       <div className="w-full md:w-2/5 flex gap-4 items-center">
         
-        <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 shadow-sm text-emerald-600">
-          <FileSpreadsheet size={24} />
+        <div className="w-16 h-16 flex items-center justify-center shrink-0 text-[#0F9D58]">
+          <SiGooglesheets size={48} />
         </div>
 
         <div className="flex-1 flex flex-wrap md:flex-nowrap items-center gap-4 md:gap-12">

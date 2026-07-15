@@ -9,5 +9,6 @@ export { RandomizerNode } from './RandomizerNode';
 export { NodeToolbar } from './NodeToolbar';
 export { CommentNode } from './CommentNode';
 export { StartAutomationNode } from './StartAutomationNode';
+export { AiNode } from './AiNode';
 
 

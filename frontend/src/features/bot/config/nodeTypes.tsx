@@ -11,6 +11,7 @@ import {
   RandomizerNode,
   CommentNode,
   StartAutomationNode,
+  AiNode,
 } from '../components/nodes';
 
 const withCollaborationWrapper = <P extends { id: string; data?: any; selected?: boolean }>(
@@ -79,6 +80,7 @@ export const NODE_TYPES = {
   RANDOMIZER: withCollaborationWrapper(RandomizerNode),
   START_AUTOMATION: withCollaborationWrapper(StartAutomationNode),
   COMMENT: withCollaborationWrapper(CommentNode),
+  AI: withCollaborationWrapper(AiNode),
   TEMP: TempNode,
 };
 
