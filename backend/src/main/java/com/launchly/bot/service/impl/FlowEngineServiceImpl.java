@@ -349,7 +349,8 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                         nextNodeId = poppedFrame.getReturnNodeId();
                     } else {
                         boolean hasOutgoingEdges = edges.stream().anyMatch(e -> e.source().equals(currentNode.id()));
-                        if (currentNode.type() == NodeType.END || !hasOutgoingEdges) {
+                        boolean isWaitingForInput = stateService.getExpectedInput(botId, telegramUserId).isPresent();
+                        if ((currentNode.type() == NodeType.END || !hasOutgoingEdges) && !isWaitingForInput) {
                             stateService.clearActiveCampaignId(botId, telegramUserId);
                             stateService.setCurrentNodeId(botId, telegramUserId, null);
                             botUser.setCurrentNodeId(null);
@@ -687,7 +688,8 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                         nextNodeId = poppedFrame.getReturnNodeId();
                     } else {
                         boolean hasOutgoingEdges = edges.stream().anyMatch(e -> e.source().equals(currentNode.id()));
-                        if (currentNode.type() == NodeType.END || !hasOutgoingEdges) {
+                        boolean isWaitingForInput = stateService.getExpectedInput(botId, telegramUserId).isPresent();
+                        if ((currentNode.type() == NodeType.END || !hasOutgoingEdges) && !isWaitingForInput) {
                             stateService.clearActiveCampaignId(botId, telegramUserId);
                             stateService.setCurrentNodeId(botId, telegramUserId, null);
                             botUser.setCurrentNodeId(null);

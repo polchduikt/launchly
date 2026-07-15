@@ -280,7 +280,7 @@ public class CrmServiceImpl implements CrmService {
         try {
             com.launchly.auth.entity.User botOwner = conversation.getBot().getUser();
             if (botOwner != null) {
-                notificationService.sendNewMessageNotification(botOwner, conversation, content);
+                notificationService.sendNewMessageNotification(botOwner.getId(), conversation.getId(), content);
             }
         } catch (Exception e) {
             log.error("Failed to send incoming message notification", e);

@@ -9,9 +9,9 @@ import com.launchly.analytics.dto.response.DashboardStatsResponse;
 
 public interface NotificationService {
 
-    void sendAssignmentNotification(User user, BotUser botUser);
+    void sendAssignmentNotification(Long userId, Long botUserId);
 
-    void sendNewMessageNotification(User user, Conversation conversation, String messageContent);
+    void sendNewMessageNotification(Long userId, Long conversationId, String messageContent);
 
     void sendStatsReportNotification(User user, DashboardStatsResponse stats);
 

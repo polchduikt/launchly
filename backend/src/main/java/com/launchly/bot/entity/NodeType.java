@@ -15,6 +15,7 @@ public enum NodeType {
     START_AUTOMATION,
     SMART_DELAY,
     RANDOMIZER,
-    COMMENT
+    COMMENT,
+    AI
 }
 

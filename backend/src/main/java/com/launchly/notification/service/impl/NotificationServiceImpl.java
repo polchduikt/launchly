@@ -5,7 +5,9 @@ import com.launchly.auth.repository.UserRepository;
 import com.launchly.auth.mapper.AuthMapper;
 import com.launchly.auth.dto.response.UserResponse;
 import com.launchly.bot.entity.BotUser;
+import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.crm.entity.Conversation;
+import com.launchly.crm.repository.ConversationRepository;
 import com.launchly.notification.dto.UpdateNotificationSettingsRequest;
 import com.launchly.analytics.dto.response.DashboardStatsResponse;
 import com.launchly.notification.service.NotificationService;
@@ -38,6 +40,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final ObjectProvider<JavaMailSender> mailSenderProvider;
     private final ObjectProvider<TelegramBotManager> botManagerProvider;
     private final UserRepository userRepository;
+    private final BotUserRepository botUserRepository;
+    private final ConversationRepository conversationRepository;
     private final AuthMapper authMapper;
 
     @Value("${app.frontend-url:http://localhost:5173}")
@@ -81,7 +85,15 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Async
-    public void sendAssignmentNotification(User user, BotUser botUser) {
+    @Transactional(readOnly = true)
+    public void sendAssignmentNotification(Long userId, Long botUserId) {
+        User user = userRepository.findById(userId).orElse(null);
+        BotUser botUser = botUserRepository.findById(botUserId).orElse(null);
+        if (user == null || botUser == null) {
+            log.warn("User {} or BotUser {} not found, skipping assignment notification.", userId, botUserId);
+            return;
+        }
+
         String contactName = (botUser.getFirstName() != null ? botUser.getFirstName() : "") + 
                              (botUser.getLastName() != null ? " " + botUser.getLastName() : "");
         if (contactName.trim().isEmpty()) {
@@ -145,7 +157,15 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Async
-    public void sendNewMessageNotification(User user, Conversation conversation, String messageContent) {
+    @Transactional(readOnly = true)
+    public void sendNewMessageNotification(Long userId, Long conversationId, String messageContent) {
+        User user = userRepository.findById(userId).orElse(null);
+        Conversation conversation = conversationRepository.findById(conversationId).orElse(null);
+        if (user == null || conversation == null) {
+            log.warn("User {} or Conversation {} not found, skipping message notification.", userId, conversationId);
+            return;
+        }
+
         BotUser botUser = conversation.getBotUser();
         String contactName = (botUser.getFirstName() != null ? botUser.getFirstName() : "") + 
                              (botUser.getLastName() != null ? " " + botUser.getLastName() : "");

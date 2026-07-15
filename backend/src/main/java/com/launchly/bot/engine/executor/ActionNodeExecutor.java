@@ -327,7 +327,7 @@ public class ActionNodeExecutor implements NodeExecutor {
                         case "NOTIFY_ASSIGNEE": {
                             User botOwner = botUser.getBot().getUser();
                             if (botOwner != null) {
-                                notificationService.sendAssignmentNotification(botOwner, botUser);
+                                notificationService.sendAssignmentNotification(botOwner.getId(), botUser.getId());
                             } else {
                                 log.warn("Cannot send assignee notification: bot owner is null");
                             }
