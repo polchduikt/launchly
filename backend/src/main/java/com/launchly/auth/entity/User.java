@@ -48,4 +48,10 @@ public class User extends BaseEntity {
     @Column(name = "is_email_verified", nullable = false)
     @Builder.Default
     private boolean emailVerified = false;
+
+    @Column(name = "telegram_user_id", unique = true)
+    private Long telegramUserId;
+
+    @Column(name = "telegram_username")
+    private String telegramUsername;
 }

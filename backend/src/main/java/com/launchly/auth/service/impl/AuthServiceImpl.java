@@ -14,11 +14,19 @@ import com.launchly.auth.service.AuthService;
 import com.launchly.auth.service.TokenService;
 import com.launchly.billing.service.BillingService;
 import com.launchly.common.exception.AppException;
+import com.launchly.auth.entity.AuthSessionStatus;
+import com.launchly.auth.entity.TelegramAuthSession;
+import com.launchly.auth.repository.TelegramAuthSessionRepository;
+import com.launchly.auth.dto.response.TelegramSessionResponse;
+import com.launchly.auth.dto.response.TelegramStatusResponse;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +37,10 @@ public class AuthServiceImpl implements AuthService {
     private final AuthMapper authMapper;
     private final PasswordEncoder passwordEncoder;
     private final BillingService billingService;
+    private final TelegramAuthSessionRepository telegramAuthSessionRepository;
+
+    @Value("${telegram.system-bot-username:}")
+    private String systemBotUsername;
 
     @Override
     @Transactional
@@ -90,5 +102,124 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
         return authMapper.toUserResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public TelegramSessionResponse createTelegramSession(String currentEmail) {
+        String token = UUID.randomUUID().toString();
+        
+        User user = null;
+        if (currentEmail != null && !currentEmail.isBlank()) {
+            user = userRepository.findByEmail(currentEmail).orElse(null);
+        }
+
+        TelegramAuthSession session = TelegramAuthSession.builder()
+                .token(token)
+                .status(AuthSessionStatus.PENDING)
+                .user(user)
+                .createdAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusMinutes(5))
+                .build();
+
+        telegramAuthSessionRepository.save(session);
+        
+        String cleanUsername = systemBotUsername;
+        if (cleanUsername != null && cleanUsername.startsWith("@")) {
+            cleanUsername = cleanUsername.substring(1);
+        }
+        return new TelegramSessionResponse(token, cleanUsername);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TelegramStatusResponse checkTelegramSessionStatus(String token) {
+        TelegramAuthSession session = telegramAuthSessionRepository.findByToken(token)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Auth session not found"));
+
+        if (session.getExpiresAt().isBefore(LocalDateTime.now()) && session.getStatus() == AuthSessionStatus.PENDING) {
+            session.setStatus(AuthSessionStatus.EXPIRED);
+            telegramAuthSessionRepository.save(session);
+            return TelegramStatusResponse.expired();
+        }
+
+        if (session.getStatus() == AuthSessionStatus.PENDING) {
+            return TelegramStatusResponse.pending();
+        }
+
+        if (session.getStatus() == AuthSessionStatus.EXPIRED) {
+            return TelegramStatusResponse.expired();
+        }
+
+        UserResponse userResponse = authMapper.toUserResponse(session.getUser());
+        return TelegramStatusResponse.success(session.getJwtAccessToken(), session.getJwtRefreshToken(), userResponse);
+    }
+
+    @Override
+    @Transactional
+    public void unlinkTelegram(String currentEmail) {
+        User user = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        user.setTelegramUserId(null);
+        user.setTelegramUsername(null);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void handleTelegramAuth(String token, Long telegramUserId, String telegramUsername) {
+        TelegramAuthSession session = telegramAuthSessionRepository.findByToken(token)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Auth session not found"));
+
+        if (session.getStatus() != AuthSessionStatus.PENDING) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Auth session is not pending");
+        }
+
+        if (session.getExpiresAt().isBefore(LocalDateTime.now())) {
+            session.setStatus(AuthSessionStatus.EXPIRED);
+            telegramAuthSessionRepository.save(session);
+            throw new AppException(HttpStatus.BAD_REQUEST, "Auth session expired");
+        }
+
+        User user = session.getUser();
+        if (user != null) {
+            user.setTelegramUserId(telegramUserId);
+            user.setTelegramUsername(telegramUsername);
+            user = userRepository.save(user);
+        } else {
+            user = userRepository.findByTelegramUserId(telegramUserId).orElse(null);
+
+            if (user == null) {
+                String email = "tg_" + telegramUserId + "@launchly.ai";
+                if (userRepository.existsByEmail(email)) {
+                    user = userRepository.findByEmail(email).get();
+                } else {
+                    String name = telegramUsername != null ? telegramUsername : "Telegram User " + telegramUserId;
+                    user = User.builder()
+                            .email(email)
+                            .name(name)
+                            .role(Role.ROLE_OWNER)
+                            .provider(Provider.LOCAL)
+                            .active(true)
+                            .emailVerified(true)
+                            .telegramUserId(telegramUserId)
+                            .telegramUsername(telegramUsername)
+                            .build();
+                    user = userRepository.save(user);
+                    billingService.createFreeSubscription(user.getId());
+                }
+            }
+        }
+
+        String accessToken = tokenService.generateAccessToken(user);
+        String refreshToken = tokenService.generateRefreshToken(user);
+
+        session.setUser(user);
+        session.setTelegramUserId(telegramUserId);
+        session.setTelegramUsername(telegramUsername);
+        session.setJwtAccessToken(accessToken);
+        session.setJwtRefreshToken(refreshToken);
+        session.setStatus(AuthSessionStatus.SUCCESS);
+        telegramAuthSessionRepository.save(session);
     }
 }

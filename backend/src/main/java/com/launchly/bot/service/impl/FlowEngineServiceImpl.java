@@ -32,6 +32,7 @@ import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.springframework.context.annotation.Lazy;
 import lombok.extern.slf4j.Slf4j;
+import com.launchly.auth.service.AuthService;
 import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -57,6 +58,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
     private final CrmService crmService;
     private final Cloudinary cloudinary;
     private final AnalyticsService analyticsService;
+    private final AuthService authService;
     private static final String SCHEMA_KEY = "launchly:bot:schema:%d";
     private static final Duration SCHEMA_TTL = Duration.ofMinutes(30);
 
@@ -73,7 +75,8 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                   EncryptionUtil encryptionUtil,
                                   @Lazy CrmService crmService,
                                   Cloudinary cloudinary,
-                                  AnalyticsService analyticsService) {
+                                  AnalyticsService analyticsService,
+                                  @Lazy AuthService authService) {
         this.botRepository = botRepository;
         this.botUserRepository = botUserRepository;
         this.flowSchemaRepository = flowSchemaRepository;
@@ -87,6 +90,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         this.crmService = crmService;
         this.cloudinary = cloudinary;
         this.analyticsService = analyticsService;
+        this.authService = authService;
         this.executors = new EnumMap<>(NodeType.class);
         nodeExecutors.forEach(e -> executors.put(e.getType(), e));
     }
@@ -97,6 +101,11 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             Long telegramUserId = extractTelegramUserId(update);
             if (telegramUserId == null) {
                 log.warn("Could not extract telegram user id from update");
+                return;
+            }
+
+            if (botId.equals(-1L)) {
+                handleSystemBotUpdate(update, client);
                 return;
             }
 
@@ -975,6 +984,53 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
         } catch (Exception e) {
             log.error("Failed to set executing bot id: {}", e.getMessage(), e);
+        }
+    }
+
+    private void handleSystemBotUpdate(Update update, TelegramClient client) {
+        if (!update.hasMessage() || !update.getMessage().hasText()) {
+            return;
+        }
+
+        String text = update.getMessage().getText().trim();
+        Long chatId = update.getMessage().getChatId();
+
+        if (text.startsWith("/start")) {
+            String token = null;
+            if (text.contains(" ")) {
+                token = text.substring(text.indexOf(" ") + 1).trim();
+            }
+
+            if (token == null || token.isBlank()) {
+                sendSystemBotMessage(chatId, "Welcome to Launchly! Please use the website to log in or link your account.", client);
+                return;
+            }
+
+            try {
+                String telegramUsername = update.getMessage().getFrom().getUserName();
+                Long telegramUserId = update.getMessage().getFrom().getId();
+                
+                authService.handleTelegramAuth(token, telegramUserId, telegramUsername);
+
+                sendSystemBotMessage(chatId, "Hi! You successfully signed up/logged in with Telegram. Thank you! You can now return to the website.", client);
+            } catch (Exception e) {
+                log.error("Failed to process system bot auth: {}", e.getMessage());
+                sendSystemBotMessage(chatId, "Failed to authorize: " + e.getMessage(), client);
+            }
+        } else {
+            sendSystemBotMessage(chatId, "Please use the website to log in or link your account.", client);
+        }
+    }
+
+    private void sendSystemBotMessage(Long chatId, String text, TelegramClient client) {
+        try {
+            SendMessage message = SendMessage.builder()
+                    .chatId(chatId.toString())
+                    .text(text)
+                    .build();
+            client.execute(message);
+        } catch (Exception e) {
+            log.error("Failed to send message from system bot: {}", e.getMessage());
         }
     }
 }

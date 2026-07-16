@@ -5,5 +5,7 @@ public record UserResponse(
         String email,
         String name,
         String avatar,
-        String role
+        String role,
+        Long telegramUserId,
+        String telegramUsername
 ) {}

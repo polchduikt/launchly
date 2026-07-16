@@ -34,6 +34,12 @@ public class TelegramBotManager {
     @Value("${telegram.mode:polling}")
     private String mode;
 
+    @Value("${telegram.system-bot-token:}")
+    private String systemBotToken;
+
+    @Value("${telegram.system-bot-username:}")
+    private String systemBotUsername;
+
     private final ConcurrentHashMap<Long, TelegramBotsLongPollingApplication> activeBots = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, TelegramClient> telegramClients = new ConcurrentHashMap<>();
 
@@ -42,6 +48,15 @@ public class TelegramBotManager {
         if (!"polling".equalsIgnoreCase(mode)) {
             log.info("Telegram bot manager running in webhook mode, skipping auto-start");
             return;
+        }
+
+        if (systemBotToken != null && !systemBotToken.isBlank()) {
+            try {
+                registerSystemBot();
+                log.info("Started system bot: {}", systemBotUsername);
+            } catch (Exception e) {
+                log.error("Failed to start system bot: {}", e.getMessage());
+            }
         }
 
         List<Bot> bots = botRepository.findAllByActiveTrue();
@@ -111,6 +126,36 @@ public class TelegramBotManager {
             log.info("Registered bot {} for long polling", bot.getId());
         } catch (Exception e) {
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to register bot: " + e.getMessage());
+        }
+    }
+
+    private void registerSystemBot() {
+        if (activeBots.containsKey(-1L)) {
+            return;
+        }
+
+        try {
+            try {
+                String deleteWebhookUrl = "https://api.telegram.org/bot" + systemBotToken + "/deleteWebhook?drop_pending_updates=false";
+                org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+                restTemplate.getForEntity(deleteWebhookUrl, String.class);
+                Thread.sleep(500);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            } catch (Exception e) {
+                log.warn("Failed to call deleteWebhook before polling for system bot: {}", e.getMessage());
+            }
+
+            TelegramClient telegramClient = new OkHttpTelegramClient(systemBotToken);
+            TelegramBotsLongPollingApplication pollingApp = new TelegramBotsLongPollingApplication();
+            BotUpdateHandler handler = new BotUpdateHandler(
+                    -1L, flowEngineService, telegramClient, crmService, botUserRepository);
+            pollingApp.registerBot(systemBotToken, handler);
+            activeBots.put(-1L, pollingApp);
+            telegramClients.put(-1L, telegramClient);
+            log.info("Registered system bot for long polling");
+        } catch (Exception e) {
+            log.error("Failed to register system bot: {}", e.getMessage());
         }
     }
 
