@@ -5,12 +5,14 @@ import { useRegisterForm } from '../hooks/useRegisterForm';
 import { AuthPageLayout } from '../components/AuthPageLayout';
 import { FormInput } from '../components/FormInput';
 import { GoogleLoginButton } from '../components/GoogleLoginButton';
+import { TelegramLoginModal } from '../components/TelegramLoginModal';
 import { GOOGLE_OAUTH_URL } from '../../../constants/auth';
 
 const RegisterPage: React.FC = () => {
   const { form, onSubmit, isPending, apiError } = useRegisterForm();
   const { register, formState: { errors } } = form;
   const [showPassword, setShowPassword] = useState(false);
+  const [isTelegramOpen, setIsTelegramOpen] = useState(false);
 
   const handleGoogleLogin = () => {
     window.location.href = GOOGLE_OAUTH_URL;
@@ -94,8 +96,18 @@ const RegisterPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-6 grid grid-cols-2 gap-3">
           <GoogleLoginButton onClick={handleGoogleLogin} />
+          <button
+            type="button"
+            onClick={() => setIsTelegramOpen(true)}
+            className="w-full inline-flex justify-center items-center py-2.5 px-4 border border-outline-variant rounded bg-surface text-on-surface text-sm font-semibold hover:bg-surface-container-low transition-colors shadow-sm cursor-pointer"
+          >
+            <svg className="h-5 w-5 mr-3 fill-blue-500" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.18-.08-.04-.19-.01-.27.01-.12.02-2.03 1.28-5.73 3.77-.54.37-1.03.55-1.47.54-.48-.01-1.4-.27-2.08-.49-.83-.27-1.5-.42-1.44-.89.03-.24.37-.49 1.03-.74 4.05-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.64-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.16-.03.22z" />
+            </svg>
+            Telegram
+          </button>
         </div>
       </div>
 
@@ -105,6 +117,7 @@ const RegisterPage: React.FC = () => {
           Sign In
         </Link>
       </p>
+      <TelegramLoginModal isOpen={isTelegramOpen} onClose={() => setIsTelegramOpen(false)} />
     </div>
   );
 

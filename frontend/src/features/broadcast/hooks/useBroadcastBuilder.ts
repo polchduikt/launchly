@@ -2,13 +2,14 @@ import { useState, useEffect, useCallback, useRef, useMemo, type MutableRefObjec
 import { useParams, useNavigate } from 'react-router-dom';
 import { useNodesState, useEdgesState, addEdge, useReactFlow } from '@xyflow/react';
 import type { Edge, Node, Connection, NodeChange, EdgeChange } from '@xyflow/react';
+import { useQueries } from '@tanstack/react-query';
 import { useBotStore } from '../../../store/useBotStore';
 import {
-  useCampaignsQuery,
   useTagsQuery,
   useUpdateCampaignMutation,
   useSendCampaignMutation,
 } from './useBroadcastQueries';
+import { getCampaignsApi } from '../api/broadcast';
 import { useLeadsQuery, useOrdersQuery } from '../../crm/hooks/useCrmQueries';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 import type { AudienceCondition, CustomNode, FilterType } from '../types';
@@ -77,14 +78,34 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
   const [conditions, setConditions] = useState<AudienceCondition[]>([]);
   const [isConditionDropdownOpen, setIsConditionDropdownOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<'general' | 'system' | 'custom'>('general');
-  const { data: campaigns = [], isLoading: isCampaignsLoading } = useCampaignsQuery(botId);
-  const { data: tags = [] } = useTagsQuery(botId);
-  const { data: leads = [] } = useLeadsQuery(botId);
-  const { data: orders = [] } = useOrdersQuery(botId);
-  const { data: bots = [] } = useBotsQuery();
-  const updateCampaignMut = useUpdateCampaignMutation(botId);
-  const sendCampaignMut = useSendCampaignMutation(botId);
-  const campaign = campaigns.find((c) => c.id === campaignId);
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
+
+  const campaignQueries = useQueries({
+    queries: bots.map((bot) => ({
+      queryKey: ['campaigns', bot.id],
+      queryFn: () => getCampaignsApi(bot.id),
+      enabled: bots.length > 0,
+      refetchInterval: (query: any) => {
+        const data = query.state.data;
+        if (!data) return false;
+        const hasActive = data.some(
+          (c: any) => c.status === 'IN_PROGRESS' || c.status === 'SCHEDULED'
+        );
+        return hasActive ? 3000 : false;
+      },
+    })),
+  });
+
+  const isCampaignsLoading = isBotsLoading || (bots.length > 0 && campaignQueries.some((q) => q.isLoading));
+  const allCampaigns = campaignQueries.flatMap((q) => q.data || []);
+  const campaign = allCampaigns.find((c) => c.id === campaignId);
+  const campaignBotId = campaign?.botId || botId;
+  const { data: tags = [] } = useTagsQuery(campaignBotId);
+  const { data: leads = [] } = useLeadsQuery(campaignBotId);
+  const { data: orders = [] } = useOrdersQuery(campaignBotId);
+  const updateCampaignMut = useUpdateCampaignMutation(campaignBotId);
+  const sendCampaignMut = useSendCampaignMutation(campaignBotId);
+
   const {
     past,
     future,

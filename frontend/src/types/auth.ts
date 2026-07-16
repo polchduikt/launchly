@@ -4,6 +4,8 @@ export interface User {
   name: string;
   avatar: string | null;
   role: string;
+  telegramUserId: number | null;
+  telegramUsername: string | null;
 }
 
 export interface LoginRequest {
