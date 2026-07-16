@@ -17,17 +17,22 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import java.util.stream.Collectors;
-
+import com.launchly.common.utils.MessageUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final MessageUtils messageUtils;
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ErrorResponse> handleAppException(AppException ex, HttpServletRequest request) {
         HttpStatus status = ex.getStatus();
-        ErrorResponse response = ErrorResponse.of(status, ex.getMessage(), request.getRequestURI());
+        String message = messageUtils.getMessage(ex.getMessage(), ex.getMessage());
+        ErrorResponse response = ErrorResponse.of(status, message, request.getRequestURI());
         return ResponseEntity.status(status).body(response);
     }
 
@@ -85,7 +90,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
-        ErrorResponse response = ErrorResponse.of(status, "Malformed JSON request or invalid input format", request.getRequestURI());
+        ErrorResponse response = ErrorResponse.of(status, messageUtils.getMessage("common.error.invalid_input"), request.getRequestURI());
         return ResponseEntity.status(status).body(response);
     }
 
@@ -117,14 +122,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
-        ErrorResponse response = ErrorResponse.of(status, "File size limit exceeded", request.getRequestURI());
+        ErrorResponse response = ErrorResponse.of(status, messageUtils.getMessage("common.error.file_size_exceeded"), request.getRequestURI());
         return ResponseEntity.status(status).body(response);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.FORBIDDEN;
-        ErrorResponse response = ErrorResponse.of(status, "Access denied", request.getRequestURI());
+        ErrorResponse response = ErrorResponse.of(status, messageUtils.getMessage("common.error.access_denied"), request.getRequestURI());
         return ResponseEntity.status(status).body(response);
     }
 
@@ -132,7 +137,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
         log.error("Unhandled exception occurred on path {}: {}", request.getRequestURI(), ex.getMessage(), ex);
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-        ErrorResponse response = ErrorResponse.of(status, ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred", request.getRequestURI());
+        String message = ex.getMessage() != null ? ex.getMessage() : messageUtils.getMessage("common.error.unexpected");
+        ErrorResponse response = ErrorResponse.of(status, message, request.getRequestURI());
         return ResponseEntity.status(status).body(response);
     }
 }
