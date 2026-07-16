@@ -3,6 +3,8 @@ import { UserCheck, ChevronDown, ChevronUp, X, Plus, Search, User, Tag, Sparkles
 import type { AudienceCondition, TagResponse } from '../types';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 import { useBotStore } from '../../../store/useBotStore';
+import { t } from '../../../i18n';
+
 
 interface AudiencePanelProps {
   isAudienceOpen: boolean;
@@ -204,19 +206,19 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
   };
 
   const getFieldLabel = (field: string, value: string = '') => {
-    if (field === 'tag') return 'Tag';
-    if (field === 'opt_in') return 'Opt-In Channel';
-    if (field === 'order') return 'Order';
+    if (field === 'tag') return t('audience.panel.field.tag');
+    if (field === 'opt_in') return t('audience.panel.field.opt_in');
+    if (field === 'order') return t('audience.panel.field.order');
     if (field === 'lead') {
       if (value.startsWith('System:')) {
         const parts = value.split(':');
-        return parts[1] || 'System Field';
+        return parts[1] || t('audience.panel.field.system');
       }
       if (value.startsWith('Field:')) {
         const parts = value.split(':');
-        return parts[1] || 'Custom Field';
+        return parts[1] || t('audience.panel.field.custom');
       }
-      return 'Lead';
+      return t('audience.panel.field.lead');
     }
     return field;
   };
@@ -245,7 +247,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
         >
           <div className="flex items-center gap-2">
             <span className="font-extrabold text-sm text-slate-800">
-              Target Audience
+              {t('audience.panel.target_audience')}
             </span>
             <button className="text-slate-400 mt-0.5">
               <ChevronUp size={15} />
@@ -253,7 +255,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
           </div>
           <div className="flex items-center gap-2 text-xs font-bold text-slate-550 bg-slate-50 border border-slate-200/60 px-3.5 py-1.5 rounded-xl">
             <User size={13} className="text-slate-400" />
-            <span>{getAudienceCount()} subscriber{getAudienceCount() !== 1 ? 's' : ''} will receive this broadcast</span>
+            <span>{t('audience.panel.subscribers_receive', { count: getAudienceCount() })}</span>
           </div>
         </div>
       ) : (
@@ -263,14 +265,14 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
             className="px-6 h-14 flex items-center justify-between border-b border-slate-100 hover:bg-slate-50/40 cursor-pointer shrink-0"
           >
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-sm text-slate-800">Target Audience</span>
+              <span className="font-extrabold text-sm text-slate-800">{t('audience.panel.target_audience')}</span>
               <ChevronDown size={15} className="text-slate-400 mt-0.5" />
             </div>
 
             <div className="flex-1 px-8 text-[11px] font-bold text-slate-700 uppercase tracking-wider text-center pointer-events-none">
-              Send to contacts matching{' '}
+              {t('audience.panel.send_matching')}{' '}
               <span className="underline decoration-indigo-500 underline-offset-2 text-indigo-750">
-                all of the following conditions:
+                {t('audience.panel.matching_conditions')}
               </span>
             </div>
 
@@ -279,14 +281,14 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
               onClick={(e) => e.stopPropagation()}
             >
               <UserCheck size={13} strokeWidth={2.5} />
-              <span>Preview {getAudienceCount()} contact{getAudienceCount() !== 1 ? 's' : ''}</span>
+              <span>{t('audience.panel.preview_contact', { count: getAudienceCount() })}</span>
             </div>
           </div>
 
           <div className="flex-1 flex overflow-hidden">
             <div className="w-64 border-r border-slate-100 px-6 py-5 shrink-0">
               <p className="text-xs font-semibold text-slate-400 leading-relaxed">
-                Set up additional conditions or select a List to make your targeting more relevant.
+                {t('audience.panel.targeting_desc')}
               </p>
             </div>
 
@@ -294,7 +296,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
               <div className="flex flex-row flex-wrap gap-2.5 items-center">
                 {conditions.map((cond) => {
                   const displayField = getFieldLabel(cond.field, cond.value);
-                  const displayOperator = cond.operator === 'is' ? 'is' : "isn't";
+                  const displayOperator = cond.operator === 'is' ? t('audience.panel.operator.is') : t('audience.panel.operator.is_not');
                   const displayValue = getConditionDisplayValue(cond);
 
                     const allFieldValues = getFieldValues(cond.field);
@@ -368,7 +370,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                       : 'text-slate-655 hover:bg-slate-100'
                                   }`}
                                 >
-                                  is
+                                  {t('audience.panel.operator.is')}
                                 </button>
                                 <button
                                   type="button"
@@ -378,6 +380,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                     );
                                     setConditions(updated);
                                     setIsDirty(true);
+                                    setActiveDropdownId(null);
                                   }}
                                   className={`w-full text-left px-2.5 py-1.5 text-xs font-bold transition-all rounded-lg cursor-pointer ${
                                     cond.operator === 'is_not'
@@ -385,18 +388,18 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                       : 'text-slate-655 hover:bg-slate-100'
                                   }`}
                                 >
-                                  isn't
+                                  {t('audience.panel.operator.is_not')}
                                 </button>
                               </div>
 
                               {cond.field === 'lead' && (cond.value?.startsWith('System:') || cond.value?.startsWith('Field:')) ? (
                                 <div className="w-[200px] p-3 flex flex-col gap-2 shrink-0 bg-white">
                                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                    Enter Value
+                                    {t('audience.panel.enter_value')}
                                   </span>
                                   <input
                                     type="text"
-                                    placeholder="Type value..."
+                                    placeholder={t('audience.panel.type_value')}
                                     value={valSearch}
                                     onChange={(e) => setValSearch(e.target.value)}
                                     onKeyDown={(e) => {
@@ -432,7 +435,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                     }}
                                     className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs transition-all cursor-pointer text-center"
                                   >
-                                    Apply
+                                    {t('editor.condition.apply')}
                                   </button>
                                 </div>
                               ) : (
@@ -441,7 +444,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                     <Search size={11} className="text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
                                     <input
                                       type="text"
-                                      placeholder="Search..."
+                                      placeholder={t('audience.panel.search_ellipsis')}
                                       value={valSearch}
                                       onChange={(e) => setValSearch(e.target.value)}
                                       className="w-full pl-7 pr-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[11px] font-semibold focus:outline-none focus:bg-white focus:border-indigo-400 transition-all text-slate-800"
@@ -475,7 +478,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                     ))}
                                     {filteredFieldValues.length === 0 && (
                                       <span className="text-[10px] text-slate-400 font-semibold text-center py-4">
-                                        No matches
+                                        {t('audience.panel.no_matches')}
                                       </span>
                                     )}
                                   </div>
@@ -494,7 +497,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                     onClick={() => setIsConditionDropdownOpen(!isConditionDropdownOpen)}
                     className="flex items-center justify-center gap-1.5 px-4 py-2 border border-slate-200 hover:border-indigo-400 text-xs font-bold text-slate-500 hover:text-indigo-600 bg-white hover:bg-slate-50/20 rounded-xl transition-all cursor-pointer shadow-xs border-dashed whitespace-nowrap"
                   >
-                    <span>+ Condition</span>
+                    <span>{t('audience.panel.add_condition')}</span>
                   </button>
 
                   {isConditionDropdownOpen && (
@@ -508,7 +511,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                           <Search size={13} className="text-slate-400 absolute left-6 top-1/2 -translate-y-1/2" />
                           <input
                             type="text"
-                            placeholder="Search filters..."
+                            placeholder={t('audience.panel.search_filters')}
                             value={dropdownSearch}
                             onChange={(e) => setDropdownSearch(e.target.value)}
                             className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-indigo-400 transition-all text-slate-800"
@@ -524,10 +527,10 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                               className={`w-full px-3 py-2 text-left text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
                                 selectedCategory === 'general'
                                   ? 'bg-white text-indigo-700 shadow-sm border border-slate-100'
-                                  : 'text-slate-650 hover:bg-slate-100'
+                                  : 'text-slate-655 hover:bg-slate-100'
                               }`}
                             >
-                              General Filters
+                              {t('audience.panel.general_filters')}
                             </button>
                             <button
                               type="button"
@@ -538,7 +541,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                   : 'text-slate-655 hover:bg-slate-100'
                               }`}
                             >
-                              System Fields
+                              {t('audience.panel.system_fields')}
                             </button>
                             <button
                               type="button"
@@ -549,7 +552,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                   : 'text-slate-655 hover:bg-slate-100'
                               }`}
                             >
-                              Custom User Fields
+                              {t('audience.panel.custom_fields')}
                             </button>
                           </div>
 
@@ -576,7 +579,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                               })
                             ) : (
                               <div className="text-[10px] text-slate-400 italic text-center py-12">
-                                No matching items
+                                {t('audience.panel.no_matching_items')}
                               </div>
                             )}
                           </div>

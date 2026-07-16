@@ -8,6 +8,7 @@ import type { CustomNodeData } from '../../../../types/bot';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 import { useBotStore } from '../../../../store/useBotStore';
+import { t } from '../../../../i18n';
 
 export const StartAutomationNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
@@ -105,10 +106,10 @@ export const StartAutomationNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({
         </span>
         <div className="flex-1 min-w-0">
           <span className="font-extrabold text-[9px] text-lime-700/70 uppercase tracking-wider block leading-none">
-            Start Automation
+            {t('node.start_automation.category')}
           </span>
           <span className="text-xs font-bold text-lime-800 truncate block mt-0.5">
-            Trigger Flow
+            {t('node.start_automation.trigger_flow')}
           </span>
         </div>
       </div>
@@ -135,7 +136,7 @@ export const StartAutomationNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({
               onClick={handleOpenAutomation}
               className="w-full py-2 bg-white hover:bg-slate-50 border border-slate-200 text-[11px] font-bold text-slate-700 rounded-xl transition-all cursor-pointer shadow-xs"
             >
-              Open Automation
+              {t('node.start_automation.open')}
             </button>
           </div>
         ) : (
@@ -144,13 +145,13 @@ export const StartAutomationNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({
             className="flex flex-col items-center justify-center p-4 border border-dashed border-slate-300 rounded-2xl bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer text-slate-400 hover:text-slate-500"
           >
             <SquareArrowRight size={20} className="stroke-[1.5] mb-1.5" />
-            <span className="text-[11px] font-bold tracking-tight">Click to Select Automation</span>
+            <span className="text-[11px] font-bold tracking-tight">{t('node.start_automation.click_to_select')}</span>
           </div>
         )}
       </div>
 
       <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">Next Step</span>
+        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">{t('node.start_automation.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}

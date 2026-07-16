@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { t } from '../../../i18n';
 import {
   Hash,
   Send,
@@ -57,7 +58,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
     );
   }
 
-  const meta = botUser ? (() => {
+  const meta: BotUserMetadata = botUser ? (() => {
     try {
       return botUser.metadata ? JSON.parse(botUser.metadata) : {};
     } catch {
@@ -151,14 +152,14 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
         <div className="flex items-center justify-between text-slate-600">
           <div className="flex items-center gap-2">
             <span className={isUnsubscribed ? 'text-rose-500' : 'text-emerald-500'}>✓</span>
-            <span>{isUnsubscribed ? 'Unsubscribed' : 'Subscribed'}</span>
+            <span>{isUnsubscribed ? t('crm.panel.status.unsubscribed') : t('crm.panel.status.subscribed')}</span>
           </div>
           {botUser && (
             <button
               onClick={() => handleUpdateContactMetadata({ ...meta, unsubscribed: !isUnsubscribed })}
               className="text-indigo-600 hover:text-indigo-700 underline text-[11px] cursor-pointer"
             >
-              {isUnsubscribed ? 'Subscribe' : 'Unsubscribe'}
+              {isUnsubscribed ? t('crm.panel.action.subscribe') : t('crm.panel.action.unsubscribe')}
             </button>
           )}
         </div>
@@ -176,13 +177,15 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
         )}
       </div>
       <div className="px-4 py-3 border-b border-slate-100 shrink-0">
-        <button className="w-full py-1.5 border border-slate-200 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">All Channels History</button>
+        <button className="w-full py-1.5 border border-slate-200 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+          {t('crm.panel.history_btn')}
+        </button>
       </div>
       
       {botUser && (
         <>
           <div className="px-4 py-3 border-b border-slate-100 shrink-0">
-            <div className="flex items-center gap-1 mb-2"><h4 className="font-bold text-[13px] text-slate-800">Automations</h4><span className="text-slate-400 cursor-pointer text-xs">ⓘ</span></div>
+            <div className="flex items-center gap-1 mb-2"><h4 className="font-bold text-[13px] text-slate-800">{t('crm.panel.automations_title')}</h4><span className="text-slate-400 cursor-pointer text-xs">ⓘ</span></div>
             <button
               onClick={() => handleUpdateContactMetadata({ ...meta, paused: !isPaused })}
               className="w-full py-2 border border-slate-200 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer flex items-center justify-center gap-2"
@@ -190,12 +193,12 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
               {isPaused ? (
                 <>
                   <Play size={14} className="text-emerald-500" />
-                  <span>Resume</span>
+                  <span>{t('crm.panel.automations.resume')}</span>
                 </>
               ) : (
                 <>
                   <Pause size={14} className="text-slate-500" />
-                  <span>Pause</span>
+                  <span>{t('crm.panel.automations.pause')}</span>
                 </>
               )}
             </button>
@@ -203,8 +206,10 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
 
           <div className="px-4 py-3 border-b border-slate-100 shrink-0">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="font-bold text-[13px] text-slate-800">Contact Tags</h4>
-              <button onClick={() => setShowAddTag(!showAddTag)} className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer">+ Add Tag</button>
+              <h4 className="font-bold text-[13px] text-slate-800">{t('crm.panel.tags_title')}</h4>
+              <button onClick={() => setShowAddTag(!showAddTag)} className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer">
+                {t('crm.panel.tags.add_btn')}
+              </button>
             </div>
             {showAddTag && (
               <div className="flex gap-1.5 mb-2.5">
@@ -213,16 +218,16 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
                   onChange={(e) => setNewTagVal(e.target.value)}
                   className="flex-1 px-2 py-1 bg-white border border-slate-200 rounded text-xs focus:outline-none"
                 >
-                  <option value="">-- Select Tag --</option>
+                  <option value="">{t('crm.panel.tags.select_tag')}</option>
                   {tags.map((t) => (
                     <option key={t.id} value={t.name}>{t.name}</option>
                   ))}
-                  <option value="NEW_TAG">+ New Tag</option>
+                  <option value="NEW_TAG">{t('crm.panel.tags.new_tag_option')}</option>
                 </select>
                 {newTagVal === 'NEW_TAG' ? (
                   <input
                     type="text"
-                    placeholder="Tag name"
+                    placeholder={t('crm.panel.tags.placeholder_name')}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleAddTag((e.target as HTMLInputElement).value);
                     }}
@@ -233,14 +238,14 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
                     onClick={() => handleAddTag(newTagVal)}
                     className="px-2.5 py-1 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700 cursor-pointer"
                   >
-                    Add
+                    {t('crm.panel.tags.add')}
                   </button>
                 )}
               </div>
             )}
             <div className="flex flex-wrap gap-1">
               {!(botUser.tags) || botUser.tags.length === 0 ? (
-                <span className="text-xs text-slate-400 italic">No tags assigned.</span>
+                <span className="text-xs text-slate-400 italic">{t('crm.panel.tags.no_tags')}</span>
               ) : (
                 botUser.tags.map(tag => (
                   <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] font-semibold rounded-md">
@@ -253,27 +258,31 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
           </div>
 
           <div className="px-4 py-3 border-b border-slate-100 shrink-0">
-            <h4 className="font-bold text-[13px] text-slate-800 mb-1">Subscribed to Sequences</h4>
-            <button className="text-[12px] font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer">Subscribe</button>
+            <h4 className="font-bold text-[13px] text-slate-800 mb-1">{t('crm.panel.sequences_title')}</h4>
+            <button className="text-[12px] font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer">
+              {t('crm.panel.sequences.subscribe')}
+            </button>
           </div>
 
           <div className="px-4 py-3 border-b border-slate-100 shrink-0 space-y-2">
             <div className="flex items-center justify-between">
-              <h4 className="font-bold text-[13px] text-slate-800">Custom Fields</h4>
-              <button onClick={() => setShowAddCustomField(!showAddCustomField)} className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer">+ Add Field</button>
+              <h4 className="font-bold text-[13px] text-slate-800">{t('crm.panel.fields_title')}</h4>
+              <button onClick={() => setShowAddCustomField(!showAddCustomField)} className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer">
+                {t('crm.panel.fields.add_btn')}
+              </button>
             </div>
             {showAddCustomField && (
               <div className="flex gap-1.5 items-center bg-slate-50 p-2 rounded border border-slate-200">
                 <input
                   type="text"
-                  placeholder="Key"
+                  placeholder={t('crm.panel.fields.placeholder_key')}
                   value={customFieldName}
                   onChange={(e) => setCustomFieldName(e.target.value)}
                   className="flex-1 min-w-0 px-2 py-1 bg-white border border-slate-200 rounded text-xs focus:outline-none"
                 />
                 <input
                   type="text"
-                  placeholder="Value"
+                  placeholder={t('crm.panel.fields.placeholder_val')}
                   value={customFieldValue}
                   onChange={(e) => setCustomFieldValue(e.target.value)}
                   className="flex-1 min-w-0 px-2 py-1 bg-white border border-slate-200 rounded text-xs focus:outline-none"
@@ -288,7 +297,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
             )}
             <div className="space-y-1.5 max-h-[180px] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
               {!(meta.customFields) || Object.keys(meta.customFields).length === 0 ? (
-                <span className="text-xs text-slate-400 italic">No custom fields set.</span>
+                <span className="text-xs text-slate-400 italic">{t('crm.panel.fields.no_fields')}</span>
               ) : (
                 Object.entries(meta.customFields).map(([k, v]) => (
                   <div key={k} className="flex items-center justify-between py-1.5 px-2 bg-blue-50/20 border border-blue-50 rounded shadow-sm">

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { t } from '../../../i18n';
 import {
   useCreateIntegrationMutation,
   useUpdateIntegrationMutation,
@@ -16,22 +17,27 @@ interface WebhookCardProps {
   integration: IntegrationResponse | undefined;
 }
 
-const webhookSchema = z.object({
-  url: z
-    .string()
-    .url('A valid URL is required')
-    .regex(/^https?:\/\/.*/, 'URL must start with http or https'),
-  events: z.array(z.enum(['ORDER_CREATED', 'LEAD_CREATED'])).min(1, 'Select at least one event'),
-  secret: z.string().optional(),
-});
-
-type WebhookFields = z.infer<typeof webhookSchema>;
+// Type definition for form fields
+type WebhookFields = {
+  url: string;
+  events: ('ORDER_CREATED' | 'LEAD_CREATED')[];
+  secret?: string;
+};
 
 export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) => {
   const createMut = useCreateIntegrationMutation();
   const updateMut = useUpdateIntegrationMutation();
   const toggleMut = useToggleIntegrationMutation();
   const deleteMut = useDeleteIntegrationMutation();
+
+  const webhookSchema = z.object({
+    url: z
+      .string()
+      .url(t('settings.integrations.webhook.error_url'))
+      .regex(/^https?:\/\/.*/, t('settings.integrations.webhook.error_url_prefix')),
+    events: z.array(z.enum(['ORDER_CREATED', 'LEAD_CREATED'])).min(1, t('settings.integrations.webhook.error_events')),
+    secret: z.string().optional(),
+  });
 
   const webhookConfig = integration?.config as WebhookConfig | null;
 
@@ -115,8 +121,8 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
             <Globe size={20} />
           </span>
           <div>
-            <h3 className="font-bold text-sm text-slate-800">Webhook Integration</h3>
-            <p className="text-xs text-slate-400">Trigger custom HTTP POST payloads on specific events</p>
+            <h3 className="font-bold text-sm text-slate-800">{t('settings.integrations.webhook.title')}</h3>
+            <p className="text-xs text-slate-400">{t('settings.integrations.webhook.desc')}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -131,9 +137,9 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
           >
             {integration
               ? integration.active
-                ? 'Active'
-                : 'Disabled'
-              : 'Not Set'}
+                ? t('settings.integrations.webhook.status_active')
+                : t('settings.integrations.webhook.status_disabled')
+              : t('settings.integrations.webhook.status_not_set')}
           </span>
         </div>
       </div>
@@ -141,11 +147,11 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
       <form onSubmit={handleSubmit(onSave)} className="space-y-5">
         <div>
           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-            Webhook Target URL
+            {t('settings.integrations.webhook.url_label')}
           </label>
           <input
             type="text"
-            placeholder="e.g. https://api.mycrm.com/webhooks/launchly"
+            placeholder={t('settings.integrations.webhook.url_placeholder')}
             {...register('url')}
             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 transition-all bg-slate-50/20 font-mono text-xs"
           />
@@ -158,11 +164,11 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
 
         <div>
           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-            HMAC Signature Secret Key (Optional)
+            {t('settings.integrations.webhook.secret_label')}
           </label>
           <input
             type="password"
-            placeholder="Leave blank to skip signing"
+            placeholder={t('settings.integrations.webhook.secret_placeholder')}
             {...register('secret')}
             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 transition-all bg-slate-50/20 font-mono text-xs"
           />
@@ -175,7 +181,7 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
 
         <div className="space-y-2">
           <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-            Trigger Events
+            {t('settings.integrations.webhook.events_label')}
           </span>
           <div className="flex gap-6">
             <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
@@ -187,7 +193,7 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
                 }
                 className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
               />
-              <span>Order Created</span>
+              <span>{t('settings.integrations.webhook.event_order')}</span>
             </label>
 
             <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
@@ -199,7 +205,7 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
                 }
                 className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
               />
-              <span>Lead Captured</span>
+              <span>{t('settings.integrations.webhook.event_lead')}</span>
             </label>
           </div>
           {errors.events && (
@@ -218,7 +224,7 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
             {createMut.isPending || updateMut.isPending ? (
               <Loader2 className="animate-spin" size={14} />
             ) : (
-              <span>Save Webhook</span>
+              <span>{t('settings.integrations.webhook.btn_save')}</span>
             )}
           </button>
 
@@ -228,10 +234,10 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
                 type="button"
                 onClick={handleToggle}
                 disabled={toggleMut.isPending}
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all border border-slate-200 cursor-pointer"
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-705 text-xs font-bold rounded-xl transition-all border border-slate-200 cursor-pointer"
               >
                 <Power size={14} />
-                <span>{integration.active ? 'Disable' : 'Enable'}</span>
+                <span>{integration.active ? t('settings.integrations.webhook.btn_disable') : t('settings.integrations.webhook.btn_enable')}</span>
               </button>
 
               <button
@@ -241,7 +247,7 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
                 className="flex items-center gap-1.5 px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl transition-all border border-rose-100 cursor-pointer ml-auto"
               >
                 <Trash2 size={14} />
-                <span>Remove Webhook</span>
+                <span>{t('settings.integrations.webhook.btn_remove')}</span>
               </button>
             </>
           )}

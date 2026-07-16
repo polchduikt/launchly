@@ -56,6 +56,8 @@ import {
   Redo2,
 } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
+import { t } from '../../../i18n';
+
 
 const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
   fromX,
@@ -430,12 +432,12 @@ const BroadcastBuilderInner: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-8 text-center space-y-4">
         <AlertTriangle className="text-amber-500" size={48} />
-        <h1 className="text-lg font-bold text-slate-800 font-sans">No active bot selected</h1>
+        <h1 className="text-lg font-bold text-slate-800 font-sans">{t('broadcast.builder.no_active_bot')}</h1>
         <button
           onClick={() => window.location.assign(ROUTES.HOME)}
           className="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all cursor-pointer"
         >
-          Select Bot
+          {t('broadcast.builder.select_bot')}
         </button>
       </div>
     );
@@ -462,9 +464,9 @@ const BroadcastBuilderInner: React.FC = () => {
           </button>
 
           <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold">
-            <span>Broadcasts</span>
+            <span>{t('broadcast.builder.breadcrumbs.broadcasts')}</span>
             <span>&gt;</span>
-            <span>Drafts</span>
+            <span>{t('broadcast.builder.breadcrumbs.drafts')}</span>
             <span>&gt;</span>
             {isEditingName ? (
               <div className="flex items-center gap-1 animate-in fade-in zoom-in-95 duration-100">
@@ -544,7 +546,7 @@ const BroadcastBuilderInner: React.FC = () => {
               {isDirty || updateCampaignMut.isPending ? (
                 <>
                   <Loader2 className="animate-spin text-indigo-500 shrink-0" size={14} />
-                  <span className="text-slate-400">Saving...</span>
+                  <span className="text-slate-400">{t('broadcast.builder.saving')}</span>
                 </>
               ) : updateCampaignMut.isError ? (
                 <div
@@ -556,12 +558,12 @@ const BroadcastBuilderInner: React.FC = () => {
                   className="flex items-center gap-1.5 cursor-help"
                 >
                   <span className="text-rose-500 shrink-0 font-bold">✕</span>
-                  <span className="text-rose-500 font-bold">Failed</span>
+                  <span className="text-rose-500 font-bold">{t('broadcast.builder.failed')}</span>
                 </div>
               ) : (
                 <>
                   <span className="text-emerald-500 shrink-0 font-bold">✓</span>
-                  <span className="text-slate-500">Saved</span>
+                  <span className="text-slate-500">{t('broadcast.builder.saved')}</span>
                 </>
               )}
             </div>
@@ -599,7 +601,7 @@ const BroadcastBuilderInner: React.FC = () => {
             }`}
           >
             <Eye size={14} />
-            <span>{isPreviewOpen ? 'Close Preview' : 'Preview'}</span>
+            <span>{isPreviewOpen ? t('broadcast.builder.close_preview') : t('broadcast.builder.preview')}</span>
           </button>
 
           {!isViewer && (
@@ -614,13 +616,13 @@ const BroadcastBuilderInner: React.FC = () => {
                 ) : (
                   <Send size={12} />
                 )}
-                <span>Send Now</span>
+                <span>{t('broadcast.builder.send_now')}</span>
               </button>
 
               <button
                 onClick={() => setIsScheduleModalOpen(true)}
                 disabled={sendCampaignMut.isPending || updateCampaignMut.isPending}
-                title="Schedule Broadcast"
+                title={t('broadcast.builder.schedule_tooltip')}
                 className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-800 rounded-xl transition-all cursor-pointer flex items-center justify-center animate-pulse animate-duration-1000"
               >
                 <Clock size={14} />
@@ -674,7 +676,7 @@ const BroadcastBuilderInner: React.FC = () => {
                   />
                   <div className="absolute right-0 mt-2.5 w-52 bg-white/95 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">
-                      Add Standalone Node
+                      {t('broadcast.builder.add_standalone_node')}
                     </span>
                     {BROADCAST_BLOCKS.map((item) => (
                       <button

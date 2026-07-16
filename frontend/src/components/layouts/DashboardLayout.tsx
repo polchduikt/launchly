@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import logoL from '../../assets/logo-l.png';
 import { NAV_ITEMS } from './config/navItems';
+import { t, getLanguage, changeLanguage } from '../../i18n';
 import type { DashboardLayoutProps } from '../../types/shared';
 import { HelpCircle, BookOpen, Users, Briefcase, Lightbulb, ClipboardList, FileText } from 'lucide-react';
 import { useBotStore } from '../../store/useBotStore';
@@ -22,6 +23,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
+  const language = getLanguage();
   const logout = useAuthStore((state) => state.logout);
   const [showPricing, setShowPricing] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -102,12 +104,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+              const localizedLabel = t(item.label.toLowerCase().replace(/\s+/g, '_'));
               if (item.disabled) {
                 return (
                   <div
                     key={item.label}
                     className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-300 cursor-not-allowed select-none"
-                    title={`${item.label} (Coming Soon)`}
+                    title={`${localizedLabel} (Coming Soon)`}
                   >
                     <Icon size={18} />
                   </div>
@@ -117,7 +120,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <button
                   key={item.label}
                   onClick={() => navigate(item.path)}
-                  title={item.label}
+                  title={localizedLabel}
                   className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all cursor-pointer ${
                     isActive
                       ? 'bg-indigo-50 text-indigo-700 shadow-sm shadow-indigo-50/50'
@@ -174,21 +177,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Manage Accounts
+                    {t('common.manage_accounts')}
                   </button>
                   <button className="w-full flex items-center gap-3 px-2 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer">
                     <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Message reports
+                    {t('common.message_reports')}
                   </button>
                 </div>
 
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 px-2">
-                  <span className="text-xs font-bold text-slate-400">Language:</span>
-                  <select className="text-xs font-bold text-slate-700 border border-slate-200 hover:border-slate-350 rounded-xl px-2.5 py-1 bg-white outline-none cursor-pointer">
-                    <option>English</option>
-                    <option>Ukrainian</option>
+                  <span className="text-xs font-bold text-slate-400">{t('common.language')}</span>
+                  <select
+                    value={language}
+                    onChange={(e) => changeLanguage(e.target.value as any)}
+                    className="text-xs font-bold text-slate-700 border border-slate-200 hover:border-slate-355 rounded-xl px-2.5 py-1 bg-white outline-none cursor-pointer"
+                  >
+                    <option value="en">English</option>
+                    <option value="uk">Ukrainian</option>
                   </select>
                 </div>
 
@@ -198,7 +205,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                       onClick={() => setShowSignInOptions(true)}
                       className="text-xs font-bold text-slate-700 cursor-pointer hover:text-indigo-650 transition-colors"
                     >
-                      Add sign-in options
+                      {t('common.add_signin_options')}
                     </span>
                     <div className="flex items-center gap-2">
                       <button
@@ -233,7 +240,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     <svg className="w-4 h-4 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
-                    Log out
+                    {t('common.log_out')}
                   </button>
                 </div>
               </div>
@@ -243,7 +250,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           <div ref={helpMenuRef} className="relative">
             <button
               onClick={() => setShowHelpMenu(!showHelpMenu)}
-              title="Help & Resources"
+              title={t('help.menu.tooltip')}
               className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
             >
               <HelpCircle size={20} />
@@ -261,7 +268,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
                   >
                     <BookOpen size={16} className="text-slate-400 shrink-0" />
-                    Knowledge base
+                    {t('help.menu.knowledge_base')}
                   </a>
                   <a
                     href="https://community.launchly.so"
@@ -270,7 +277,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
                   >
                     <Users size={16} className="text-slate-400 shrink-0" />
-                    Ask the Community
+                    {t('help.menu.ask_community')}
                   </a>
                   <a
                     href="https://agencies.launchly.so"
@@ -279,7 +286,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
                   >
                     <Briefcase size={16} className="text-slate-400 shrink-0" />
-                    Hire an Agency
+                    {t('help.menu.hire_agency')}
                   </a>
                   <a
                     href="https://ideas.launchly.so"
@@ -288,7 +295,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
                   >
                     <Lightbulb size={16} className="text-slate-400 shrink-0" />
-                    Share an Idea
+                    {t('help.menu.share_idea')}
                   </a>
                   <a
                     href="https://changelog.launchly.so"
@@ -297,7 +304,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
                   >
                     <ClipboardList size={16} className="text-slate-400 shrink-0" />
-                    Launchly Changelog
+                    {t('help.menu.changelog')}
                   </a>
                   <a
                     href="https://blog.launchly.so"
@@ -306,7 +313,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
                   >
                     <FileText size={16} className="text-slate-400 shrink-0" />
-                    Launchly Blog
+                    {t('help.menu.blog')}
                   </a>
                 </div>
 
@@ -315,23 +322,23 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     href="https://launchly.so/terms"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block px-2.5 py-1 text-xs font-bold text-slate-600 hover:text-indigo-650 transition-colors text-left"
+                    className="block px-2.5 py-1 text-xs font-bold text-slate-600 hover:text-indigo-655 transition-colors text-left"
                   >
-                    Terms of service
+                    {t('help.menu.terms')}
                   </a>
                   <a
                     href="https://launchly.so/privacy"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block px-2.5 py-1 text-xs font-bold text-slate-600 hover:text-indigo-650 transition-colors text-left"
+                    className="block px-2.5 py-1 text-xs font-bold text-slate-600 hover:text-indigo-655 transition-colors text-left"
                   >
-                    Privacy policy
+                    {t('help.menu.privacy_policy')}
                   </a>
                   <button
                     onClick={() => console.log('Privacy settings clicked')}
-                    className="w-full px-2.5 py-1 text-xs font-bold text-slate-600 hover:text-indigo-650 transition-colors text-left cursor-pointer"
+                    className="w-full px-2.5 py-1 text-xs font-bold text-slate-600 hover:text-indigo-655 transition-colors text-left cursor-pointer"
                   >
-                    Privacy settings
+                    {t('help.menu.privacy_settings')}
                   </button>
                 </div>
               </div>

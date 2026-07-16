@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../hooks/useBotsQuery';
+import { t } from '../../../i18n';
 import {
   useCreateBotMutation,
   useDeleteBotMutation,
@@ -150,23 +151,23 @@ export const AutomationsPage: React.FC = () => {
   }, []);
 
   const formatModifiedDate = (dateString?: string | null) => {
-    if (!dateString) return 'n/a';
+    if (!dateString) return t('common.not_applicable');
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'n/a';
+      if (isNaN(date.getTime())) return t('common.not_applicable');
       const now = new Date();
       const diffMs = now.getTime() - date.getTime();
-      if (diffMs < 0) return 'Just now';
+      if (diffMs < 0) return t('common.time.just_now');
       const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return 'Just now';
-      if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+      if (diffMins < 1) return t('common.time.just_now');
+      if (diffMins < 60) return t('common.time.mins_ago', { count: diffMins });
       const diffHours = Math.floor(diffMins / 60);
-      if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+      if (diffHours < 24) return t('common.time.hours_ago', { count: diffHours });
       const diffDays = Math.floor(diffHours / 24);
-      if (diffDays < 30) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+      if (diffDays < 30) return t('common.time.days_ago', { count: diffDays });
       return date.toLocaleDateString();
     } catch {
-      return 'n/a';
+      return t('common.not_applicable');
     }
   };
 
@@ -374,7 +375,7 @@ export const AutomationsPage: React.FC = () => {
     <DashboardLayout>
       <div className="flex h-full min-h-screen bg-slate-50 font-sans">
         <aside className="w-60 bg-slate-50 border-r border-slate-200 p-4 shrink-0 hidden md:block">
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2">Automation</h2>
+          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2">{t('automations.sidebar.title')}</h2>
           <nav className="space-y-1">
             <button
               onClick={() => setSelectedFolderId(null)}
@@ -384,13 +385,13 @@ export const AutomationsPage: React.FC = () => {
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              My Automations
+              {t('automations.sidebar.my_automations')}
             </button>
           </nav>
 
           <div className="mt-8">
             <div className="flex items-center justify-between px-2 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
-              <span>Folders</span>
+              <span>{t('automations.sidebar.folders')}</span>
             </div>
             <nav className="space-y-1">
               <button
@@ -403,7 +404,7 @@ export const AutomationsPage: React.FC = () => {
               >
                 <div className="flex items-center">
                   <FolderOpen size={14} className="mr-2 text-slate-400" />
-                  <span>All Automations</span>
+                  <span>{t('automations.sidebar.all_automations')}</span>
                 </div>
                 <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
                   {getFolderBotCount(null)}
@@ -431,7 +432,7 @@ export const AutomationsPage: React.FC = () => {
                   <button
                     onClick={() => handleDeleteFolder(folder.id)}
                     className="p-2 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all cursor-pointer rounded-lg shrink-0"
-                    title="Delete Folder"
+                    title={t('automations.sidebar.delete_folder')}
                   >
                     <Trash2 size={12} />
                   </button>
@@ -443,7 +444,7 @@ export const AutomationsPage: React.FC = () => {
 
         <div className="flex-1 p-6 md:p-10 max-w-5xl mx-auto space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Automation</h1>
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('automations.title')}</h1>
           </div>
 
           <div className="space-y-6 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
@@ -451,24 +452,24 @@ export const AutomationsPage: React.FC = () => {
               <div>
                 <h2 className="text-lg font-bold text-slate-900 tracking-tight">
                   {selectedFolderId
-                    ? folders.find((f) => f.id === selectedFolderId)?.name || 'Folder'
-                    : 'My Automations'}
+                    ? folders.find((f) => f.id === selectedFolderId)?.name || t('automations.sidebar.folders')
+                    : t('automations.sidebar.my_automations')}
                 </h2>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsNewFolderModalOpen(true)}
-                  className="flex items-center gap-1 px-4 py-2 text-xs font-bold text-indigo-600 hover:bg-indigo-50 border border-slate-200 rounded-xl transition-all cursor-pointer"
+                  className="flex items-center gap-1 px-4 py-2 text-xs font-bold text-indigo-600 hover:bg-indigo-550/10 border border-slate-200 rounded-xl transition-all cursor-pointer"
                 >
                   <FolderPlus size={14} />
-                  <span>New Folder</span>
+                  <span>{t('automations.btn.new_folder')}</span>
                 </button>
                 <button
                   onClick={() => setIsNewBotModalOpen(true)}
                   className="flex items-center gap-1 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
                 >
                   <Plus size={14} />
-                  <span>New Automation</span>
+                  <span>{t('automations.btn.new_automation')}</span>
                 </button>
               </div>
             </div>
@@ -478,7 +479,7 @@ export const AutomationsPage: React.FC = () => {
                 <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search all Automations"
+                  placeholder={t('automations.search_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all bg-slate-50/50"
@@ -495,7 +496,7 @@ export const AutomationsPage: React.FC = () => {
                   }`}
                 >
                   <Trash2 size={14} className={selectedBotIds.size > 0 ? 'text-red-500' : ''} />
-                  <span>Trash</span>
+                  <span>{t('automations.btn.trash')}</span>
                 </button>
                 <div className="h-4 w-px bg-slate-200 hidden md:block" />
                 <div className="flex items-center border border-slate-200 rounded-lg p-0.5 bg-slate-50">
@@ -522,7 +523,7 @@ export const AutomationsPage: React.FC = () => {
             {isLoading ? (
               <div className="py-12 flex flex-col items-center justify-center gap-2 text-sm text-slate-500">
                 <Loader2 size={24} className="animate-spin text-indigo-600" />
-                <span>Loading automations...</span>
+                <span>{t('automations.loading')}</span>
               </div>
             ) : filteredBots.length > 0 ? (
               viewMode === 'list' ? (
@@ -538,10 +539,10 @@ export const AutomationsPage: React.FC = () => {
                             className="rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
                           />
                         </th>
-                        <th className="py-3 px-2">Name</th>
-                        <th className="py-3 px-2 w-28 text-center">Runs</th>
-                        <th className="py-3 px-2 w-28 text-center">CTR</th>
-                        <th className="py-3 px-2 w-40">Modified</th>
+                        <th className="py-3 px-2">{t('automations.table.name')}</th>
+                        <th className="py-3 px-2 w-28 text-center">{t('automations.table.runs')}</th>
+                        <th className="py-3 px-2 w-28 text-center">{t('automations.table.ctr')}</th>
+                        <th className="py-3 px-2 w-40">{t('automations.table.modified')}</th>
                         <th className="py-3 px-4 w-12"></th>
                       </tr>
                     </thead>
@@ -639,17 +640,17 @@ export const AutomationsPage: React.FC = () => {
                           )}
                         </div>
                         <p className="text-xs text-slate-400 mt-2 line-clamp-2">
-                          {bot.description || 'No description provided.'}
+                          {bot.description || t('automations.no_description')}
                         </p>
                       </div>
 
                       <div className="flex items-center justify-between border-t border-slate-100 pt-3.5 mt-4 text-[11px] text-slate-500 font-medium">
                         <div className="flex items-center gap-3">
                           <span>
-                            Runs: <span className="font-bold text-slate-700">{bot.totalUsers}</span>
+                            {t('automations.table.runs')}: <span className="font-bold text-slate-700">{bot.totalUsers}</span>
                           </span>
                           <span>
-                            CTR: <span className="font-bold text-slate-700">
+                            {t('automations.table.ctr')}: <span className="font-bold text-slate-700">
                               {bot.totalUsers === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
                             </span>
                           </span>
@@ -662,7 +663,7 @@ export const AutomationsPage: React.FC = () => {
               )
             ) : (
               <div className="py-12 text-center text-sm text-slate-400">
-                No automations found. Create a new automation to get started.
+                {t('automations.no_automations')}
               </div>
             )}
           </div>
@@ -690,7 +691,7 @@ export const AutomationsPage: React.FC = () => {
                     className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
                   >
                     <Square size={13} className="text-slate-500 fill-slate-500" />
-                    <span>Stop Automation</span>
+                    <span>{t('automations.menu.stop')}</span>
                   </button>
                 ) : (
                   <button
@@ -698,7 +699,7 @@ export const AutomationsPage: React.FC = () => {
                     className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
                   >
                     <Play size={13} className="text-emerald-500 fill-emerald-500" />
-                    <span>Start Automation</span>
+                    <span>{t('automations.menu.start')}</span>
                   </button>
                 )}
                 <button
@@ -715,7 +716,7 @@ export const AutomationsPage: React.FC = () => {
                   className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
                 >
                   <Pencil size={13} className="text-slate-500" />
-                  <span>Edit</span>
+                  <span>{t('automations.menu.edit')}</span>
                 </button>
                 <button
                   onClick={() => {
@@ -728,7 +729,7 @@ export const AutomationsPage: React.FC = () => {
                   className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
                 >
                   <Folder size={13} className="text-slate-500" />
-                  <span>Move to Folder</span>
+                  <span>{t('automations.menu.move')}</span>
                 </button>
                 <div className="h-px bg-slate-100 my-1" />
                 <button
@@ -736,7 +737,7 @@ export const AutomationsPage: React.FC = () => {
                   className="w-full px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2 transition-all cursor-pointer"
                 >
                   <Trash2 size={13} />
-                  <span>Delete</span>
+                  <span>{t('automations.menu.delete')}</span>
                 </button>
               </>
             );
@@ -748,7 +749,7 @@ export const AutomationsPage: React.FC = () => {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-xl animate-in fade-in duration-200">
             <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900">New Automation</h3>
+              <h3 className="text-lg font-bold text-slate-900">{t('automations.modal.new_automation')}</h3>
               <button
                 onClick={() => setIsNewBotModalOpen(false)}
                 className="text-slate-400 hover:text-slate-600 transition-colors"
@@ -759,19 +760,19 @@ export const AutomationsPage: React.FC = () => {
             <div className="p-6 space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-                  Automation Name
+                  {t('automations.modal.name_label')}
                 </label>
                 <input
                   type="text"
                   value={newBotName}
                   onChange={(e) => setNewBotName(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
-                  placeholder="e.g. Welcome Bot"
+                  placeholder={t('automations.modal.name_placeholder')}
                 />
               </div>
               <div className="relative">
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-                  Telegram Bot Connection
+                  {t('automations.modal.conn_label')}
                 </label>
                 <button
                   type="button"
@@ -780,13 +781,13 @@ export const AutomationsPage: React.FC = () => {
                 >
                   <span className="text-slate-800 font-semibold">
                     {(() => {
-                      if (selectedBotOption === 'nobot') return 'Without bot';
-                      if (selectedBotOption === 'new') return 'Connect new bot';
+                      if (selectedBotOption === 'nobot') return t('automations.modal.conn_without');
+                      if (selectedBotOption === 'new') return t('automations.modal.conn_new');
                       const selectedBot = bots.find(b => String(b.id) === selectedBotOption);
                       if (selectedBot) {
                         return `${selectedBot.name} ${selectedBot.username ? `@${selectedBot.username}` : ''}`;
                       }
-                      return 'Without bot';
+                      return t('automations.modal.conn_without');
                     })()}
                   </span>
                   <ChevronDown size={16} className={`text-slate-500 transition-transform ${isBotSelectOpen ? 'rotate-180' : ''}`} />
@@ -808,7 +809,7 @@ export const AutomationsPage: React.FC = () => {
                         }}
                         className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between ${selectedBotOption === 'nobot' ? 'bg-indigo-50/50 text-indigo-600 font-bold' : 'text-slate-700 font-medium'}`}
                       >
-                        <span>Without bot</span>
+                        <span>{t('automations.modal.conn_without')}</span>
                       </button>
                       <button
                         type="button"
@@ -819,7 +820,7 @@ export const AutomationsPage: React.FC = () => {
                         }}
                         className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between ${selectedBotOption === 'new' ? 'bg-indigo-50/50 text-indigo-600 font-bold' : 'text-slate-700 font-medium'}`}
                       >
-                        <span>Connect new bot</span>
+                        <span>{t('automations.modal.conn_new')}</span>
                       </button>
 
                       {(() => {

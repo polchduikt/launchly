@@ -1,5 +1,6 @@
 import React from 'react';
 import { Copy, Trash2 } from 'lucide-react';
+import { t } from '../../../../i18n';
 
 interface NodeToolbarProps {
   nodeId: string;
@@ -20,7 +21,7 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = ({ nodeId, onMouseEnter, 
           window.dispatchEvent(new CustomEvent('flow-copy-node', { detail: { nodeId } }));
         }}
         className="p-1 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer flex items-center justify-center"
-        title="Copy Block"
+        title={t('flow_builder.copy_block')}
       >
         <Copy size={16} />
       </button>
@@ -31,7 +32,7 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = ({ nodeId, onMouseEnter, 
           window.dispatchEvent(new CustomEvent('flow-delete-node', { detail: { nodeId } }));
         }}
         className="p-1 text-rose-500 hover:text-rose-700 transition-colors cursor-pointer flex items-center justify-center"
-        title="Delete Block"
+        title={t('flow_builder.delete_block')}
       >
         <Trash2 size={16} />
       </button>

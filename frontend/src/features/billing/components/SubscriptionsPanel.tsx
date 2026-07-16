@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { t } from '../../../i18n';
 import {
   useSubscriptionQuery,
   useCancelSubscriptionMutation,
@@ -32,7 +33,7 @@ export const SubscriptionsPanel: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center p-12 space-y-4 min-h-[300px]">
         <Loader2 className="animate-spin text-indigo-600" size={32} />
-        <span className="text-xs font-bold text-slate-400">Loading subscription details...</span>
+        <span className="text-xs font-bold text-slate-400">{t('settings.billing.loading')}</span>
       </div>
     );
   }
@@ -42,7 +43,7 @@ export const SubscriptionsPanel: React.FC = () => {
       <div className="bg-rose-50 border border-rose-200 text-rose-800 p-6 rounded-3xl flex items-start gap-3 max-w-md mx-auto shadow-sm">
         <AlertCircle size={20} className="text-rose-600 shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <h3 className="font-extrabold text-sm">Failed to load billing subscription</h3>
+          <h3 className="font-extrabold text-sm">{t('settings.billing.error_loading')}</h3>
           <p className="text-xs text-rose-700/90 leading-relaxed">
             {error instanceof Error ? error.message : 'An unexpected error occurred.'}
           </p>
@@ -70,7 +71,7 @@ export const SubscriptionsPanel: React.FC = () => {
         <div className="flex items-start justify-between pb-6 border-b border-slate-100">
           <div className="space-y-1.5">
             <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
-              Your plan
+              {t('settings.billing.your_plan')}
             </span>
             <h2 className="text-3xl font-black text-slate-800 capitalize tracking-tight leading-none">
               {plan.displayName}
@@ -83,7 +84,7 @@ export const SubscriptionsPanel: React.FC = () => {
                 onClick={() => setIsPricingModalOpen(true)}
                 className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
               >
-                Change Plan
+                {t('settings.billing.change_plan')}
               </button>
             )}
 
@@ -92,7 +93,7 @@ export const SubscriptionsPanel: React.FC = () => {
                 onClick={() => setIsPricingModalOpen(true)}
                 className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm shadow-emerald-100"
               >
-                Activate Trial
+                {t('settings.billing.activate_trial')}
               </button>
             ) : cancelAtPeriodEnd ? (
               <button
@@ -101,7 +102,7 @@ export const SubscriptionsPanel: React.FC = () => {
                 className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
               >
                 {resumeMutation.isPending && <Loader2 size={12} className="animate-spin" />}
-                Restore Subscription
+                {t('settings.billing.restore')}
               </button>
             ) : (
               <button
@@ -110,7 +111,7 @@ export const SubscriptionsPanel: React.FC = () => {
                 className="px-5 py-2.5 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
               >
                 {cancelMutation.isPending && <Loader2 size={12} className="animate-spin text-rose-600" />}
-                Cancel Subscription
+                {t('settings.billing.cancel')}
               </button>
             )}
           </div>
@@ -118,9 +119,9 @@ export const SubscriptionsPanel: React.FC = () => {
 
         <div className="pt-6 space-y-6">
           <div className="space-y-1">
-            <h3 className="text-sm font-bold text-slate-800">Contacts</h3>
+            <h3 className="text-sm font-bold text-slate-800">{t('settings.billing.contacts')}</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              The price of your plan is based on the number of contacts in your Manychat account, set a contact limit to control how your list scales and the amount you pay.
+              {t('settings.billing.desc')}
             </p>
           </div>
 
@@ -134,7 +135,7 @@ export const SubscriptionsPanel: React.FC = () => {
                   {activeContactsCount}
                 </span>
                 <span className="text-[10px] font-bold text-slate-500 mt-1 whitespace-nowrap">
-                  Your Active contacts
+                  {t('settings.billing.active_contacts')}
                 </span>
                 <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-[#1d59c9] mt-1.5" />
               </div>
@@ -155,13 +156,13 @@ export const SubscriptionsPanel: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-6 pt-6 border-t border-slate-100 text-left">
             <div className="space-y-1">
-              <span className="text-xs font-bold text-slate-400">Price</span>
+              <span className="text-xs font-bold text-slate-400">{t('settings.billing.price')}</span>
               <p className="text-sm font-extrabold text-slate-700">
                 {isFree ? '$0' : `$${plan.price}`}
               </p>
             </div>
             <div className="space-y-1 border-l border-slate-100 pl-6">
-              <span className="text-xs font-bold text-slate-400">Contacts</span>
+              <span className="text-xs font-bold text-slate-400">{t('settings.billing.contacts')}</span>
               <p className="text-sm font-extrabold text-slate-700">
                 {activeContactsCount}/{maxContactsLimit}
               </p>

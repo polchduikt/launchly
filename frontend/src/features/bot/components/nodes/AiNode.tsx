@@ -6,6 +6,7 @@ import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../types/bot';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
+import { t } from '../../../../i18n';
 
 export const AiNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
@@ -64,10 +65,10 @@ export const AiNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected
         </span>
         <div className="flex-1 min-w-0">
           <span className="font-extrabold text-[9px] text-emerald-600/70 uppercase tracking-wider block leading-none">
-            Telegram
+            {t('node.ai.category')}
           </span>
           <span className="text-xs font-bold text-emerald-800 truncate block mt-0.5">
-            AI Step
+            {t('node.ai.title')}
           </span>
         </div>
       </div>
@@ -80,14 +81,14 @@ export const AiNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected
         ) : (
           <div className="border border-dashed border-slate-250 rounded-2xl p-4 flex items-center justify-center text-center select-none">
             <span className="text-xs text-slate-400 font-bold">
-              Define instructions for AI Step
+              {t('node.ai.define_instructions')}
             </span>
           </div>
         )}
       </div>
 
       <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">Next Step</span>
+        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">{t('node.ai.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}

@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueries } from '@tanstack/react-query';
 import { useBotStore } from '../../../store/useBotStore';
+import { t } from '../../../i18n';
 import { ROUTES } from '../../../constants/routes';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 import {
-  useCampaignsQuery,
   useTagsQuery,
   useSendCampaignMutation,
   useDeleteCampaignMutation,
@@ -64,17 +64,17 @@ export const BroadcastsPage: React.FC = () => {
   const cancelScheduleMut = useCancelScheduleMutation();
 
   const handleSendNow = (campaignId: number, targetBotId: number, name: string) => {
-    if (window.confirm(`Are you sure you want to send the broadcast "${name}" now?`)) {
+    if (window.confirm(t('broadcasts.alert.send_confirm', { name }))) {
       sendCampaignMut.mutate({ botId: targetBotId, campaignId });
     }
   };
   const handleDeleteCampaign = (campaignId: number, targetBotId: number, name: string) => {
-    if (window.confirm(`Are you sure you want to delete the broadcast "${name}"?`)) {
+    if (window.confirm(t('broadcasts.alert.delete_confirm', { name }))) {
       deleteCampaignMut.mutate({ botId: targetBotId, campaignId });
     }
   };
   const handleCancelSchedule = (campaignId: number, targetBotId: number, name: string) => {
-    if (window.confirm(`Cancel the scheduled broadcast "${name}"? It will revert to Draft.`)) {
+    if (window.confirm(t('broadcasts.alert.cancel_confirm', { name }))) {
       cancelScheduleMut.mutate({ botId: targetBotId, campaignId });
     }
   };
@@ -87,16 +87,16 @@ export const BroadcastsPage: React.FC = () => {
             <Bell size={28} />
           </div>
           <div className="space-y-2">
-            <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">Connect a Bot first</h1>
+            <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">{t('broadcasts.connect_bot_title')}</h1>
             <p className="text-sm text-slate-555">
-              Please connect a Telegram bot in the dashboard home page to manage campaigns.
+              {t('broadcasts.connect_bot_desc')}
             </p>
           </div>
           <button
             onClick={() => navigate('/')}
             className="px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-100 cursor-pointer"
           >
-            Go to Home
+            {t('broadcasts.btn.go_home')}
           </button>
         </div>
       </DashboardLayout>
@@ -108,9 +108,9 @@ export const BroadcastsPage: React.FC = () => {
       <div className="min-h-screen bg-slate-50 p-6 md:p-10 max-w-6xl mx-auto space-y-6 font-sans">
         <div className="flex items-center justify-between pb-6 border-b border-slate-200">
           <div>
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Broadcasts</h1>
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('broadcasts.title')}</h1>
             <p className="text-xs text-slate-550 font-semibold mt-1">
-              Send bulk messages and campaigns to your segmented subscribers.
+              {t('broadcasts.subtitle')}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -119,7 +119,7 @@ export const BroadcastsPage: React.FC = () => {
               className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
             >
               <Plus size={14} />
-              <span>New Broadcast</span>
+              <span>{t('broadcasts.btn.new')}</span>
             </button>
           </div>
         </div>
@@ -142,16 +142,16 @@ export const BroadcastsPage: React.FC = () => {
               </div>
             </div>
 
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight mb-2">Create your first Broadcast</h2>
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight mb-2">{t('broadcasts.empty.title')}</h2>
             <p className="text-sm text-slate-550 max-w-md mx-auto mb-6 leading-relaxed">
-              Engage your contacts by sending your Broadcasts immediately or scheduling it on a particular date and time.
+              {t('broadcasts.empty.desc')}
             </p>
 
             <button
               onClick={() => setIsCreateOpen(true)}
               className="px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-100 cursor-pointer"
             >
-              New Broadcast
+              {t('broadcasts.btn.new')}
             </button>
           </div>
         ) : (
@@ -160,13 +160,13 @@ export const BroadcastsPage: React.FC = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">
-                    <th className="py-3 px-4">Campaign Name</th>
-                    <th className="py-3 px-4">Automation</th>
-                    <th className="py-3 px-4">Target Audience</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 w-44 text-center">Delivery Progress</th>
-                    <th className="py-3 px-4">Created Date</th>
-                    <th className="py-3 px-4 text-right">Action</th>
+                    <th className="py-3 px-4">{t('broadcasts.table.campaign_name')}</th>
+                    <th className="py-3 px-4">{t('broadcasts.table.automation')}</th>
+                    <th className="py-3 px-4">{t('broadcasts.table.target_audience')}</th>
+                    <th className="py-3 px-4">{t('broadcasts.table.status')}</th>
+                    <th className="py-3 px-4 w-44 text-center">{t('broadcasts.table.delivery_progress')}</th>
+                    <th className="py-3 px-4">{t('broadcasts.table.created_date')}</th>
+                    <th className="py-3 px-4 text-right">{t('broadcasts.table.action')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -201,8 +201,8 @@ export const BroadcastsPage: React.FC = () => {
                         <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
                           <div className="text-xs text-slate-550 font-bold mb-1.5">
                             {camp.status === 'SCHEDULED' && camp.sentCount === 0 && camp.totalCount === 0
-                              ? '— pending —'
-                              : `${camp.sentCount} / ${camp.totalCount} sent`}
+                              ? t('broadcasts.table.pending')
+                              : t('broadcasts.table.sent', { sent: camp.sentCount, total: camp.totalCount })}
                           </div>
                           <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                             <div
@@ -240,14 +240,14 @@ export const BroadcastsPage: React.FC = () => {
                                 <button
                                   onClick={() => handleSendNow(camp.id, camp.botId, camp.name)}
                                   disabled={sendCampaignMut.isPending}
-                                  title="Send Now"
+                                  title={t('broadcasts.tooltip.send_now')}
                                   className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border border-transparent hover:border-emerald-100 rounded-xl transition-all cursor-pointer shrink-0"
                                 >
                                   <Play size={14} className="fill-current" />
                                 </button>
                                 <button
                                   onClick={() => setEditingCampaign(camp)}
-                                  title="Edit Broadcast"
+                                  title={t('broadcasts.tooltip.edit')}
                                   className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 rounded-xl transition-all cursor-pointer shrink-0"
                                 >
                                   <Pencil size={14} />
@@ -256,7 +256,7 @@ export const BroadcastsPage: React.FC = () => {
                                   <button
                                     onClick={() => handleCancelSchedule(camp.id, camp.botId, camp.name)}
                                     disabled={cancelScheduleMut.isPending}
-                                    title="Cancel Schedule"
+                                    title={t('broadcasts.tooltip.cancel_schedule')}
                                     className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-transparent hover:border-amber-100 rounded-xl transition-all cursor-pointer shrink-0"
                                   >
                                     <CalendarX size={14} />
@@ -265,7 +265,7 @@ export const BroadcastsPage: React.FC = () => {
                                 <button
                                   onClick={() => handleDeleteCampaign(camp.id, camp.botId, camp.name)}
                                   disabled={deleteCampaignMut.isPending}
-                                  title="Delete Broadcast"
+                                  title={t('broadcasts.tooltip.delete')}
                                   className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 rounded-xl transition-all cursor-pointer shrink-0"
                                 >
                                   <Trash2 size={14} />

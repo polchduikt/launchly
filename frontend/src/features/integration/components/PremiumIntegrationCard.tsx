@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HelpCircle, CheckCircle } from 'lucide-react';
+import { t } from '../../../i18n';
 
 interface PremiumIntegrationCardProps {
   title: string;
@@ -69,7 +70,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
         {isConnected && (
           <div className="mt-2.5 flex items-center gap-1.5 text-emerald-600 font-extrabold text-xs">
             <CheckCircle size={13} className="shrink-0" />
-            <span>Connected</span>
+            <span>{t('settings.integrations.premium.connected')}</span>
           </div>
         )}
       </div>
@@ -86,14 +87,14 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
             <div className="mt-2.5 space-y-2.5 w-full">
               {stepText && !isConnected && (
                 <div className="flex flex-col select-none">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider leading-none">Step 1</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider leading-none">{t('settings.integrations.premium.step1')}</span>
                   <span className="text-xs font-bold text-slate-500 mt-0.5">{stepText}</span>
                 </div>
               )}
               
               <div className="space-y-1">
                 <label className="flex items-center gap-1 text-[9px] font-extrabold text-slate-450 uppercase tracking-wider select-none">
-                  <span>API Secret</span>
+                  <span>{t('settings.integrations.premium.api_secret')}</span>
                   <HelpCircle size={10} className="text-slate-400 cursor-help" />
                 </label>
                 <input
@@ -101,7 +102,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
                   value={isConnected ? '••••••••••••••••' : apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   disabled={isConnected}
-                  placeholder={placeholder || `Enter ${name} API Secret`}
+                  placeholder={placeholder || t('settings.integrations.premium.api_secret')}
                   className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 disabled:bg-slate-50 disabled:text-slate-400 transition-all font-semibold bg-slate-50/50"
                 />
               </div>
@@ -112,7 +113,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
                   onClick={handleDisconnect}
                   className="w-full px-4 py-2 border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm select-none text-center"
                 >
-                  Disconnect Account
+                  {t('settings.integrations.premium.disconnect')}
                 </button>
               ) : (
                 <button
@@ -120,7 +121,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
                   onClick={handleConnect}
                   className="w-full px-4 py-2 border border-slate-250 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm select-none text-center"
                 >
-                  Connect {name} Account
+                  {t('settings.integrations.premium.connect', { name })}
                 </button>
               )}
             </div>
@@ -128,7 +129,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
             <div className="mt-2.5 w-full space-y-2">
               {stepText && !isConnected && (
                 <div className="flex flex-col select-none mb-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider leading-none">Step 1</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider leading-none">{t('settings.integrations.premium.step1')}</span>
                   <span className="text-xs font-bold text-slate-500 mt-0.5">{stepText}</span>
                 </div>
               )}
@@ -138,7 +139,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
                   onClick={handleDisconnect}
                   className="w-full px-4 py-2 border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm select-none text-center"
                 >
-                  Disconnect Account
+                  {t('settings.integrations.premium.disconnect')}
                 </button>
               ) : (
                 <button
@@ -146,7 +147,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
                   onClick={handleConnect}
                   className="w-full px-4 py-2 border border-slate-250 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm select-none text-center"
                 >
-                  Connect {name} Account
+                  {t('settings.integrations.premium.connect', { name })}
                 </button>
               )}
             </div>

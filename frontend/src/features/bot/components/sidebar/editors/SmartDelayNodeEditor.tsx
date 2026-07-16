@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Info, Clock, Calendar, ChevronDown } from 'lucide-react';
 import type { SmartDelayNodeEditorProps } from '../../../../../types/bot';
+import { t } from '../../../../../i18n';
 
 interface EditorStateLocal {
   setIsNextStepDrawerOpen: (open: boolean) => void;
@@ -78,7 +79,7 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
           }`}
         >
           <Clock size={13} />
-          Duration
+          {t('editor.smart_delay.duration')}
         </button>
         <button
           type="button"
@@ -90,7 +91,7 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
           }`}
         >
           <Calendar size={13} />
-          Date
+          {t('editor.smart_delay.date')}
         </button>
       </div>
 
@@ -98,7 +99,7 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
         <div className="space-y-4">
           <div>
             <label htmlFor="sdDateTime" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-              Specific Date & Time
+              {t('editor.smart_delay.specific_date')}
             </label>
             <input
               id="sdDateTime"
@@ -117,7 +118,7 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
               <Info size={14} />
             </span>
             <p className="text-[10px] text-[#A34226]/90 font-semibold leading-relaxed">
-              Automation stops here if the date has already passed. We use the contact's timezone, or your account timezone if theirs is unknown.
+              {t('editor.smart_delay.date_warning')}
             </p>
           </div>
         </div>
@@ -125,7 +126,7 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
         <div className="space-y-5">
           <div>
             <label htmlFor="sdWaitAmt" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-              Wait For
+              {t('editor.smart_delay.wait_for')}
             </label>
             <div className="flex gap-3 items-center">
               <div className="relative flex-1">
@@ -144,9 +145,9 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
                   onChange={(e) => handleChange('waitUnit', e.target.value)}
                   className="appearance-none pr-10 pl-7 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 text-sm font-bold bg-white cursor-pointer shadow-xs transition-all"
                 >
-                  <option value="Minutes">Minutes</option>
-                  <option value="Hours">Hours</option>
-                  <option value="Days">Days</option>
+                  <option value="Minutes">{t('editor.smart_delay.minutes')}</option>
+                  <option value="Hours">{t('editor.smart_delay.hours')}</option>
+                  <option value="Days">{t('editor.smart_delay.days')}</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-500">
                   <ChevronDown size={14} strokeWidth={2.5} />
@@ -154,15 +155,15 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
               </div>
             </div>
             <p className="text-[10px] text-slate-400 font-semibold leading-relaxed mt-2.5 select-none">
-              Enter a number or a numeric contact field formula. Max 365 days.
+              {t('editor.smart_delay.max_desc')}
             </p>
           </div>
 
           <div className="flex items-center justify-between border border-slate-150 rounded-2xl p-4 shadow-xs bg-slate-50/20">
             <div className="pr-4 select-none">
-              <p className="text-xs font-extrabold text-slate-700">Send within specific hours</p>
+              <p className="text-xs font-extrabold text-slate-700">{t('editor.smart_delay.send_within')}</p>
               <p className="text-[10px] text-slate-400 font-semibold leading-relaxed mt-1">
-                Sends when the contact's local time is within the hours you set. Your account timezone is used if theirs is unknown.
+                {t('editor.smart_delay.send_within_desc')}
               </p>
             </div>
             <button
@@ -193,7 +194,7 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
           }}
           className="w-full py-3.5 bg-white hover:bg-orange-50/10 border border-dashed border-orange-200 hover:border-orange-400 text-[#C2410C] hover:text-[#A34226] text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"
         >
-          Choose Next Step
+          {t('editor.smart_delay.choose_next_step')}
         </button>
       </div>
     </div>

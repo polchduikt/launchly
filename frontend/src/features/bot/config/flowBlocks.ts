@@ -1,22 +1,39 @@
+import { t } from '../../../i18n';
+
 export interface FlowBlockConfig {
   type: string;
-  label: string;
+  labelKey: string;
   color: string;
 }
 
-export const FLOW_BLOCKS: FlowBlockConfig[] = [
-  { type: 'MESSAGE', label: 'Send Message', color: 'text-sky-500 bg-sky-50' },
-  { type: 'CONDITION', label: 'Condition Rule', color: 'text-purple-700 bg-purple-50' },
-  { type: 'ACTION', label: 'Actions', color: 'text-amber-600 bg-amber-50' },
+const FLOW_BLOCK_COLORS: Record<string, string> = {
+  MESSAGE: 'text-sky-500 bg-sky-50',
+  CONDITION: 'text-purple-700 bg-purple-50',
+  ACTION: 'text-amber-600 bg-amber-50',
+  API_CALL: 'text-indigo-500 bg-indigo-50',
+  SMART_DELAY: 'text-rose-500 bg-rose-50',
+  RANDOMIZER: 'text-purple-600 bg-purple-50',
+  START_AUTOMATION: 'text-lime-600 bg-lime-50',
+  COMMENT: 'text-amber-500 bg-amber-50',
+  AI: 'text-emerald-600 bg-emerald-50',
+  END: 'text-slate-500 bg-slate-50',
+};
 
-  { type: 'API_CALL', label: 'API Integration', color: 'text-indigo-500 bg-indigo-50' },
-  { type: 'SMART_DELAY', label: 'Smart Delay', color: 'text-rose-500 bg-rose-50' },
-  { type: 'RANDOMIZER', label: 'Randomizer', color: 'text-purple-600 bg-purple-50' },
-  { type: 'START_AUTOMATION', label: 'Start Automation', color: 'text-lime-600 bg-lime-50' },
-  { type: 'COMMENT', label: 'Comment', color: 'text-amber-500 bg-amber-50' },
-  { type: 'AI', label: 'AI Step', color: 'text-emerald-600 bg-emerald-50' },
-  { type: 'END', label: 'End Session', color: 'text-slate-500 bg-slate-50' },
-];
+const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'ACTION', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMENT', 'AI', 'END'];
+
+export const getFlowBlocks = (): Array<{ type: string; label: string; color: string }> =>
+  FLOW_BLOCK_TYPES.map((type) => ({
+    type,
+    label: t(`flow_block.${type}`),
+    color: FLOW_BLOCK_COLORS[type] || 'text-slate-500 bg-slate-50',
+  }));
+
+// Legacy export for backward compatibility — static labels (English fallback)
+export const FLOW_BLOCKS = FLOW_BLOCK_TYPES.map((type) => ({
+  type,
+  get label() { return t(`flow_block.${type}`); },
+  color: FLOW_BLOCK_COLORS[type] || 'text-slate-500 bg-slate-50',
+}));
 
 export const createDefaultNodeData = (type: string): Record<string, unknown> => {
   switch (type) {
@@ -54,7 +71,7 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
       };
     case 'COMMENT':
       return {
-        text: 'Write a comment...',
+        text: '',
         noteSize: 'M',
         fontSize: 'S'
       };

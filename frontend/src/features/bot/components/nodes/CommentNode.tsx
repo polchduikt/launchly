@@ -4,6 +4,7 @@ import { useConnection } from '@xyflow/react';
 import type { CustomNodeData } from '../../../../types/bot';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
+import { t } from '../../../../i18n';
 
 export const CommentNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const { showToolbar, bindHover } = useNodeHover();
@@ -52,7 +53,7 @@ export const CommentNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
     }
   };
 
-  const text = data.text || 'Write a comment...';
+  const text = data.text || t('node.comment.placeholder');
 
   return (
     <div
@@ -62,7 +63,7 @@ export const CommentNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
           ? 'border-emerald-500 ring-4 ring-emerald-100'
           : isHighlighted
             ? 'border-indigo-400 ring-2 ring-indigo-50/60'
-            : 'border-slate-200 hover:border-slate-350'
+            : 'border-slate-200 hover:border-slate-355'
       } ${isConnecting ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
 

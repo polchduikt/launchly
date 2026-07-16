@@ -6,6 +6,7 @@ import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../types/bot';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
+import { t } from '../../../../i18n';
 
 export const EndNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected }) => {
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
@@ -61,14 +62,14 @@ export const EndNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selecte
           <Octagon size={14} strokeWidth={2.5} />
         </span>
         <div>
-          <span className="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider block leading-none">Flow End</span>
-          <span className="text-xs font-bold text-slate-700 truncate block mt-0.5">Terminate Walk</span>
+          <span className="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider block leading-none">{t('node.end.flow_end')}</span>
+          <span className="text-xs font-bold text-slate-700 truncate block mt-0.5">{t('node.end.terminate')}</span>
         </div>
       </div>
 
       <div className="p-3.5">
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-500 leading-relaxed text-center font-semibold select-none">
-          Bot stops executing and closes session.
+          {t('node.end.description')}
         </div>
       </div>
     </div>

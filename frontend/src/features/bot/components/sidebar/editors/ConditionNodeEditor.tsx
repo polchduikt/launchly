@@ -6,6 +6,7 @@ import { CONDITION_OPERATORS, getOperatorLabel } from '../../../config/editorOpt
 import { FieldVariableSelector } from './FieldVariableSelector';
 import { useBotStore } from '../../../../../store/useBotStore';
 import { useTagsQuery } from '../../../../broadcast/hooks/useBroadcastQueries';
+import { t } from '../../../../../i18n';
 
 interface EditorStateLocal {
   setIsNextStepDrawerOpen: (open: boolean) => void;
@@ -179,13 +180,13 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
 
             <div>
               <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-800 font-extrabold select-none mb-2">
-                <span>Does the contact match</span>
+                <span>{t('editor.condition.does_contact_match')}</span>
                 <button
                   type="button"
                   onClick={() => toggleMatchType(branch.id!, branch.matchType || 'all')}
                   className="text-indigo-650 hover:text-indigo-700 underline underline-offset-2 decoration-dotted font-black cursor-pointer bg-transparent border-none p-0"
                 >
-                  {branch.matchType === 'all' ? 'all of the following conditions?' : 'any of the following conditions?'}
+                  {branch.matchType === 'all' ? t('editor.condition.all_conditions') : t('editor.condition.any_conditions')}
                 </button>
               </div>
 
@@ -202,7 +203,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                           type="button"
                           className="px-2.5 py-1 text-[11px] font-bold text-slate-650 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg cursor-pointer max-w-[100px] truncate"
                         >
-                          {cond.variable ? (cond.variable.charAt(0).toUpperCase() + cond.variable.slice(1).replace(/_/g, ' ')) : 'Select Field'}
+                          {cond.variable ? (cond.variable.charAt(0).toUpperCase() + cond.variable.slice(1).replace(/_/g, ' ')) : t('editor.condition.select_field')}
                         </button>
                       }
                       onSelect={(val) => updateConditionField(branch.id!, cond.id!, 'variable', val)}
@@ -245,12 +246,12 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                 className="w-full py-2.5 bg-white hover:bg-teal-50/30 border border-dashed border-teal-200 hover:border-teal-400 text-teal-650 hover:text-teal-700 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 select-none shadow-xs"
               >
                 <Plus size={13} />
-                <span>+ Condition</span>
+                <span>{t('editor.condition.add_condition')}</span>
               </button>
             </div>
 
             <div className="pt-4 border-t border-slate-100">
-              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Yes, the contact matches</p>
+              <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">{t('editor.condition.yes_matches')}</p>
               <button
                 type="button"
                 onClick={() => {
@@ -261,7 +262,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                 }}
                 className="w-full py-2.5 bg-white hover:bg-blue-50/20 border border-dashed border-blue-200 hover:border-blue-400 text-blue-600 hover:text-blue-700 text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"
               >
-                Choose Next Step
+                {t('editor.condition.choose_next_step')}
               </button>
             </div>
           </div>
@@ -270,7 +271,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
 
       <div className="relative flex py-2 items-center">
         <div className="flex-grow border-t border-slate-200"></div>
-        <span className="flex-shrink mx-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider select-none">If not</span>
+        <span className="flex-shrink mx-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider select-none">{t('editor.condition.if_not')}</span>
         <div className="flex-grow border-t border-slate-200"></div>
       </div>
 
@@ -281,7 +282,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
           className="w-full py-2.5 bg-white hover:bg-teal-50/30 border border-dashed border-teal-200 hover:border-teal-400 text-teal-650 hover:text-teal-700 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 select-none shadow-xs"
         >
           <Plus size={13} />
-          <span>+ Add Another Condition</span>
+          <span>{t('editor.condition.add_another')}</span>
         </button>
 
         <button
@@ -294,7 +295,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
           }}
           className="w-full py-2.5 bg-white hover:bg-blue-50/20 border border-dashed border-blue-200 hover:border-blue-400 text-blue-600 hover:text-blue-700 text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"
         >
-          Choose Next Step
+          {t('editor.condition.choose_next_step')}
         </button>
       </div>
 
@@ -339,7 +340,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                currentEditingCond.operator !== 'empty' ? (
                 <div className="space-y-3">
                   <label htmlFor="popoverValue" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Value to compare
+                    {t('editor.condition.value_to_compare')}
                   </label>
                   <div className="relative">
                     <input
@@ -370,12 +371,12 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                       onChange={(e) => updateConditionField(popoverState.branchId, popoverState.condId, 'caseSensitive', e.target.checked)}
                       className="rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5"
                     />
-                    <span>Case Sensitivity</span>
+                    <span>{t('editor.condition.case_sensitivity')}</span>
                   </label>
                 </div>
               ) : (
                 <div className="h-full flex items-center justify-center text-slate-400 text-xs italic font-medium">
-                  No value required
+                  {t('editor.condition.no_value_required')}
                 </div>
               )}
 
@@ -385,7 +386,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                   onClick={() => setPopoverState(null)}
                   className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all shadow-xs"
                 >
-                  Apply
+                  {t('editor.condition.apply')}
                 </button>
               </div>
             </div>

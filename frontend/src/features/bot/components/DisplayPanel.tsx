@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { t } from '../../../i18n';
 
 export const DisplayPanel: React.FC = () => {
   const [showTemplatesModal, setShowTemplatesModal] = useState(true);
@@ -31,7 +32,7 @@ export const DisplayPanel: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-start">
           <div className="lg:col-span-3">
             <h3 className="text-sm font-bold text-slate-800">
-              Ready-to-Go Templates
+              {t('settings.display.templates_title')}
             </h3>
           </div>
           <div className="lg:col-span-5 flex items-center">
@@ -44,13 +45,13 @@ export const DisplayPanel: React.FC = () => {
               />
               <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
               <span className="ml-3 text-xs font-semibold text-slate-700">
-                Show Templates modal
+                {t('settings.display.templates_toggle')}
               </span>
             </label>
           </div>
           <div className="lg:col-span-4">
             <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
-              Show the "Ready-to-Go Templates" modal when creating the Automation.
+              {t('settings.display.templates_desc')}
             </p>
           </div>
         </div>
@@ -58,7 +59,7 @@ export const DisplayPanel: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-start">
           <div className="lg:col-span-3">
             <h3 className="text-sm font-bold text-slate-800">
-              Contacts
+              {t('settings.display.contacts_title')}
             </h3>
           </div>
           <div className="lg:col-span-5 flex items-center">
@@ -71,13 +72,13 @@ export const DisplayPanel: React.FC = () => {
               />
               <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
               <span className="ml-3 text-xs font-semibold text-slate-700">
-                Show only subscribed contacts
+                {t('settings.display.contacts_toggle')}
               </span>
             </label>
           </div>
           <div className="lg:col-span-4">
             <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
-              Hide all unsubscribed contacts and visitors.
+              {t('settings.display.contacts_desc')}
             </p>
           </div>
         </div>

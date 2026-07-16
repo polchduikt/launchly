@@ -3,6 +3,7 @@ import { X, Trash2, Send, Sparkles, Globe, CreditCard, Zap, GitFork, Shuffle, Cl
 import type { EditButtonDrawerProps } from '../../../../../types/bot';
 import type { Node, Edge } from '@xyflow/react';
 import { NODE_TITLES } from '../../../config/nodeDisplay';
+import { t } from '../../../../../i18n';
 
 const mapNodeTypeToActionType = (nodeType?: string): string => {
   switch (nodeType) {
@@ -93,15 +94,15 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   };
 
   const actionOptions = [
-    { type: 'TELEGRAM', label: 'Telegram', icon: Send, color: 'text-sky-500 bg-sky-50' },
-    { type: 'AI_STEP', label: 'AI Step', icon: Sparkles, color: 'text-indigo-500 bg-indigo-50' },
-    { type: 'URL', label: 'Open website', icon: Globe, color: 'text-emerald-500 bg-emerald-50' },
-    { type: 'BUY', label: 'Buy Button', icon: CreditCard, color: 'text-amber-500 bg-amber-50', pro: true },
-    { type: 'ACTIONS', label: 'Perform Actions', icon: Zap, color: 'text-purple-500 bg-purple-50' },
-    { type: 'CONDITION', label: 'Condition', icon: GitFork, color: 'text-rose-500 bg-rose-50', pro: true },
-    { type: 'RANDOM', label: 'Randomizer', icon: Shuffle, color: 'text-violet-500 bg-violet-50', pro: true },
-    { type: 'DELAY', label: 'Smart Delay', icon: Clock, color: 'text-cyan-500 bg-cyan-50', pro: true },
-    { type: 'AUTOMATION', label: 'Start another Automation', icon: Play, color: 'text-teal-500 bg-teal-50' },
+    { type: 'TELEGRAM', label: t('step_option.MESSAGE.label'), icon: Send, color: 'text-sky-500 bg-sky-50' },
+    { type: 'AI_STEP', label: t('node.title.ai'), icon: Sparkles, color: 'text-indigo-500 bg-indigo-50' },
+    { type: 'URL', label: t('editor.edit_button.action.open_website'), icon: Globe, color: 'text-emerald-500 bg-emerald-50' },
+    { type: 'BUY', label: t('editor.edit_button.action.buy_button'), icon: CreditCard, color: 'text-amber-500 bg-amber-50', pro: true },
+    { type: 'ACTIONS', label: t('node.action.perform_actions'), icon: Zap, color: 'text-purple-500 bg-purple-50' },
+    { type: 'CONDITION', label: t('node.condition.category'), icon: GitFork, color: 'text-rose-500 bg-rose-50', pro: true },
+    { type: 'RANDOM', label: t('node.randomizer'), icon: Shuffle, color: 'text-violet-500 bg-violet-50', pro: true },
+    { type: 'DELAY', label: t('node.title.smart_delay'), icon: Clock, color: 'text-cyan-500 bg-cyan-50', pro: true },
+    { type: 'AUTOMATION', label: t('editor.edit_button.action.start_automation'), icon: Play, color: 'text-teal-500 bg-teal-50' },
   ];
 
   const isStripeConnected = localStorage.getItem('launchly_payments_stripe_connected') === 'true';
@@ -111,7 +112,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   return (
     <div className="h-full flex flex-col justify-between bg-white font-sans w-full">
       <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 select-none shrink-0">
-        <h3 className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">Edit Button</h3>
+        <h3 className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">{t('editor.edit_button.title')}</h3>
         <button onClick={onClose} className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg transition-colors cursor-pointer">
           <X size={16} />
         </button>
@@ -121,7 +122,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
         <div className="space-y-5">
           <div>
             <label htmlFor="btnLabel" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-              Button title
+              {t('editor.edit_button.button_title')}
             </label>
             <div className="relative">
               <input
@@ -129,7 +130,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                 type="text"
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
-                placeholder="e.g. Learn More"
+                placeholder={t('editor.edit_button.title_placeholder')}
                 maxLength={25}
                 className="w-full px-4 py-2.5 pr-12 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold transition-all bg-slate-50/20"
                 autoFocus
@@ -142,13 +143,13 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
 
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-              When this button is pressed
+              {t('editor.edit_button.when_pressed')}
             </label>
             {targetNode ? (() => {
               const matchedOpt = actionOptions.find((o) => o.type === actionType);
               const IconComponent = matchedOpt?.icon || Send;
               const optColorClass = matchedOpt?.color || 'text-sky-500 bg-sky-50';
-              const optLabel = matchedOpt?.label || 'Telegram';
+              const optLabel = matchedOpt?.label || t('step_option.MESSAGE.label');
               const targetNodeTitle = getTargetNodeDisplayName(targetNode);
               return (
                 <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-2xl animate-fade-in select-none">
@@ -173,7 +174,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                       }
                       setActionType('');
                     }}
-                    className="p-1.5 hover:bg-slate-200/60 text-slate-450 hover:text-slate-700 rounded-xl transition-all cursor-pointer border border-transparent hover:border-slate-300/40"
+                    className="p-1.5 hover:bg-slate-200/60 text-slate-455 hover:text-slate-700 rounded-xl transition-all cursor-pointer border border-transparent hover:border-slate-300/40"
                   >
                     <X size={15} />
                   </button>
@@ -216,14 +217,14 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
           {actionType === 'URL' && (
             <div className="animate-fade-in">
               <label htmlFor="btnUrl" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                Website URL Link
+                {t('editor.edit_button.url_link')}
               </label>
               <input
                 id="btnUrl"
                 type="text"
                 value={actionTarget}
                 onChange={(e) => setActionTarget(e.target.value)}
-                placeholder="e.g. https://yoursite.com"
+                placeholder={t('editor.edit_button.url_placeholder')}
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold transition-all bg-slate-50/20"
               />
             </div>
@@ -233,7 +234,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
             !isPaymentConnected ? (
               <div className="bg-slate-55 border border-slate-200/80 rounded-2xl p-5 text-center space-y-4 animate-fade-in select-none">
                 <p className="text-xs text-slate-600 leading-relaxed font-semibold">
-                  You must have an active payment system connected to Manychat.
+                  {t('editor.edit_button.stripe_paypal_error')}
                 </p>
                 <button
                   type="button"
@@ -242,41 +243,41 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                   }}
                   className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-indigo-100 cursor-pointer flex items-center justify-center"
                 >
-                  Go To Settings
+                  {t('editor.ai.go_to_settings')}
                 </button>
               </div>
             ) : (
               <div className="animate-fade-in space-y-4">
                 <div>
                   <label htmlFor="prodName" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Product Name
+                    {t('editor.edit_button.product_name')}
                   </label>
                   <input
                     id="prodName"
                     type="text"
                     value={productName}
                     onChange={(e) => setProductName(e.target.value)}
-                    placeholder="e.g. Premium Course"
+                    placeholder={t('editor.edit_button.product_placeholder')}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold transition-all bg-slate-50/20"
                   />
                 </div>
                 <div className="flex gap-3">
                   <div className="flex-1">
                     <label htmlFor="prodPrice" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                      Price
+                      {t('editor.edit_button.price')}
                     </label>
                     <input
                       id="prodPrice"
                       type="text"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                      placeholder="e.g. 100"
+                      placeholder={t('editor.edit_button.price_placeholder')}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold transition-all bg-slate-50/20"
                     />
                   </div>
                   <div className="w-24">
                     <label htmlFor="prodCurrency" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                      Currency
+                      {t('editor.edit_button.currency')}
                     </label>
                     <select
                       id="prodCurrency"
@@ -306,7 +307,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
               className="flex items-center justify-center gap-1.5 px-4 py-2 text-rose-600 hover:text-rose-700 text-xs font-bold rounded-xl transition-all cursor-pointer w-full hover:bg-rose-50"
             >
               <Trash2 size={14} className="text-rose-500" />
-              <span>Remove</span>
+              <span>{t('editor.edit_button.remove')}</span>
             </button>
           </div>
         ) : (
@@ -320,7 +321,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
               className="flex items-center justify-center gap-1 px-3 py-2 bg-rose-50 hover:bg-rose-105 hover:text-rose-700 text-rose-600 text-[11px] font-bold rounded-xl transition-all border border-rose-100 cursor-pointer shadow-sm"
             >
               <Trash2 size={13} />
-              <span>Remove</span>
+              <span>{t('editor.edit_button.remove')}</span>
             </button>
 
             <div className="flex gap-2">
@@ -329,7 +330,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                 onClick={onClose}
                 className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-bold rounded-xl transition-all cursor-pointer"
               >
-                Cancel
+                {t('editor.edit_button.cancel')}
               </button>
               <button
                  type="submit"
@@ -340,7 +341,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                  }
                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-[11px] font-bold rounded-xl transition-all shadow shadow-indigo-150 cursor-pointer disabled:cursor-not-allowed"
                 >
-                  Done
+                  {t('editor.edit_button.done')}
                 </button>
              </div>
            </div>

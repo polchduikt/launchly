@@ -28,6 +28,7 @@ import type { ButtonData } from '../../../../../types/bot';
 import { useNodeEditor, getBlocks } from '../../../hooks/useNodeEditor';
 import { useBotStore } from '../../../../../store/useBotStore';
 import { useTagsQuery } from '../../../../broadcast/hooks/useBroadcastQueries';
+import { t } from '../../../../../i18n';
 import { FieldVariableSelector } from './FieldVariableSelector';
 import emojiData from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
@@ -545,16 +546,16 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                     {block.type === 'telegram_menu' && <Grid size={13} className="text-slate-400" />}
                   </span>
                   <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">
-                    {block.type === 'text' && 'Text block'}
-                    {block.type === 'image' && 'Image block'}
-                    {block.type === 'delay' && 'Delay block'}
-                    {block.type === 'data_collection' && 'Data collection'}
-                    {block.type === 'file' && 'File block'}
-                    {block.type === 'audio' && 'Audio block'}
-                    {block.type === 'video' && 'Video block'}
+                    {block.type === 'text' && t('flow_builder.text_block')}
+                    {block.type === 'image' && t('flow_builder.image_block')}
+                    {block.type === 'delay' && t('flow_builder.delay_block')}
+                    {block.type === 'data_collection' && t('flow_builder.data_collection')}
+                    {block.type === 'file' && t('flow_builder.file_block')}
+                    {block.type === 'audio' && t('flow_builder.audio_block')}
+                    {block.type === 'video' && t('flow_builder.video_block')}
                     {block.type === 'telegram_menu' && (
                       <span className="inline-flex items-center gap-1 normal-case font-bold text-slate-700">
-                        <span>Telegram Menu</span>
+                        <span>{t('flow_builder.telegram_menu_block')}</span>
                         <span title="Group buttons into rows. Buttons in the same row appear side-by-side in Telegram. Drag and drop to reorder.">
                           <HelpCircle 
                             size={12} 
@@ -896,7 +897,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       className="w-full py-2 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 text-xs font-bold rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Plus size={13} />
-                      <span>Add Button</span>
+                      <span>{t('flow_builder.btn_add_button')}</span>
                     </button>
 
                     {!blocks.some((b) => b.type === 'telegram_menu') && (
@@ -906,7 +907,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                         className="w-full py-2 bg-white hover:bg-slate-50 border border-dashed border-slate-200 text-slate-500 text-xs font-bold rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-pointer mt-1.5"
                       >
                         <Plus size={13} />
-                        <span>Telegram Menu</span>
+                        <span>{t('flow_builder.btn_telegram_menu')}</span>
                       </button>
                     )}
                   </div>
@@ -1008,7 +1009,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       className="w-full py-2 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 text-xs font-bold rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Plus size={13} />
-                      <span>Add Button</span>
+                      <span>{t('flow_builder.btn_add_button')}</span>
                     </button>
                   </div>
                 </div>
@@ -1165,7 +1166,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       className="w-full py-2 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 text-xs font-bold rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Plus size={13} />
-                      <span>Add Button</span>
+                      <span>{t('flow_builder.btn_add_button')}</span>
                     </button>
                   </div>
                 </div>
@@ -1270,7 +1271,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       className="w-full py-2 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 text-xs font-bold rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Plus size={13} />
-                      <span>Add Button</span>
+                      <span>{t('flow_builder.btn_add_button')}</span>
                     </button>
                   </div>
                 </div>
@@ -1375,7 +1376,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       className="w-full py-2 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 text-xs font-bold rounded-2xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Plus size={13} />
-                      <span>Add Button</span>
+                      <span>{t('flow_builder.btn_add_button')}</span>
                     </button>
                   </div>
                 </div>
@@ -1470,7 +1471,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                           className="w-full py-2 bg-white hover:bg-slate-50 border border-dashed border-slate-200 hover:border-slate-300 text-slate-550 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
                         >
                           <Plus size={13} />
-                          <span>Add Button</span>
+                          <span>{t('ai.builder.add_button')}</span>
                         </button>
                       </div>
                     );
@@ -1484,7 +1485,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
 
       <div className="border-t border-slate-100 pt-4 space-y-3">
         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">
-          Add one of the content blocks:
+          {t('ai.builder.add_content_blocks_header')}
         </span>
         <div className="grid grid-cols-1 gap-2.5">
           <button
@@ -1497,8 +1498,8 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                 <AlignLeft size={16} />
               </span>
               <div className="text-left">
-                <p className="text-xs font-bold text-slate-800">Text</p>
-                <p className="text-[10px] text-slate-400 font-semibold leading-normal">Add simple text and buttons</p>
+                <p className="text-xs font-bold text-slate-800">{t('ai.builder.block_text_title')}</p>
+                <p className="text-[10px] text-slate-400 font-semibold leading-normal">{t('ai.builder.block_text_desc')}</p>
               </div>
             </div>
           </button>
@@ -1513,8 +1514,8 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                 <ImageIcon size={16} />
               </span>
               <div className="text-left">
-                <p className="text-xs font-bold text-slate-800">Image</p>
-                <p className="text-[10px] text-slate-400 font-semibold leading-normal">Boost engagement with visuals</p>
+                <p className="text-xs font-bold text-slate-800">{t('ai.builder.block_image_title')}</p>
+                <p className="text-[10px] text-slate-400 font-semibold leading-normal">{t('ai.builder.block_image_desc')}</p>
               </div>
             </div>
           </button>
@@ -1529,8 +1530,8 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                 <Clock size={16} />
               </span>
               <div className="text-left">
-                <p className="text-xs font-bold text-slate-800">Delay</p>
-                <p className="text-[10px] text-slate-400 font-semibold leading-normal">Wait a few seconds in between texts</p>
+                <p className="text-xs font-bold text-slate-800">{t('ai.builder.block_delay_title')}</p>
+                <p className="text-[10px] text-slate-400 font-semibold leading-normal">{t('ai.builder.block_delay_desc')}</p>
               </div>
             </div>
           </button>
@@ -1545,8 +1546,8 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                 <Database size={16} />
               </span>
               <div className="text-left">
-                <p className="text-xs font-bold text-slate-800">Data Collection</p>
-                <p className="text-[10px] text-slate-400 font-semibold leading-normal">Collect emails, phones and more</p>
+                <p className="text-xs font-bold text-slate-800">{t('ai.builder.block_data_collection_title')}</p>
+                <p className="text-[10px] text-slate-400 font-semibold leading-normal">{t('ai.builder.block_data_collection_desc')}</p>
               </div>
             </div>
             <span className="text-[8px] font-extrabold bg-blue-500 text-white px-1.5 py-0.5 rounded uppercase tracking-wider mr-1">
@@ -1565,8 +1566,8 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                   <MoreHorizontal size={16} />
                 </span>
                 <div className="text-left">
-                  <p className="text-xs font-bold text-slate-800">More</p>
-                  <p className="text-[10px] text-slate-400 font-semibold leading-normal">View all available options</p>
+                  <p className="text-xs font-bold text-slate-800">{t('ai.builder.block_more_title')}</p>
+                  <p className="text-[10px] text-slate-400 font-semibold leading-normal">{t('ai.builder.block_more_desc')}</p>
                 </div>
               </div>
             </button>
@@ -1586,8 +1587,8 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       <Paperclip size={16} />
                     </span>
                     <div className="text-left">
-                      <p className="text-xs font-bold text-slate-800">File</p>
-                      <p className="text-[10px] text-slate-400 font-semibold leading-normal">Add files to the message</p>
+                      <p className="text-xs font-bold text-slate-800">{t('ai.builder.block_file_title')}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold leading-normal">{t('ai.builder.block_file_desc')}</p>
                     </div>
                   </div>
                 </button>
@@ -1604,8 +1605,8 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       <Volume2 size={16} />
                     </span>
                     <div className="text-left">
-                      <p className="text-xs font-bold text-slate-800">Audio</p>
-                      <p className="text-[10px] text-slate-400 font-semibold leading-normal">Send voice snippets in chat</p>
+                      <p className="text-xs font-bold text-slate-800">{t('ai.builder.block_audio_title')}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold leading-normal">{t('ai.builder.block_audio_desc')}</p>
                     </div>
                   </div>
                 </button>
@@ -1622,8 +1623,8 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       <Video size={16} />
                     </span>
                     <div className="text-left">
-                      <p className="text-xs font-bold text-slate-800">Video</p>
-                      <p className="text-[10px] text-slate-400 font-semibold leading-normal">Share video in chat</p>
+                      <p className="text-xs font-bold text-slate-800">{t('ai.builder.block_video_title')}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold leading-normal">{t('ai.builder.block_video_desc')}</p>
                     </div>
                   </div>
                 </button>
@@ -1639,7 +1640,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
           onClick={() => setIsNextStepDrawerOpen(true)}
           className="w-full py-2.5 bg-white hover:bg-indigo-50/30 border border-indigo-200 hover:border-indigo-450 text-indigo-650 hover:text-indigo-700 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm select-none"
         >
-          Choose Next Step
+          {t('ai.builder.choose_next_step')}
         </button>
       </div>
     </div>

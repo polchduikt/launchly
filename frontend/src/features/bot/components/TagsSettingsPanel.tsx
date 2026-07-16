@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { t } from '../../../i18n';
 import { Search, Plus, MoreVertical, X, Folder, ChevronRight, Edit2 } from 'lucide-react';
 import { useBotStore } from '../../../store/useBotStore';
 import { useTagsQuery, useCreateTagMutation, useDeleteTagMutation } from '../../broadcast/hooks/useBroadcastQueries';
@@ -162,7 +163,7 @@ export const TagsSettingsPanel: React.FC = () => {
         <div className="relative w-64 text-left">
           <input
             type="text"
-            placeholder="Search by Tag name"
+            placeholder={t('settings.tags.search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 border border-slate-200 focus:outline-none focus:border-blue-500 rounded-xl text-xs font-semibold bg-white"
@@ -180,7 +181,7 @@ export const TagsSettingsPanel: React.FC = () => {
                   onClick={() => setActiveFolderId(null)}
                   className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                 >
-                  Tags
+                  {t('settings.tags.title')}
                 </button>
                 <ChevronRight size={14} className="text-slate-350" />
                 <div className="flex items-center gap-1">
@@ -197,7 +198,7 @@ export const TagsSettingsPanel: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <span className="text-slate-800 font-extrabold text-sm">Tags</span>
+              <span className="text-slate-800 font-extrabold text-sm">{t('settings.tags.title')}</span>
             )}
           </div>
 
@@ -206,7 +207,7 @@ export const TagsSettingsPanel: React.FC = () => {
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer select-none"
           >
             <Plus size={14} />
-            <span>New Tag</span>
+            <span>{t('settings.tags.new_tag_btn')}</span>
           </button>
         </div>
 
@@ -243,13 +244,13 @@ export const TagsSettingsPanel: React.FC = () => {
                         }}
                         className="w-full px-3 py-1.5 hover:bg-slate-50 text-slate-700 text-xs font-bold text-left cursor-pointer"
                       >
-                        Rename
+                        {t('settings.tags.action_rename')}
                       </button>
                       <button
                         onClick={() => handleDeleteFolder(folder.id)}
                         className="w-full px-3 py-1.5 hover:bg-rose-50 text-rose-655 text-xs font-bold text-left cursor-pointer border-t border-slate-50"
                       >
-                        Delete
+                        {t('settings.tags.action_delete')}
                       </button>
                     </div>
                   )}
@@ -261,7 +262,7 @@ export const TagsSettingsPanel: React.FC = () => {
                 className="px-4 py-2.5 border border-dashed border-blue-200 text-blue-655 hover:bg-blue-50/10 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer select-none"
               >
                 <Plus size={14} />
-                <span>New Folder</span>
+                <span>{t('settings.tags.new_folder_btn')}</span>
               </button>
             </div>
           )}
@@ -277,7 +278,7 @@ export const TagsSettingsPanel: React.FC = () => {
                       className="w-4 h-4 rounded border-slate-350 text-blue-600 focus:ring-blue-500 cursor-not-allowed"
                     />
                   </th>
-                  <th className="px-5 py-3">Name</th>
+                  <th className="px-5 py-3">{t('settings.tags.table_name')}</th>
                   <th className="px-5 py-3 w-12 text-right"></th>
                 </tr>
               </thead>
@@ -309,7 +310,7 @@ export const TagsSettingsPanel: React.FC = () => {
                               onClick={() => handleDeleteTag(tag.id)}
                               className="w-full px-3 py-1.5 hover:bg-rose-50 text-rose-600 text-xs font-bold text-left cursor-pointer"
                             >
-                              Delete
+                              {t('settings.tags.action_delete')}
                             </button>
                           </div>
                         )}
@@ -320,7 +321,7 @@ export const TagsSettingsPanel: React.FC = () => {
                 {filteredTags.length === 0 && (
                   <tr>
                     <td colSpan={3} className="text-center py-10 text-slate-450 italic bg-white select-none">
-                      No Tags
+                      {t('settings.tags.empty_state')}
                     </td>
                   </tr>
                 )}
@@ -335,7 +336,7 @@ export const TagsSettingsPanel: React.FC = () => {
           <form onSubmit={handleCreateTag} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 select-none">
               <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
-                Create Tag
+                {t('settings.tags.create_tag_title')}
               </h3>
               <button
                 type="button"
@@ -348,14 +349,14 @@ export const TagsSettingsPanel: React.FC = () => {
 
             <div>
               <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                Name
+                {t('settings.tags.table_name')}
               </label>
               <input
                 type="text"
                 required
                 value={newTagName}
                 onChange={(e) => setNewTagName(e.target.value)}
-                placeholder="Enter tag name"
+                placeholder={t('settings.tags.placeholder_tag_name')}
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs font-semibold bg-slate-50/20"
               />
             </div>
@@ -366,14 +367,14 @@ export const TagsSettingsPanel: React.FC = () => {
                 onClick={() => setIsTagModalOpen(false)}
                 className="px-4 py-2.5 bg-slate-150 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all cursor-pointer"
               >
-                Cancel
+                {t('settings.tags.btn_cancel')}
               </button>
               <button
                 type="submit"
                 disabled={!newTagName.trim() || createTagMutation.isPending}
                 className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold rounded-xl transition-all shadow-sm cursor-pointer shadow-blue-100 disabled:opacity-50"
               >
-                {createTagMutation.isPending ? 'Creating...' : 'Create'}
+                {createTagMutation.isPending ? 'Creating...' : t('settings.tags.btn_create')}
               </button>
             </div>
           </form>
@@ -385,7 +386,7 @@ export const TagsSettingsPanel: React.FC = () => {
           <form onSubmit={handleCreateFolder} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 select-none">
               <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
-                Create Folder
+                {t('settings.tags.create_folder_title')}
               </h3>
               <button
                 type="button"
@@ -398,14 +399,14 @@ export const TagsSettingsPanel: React.FC = () => {
 
             <div>
               <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                Folder Name
+                {t('settings.tags.new_folder_btn')}
               </label>
               <input
                 type="text"
                 required
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
-                placeholder="Enter folder name"
+                placeholder={t('settings.tags.placeholder_folder_name')}
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs font-semibold bg-slate-50/20"
               />
             </div>
@@ -416,13 +417,13 @@ export const TagsSettingsPanel: React.FC = () => {
                 onClick={() => setIsFolderModalOpen(false)}
                 className="px-4 py-2.5 bg-slate-150 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all cursor-pointer"
               >
-                Cancel
+                {t('settings.tags.btn_cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold rounded-xl transition-all shadow-sm cursor-pointer shadow-blue-100"
               >
-                Create Folder
+                {t('settings.tags.btn_create_folder')}
               </button>
             </div>
           </form>
@@ -434,7 +435,7 @@ export const TagsSettingsPanel: React.FC = () => {
           <form onSubmit={handleRenameFolder} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 select-none">
               <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
-                Rename Folder
+                {t('settings.tags.rename_folder_title')}
               </h3>
               <button
                 type="button"
@@ -447,14 +448,14 @@ export const TagsSettingsPanel: React.FC = () => {
 
             <div>
               <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                Folder Name
+                {t('settings.tags.new_folder_btn')}
               </label>
               <input
                 type="text"
                 required
                 value={renameFolderName}
                 onChange={(e) => setRenameFolderName(e.target.value)}
-                placeholder="Enter folder name"
+                placeholder={t('settings.tags.placeholder_folder_name')}
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs font-semibold bg-slate-50/20"
               />
             </div>
@@ -465,13 +466,13 @@ export const TagsSettingsPanel: React.FC = () => {
                 onClick={() => setIsRenameFolderOpen(false)}
                 className="px-4 py-2.5 bg-slate-150 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all cursor-pointer"
               >
-                Cancel
+                {t('settings.tags.btn_cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold rounded-xl transition-all shadow-sm cursor-pointer shadow-blue-100"
               >
-                Save
+                {t('settings.tags.btn_save')}
               </button>
             </div>
           </form>

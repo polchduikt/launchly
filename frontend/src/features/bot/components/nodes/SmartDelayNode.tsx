@@ -6,6 +6,7 @@ import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../types/bot';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
+import { t } from '../../../../i18n';
 
 export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
@@ -100,10 +101,10 @@ export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
         </span>
         <div className="flex-1 min-w-0">
           <span className="font-extrabold text-[9px] text-[#C2410C]/70 uppercase tracking-wider block leading-none">
-            Smart Delay
+            {t('node.smart_delay.category')}
           </span>
           <span className="text-xs font-bold text-[#7C2D12] truncate block mt-0.5">
-            Delay Flow
+            {t('node.smart_delay.delay_flow')}
           </span>
         </div>
       </div>
@@ -111,18 +112,18 @@ export const SmartDelayNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
       <div className="p-4">
         {mode === 'date' ? (
           <div className="space-y-1 select-none">
-            <p className="text-xs font-extrabold text-slate-800 leading-normal">Wait Until</p>
+            <p className="text-xs font-extrabold text-slate-800 leading-normal">{t('node.smart_delay.wait_until')}</p>
             <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">{formattedDateTime}</p>
           </div>
         ) : (
           <div className="text-xs text-slate-650 leading-relaxed font-semibold select-none">
-            Wait <strong className="font-extrabold text-slate-800">{waitAmount} {waitUnit}</strong> and then continue
+            {t('node.smart_delay.wait', { amount: String(waitAmount), unit: waitUnit })}
           </div>
         )}
       </div>
 
       <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">Next Step</span>
+        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">{t('node.smart_delay.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}

@@ -16,6 +16,7 @@ import { TagsSettingsPanel } from '../components/TagsSettingsPanel';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { TelegramLoginModal } from '../../auth/components/TelegramLoginModal';
 import { unlinkTelegramApi } from '../../auth/api/auth';
+import { t } from '../../../i18n';
 import { Loader2, AlertCircle, CheckCircle2, X } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
@@ -75,7 +76,7 @@ export const SettingsPage: React.FC = () => {
             {SETTINGS_SECTIONS.map((section) => (
               <div key={section.title}>
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-2 select-none">
-                  {section.title}
+                  {t('settings.section.' + section.title.toLowerCase())}
                 </h3>
                 <nav className="space-y-0.5">
                   {section.items.map((item) => (
@@ -91,7 +92,7 @@ export const SettingsPage: React.FC = () => {
                           : 'text-slate-500 hover:text-slate-800'
                       }`}
                     >
-                      {item.label}
+                      {t('settings.section.' + item.id)}
                     </button>
                   ))}
                 </nav>
@@ -102,7 +103,7 @@ export const SettingsPage: React.FC = () => {
 
         <div className="flex-1 p-6 md:p-10 max-w-7xl mx-auto space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Settings</h1>
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('settings.settings')}</h1>
           </div>
 
           {showSuccessBanner && (
@@ -125,7 +126,7 @@ export const SettingsPage: React.FC = () => {
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
                 <div className="w-full md:w-1/3">
-                  <h3 className="font-bold text-sm text-slate-800">Account Time Zone</h3>
+                  <h3 className="font-bold text-sm text-slate-800">{t('settings.general.account_timezone')}</h3>
                 </div>
                 <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
                   <select
@@ -139,57 +140,57 @@ export const SettingsPage: React.FC = () => {
                     <option value="UTC-05:00">(UTC-05:00) - New York, EST</option>
                   </select>
                   <div className="text-xs text-slate-400 leading-relaxed md:max-w-xs">
-                    All the data in Launchly will be displayed and exported according to this timezone.{' '}
-                    <button className="text-indigo-600 font-bold hover:underline">Learn more</button>
+                    {t('settings.general.timezone_desc')}{' '}
+                    <button className="text-indigo-600 font-bold hover:underline">{t('settings.general.learn_more')}</button>
                   </div>
                 </div>
               </div>
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
                 <div className="w-full md:w-1/3">
-                  <h3 className="font-bold text-sm text-slate-800">Clone to Another Account</h3>
+                  <h3 className="font-bold text-sm text-slate-800">{t('settings.general.clone_account')}</h3>
                 </div>
                 <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
                   <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100">
-                    Clone This Account
+                    {t('settings.general.clone_btn')}
                   </button>
                   <p className="text-xs text-slate-400 leading-relaxed md:max-w-xs">
-                    Copy all content to another account
+                    {t('settings.general.clone_desc')}
                   </p>
                 </div>
               </div>
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
                 <div className="w-full md:w-1/3">
-                  <h3 className="font-bold text-sm text-slate-800">Use as Template</h3>
+                  <h3 className="font-bold text-sm text-slate-800">{t('settings.general.use_template')}</h3>
                 </div>
                 <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
                   <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100">
-                    Create Account Template
+                    {t('settings.general.template_btn')}
                   </button>
                   <p className="text-xs text-slate-400 leading-relaxed md:max-w-xs">
-                    Create a snapshot of this account and share it via link
+                    {t('settings.general.template_desc')}
                   </p>
                 </div>
               </div>
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
                 <div className="w-full md:w-1/3">
-                  <h3 className="font-bold text-sm text-slate-800">Leave Account</h3>
+                  <h3 className="font-bold text-sm text-slate-800">{t('settings.general.leave_account')}</h3>
                 </div>
                 <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
                   <button className="px-5 py-2.5 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl transition-all select-none cursor-not-allowed border border-slate-200">
-                    Leave
+                    {t('settings.general.leave_btn')}
                   </button>
                   <p className="text-xs text-slate-500 leading-relaxed md:max-w-xs">
-                    Transfer your ownership to another team member if you want to leave this account
+                    {t('settings.general.leave_desc')}
                   </p>
                 </div>
               </div>
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
                 <div className="w-full md:w-1/3">
-                  <h3 className="font-bold text-sm text-slate-800">Sign Out</h3>
+                  <h3 className="font-bold text-sm text-slate-800">{t('settings.general.sign_out')}</h3>
                 </div>
                 <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
                   <button
@@ -203,25 +204,25 @@ export const SettingsPage: React.FC = () => {
                         <span>Signing out...</span>
                       </>
                     ) : (
-                      <span>Sign Out</span>
+                      <span>{t('settings.general.sign_out')}</span>
                     )}
                   </button>
                   <p className="text-xs text-slate-400 leading-relaxed md:max-w-xs">
-                    Sign out of your Launchly account from this device
+                    {t('settings.general.sign_out_desc')}
                   </p>
                 </div>
               </div>
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
                 <div className="w-full md:w-1/3">
-                  <h3 className="font-bold text-sm text-rose-600">Delete Account</h3>
+                  <h3 className="font-bold text-sm text-rose-600">{t('settings.general.delete_account')}</h3>
                 </div>
                 <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
                   <button className="px-5 py-2 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold rounded-xl transition-all cursor-pointer">
-                    Delete
+                    {t('settings.general.delete_btn')}
                   </button>
                   <p className="text-xs text-slate-400 leading-relaxed md:max-w-xs">
-                    Continue to account deletion
+                    {t('settings.general.delete_desc')}
                   </p>
                 </div>
               </div>

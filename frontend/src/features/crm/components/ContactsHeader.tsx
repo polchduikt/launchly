@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../../i18n';
 
 interface ContactsHeaderProps {
   onCreateContact: () => void;
@@ -9,20 +10,20 @@ export const ContactsHeader: React.FC<ContactsHeaderProps> = ({ onCreateContact,
   return (
     <header className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center shrink-0 shadow-sm">
       <div>
-        <h1 className="text-xl font-bold text-slate-900 tracking-tight">Contacts</h1>
+        <h1 className="text-xl font-bold text-slate-900 tracking-tight">{t('crm.contacts.title')}</h1>
       </div>
       <div className="flex items-center gap-3">
         <button
           onClick={onCreateContact}
           className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer"
         >
-          Create New Contact
+          {t('crm.contacts.btn.create')}
         </button>
         <button
           onClick={onImport}
           className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-indigo-600/10 cursor-pointer"
         >
-          Import
+          {t('crm.contacts.btn.import')}
         </button>
       </div>
     </header>

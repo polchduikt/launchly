@@ -1,4 +1,6 @@
+import React from 'react';
 import type { Node } from '@xyflow/react';
+import { t } from '../../../../i18n';
 import { useNodeEditor } from '../../hooks/useNodeEditor';
 import { NODE_TITLES, NODE_ICONS } from '../../config/nodeDisplay';
 import { StartNodeEditor } from './editors/StartNodeEditor';
@@ -34,7 +36,7 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
   if (!node) {
     return (
       <div className="h-full flex items-center justify-center text-slate-400 text-xs font-semibold select-none text-center p-8">
-        Click on any node in the canvas to edit its properties.
+        {t('flow_builder.empty_canvas')}
       </div>
     );
   }
@@ -44,6 +46,9 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
   };
 
   const renderTitle = () => {
+    const key = `node.title.${String(node.type || '').toLowerCase()}`;
+    const val = t(key);
+    if (val !== key) return val;
     return NODE_TITLES[node.type || ''] || 'Node Settings';
   };
 
@@ -93,7 +98,7 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
             </span>
             <div>
               <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block leading-none">
-                Editing node
+                {t('flow_builder.editing_node')}
               </span>
               <span className="text-xs font-bold text-slate-800 block mt-0.5">
                 {renderTitle()}

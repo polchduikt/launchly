@@ -2,6 +2,7 @@ import React from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { BotUserResponse } from '../../../types/bot';
 import { ContactAvatar } from './ContactAvatar';
+import { t } from '../../../i18n';
 
 interface ContactsTableProps {
   botId: number;
@@ -38,10 +39,10 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffMins < 1) return 'just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours} hours ago`;
-    if (diffDays < 30) return `${diffDays} days ago`;
+    if (diffMins < 1) return t('common.time.just_now');
+    if (diffMins < 60) return t('common.time.mins_ago', { count: diffMins });
+    if (diffHours < 24) return t('common.time.hours_ago', { count: diffHours });
+    if (diffDays < 30) return t('common.time.days_ago', { count: diffDays });
     return date.toLocaleDateString();
   };
 
@@ -50,8 +51,8 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
       <div className="h-full flex items-center justify-center p-8 text-center bg-white rounded-2xl border border-slate-200 shadow-sm m-6">
         <div className="max-w-sm space-y-3">
           <AlertCircle size={40} className="text-slate-300 mx-auto" />
-          <p className="font-bold text-slate-700">No active bot found</p>
-          <p className="text-xs text-slate-400">Please connect a bot first to view contacts.</p>
+          <p className="font-bold text-slate-700">{t('crm.contacts.no_bot_title')}</p>
+          <p className="text-xs text-slate-400">{t('crm.contacts.no_bot_desc')}</p>
         </div>
       </div>
     );
@@ -68,7 +69,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
   if (filteredContacts.length === 0) {
     return (
       <div className="h-full flex items-center justify-center text-slate-400 italic bg-white rounded-2xl border border-slate-200 shadow-sm m-6">
-        No contacts found matching criteria.
+        {t('crm.contacts.no_contacts_found')}
       </div>
     );
   }
@@ -90,10 +91,10 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
                   className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                 />
               </th>
-              <th className="py-4 px-2 w-16">Avatar</th>
-              <th className="py-4 px-2">Name</th>
-              <th className="py-4 px-6">Status</th>
-              <th className="py-4 px-6">Subscribed</th>
+              <th className="py-4 px-2 w-16">{t('crm.contacts.table.avatar')}</th>
+              <th className="py-4 px-2">{t('crm.contacts.table.name')}</th>
+              <th className="py-4 px-6">{t('crm.contacts.table.status')}</th>
+              <th className="py-4 px-6">{t('crm.contacts.table.subscribed')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
@@ -103,9 +104,9 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
               const isPaused = meta.paused;
               const isUnsubscribed = meta.unsubscribed;
 
-              let statusText = 'Subscribed';
-              if (isUnsubscribed) statusText = 'Unsubscribed';
-              else if (isPaused) statusText = 'Paused';
+              let statusText = t('crm.contacts.status.subscribed');
+              if (isUnsubscribed) statusText = t('crm.contacts.status.unsubscribed');
+              else if (isPaused) statusText = t('crm.contacts.status.paused');
 
               return (
                 <tr

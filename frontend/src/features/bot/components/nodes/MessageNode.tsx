@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { t } from '../../../../i18n';
 import { Handle, Position, useReactFlow, useEdges, useUpdateNodeInternals, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Send, Plus, Image as ImageIcon, Paperclip, Volume2, Video, Clock, Database, MessageSquare, Zap, AlertCircle } from 'lucide-react';
@@ -254,7 +255,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
             Telegram
           </span>
           <span className="text-xs font-bold text-slate-700 truncate block mt-0.5">
-            Send Message
+            {t('node.title.message')}
           </span>
         </div>
       </div>
@@ -277,7 +278,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
                       </div>
                     ) : (
                       <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-400 italic text-center bg-slate-50/20">
-                        Add a text
+                        {t('flow_builder.add_a_text')}
                       </div>
                     )
                   )}
@@ -346,7 +347,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
                   {block.type === 'telegram_menu' && (
                     <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex flex-col gap-2">
                       <div className="text-center text-xs font-bold text-slate-500 pb-1.5 border-b border-slate-200/55">
-                        Telegram Menu
+                        {t('flow_builder.btn_telegram_menu')}
                       </div>
                       {(() => {
                         const groups = groupButtonsByRow(blockBtns);
@@ -468,7 +469,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
           className="w-full py-2 border border-dashed border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 nodrag shadow-sm"
         >
           <Plus size={13} />
-          <span>Add Button</span>
+          <span>{t('flow_builder.add_button')}</span>
         </button>
       </div>
 
@@ -477,7 +478,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
           <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative">
             <div className="flex items-center gap-1 mr-2 text-[9px] font-extrabold text-amber-650 uppercase tracking-wider">
               <Zap size={10} className="text-amber-500 shrink-0" />
-              <span>Action on reply</span>
+              <span>{t('flow_builder.action_on_reply')}</span>
             </div>
             <NodeHandle
               type="source"
@@ -490,7 +491,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
           <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative">
             <div className="flex items-center gap-1 mr-2 text-[9px] font-extrabold text-rose-600 uppercase tracking-wider">
               <AlertCircle size={10} className="text-rose-500 shrink-0" />
-              <span>If contact has not responded</span>
+              <span>{t('flow_builder.if_not_responded')}</span>
             </div>
             <NodeHandle
               type="source"
@@ -504,7 +505,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
       )}
 
       <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mr-2">Next Step</span>
+        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mr-2">{t('flow_builder.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}

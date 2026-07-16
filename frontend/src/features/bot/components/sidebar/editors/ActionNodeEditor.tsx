@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import type { ActionItem, ActionNodeEditorProps } from '../../../../../types/bot';
+import { t } from '../../../../../i18n';
 
 interface EditorStateLocal {
   setIsNextStepDrawerOpen: (open: boolean) => void;
@@ -86,20 +87,20 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
   const [activePopoverIndex, setActivePopoverIndex] = useState<number | null>(null);
 
   const allActions = [
-    { type: 'ADD_TAG', title: 'Add Tag', desc: 'Add a tag to this contact.', icon: <Tag size={18} className="text-amber-500" />, category: 'contact' },
-    { type: 'REMOVE_TAG', title: 'Remove Tag', desc: 'Remove a tag from this contact.', icon: <Tag size={18} className="text-amber-500" />, category: 'contact' },
-    { type: 'SET_USER_FIELD', title: 'Set Custom Field', desc: 'Set a custom field value on the contact.', icon: <User size={18} className="text-sky-500" />, category: 'contact' },
-    { type: 'CLEAR_USER_FIELD', title: 'Clear Custom Field', desc: 'Clear a custom field value from the contact.', icon: <User size={18} className="text-sky-500" />, category: 'contact' },
+    { type: 'ADD_TAG', title: t('editor.action.add_tag_title'), desc: t('editor.action.add_tag_desc'), icon: <Tag size={18} className="text-amber-500" />, category: 'contact' },
+    { type: 'REMOVE_TAG', title: t('editor.action.remove_tag_title'), desc: t('editor.action.remove_tag_desc'), icon: <Tag size={18} className="text-amber-500" />, category: 'contact' },
+    { type: 'SET_USER_FIELD', title: t('editor.action.set_field_title'), desc: t('editor.action.set_field_desc'), icon: <User size={18} className="text-sky-500" />, category: 'contact' },
+    { type: 'CLEAR_USER_FIELD', title: t('editor.action.clear_field_title'), desc: t('editor.action.clear_field_desc'), icon: <User size={18} className="text-sky-500" />, category: 'contact' },
     
-    { type: 'TELEGRAM_SUBSCRIBE', title: 'Set Telegram Opt-in', desc: 'Subscribe the contact to Telegram updates.', icon: <CheckSquare size={18} className="text-indigo-500" />, category: 'automation' },
-    { type: 'TELEGRAM_UNSUBSCRIBE', title: 'Unsubscribe from Telegram', desc: 'Unsubscribe the contact from Telegram updates.', icon: <CheckSquare size={18} className="text-indigo-500" />, category: 'automation' },
+    { type: 'TELEGRAM_SUBSCRIBE', title: t('editor.action.tg_subscribe_title'), desc: t('editor.action.tg_subscribe_desc'), icon: <CheckSquare size={18} className="text-indigo-500" />, category: 'automation' },
+    { type: 'TELEGRAM_UNSUBSCRIBE', title: t('editor.action.tg_unsubscribe_title'), desc: t('editor.action.tg_unsubscribe_desc'), icon: <CheckSquare size={18} className="text-indigo-500" />, category: 'automation' },
     
-    { type: 'GS_INSERT_ROW', title: 'Insert Row', desc: 'Send Launchly data to Google Sheets.', pro: true, icon: <FileSpreadsheet size={18} className="text-emerald-500" />, category: 'sheets' },
-    { type: 'GS_GET_ROW', title: 'Get Row by Value', desc: 'Return Google Sheets data to Launchly.', pro: true, icon: <FileSpreadsheet size={18} className="text-emerald-500" />, category: 'sheets' },
-    { type: 'GS_UPDATE_ROW', title: 'Update Row', desc: 'Update Google Sheets with Launchly data.', pro: true, icon: <FileSpreadsheet size={18} className="text-emerald-500" />, category: 'sheets' },
+    { type: 'GS_INSERT_ROW', title: t('editor.action.gs_insert_title'), desc: t('editor.action.gs_insert_desc'), pro: true, icon: <FileSpreadsheet size={18} className="text-emerald-500" />, category: 'sheets' },
+    { type: 'GS_GET_ROW', title: t('editor.action.gs_get_title'), desc: t('editor.action.gs_get_desc'), pro: true, icon: <FileSpreadsheet size={18} className="text-emerald-500" />, category: 'sheets' },
+    { type: 'GS_UPDATE_ROW', title: t('editor.action.gs_update_title'), desc: t('editor.action.gs_update_desc'), pro: true, icon: <FileSpreadsheet size={18} className="text-emerald-500" />, category: 'sheets' },
     
-    { type: 'MARK_DONE', title: 'Mark Conversation as Done', desc: 'Close the active conversation thread.', icon: <MessageSquare size={18} className="text-emerald-500" />, category: 'live_chat' },
-    { type: 'ASSIGN_AGENT', title: 'Assign to Agent', desc: 'Assign this chat session to a live support representative.', icon: <User size={18} className="text-blue-500" />, category: 'live_chat' },
+    { type: 'MARK_DONE', title: t('editor.action.mark_done_title'), desc: t('editor.action.mark_done_desc'), icon: <MessageSquare size={18} className="text-emerald-500" />, category: 'live_chat' },
+    { type: 'ASSIGN_AGENT', title: t('editor.action.assign_agent_title'), desc: t('editor.action.assign_agent_desc'), icon: <User size={18} className="text-blue-500" />, category: 'live_chat' },
   ];
 
   const filteredActions = allActions.filter(
@@ -442,21 +443,11 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
   };
 
   const getActionName = (type: string) => {
-    switch (type) {
-      case 'ADD_TAG': return 'Add Tag';
-      case 'REMOVE_TAG': return 'Remove Tag';
-      case 'SET_USER_FIELD': return 'Set Custom Field';
-      case 'CLEAR_USER_FIELD': return 'Clear Custom Field';
-      case 'TELEGRAM_SUBSCRIBE': return 'Subscribe to Telegram';
-      case 'TELEGRAM_UNSUBSCRIBE': return 'Unsubscribe Telegram';
-      case 'GS_INSERT_ROW': return 'Google Sheets: Insert Row';
-      case 'GS_GET_ROW': return 'Google Sheets: Get Row';
-      case 'GS_UPDATE_ROW': return 'Google Sheets: Update Row';
-            case 'MARK_DONE': return 'Mark Conversation as Done';
-      case 'ASSIGN_AGENT': return 'Assign to Agent';
-      default: return 'Action';
-    }
+    return t(`action.name.${type}`) !== `action.name.${type}`
+      ? t(`action.name.${type}`)
+      : t('action.name.DEFAULT');
   };
+
 
   const getActionIcon = (type: string) => {
     switch (type) {
@@ -488,14 +479,14 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-          Perform Following Actions
+          {t('node.action.perform_actions')}
         </label>
       </div>
 
       <div className="space-y-4">
         {actions.length === 0 ? (
           <div className="border border-dashed border-slate-200 rounded-2xl p-4 text-center text-xs text-slate-400 font-semibold select-none italic bg-slate-50/30">
-            No actions configured. Click "+ Action" to add one.
+            {t('editor.action.no_actions')}
           </div>
         ) : (
           <div className="flex flex-col gap-4">
@@ -679,7 +670,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
           className="w-full py-2.5 border border-dashed border-[#EED796] hover:border-[#ffb200] hover:bg-amber-50/30 text-[#ffb200] hover:text-[#ff9f00] text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-xs"
         >
           <Plus size={14} />
-          <span>+ Action</span>
+          <span>{t('editor.action.add_action')}</span>
         </button>
 
         {!!editorState && (
@@ -687,7 +678,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
             onClick={() => (editorState as EditorStateLocal).setIsNextStepDrawerOpen(true)}
             className="w-full py-2.5 border border-[#407BFF] hover:bg-blue-50/10 text-[#407BFF] hover:text-[#2d6ae5] text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-xs"
           >
-            <span>Choose Next Step</span>
+            <span>{t('editor.action.choose_next_step')}</span>
           </button>
         )}
       </div>
@@ -721,11 +712,11 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                 Perform next actions...
               </h2>
               {[
-                { id: 'recently_used', name: 'Recently used' },
-                { id: 'contact', name: 'Contact Data' },
-                { id: 'automation', name: 'Automation' },
-                { id: 'live_chat', name: 'Live Chat' },
-                { id: 'sheets', name: 'Google Sheets' },
+                { id: 'recently_used', name: t('editor.action.categories.recently_used') },
+                { id: 'contact', name: t('editor.action.categories.contact') },
+                { id: 'automation', name: t('editor.action.categories.automation') },
+                { id: 'live_chat', name: t('editor.action.categories.live_chat') },
+                { id: 'sheets', name: t('editor.action.categories.sheets') },
               ].map((cat) => (
                 <button
                   key={cat.id}
@@ -752,7 +743,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                   <input
                     type="text"
-                    placeholder="Search actions..."
+                    placeholder={t('editor.action.search_placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:border-indigo-400 text-xs font-semibold bg-white"

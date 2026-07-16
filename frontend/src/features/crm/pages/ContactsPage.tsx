@@ -26,6 +26,7 @@ import { ContactsSidebar } from '../components/ContactsSidebar';
 import { ContactsHeader } from '../components/ContactsHeader';
 import { ContactsTable } from '../components/ContactsTable';
 import { ContactDetailModal } from '../components/ContactDetailModal';
+import { t } from '../../../i18n';
 
 interface BotUserMetadata {
   sequences?: string[];
@@ -187,13 +188,13 @@ export const ContactsPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <button className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl text-xs font-bold text-slate-600 transition-all cursor-pointer shadow-sm">
                 <Filter size={14} className="text-slate-400" />
-                <span>Filter</span>
+                <span>{t('crm.contacts.filter')}</span>
               </button>
               <div className="relative w-full sm:w-64">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search"
+                  placeholder={t('crm.contacts.search_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 focus:border-indigo-500 rounded-xl text-xs font-semibold text-slate-700 placeholder:text-slate-400 focus:outline-none transition-all"
@@ -203,7 +204,7 @@ export const ContactsPage: React.FC = () => {
 
             <div className="flex items-center gap-3 self-end sm:self-auto">
               <span className="text-xs font-bold text-slate-500">
-                {selectedContactIds.size} selected of {filteredContacts.length} total
+                {t('crm.contacts.selected_count', { count: selectedContactIds.size, total: filteredContacts.length })}
               </span>
               <div className="relative">
                 <button
@@ -211,42 +212,42 @@ export const ContactsPage: React.FC = () => {
                   disabled={selectedContactIds.size === 0}
                   className="flex items-center gap-1 px-3 py-2 bg-white hover:bg-slate-50 disabled:opacity-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition-all cursor-pointer shadow-sm"
                 >
-                  <span>Bulk Actions</span>
+                  <span>{t('crm.contacts.btn.bulk_actions')}</span>
                   <ChevronDown size={14} className="text-slate-400" />
                 </button>
 
                 {showBulkMenu && (
                   <div className="absolute right-0 mt-1.5 w-60 bg-white border border-slate-200 rounded-xl shadow-xl z-30 py-1.5 overflow-hidden text-xs font-bold text-slate-700">
                     <button onClick={() => setBulkActionType('add-tag')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <Tag size={13} className="text-slate-400" /> Add Tag
+                      <Tag size={13} className="text-slate-400" /> {t('crm.contacts.bulk.add_tag')}
                     </button>
                     <button onClick={() => setBulkActionType('remove-tag')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <X size={13} className="text-slate-400" /> Remove Tag
+                      <X size={13} className="text-slate-400" /> {t('crm.contacts.bulk.remove_tag')}
                     </button>
                     <button onClick={() => setBulkActionType('sub-seq')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <Plus size={13} className="text-slate-400" /> Subscribe to Sequence
+                      <Plus size={13} className="text-slate-400" /> {t('crm.contacts.bulk.sub_seq')}
                     </button>
                     <button onClick={() => setBulkActionType('unsub-seq')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <X size={13} className="text-slate-400" /> Unsubscribe from Sequence
+                      <X size={13} className="text-slate-400" /> {t('crm.contacts.bulk.unsub_seq')}
                     </button>
                     <button onClick={() => setBulkActionType('pause')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <Pause size={13} className="text-slate-400" /> Pause Automations Forever
+                      <Pause size={13} className="text-slate-400" /> {t('crm.contacts.bulk.pause')}
                     </button>
                     <button onClick={() => setBulkActionType('resume')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <Play size={13} className="text-slate-400" /> Resume Automations
+                      <Play size={13} className="text-slate-400" /> {t('crm.contacts.bulk.resume')}
                     </button>
                     <button onClick={() => setBulkActionType('set-field')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <Bookmark size={13} className="text-slate-400" /> Set User Field
+                      <Bookmark size={13} className="text-slate-400" /> {t('crm.contacts.bulk.set_field')}
                     </button>
                     <button onClick={() => setBulkActionType('clear-field')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <X size={13} className="text-slate-400" /> Clear User Field
+                      <X size={13} className="text-slate-400" /> {t('crm.contacts.bulk.clear_field')}
                     </button>
                     <div className="border-t border-slate-100 my-1"></div>
                     <button onClick={() => setBulkActionType('unsub-acc')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer text-amber-600">
-                      <Lock size={13} className="text-amber-500" /> Unsubscribe from Account
+                      <Lock size={13} className="text-amber-500" /> {t('crm.contacts.bulk.unsub_acc')}
                     </button>
                     <button onClick={() => setBulkActionType('delete')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer text-rose-600">
-                      <Trash2 size={13} className="text-rose-500" /> Delete Contact
+                      <Trash2 size={13} className="text-rose-500" /> {t('crm.contacts.bulk.delete')}
                     </button>
                   </div>
                 )}
@@ -258,7 +259,7 @@ export const ContactsPage: React.FC = () => {
             <div className="px-6 py-3 bg-indigo-50 border-b border-indigo-100 flex items-center justify-between gap-4 text-xs font-bold text-indigo-950 shrink-0 animation-slide-in">
               <div className="flex items-center gap-3 flex-1">
                 <span>
-                  Bulk: {bulkActionType.replace('-', ' ').toUpperCase()} on {selectedContactIds.size} contacts
+                  {t('crm.contacts.bulk.header', { action: bulkActionType.replace('-', ' ').toUpperCase(), count: selectedContactIds.size })}
                 </span>
                 
                 {['add-tag', 'remove-tag'].includes(bulkActionType) && (
@@ -267,12 +268,12 @@ export const ContactsPage: React.FC = () => {
                     onChange={(e) => setBulkValue(e.target.value)}
                     className="px-2 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
                   >
-                    <option value="">-- Select Tag --</option>
+                    <option value="">{t('crm.contacts.bulk.select_tag')}</option>
                     {tags.map((t) => (
                       <option key={t.id} value={t.name}>{t.name}</option>
                     ))}
                     {bulkActionType === 'add-tag' && (
-                      <option value="NEW_TAG">+ New Tag (Write custom name below)</option>
+                      <option value="NEW_TAG">{t('crm.contacts.bulk.new_tag_option')}</option>
                     )}
                   </select>
                 )}
@@ -283,7 +284,7 @@ export const ContactsPage: React.FC = () => {
                     onChange={(e) => setBulkValue(e.target.value)}
                     className="px-2 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
                   >
-                    <option value="">-- Select Sequence --</option>
+                    <option value="">{t('crm.contacts.bulk.select_seq')}</option>
                     <option value="1">Sequence 1</option>
                   </select>
                 )}
@@ -291,7 +292,7 @@ export const ContactsPage: React.FC = () => {
                 {bulkActionType === 'add-tag' && bulkValue === 'NEW_TAG' && (
                   <input
                     type="text"
-                    placeholder="Enter custom tag name"
+                    placeholder={t('crm.contacts.bulk.enter_tag')}
                     onChange={(e) => setBulkValue(e.target.value)}
                     className="px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
                   />
@@ -301,13 +302,13 @@ export const ContactsPage: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      placeholder="Field name (e.g. Gender)"
+                      placeholder={t('crm.contacts.bulk.field_name_placeholder')}
                       id="bulkFieldKey"
                       className="px-2.5 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs w-36 focus:outline-none"
                     />
                     <input
                       type="text"
-                      placeholder="Value (e.g. Male)"
+                      placeholder={t('crm.contacts.bulk.field_value_placeholder')}
                       id="bulkFieldVal"
                       className="px-2.5 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs w-36 focus:outline-none"
                       onBlur={() => {
@@ -322,7 +323,7 @@ export const ContactsPage: React.FC = () => {
                 {bulkActionType === 'clear-field' && (
                   <input
                     type="text"
-                    placeholder="Field name to clear"
+                    placeholder={t('crm.contacts.bulk.field_clear_placeholder')}
                     value={bulkValue}
                     onChange={(e) => setBulkValue(e.target.value)}
                     className="px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
@@ -330,7 +331,7 @@ export const ContactsPage: React.FC = () => {
                 )}
 
                 {['pause', 'resume', 'unsub-acc', 'delete'].includes(bulkActionType) && (
-                  <span className="text-slate-400 italic font-semibold">No value needed. Click Apply.</span>
+                  <span className="text-slate-400 italic font-semibold">{t('crm.contacts.bulk.no_val_needed')}</span>
                 )}
               </div>
               <div className="flex items-center gap-2">
@@ -338,7 +339,7 @@ export const ContactsPage: React.FC = () => {
                   onClick={handleApplyBulkAction}
                   className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer transition-all"
                 >
-                  Apply
+                  {t('crm.contacts.bulk.btn_apply')}
                 </button>
                 <button
                   onClick={() => {
@@ -347,7 +348,7 @@ export const ContactsPage: React.FC = () => {
                   }}
                   className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-all"
                 >
-                  Cancel
+                  {t('crm.contacts.bulk.btn_cancel')}
                 </button>
               </div>
             </div>

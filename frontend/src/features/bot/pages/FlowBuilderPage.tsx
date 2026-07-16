@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { t } from '../../../i18n';
 import {ReactFlow, Controls, Background, ReactFlowProvider, getBezierPath, getSmoothStepPath, ConnectionLineType,} from '@xyflow/react';
 import type { ConnectionLineComponentProps } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -340,12 +341,12 @@ const FlowBuilderInner: React.FC = () => {
               onClick={() => navigate(ROUTES.AUTOMATIONS)}
               className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 border border-slate-200 rounded-xl transition-all cursor-pointer"
             >
-              <ArrowLeft size={16} />
+               <ArrowLeft size={16} />
             </button>
             <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold">
-              <span>Automations</span>
+              <span>{t('flow_builder.automations')}</span>
               <span>&gt;</span>
-              <span className="text-slate-800 font-bold text-sm">Telegram Flow Schema</span>
+              <span className="text-slate-800 font-bold text-sm">{t('flow_builder.telegram_flow_schema')}</span>
             </div>
           </div>
 
@@ -396,17 +397,17 @@ const FlowBuilderInner: React.FC = () => {
                 {isDirty || saveMutation.isPending ? (
                   <>
                     <Loader2 className="animate-spin text-indigo-500 shrink-0" size={14} />
-                    <span className="text-slate-400">Saving...</span>
+                    <span className="text-slate-400">{t('flow_builder.saving')}</span>
                   </>
                 ) : saveMutation.isError ? (
                   <>
                     <span className="text-rose-500 shrink-0 font-bold">✕</span>
-                    <span className="text-rose-500">Failed</span>
+                    <span className="text-rose-500">{t('flow_builder.failed')}</span>
                   </>
                 ) : (
                   <>
                     <span className="text-emerald-500 shrink-0 font-bold">✓</span>
-                    <span className="text-slate-500">Saved</span>
+                    <span className="text-slate-500">{t('flow_builder.saved')}</span>
                   </>
                 )}
               </div>
@@ -445,7 +446,7 @@ const FlowBuilderInner: React.FC = () => {
               title="Preview flow"
             >
               <Eye size={14} />
-              <span>{isPreviewOpen ? 'Close Preview' : 'Preview'}</span>
+              <span>{isPreviewOpen ? t('flow_builder.close_preview') : t('flow_builder.preview')}</span>
             </button>
 
             {!isViewer && (
@@ -458,7 +459,7 @@ const FlowBuilderInner: React.FC = () => {
                 title="Generate flow with AI"
               >
                 <Sparkles size={14} className="animate-pulse" />
-                <span>AI Gen</span>
+                <span>{t('flow_builder.ai_gen')}</span>
               </button>
             )}
 
@@ -471,18 +472,19 @@ const FlowBuilderInner: React.FC = () => {
                 {saveMutation.isPending ? (
                   <>
                     <Loader2 className="animate-spin" size={14} />
-                    <span>Saving...</span>
+                    <span>{t('flow_builder.saving')}</span>
                   </>
                 ) : (
                   <>
                     <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isBotLive ? 'bg-emerald-400' : 'bg-slate-400'}`} />
-                    <span>Set Live</span>
+                    <span>{t('flow_builder.set_live')}</span>
                   </>
                 )}
               </button>
             )}
           </div>
         </header>
+
 
         <div className="flex-1 flex overflow-hidden relative">
           <div className="flex-1 relative h-full">
@@ -670,7 +672,7 @@ const FlowBuilderInner: React.FC = () => {
                     />
                     <div className="absolute right-0 mt-2.5 w-52 bg-white/95 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">
-                        Add Standalone Node
+                        {t('flow_builder.add_standalone_node')}
                       </span>
                       {FLOW_BLOCKS.map((item) => (
                         <button
@@ -707,7 +709,7 @@ const FlowBuilderInner: React.FC = () => {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 px-3 pt-1 select-none">
-                    Connect to:
+                    {t('flow_builder.connect_to')}
                   </span>
                   {filteredContextMenuOptions.map((opt, idx) => (
                     <button
@@ -733,7 +735,7 @@ const FlowBuilderInner: React.FC = () => {
                     onClick={() => setContextMenu(null)}
                     className="w-full text-center py-2 text-xs font-bold text-slate-400 hover:text-slate-700 transition-all border-t border-slate-100 mt-2.5 cursor-pointer pt-2 select-none"
                   >
-                    Cancel
+                    {t('flow_builder.cancel')}
                   </button>
                 </div>
               </div>

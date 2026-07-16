@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, FileSpreadsheet, AlertTriangle, Info, ChevronDown, RefreshCw } from 'lucide-react';
 import { FieldVariableSelector } from './FieldVariableSelector';
 import type { GoogleSheetsConfigModalProps } from '../../../../../types/bot';
+import { t } from '../../../../../i18n';
 
 export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = ({
   isOpen,
@@ -47,7 +48,7 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
             <X size={16} />
           </button>
           <h3 className="text-base font-extrabold text-slate-800 tracking-tight">
-            Edit Google Sheets Actions
+            {t('editor.gs.modal_title')}
           </h3>
         </div>
 
@@ -58,14 +59,14 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
             </div>
             <div>
               <p className="text-sm font-extrabold text-slate-800">
-                {sheetsAction.type === 'GS_INSERT_ROW' ? 'Google Sheets Actions: Insert Row'
-                  : sheetsAction.type === 'GS_GET_ROW' ? 'Google Sheets Actions: Get Row by Value'
-                  : 'Google Sheets Actions: Update Row'}
+                {sheetsAction.type === 'GS_INSERT_ROW' ? t('editor.gs.modal_subtitle.insert')
+                  : sheetsAction.type === 'GS_GET_ROW' ? t('editor.gs.modal_subtitle.get')
+                  : t('editor.gs.modal_subtitle.update')}
               </p>
               <p className="text-xs text-slate-500 font-medium mt-1">
-                {sheetsAction.type === 'GS_INSERT_ROW' ? 'Send Launchly data to Google Sheets.'
-                  : sheetsAction.type === 'GS_GET_ROW' ? 'Return Google Sheets data to Launchly.'
-                  : 'Update Google Sheets with Launchly data.'}
+                {sheetsAction.type === 'GS_INSERT_ROW' ? t('editor.action.gs_insert_desc')
+                  : sheetsAction.type === 'GS_GET_ROW' ? t('editor.action.gs_get_desc')
+                  : t('editor.action.gs_update_desc')}
               </p>
             </div>
           </div>
@@ -75,11 +76,7 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3 text-[11px] text-amber-800 leading-relaxed font-semibold">
                 <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
                 <div>
-                  Google Sheets integration is not connected or active. Please connect your account in{' '}
-                  <a href="/settings" className="text-indigo-650 font-bold hover:underline">
-                    Settings
-                  </a>{' '}
-                  first.
+                  {t('editor.gs.not_connected')}
                 </div>
               </div>
             )}
@@ -87,9 +84,9 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
             <div className="bg-slate-50 border border-slate-150 rounded-2xl p-4 flex gap-3 text-[11px] text-slate-500 leading-relaxed font-medium select-none">
               <Info size={16} className="text-indigo-500 shrink-0 mt-0.5" />
               <div>
-                The first row of the table is used for your column titles. You could easily match Launchly contact data with your columns by titles names.{' '}
+                {t('editor.gs.help_desc')}{' '}
                 <a href="https://google.com" target="_blank" rel="noopener noreferrer" className="text-indigo-650 font-bold hover:underline">
-                  Help
+                  {t('editor.gs.help_link')}
                 </a>
               </div>
             </div>
@@ -97,7 +94,7 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Spreadsheet
+                  {t('editor.gs.spreadsheet')}
                 </label>
                 <div className="relative">
                   <select
@@ -106,7 +103,7 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
                     className="w-full px-4 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white appearance-none cursor-pointer"
                   >
                     <option value="">
-                      {isLoadingSpreadsheets ? 'Loading spreadsheets...' : '-- Select Spreadsheet --'}
+                      {isLoadingSpreadsheets ? t('editor.gs.loading_spreadsheets') : t('editor.gs.select_spreadsheet')}
                     </option>
                     {spreadsheets.map((sheet) => (
                       <option key={sheet.id} value={sheet.id}>
@@ -131,20 +128,20 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
                       onClick={handleReconnectGoogleSheets}
                       className="mt-2 rounded-md bg-amber-100 px-3 py-1.5 text-[11px] font-extrabold text-amber-900 transition-colors hover:bg-amber-200"
                     >
-                      Reconnect Google Sheets
+                      {t('editor.gs.reconnect')}
                     </button>
                   </div>
                 )}
                 {!spreadsheetsError && !isLoadingSpreadsheets && spreadsheets.length === 0 && (
                   <div className="rounded-xl border border-slate-150 bg-slate-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-slate-500">
-                    No spreadsheets found in this Google account.
+                    {t('editor.gs.no_spreadsheets')}
                   </div>
                 )}
               </div>
 
               <div className="space-y-1.5">
                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Worksheet
+                  {t('editor.gs.worksheet')}
                 </label>
                 <div className="relative">
                   <select
@@ -154,7 +151,7 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
                     className="w-full px-4 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white disabled:opacity-50 appearance-none cursor-pointer"
                   >
                     <option value="">
-                      {isLoadingWorksheets ? 'Loading worksheets...' : '-- Select Worksheet --'}
+                      {isLoadingWorksheets ? t('editor.gs.loading_worksheets') : t('editor.gs.select_worksheet')}
                     </option>
                     {worksheets.map((sheet) => (
                       <option key={sheet} value={sheet}>
@@ -184,7 +181,7 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
                     <div className="grid grid-cols-2 gap-4 pb-2 border-b border-slate-100">
                       <div className="space-y-1.5">
                         <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                          Lookup Column
+                          {t('editor.gs.lookup_column')}
                         </label>
                         <div className="relative">
                           <select
@@ -192,7 +189,7 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
                             onChange={(e) => handleLookupColumnChange(e.target.value)}
                             className="w-full px-4 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white appearance-none cursor-pointer"
                           >
-                            <option value="">-- Select Lookup Column --</option>
+                            <option value="">{t('editor.gs.select_lookup')}</option>
                             {headers.map((header) => (
                               <option key={header} value={header}>
                                 {header}
@@ -207,7 +204,7 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
 
                       <div className="space-y-1.5">
                         <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                          Lookup Value
+                          {t('editor.gs.lookup_value')}
                         </label>
                         <div className="relative flex items-center">
                           <span className="absolute left-3.5 text-slate-400 text-xs font-extrabold select-none">T</span>
@@ -215,7 +212,7 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
                             type="text"
                             value={sheetsAction.lookupValue || ''}
                             onChange={(e) => handleLookupValueChange(e.target.value)}
-                            placeholder="Type value or insert variable"
+                            placeholder={t('editor.gs.lookup_placeholder')}
                             className="w-full pl-8 pr-16 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white"
                           />
                           <div className="absolute right-2 flex items-center gap-1">
@@ -247,12 +244,12 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
 
                   <div className="grid grid-cols-[1fr_20px_1fr] gap-3 items-center select-none text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
                     <div>
-                      {sheetsAction.type === 'GS_GET_ROW' ? 'Google Column Titles' : 'Launchly Data'}
+                      {sheetsAction.type === 'GS_GET_ROW' ? t('editor.gs.col_titles.get') : t('editor.gs.col_titles.other')}
                     </div>
                     <div></div>
                     <div className="flex items-center justify-between">
                       <span>
-                        {sheetsAction.type === 'GS_GET_ROW' ? 'Save into Launchly Field' : 'Google Column Titles'}
+                        {sheetsAction.type === 'GS_GET_ROW' ? t('editor.gs.col_values.get') : t('editor.gs.col_values.other')}
                       </span>
                       <button
                         type="button"
@@ -261,18 +258,18 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
                         className="text-[#407BFF] hover:underline font-bold text-[10px] lowercase tracking-normal flex items-center gap-0.5 cursor-pointer normal-case"
                       >
                         {isLoadingHeaders && <RefreshCw size={10} className="animate-spin" />}
-                        <span>Refresh</span>
+                        <span>{t('editor.gs.refresh')}</span>
                       </button>
                     </div>
                   </div>
 
                   {isLoadingHeaders ? (
                     <div className="py-8 text-center text-xs text-slate-400 font-bold">
-                      Loading column headers...
+                      {t('editor.gs.loading_headers')}
                     </div>
                   ) : headers.length === 0 ? (
                     <div className="py-8 text-center text-xs text-slate-400 italic">
-                      No headers found. Make sure your spreadsheet's first row has columns.
+                      {t('editor.gs.no_headers')}
                     </div>
                   ) : (
                     <div className="space-y-2.5">
@@ -295,19 +292,19 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
                                   onChange={(e) => handleMappingValueChange(header, e.target.value)}
                                   className="w-full px-4 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white cursor-pointer appearance-none"
                                 >
-                                  <option value="">-- Don't map --</option>
-                                  <optgroup label="System Fields">
-                                    <option value="first_name">First Name</option>
-                                    <option value="last_name">Last Name</option>
-                                    <option value="username">Telegram Username</option>
-                                    <option value="phone">Phone</option>
-                                    <option value="email">Email</option>
-                                    <option value="telegram_user_id">Telegram User ID</option>
-                                    <option value="contact_id">Contact ID</option>
-                                    <option value="subscribed">Subscribed</option>
+                                  <option value="">{t('editor.gs.dont_map')}</option>
+                                  <optgroup label={t('editor.gs.system_fields')}>
+                                    <option value="first_name">{t('editor.gs.fields.first_name')}</option>
+                                    <option value="last_name">{t('editor.gs.fields.last_name')}</option>
+                                    <option value="username">{t('editor.gs.fields.username')}</option>
+                                    <option value="phone">{t('editor.gs.fields.phone')}</option>
+                                    <option value="email">{t('editor.gs.fields.email')}</option>
+                                    <option value="telegram_user_id">{t('editor.gs.fields.tg_id')}</option>
+                                    <option value="contact_id">{t('editor.gs.fields.contact_id')}</option>
+                                    <option value="subscribed">{t('editor.gs.fields.subscribed')}</option>
                                   </optgroup>
                                   {customFields && customFields.length > 0 && (
-                                    <optgroup label="Custom User Fields">
+                                    <optgroup label={t('editor.gs.custom_fields')}>
                                       {customFields.map((cf) => (
                                         <option key={cf} value={cf}>
                                           {cf}
@@ -331,7 +328,7 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
                                   type="text"
                                   value={val}
                                   onChange={(e) => handleMappingValueChange(header, e.target.value)}
-                                  placeholder="Type or insert variable"
+                                  placeholder={t('editor.gs.placeholder_input')}
                                   className="w-full pl-8 pr-16 py-2.5 rounded-md border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-white"
                                 />
 
@@ -382,7 +379,7 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
             onClick={onClose}
             className="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-extrabold rounded-md transition-all cursor-pointer select-none"
           >
-            Cancel
+            {t('editor.gs.cancel')}
           </button>
           <button
             type="button"
@@ -390,7 +387,7 @@ export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = (
             onClick={handleSaveSheetsConfig}
             className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:opacity-55 disabled:cursor-not-allowed text-white text-xs font-extrabold rounded-md transition-all cursor-pointer shadow shadow-blue-100 select-none"
           >
-            Save
+            {t('editor.gs.save')}
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate as useRoutingNavigate } from 'react-router-dom';
+import { t } from '../../../i18n';
 import {
   Send,
   Loader2,
@@ -51,15 +52,15 @@ export const TelegramSettingsPanel: React.FC = () => {
         <div className="w-16 h-16 bg-sky-50 rounded-full flex items-center justify-center mx-auto text-[#0088cc]">
           <Send size={32} className="fill-[#0088cc]/10" />
         </div>
-        <h3 className="font-extrabold text-slate-800 text-lg">No Telegram Bots Connected</h3>
+        <h3 className="font-extrabold text-slate-800 text-lg">{t('settings.telegram.no_bots_title')}</h3>
         <p className="text-sm text-slate-400 max-w-sm mx-auto leading-relaxed">
-          Connect your first Telegram bot to build funnels, automate customer support, and close sales.
+          {t('settings.telegram.no_bots_desc')}
         </p>
         <button
           onClick={() => navigate('/connect-bot')}
           className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-indigo-100 cursor-pointer"
         >
-          Connect Telegram Bot
+          {t('settings.telegram.btn_connect')}
         </button>
       </div>
     );
@@ -88,16 +89,16 @@ export const TelegramSettingsPanel: React.FC = () => {
             <Send size={24} className="fill-[#0088cc]/10" />
           </div>
           <div>
-            <h1 className="text-lg font-extrabold text-slate-900 tracking-tight">Telegram channel</h1>
+            <h1 className="text-lg font-extrabold text-slate-900 tracking-tight">{t('settings.telegram.header')}</h1>
             <p className="text-xs text-slate-400 mt-0.5">
-              Manage automatic replies, greetings, and active tokens for your Telegram bots.
+              {t('settings.telegram.subheader')}
             </p>
           </div>
         </div>
         <div className="bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100 flex items-center gap-3">
-          <span className="text-xs font-extrabold text-slate-600">Telegram Status</span>
+          <span className="text-xs font-extrabold text-slate-600">{t('settings.telegram.status_label')}</span>
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
-            Enabled
+            {t('settings.telegram.enabled')}
           </span>
         </div>
       </div>
@@ -124,7 +125,7 @@ export const TelegramSettingsPanel: React.FC = () => {
                       {bot.name}
                       {isMultiple && (
                         <span className="text-[10px] font-bold text-sky-600 bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-full">
-                          Bot #{index + 1}
+                          {t('settings.telegram.bot_tag', { index: index + 1 })}
                         </span>
                       )}
                     </h2>
@@ -135,7 +136,7 @@ export const TelegramSettingsPanel: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-3 bg-slate-50 px-3 py-1.5 rounded-2xl border border-slate-200 shadow-inner">
-                  <span className="text-[11px] font-bold text-slate-500">Enabled</span>
+                  <span className="text-[11px] font-bold text-slate-500">{t('settings.telegram.enabled')}</span>
                   <button
                     onClick={() => handleToggleBot(bot)}
                     className={`w-9 h-5 rounded-full transition-all relative outline-none cursor-pointer ${
@@ -155,15 +156,15 @@ export const TelegramSettingsPanel: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b border-slate-50 items-center">
                   <div className="md:col-span-3">
-                    <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wider">Bot information</h4>
+                    <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wider">{t('settings.telegram.bot_info_title')}</h4>
                   </div>
                   <div className="md:col-span-5 space-y-3">
                     <div>
-                      <div className="text-[11px] font-bold text-slate-400">Bot name</div>
+                      <div className="text-[11px] font-bold text-slate-400">{t('settings.telegram.bot_name_label')}</div>
                       <div className="text-xs text-slate-700 font-semibold mt-0.5">{bot.name}</div>
                     </div>
                     <div>
-                      <div className="text-[11px] font-bold text-slate-400">Bot username</div>
+                      <div className="text-[11px] font-bold text-slate-400">{t('settings.telegram.bot_username_label')}</div>
                       <a
                         href={`https://t.me/${username.startsWith('@') ? username.substring(1) : username}`}
                         target="_blank"
@@ -176,63 +177,52 @@ export const TelegramSettingsPanel: React.FC = () => {
                   </div>
                   <div className="md:col-span-4">
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      To change bot name you have to open{' '}
-                      <a
-                        href="https://t.me/BotFather"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[#0088cc] hover:underline font-semibold"
-                      >
-                        @BotFather
-                      </a>{' '}
-                      via Telegram and enter the command <code className="bg-slate-50 px-1 py-0.5 rounded text-[10px] border border-slate-200 text-slate-500 font-mono">/setname</code>.
+                      {t('settings.telegram.bot_name_desc')}
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b border-slate-50 items-center">
                   <div className="md:col-span-3">
-                    <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wider">Opt-in Automation</h4>
+                    <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wider">{t('settings.telegram.opt_in_title')}</h4>
                   </div>
                   <div className="md:col-span-5">
                     <button
                       onClick={() => setActiveEditAutomation({ botId: bot.id, type: 'opt-in' })}
                       className="bg-white border border-slate-200 hover:bg-slate-50 px-6 py-2 rounded-xl text-xs font-bold text-slate-700 transition-all cursor-pointer shadow-sm active:scale-98"
                     >
-                      Edit
+                      {t('settings.telegram.btn_edit')}
                     </button>
                   </div>
                   <div className="md:col-span-4">
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Opt-In triggers the automation when the user types "Start" or "Subscribe" in your Telegram bot.
-                      These system keywords are by default and aren't editable.
+                      {t('settings.telegram.opt_in_desc')}
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b border-slate-50 items-center">
                   <div className="md:col-span-3">
-                    <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wider">Opt-out Automation</h4>
+                    <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wider">{t('settings.telegram.opt_out_title')}</h4>
                   </div>
                   <div className="md:col-span-5">
                     <button
                       onClick={() => setActiveEditAutomation({ botId: bot.id, type: 'opt-out' })}
                       className="bg-white border border-slate-200 hover:bg-slate-50 px-6 py-2 rounded-xl text-xs font-bold text-slate-700 transition-all cursor-pointer shadow-sm active:scale-98"
                     >
-                      Edit
+                      {t('settings.telegram.btn_edit')}
                     </button>
                   </div>
                   <div className="md:col-span-4">
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Opt-out triggers the automation when the user types "Stop" or "Unsubscribe" in your Telegram bot.
-                      These system keywords are by default and aren't editable.
+                      {t('settings.telegram.opt_out_desc')}
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b border-slate-50 items-center">
                   <div className="md:col-span-3">
-                    <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wider">Revoke bot token</h4>
+                    <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wider">{t('settings.telegram.revoke_title')}</h4>
                   </div>
                   <div className="md:col-span-5">
                     <button
@@ -243,20 +233,19 @@ export const TelegramSettingsPanel: React.FC = () => {
                       }}
                       className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm shadow-indigo-100 active:scale-98"
                     >
-                      Refresh Token
+                      {t('settings.telegram.btn_refresh')}
                     </button>
                   </div>
                   <div className="md:col-span-4">
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      After you revoke the token with @BotFather your marketing automations will stop. To restart them,
-                      refresh the new token right here.
+                      {t('settings.telegram.revoke_desc')}
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 items-center">
                   <div className="md:col-span-3">
-                    <h4 className="font-bold text-xs text-rose-600 uppercase tracking-wider">Remove Telegram Bot</h4>
+                    <h4 className="font-bold text-xs text-rose-600 uppercase tracking-wider">{t('settings.telegram.remove_title')}</h4>
                   </div>
                   <div className="md:col-span-5">
                     <button
@@ -266,13 +255,12 @@ export const TelegramSettingsPanel: React.FC = () => {
                       }}
                       className="bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 px-6 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-98"
                     >
-                      Remove
+                      {t('settings.telegram.btn_remove')}
                     </button>
                   </div>
                   <div className="md:col-span-4">
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      You can completely disconnect and remove your Telegram bot from Launchly. Note: all of your
-                      Telegram contacts for this bot will be deleted from the workspace.
+                      {t('settings.telegram.remove_desc')}
                     </p>
                   </div>
                 </div>
@@ -293,13 +281,13 @@ export const TelegramSettingsPanel: React.FC = () => {
               <X size={16} />
             </button>
             <div className="space-y-1">
-              <h3 className="font-extrabold text-slate-900 text-base">Refresh Telegram Bot Token</h3>
+              <h3 className="font-extrabold text-slate-900 text-base">{t('settings.telegram.modal.refresh_title')}</h3>
               <p className="text-xs text-slate-400">
-                Update the access token for bot <span className="font-bold text-slate-700">"{activeTokenBot.name}"</span>.
+                {t('settings.telegram.modal.refresh_desc', { name: activeTokenBot.name })}
               </p>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-slate-500 uppercase">New Bot Token</label>
+              <label className="text-[11px] font-bold text-slate-500 uppercase">{t('settings.telegram.modal.token_label')}</label>
               <input
                 type="text"
                 placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
@@ -322,7 +310,7 @@ export const TelegramSettingsPanel: React.FC = () => {
                 onClick={() => setActiveTokenBot(null)}
                 className="px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-500 transition-all cursor-pointer"
               >
-                Cancel
+                {t('settings.telegram.modal.btn_cancel')}
               </button>
               <button
                 onClick={handleRefreshBotToken}
@@ -332,7 +320,7 @@ export const TelegramSettingsPanel: React.FC = () => {
                 {updateBotMutation.isPending ? (
                   <Loader2 className="animate-spin" size={12} />
                 ) : (
-                  <span>Save Token</span>
+                  <span>{t('settings.telegram.modal.btn_save_token')}</span>
                 )}
               </button>
             </div>
@@ -350,15 +338,14 @@ export const TelegramSettingsPanel: React.FC = () => {
               <X size={16} />
             </button>
             <div className="space-y-1">
-              <h3 className="font-extrabold text-rose-600 text-base">Remove Telegram Bot</h3>
+              <h3 className="font-extrabold text-rose-600 text-base">{t('settings.telegram.modal.remove_title')}</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                This action is irreversible. All chat history, tags, and contacts linked to{' '}
-                <span className="font-bold text-slate-700">"{activeDeleteBot.name}"</span> will be permanently deleted.
+                {t('settings.telegram.modal.remove_desc', { name: activeDeleteBot.name })}
               </p>
             </div>
             <div className="space-y-1.5">
               <label className="text-[11px] font-bold text-slate-500">
-                Type the bot's name <span className="font-extrabold text-slate-700">"{activeDeleteBot.name}"</span> to confirm:
+                {t('settings.telegram.modal.remove_confirm', { name: activeDeleteBot.name })}
               </label>
               <input
                 type="text"
@@ -373,7 +360,7 @@ export const TelegramSettingsPanel: React.FC = () => {
                 onClick={() => setActiveDeleteBot(null)}
                 className="px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-500 transition-all cursor-pointer"
               >
-                Cancel
+                {t('settings.telegram.modal.btn_cancel')}
               </button>
               <button
                 onClick={handleDeleteBot}
@@ -386,7 +373,7 @@ export const TelegramSettingsPanel: React.FC = () => {
                 {deleteBotMutation.isPending ? (
                   <Loader2 className="animate-spin" size={12} />
                 ) : (
-                  <span>Delete Bot</span>
+                  <span>{t('settings.telegram.modal.btn_delete_bot')}</span>
                 )}
               </button>
             </div>
@@ -405,16 +392,21 @@ export const TelegramSettingsPanel: React.FC = () => {
             </button>
             <div className="space-y-1">
               <h3 className="font-extrabold text-slate-900 text-base">
-                Edit {activeEditAutomation.type === 'opt-in' ? 'Opt-in' : 'Opt-out'} Automation
+                {t('settings.telegram.modal.edit_opt_title', {
+                  type: activeEditAutomation.type === 'opt-in' ? 'Opt-in' : 'Opt-out'
+                })}
               </h3>
               <p className="text-xs text-slate-400">
-                Configure keywords and actions for{' '}
-                {activeEditAutomation.type === 'opt-in' ? 'subscription' : 'unsubscription'}.
+                {t('settings.telegram.modal.edit_opt_desc', {
+                  action: activeEditAutomation.type === 'opt-in' 
+                    ? t('settings.telegram.modal.subscription') 
+                    : t('settings.telegram.modal.unsubscription')
+                })}
               </p>
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase">System Keywords</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase">{t('settings.telegram.modal.keywords_label')}</label>
                 <div className="flex gap-2 mt-1.5">
                   {(activeEditAutomation.type === 'opt-in' ? ['Start', 'Subscribe'] : ['Stop', 'Unsubscribe']).map(
                     (kw) => (
@@ -428,12 +420,12 @@ export const TelegramSettingsPanel: React.FC = () => {
                   )}
                 </div>
                 <p className="text-[10px] text-slate-400 mt-1 italic">
-                  System keywords cannot be edited.
+                  {t('settings.telegram.modal.keywords_desc')}
                 </p>
               </div>
 
               <div className="flex items-center justify-between py-2 border-t border-slate-100">
-                <span className="text-xs font-bold text-slate-600">Trigger active automation</span>
+                <span className="text-xs font-bold text-slate-600">{t('settings.telegram.modal.trigger_toggle')}</span>
                 <button
                   onClick={() => {
                     const key =
@@ -465,15 +457,15 @@ export const TelegramSettingsPanel: React.FC = () => {
               <button
                 onClick={() => {
                   setShowSuccessBanner(
-                    `${
-                      activeEditAutomation.type === 'opt-in' ? 'Opt-in' : 'Opt-out'
-                    } automation updated.`
+                    t('settings.telegram.modal.success_opt_banner', {
+                      type: activeEditAutomation.type === 'opt-in' ? 'Opt-in' : 'Opt-out'
+                    })
                   );
                   setActiveEditAutomation(null);
                 }}
                 className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm shadow-indigo-100"
               >
-                Close
+                {t('settings.telegram.modal.btn_close')}
               </button>
             </div>
           </div>

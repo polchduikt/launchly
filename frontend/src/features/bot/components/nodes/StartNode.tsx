@@ -4,6 +4,7 @@ import type { NodeProps, Node } from '@xyflow/react';
 import { Zap, Plus } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../types/bot';
+import { t } from '../../../../i18n';
 
 export const StartNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
@@ -41,7 +42,7 @@ export const StartNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
         <span className="text-emerald-500 shrink-0">
           <Zap size={15} fill="currentColor" />
         </span>
-        <span className="font-extrabold text-xs text-slate-800 tracking-wider">When...</span>
+        <span className="font-extrabold text-xs text-slate-800 tracking-wider">{t('node.start.when')}</span>
       </div>
 
       <div className="p-3.5 space-y-3">
@@ -51,22 +52,22 @@ export const StartNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
           </span>
           <div className="min-w-0">
             <p className="text-xs font-bold text-slate-800 leading-tight">
-              User subscribes by clicking the Subscribe button
+              {t('node.start.user_subscribes')}
             </p>
             <p className="text-[10px] text-slate-400 font-semibold mt-1 uppercase">
-              Welcome Message
+              {t('node.start.welcome')}
             </p>
           </div>
         </div>
 
         <button className="w-full py-2 border border-dashed border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-indigo-600 hover:text-indigo-700 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-sm">
           <Plus size={13} />
-          <span>New Trigger</span>
+          <span>{t('node.start.new_trigger')}</span>
         </button>
       </div>
 
       <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mr-2">Then</span>
+        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mr-2">{t('node.start.then')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}

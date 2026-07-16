@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { CustomNodeData } from '../../../../../types/bot';
 import { API_METHODS } from '../../../config/editorOptions';
 import { Plus, Trash2, HelpCircle } from 'lucide-react';
+import { t } from '../../../../../i18n';
 
 interface ApiCallNodeEditorProps {
   data: CustomNodeData;
@@ -50,8 +51,6 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
     handleChange('headers', updated);
   };
 
-  const showBodyTab = ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase());
-
   return (
     <div className="space-y-4">
       <div className="flex border-b border-slate-100 pb-1 gap-1">
@@ -64,7 +63,7 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
               : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          Settings
+          {t('editor.api_call.tabs.settings')}
         </button>
         <button
           type="button"
@@ -75,7 +74,7 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
               : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          Headers
+          {t('editor.api_call.tabs.headers')}
           {Object.keys(headers).length > 0 && (
             <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[9px] font-extrabold">
               {Object.keys(headers).length}
@@ -91,7 +90,7 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
               : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          Body
+          {t('editor.api_call.tabs.body')}
         </button>
       </div>
 
@@ -99,7 +98,7 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
         <div className="space-y-4 pt-1">
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-              Request Details
+              {t('editor.api_call.request_details')}
             </label>
             <div className="flex rounded-xl border border-slate-200 overflow-hidden focus-within:border-indigo-500 transition-all bg-white shadow-3xs">
               <select
@@ -130,13 +129,14 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
               />
             </div>
             <p className="text-[10px] text-slate-400 font-medium mt-1.5">
-              Supports placeholders like <code className="bg-slate-100 text-slate-600 px-1 py-0.5 rounded font-mono font-bold text-[9px]">{"{{telegramId}}"}</code> or <code className="bg-slate-100 text-slate-600 px-1 py-0.5 rounded font-mono font-bold text-[9px]">{"{{phone}}"}</code>.
+              {t('editor.api_call.supports_placeholders')}{' '}
+              <code className="bg-slate-100 text-slate-600 px-1 py-0.5 rounded font-mono font-bold text-[9px]">{"{{telegramId}}"}</code> or <code className="bg-slate-100 text-slate-600 px-1 py-0.5 rounded font-mono font-bold text-[9px]">{"{{phone}}"}</code>.
             </p>
           </div>
 
           <div>
             <label htmlFor="responseVariable" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-              Save Response to Variable
+              {t('editor.api_call.save_response_var')}
             </label>
             <div className="relative">
               <input
@@ -152,7 +152,7 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
               <div className="flex gap-1.5 items-start text-[10px] text-slate-500 leading-normal font-semibold">
                 <HelpCircle size={13} className="text-indigo-500 shrink-0 mt-0.5" />
                 <div>
-                  <p>Bellow variables will be populated after the request:</p>
+                  <p>{t('editor.api_call.variables_populated')}</p>
                   <ul className="list-disc list-inside mt-1 space-y-1 font-mono text-[9px] text-slate-600 font-bold bg-white p-2 rounded-lg border border-slate-100">
                     <li><code className="text-indigo-600">{`{{${responseVariable}}}`}</code> - response body text</li>
                     <li><code className="text-indigo-600">{`{{${responseVariable}_status}}`}</code> - HTTP status code (e.g. 200)</li>
@@ -169,7 +169,7 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
         <div className="space-y-3 pt-1">
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              HTTP Header Fields
+              {t('editor.api_call.headers_label')}
             </span>
             <button
               type="button"
@@ -177,13 +177,13 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
               className="text-[10px] text-indigo-600 hover:text-indigo-700 font-extrabold flex items-center gap-1 cursor-pointer"
             >
               <Plus size={12} />
-              Add Header
+              {t('editor.api_call.add_header')}
             </button>
           </div>
 
           {Object.keys(headers).length === 0 ? (
             <div className="border border-dashed border-slate-200 rounded-xl p-4 text-center text-xs text-slate-400 italic font-medium select-none bg-slate-50/20">
-              No custom headers configured
+              {t('editor.api_call.no_headers')}
             </div>
           ) : (
             <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
@@ -193,7 +193,7 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
                     <input
                       type="text"
                       defaultValue={key}
-                      placeholder="Header Name"
+                      placeholder={t('editor.api_call.header_name')}
                       onBlur={(e) => {
                         const newKey = e.target.value.trim();
                         if (newKey && newKey !== key) {
@@ -207,7 +207,7 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
                     <input
                       type="text"
                       value={value}
-                      placeholder="Header Value"
+                      placeholder={t('editor.api_call.header_value')}
                       onChange={(e) => handleHeaderChange(key, key, e.target.value)}
                       className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:border-indigo-400 text-[11px] font-semibold bg-white"
                     />
@@ -216,7 +216,7 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
                     type="button"
                     onClick={() => handleRemoveHeader(key)}
                     className="p-2 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100 transition-all cursor-pointer shrink-0"
-                    title="Remove Header"
+                    title={t('editor.api_call.remove_header')}
                   >
                     <Trash2 size={13} />
                   </button>
@@ -230,7 +230,7 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
       {activeTab === 'body' && (
         <div className="space-y-2 pt-1">
           <label htmlFor="apiBody" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            HTTP Body Payload (text/JSON)
+            {t('editor.api_call.body_payload')}
           </label>
           <textarea
             id="apiBody"
@@ -241,7 +241,7 @@ export const ApiCallNodeEditor: React.FC<ApiCallNodeEditorProps> = ({ data, hand
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-mono transition-all bg-slate-50/20 leading-normal resize-y min-h-32"
           />
           <p className="text-[10px] text-slate-400 font-medium">
-            You can use double braces <code className="bg-slate-100 text-slate-600 px-1 py-0.5 rounded font-mono font-bold text-[9px]">{"{{variable}}"}</code> to dynamically inject customer data from CRM variables.
+            {t('editor.api_call.body_desc')}
           </p>
         </div>
       )}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { useDashboardStatsQuery } from '../hooks/useDashboardStatsQuery';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
+import { t } from '../../../i18n';
 import { 
   Users, 
   Activity, 
@@ -234,9 +235,9 @@ export const DashboardStatsPage: React.FC = () => {
           <div>
             <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2 select-none">
               <TrendingUp size={20} className="text-indigo-600" />
-              <span>Dashboard</span>
+              <span>{t('dashboard.stats.title')}</span>
             </h1>
-            <p className="text-xs text-slate-400">Real-time statistics and interaction metrics for your active chatbot</p>
+            <p className="text-xs text-slate-400">{t('dashboard.stats.subtitle')}</p>
           </div>
           {connectedBots.length > 0 && (
             <div className="relative">
@@ -253,7 +254,7 @@ export const DashboardStatsPage: React.FC = () => {
                 <div className="flex items-center gap-2 truncate">
                   <MessageSquare size={14} className="text-indigo-500 shrink-0" />
                   <span className="truncate">
-                    {selectedBotId === 0 ? 'All Automation' : (currentBot ? currentBot.name : 'Select Bot')}
+                    {selectedBotId === 0 ? t('dashboard.stats.all_automation') : (currentBot ? currentBot.name : t('dashboard.stats.select_bot'))}
                   </span>
                 </div>
                 {isMultipleBots && <ChevronDown size={14} className="text-slate-400 shrink-0" />}
@@ -269,7 +270,7 @@ export const DashboardStatsPage: React.FC = () => {
                         : 'text-slate-655 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
-                    All Automation
+                    {t('dashboard.stats.all_automation')}
                   </button>
                   
                   {connectedBots.map((bot) => (
@@ -296,21 +297,21 @@ export const DashboardStatsPage: React.FC = () => {
             <div className="h-full flex items-center justify-center p-8 text-center bg-white border border-slate-200 rounded-3xl shadow-sm">
               <div className="max-w-md space-y-3.5">
                 <AlertCircle size={44} className="text-slate-350 mx-auto animate-pulse" />
-                <p className="font-extrabold text-slate-700 text-base">Select or connect a Bot</p>
+                <p className="font-extrabold text-slate-700 text-base">{t('dashboard.stats.no_bot_title')}</p>
                 <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
-                  Choose a chatbot from the switcher menu or click Connect to bind your Telegram bot token.
+                  {t('dashboard.stats.no_bot_desc')}
                 </p>
               </div>
             </div>
           ) : isLoading ? (
             <div className="h-96 flex flex-col items-center justify-center gap-3">
               <Loader2 className="animate-spin text-indigo-600" size={32} />
-              <span className="text-xs font-bold text-slate-400">Hydrating stats metrics...</span>
+              <span className="text-xs font-bold text-slate-400">{t('dashboard.stats.loading')}</span>
             </div>
           ) : error ? (
             <div className="p-6 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-700 text-xs font-semibold">
               <AlertCircle size={18} className="shrink-0" />
-              <span>Failed to fetch stats: {error.message}</span>
+              <span>{t('dashboard.stats.error')}: {error.message}</span>
             </div>
           ) : (
             <div className="space-y-6 w-full pb-10">
@@ -320,24 +321,24 @@ export const DashboardStatsPage: React.FC = () => {
                 <div className="bg-gradient-to-tr from-white to-slate-50/50 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all rounded-3xl p-5 relative overflow-hidden group select-none shadow-3xs">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Total Subscribers</span>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{t('dashboard.stats.total_subscribers')}</span>
                       <span className="text-2xl font-black text-slate-900 tracking-tight block">
                         {stats?.totalSubscribers ?? 0}
                       </span>
                     </div>
-                    <span className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <span className="w-9 h-9 rounded-xl bg-indigo-550/10 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                       <Users size={16} />
                     </span>
                   </div>
-                  <div className="mt-4 flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50/40 px-2 py-0.5 rounded-lg w-fit">
-                    <span>Lifetime total</span>
+                  <div className="mt-4 flex items-center gap-1 text-[10px] font-bold text-indigo-650 bg-indigo-50/40 px-2 py-0.5 rounded-lg w-fit">
+                    <span>{t('dashboard.stats.lifetime_total')}</span>
                   </div>
                 </div>
 
                 <div className="bg-gradient-to-tr from-white to-slate-50/50 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all rounded-3xl p-5 relative overflow-hidden group select-none shadow-3xs">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Active Users (24h)</span>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{t('dashboard.stats.active_users')}</span>
                       <span className="text-2xl font-black text-slate-900 tracking-tight block">
                         {stats?.activeUsers24h ?? 0}
                       </span>
@@ -346,15 +347,15 @@ export const DashboardStatsPage: React.FC = () => {
                       <Activity size={16} />
                     </span>
                   </div>
-                  <div className="mt-4 flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50/40 px-2 py-0.5 rounded-lg w-fit">
-                    <span>Unique visitors</span>
+                  <div className="mt-4 flex items-center gap-1 text-[10px] font-bold text-violet-650 bg-violet-50/40 px-2 py-0.5 rounded-lg w-fit">
+                    <span>{t('dashboard.stats.unique_visitors')}</span>
                   </div>
                 </div>
 
                 <div className="bg-gradient-to-tr from-white to-slate-50/50 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all rounded-3xl p-5 relative overflow-hidden group select-none shadow-3xs">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Total Clicks (30d)</span>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{t('dashboard.stats.total_clicks')}</span>
                       <span className="text-2xl font-black text-slate-900 tracking-tight block">
                         {stats?.clicksCount30d ?? 0}
                       </span>
@@ -364,14 +365,14 @@ export const DashboardStatsPage: React.FC = () => {
                     </span>
                   </div>
                   <div className="mt-4 flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50/40 px-2 py-0.5 rounded-lg w-fit">
-                    <span>Interaction counts</span>
+                    <span>{t('dashboard.stats.interaction_counts')}</span>
                   </div>
                 </div>
 
                 <div className="bg-gradient-to-tr from-white to-slate-50/50 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all rounded-3xl p-5 relative overflow-hidden group select-none shadow-3xs">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Active Automations</span>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{t('dashboard.stats.active_automations')}</span>
                       <span className="text-2xl font-black text-slate-900 tracking-tight block">
                         {stats?.activeAutomations ?? 0}
                       </span>
@@ -380,8 +381,8 @@ export const DashboardStatsPage: React.FC = () => {
                       <Zap size={16} />
                     </span>
                   </div>
-                  <div className="mt-4 flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50/40 px-2 py-0.5 rounded-lg w-fit">
-                    <span>Active bots count</span>
+                  <div className="mt-4 flex items-center gap-1 text-[10px] font-bold text-amber-650 bg-amber-50/40 px-2 py-0.5 rounded-lg w-fit">
+                    <span>{t('dashboard.stats.active_bots_count')}</span>
                   </div>
                 </div>
 
@@ -391,24 +392,24 @@ export const DashboardStatsPage: React.FC = () => {
                 <div className="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 shadow-3xs flex flex-col justify-between">
                   <div className="flex flex-row justify-between items-center mb-6 select-none">
                     <div className="space-y-1">
-                      <h2 className="font-extrabold text-slate-800 text-sm">Interaction History</h2>
+                      <h2 className="font-extrabold text-slate-800 text-sm">{t('dashboard.stats.interaction_history')}</h2>
                       <div className="flex items-center gap-3 text-[10px] font-bold">
                         <div className="flex items-center gap-1.5">
                           <span className="w-2.5 h-2.5 rounded-full bg-indigo-400" />
-                          <span className="text-slate-500">Active Users</span>
+                          <span className="text-slate-500">{t('dashboard.stats.active_users_legend')}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                          <span className="text-slate-500">Button Clicks</span>
+                          <span className="text-slate-500">{t('dashboard.stats.button_clicks_legend')}</span>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-3xs shrink-0">
                       {[
-                        { label: '7 Days', val: 7 },
-                        { label: '14 Days', val: 14 },
-                        { label: '30 Days', val: 30 },
+                        { label: t('dashboard.stats.days_7'), val: 7 },
+                        { label: t('dashboard.stats.days_14'), val: 14 },
+                        { label: t('dashboard.stats.days_30'), val: 30 },
                       ].map((p) => (
                         <button
                           key={p.val}
@@ -430,14 +431,14 @@ export const DashboardStatsPage: React.FC = () => {
 
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-3xs flex flex-col">
                   <div className="mb-4">
-                    <h2 className="font-extrabold text-slate-800 text-sm">Top Clicked Buttons</h2>
-                    <p className="text-[10px] text-slate-400">Most clicked interactive menu buttons</p>
+                    <h2 className="font-extrabold text-slate-800 text-sm">{t('dashboard.stats.top_clicked_buttons')}</h2>
+                    <p className="text-[10px] text-slate-400">{t('dashboard.stats.top_clicked_buttons_desc')}</p>
                   </div>
 
                   <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 select-none">
                     {!stats || !stats.topButtons || stats.topButtons.length === 0 ? (
                       <div className="h-full flex items-center justify-center text-center p-6 text-slate-400 text-xs font-semibold">
-                        No clicked buttons logged yet.
+                        {t('dashboard.stats.no_buttons')}
                       </div>
                     ) : (
                       stats.topButtons.map((btn, idx) => {
@@ -447,8 +448,10 @@ export const DashboardStatsPage: React.FC = () => {
                         return (
                           <div key={idx} className="space-y-1.5">
                             <div className="flex justify-between items-center text-xs font-bold text-slate-700">
-                              <span className="truncate max-w-[170px]">{btn.buttonName || 'Option button'}</span>
-                              <span className="text-[10.5px] text-slate-400 font-extrabold">{btn.clicks} clicks</span>
+                              <span className="truncate max-w-[170px]">{btn.buttonName || t('dashboard.stats.option_button')}</span>
+                              <span className="text-[10.5px] text-slate-400 font-extrabold">
+                                {t('dashboard.stats.clicks_count', { count: btn.clicks })}
+                              </span>
                             </div>
                             <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                               <div 

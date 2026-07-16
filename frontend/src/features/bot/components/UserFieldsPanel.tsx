@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, MoreVertical, HelpCircle, X, Folder, ChevronRight, Edit2 } from 'lucide-react';
 import { useBotStore } from '../../../store/useBotStore';
+import { t } from '../../../i18n';
 
 interface UserField {
   name: string;
@@ -201,16 +202,16 @@ export const UserFieldsPanel: React.FC = () => {
       <div className="flex justify-between items-center select-none">
         <div className="flex border-b border-slate-200">
           <button className="px-4 py-2 text-xs font-bold border-b-2 border-blue-600 text-slate-800 cursor-pointer">
-            User Fields
+            {t('settings.fields.user_fields_tab')}
           </button>
-          <button className="px-4 py-2 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-650 cursor-pointer">
-            Bot Fields
+          <button className="px-4 py-2 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 cursor-pointer">
+            {t('settings.fields.bot_fields_tab')}
           </button>
         </div>
         <div className="relative w-64">
           <input
             type="text"
-            placeholder="Search by User Field name"
+            placeholder={t('settings.fields.search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 border border-slate-200 focus:outline-none focus:border-blue-500 rounded-xl text-xs font-semibold bg-white"
@@ -228,7 +229,7 @@ export const UserFieldsPanel: React.FC = () => {
                   onClick={() => setActiveFolderId(null)}
                   className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                 >
-                  User Fields
+                  {t('settings.fields.user_fields_tab')}
                 </button>
                 <ChevronRight size={14} className="text-slate-350" />
                 <div className="flex items-center gap-1">
@@ -245,7 +246,7 @@ export const UserFieldsPanel: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <span className="text-slate-800 font-extrabold text-sm">User Fields</span>
+              <span className="text-slate-800 font-extrabold text-sm">{t('settings.fields.user_fields_tab')}</span>
             )}
           </div>
 
@@ -254,7 +255,7 @@ export const UserFieldsPanel: React.FC = () => {
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer select-none"
           >
             <Plus size={14} />
-            <span>New User Field</span>
+            <span>{t('settings.fields.new_field_btn')}</span>
           </button>
         </div>
 
@@ -291,13 +292,13 @@ export const UserFieldsPanel: React.FC = () => {
                         }}
                         className="w-full px-3 py-1.5 hover:bg-slate-50 text-slate-700 text-xs font-bold text-left cursor-pointer"
                       >
-                        Rename
+                        {t('settings.fields.action_rename')}
                       </button>
                       <button
                         onClick={() => handleDeleteFolder(folder.id)}
-                        className="w-full px-3 py-1.5 hover:bg-rose-50 text-rose-655 text-xs font-bold text-left cursor-pointer border-t border-slate-50"
+                        className="w-full px-3 py-1.5 hover:bg-rose-50 text-rose-600 text-xs font-bold text-left cursor-pointer border-t border-slate-50"
                       >
-                        Delete
+                        {t('settings.fields.action_delete')}
                       </button>
                     </div>
                   )}
@@ -309,7 +310,7 @@ export const UserFieldsPanel: React.FC = () => {
                 className="px-4 py-2.5 border border-dashed border-blue-200 text-blue-650 hover:bg-blue-50/10 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer select-none"
               >
                 <Plus size={14} />
-                <span>New Folder</span>
+                <span>{t('settings.fields.new_folder_btn')}</span>
               </button>
             </div>
           )}
@@ -327,19 +328,19 @@ export const UserFieldsPanel: React.FC = () => {
                   </th>
                   <th className="px-5 py-3">
                     <div className="flex items-center gap-1">
-                      <span>Name</span>
+                      <span>{t('settings.fields.table_name')}</span>
                       <HelpCircle size={12} />
                     </div>
                   </th>
                   <th className="px-5 py-3">
                     <div className="flex items-center gap-1">
-                      <span>Type</span>
+                      <span>{t('settings.fields.table_type')}</span>
                       <HelpCircle size={12} />
                     </div>
                   </th>
                   <th className="px-5 py-3">
                     <div className="flex items-center gap-1">
-                      <span>Description</span>
+                      <span>{t('settings.fields.table_desc')}</span>
                       <HelpCircle size={12} />
                     </div>
                   </th>
@@ -380,13 +381,13 @@ export const UserFieldsPanel: React.FC = () => {
                               onClick={() => handleArchiveField(field.name)}
                               className="w-full px-3 py-1.5 hover:bg-slate-50 text-slate-700 text-xs font-bold text-left cursor-pointer"
                             >
-                              Archive
+                              {t('settings.fields.action_archive')}
                             </button>
                             <button
                               onClick={() => handleDeleteField(field.name, false)}
                               className="w-full px-3 py-1.5 hover:bg-rose-50 text-rose-600 text-xs font-bold text-left cursor-pointer border-t border-slate-50"
                             >
-                              Delete
+                              {t('settings.fields.action_delete')}
                             </button>
                           </div>
                         )}
@@ -396,8 +397,8 @@ export const UserFieldsPanel: React.FC = () => {
                 })}
                 {filteredFields.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="text-center py-10 text-slate-450 italic bg-white">
-                      No Fields
+                    <td colSpan={5} className="text-center py-10 text-slate-400 italic bg-white">
+                      {t('settings.fields.empty_state')}
                     </td>
                   </tr>
                 )}
@@ -410,7 +411,7 @@ export const UserFieldsPanel: React.FC = () => {
       <div className="bg-white border border-slate-200 rounded-[20px] shadow-sm text-left">
         <div className="p-5 border-b border-slate-100">
           <h3 className="text-sm font-extrabold text-slate-800">
-            Archived User Fields
+            {t('settings.fields.archived_header')}
           </h3>
         </div>
         <div className="p-5">
@@ -425,9 +426,9 @@ export const UserFieldsPanel: React.FC = () => {
                       className="w-4 h-4 rounded border-slate-350 text-blue-600 focus:ring-blue-500 cursor-not-allowed"
                     />
                   </th>
-                  <th className="px-5 py-3">Name</th>
-                  <th className="px-5 py-3">Type</th>
-                  <th className="px-5 py-3">Description</th>
+                  <th className="px-5 py-3">{t('settings.fields.table_name')}</th>
+                  <th className="px-5 py-3">{t('settings.fields.table_type')}</th>
+                  <th className="px-5 py-3">{t('settings.fields.table_desc')}</th>
                   <th className="px-5 py-3 w-12 text-right"></th>
                 </tr>
               </thead>

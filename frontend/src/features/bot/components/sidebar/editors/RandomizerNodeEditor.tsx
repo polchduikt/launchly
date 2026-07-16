@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEdges, useNodes } from '@xyflow/react';
 import { Plus, Trash2 } from 'lucide-react';
+import { t } from '../../../../../i18n';
 import type { RandomizerNodeEditorProps } from '../../../../../types/bot';
 import { VARIATION_COLORS } from '../../../config/constants';
 
@@ -154,14 +155,14 @@ export const RandomizerNodeEditor: React.FC<RandomizerNodeEditorProps> = ({
 
       <div>
         <h4 className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">
-          Split the traffic
+          {t('node.randomizer.split_traffic')}
         </h4>
 
         <div className="flex items-center justify-between border border-slate-150 rounded-2xl p-4 shadow-xs bg-slate-50/20 mb-5">
           <div className="pr-4 select-none">
-            <p className="text-xs font-extrabold text-slate-700">Pick a random path every time</p>
+            <p className="text-xs font-extrabold text-slate-700">{t('node.randomizer.pick_random')}</p>
             <p className="text-[10px] text-slate-400 font-semibold leading-relaxed mt-1">
-              If enabled, evaluates a new random path on every visit. Otherwise, keeps the path persistent for the user.
+              {t('node.randomizer.pick_random_desc')}
             </p>
           </div>
           <button
@@ -180,7 +181,7 @@ export const RandomizerNodeEditor: React.FC<RandomizerNodeEditorProps> = ({
         </div>
 
         <div className="flex items-center justify-between px-4 py-3 rounded-2xl border border-slate-200 bg-white shadow-xs select-none">
-          <span className="text-xs font-extrabold text-slate-700">Assigned traffic</span>
+          <span className="text-xs font-extrabold text-slate-700">{t('node.randomizer.assigned_traffic')}</span>
           <span className={`text-sm font-black ${totalAssigned === 100 ? 'text-slate-800' : 'text-rose-500 animate-pulse'}`}>
             {totalAssigned}%
           </span>
@@ -197,7 +198,7 @@ export const RandomizerNodeEditor: React.FC<RandomizerNodeEditorProps> = ({
             <div key={v.id} className="p-4 bg-slate-50/30 border border-slate-150 rounded-2xl space-y-4">
               <div className="flex justify-between items-center select-none">
                 <span className="text-xs font-black" style={{ color: v.color }}>
-                  Variation {v.label}
+                  {t('node.randomizer.variation', { label: v.label })}
                 </span>
                 {variations.length > 2 && (
                   <button
@@ -252,7 +253,7 @@ export const RandomizerNodeEditor: React.FC<RandomizerNodeEditorProps> = ({
                     : 'bg-white border-slate-200 hover:border-slate-350 text-slate-500 hover:text-slate-700'
                 }`}
               >
-                {isConnected ? 'Step Connected' : 'Choose Next Step'}
+                {isConnected ? t('flow_builder.step_connected') : t('flow_builder.choose_next_step')}
               </button>
             </div>
           );
@@ -266,7 +267,7 @@ export const RandomizerNodeEditor: React.FC<RandomizerNodeEditorProps> = ({
           className="w-full py-3.5 bg-white hover:bg-purple-50/10 border border-dashed border-purple-200 hover:border-purple-400 text-purple-600 hover:text-purple-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 select-none shadow-xs"
         >
           <Plus size={14} />
-          New Variation
+          {t('node.randomizer.new_variation')}
         </button>
       )}
     </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import type { CustomNodeData } from '../../../../../types/bot';
+import { t } from '../../../../../i18n';
 
 interface CommentNodeEditorProps {
   data: CustomNodeData;
@@ -15,21 +16,21 @@ export const CommentNodeEditor: React.FC<CommentNodeEditorProps> = ({ data, hand
     <div className="space-y-5">
       <div>
         <label htmlFor="commentText" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-          Comment Text
+          {t('editor.comment.text_label')}
         </label>
         <textarea
           id="commentText"
           rows={5}
           value={text}
           onChange={(e) => handleChange('text', e.target.value)}
-          placeholder="Write your comment here..."
+          placeholder={t('editor.comment.placeholder')}
           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-sm font-semibold transition-all resize-none bg-slate-50/20"
         />
       </div>
 
       <div>
         <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-          Note Size
+          {t('editor.comment.note_size')}
         </label>
         <div className="flex bg-slate-100/80 p-1 rounded-2xl select-none border border-slate-200/50">
           <button
@@ -70,7 +71,7 @@ export const CommentNodeEditor: React.FC<CommentNodeEditorProps> = ({ data, hand
 
       <div>
         <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-          Font Size
+          {t('editor.comment.font_size')}
         </label>
         <div className="flex bg-slate-100/80 p-1 rounded-2xl select-none border border-slate-200/50">
           <button
@@ -82,7 +83,7 @@ export const CommentNodeEditor: React.FC<CommentNodeEditorProps> = ({ data, hand
                 : 'text-slate-500 hover:text-slate-800 bg-transparent'
             }`}
           >
-            Small (aA)
+            {t('editor.comment.font_small')}
           </button>
           <button
             type="button"
@@ -93,7 +94,7 @@ export const CommentNodeEditor: React.FC<CommentNodeEditorProps> = ({ data, hand
                 : 'text-slate-500 hover:text-slate-800 bg-transparent'
             }`}
           >
-            Large (AA)
+            {t('editor.comment.font_large')}
           </button>
         </div>
       </div>

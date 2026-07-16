@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useAiStore } from '../../../store/useAiStore';
 import { useAiAssistant } from '../hooks/useAiAssistant';
 import { QUICK_QUESTIONS } from '../config';
+import { t } from '../../../i18n';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { Sparkles, Send, Bot, User, Loader2, RefreshCw, AlertCircle, Trash2 } from 'lucide-react';
 
@@ -62,15 +63,15 @@ const AiPage: React.FC = () => {
               {isUsageLoading ? (
                 <div className="flex items-center justify-center gap-1.5 py-0.5 text-slate-400">
                   <Loader2 size={10} className="animate-spin" />
-                  <span className="font-bold text-[9px] uppercase tracking-wider">Loading...</span>
+                  <span className="font-bold text-[9px] uppercase tracking-wider">{t('ai.drawer.usage.loading')}</span>
                 </div>
               ) : usage ? (
                 <div className="space-y-1">
                   <div className="flex justify-between items-center font-extrabold text-[9px] text-slate-450 uppercase tracking-widest leading-none">
-                    <span>Daily AI Calls</span>
+                    <span>{t('ai.drawer.usage.daily_requests')}</span>
                     <span>
                       {usage.requestsLimit === -1 ? (
-                        <span className="text-indigo-600 font-black">PRO</span>
+                        <span className="text-indigo-600 font-black">{t('ai.drawer.usage.unlimited')}</span>
                       ) : (
                         `${usage.requestsUsed}/${usage.requestsLimit}`
                       )}
@@ -91,7 +92,7 @@ const AiPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="flex items-center justify-between text-slate-400">
-                  <span className="text-[9px] font-bold">Failed to load</span>
+                  <span className="text-[9px] font-bold">{t('ai.drawer.usage.failed_load')}</span>
                   <button onClick={() => refetchUsage()} className="p-0.5 hover:bg-slate-200 rounded cursor-pointer">
                     <RefreshCw size={8} />
                   </button>
@@ -101,7 +102,7 @@ const AiPage: React.FC = () => {
 
             <button
               onClick={clearMessages}
-              title="Clear Conversation History"
+              title={t('ai.drawer.clear_history_tooltip')}
               className="p-2 hover:bg-slate-100 hover:text-rose-600 text-slate-400 rounded-xl transition-all border border-slate-200 hover:border-slate-300 cursor-pointer shadow-3xs"
             >
               <Trash2 size={15} />
@@ -153,7 +154,7 @@ const AiPage: React.FC = () => {
                   </div>
                   <div className="p-4 rounded-2xl bg-white text-slate-400 border border-slate-200/80 rounded-tl-none shadow-3xs flex items-center gap-2">
                     <Loader2 size={13} className="animate-spin text-slate-400" />
-                    <span className="text-[11px] font-bold">Launchly AI is composing...</span>
+                    <span className="text-[11px] font-bold">{t('ai.drawer.composing')}</span>
                   </div>
                 </div>
               )}
@@ -163,17 +164,17 @@ const AiPage: React.FC = () => {
 
             {messages.length === 1 && !chatMutation.isPending && (
               <div className="pt-6 border-t border-slate-100 select-none max-w-2xl mx-auto w-full">
-                <p className="text-[10px] font-extrabold text-slate-450 uppercase tracking-widest mb-3 text-center">
-                  Suggested Questions
+                <p className="text-[10px] font-extrabold text-slate-455 uppercase tracking-widest mb-3 text-center">
+                  {t('ai.drawer.suggested_questions')}
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {QUICK_QUESTIONS.map((q) => (
                     <button
                       key={q}
-                      onClick={() => handleQuickQuestion(q)}
+                      onClick={() => handleQuickQuestion(t(q))}
                       className="px-3.5 py-2 bg-white hover:bg-indigo-50/50 hover:text-indigo-700 border border-slate-200 hover:border-indigo-150 rounded-full text-[11px] font-bold text-slate-650 transition-all cursor-pointer shadow-3xs hover:shadow-2xs active:scale-95"
                     >
-                      {q}
+                      {t(q)}
                     </button>
                   ))}
                 </div>
@@ -188,7 +189,7 @@ const AiPage: React.FC = () => {
               <div className="flex items-start gap-2 text-rose-700 bg-rose-50 border border-rose-100 p-2.5 rounded-xl">
                 <AlertCircle size={15} className="shrink-0 mt-0.5" />
                 <span className="text-[10px] font-extrabold">
-                  Daily request limit reached. Upgrade to Pro for unlimited Copilot chats.
+                  {t('ai.drawer.usage.limit_reached')}
                 </span>
               </div>
             )}
@@ -201,7 +202,7 @@ const AiPage: React.FC = () => {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={isLimitReached ? "Daily request limit reached..." : "Ask Launchly AI anything..."}
+                placeholder={isLimitReached ? t('ai.drawer.chat_limit_reached') : t('ai.drawer.chat_placeholder')}
                 className="flex-1 bg-transparent pl-3 py-2 text-xs font-medium focus:outline-none transition-all placeholder:text-slate-400 disabled:opacity-55 disabled:cursor-not-allowed resize-none max-h-40 overflow-y-auto leading-relaxed"
               />
               <button

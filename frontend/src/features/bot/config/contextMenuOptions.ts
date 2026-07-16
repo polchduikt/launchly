@@ -1,3 +1,5 @@
+import { t } from '../../../i18n';
+
 export interface ContextMenuOption {
   type: string;
   label: string;
@@ -5,14 +7,18 @@ export interface ContextMenuOption {
   isAi: boolean;
 }
 
-export const CONTEXT_MENU_OPTIONS: ContextMenuOption[] = [
-  { type: 'MESSAGE', label: '+ Telegram', isPro: false, isAi: false },
-  { type: 'API_CALL', label: '+ API Integration', isPro: false, isAi: false },
-  { type: 'ACTION', label: '+ Actions', isPro: false, isAi: false },
-  { type: 'CONDITION', label: '+ Condition', isPro: true, isAi: false },
-  { type: 'RANDOMIZER', label: '+ Randomizer', isPro: true, isAi: false },
-  { type: 'SMART_DELAY', label: '+ Smart Delay', isPro: true, isAi: false },
-  { type: 'START_AUTOMATION', label: '+ Start Automation', isPro: false, isAi: false },
-  { type: 'AI', label: '+ AI Step', isPro: false, isAi: true },
+const CONTEXT_MENU_CONFIGS = [
+  { type: 'MESSAGE', isPro: false, isAi: false },
+  { type: 'API_CALL', isPro: false, isAi: false },
+  { type: 'ACTION', isPro: false, isAi: false },
+  { type: 'CONDITION', isPro: true, isAi: false },
+  { type: 'RANDOMIZER', isPro: true, isAi: false },
+  { type: 'SMART_DELAY', isPro: true, isAi: false },
+  { type: 'START_AUTOMATION', isPro: false, isAi: false },
+  { type: 'AI', isPro: false, isAi: true },
 ];
 
+export const CONTEXT_MENU_OPTIONS: ContextMenuOption[] = CONTEXT_MENU_CONFIGS.map((cfg) => ({
+  ...cfg,
+  get label() { return t(`context_menu.${cfg.type}`); },
+}));

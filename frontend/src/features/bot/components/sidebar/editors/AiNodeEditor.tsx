@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, HelpCircle, Send, RotateCcw, Pencil, Plus, Trash2, ChevronDown, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SiClaude, SiGooglegemini } from '@icons-pack/react-simple-icons';
+import { t } from '../../../../../i18n';
 
 interface AiNodeEditorProps {
   data: Record<string, any>;
@@ -187,10 +188,10 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
 
           <div className="space-y-2">
             <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
-              AI Provider Required
+              {t('editor.ai.provider_required')}
             </h4>
             <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
-              To configure and use the AI Step node in your builder, you must first connect at least one AI provider (ChatGPT, Claude, DeepSeek, or Gemini) in your account settings.
+              {t('editor.ai.provider_desc')}
             </p>
           </div>
 
@@ -200,7 +201,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
             className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-2xl border-none transition-all cursor-pointer shadow-sm active:scale-[0.99] flex items-center justify-center gap-2"
           >
             <Settings size={13} />
-            Go to Settings
+            {t('editor.ai.go_to_settings')}
           </button>
         </div>
       </div>
@@ -211,7 +212,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
     <div className="space-y-6 flex-1 flex flex-col justify-start">
       <div className="space-y-2 mt-2">
         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-          Choose AI Provider
+          {t('editor.ai.choose_provider')}
         </label>
         <div className="flex flex-wrap gap-2">
           {connectedProviders.map((p) => {
@@ -240,7 +241,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
           <div className="space-y-2 relative">
             <div className="flex items-center gap-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Tell AI what to do
+                {t('editor.ai.tell_ai')}
               </label>
               <button
                 type="button"
@@ -254,7 +255,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
 
             {showGoalTooltip && (
               <div className="absolute top-6 left-0 bg-slate-800 text-white text-[10px] p-2.5 rounded-xl z-50 shadow-lg max-w-[240px] leading-relaxed font-medium">
-                Think about the conversations you have with your audience. Tell AI what to handle for you specifically.
+                {t('editor.ai.tell_ai_tooltip')}
               </div>
             )}
 
@@ -262,7 +263,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
               <textarea
                 value={promptInput}
                 onChange={(e) => setPromptInput(e.target.value)}
-                placeholder="Set a goal for the conversation"
+                placeholder={t('editor.ai.goal_placeholder')}
                 rows={3}
                 className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 text-xs font-bold text-slate-800 transition-all bg-white shadow-xs resize-none"
               />
@@ -275,7 +276,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
           <div className="space-y-2 relative">
             <div className="flex items-center gap-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Give AI context
+                {t('editor.ai.give_context')}
               </label>
               <button
                 type="button"
@@ -289,14 +290,14 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
 
             {showContextTooltip && (
               <div className="absolute top-6 left-0 bg-slate-800 text-white text-[10px] p-2.5 rounded-xl z-50 shadow-lg max-w-[240px] leading-relaxed font-medium">
-                Share all the info AI needs to talk to your audience. Include business or product details, relevant links or promotional info.
+                {t('editor.ai.context_tooltip')}
               </div>
             )}
 
             <textarea
               value={contextInput}
               onChange={(e) => setContextInput(e.target.value)}
-              placeholder="Share all the info"
+              placeholder={t('editor.ai.context_placeholder')}
               rows={4}
               className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 text-xs font-bold text-slate-800 transition-all bg-white shadow-xs resize-none"
             />
@@ -313,14 +314,14 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
             }`}
           >
             <Sparkles size={14} />
-            Generate
+            {t('editor.ai.generate')}
           </button>
         </div>
       ) : (
         <div className="space-y-5">
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-              Goal
+              {t('editor.ai.goal')}
             </label>
             <div className="relative">
               <input
@@ -358,7 +359,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
                     type="text"
                     value={newTaskText}
                     onChange={(e) => setNewTaskText(e.target.value)}
-                    placeholder="Enter new task..."
+                    placeholder={t('editor.ai.task_placeholder')}
                     className="flex-1 px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleAddTask();
@@ -369,7 +370,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
                     onClick={handleAddTask}
                     className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl border-none cursor-pointer"
                   >
-                    Add
+                    {t('editor.ai.add_task')}
                   </button>
                 </div>
               ) : (
@@ -379,7 +380,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
                   className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-800 font-bold bg-transparent border-none cursor-pointer p-0 mt-2"
                 >
                   <Plus size={12} />
-                  New Task
+                  {t('editor.ai.new_task')}
                 </button>
               )}
             </div>
@@ -387,7 +388,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
 
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-              Context
+              {t('editor.ai.context')}
             </label>
             <div className="relative group bg-slate-50/50 border border-slate-200 rounded-2xl p-4 pr-10 text-xs text-slate-700 font-semibold leading-relaxed">
               {context}
@@ -412,7 +413,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
               }}
               className="w-full py-3.5 bg-white hover:bg-emerald-50/10 border border-dashed border-emerald-200 hover:border-emerald-400 text-emerald-700 hover:text-emerald-800 text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"
             >
-              Choose Next Step
+              {t('editor.ai.choose_next_step')}
             </button>
           </div>
         </div>
@@ -426,8 +427,8 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
                 AI
               </span>
               <div>
-                <span className="text-[10px] text-slate-400 font-bold block leading-none">Simulation</span>
-                <span className="text-xs font-extrabold text-slate-800 block mt-0.5">AI Step Preview</span>
+                <span className="text-[10px] text-slate-400 font-bold block leading-none">{t('editor.ai.simulation')}</span>
+                <span className="text-xs font-extrabold text-slate-800 block mt-0.5">{t('editor.ai.step_preview')}</span>
               </div>
             </div>
             <button
@@ -436,7 +437,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
               className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-xl border-none cursor-pointer transition-all"
             >
               <RotateCcw size={10} />
-              Restart Preview
+              {t('editor.ai.restart_preview')}
             </button>
           </div>
 
@@ -483,7 +484,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
               type="text"
               value={userMessage}
               onChange={(e) => setUserMessage(e.target.value)}
-              placeholder="Write a message..."
+              placeholder={t('editor.ai.write_message')}
               className="flex-1 px-4 py-2.5 border border-slate-200 rounded-2xl text-xs focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 font-semibold"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSendMessage();

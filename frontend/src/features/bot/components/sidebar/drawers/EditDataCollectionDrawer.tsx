@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
-import { X, Trash2, Database, Zap, AlertCircle, Sparkles, Globe, CreditCard, GitFork, Shuffle, Clock, Play, Send } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Trash2, Database, Zap, AlertCircle } from 'lucide-react';
 import type { FlowBlock } from '../../../../../types/bot';
 import type { Node, Edge } from '@xyflow/react';
 import { NODE_TITLES } from '../../../config/nodeDisplay';
 import { FieldVariableSelector } from '../editors/FieldVariableSelector';
+import { t } from '../../../../../i18n';
 
 export interface EditDataCollectionDrawerProps {
   onClose: () => void;
@@ -63,20 +64,10 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
   const timeoutEdge = edges.find((e) => e.source === nodeId && e.sourceHandle === 'timeout');
   const timeoutNode = timeoutEdge ? nodes.find((n) => n.id === timeoutEdge.target) : null;
 
-  const handleFormSave = () => {
-    onSave({
-      ...block,
-      replyType,
-      variableName: saveToField,
-      expirationMinutes,
-      retryCount,
-    });
-  };
-
   return (
     <div className="h-full flex flex-col justify-between bg-white font-sans w-full select-none">
       <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-        <h3 className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">Edit Data Collection</h3>
+        <h3 className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">{t('editor.data_collection.title')}</h3>
         <button onClick={onClose} className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg transition-colors cursor-pointer">
           <X size={16} />
         </button>
@@ -85,7 +76,7 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
       <div className="flex-1 overflow-y-auto p-5 pb-24 space-y-5 custom-scrollbar">
         <div>
           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-            Reply Type
+            {t('editor.data_collection.reply_type')}
           </label>
           <select
             value={replyType}
@@ -95,16 +86,16 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
             }}
             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-slate-50/20"
           >
-            <option value="Text">Text</option>
-            <option value="Number">Number</option>
-            <option value="Email">Email</option>
-            <option value="Phone">Phone</option>
+            <option value="Text">{t('editor.data_collection.reply.text')}</option>
+            <option value="Number">{t('editor.data_collection.reply.number')}</option>
+            <option value="Email">{t('editor.data_collection.reply.email')}</option>
+            <option value="Phone">{t('editor.data_collection.reply.phone')}</option>
           </select>
         </div>
 
         <div>
           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-            Save Response to a Custom Field
+            {t('editor.data_collection.save_field')}
           </label>
           <div className="relative flex items-center">
             <div className="absolute left-3.5 text-slate-400">
@@ -117,7 +108,7 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
                 setSaveToField(e.target.value);
                 onSave({ ...block, replyType, variableName: e.target.value, expirationMinutes, retryCount });
               }}
-              placeholder="Select or enter field name..."
+              placeholder={t('editor.data_collection.placeholder_field')}
               className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
             />
             <div className="absolute right-2.5">
@@ -136,7 +127,7 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
 
         <div>
           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Actions on successful input
+            {t('editor.data_collection.actions_success')}
           </label>
           {replyNode ? (
             <div className="flex items-center justify-between p-3.5 bg-amber-50/30 border border-amber-200/60 rounded-2xl animate-fade-in">
@@ -146,7 +137,7 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
                 </span>
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">
-                    Perform Actions
+                    {t('editor.data_collection.perform_actions')}
                   </p>
                   <p className="text-xs font-bold text-slate-800 mt-1">
                     {getTargetNodeDisplayName(replyNode, nodes)}
@@ -156,7 +147,7 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
               <button
                 type="button"
                 onClick={() => onUnlinkConnection?.('reply')}
-                className="p-1.5 hover:bg-amber-100/50 text-slate-450 hover:text-slate-700 rounded-xl transition-all cursor-pointer border border-transparent hover:border-amber-200/60"
+                className="p-1.5 hover:bg-amber-100/50 text-slate-455 hover:text-slate-700 rounded-xl transition-all cursor-pointer border border-transparent hover:border-amber-200/60"
               >
                 <X size={15} />
               </button>
@@ -168,18 +159,18 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
               className="w-full py-3.5 border border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/10 text-slate-500 hover:text-indigo-600 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
             >
               <Zap size={13} />
-              <span>Perform Actions</span>
+              <span>{t('editor.data_collection.perform_actions')}</span>
             </button>
           )}
         </div>
 
         <div>
           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-            If contact has not responded
+            {t('editor.data_collection.no_response')}
           </label>
           <div className="p-4 bg-slate-50/40 border border-slate-100 rounded-2xl space-y-3 mb-2.5">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-650">
-              <span>Expires in</span>
+            <div className="flex items-center justify-between text-xs font-bold text-slate-655">
+              <span>{t('editor.data_collection.expires_in')}</span>
               <select
                 value={expirationMinutes}
                 onChange={(e) => {
@@ -189,12 +180,12 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
                 }}
                 className="px-2 py-1 rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-indigo-500 text-xs font-extrabold"
               >
-                <option value="5">5 minutes</option>
-                <option value="15">15 minutes</option>
-                <option value="30">30 minutes</option>
-                <option value="60">1 hour</option>
-                <option value="120">2 hours</option>
-                <option value="1440">24 hours</option>
+                <option value="5">{t('editor.data_collection.5_mins')}</option>
+                <option value="15">{t('editor.data_collection.15_mins')}</option>
+                <option value="30">{t('editor.data_collection.30_mins')}</option>
+                <option value="60">{t('editor.data_collection.1_hour')}</option>
+                <option value="120">{t('editor.data_collection.2_hours')}</option>
+                <option value="1440">{t('editor.data_collection.24_hours')}</option>
               </select>
             </div>
           </div>
@@ -207,7 +198,7 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
                 </span>
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">
-                    Timeout Flow
+                    {t('editor.data_collection.timeout_flow')}
                   </p>
                   <p className="text-xs font-bold text-slate-800 mt-1">
                     {getTargetNodeDisplayName(timeoutNode, nodes)}
@@ -217,7 +208,7 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
               <button
                 type="button"
                 onClick={() => onUnlinkConnection?.('timeout')}
-                className="p-1.5 hover:bg-rose-100/50 text-slate-450 hover:text-slate-700 rounded-xl transition-all cursor-pointer border border-transparent hover:border-rose-200/60"
+                className="p-1.5 hover:bg-rose-100/50 text-slate-455 hover:text-slate-700 rounded-xl transition-all cursor-pointer border border-transparent hover:border-rose-200/60"
               >
                 <X size={15} />
               </button>
@@ -228,17 +219,17 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
               onClick={() => onOpenNextStepDrawer?.('timeout')}
               className="w-full py-3.5 border border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/10 text-slate-500 hover:text-indigo-600 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <span>Choose Next Step</span>
+              <span>{t('flow_builder.choose_next_step')}</span>
             </button>
           )}
         </div>
 
         <div>
           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Retry if invalid
+            {t('editor.data_collection.retry_invalid')}
           </label>
-          <div className="p-4 bg-slate-50/40 border border-slate-100 rounded-2xl flex items-center justify-between text-xs font-bold text-slate-650">
-            <span>Retry count</span>
+          <div className="p-4 bg-slate-50/40 border border-slate-100 rounded-2xl flex items-center justify-between text-xs font-bold text-slate-655">
+            <span>{t('editor.data_collection.retry_count')}</span>
             <select
               value={retryCount}
               onChange={(e) => {
@@ -248,10 +239,10 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
               }}
               className="px-2 py-1 rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-indigo-500 text-xs font-extrabold"
             >
-              <option value="1">1 time</option>
-              <option value="2">2 times</option>
-              <option value="3">3 times</option>
-              <option value="5">5 times</option>
+              <option value="1">{t('editor.data_collection.1_time')}</option>
+              <option value="2">{t('editor.data_collection.2_times')}</option>
+              <option value="3">{t('editor.data_collection.3_times')}</option>
+              <option value="5">{t('editor.data_collection.5_times')}</option>
             </select>
           </div>
         </div>
@@ -260,10 +251,10 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
       <div className="p-4 border-t border-slate-100 bg-slate-50/30 flex gap-3 shrink-0">
         <button
           onClick={onRemove}
-          className="flex-1 py-2.5 border border-dashed border-red-200 hover:border-red-300 hover:bg-red-50 text-red-500 hover:text-red-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+          className="flex-grow py-2.5 border border-dashed border-red-200 hover:border-red-300 hover:bg-red-50 text-red-500 hover:text-red-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
         >
           <Trash2 size={13} />
-          <span>Remove Block</span>
+          <span>{t('editor.data_collection.remove_block')}</span>
         </button>
       </div>
     </div>

@@ -1,10 +1,11 @@
 import React from 'react';
 import {
-  useDeleteIntegrationMutation,
+   useDeleteIntegrationMutation,
 } from '../hooks/useIntegrationQueries';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { SiGooglesheets } from '@icons-pack/react-simple-icons';
 import type { IntegrationResponse } from '../types';
+import { t } from '../../../i18n';
 
 interface GoogleSheetsCardProps {
   botId: number;
@@ -27,7 +28,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
 
   const isConnected = integration && integration.active;
   
-  let connectedEmail = 'Reconnect to show email';
+  let connectedEmail = t('settings.integrations.google.reconnect_email');
   let hasConnectedEmail = false;
   if (integration?.config) {
     try {
@@ -42,7 +43,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
         hasConnectedEmail = true;
       }
     } catch (e) {
-      connectedEmail = 'Reconnect to show email';
+      connectedEmail = t('settings.integrations.google.reconnect_email');
     }
   }
 
@@ -51,7 +52,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
       
       <div className="w-full md:w-1/4 shrink-0">
         <h3 className="font-extrabold text-sm text-slate-800 tracking-tight leading-snug">
-          Connect Google Sheets Account
+          {t('settings.integrations.google.title')}
         </h3>
       </div>
 
@@ -68,7 +69,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
             {isConnected && (
               <div className="mt-1 space-y-0.5">
                 <span className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">
-                  Google Sheets Account Name
+                  {t('settings.integrations.google.account_name')}
                 </span>
                 <span className="block text-xs font-bold text-slate-700">
                   {connectedEmail}
@@ -85,7 +86,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
                   onClick={handleConnectGoogle}
                   className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 text-emerald-700 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm select-none shrink-0"
                 >
-                  Reconnect
+                  {t('settings.integrations.google.reconnect')}
                 </button>
               )}
               <button
@@ -94,7 +95,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
                 disabled={deleteMut.isPending}
                 className="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm select-none shrink-0"
               >
-                {deleteMut.isPending ? 'Disconnecting...' : 'Disconnect'}
+                {deleteMut.isPending ? t('settings.integrations.google.disconnecting') : t('settings.integrations.google.disconnect')}
               </button>
             </div>
           ) : (
@@ -103,7 +104,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
               onClick={handleConnectGoogle}
               className="px-4 py-2 border border-slate-250 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm select-none shrink-0"
             >
-              Connect Google Sheets Account
+              {t('settings.integrations.google.title')}
             </button>
           )}
         </div>
@@ -111,9 +112,9 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
 
       
       <div className="w-full md:w-1/3 text-xs text-slate-400 leading-relaxed font-medium">
-        The integration provides you with an ability to save customers data from Launchly bot to Google Sheets.{' '}
+        {t('settings.integrations.google.desc')}{' '}
         <a href="https://google.com" target="_blank" rel="noopener noreferrer" className="text-indigo-650 font-bold hover:underline cursor-pointer">
-          Learn more
+          {t('settings.integrations.google.learn_more')}
         </a>
       </div>
     </div>

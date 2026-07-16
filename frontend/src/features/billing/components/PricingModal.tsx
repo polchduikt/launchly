@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { t } from '../../../i18n';
 import { X, Loader2, Sparkles, HelpCircle } from 'lucide-react';
 import {
   usePlansQuery,
@@ -52,56 +53,23 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
   };
 
   const getPlanTagline = (planName: string) => {
-    const name = planName.toUpperCase();
-    if (name === 'FREE') return 'Automate, save time, stay connected';
-    if (name === 'STARTER') return 'Keep fans and community engaged';
-    if (name === 'PRO') return 'The "not a side hustle anymore" plan';
-    return 'Big boss energy, more advanced tools';
+    const name = planName.toLowerCase();
+    return t(`pricing.tagline.${name}`);
   };
 
   const getPlanFeaturesList = (planName: string) => {
-    const name = planName.toUpperCase();
-    if (name === 'FREE') {
-      return [
-        '1 Telegram Channel/Bot',
-        'Basic automations (up to 4 active)',
-        '1 user account',
-        'Basic unified Inbox',
-        'Self-serve Support',
-        'Launchly branding'
-      ];
+    const name = planName.toLowerCase();
+    const list: string[] = [];
+    let idx = 0;
+    while (true) {
+      const translation = t(`pricing.features.${name}.${idx}`);
+      if (translation.startsWith('pricing.features.')) {
+        break;
+      }
+      list.push(translation);
+      idx++;
     }
-    if (name === 'STARTER') {
-      return [
-        '2 Telegram Channels/Bots',
-        'Unlimited custom automations',
-        '2 user accounts',
-        'Basic Inbox + tags & reminders',
-        'Email Support',
-        'No Launchly branding'
-      ];
-    }
-    if (name === 'PRO') {
-      return [
-        '4 Telegram Channels/Bots',
-        'Advanced automations & AI convos',
-        '3 user accounts',
-        'Custom Inbox labels & rules',
-        'AI Chat Assistant',
-        'Email & Priority Support',
-        'No Launchly branding'
-      ];
-    }
-    return [
-      'Unlimited Channels/Bots (up to 100)',
-      'Advanced automations & AI convos',
-      'Unlimited users (up to 10)',
-      'Shared team Inbox & assignments',
-      'AI Chat Assistant',
-      'Priority 24/7 Support',
-      'Dedicated Success Manager',
-      'No Launchly branding'
-    ];
+    return list;
   };
 
   return (
@@ -117,7 +85,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
           </button>
 
           <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight text-center">
-            1M+ Creators love Launchly. Now it's your turn.
+            {t('pricing.header')}
           </h2>
 
           <div className="flex bg-slate-100 p-1 rounded-full gap-1 mt-6">
@@ -129,7 +97,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              Monthly
+              {t('pricing.period.monthly')}
             </button>
             <button
               onClick={() => setBillingPeriod('annually')}
@@ -139,9 +107,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <span>Annually</span>
+              <span>{t('pricing.period.annually')}</span>
               <span className="bg-emerald-100 text-emerald-700 text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full select-none">
-                up to 30% off
+                {t('pricing.period.discount')}
               </span>
             </button>
           </div>
@@ -177,7 +145,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                   >
                     {isPro && (
                       <span className="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-md flex items-center gap-1 select-none whitespace-nowrap">
-                        <Sparkles size={10} /> Most Popular
+                        <Sparkles size={10} /> {t('pricing.most_popular')}
                       </span>
                     )}
 
@@ -210,7 +178,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                             {plan.maxBotUsers.toLocaleString()}
                           </div>
                           <div className="text-[11px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
-                            <span>Active Contacts/mo</span>
+                            <span>{t('pricing.active_contacts')}</span>
                             <HelpCircle size={12} className="text-slate-300" />
                           </div>
                         </div>
@@ -222,7 +190,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                             disabled
                             className="w-full py-3.5 bg-slate-50 border border-slate-100 text-slate-400 text-xs font-bold rounded-2xl select-none cursor-not-allowed text-center transition-all shadow-sm"
                           >
-                            Current Plan
+                            {t('pricing.current_plan')}
                           </button>
                         ) : (
                           <button
@@ -237,14 +205,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                             {isUpgrading ? (
                               <>
                                 <Loader2 size={14} className="animate-spin" />
-                                <span>Processing...</span>
+                                <span>{t('pricing.btn.processing')}</span>
                               </>
                             ) : isFree ? (
-                              'Continue with Free'
+                              t('pricing.btn.free')
                             ) : isPro ? (
-                              'Try Pro for 14 days'
+                              t('pricing.btn.pro')
                             ) : (
-                              'Get started'
+                              t('pricing.btn.start')
                             )}
                           </button>
                         )}
@@ -269,7 +237,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
 
           <div className="flex justify-center mt-8">
             <span className="text-slate-400 text-xs hover:text-indigo-600 hover:underline cursor-pointer transition-colors font-medium">
-              Need a deep dive? View plan comparison table
+              {t('pricing.deep_dive')}
             </span>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { t } from '../../../../i18n';
 import { Position, useEdges, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Shuffle } from 'lucide-react';
@@ -68,10 +69,10 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
         </span>
         <div className="flex-1 min-w-0">
           <span className="font-extrabold text-[9px] text-[#6D28D9]/75 uppercase tracking-wider block leading-none">
-            Split Traffic
+            {t('node.randomizer.split_traffic')}
           </span>
           <span className="text-xs font-bold text-[#4C1D95] truncate block mt-0.5">
-            Randomizer
+            {t('node.title.randomizer')}
           </span>
         </div>
       </div>

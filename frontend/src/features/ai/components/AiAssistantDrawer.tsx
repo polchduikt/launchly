@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { useAiAssistant } from '../hooks/useAiAssistant';
 import { QUICK_QUESTIONS, AI_FLOW_TEMPLATES } from '../config';
 import { Sparkles, X, Send, Bot, User, Loader2, RefreshCw, AlertCircle, AlertTriangle } from 'lucide-react';
+import { t } from '../../../i18n';
+
 
 export const AiAssistantDrawer: React.FC = () => {
   const {
@@ -43,7 +45,7 @@ export const AiAssistantDrawer: React.FC = () => {
   return (
     <>
       <div
-        className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-50 transition-opacity duration-300 animate-fadeIn"
+        className="fixed inset-0 bg-slate-900/40 z-50 transition-opacity duration-300 animate-fadeIn"
         onClick={() => setIsOpen(false)}
       />
 
@@ -56,9 +58,9 @@ export const AiAssistantDrawer: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-800">
-                  {onGenerate ? 'Launchly AI Flow Generator' : 'Launchly AI Copilot'}
+                  {onGenerate ? t('ai.drawer.title.generator') : t('ai.drawer.title.copilot')}
                 </h3>
-                <p className="text-[10px] text-slate-400 font-semibold">Online • Powered by Groq</p>
+                <p className="text-[10px] text-slate-400 font-semibold">{t('ai.drawer.online_status')}</p>
               </div>
             </div>
             <button
@@ -73,15 +75,15 @@ export const AiAssistantDrawer: React.FC = () => {
             {isUsageLoading ? (
               <div className="flex items-center justify-center gap-1.5 py-1 text-slate-400">
                 <Loader2 size={12} className="animate-spin" />
-                <span className="font-semibold text-[10px]">Loading AI usage details...</span>
+                <span className="font-semibold text-[10px]">{t('ai.drawer.usage.loading')}</span>
               </div>
             ) : usage ? (
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center font-bold text-[10px] text-slate-500 uppercase tracking-wider">
-                  <span>Daily AI Requests</span>
+                  <span>{t('ai.drawer.usage.daily_requests')}</span>
                   <span>
                     {usage.requestsLimit === -1 ? (
-                      <span className="text-indigo-600">Unlimited (Pro)</span>
+                      <span className="text-indigo-600">{t('ai.drawer.usage.unlimited')}</span>
                     ) : (
                       `${usage.requestsUsed} / ${usage.requestsLimit}`
                     )}
@@ -105,21 +107,21 @@ export const AiAssistantDrawer: React.FC = () => {
                 )}
                 {usage.requestsLimit > 0 && !isLimitReached && (
                   <p className="text-[9px] text-slate-400 font-medium leading-normal">
-                    Limit resets every 24 hours. Free tier gets 20 chat & schema generations per day.
+                    {t('ai.drawer.usage.limit_desc')}
                   </p>
                 )}
                 {isLimitReached && (
                   <div className="flex items-start gap-1.5 text-rose-600 bg-rose-50 border border-rose-100 p-2 rounded-lg mt-1">
                     <AlertCircle size={14} className="shrink-0 mt-0.5" />
                     <span className="text-[9px] font-bold">
-                      You have reached the daily limit. Please upgrade to Pro for unlimited requests.
+                      {t('ai.drawer.usage.limit_reached')}
                     </span>
                   </div>
                 )}
               </div>
             ) : (
               <div className="flex items-center justify-between text-slate-400">
-                <span>Failed to load usage</span>
+                <span>{t('ai.drawer.usage.failed_load')}</span>
                 <button
                   onClick={() => refetchUsage()}
                   className="p-1 hover:bg-slate-200 rounded cursor-pointer"
@@ -180,17 +182,17 @@ export const AiAssistantDrawer: React.FC = () => {
               {messages.length <= 2 && !chatMutation.isPending && (
                 <div className="pt-4 space-y-2 select-none">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Quick Prompts
+                    {t('ai.drawer.quick_prompts')}
                   </span>
                   <div className="grid grid-cols-1 gap-2">
                     {QUICK_QUESTIONS.map((q) => (
                       <button
                         key={q}
                         disabled={isLimitReached}
-                        onClick={() => handleQuickQuestion(q)}
+                        onClick={() => handleQuickQuestion(t(q))}
                         className="w-full text-left p-2.5 bg-white hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-200 rounded-xl text-[11px] font-semibold text-slate-600 hover:text-indigo-700 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {q}
+                        {t(q)}
                       </button>
                     ))}
                   </div>
@@ -207,9 +209,9 @@ export const AiAssistantDrawer: React.FC = () => {
                     <AlertTriangle size={24} className="animate-pulse" />
                   </div>
                   <div className="space-y-1.5 max-w-[280px]">
-                    <h4 className="text-xs font-bold text-slate-800">Overwrite Canvas?</h4>
+                    <h4 className="text-xs font-bold text-slate-800">{t('ai.drawer.overwrite.title')}</h4>
                     <p className="text-[10px] text-slate-500 leading-relaxed font-semibold">
-                      You already have nodes on your constructor canvas. Generating a new flow with AI will completely replace all existing blocks. This cannot be undone.
+                      {t('ai.drawer.overwrite.desc')}
                     </p>
                   </div>
                   <div className="flex gap-2 w-full max-w-[280px] pt-2">
@@ -217,13 +219,13 @@ export const AiAssistantDrawer: React.FC = () => {
                       onClick={() => setConfirmOverwrite(false)}
                       className="px-4 py-2 hover:bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl transition-all cursor-pointer flex-1"
                     >
-                      Back
+                      {t('ai.drawer.overwrite.back')}
                     </button>
                     <button
                       onClick={handleGenerate}
                       className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex-1"
                     >
-                      Yes, Overwrite
+                      {t('ai.drawer.overwrite.confirm')}
                     </button>
                   </div>
                 </div>
@@ -233,9 +235,9 @@ export const AiAssistantDrawer: React.FC = () => {
                 <div className="space-y-4 py-16 flex flex-col items-center justify-center">
                   <Loader2 className="animate-spin text-indigo-600" size={32} />
                   <div className="space-y-1 text-center">
-                    <h4 className="text-xs font-bold text-slate-800 animate-pulse">AI is generating flow...</h4>
+                    <h4 className="text-xs font-bold text-slate-800 animate-pulse">{t('ai.drawer.loading.title')}</h4>
                     <p className="text-[10px] text-slate-400 font-semibold">
-                      Structuring nodes, connecting edges, and validating Start block.
+                      {t('ai.drawer.loading.desc')}
                     </p>
                   </div>
                 </div>
@@ -244,7 +246,7 @@ export const AiAssistantDrawer: React.FC = () => {
               {!confirmOverwrite && !schemaMutation.isPending && (
                 <div className="space-y-5">
                   <div className="text-xs text-slate-500 leading-relaxed font-semibold">
-                    Describe the bot flow you want to build. Launchly AI will automatically generate the appropriate layout, blocks, and connections.
+                    {t('ai.drawer.prompt_desc')}
                   </div>
 
                   {schemaMutation.isError && (
@@ -253,42 +255,42 @@ export const AiAssistantDrawer: React.FC = () => {
                       <div>
                         {schemaMutation.error instanceof Error
                           ? schemaMutation.error.message
-                          : 'Failed to generate bot schema. Please check your prompt and try again.'}
+                          : t('ai.drawer.error_desc')}
                       </div>
                     </div>
                   )}
 
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Describe Bot Flow
+                      {t('ai.drawer.prompt_label')}
                     </label>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       disabled={isLimitReached}
                       rows={5}
-                      placeholder="E.g., A lead capture bot that greets the user, asks for their contact phone, registers a lead, and tags them as 'interested'..."
+                      placeholder={t('ai.drawer.prompt_placeholder')}
                       className="w-full bg-white border border-slate-200 rounded-2xl p-4 text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-400"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Quick Start Templates
+                      {t('ai.drawer.quick_start')}
                     </span>
                     <div className="grid grid-cols-1 gap-2 select-none">
                       {AI_FLOW_TEMPLATES.map((tpl) => (
                         <button
-                          key={tpl.title}
+                          key={tpl.titleKey}
                           disabled={isLimitReached}
-                          onClick={() => setDescription(tpl.text)}
+                          onClick={() => setDescription(t(tpl.textKey))}
                           className="w-full text-left p-3 bg-white hover:bg-indigo-50/40 border border-slate-200/80 hover:border-indigo-200 rounded-2xl transition-all cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <span className="text-[11px] font-bold text-slate-700 group-hover:text-indigo-600 block mb-0.5">
-                            {tpl.title}
+                            {t(tpl.titleKey)}
                           </span>
                           <span className="text-[10px] text-slate-400 font-medium line-clamp-1 group-hover:text-indigo-600/80">
-                            {tpl.text}
+                            {t(tpl.textKey)}
                           </span>
                         </button>
                       ))}
@@ -312,8 +314,8 @@ export const AiAssistantDrawer: React.FC = () => {
                 disabled={isLimitReached || chatMutation.isPending}
                 placeholder={
                   isLimitReached
-                    ? 'Daily request limit reached'
-                    : 'Ask Launchly AI something...'
+                    ? t('ai.drawer.chat_limit_reached')
+                    : t('ai.drawer.chat_placeholder')
                 }
                 className="flex-1 bg-transparent pl-2 py-1.5 text-xs font-medium focus:outline-none resize-none max-h-32 overflow-y-auto leading-relaxed placeholder:text-slate-400 disabled:opacity-55 disabled:cursor-not-allowed"
               />
@@ -333,7 +335,7 @@ export const AiAssistantDrawer: React.FC = () => {
                 onClick={() => setDescription('')}
                 className="px-4 py-2.5 hover:bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl transition-all cursor-pointer"
               >
-                Clear
+                {t('ai.drawer.clear')}
               </button>
               <button
                 disabled={!description.trim() || isLimitReached}
@@ -341,7 +343,7 @@ export const AiAssistantDrawer: React.FC = () => {
                 className="flex items-center gap-1.5 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-bold rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed"
               >
                 <Sparkles size={12} />
-                <span>Generate Bot Flow</span>
+                <span>{t('ai.drawer.generate_btn')}</span>
               </button>
             </footer>
           )

@@ -7,6 +7,7 @@ import type { CustomNodeData, ConditionBranch } from '../../../../types/bot';
 import { getOperatorLabel } from '../../config/editorOptions';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
+import { t } from '../../../../i18n';
 
 export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
@@ -72,10 +73,10 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
         </span>
         <div className="flex-1 min-w-0">
           <span className="font-extrabold text-[9px] text-[#0F766E]/70 uppercase tracking-wider block leading-none">
-            Condition
+            {t('node.condition.category')}
           </span>
           <span className="text-xs font-bold text-[#095244] truncate block mt-0.5">
-            Filter Flow
+            {t('node.condition.filter_flow')}
           </span>
         </div>
       </div>
@@ -88,7 +89,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
               <div key={branch.id || idx} className="relative">
                 {conds.length === 0 ? (
                   <div className="border border-dashed border-slate-200 rounded-2xl p-4 text-center text-[11px] text-slate-400 font-semibold select-none italic bg-slate-50/50 cursor-pointer">
-                    Click to add a condition
+                    {t('node.condition.click_to_add')}
                   </div>
                 ) : (
                   <div className="space-y-2 bg-slate-50/75 border border-slate-150 rounded-xl p-2.5 pr-6">
@@ -134,7 +135,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
 
         <div className="relative pt-3 border-t border-slate-100 flex flex-col gap-1">
           <div className="text-[10px] font-extrabold text-slate-400 leading-normal pr-6">
-            The contact doesn't match any of these conditions
+            {t('node.condition.does_not_match')}
           </div>
           {(() => {
             const isFallbackConnected = data?._tempSourceHandle !== 'fallback' && edges.some((e) => e.source === id && e.sourceHandle === 'fallback' && e.target !== 'temp_menu_node');

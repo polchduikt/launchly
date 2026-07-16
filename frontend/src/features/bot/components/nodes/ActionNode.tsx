@@ -6,6 +6,7 @@ import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData, ActionItem } from '../../../../types/bot';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
+import { t } from '../../../../i18n';
 
 export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
@@ -44,46 +45,25 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
     };
   }, [id]);
 
-  const getActionLabel = (action: ActionItem) => {
-    switch (action.type) {
-      case 'ADD_TAG':
-        return `Add Tag: ${action.tagName || 'Tag'}`;
-      case 'REMOVE_TAG':
-        return `Remove Tag: ${action.tagName || 'Tag'}`;
-      case 'SET_FIELD':
-        return `Set Field: ${action.fieldName || 'Field'}`;
-      case 'REMOVE_FIELD':
-        return `Remove Field: ${action.fieldName || 'Field'}`;
-      case 'SHEETS_INSERT':
-        return 'Sheets: Insert Row';
-      case 'SHEETS_UPDATE':
-        return 'Sheets: Update Row';
-      case 'API_REQUEST':
-        return `API: ${action.apiMethod || 'GET'} ${action.apiUrl || ''}`;
-      default:
-        return 'Unknown Action';
-    }
-  };
-
   const getActionLabelForCanvas = (type: string) => {
     switch (type) {
       case 'ADD_TAG':
-        return 'Add Tag';
+        return t('node.action.add_tag');
       case 'REMOVE_TAG':
-        return 'Remove Tag';
+        return t('node.action.remove_tag');
       case 'SET_USER_FIELD':
-        return 'Set User Field';
+        return t('node.action.set_user_field');
       case 'CLEAR_USER_FIELD':
-        return 'Clear User Field';
+        return t('node.action.clear_user_field');
       case 'TELEGRAM_SUBSCRIBE':
       case 'TELEGRAM_UNSUBSCRIBE':
-        return 'Telegram Actions';
+        return t('node.action.telegram_actions');
       case 'GS_INSERT_ROW':
       case 'GS_GET_ROW':
       case 'GS_UPDATE_ROW':
-        return 'Google Sheets Actions';
+        return t('node.action.sheets_actions');
       default:
-        return 'Action';
+        return t('node.title.action');
     }
   };
 
@@ -93,11 +73,11 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
       case 'REMOVE_TAG':
         return action.tagName || 'Unknown tag';
       case 'SET_USER_FIELD':
-        return action.fieldName 
+        return action.fieldName
           ? `Set ${action.fieldName} to ${action.fieldValue || ''}`
           : 'Unknown field';
       case 'CLEAR_USER_FIELD':
-        return action.fieldName 
+        return action.fieldName
           ? `Clear ${action.fieldName}`
           : 'Unknown field';
       case 'TELEGRAM_SUBSCRIBE':
@@ -111,7 +91,7 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
       case 'GS_UPDATE_ROW':
         return 'Update Row';
       default:
-        return getActionLabel(action);
+        return action.type || '';
     }
   };
 
@@ -140,10 +120,10 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
         </span>
         <div className="flex-1 min-w-0">
           <span className="font-extrabold text-[9px] text-[#a87f18]/70 uppercase tracking-wider block leading-none">
-            Actions
+            {t('node.action.actions_label')}
           </span>
           <span className="text-xs font-bold text-[#6e530f] truncate block mt-0.5">
-            Perform Actions
+            {t('node.action.perform_actions')}
           </span>
         </div>
       </div>
@@ -152,7 +132,7 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
         <div className="space-y-3">
           {actions.length === 0 ? (
             <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-center text-[11px] text-slate-400 font-medium select-none italic bg-slate-50/50">
-              No actions configured. Click to edit.
+              {t('node.action.no_actions')}
             </div>
           ) : (
             <div className="flex flex-col gap-2.5 max-h-56 overflow-y-auto pr-0.5 custom-scrollbar">
@@ -172,7 +152,7 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
       </div>
 
       <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">Next Step</span>
+        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">{t('node.action.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}

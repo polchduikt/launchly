@@ -2,6 +2,7 @@ import React from 'react';
 import { MessageSquare, ChevronDown, Plus } from 'lucide-react';
 import type { ChatFilter, SortOrder } from '../types/chat';
 import { CHAT_FILTER_OPTIONS } from '../config/chat';
+import { t } from '../../../i18n';
 
 interface ChatFilterBarProps {
   chatFilter: ChatFilter;
@@ -24,7 +25,7 @@ interface ChatFilterBarProps {
 export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
   chatFilter,
   onChatFilterChange,
-  chatFilterLabel,
+  chatFilterLabel: _chatFilterLabel,
   showChatFilterDrop,
   onShowChatFilterDrop,
   filterRef,
@@ -48,7 +49,7 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-indigo-200 bg-indigo-50/50 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50 cursor-pointer"
         >
           <MessageSquare size={12} className="text-indigo-500" />
-          {chatFilterLabel} <ChevronDown size={11} />
+          {chatFilter === 'open' ? t('crm.chat.open_chats') : chatFilter === 'closed' ? t('crm.chat.closed_chats') : t('crm.chat.all_chats')} <ChevronDown size={11} />
         </button>
         {showChatFilterDrop && (
           <div className="absolute top-full mt-1 left-0 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1 min-w-[140px]">
@@ -58,7 +59,7 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
                 onClick={() => { onChatFilterChange(f.value); onShowChatFilterDrop(false); }}
                 className={`w-full text-left px-3 py-1.5 text-xs font-medium cursor-pointer ${chatFilter === f.value ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}
               >
-                {f.label}
+                {f.value === 'open' ? t('crm.chat.open_chats') : f.value === 'closed' ? t('crm.chat.closed_chats') : t('crm.chat.all_chats')}
               </button>
             ))}
           </div>
@@ -71,7 +72,7 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
           showUnreadOnly ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
         }`}
       >
-        Unread {unreadCount > 0 && <span className="ml-1 bg-indigo-500 text-white text-[9px] font-bold px-1 rounded-full">{unreadCount}</span>}
+        {t('crm.chat.unread')} {unreadCount > 0 && <span className="ml-1 bg-indigo-500 text-white text-[9px] font-bold px-1 rounded-full">{unreadCount}</span>}
       </button>
 
       <div ref={sortRef} className="relative shrink-0">
@@ -79,20 +80,20 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
           onClick={() => { onShowSortDrop(!showSortDrop); onShowChatFilterDrop(false); }}
           className="flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-[11px] font-semibold text-slate-600 hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
         >
-          Sort: {sortOrder === 'newest' ? 'Newest' : 'Oldest'} <ChevronDown size={11} />
+          {sortOrder === 'newest' ? t('crm.chat.sort_newest') : t('crm.chat.sort_oldest')} <ChevronDown size={11} />
         </button>
         {showSortDrop && (
           <div className="absolute top-full mt-1 left-0 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1 min-w-[110px]">
-            <button onClick={() => { onSortOrderChange('newest'); onShowSortDrop(false); }} className={`w-full text-left px-3 py-1.5 text-xs font-medium cursor-pointer ${sortOrder === 'newest' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}>Newest</button>
-            <button onClick={() => { onSortOrderChange('oldest'); onShowSortDrop(false); }} className={`w-full text-left px-3 py-1.5 text-xs font-medium cursor-pointer ${sortOrder === 'oldest' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}>Oldest</button>
+            <button onClick={() => { onSortOrderChange('newest'); onShowSortDrop(false); }} className={`w-full text-left px-3 py-1.5 text-xs font-medium cursor-pointer ${sortOrder === 'newest' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}>{t('crm.chat.sort_newest_opt')}</button>
+            <button onClick={() => { onSortOrderChange('oldest'); onShowSortDrop(false); }} className={`w-full text-left px-3 py-1.5 text-xs font-medium cursor-pointer ${sortOrder === 'oldest' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}>{t('crm.chat.sort_oldest_opt')}</button>
           </div>
         )}
       </div>
 
       <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-dashed border-slate-300 bg-white text-[11px] font-semibold text-slate-500 hover:border-indigo-300 hover:text-indigo-600 cursor-pointer shrink-0">
-        <Plus size={10} /> Filter
+        <Plus size={10} /> {t('crm.chat.filter')}
       </button>
     </div>
-    <button onClick={onResetFilters} className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer ml-4 shrink-0">Reset Filters</button>
+    <button onClick={onResetFilters} className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer ml-4 shrink-0">{t('crm.chat.reset_filters')}</button>
   </div>
 );

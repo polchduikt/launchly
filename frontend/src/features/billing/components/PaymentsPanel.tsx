@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { t } from '../../../i18n';
 import { 
   CheckCircle2, 
-  X, 
   HelpCircle, 
   CreditCard, 
   AlertCircle, 
-  DollarSign, 
-  Mail, 
-  MessageSquare,
-  Sparkles,
-  ShoppingBag,
-  ArrowRight,
   Plus
 } from 'lucide-react';
 
@@ -41,6 +35,7 @@ export const PaymentsPanel: React.FC = () => {
   const [sendReceiptEmail, setSendReceiptEmail] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
   useEffect(() => {
     const savedStripe = localStorage.getItem('launchly_payments_stripe_connected');
     if (savedStripe === 'true') setIsStripeConnected(true);
@@ -82,7 +77,7 @@ export const PaymentsPanel: React.FC = () => {
     if (isStripeConnected) {
       setIsStripeConnected(false);
       localStorage.removeItem('launchly_payments_stripe_connected');
-      showNotification('success', 'Stripe account disconnected successfully.');
+      showNotification('success', t('settings.payments.stripe.disconnected_msg'));
       return;
     }
 
@@ -91,7 +86,7 @@ export const PaymentsPanel: React.FC = () => {
       setIsStripeConnecting(false);
       setIsStripeConnected(true);
       localStorage.setItem('launchly_payments_stripe_connected', 'true');
-      showNotification('success', 'Stripe account connected successfully!');
+      showNotification('success', t('settings.payments.stripe.connected_msg'));
     }, 1500);
   };
 
@@ -108,12 +103,12 @@ export const PaymentsPanel: React.FC = () => {
       setPaypalWebhookId('');
       setPaypalLiveClientId('');
       setPaypalLiveWebhookId('');
-      showNotification('success', 'PayPal account disconnected successfully.');
+      showNotification('success', t('settings.payments.paypal.disconnected_msg'));
       return;
     }
 
     if (!paypalClientId.trim() || !paypalWebhookId.trim() || !paypalLiveClientId.trim() || !paypalLiveWebhookId.trim()) {
-      showNotification('error', 'Please fill in all PayPal Client ID and Webhook ID fields.');
+      showNotification('error', t('settings.payments.paypal.error_fill'));
       return;
     }
 
@@ -126,17 +121,18 @@ export const PaymentsPanel: React.FC = () => {
       localStorage.setItem('launchly_payments_paypal_wh', paypalWebhookId);
       localStorage.setItem('launchly_payments_paypal_live_client', paypalLiveClientId);
       localStorage.setItem('launchly_payments_paypal_live_wh', paypalLiveWebhookId);
-      showNotification('success', 'PayPal account connected successfully!');
+      showNotification('success', t('settings.payments.paypal.connected_msg'));
     }, 1500);
   };
 
   const handleSaveSettings = (key: string, value: any) => {
     localStorage.setItem(key, String(value));
-    showNotification('success', 'Setting saved successfully.');
+    showNotification('success', t('settings.payments.history.saved_msg'));
   };
+
   const handleGenerateTestOrder = () => {
     if (!isStripeConnected && !isPaypalConnected) {
-      showNotification('error', 'Please connect Stripe or PayPal to simulate orders.');
+      showNotification('error', t('settings.payments.history.connect_needed'));
       return;
     }
 
@@ -183,13 +179,13 @@ export const PaymentsPanel: React.FC = () => {
     const updated = [newOrder, ...orders];
     setOrders(updated);
     localStorage.setItem('launchly_payments_orders', JSON.stringify(updated));
-    showNotification('success', 'Simulated order created successfully!');
+    showNotification('success', t('settings.payments.history.success_sim'));
   };
 
   const handleClearOrders = () => {
     setOrders([]);
     localStorage.removeItem('launchly_payments_orders');
-    showNotification('success', 'Order history cleared.');
+    showNotification('success', t('settings.payments.history.success_clear'));
   };
 
   return (
@@ -211,7 +207,7 @@ export const PaymentsPanel: React.FC = () => {
       <div className="bg-white border border-slate-200 rounded-3xl shadow-sm divide-y divide-slate-100 overflow-hidden">
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
           <div className="w-full md:w-1/4">
-            <h3 className="font-bold text-sm text-slate-800">Stripe Account</h3>
+            <h3 className="font-bold text-sm text-slate-800">{t('settings.payments.stripe.title')}</h3>
           </div>
           <div className="w-full md:w-5/12 flex flex-col gap-3">
             {isStripeConnected ? (
@@ -221,15 +217,15 @@ export const PaymentsPanel: React.FC = () => {
                     <CreditCard size={18} />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-slate-800">Connected to Stripe</div>
-                    <div className="text-[10px] text-slate-400 font-semibold mt-0.5">Live Mode • USD</div>
+                    <div className="text-xs font-bold text-slate-800">{t('settings.payments.stripe.connected')}</div>
+                    <div className="text-[10px] text-slate-400 font-semibold mt-0.5">{t('settings.payments.stripe.mode')}</div>
                   </div>
                 </div>
                 <button
                   onClick={handleConnectStripe}
                   className="px-3 py-1.5 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-500 hover:text-rose-600 text-[10px] font-bold rounded-lg transition-all cursor-pointer"
                 >
-                  Disconnect
+                  {t('settings.payments.stripe.btn_disconnect')}
                 </button>
               </div>
             ) : (
@@ -241,22 +237,22 @@ export const PaymentsPanel: React.FC = () => {
                 {isStripeConnecting ? (
                   <>
                     <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Connecting...</span>
+                    <span>{t('settings.payments.stripe.connecting')}</span>
                   </>
                 ) : (
-                  <span>Connect Stripe Account</span>
+                  <span>{t('settings.payments.stripe.btn_connect')}</span>
                 )}
               </button>
             )}
           </div>
-          <div className="w-full md:w-1/3 text-xs text-slate-400 leading-relaxed">
-            You can accept payments via Messenger and Instagram. You need to connect an existing Stripe account or create a new one to access Buy Button in your Automations. Buy Button can be used with Card, Gallery, List or Media Template elements. <a href="https://stripe.com" target="_blank" rel="noreferrer" className="text-indigo-600 font-bold hover:underline">Learn more</a>
+          <div className="w-full md:w-1/3 text-xs text-slate-400 leading-relaxed text-balance">
+            {t('settings.payments.stripe.desc')}
           </div>
         </div>
 
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
           <div className="w-full md:w-1/4">
-            <h3 className="font-bold text-sm text-slate-800">PayPal Account</h3>
+            <h3 className="font-bold text-sm text-slate-800">{t('settings.payments.paypal.title')}</h3>
           </div>
           <div className="w-full md:w-5/12 flex flex-col gap-3.5">
             <a 
@@ -265,7 +261,7 @@ export const PaymentsPanel: React.FC = () => {
               rel="noreferrer" 
               className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1 w-fit"
             >
-              How can I find needed Client ID and Webhook ID?
+              {t('settings.payments.paypal.faq_link')}
             </a>
 
             {isPaypalConnected ? (
@@ -275,15 +271,15 @@ export const PaymentsPanel: React.FC = () => {
                     PP
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-slate-800">Connected to PayPal</div>
-                    <div className="text-[10px] text-slate-400 font-semibold mt-0.5">Test & Live Mode</div>
+                    <div className="text-xs font-bold text-slate-800">{t('settings.payments.paypal.connected')}</div>
+                    <div className="text-[10px] text-slate-400 font-semibold mt-0.5">{t('settings.payments.paypal.mode')}</div>
                   </div>
                 </div>
                 <button
                   onClick={handleConnectPaypal}
                   className="px-3 py-1.5 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-500 hover:text-rose-600 text-[10px] font-bold rounded-lg transition-all cursor-pointer"
                 >
-                  Disconnect
+                  {t('settings.payments.stripe.btn_disconnect')}
                 </button>
               </div>
             ) : (
@@ -291,7 +287,7 @@ export const PaymentsPanel: React.FC = () => {
                 <input
                   type="text"
                   required
-                  placeholder="Client ID"
+                  placeholder={t('settings.payments.paypal.placeholder_client')}
                   value={paypalClientId}
                   onChange={(e) => setPaypalClientId(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-indigo-400 bg-slate-50/20"
@@ -299,7 +295,7 @@ export const PaymentsPanel: React.FC = () => {
                 <input
                   type="text"
                   required
-                  placeholder="Webhook ID"
+                  placeholder={t('settings.payments.paypal.placeholder_wh')}
                   value={paypalWebhookId}
                   onChange={(e) => setPaypalWebhookId(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-indigo-400 bg-slate-50/20"
@@ -307,7 +303,7 @@ export const PaymentsPanel: React.FC = () => {
                 <input
                   type="text"
                   required
-                  placeholder="Live Client ID"
+                  placeholder={t('settings.payments.paypal.placeholder_live_client')}
                   value={paypalLiveClientId}
                   onChange={(e) => setPaypalLiveClientId(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-indigo-400 bg-slate-50/20"
@@ -315,7 +311,7 @@ export const PaymentsPanel: React.FC = () => {
                 <input
                   type="text"
                   required
-                  placeholder="Live Webhook ID"
+                  placeholder={t('settings.payments.paypal.placeholder_live_wh')}
                   value={paypalLiveWebhookId}
                   onChange={(e) => setPaypalLiveWebhookId(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-indigo-400 bg-slate-50/20"
@@ -329,22 +325,22 @@ export const PaymentsPanel: React.FC = () => {
                   {isPaypalConnecting ? (
                     <>
                       <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Connecting...</span>
+                      <span>{t('settings.payments.stripe.connecting')}</span>
                     </>
                   ) : (
-                    <span>Connect PayPal Account</span>
+                    <span>{t('settings.payments.paypal.btn_connect')}</span>
                   )}
                 </button>
               </form>
             )}
           </div>
-          <div className="w-full md:w-1/3 text-xs text-slate-400 leading-relaxed">
-            You can accept PayPal payments via Messenger and Instagram. You need to connect an existing PayPal Business account to access Buy Button in your Automation.
+          <div className="w-full md:w-1/3 text-xs text-slate-400 leading-relaxed text-balance">
+            {t('settings.payments.paypal.desc')}
           </div>
         </div>
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
           <div className="w-full md:w-1/4">
-            <h3 className="font-bold text-sm text-slate-800">Currency</h3>
+            <h3 className="font-bold text-sm text-slate-800">{t('settings.payments.currency.title')}</h3>
           </div>
           <div className="w-full md:w-5/12">
             <select
@@ -355,19 +351,19 @@ export const PaymentsPanel: React.FC = () => {
               }}
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-indigo-500 transition-all bg-white"
             >
-              <option value="USD">US Dollar</option>
-              <option value="EUR">Euro</option>
-              <option value="UAH">Ukrainian Hryvnia</option>
-              <option value="GBP">British Pound</option>
+              <option value="USD">{t('settings.payments.currency.usd')}</option>
+              <option value="EUR">{t('settings.payments.currency.eur')}</option>
+              <option value="UAH">{t('settings.payments.currency.uah')}</option>
+              <option value="GBP">{t('settings.payments.currency.gbp')}</option>
             </select>
           </div>
-          <div className="w-full md:w-1/3 text-xs text-slate-400 leading-relaxed">
-            Select currency type.
+          <div className="w-full md:w-1/3 text-xs text-slate-400 leading-relaxed text-balance">
+            {t('settings.payments.currency.desc')}
           </div>
         </div>
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
           <div className="w-full md:w-1/4">
-            <h3 className="font-bold text-sm text-slate-800">Notify Assignees About New Orders</h3>
+            <h3 className="font-bold text-sm text-slate-800">{t('settings.payments.notify.title')}</h3>
           </div>
           <div className="w-full md:w-5/12 flex flex-col gap-2.5 pt-1">
             <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
@@ -381,8 +377,8 @@ export const PaymentsPanel: React.FC = () => {
                 className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
               />
               <span className="flex items-center gap-1">
-                Messenger 
-                <HelpCircle size={13} className="text-slate-400" title="Sends a push notification inside the Launchly Inbox to active operators" />
+                {t('settings.payments.notify.messenger')}
+                <HelpCircle size={13} className="text-slate-400" title={t('settings.payments.notify.messenger_tooltip')} />
               </span>
             </label>
             <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
@@ -395,16 +391,16 @@ export const PaymentsPanel: React.FC = () => {
                 }}
                 className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
               />
-              <span>Email</span>
+              <span>{t('settings.payments.notify.email')}</span>
             </label>
           </div>
-          <div className="w-full md:w-1/3 text-xs text-slate-400 leading-relaxed">
-            Notify Assignees when a new payment received.
+          <div className="w-full md:w-1/3 text-xs text-slate-400 leading-relaxed text-balance">
+            {t('settings.payments.notify.desc')}
           </div>
         </div>
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
           <div className="w-full md:w-1/4">
-            <h3 className="font-bold text-sm text-slate-800">Send To Contact Successful Charge Receipt</h3>
+            <h3 className="font-bold text-sm text-slate-800">{t('settings.payments.receipt.title')}</h3>
           </div>
           <div className="w-full md:w-5/12 pt-1">
             <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
@@ -417,18 +413,18 @@ export const PaymentsPanel: React.FC = () => {
                 }}
                 className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
               />
-              <span>Email</span>
+              <span>{t('settings.payments.receipt.email')}</span>
             </label>
           </div>
-          <div className="w-full md:w-1/3 text-xs text-slate-400 leading-relaxed">
-            To notify a user about successful payment by e-mail, you have to tick the box in Manychat Payments and set this option up in your Stripe account by following <a href="https://stripe.com" target="_blank" rel="noreferrer" className="text-indigo-600 font-bold hover:underline">this link</a>
+          <div className="w-full md:w-1/3 text-xs text-slate-400 leading-relaxed text-balance">
+            {t('settings.payments.receipt.desc')}
           </div>
         </div>
 
       </div>
       <div className="space-y-4">
         <div className="space-y-2 select-none">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Orders:</span>
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('settings.payments.history.total_orders')}</span>
           <div className="w-fit px-10 py-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm text-center">
             <span className="text-3xl font-black text-emerald-600 leading-none">
               {orders.length}
@@ -438,8 +434,8 @@ export const PaymentsPanel: React.FC = () => {
         <div className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 md:p-8 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-md font-extrabold text-slate-800 tracking-tight">Purchase History</h2>
-              <p className="text-[11px] text-slate-400 mt-0.5">Real-time log of customer payments processed through automations.</p>
+              <h2 className="text-md font-extrabold text-slate-800 tracking-tight">{t('settings.payments.history.title')}</h2>
+              <p className="text-[11px] text-slate-400 mt-0.5">{t('settings.payments.history.subtitle')}</p>
             </div>
             
             {(isStripeConnected || isPaypalConnected) && (
@@ -449,7 +445,7 @@ export const PaymentsPanel: React.FC = () => {
                     onClick={handleClearOrders}
                     className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold rounded-lg transition-all cursor-pointer"
                   >
-                    Clear History
+                    {t('settings.payments.history.btn_clear')}
                   </button>
                 )}
                 <button
@@ -457,7 +453,7 @@ export const PaymentsPanel: React.FC = () => {
                   className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold rounded-lg transition-all shadow-xs cursor-pointer shadow-indigo-100 flex items-center gap-1"
                 >
                   <Plus size={11} />
-                  <span>Simulate Order</span>
+                  <span>{t('settings.payments.history.btn_simulate')}</span>
                 </button>
               </div>
             )}
@@ -467,14 +463,14 @@ export const PaymentsPanel: React.FC = () => {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-150 text-slate-500 font-bold uppercase tracking-wider">
-                  <th className="px-5 py-3 select-none">Avatar</th>
-                  <th className="px-5 py-3 select-none">Name</th>
-                  <th className="px-5 py-3 select-none">Date</th>
-                  <th className="px-5 py-3 select-none">Order ID</th>
-                  <th className="px-5 py-3 select-none">Item Price</th>
-                  <th className="px-5 py-3 select-none">Status</th>
-                  <th className="px-5 py-3 select-none">Item Name</th>
-                  <th className="px-5 py-3 select-none">Additional Information</th>
+                  <th className="px-5 py-3 select-none">{t('settings.payments.history.col.avatar')}</th>
+                  <th className="px-5 py-3 select-none">{t('settings.payments.history.col.name')}</th>
+                  <th className="px-5 py-3 select-none">{t('settings.payments.history.col.date')}</th>
+                  <th className="px-5 py-3 select-none">{t('settings.payments.history.col.order_id')}</th>
+                  <th className="px-5 py-3 select-none">{t('settings.payments.history.col.price')}</th>
+                  <th className="px-5 py-3 select-none">{t('settings.payments.history.col.status')}</th>
+                  <th className="px-5 py-3 select-none">{t('settings.payments.history.col.item_name')}</th>
+                  <th className="px-5 py-3 select-none">{t('settings.payments.history.col.info')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
@@ -502,7 +498,7 @@ export const PaymentsPanel: React.FC = () => {
                 {orders.length === 0 && (
                   <tr>
                     <td colSpan={8} className="text-center py-12 text-slate-400 font-semibold bg-slate-50/10">
-                      No orders yet
+                      {t('settings.payments.history.empty')}
                     </td>
                   </tr>
                 )}

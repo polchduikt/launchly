@@ -7,6 +7,7 @@ import type { CustomNodeData } from '../../../../types/bot';
 import { API_METHOD_COLORS } from '../../config/editorOptions';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
+import { t } from '../../../../i18n';
 
 export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
@@ -66,15 +67,15 @@ export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
           <Globe size={16} />
         </span>
         <div>
-          <span className="font-bold text-xs text-slate-800 uppercase tracking-wider block">API Call</span>
-          <span className="text-[10px] text-slate-400 font-semibold uppercase">HTTP Integration</span>
+          <span className="font-bold text-xs text-slate-800 uppercase tracking-wider block">{t('node.api_call.title')}</span>
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{t('node.api_call.integration')}</span>
         </div>
       </div>
 
       <div className="space-y-3">
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 leading-relaxed font-semibold">
           <div className="flex justify-between items-center text-[10px] text-slate-400 uppercase tracking-wider mb-2.5">
-            <span>Request info</span>
+            <span>{t('node.api_call.request_info')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className={`text-[10px] uppercase font-extrabold tracking-wider px-2.5 py-1 rounded border shrink-0 ${API_METHOD_COLORS[method.toUpperCase()] || 'bg-slate-50 text-slate-500 border-slate-100'}`}>
@@ -88,7 +89,7 @@ export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
       </div>
 
       <div className="flex justify-end items-center mt-3 pt-2 border-t border-slate-100 relative">
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2">Next Step</span>
+        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2">{t('node.api_call.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}
