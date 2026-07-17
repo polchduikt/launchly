@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { HelpCircle, CheckCircle } from 'lucide-react';
 import { t } from '../../../i18n';
+import {
+  useCreateIntegrationMutation,
+  useDeleteIntegrationMutation
+} from '../hooks/useIntegrationQueries';
 
 interface PremiumIntegrationCardProps {
   title: string;
@@ -11,6 +15,8 @@ interface PremiumIntegrationCardProps {
   stepText?: string;
   placeholder?: string;
   onUpgrade: () => void;
+  botId: number;
+  integration?: any;
 }
 
 export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
@@ -22,6 +28,8 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
   stepText,
   placeholder,
   onUpgrade,
+  botId,
+  integration,
 }) => {
   const normalizedName = name.toLowerCase().replace(/\s+/g, '_');
   const storageKey = hasApiSecret 
@@ -31,31 +39,74 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
   const [apiKey, setApiKey] = useState('');
   const [isConnected, setIsConnected] = useState(false);
 
+  const createMutation = useCreateIntegrationMutation();
+  const deleteMutation = useDeleteIntegrationMutation();
+
   useEffect(() => {
-    const value = localStorage.getItem(storageKey);
-    if (value) {
-      setIsConnected(true);
-      if (hasApiSecret) {
-        setApiKey(value);
+    if (integration) {
+      setIsConnected(integration.active);
+      if (integration.config && integration.config.apiKey) {
+        setApiKey(integration.config.apiKey);
+        localStorage.setItem(storageKey, integration.config.apiKey);
+      }
+    } else {
+      const value = localStorage.getItem(storageKey);
+      if (value) {
+        setIsConnected(true);
+        if (hasApiSecret) {
+          setApiKey(value);
+        }
+      } else {
+        setIsConnected(false);
+        setApiKey('');
       }
     }
-  }, [storageKey, hasApiSecret]);
+  }, [integration, storageKey, hasApiSecret]);
 
-  const handleConnect = () => {
+  const handleConnect = async () => {
     if (hasApiSecret) {
       if (apiKey.trim()) {
-        localStorage.setItem(storageKey, apiKey.trim());
-        setIsConnected(true);
+        try {
+          const typeStr = name.toUpperCase().replace(/\s+/g, '_');
+          await createMutation.mutateAsync({
+            name: name,
+            type: typeStr as any,
+            botId: botId,
+            config: { apiKey: apiKey.trim() } as any
+          });
+          localStorage.setItem(storageKey, apiKey.trim());
+          setIsConnected(true);
+        } catch (err) {
+          console.error(err);
+        }
       } else {
         onUpgrade();
       }
     } else {
-      localStorage.setItem(storageKey, 'true');
-      setIsConnected(true);
+      try {
+        const typeStr = name.toUpperCase().replace(/\s+/g, '_');
+        await createMutation.mutateAsync({
+          name: name,
+          type: typeStr as any,
+          botId: botId,
+          config: {} as any
+        });
+        localStorage.setItem(storageKey, 'true');
+        setIsConnected(true);
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
-  const handleDisconnect = () => {
+  const handleDisconnect = async () => {
+    if (integration && integration.id) {
+      try {
+        await deleteMutation.mutateAsync(integration.id);
+      } catch (err) {
+        console.error(err);
+      }
+    }
     localStorage.removeItem(storageKey);
     setIsConnected(false);
     setApiKey('');

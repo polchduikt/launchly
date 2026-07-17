@@ -272,8 +272,14 @@ export const TelegramSettingsPanel: React.FC = () => {
       </div>
 
       {activeTokenBot && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 w-full max-w-md rounded-3xl p-6 shadow-xl relative space-y-4">
+        <div 
+          onClick={() => setActiveTokenBot(null)}
+          className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 w-full max-w-md rounded-3xl p-6 shadow-xl relative space-y-4 cursor-default"
+          >
             <button
               onClick={() => setActiveTokenBot(null)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"
@@ -329,8 +335,14 @@ export const TelegramSettingsPanel: React.FC = () => {
       )}
 
       {activeDeleteBot && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 w-full max-w-md rounded-3xl p-6 shadow-xl relative space-y-4">
+        <div 
+          onClick={() => setActiveDeleteBot(null)}
+          className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 w-full max-w-md rounded-3xl p-6 shadow-xl relative space-y-4 cursor-default"
+          >
             <button
               onClick={() => setActiveDeleteBot(null)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"
@@ -382,8 +394,14 @@ export const TelegramSettingsPanel: React.FC = () => {
       )}
 
       {activeEditAutomation && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 w-full max-w-md rounded-3xl p-6 shadow-xl relative space-y-4">
+        <div 
+          onClick={() => setActiveEditAutomation(null)}
+          className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 w-full max-w-md rounded-3xl p-6 shadow-xl relative space-y-4 cursor-default"
+          >
             <button
               onClick={() => setActiveEditAutomation(null)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"

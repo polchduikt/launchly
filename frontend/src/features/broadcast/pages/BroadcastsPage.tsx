@@ -5,6 +5,7 @@ import { useBotStore } from '../../../store/useBotStore';
 import { t } from '../../../i18n';
 import { ROUTES } from '../../../constants/routes';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 import {
   useTagsQuery,
@@ -38,6 +39,12 @@ export const BroadcastsPage: React.FC = () => {
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<CampaignResponse | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   const campaignQueries = useQueries({
     queries: bots.map((bot) => ({
@@ -64,19 +71,37 @@ export const BroadcastsPage: React.FC = () => {
   const cancelScheduleMut = useCancelScheduleMutation();
 
   const handleSendNow = (campaignId: number, targetBotId: number, name: string) => {
-    if (window.confirm(t('broadcasts.alert.send_confirm', { name }))) {
-      sendCampaignMut.mutate({ botId: targetBotId, campaignId });
-    }
+    setConfirmDialog({
+      title: 'Надіслати зараз',
+      message: t('broadcasts.alert.send_confirm', { name }),
+      confirmLabel: 'Надіслати',
+      onConfirm: () => {
+        sendCampaignMut.mutate({ botId: targetBotId, campaignId });
+        setConfirmDialog(null);
+      },
+    });
   };
   const handleDeleteCampaign = (campaignId: number, targetBotId: number, name: string) => {
-    if (window.confirm(t('broadcasts.alert.delete_confirm', { name }))) {
-      deleteCampaignMut.mutate({ botId: targetBotId, campaignId });
-    }
+    setConfirmDialog({
+      title: 'Видалити розсилку',
+      message: t('broadcasts.alert.delete_confirm', { name }),
+      confirmLabel: 'Видалити',
+      onConfirm: () => {
+        deleteCampaignMut.mutate({ botId: targetBotId, campaignId });
+        setConfirmDialog(null);
+      },
+    });
   };
   const handleCancelSchedule = (campaignId: number, targetBotId: number, name: string) => {
-    if (window.confirm(t('broadcasts.alert.cancel_confirm', { name }))) {
-      cancelScheduleMut.mutate({ botId: targetBotId, campaignId });
-    }
+    setConfirmDialog({
+      title: 'Скасувати планування',
+      message: t('broadcasts.alert.cancel_confirm', { name }),
+      confirmLabel: 'Скасувати',
+      onConfirm: () => {
+        cancelScheduleMut.mutate({ botId: targetBotId, campaignId });
+        setConfirmDialog(null);
+      },
+    });
   };
 
   if (bots.length === 0) {
@@ -105,6 +130,16 @@ export const BroadcastsPage: React.FC = () => {
 
   return (
     <DashboardLayout>
+      <ConfirmModal
+        isOpen={!!confirmDialog}
+        title={confirmDialog?.title ?? ''}
+        message={confirmDialog?.message ?? ''}
+        variant="danger"
+        confirmLabel={confirmDialog?.confirmLabel ?? 'Підтвердити'}
+        cancelLabel="Скасувати"
+        onConfirm={() => confirmDialog?.onConfirm()}
+        onCancel={() => setConfirmDialog(null)}
+      />
       <div className="min-h-screen bg-slate-50 p-6 md:p-10 max-w-6xl mx-auto space-y-6 font-sans">
         <div className="flex items-center justify-between pb-6 border-b border-slate-200">
           <div>

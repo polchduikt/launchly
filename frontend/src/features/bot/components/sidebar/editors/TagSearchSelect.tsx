@@ -1,8 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus } from 'lucide-react';
-import type { TagSearchSelectProps } from '../../../../../types/bot';
 
-export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({ tagName, tags, onChange, onCreateTag }) => {
+export interface TagSearchSelectProps {
+  tagName: string;
+  tags: { id: number; name: string; botId: number }[];
+  onChange: (tag: { id: number; name: string; botId: number }) => void;
+  onCreateTag: () => void;
+  assignedTags?: string[];
+}
+
+export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({ 
+  tagName, 
+  tags, 
+  onChange, 
+  onCreateTag,
+  assignedTags = []
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -34,6 +47,7 @@ export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({ tagName, tags,
           setIsOpen(true);
         }}
         onFocus={() => setIsOpen(true)}
+        onClick={() => setIsOpen(true)}
         className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-400 text-xs font-bold bg-white"
       />
       {isOpen && (
@@ -50,20 +64,35 @@ export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({ tagName, tags,
             <span>Create new tag...</span>
           </button>
 
-          {filteredTags.map((tag) => (
-            <button
-              key={tag.id}
-              type="button"
-              onClick={() => {
-                onChange(tag);
-                setIsOpen(false);
-                setSearch('');
-              }}
-              className="w-full text-left px-2.5 py-1.5 hover:bg-slate-50 rounded-lg text-xs font-bold text-slate-700 transition-all cursor-pointer"
-            >
-              {tag.name}
-            </button>
-          ))}
+          {filteredTags.map((tag) => {
+            const isAssigned = assignedTags.includes(tag.name);
+            return (
+              <button
+                key={tag.id}
+                type="button"
+                disabled={isAssigned}
+                onClick={() => {
+                  if (!isAssigned) {
+                    onChange(tag);
+                    setIsOpen(false);
+                    setSearch('');
+                  }
+                }}
+                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-between ${
+                  isAssigned
+                    ? 'bg-slate-50 text-slate-400 cursor-not-allowed'
+                    : 'hover:bg-slate-50 text-slate-700 cursor-pointer'
+                }`}
+              >
+                <span>{tag.name}</span>
+                {isAssigned && (
+                  <span className="text-[9px] bg-slate-200/60 text-slate-500 px-1.5 py-0.5 rounded font-extrabold">
+                    Added
+                  </span>
+                )}
+              </button>
+            );
+          })}
           {filteredTags.length === 0 && search.trim() !== '' && (
             <button
               type="button"

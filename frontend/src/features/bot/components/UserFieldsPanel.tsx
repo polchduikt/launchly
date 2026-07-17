@@ -494,11 +494,18 @@ export const UserFieldsPanel: React.FC = () => {
       </div>
 
       {isFieldModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleCreateField} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left">
+        <div 
+          onClick={() => setIsFieldModalOpen(false)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+        >
+          <form 
+            onSubmit={handleCreateField}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+          >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 select-none">
               <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
-                Create User Field
+                {t('settings.fields.create_field_title')}
               </h3>
               <button
                 type="button"
@@ -512,43 +519,43 @@ export const UserFieldsPanel: React.FC = () => {
             <div className="space-y-3.5">
               <div>
                 <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Name
+                  {t('settings.fields.name_label')}
                 </label>
                 <input
                   type="text"
                   required
                   value={newFieldName}
                   onChange={(e) => setNewFieldName(e.target.value)}
-                  placeholder="Enter field name"
+                  placeholder={t('settings.fields.placeholder_field_name')}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs font-semibold bg-slate-50/20"
                 />
               </div>
 
               <div>
                 <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Type
+                  {t('settings.fields.type_label')}
                 </label>
                 <select
                   value={newFieldType}
                   onChange={(e) => setNewFieldType(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs font-semibold bg-white cursor-pointer"
                 >
-                  <option value="Text">Text</option>
-                  <option value="Number">Number</option>
-                  <option value="Date">Date</option>
-                  <option value="Boolean">Boolean</option>
+                  <option value="Text">{t('settings.fields.type_text')}</option>
+                  <option value="Number">{t('settings.fields.type_number')}</option>
+                  <option value="Date">{t('settings.fields.type_date')}</option>
+                  <option value="Boolean">{t('settings.fields.type_boolean')}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Description (optional)
+                  {t('settings.fields.desc_label')}
                 </label>
                 <input
                   type="text"
                   value={newFieldDesc}
                   onChange={(e) => setNewFieldDesc(e.target.value)}
-                  placeholder="Enter description"
+                  placeholder={t('settings.fields.placeholder_desc')}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs font-semibold bg-slate-50/20"
                 />
               </div>
@@ -560,13 +567,13 @@ export const UserFieldsPanel: React.FC = () => {
                 onClick={() => setIsFieldModalOpen(false)}
                 className="px-4 py-2.5 bg-slate-150 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all cursor-pointer"
               >
-                Cancel
+                {t('settings.fields.btn_cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold rounded-xl transition-all shadow-sm cursor-pointer shadow-blue-100"
               >
-                Create Field
+                {t('settings.fields.btn_create_field')}
               </button>
             </div>
           </form>
@@ -574,11 +581,18 @@ export const UserFieldsPanel: React.FC = () => {
       )}
 
       {isFolderModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleCreateFolder} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left">
+        <div 
+          onClick={() => setIsFolderModalOpen(false)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+        >
+          <form 
+            onSubmit={handleCreateFolder}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+          >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 select-none">
               <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
-                Create Folder
+                {t('settings.fields.create_folder_title')}
               </h3>
               <button
                 type="button"
@@ -591,14 +605,14 @@ export const UserFieldsPanel: React.FC = () => {
 
             <div>
               <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                Folder Name
+                {t('settings.fields.folder_name_label')}
               </label>
               <input
                 type="text"
                 required
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
-                placeholder="Enter folder name"
+                placeholder={t('settings.fields.placeholder_folder_name')}
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs font-semibold bg-slate-50/20"
               />
             </div>
@@ -609,13 +623,13 @@ export const UserFieldsPanel: React.FC = () => {
                 onClick={() => setIsFolderModalOpen(false)}
                 className="px-4 py-2.5 bg-slate-150 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all cursor-pointer"
               >
-                Cancel
+                {t('settings.fields.btn_cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold rounded-xl transition-all shadow-sm cursor-pointer shadow-blue-100"
               >
-                Create Folder
+                {t('settings.fields.btn_create_folder')}
               </button>
             </div>
           </form>
@@ -623,11 +637,18 @@ export const UserFieldsPanel: React.FC = () => {
       )}
 
       {isRenameFolderOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleRenameFolder} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left">
+        <div 
+          onClick={() => setIsRenameFolderOpen(false)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+        >
+          <form 
+            onSubmit={handleRenameFolder}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+          >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 select-none">
               <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
-                Rename Folder
+                {t('settings.fields.rename_folder_title')}
               </h3>
               <button
                 type="button"
@@ -640,14 +661,14 @@ export const UserFieldsPanel: React.FC = () => {
 
             <div>
               <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-                Folder Name
+                {t('settings.fields.folder_name_label')}
               </label>
               <input
                 type="text"
                 required
                 value={renameFolderName}
                 onChange={(e) => setRenameFolderName(e.target.value)}
-                placeholder="Enter folder name"
+                placeholder={t('settings.fields.placeholder_folder_name')}
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs font-semibold bg-slate-50/20"
               />
             </div>
@@ -658,13 +679,13 @@ export const UserFieldsPanel: React.FC = () => {
                 onClick={() => setIsRenameFolderOpen(false)}
                 className="px-4 py-2.5 bg-slate-150 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition-all cursor-pointer"
               >
-                Cancel
+                {t('settings.fields.btn_cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold rounded-xl transition-all shadow-sm cursor-pointer shadow-blue-100"
               >
-                Save
+                {t('settings.fields.btn_save')}
               </button>
             </div>
           </form>

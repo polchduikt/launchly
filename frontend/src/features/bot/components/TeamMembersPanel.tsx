@@ -439,8 +439,18 @@ export const TeamMembersPanel: React.FC = () => {
       )}
 
       {isInviteOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleSendInvite} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-md flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left">
+        <div 
+          onClick={() => {
+            setIsInviteOpen(false);
+            setInviteEmail('');
+          }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+        >
+          <form 
+            onSubmit={handleSendInvite}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-md flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+          >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
                 {t('settings.members.invite_btn')}

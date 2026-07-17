@@ -191,7 +191,7 @@ export const ChatPage: React.FC = () => {
 
           {selectedConversation && (
             <ContactInfoPanel
-              botId={botId}
+              botId={currentBotId}
               conversation={selectedConversation}
               botUser={currentBotUser}
               isOpen={infoPanelOpen}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AlertTriangle, Send, Loader2, X, User } from 'lucide-react';
+import { t } from '../../../i18n';
 import type { CreateBroadcastDialogProps } from '../types';
 
 export const CreateBroadcastDialog: React.FC<CreateBroadcastDialogProps> = ({
@@ -24,10 +25,16 @@ export const CreateBroadcastDialog: React.FC<CreateBroadcastDialogProps> = ({
       : connectedBots.find((b) => String(b.id) === selectedAutomation)?.totalUsers || 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 cursor-pointer"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-3xl border border-slate-200 shadow-xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150 cursor-default"
+      >
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">New Broadcast Campaign</h3>
+          <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">{t('broadcast.dialog.create_title')}</h3>
           <button
             type="button"
             onClick={onClose}
@@ -46,10 +53,10 @@ export const CreateBroadcastDialog: React.FC<CreateBroadcastDialogProps> = ({
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Campaign Name</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('broadcast.dialog.campaign_name')}</label>
             <input
               type="text"
-              placeholder="e.g. Weekly Promotion Promo Code"
+              placeholder={t('broadcast.dialog.campaign_name_placeholder')}
               {...form.register('name')}
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-semibold text-slate-800"
             />
@@ -58,13 +65,13 @@ export const CreateBroadcastDialog: React.FC<CreateBroadcastDialogProps> = ({
             )}
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Automation</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('broadcast.dialog.automation')}</label>
             <select
               value={selectedAutomation}
               onChange={(e) => setSelectedAutomation(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all bg-white font-semibold text-slate-855"
             >
-              <option value="ALL">All Automations</option>
+              <option value="ALL">{t('broadcast.dialog.all_automations')}</option>
               {connectedBots.map((b) => (
                 <option key={b.id} value={String(b.id)}>
                   {b.name}
@@ -74,17 +81,17 @@ export const CreateBroadcastDialog: React.FC<CreateBroadcastDialogProps> = ({
             <div className="flex items-center gap-1.5 px-3 py-2 bg-indigo-50/40 border border-indigo-100/50 rounded-xl text-xs font-semibold text-indigo-655 mt-1">
               <User size={13} className="text-indigo-500" />
               <span>
-                {selectedAutomationCount} subscriber{selectedAutomationCount !== 1 ? 's' : ''} of this automation will receive the broadcast
+                {t('broadcast.dialog.subscribers_of_automation_desc', { count: selectedAutomationCount })}
               </span>
             </div>
           </div>
           <input type="hidden" value="ALL" {...form.register('filterType')} />
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Message Text</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('broadcast.dialog.message_text')}</label>
             <textarea
               rows={4}
-              placeholder="Enter broadcast message content..."
+              placeholder={t('broadcast.dialog.message_placeholder')}
               {...form.register('message')}
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all resize-none font-medium text-slate-700"
             />
@@ -99,7 +106,7 @@ export const CreateBroadcastDialog: React.FC<CreateBroadcastDialogProps> = ({
               onClick={onClose}
               className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-xl transition-all cursor-pointer"
             >
-              Cancel
+              {t('broadcast.dialog.cancel')}
             </button>
             <button
               type="submit"
@@ -109,12 +116,12 @@ export const CreateBroadcastDialog: React.FC<CreateBroadcastDialogProps> = ({
               {isCreating ? (
                 <>
                   <Loader2 size={12} className="animate-spin" />
-                  <span>Creating...</span>
+                  <span>{t('broadcast.dialog.creating')}</span>
                 </>
               ) : (
                 <>
                   <Send size={12} />
-                  <span>Create Campaign</span>
+                  <span>{t('broadcast.dialog.create_campaign')}</span>
                 </>
               )}
             </button>

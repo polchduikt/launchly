@@ -4,7 +4,6 @@ import {
   Play,
   Pause,
   CheckCircle2,
-  Clock,
   Send,
   ExternalLink,
   MessageSquare,
@@ -16,6 +15,8 @@ import type { BotUserResponse, BotUserUpdateRequest } from '../../../types/bot';
 import { ContactAvatar } from './ContactAvatar';
 import { useUpdateBotUserMutation, useDeleteBotUserMutation } from '../hooks/useCrmQueries';
 import { ROUTES } from '../../../constants/routes';
+import { t } from '../../../i18n';
+import { TagSearchSelect } from '../../bot/components/sidebar/editors/TagSearchSelect';
 
 import type { ConversationResponse } from '../../../types/crm';
 import type { TagResponse } from '../../broadcast/types';
@@ -53,6 +54,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
   const [showAddTagInline, setShowAddTagInline] = useState(false);
   const [newTagVal, setNewTagVal] = useState('');
+  const [customTagName, setCustomTagName] = useState('');
   const [showSubscribeSeqInline, setShowSubscribeSeqInline] = useState(false);
   const [showAddCustomFieldInline, setShowAddCustomFieldInline] = useState(false);
   const [customFieldName, setCustomFieldName] = useState('');
@@ -204,8 +206,14 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm select-none animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] border border-slate-100 animate-scale-up">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 select-none animate-fade-in cursor-pointer"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] border border-slate-100 animate-scale-up cursor-default"
+      >
         
         <div className="w-full md:w-[320px] border-r border-slate-100 p-6 flex flex-col items-center space-y-5 bg-slate-50/50 shrink-0">
           <ContactAvatar photoUrl={selectedContact.photoUrl} name={selectedContact.firstName} size="lg" />
@@ -217,12 +225,12 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
             {isPaused ? (
               <>
                 <Play size={14} className="text-emerald-500" />
-                <span>Resume Automations</span>
+                <span>{t('crm.contact.resume_automations')}</span>
               </>
             ) : (
               <>
                 <Pause size={14} className="text-slate-500" />
-                <span>Pause Automations</span>
+                <span>{t('crm.contact.pause_automations')}</span>
               </>
             )}
           </button>
@@ -231,13 +239,13 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <CheckCircle2 size={15} className={isUnsubscribed ? 'text-rose-500' : 'text-emerald-500'} />
-                <span>{isUnsubscribed ? 'Unsubscribed' : 'Subscribed'}</span>
+                <span>{isUnsubscribed ? t('crm.contact.unsubscribed') : t('crm.contact.subscribed')}</span>
               </div>
               <button
                 onClick={() => handleUpdateContactMetadata({ ...meta, unsubscribed: !isUnsubscribed })}
                 className="text-indigo-600 hover:text-indigo-700 underline text-[11px] cursor-pointer"
               >
-                {isUnsubscribed ? 'Subscribe' : 'Unsubscribe'}
+                {isUnsubscribed ? t('crm.contact.subscribe') : t('crm.contact.unsubscribe')}
               </button>
             </div>
 
@@ -266,7 +274,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
               className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/10 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <MessageSquare size={14} />
-              <span>Start Chat</span>
+              <span>{t('crm.contact.start_chat')}</span>
             </button>
           </div>
         </div>
@@ -279,13 +287,13 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
-                  if (confirm('Are you sure you want to delete this contact?')) {
+                  if (confirm(t('crm.contact.delete_confirm'))) {
                     deleteBotUserMut.mutate(selectedContact.id);
                     onContactDeleted();
                   }
                 }}
                 className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
-                title="Delete Contact"
+                title={t('crm.contact.delete_tooltip')}
               >
                 <Trash2 size={16} />
               </button>
@@ -300,51 +308,74 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
           <div className="space-y-2">
             <div className="flex justify-between items-center select-none">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Contact Tags</span>
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{t('crm.contact.tags_title')}</span>
               <button
                 onClick={() => setShowAddTagInline(!showAddTagInline)}
                 className="text-indigo-600 hover:text-indigo-700 text-xs font-bold cursor-pointer"
               >
-                + Add Tag
+                {t('crm.contact.add_tag')}
               </button>
             </div>
             
             {showAddTagInline && (
-              <div className="flex gap-2 max-w-sm animation-slide-in">
-                <select
-                  value={newTagVal}
-                  onChange={(e) => setNewTagVal(e.target.value)}
-                  className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none"
-                >
-                  <option value="">-- Select Tag --</option>
-                  {tags.map((t) => (
-                    <option key={t.id} value={t.name}>{t.name}</option>
-                  ))}
-                  <option value="NEW_TAG">+ New Tag (Write custom name below)</option>
-                </select>
+              <div className="flex gap-2 max-w-sm animation-slide-in w-full">
                 {newTagVal === 'NEW_TAG' ? (
-                  <input
-                    type="text"
-                    placeholder="Custom tag name"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleAddTagInline((e.target as HTMLInputElement).value);
-                    }}
-                    className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none"
-                  />
+                  <>
+                    <input
+                      type="text"
+                      placeholder={t('crm.contact.custom_tag_placeholder')}
+                      value={customTagName}
+                      onChange={(e) => setCustomTagName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleAddTagInline(customTagName);
+                          setCustomTagName('');
+                        }
+                      }}
+                      className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none"
+                    />
+                    <button
+                      onClick={() => {
+                        handleAddTagInline(customTagName);
+                        setCustomTagName('');
+                      }}
+                      className="px-3.5 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 cursor-pointer"
+                    >
+                      {t('crm.contact.add')}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setNewTagVal('');
+                        setCustomTagName('');
+                      }}
+                      className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded-xl text-xs font-semibold hover:bg-slate-200 cursor-pointer flex items-center justify-center"
+                    >
+                      ✕
+                    </button>
+                  </>
                 ) : (
-                  <button
-                    onClick={() => handleAddTagInline(newTagVal)}
-                    className="px-3.5 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 cursor-pointer"
-                  >
-                    Add
-                  </button>
+                  <div className="w-full">
+                    <TagSearchSelect
+                      tagName=""
+                      tags={tags}
+                      assignedTags={selectedContact.tags || []}
+                      onChange={(selectedTag: any) => {
+                        if (selectedTag) {
+                          handleAddTagInline(selectedTag.name);
+                        }
+                      }}
+                      onCreateTag={() => {
+                        setNewTagVal('NEW_TAG');
+                      }}
+                    />
+                  </div>
                 )}
               </div>
             )}
 
             <div className="flex flex-wrap gap-1.5">
               {!(selectedContact.tags) || selectedContact.tags.length === 0 ? (
-                <span className="text-xs text-slate-400 italic">No tags assigned.</span>
+                <span className="text-xs text-slate-400 italic">{t('crm.contact.no_tags')}</span>
               ) : (
                 (selectedContact.tags || []).map((t) => (
                   <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-full select-none">
@@ -363,12 +394,12 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
           <div className="space-y-2">
             <div className="flex justify-between items-center select-none">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Subscribed to Sequences</span>
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{t('crm.contact.sequences_title')}</span>
               <button
                 onClick={() => setShowSubscribeSeqInline(!showSubscribeSeqInline)}
                 className="text-indigo-600 hover:text-indigo-700 text-xs font-bold cursor-pointer"
               >
-                Subscribe
+                {t('crm.contact.subscribe')}
               </button>
             </div>
 
@@ -379,19 +410,19 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
                   className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none"
                   defaultValue=""
                 >
-                  <option value="" disabled>-- Select Sequence --</option>
-                  <option value="1">Sequence 1</option>
+                  <option value="" disabled>{t('crm.contact.select_sequence')}</option>
+                  <option value="1">{t('crm.contact.sequence_item', { number: 1 })}</option>
                 </select>
               </div>
             )}
 
             <div className="flex flex-wrap gap-1.5">
               {!(meta.sequences) || meta.sequences.length === 0 ? (
-                <span className="text-xs text-slate-400 italic">No sequence subscriptions.</span>
+                <span className="text-xs text-slate-400 italic">{t('crm.contact.no_sequences')}</span>
               ) : (
                 meta.sequences.map((s) => (
                   <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-full select-none">
-                    <span>Sequence {s}</span>
+                    <span>{t('crm.contact.sequence_item', { number: s })}</span>
                     <button
                       onClick={() => handleUnsubscribeSequenceInline(s)}
                       className="text-slate-400 hover:text-slate-600 cursor-pointer"
@@ -407,10 +438,10 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
 
           <div className="space-y-3">
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block border-b border-slate-100 pb-1">System Fields</span>
+            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block border-b border-slate-100 pb-1">{t('crm.contact.system_fields')}</span>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-extrabold text-slate-400 uppercase">First Name</label>
+                <label className="text-[11px] font-extrabold text-slate-400 uppercase">{t('crm.contact.first_name')}</label>
                 <input
                   type="text"
                   defaultValue={selectedContact.firstName}
@@ -419,12 +450,12 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[11px] font-extrabold text-slate-400 uppercase">Last Name</label>
+                <label className="text-[11px] font-extrabold text-slate-400 uppercase">{t('crm.contact.last_name')}</label>
                 <input
                   type="text"
                   defaultValue={selectedContact.lastName || ''}
                   onBlur={(e) => handleUpdateName('last', e.target.value)}
-                  placeholder="Not Set"
+                  placeholder={t('crm.contact.not_set')}
                   className="w-full px-3 py-2 bg-blue-50/30 focus:bg-white border border-blue-100 focus:border-indigo-500 rounded-xl text-xs font-bold text-slate-800 placeholder:text-slate-400 placeholder:italic focus:outline-none transition-all shadow-sm shadow-blue-50/20"
                 />
               </div>
@@ -433,12 +464,12 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
           <div className="space-y-3">
             <div className="flex justify-between items-center select-none border-b border-slate-100 pb-1">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Custom Fields</span>
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{t('crm.contact.custom_fields')}</span>
               <button
                 onClick={() => setShowAddCustomFieldInline(!showAddCustomFieldInline)}
                 className="text-indigo-600 hover:text-indigo-700 text-xs font-bold cursor-pointer"
               >
-                + Add Custom Field
+                {t('crm.contact.add_custom_field')}
               </button>
             </div>
 
@@ -446,14 +477,14 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
               <div className="flex gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-200 animation-slide-in">
                 <input
                   type="text"
-                  placeholder="Field Key (e.g. Gender)"
+                  placeholder={t('crm.contact.field_key_placeholder')}
                   value={customFieldName}
                   onChange={(e) => setCustomFieldName(e.target.value)}
                   className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none"
                 />
                 <input
                   type="text"
-                  placeholder="Value (e.g. Male)"
+                  placeholder={t('crm.contact.value_placeholder')}
                   value={customFieldValue}
                   onChange={(e) => setCustomFieldValue(e.target.value)}
                   className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none"
@@ -469,7 +500,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
             <div className="space-y-2">
               {!(meta.customFields) || Object.keys(meta.customFields).length === 0 ? (
-                <span className="text-xs text-slate-400 italic">No custom fields set.</span>
+                <span className="text-xs text-slate-400 italic">{t('crm.contact.no_custom_fields')}</span>
               ) : (
                 Object.entries(meta.customFields).map(([k, v]) => (
                   <div key={k} className="flex items-center justify-between py-2 px-3 bg-blue-50/20 border border-blue-50 rounded-xl shadow-sm shadow-blue-50/10">

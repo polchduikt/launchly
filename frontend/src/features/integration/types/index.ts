@@ -1,4 +1,4 @@
-export type IntegrationType = 'GOOGLE_SHEETS' | 'EXCEL' | 'WEBHOOK';
+export type IntegrationType = 'GOOGLE_SHEETS' | 'EXCEL' | 'WEBHOOK' | 'CHATGPT' | 'CLAUDE' | 'DEEPSEEK' | 'GEMINI';
 
 export interface GoogleSheetsConfig {
   spreadsheetId: string;

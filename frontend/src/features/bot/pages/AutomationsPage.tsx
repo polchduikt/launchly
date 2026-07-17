@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import {
   Search,
   FolderPlus,
@@ -71,25 +72,29 @@ export const AutomationsPage: React.FC = () => {
   };
 
   const handleBulkDelete = () => {
-    if (selectedBotIds.size === 0) {
-      alert('No automations selected.');
-      return;
-    }
-    if (window.confirm(`Are you sure you want to delete the ${selectedBotIds.size} selected automation(s)?`)) {
-      const ids = Array.from(selectedBotIds);
-      ids.forEach((id) => {
-        deleteBotMutation.mutate(id, {
-          onSuccess: () => {
-            setBotFolders((prev) => {
-              const updated = { ...prev };
-              delete updated[id];
-              return updated;
-            });
-          }
+    if (selectedBotIds.size === 0) return;
+    setConfirmDialog({
+      title: 'Видалити автоматизації',
+      message: `Ви впевнені, що хочете видалити ${selectedBotIds.size} обрану(их) автоматизацію(ій)?`,
+      variant: 'danger',
+      confirmLabel: 'Видалити',
+      onConfirm: () => {
+        const ids = Array.from(selectedBotIds);
+        ids.forEach((id) => {
+          deleteBotMutation.mutate(id, {
+            onSuccess: () => {
+              setBotFolders((prev) => {
+                const updated = { ...prev };
+                delete updated[id];
+                return updated;
+              });
+            }
+          });
         });
-      });
-      setSelectedBotIds(new Set());
-    }
+        setSelectedBotIds(new Set());
+        setConfirmDialog(null);
+      },
+    });
   };
 
   const createBotMutation = useCreateBotMutation();
@@ -128,6 +133,13 @@ export const AutomationsPage: React.FC = () => {
   const [moveBotId, setMoveBotId] = useState<number | null>(null);
   const [tempFolderId, setTempFolderId] = useState('');
   const [tempFolderName, setTempFolderName] = useState('');
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string;
+    message: string;
+    variant?: 'danger' | 'warning' | 'default';
+    confirmLabel?: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   useEffect(() => {
     localStorage.setItem('launchly_folders', JSON.stringify(folders));
@@ -212,17 +224,24 @@ export const AutomationsPage: React.FC = () => {
   };
 
   const handleDeleteBot = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this automation?')) {
-      deleteBotMutation.mutate(id, {
-        onSuccess: () => {
-          const updated = { ...botFolders };
-          delete updated[id];
-          setBotFolders(updated);
-          setActiveMenuBotId(null);
-          setMenuCoords(null);
-        },
-      });
-    }
+    setConfirmDialog({
+      title: 'Видалити автоматизацію',
+      message: 'Ви впевнені, що хочете видалити цю автоматизацію? Цю дію неможливо скасувати.',
+      variant: 'danger',
+      confirmLabel: 'Видалити',
+      onConfirm: () => {
+        deleteBotMutation.mutate(id, {
+          onSuccess: () => {
+            const updated = { ...botFolders };
+            delete updated[id];
+            setBotFolders(updated);
+            setActiveMenuBotId(null);
+            setMenuCoords(null);
+          },
+        });
+        setConfirmDialog(null);
+      },
+    });
   };
 
   const handleEditBot = () => {
@@ -293,24 +312,27 @@ export const AutomationsPage: React.FC = () => {
   };
 
   const handleDeleteFolder = (folderId: string) => {
-    if (
-      window.confirm(
-        'Are you sure you want to delete this folder? All automations in it will be moved to the root folder list.'
-      )
-    ) {
-      setFolders(folders.filter((f) => f.id !== folderId));
-      const updated = { ...botFolders };
-      Object.keys(updated).forEach((botIdKey) => {
-        const bId = Number(botIdKey);
-        if (updated[bId] === folderId) {
-          delete updated[bId];
+    setConfirmDialog({
+      title: 'Видалити папку',
+      message: 'Ви впевнені? Всі автоматизації з папки будуть переміщені до кореневого списку.',
+      variant: 'danger',
+      confirmLabel: 'Видалити',
+      onConfirm: () => {
+        setFolders(folders.filter((f) => f.id !== folderId));
+        const updated = { ...botFolders };
+        Object.keys(updated).forEach((botIdKey) => {
+          const bId = Number(botIdKey);
+          if (updated[bId] === folderId) {
+            delete updated[bId];
+          }
+        });
+        setBotFolders(updated);
+        if (selectedFolderId === folderId) {
+          setSelectedFolderId(null);
         }
-      });
-      setBotFolders(updated);
-      if (selectedFolderId === folderId) {
-        setSelectedFolderId(null);
-      }
-    }
+        setConfirmDialog(null);
+      },
+    });
   };
 
   const handleCreateBotSubmit = () => {
@@ -373,6 +395,16 @@ export const AutomationsPage: React.FC = () => {
 
   return (
     <DashboardLayout>
+      <ConfirmModal
+        isOpen={!!confirmDialog}
+        title={confirmDialog?.title ?? ''}
+        message={confirmDialog?.message ?? ''}
+        variant={confirmDialog?.variant ?? 'danger'}
+        confirmLabel={confirmDialog?.confirmLabel ?? 'Підтвердити'}
+        cancelLabel="Скасувати"
+        onConfirm={() => confirmDialog?.onConfirm()}
+        onCancel={() => setConfirmDialog(null)}
+      />
       <div className="flex h-full min-h-screen bg-slate-50 font-sans">
         <aside className="w-60 bg-slate-50 border-r border-slate-200 p-4 shrink-0 hidden md:block">
           <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2">{t('automations.sidebar.title')}</h2>
@@ -746,8 +778,14 @@ export const AutomationsPage: React.FC = () => {
       )}
 
       {isNewBotModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-xl animate-in fade-in duration-200">
+        <div 
+          onClick={() => setIsNewBotModalOpen(false)}
+          className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-xl animate-in fade-in duration-200 cursor-default"
+          >
             <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900">{t('automations.modal.new_automation')}</h3>
               <button
@@ -917,8 +955,14 @@ export const AutomationsPage: React.FC = () => {
       )}
 
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-xl animate-in fade-in duration-200">
+        <div 
+          onClick={() => setIsEditModalOpen(false)}
+          className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-xl animate-in fade-in duration-200 cursor-default"
+          >
             <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900">Edit Automation</h3>
               <button
@@ -1111,8 +1155,14 @@ export const AutomationsPage: React.FC = () => {
       )}
 
       {isMoveModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-xl overflow-hidden animate-in fade-in duration-200">
+        <div 
+          onClick={() => setIsMoveModalOpen(false)}
+          className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-xl overflow-hidden animate-in fade-in duration-200 cursor-default"
+          >
             <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900">Move to Folder</h3>
               <button
@@ -1156,10 +1206,16 @@ export const AutomationsPage: React.FC = () => {
       )}
 
       {isNewFolderModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-xl overflow-hidden animate-in fade-in duration-200">
+        <div 
+          onClick={() => setIsNewFolderModalOpen(false)}
+          className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-xl overflow-hidden animate-in fade-in duration-200 cursor-default"
+          >
             <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900">Create Folder</h3>
+              <h3 className="text-lg font-bold text-slate-900">{t('automations.folder.create_title')}</h3>
               <button
                 onClick={() => setIsNewFolderModalOpen(false)}
                 className="text-slate-400 hover:text-slate-600 transition-colors"
@@ -1168,13 +1224,13 @@ export const AutomationsPage: React.FC = () => {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Folder Name</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">{t('automations.folder.name_label')}</label>
               <input
                 type="text"
                 value={tempFolderName}
                 onChange={(e) => setTempFolderName(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
-                placeholder="Enter folder name"
+                placeholder={t('automations.folder.placeholder')}
               />
             </div>
             <div className="p-6 pt-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
@@ -1182,13 +1238,13 @@ export const AutomationsPage: React.FC = () => {
                 onClick={() => setIsNewFolderModalOpen(false)}
                 className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
               >
-                Cancel
+                {t('automations.folder.cancel')}
               </button>
               <button
                 onClick={handleCreateFolder}
                 className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
               >
-                Create
+                {t('automations.folder.create')}
               </button>
             </div>
           </div>

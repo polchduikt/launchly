@@ -16,6 +16,7 @@ import type { BotUserResponse } from '../../../types/bot';
 import { UserAvatar } from './UserAvatar';
 import { useTagsQuery } from '../../broadcast/hooks/useBroadcastQueries';
 import { useUpdateBotUserMutation } from '../hooks/useCrmQueries';
+import { TagSearchSelect } from '../../bot/components/sidebar/editors/TagSearchSelect';
 
 interface BotUserMetadata {
   sequences?: string[];
@@ -46,6 +47,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
 
   const [showAddTag, setShowAddTag] = useState(false);
   const [newTagVal, setNewTagVal] = useState('');
+  const [customTagName, setCustomTagName] = useState('');
   const [showAddCustomField, setShowAddCustomField] = useState(false);
   const [customFieldName, setCustomFieldName] = useState('');
   const [customFieldValue, setCustomFieldValue] = useState('');
@@ -212,34 +214,57 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
               </button>
             </div>
             {showAddTag && (
-              <div className="flex gap-1.5 mb-2.5">
-                <select
-                  value={newTagVal}
-                  onChange={(e) => setNewTagVal(e.target.value)}
-                  className="flex-1 px-2 py-1 bg-white border border-slate-200 rounded text-xs focus:outline-none"
-                >
-                  <option value="">{t('crm.panel.tags.select_tag')}</option>
-                  {tags.map((t) => (
-                    <option key={t.id} value={t.name}>{t.name}</option>
-                  ))}
-                  <option value="NEW_TAG">{t('crm.panel.tags.new_tag_option')}</option>
-                </select>
+              <div className="flex flex-col gap-1.5 mb-2.5">
                 {newTagVal === 'NEW_TAG' ? (
-                  <input
-                    type="text"
-                    placeholder={t('crm.panel.tags.placeholder_name')}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleAddTag((e.target as HTMLInputElement).value);
-                    }}
-                    className="flex-1 px-2 py-1 bg-white border border-slate-200 rounded text-xs focus:outline-none"
-                  />
+                  <div className="flex gap-1.5 w-full">
+                    <input
+                      type="text"
+                      placeholder={t('crm.panel.tags.placeholder_name')}
+                      value={customTagName}
+                      onChange={(e) => setCustomTagName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleAddTag(customTagName);
+                          setCustomTagName('');
+                        }
+                      }}
+                      className="flex-1 px-2 py-1 bg-white border border-slate-200 rounded text-xs focus:outline-none"
+                    />
+                    <button
+                      onClick={() => {
+                        handleAddTag(customTagName);
+                        setCustomTagName('');
+                      }}
+                      className="px-2.5 py-1 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700 cursor-pointer"
+                    >
+                      {t('crm.panel.tags.add')}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setNewTagVal('');
+                        setCustomTagName('');
+                      }}
+                      className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded text-xs font-semibold hover:bg-slate-200 cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  </div>
                 ) : (
-                  <button
-                    onClick={() => handleAddTag(newTagVal)}
-                    className="px-2.5 py-1 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700 cursor-pointer"
-                  >
-                    {t('crm.panel.tags.add')}
-                  </button>
+                  <div className="w-full">
+                    <TagSearchSelect
+                      tagName=""
+                      tags={tags}
+                      assignedTags={botUser?.tags || []}
+                      onChange={(selectedTag: any) => {
+                        if (selectedTag) {
+                          handleAddTag(selectedTag.name);
+                        }
+                      }}
+                      onCreateTag={() => {
+                        setNewTagVal('NEW_TAG');
+                      }}
+                    />
+                  </div>
                 )}
               </div>
             )}

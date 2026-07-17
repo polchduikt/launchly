@@ -332,8 +332,15 @@ export const TagsSettingsPanel: React.FC = () => {
       </div>
 
       {isTagModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleCreateTag} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left">
+        <div 
+          onClick={() => setIsTagModalOpen(false)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+        >
+          <form 
+            onSubmit={handleCreateTag}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+          >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 select-none">
               <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
                 {t('settings.tags.create_tag_title')}
@@ -382,8 +389,15 @@ export const TagsSettingsPanel: React.FC = () => {
       )}
 
       {isFolderModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleCreateFolder} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left">
+        <div 
+          onClick={() => setIsFolderModalOpen(false)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+        >
+          <form 
+            onSubmit={handleCreateFolder}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+          >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 select-none">
               <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
                 {t('settings.tags.create_folder_title')}
@@ -431,8 +445,15 @@ export const TagsSettingsPanel: React.FC = () => {
       )}
 
       {isRenameFolderOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleRenameFolder} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left">
+        <div 
+          onClick={() => setIsRenameFolderOpen(false)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+        >
+          <form 
+            onSubmit={handleRenameFolder}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+          >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 select-none">
               <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
                 {t('settings.tags.rename_folder_title')}

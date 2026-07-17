@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Check } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
+import { t } from '../../i18n';
 import { GOOGLE_OAUTH_URL } from '../../constants/auth';
 import { TelegramLoginModal } from '../../features/auth/components/TelegramLoginModal';
 import { unlinkTelegramApi } from '../../features/auth/api/auth';
@@ -36,14 +37,20 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 transition-all duration-300">
-        <div className="relative w-full max-w-2xl p-6 md:p-8 bg-white rounded-3xl shadow-2xl border border-slate-100 transform transition-all animate-in fade-in zoom-in-95 duration-200">
+      <div 
+        onClick={onClose}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 transition-all duration-300 cursor-pointer"
+      >
+        <div 
+          onClick={(e) => e.stopPropagation()}
+          className="relative w-full max-w-2xl p-6 md:p-8 bg-white rounded-3xl shadow-2xl border border-slate-100 transform transition-all animate-in fade-in zoom-in-95 duration-200 cursor-default"
+        >
 
           <div className="flex items-start justify-between mb-6">
             <div className="text-center w-full">
-              <h2 className="text-lg font-bold text-slate-800">Manage sign-in options</h2>
+              <h2 className="text-lg font-bold text-slate-800">{t('auth.signin.manage_title')}</h2>
               <p className="text-xs text-slate-400 mt-2 px-8 leading-relaxed">
-                Connect alternative sign-in options to have backup access to your profile and accounts
+                {t('auth.signin.manage_desc')}
               </p>
             </div>
             <button
@@ -72,7 +79,7 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
                       {user?.email}
                     </span>
                   ) : (
-                    <span className="text-[10px] text-slate-400 block mt-0.5">Not connected</span>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">{t('auth.signin.not_connected')}</span>
                   )}
                 </div>
               </div>
@@ -83,14 +90,14 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
                   className="px-5 py-1.5 border border-slate-200 bg-white text-slate-700 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5"
                 >
                   <Check size={14} className="text-slate-500" />
-                  <span>Connected</span>
+                  <span>{t('auth.signin.connected')}</span>
                 </button>
               ) : (
                 <button
                   onClick={handleConnectGoogle}
                   className="px-6 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-blue-100 cursor-pointer"
                 >
-                  Connect
+                  {t('auth.signin.connect')}
                 </button>
               )}
             </div>
@@ -109,7 +116,7 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
                       {user?.telegramUsername ? `@${user.telegramUsername}` : `ID: ${user?.telegramUserId}`}
                     </span>
                   ) : (
-                    <span className="text-[10px] text-slate-400 block mt-0.5">Not connected</span>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">{t('auth.signin.not_connected')}</span>
                   )}
                 </div>
               </div>
@@ -121,13 +128,13 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
                     className="px-5 py-1.5 border border-slate-200 bg-white text-slate-700 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5"
                   >
                     <Check size={14} className="text-slate-500" />
-                    <span>Connected</span>
+                    <span>{t('auth.signin.connected')}</span>
                   </button>
                   <button
                     onClick={handleDisconnectTelegram}
                     className="px-3 py-1.5 border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs font-bold rounded-xl transition-all cursor-pointer"
                   >
-                    Disconnect
+                    {t('auth.signin.disconnect')}
                   </button>
                 </div>
               ) : (
@@ -135,7 +142,7 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
                   onClick={() => setIsTelegramOpen(true)}
                   className="px-6 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-blue-100 cursor-pointer"
                 >
-                  Connect
+                  {t('auth.signin.connect')}
                 </button>
               )}
             </div>
