@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection } from '@xyflow/react';
+import React, { useMemo } from 'react';
+import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Sliders } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -8,8 +8,9 @@ import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 import { t } from '../../../../i18n';
 
-export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
+const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+  const sourceConns = useNodeConnections({ handleType: 'source' });
+  const targetConns = useNodeConnections({ handleType: 'target' });
   const actions = (data?.actions || []) as ActionItem[];
 
   const connection = useConnection();
@@ -27,23 +28,6 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
     return false;
   }, [isConnecting, connection, id]);
   const { showToolbar, bindHover } = useNodeHover();
-  const [isHighlighted, setIsHighlighted] = useState(false);
-
-  useEffect(() => {
-    const handleHoverEdge = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        const { source, target } = customEvent.detail;
-        setIsHighlighted(source === id || target === id);
-      } else {
-        setIsHighlighted(false);
-      }
-    };
-    window.addEventListener('flow-hover-edge', handleHoverEdge);
-    return () => {
-      window.removeEventListener('flow-hover-edge', handleHoverEdge);
-    };
-  }, [id]);
 
   const getActionLabelForCanvas = (type: string) => {
     switch (type) {
@@ -101,9 +85,7 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
       className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
         selected
           ? 'border-indigo-500 ring-4 ring-indigo-500/10'
-          : isHighlighted
-            ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm'
-            : 'border-slate-200 hover:border-slate-350'
+          : 'border-slate-200 hover:border-slate-350'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
@@ -113,7 +95,7 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
+          isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-amber-100/60 text-[#a87f18] flex items-center justify-center shrink-0">
           <Sliders size={13} strokeWidth={2.5} />
@@ -157,10 +139,11 @@ export const ActionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
           type="source"
           position={Position.Right}
           id="next"
-          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && e.target !== 'temp_menu_node')}
+          isConnected={data?._tempSourceHandle !== 'next' && sourceConns.some((c) => c.sourceHandle === 'next')}
         />
       </div>
     </div>
   );
 };
-ActionNode.displayName = 'ActionNode';
+ActionNodeInner.displayName = 'ActionNode';
+export const ActionNode = React.memo(ActionNodeInner);

@@ -287,9 +287,12 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
         return [...p, startState];
       });
       setFuture([]);
+      if (isLocalChangeRef) {
+        isLocalChangeRef.current = true;
+      }
     }
     dragStartStateRef.current = null;
-  }, [nodes, edges, setPast, setFuture]);
+  }, [nodes, edges, setPast, setFuture, isLocalChangeRef]);
 
   const [contextMenuState, setContextMenuState] = useState<{
     isOpen: boolean;

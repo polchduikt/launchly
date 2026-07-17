@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { t } from '../../../../i18n';
-import { Position, useEdges, useConnection } from '@xyflow/react';
+import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Shuffle } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -8,8 +8,9 @@ import type { CustomNodeData } from '../../../../types/bot';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 
-export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
+const RandomizerNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+  const sourceConns = useNodeConnections({ handleType: 'source' });
+  const targetConns = useNodeConnections({ handleType: 'target' });
   const connection = useConnection();
   const isConnecting = connection.inProgress;
   const isGrayedOut = useMemo(() => {
@@ -22,23 +23,6 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
     return false;
   }, [isConnecting, connection, id]);
   const { showToolbar, bindHover } = useNodeHover();
-  const [isHighlighted, setIsHighlighted] = useState(false);
-
-  useEffect(() => {
-    const handleHoverEdge = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        const { source, target } = customEvent.detail;
-        setIsHighlighted(source === id || target === id);
-      } else {
-        setIsHighlighted(false);
-      }
-    };
-    window.addEventListener('flow-hover-edge', handleHoverEdge);
-    return () => {
-      window.removeEventListener('flow-hover-edge', handleHoverEdge);
-    };
-  }, [id]);
 
   const variations = data.variations || [
     { id: 'variation_0', label: 'A', percentage: 50, color: '#7C3AED' },
@@ -51,9 +35,7 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
       className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
         selected
           ? 'border-indigo-500 ring-4 ring-indigo-500/10'
-          : isHighlighted
-            ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm'
-            : 'border-slate-200 hover:border-slate-355'
+          : 'border-slate-200 hover:border-slate-355'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
@@ -62,7 +44,7 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
+          isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-purple-100/70 text-[#6D28D9] flex items-center justify-center shrink-0">
           <Shuffle size={13} strokeWidth={2.5} />
@@ -79,9 +61,7 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
 
       <div className="rounded-b-[22px] divide-y divide-slate-100/70">
         {variations.map((v) => {
-          const isVarConnected = edges.some(
-          (e) => e.source === id && e.sourceHandle === v.id && e.target !== 'temp_menu_node'
-          );
+          const isVarConnected = sourceConns.some((c) => c.sourceHandle === v.id);
 
           return (
             <div key={v.id} className="relative flex justify-between items-center px-4 py-3 select-none last:rounded-b-[22px]">
@@ -110,4 +90,5 @@ export const RandomizerNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, 
     </div>
   );
 };
-RandomizerNode.displayName = 'RandomizerNode';
+RandomizerNodeInner.displayName = 'RandomizerNode';
+export const RandomizerNode = React.memo(RandomizerNodeInner);

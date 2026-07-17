@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection, useReactFlow } from '@xyflow/react';
+import React, { useMemo } from 'react';
+import { Position, useNodeConnections, useConnection, useReactFlow } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { SquareArrowRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -10,8 +10,9 @@ import { NodeToolbar } from './NodeToolbar';
 import { useBotStore } from '../../../../store/useBotStore';
 import { t } from '../../../../i18n';
 
-export const StartAutomationNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
+const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+  const sourceConns = useNodeConnections({ handleType: 'source' });
+  const targetConns = useNodeConnections({ handleType: 'target' });
   const navigate = useNavigate();
   const setActiveBotId = useBotStore((state) => state.setActiveBotId);
   const { setNodes } = useReactFlow();
@@ -25,23 +26,6 @@ export const StartAutomationNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({
   }, [isConnecting, id]);
 
   const { showToolbar, bindHover } = useNodeHover();
-  const [isHighlighted, setIsHighlighted] = useState(false);
-
-  useEffect(() => {
-    const handleHoverEdge = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        const { source, target } = customEvent.detail;
-        setIsHighlighted(source === id || target === id);
-      } else {
-        setIsHighlighted(false);
-      }
-    };
-    window.addEventListener('flow-hover-edge', handleHoverEdge);
-    return () => {
-      window.removeEventListener('flow-hover-edge', handleHoverEdge);
-    };
-  }, [id]);
 
   const targetBotName = typeof data?.targetBotName === 'string'
     ? data.targetBotName
@@ -88,9 +72,7 @@ export const StartAutomationNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({
       className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
         selected
           ? 'border-indigo-500 ring-4 ring-indigo-500/10'
-          : isHighlighted
-            ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm'
-            : 'border-slate-200 hover:border-slate-355'
+          : 'border-slate-200 hover:border-slate-355'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
@@ -99,7 +81,7 @@ export const StartAutomationNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
+          isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-lime-100/60 text-lime-700 flex items-center justify-center shrink-0">
           <SquareArrowRight size={13} strokeWidth={2.5} />
@@ -156,10 +138,11 @@ export const StartAutomationNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({
           type="source"
           position={Position.Right}
           id="next"
-          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && e.target !== 'temp_menu_node')}
+          isConnected={data?._tempSourceHandle !== 'next' && sourceConns.some((c) => c.sourceHandle === 'next')}
         />
       </div>
     </div>
   );
 };
-StartAutomationNode.displayName = 'StartAutomationNode';
+StartAutomationNodeInner.displayName = 'StartAutomationNode';
+export const StartAutomationNode = React.memo(StartAutomationNodeInner);

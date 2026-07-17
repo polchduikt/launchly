@@ -523,7 +523,7 @@ const FlowBuilderInner: React.FC = () => {
               zoomOnDoubleClick={false}
               multiSelectionKeyCode="Control"
               selectionKeyCode="Control"
-              onlyRenderVisibleElements={nodes.length > 20}
+              onlyRenderVisibleElements={nodes.length > 100}
               renderToPortal={nodes.length > 30}
             >
               <Controls

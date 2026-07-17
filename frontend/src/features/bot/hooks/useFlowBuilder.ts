@@ -140,9 +140,12 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
         return [...p, startState];
       });
       setFuture([]);
+      if (isLocalChangeRef) {
+        isLocalChangeRef.current = true;
+      }
     }
     dragStartStateRef.current = null;
-  }, [nodes, edges, setPast, setFuture]);
+  }, [nodes, edges, setPast, setFuture, isLocalChangeRef]);
 
   const triggerSaveError = (msg: string) => {
     setSaveError(msg);

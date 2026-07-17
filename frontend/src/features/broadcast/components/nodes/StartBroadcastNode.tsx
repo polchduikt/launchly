@@ -1,39 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Position, useConnection, useEdges, useNodes } from '@xyflow/react';
+import React from 'react';
+import { Position, useConnection, useNodeConnections } from '@xyflow/react';
 import { Send } from 'lucide-react';
 import { NodeHandle } from '../../../bot/components/nodes/NodeHandle';
 
-export const StartBroadcastNode: React.FC = () => {
+const StartBroadcastNodeInner: React.FC = () => {
   const connection = useConnection();
   const isConnecting = connection.inProgress;
-  const edges = useEdges();
-  const nodes = useNodes();
-  const [isHighlighted, setIsHighlighted] = useState(false);
-
-  useEffect(() => {
-    const handleHoverEdge = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        const { source, target } = customEvent.detail;
-        setIsHighlighted(source === 'start' || target === 'start');
-      } else {
-        setIsHighlighted(false);
-      }
-    };
-    window.addEventListener('flow-hover-edge', handleHoverEdge);
-    return () => {
-      window.removeEventListener('flow-hover-edge', handleHoverEdge);
-    };
-  }, []);
-
-  const isConnected = edges.some((e) => e.source === 'start' && nodes.some((n) => n.id === e.target));
+  const sourceConns = useNodeConnections({ handleType: 'source' });
+  const isConnected = sourceConns.length > 0;
 
   return (
-    <div className={`w-60 bg-white border-2 rounded-2xl p-4 shadow-xs select-none transition-all ${
-      isHighlighted 
-        ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm' 
-        : 'border-slate-200'
-    } ${isConnecting ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
+    <div className={`w-60 bg-white border-2 rounded-2xl p-4 shadow-xs select-none transition-all border-slate-200 ${
+      isConnecting ? 'opacity-40 grayscale pointer-events-none' : ''
+    }`}>
       <div className="flex items-center gap-2 mb-3">
         <span className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
           <Send size={14} className="fill-indigo-100" />
@@ -52,3 +31,5 @@ export const StartBroadcastNode: React.FC = () => {
     </div>
   );
 };
+
+export const StartBroadcastNode = React.memo(StartBroadcastNodeInner);

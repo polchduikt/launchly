@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Handle, Position, useConnection } from '@xyflow/react';
 import { Grid } from 'lucide-react';
 import { useNodeHover } from '../../../bot/hooks/useNodeHover';
@@ -14,29 +14,12 @@ interface StartAutomationNodeProps {
   id: string;
 }
 
-export const StartAutomationBroadcastNode: React.FC<StartAutomationNodeProps> = ({ id, selected, data = {} }) => {
+const StartAutomationBroadcastNodeInner: React.FC<StartAutomationNodeProps> = ({ id, selected, data = {} }) => {
   const name = data?.automationName || '';
   const connection = useConnection();
   const isConnecting = connection.inProgress;
   const isSelf = isConnecting && connection.fromNode?.id === id;
   const { showToolbar, bindHover } = useNodeHover();
-  const [isHighlighted, setIsHighlighted] = useState(false);
-
-  useEffect(() => {
-    const handleHoverEdge = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        const { source, target } = customEvent.detail;
-        setIsHighlighted(source === id || target === id);
-      } else {
-        setIsHighlighted(false);
-      }
-    };
-    window.addEventListener('flow-hover-edge', handleHoverEdge);
-    return () => {
-      window.removeEventListener('flow-hover-edge', handleHoverEdge);
-    };
-  }, [id]);
 
   return (
     <div
@@ -44,9 +27,7 @@ export const StartAutomationBroadcastNode: React.FC<StartAutomationNodeProps> = 
       className={`w-60 bg-white border-2 rounded-2xl p-4 shadow-xs transition-all select-none relative overflow-visible isolate ${
         selected 
           ? 'border-emerald-500 ring-2 ring-emerald-50' 
-          : isHighlighted 
-            ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm' 
-            : 'border-slate-200'
+          : 'border-slate-200'
       } ${isSelf ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
@@ -80,3 +61,5 @@ export const StartAutomationBroadcastNode: React.FC<StartAutomationNodeProps> = 
     </div>
   );
 };
+
+export const StartAutomationBroadcastNode = React.memo(StartAutomationBroadcastNodeInner);

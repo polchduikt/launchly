@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection } from '@xyflow/react';
+import React, { useMemo } from 'react';
+import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Filter } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -9,8 +9,9 @@ import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 import { t } from '../../../../i18n';
 
-export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
+const ConditionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+  const sourceConns = useNodeConnections({ handleType: 'source' });
+  const targetConns = useNodeConnections({ handleType: 'target' });
 
   const connection = useConnection();
   const isConnecting = connection.inProgress;
@@ -24,23 +25,6 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
     return false;
   }, [isConnecting, connection, id]);
   const { showToolbar, bindHover } = useNodeHover();
-  const [isHighlighted, setIsHighlighted] = useState(false);
-
-  useEffect(() => {
-    const handleHoverEdge = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        const { source, target } = customEvent.detail;
-        setIsHighlighted(source === id || target === id);
-      } else {
-        setIsHighlighted(false);
-      }
-    };
-    window.addEventListener('flow-hover-edge', handleHoverEdge);
-    return () => {
-      window.removeEventListener('flow-hover-edge', handleHoverEdge);
-    };
-  }, [id]);
 
   const rawBranches = data?.branches;
   const branches: ConditionBranch[] = Array.isArray(rawBranches)
@@ -55,9 +39,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
       className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
         selected
           ? 'border-indigo-500 ring-4 ring-indigo-500/10'
-          : isHighlighted
-            ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm'
-            : 'border-slate-200 hover:border-slate-355'
+          : 'border-slate-200 hover:border-slate-355'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
@@ -66,7 +48,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
+          isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-teal-100/60 text-[#0F766E] flex items-center justify-center shrink-0">
           <Filter size={13} strokeWidth={2.5} />
@@ -117,7 +99,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
                   </div>
                 )}
                 {(() => {
-                  const isBranchConnected = data?._tempSourceHandle !== `branch_${idx}` && edges.some((e) => e.source === id && e.sourceHandle === `branch_${idx}` && e.target !== 'temp_menu_node');
+                  const isBranchConnected = data?._tempSourceHandle !== `branch_${idx}` && sourceConns.some((c) => c.sourceHandle === `branch_${idx}`);
                   return (
                     <NodeHandle
                       type="source"
@@ -138,7 +120,7 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
             {t('node.condition.does_not_match')}
           </div>
           {(() => {
-            const isFallbackConnected = data?._tempSourceHandle !== 'fallback' && edges.some((e) => e.source === id && e.sourceHandle === 'fallback' && e.target !== 'temp_menu_node');
+            const isFallbackConnected = data?._tempSourceHandle !== 'fallback' && sourceConns.some((c) => c.sourceHandle === 'fallback');
             return (
               <NodeHandle
                 type="source"
@@ -154,4 +136,5 @@ export const ConditionNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
     </div>
   );
 };
-ConditionNode.displayName = 'ConditionNode';
+ConditionNodeInner.displayName = 'ConditionNode';
+export const ConditionNode = React.memo(ConditionNodeInner);

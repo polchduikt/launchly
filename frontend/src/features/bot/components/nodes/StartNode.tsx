@@ -1,41 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Position, useEdges, useConnection } from '@xyflow/react';
+import React from 'react';
+import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Zap, Plus } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../types/bot';
 import { t } from '../../../../i18n';
 
-export const StartNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
+const StartNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+  const sourceConns = useNodeConnections({ handleType: 'source' });
   const connection = useConnection();
   const isConnecting = connection.inProgress;
-  const [isHighlighted, setIsHighlighted] = useState(false);
-
-  useEffect(() => {
-    const handleHoverEdge = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        const { source, target } = customEvent.detail;
-        setIsHighlighted(source === id || target === id);
-      } else {
-        setIsHighlighted(false);
-      }
-    };
-    window.addEventListener('flow-hover-edge', handleHoverEdge);
-    return () => {
-      window.removeEventListener('flow-hover-edge', handleHoverEdge);
-    };
-  }, [id]);
 
   return (
     <div
       className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
         selected 
           ? 'border-emerald-500 ring-4 ring-emerald-100' 
-          : isHighlighted 
-            ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm' 
-            : 'border-slate-200'
+          : 'border-slate-200'
       } ${isConnecting ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/50 select-none rounded-t-[22px]">
@@ -72,11 +53,12 @@ export const StartNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
           type="source"
           position={Position.Right}
           id="then"
-          isConnected={data?._tempSourceHandle !== 'then' && edges.some((e) => e.source === id && e.sourceHandle === 'then' && e.target !== 'temp_menu_node')}
+          isConnected={data?._tempSourceHandle !== 'then' && sourceConns.some((c) => c.sourceHandle === 'then')}
           padded={false}
         />
       </div>
     </div>
   );
 };
-StartNode.displayName = 'StartNode';
+StartNodeInner.displayName = 'StartNode';
+export const StartNode = React.memo(StartNodeInner);

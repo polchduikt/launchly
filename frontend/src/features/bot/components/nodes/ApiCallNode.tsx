@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection } from '@xyflow/react';
+import React, { useMemo } from 'react';
+import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Globe } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -9,8 +9,9 @@ import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 import { t } from '../../../../i18n';
 
-export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
+const ApiCallNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+  const sourceConns = useNodeConnections({ handleType: 'source' });
+  const targetConns = useNodeConnections({ handleType: 'target' });
   const url = data?.url || 'https://api.example.com/endpoint';
   const method = data?.method || 'GET';
 
@@ -26,23 +27,6 @@ export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
     return false;
   }, [isConnecting, connection, id]);
   const { showToolbar, bindHover } = useNodeHover();
-  const [isHighlighted, setIsHighlighted] = useState(false);
-
-  useEffect(() => {
-    const handleHoverEdge = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        const { source, target } = customEvent.detail;
-        setIsHighlighted(source === id || target === id);
-      } else {
-        setIsHighlighted(false);
-      }
-    };
-    window.addEventListener('flow-hover-edge', handleHoverEdge);
-    return () => {
-      window.removeEventListener('flow-hover-edge', handleHoverEdge);
-    };
-  }, [id]);
 
   return (
     <div
@@ -50,9 +34,7 @@ export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
       className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
         selected 
           ? 'border-indigo-400 ring-2 ring-indigo-100' 
-          : isHighlighted 
-            ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm' 
-            : 'border-slate-200'
+          : 'border-slate-200'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
@@ -61,7 +43,7 @@ export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
+          isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-indigo-100/60 text-indigo-500 flex items-center justify-center shrink-0">
           <Globe size={13} strokeWidth={2.5} />
@@ -96,11 +78,12 @@ export const ApiCallNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
           type="source"
           position={Position.Right}
           id="next"
-          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && e.target !== 'temp_menu_node')}
+          isConnected={data?._tempSourceHandle !== 'next' && sourceConns.some((c) => c.sourceHandle === 'next')}
           padded={false}
         />
       </div>
     </div>
   );
 };
-ApiCallNode.displayName = 'ApiCallNode';
+ApiCallNodeInner.displayName = 'ApiCallNode';
+export const ApiCallNode = React.memo(ApiCallNodeInner);

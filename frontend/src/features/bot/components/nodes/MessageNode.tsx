@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { t } from '../../../../i18n';
-import { Handle, Position, useReactFlow, useEdges, useUpdateNodeInternals, useConnection } from '@xyflow/react';
+import { Handle, Position, useReactFlow, useNodeConnections, useUpdateNodeInternals, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Send, Plus, Image as ImageIcon, Paperclip, Volume2, Video, Clock, Database, MessageSquare, Zap, AlertCircle } from 'lucide-react';
 import type { ButtonData, CustomNodeData } from '../../../../types/bot';
@@ -9,9 +9,10 @@ import { getBlocks } from '../../hooks/useNodeEditor';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 
-export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const { setNodes } = useReactFlow();
-  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
+  const sourceConns = useNodeConnections({ handleType: 'source' });
+  const targetConns = useNodeConnections({ handleType: 'target' });
   const updateNodeInternals = useUpdateNodeInternals();
   const buttons = (data?.buttons || []) as ButtonData[];
   const blocks = getBlocks(data);
@@ -28,23 +29,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
     return false;
   }, [isConnecting, connection, id]);
   const { showToolbar, bindHover } = useNodeHover();
-  const [isHighlighted, setIsHighlighted] = useState(false);
 
-  useEffect(() => {
-    const handleHoverEdge = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        const { source, target } = customEvent.detail;
-        setIsHighlighted(source === id || target === id);
-      } else {
-        setIsHighlighted(false);
-      }
-    };
-    window.addEventListener('flow-hover-edge', handleHoverEdge);
-    return () => {
-      window.removeEventListener('flow-hover-edge', handleHoverEdge);
-    };
-  }, [id]);
 
   const hasDataCollection = blocks.some((b) => b.type === 'data_collection');
   const buttonsSerialized = JSON.stringify(buttons);
@@ -235,9 +220,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
       className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
         selected 
           ? 'border-emerald-500 ring-4 ring-emerald-100' 
-          : isHighlighted 
-            ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm' 
-            : 'border-slate-200 hover:border-slate-300'
+          : 'border-slate-200 hover:border-slate-300'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
@@ -245,7 +228,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
+          isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center shrink-0">
           <Send size={14} />
@@ -394,7 +377,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
                                               height: '9px',
                                             }}
                                             className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
-                                              data?._tempSourceHandle !== btn.value && edges.some((e) => e.source === id && e.sourceHandle === btn.value && e.target !== 'temp_menu_node')
+                                              data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')
                                                 ? '!bg-[#7b8794] !border-[#7b8794]'
                                                 : '!bg-white !border-slate-300 hover:!border-slate-400'
                                             }`}
@@ -446,7 +429,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
                                   height: '10px',
                                 }}
                                 className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
-                                  data?._tempSourceHandle !== btn.value && edges.some((e) => e.source === id && e.sourceHandle === btn.value && e.target !== 'temp_menu_node')
+                                  data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')
                                     ? '!bg-[#7b8794] !border-[#7b8794]'
                                     : '!bg-white !border-slate-300 hover:!border-slate-400'
                                 }`}
@@ -484,7 +467,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
               type="source"
               position={Position.Right}
               id="reply"
-              isConnected={edges.some((e) => e.source === id && e.sourceHandle === 'reply')}
+              isConnected={sourceConns.some((c) => c.sourceHandle === 'reply')}
               padded={false}
             />
           </div>
@@ -497,7 +480,7 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
               type="source"
               position={Position.Right}
               id="timeout"
-              isConnected={edges.some((e) => e.source === id && e.sourceHandle === 'timeout')}
+              isConnected={sourceConns.some((c) => c.sourceHandle === 'timeout')}
               padded={false}
             />
           </div>
@@ -510,11 +493,12 @@ export const MessageNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
           type="source"
           position={Position.Right}
           id="next"
-          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && e.target !== 'temp_menu_node')}
+          isConnected={data?._tempSourceHandle !== 'next' && sourceConns.some((c) => c.sourceHandle === 'next' && c.target !== 'temp_menu_node')}
           padded={false}
         />
       </div>
     </div>
   );
 };
-MessageNode.displayName = 'MessageNode';
+MessageNodeInner.displayName = 'MessageNode';
+export const MessageNode = React.memo(MessageNodeInner);

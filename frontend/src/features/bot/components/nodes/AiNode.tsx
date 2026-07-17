@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection } from '@xyflow/react';
+import React, { useMemo } from 'react';
+import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Sparkles } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -8,8 +8,9 @@ import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 import { t } from '../../../../i18n';
 
-export const AiNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
+const AiNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+  const sourceConns = useNodeConnections({ handleType: 'source' });
+  const targetConns = useNodeConnections({ handleType: 'target' });
   const connection = useConnection();
   const isConnecting = connection.inProgress;
 
@@ -20,23 +21,6 @@ export const AiNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected
   }, [isConnecting, connection, id]);
 
   const { showToolbar, bindHover } = useNodeHover();
-  const [isHighlighted, setIsHighlighted] = useState(false);
-
-  useEffect(() => {
-    const handleHoverEdge = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        const { source, target } = customEvent.detail;
-        setIsHighlighted(source === id || target === id);
-      } else {
-        setIsHighlighted(false);
-      }
-    };
-    window.addEventListener('flow-hover-edge', handleHoverEdge);
-    return () => {
-      window.removeEventListener('flow-hover-edge', handleHoverEdge);
-    };
-  }, [id]);
 
   const generated = !!data?.generated;
   const prompt = typeof data?.prompt === 'string' ? data.prompt : '';
@@ -47,9 +31,7 @@ export const AiNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected
       className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
         selected
           ? 'border-emerald-500 ring-4 ring-emerald-500/10'
-          : isHighlighted
-            ? 'border-emerald-400 ring-2 ring-emerald-50/60 shadow-sm'
-            : 'border-slate-200 hover:border-slate-355'
+          : 'border-slate-200 hover:border-slate-355'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
@@ -58,7 +40,7 @@ export const AiNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected
         <NodeHandle
           type="target"
           position={Position.Left}
-          isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
+          isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-emerald-100/60 text-emerald-700 flex items-center justify-center shrink-0">
           <Sparkles size={13} strokeWidth={2.5} />
@@ -93,10 +75,11 @@ export const AiNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected
           type="source"
           position={Position.Right}
           id="next"
-          isConnected={data?._tempSourceHandle !== 'next' && edges.some((e) => e.source === id && e.sourceHandle === 'next' && e.target !== 'temp_menu_node')}
+          isConnected={data?._tempSourceHandle !== 'next' && sourceConns.some((c) => c.sourceHandle === 'next')}
         />
       </div>
     </div>
   );
 };
-AiNode.displayName = 'AiNode';
+AiNodeInner.displayName = 'AiNode';
+export const AiNode = React.memo(AiNodeInner);

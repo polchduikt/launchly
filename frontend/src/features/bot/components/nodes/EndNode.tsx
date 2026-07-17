@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Position, useEdges, useConnection } from '@xyflow/react';
+import React, { useMemo } from 'react';
+import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Octagon } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -8,8 +8,8 @@ import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 import { t } from '../../../../i18n';
 
-export const EndNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected }) => {
-  const edges = useEdges().filter((e) => e.id !== 'temp_menu_edge');
+const EndNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected }) => {
+  const targetConns = useNodeConnections({ handleType: 'target' });
   const connection = useConnection();
   const isConnecting = connection.inProgress;
   const isGrayedOut = useMemo(() => {
@@ -22,23 +22,6 @@ export const EndNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selecte
     return false;
   }, [isConnecting, connection, id]);
   const { showToolbar, bindHover } = useNodeHover();
-  const [isHighlighted, setIsHighlighted] = useState(false);
-
-  useEffect(() => {
-    const handleHoverEdge = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        const { source, target } = customEvent.detail;
-        setIsHighlighted(source === id || target === id);
-      } else {
-        setIsHighlighted(false);
-      }
-    };
-    window.addEventListener('flow-hover-edge', handleHoverEdge);
-    return () => {
-      window.removeEventListener('flow-hover-edge', handleHoverEdge);
-    };
-  }, [id]);
 
   return (
     <div
@@ -46,16 +29,14 @@ export const EndNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selecte
       className={`w-64 bg-white/75 backdrop-blur-[2px] border-2 rounded-2xl shadow-sm transition-all relative overflow-visible isolate ${
         selected 
           ? 'border-slate-400 ring-2 ring-slate-100' 
-          : isHighlighted 
-            ? 'border-indigo-400 ring-2 ring-indigo-50/60 shadow-sm' 
-            : 'border-slate-200'
+          : 'border-slate-200'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
       <NodeHandle
         type="target"
         position={Position.Left}
-        isConnected={edges.some((e) => e.target === id && e.source !== 'temp_menu_node')}
+        isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
       />
       <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/50 select-none rounded-t-[22px]">
         <span className="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
@@ -75,4 +56,5 @@ export const EndNode: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selecte
     </div>
   );
 };
-EndNode.displayName = 'EndNode';
+EndNodeInner.displayName = 'EndNode';
+export const EndNode = React.memo(EndNodeInner);
