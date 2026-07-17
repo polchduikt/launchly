@@ -3,5 +3,9 @@ package com.launchly.integration.entity;
 public enum IntegrationType {
     GOOGLE_SHEETS,
     EXCEL,
-    WEBHOOK
+    WEBHOOK,
+    CHATGPT,
+    CLAUDE,
+    DEEPSEEK,
+    GEMINI
 }

@@ -416,6 +416,7 @@ public class BotServiceImpl implements BotService {
 
         if (request.tags() != null) {
             botUserTagRepository.deleteByBotUserId(botUser.getId());
+            botUserTagRepository.flush();
             for (String tagName : request.tags()) {
                 if (tagName == null || tagName.trim().isEmpty()) continue;
                 String trimmedName = tagName.trim();

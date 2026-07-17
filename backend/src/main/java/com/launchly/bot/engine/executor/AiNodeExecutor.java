@@ -7,6 +7,13 @@ import com.launchly.bot.engine.model.FlowNode;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.entity.NodeType;
 import com.launchly.bot.service.BotDialogStateService;
+import com.launchly.integration.entity.Integration;
+import com.launchly.integration.entity.IntegrationType;
+import com.launchly.integration.repository.IntegrationRepository;
+import com.launchly.analytics.service.AnalyticsService;
+import com.launchly.analytics.entity.AnalyticsEventType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,6 +32,9 @@ public class AiNodeExecutor implements NodeExecutor {
 
     private final BotDialogStateService stateService;
     private final AiProviderRouter aiProviderRouter;
+    private final IntegrationRepository integrationRepository;
+    private final ObjectMapper objectMapper;
+    private final AnalyticsService analyticsService;
 
     @Override
     public NodeType getType() {
@@ -41,6 +51,48 @@ public class AiNodeExecutor implements NodeExecutor {
 
         String prompt = data != null ? (String) data.getOrDefault("prompt", "") : "";
         String context = data != null ? (String) data.getOrDefault("context", "") : "";
+        String providerName = data != null ? (String) data.get("provider") : null;
+
+        String customApiKey = null;
+        if (providerName != null) {
+            IntegrationType type = null;
+            switch (providerName.toLowerCase()) {
+                case "gemini" -> type = IntegrationType.GEMINI;
+                case "chatgpt" -> type = IntegrationType.CHATGPT;
+                case "claude" -> type = IntegrationType.CLAUDE;
+                case "deepseek" -> type = IntegrationType.DEEPSEEK;
+            }
+            if (type != null) {
+                Optional<Integration> integrationOpt = integrationRepository.findByBotIdAndType(botId, type);
+                if (integrationOpt.isPresent() && integrationOpt.get().isActive()) {
+                    String configJson = integrationOpt.get().getConfig();
+                    if (configJson != null) {
+                        try {
+                            JsonNode configNode = objectMapper.readTree(configJson);
+                            customApiKey = configNode.path("apiKey").asText(null);
+                        } catch (Exception e) {
+                            log.warn("Failed to parse AI provider config for bot {}: {}", botId, e.getMessage());
+                        }
+                    }
+                }
+            }
+        }
+
+        if (customApiKey == null || customApiKey.trim().isEmpty()) {
+            log.warn("AI provider '{}' is not configured or disabled for bot {}.", providerName, botId);
+            String errorMsg = "AI Assistant is temporarily unavailable. (AI provider credentials are not configured by the owner)";
+            try {
+                SendMessage message = SendMessage.builder()
+                        .chatId(chatId)
+                        .text(errorMsg)
+                        .build();
+                client.execute(message);
+            } catch (TelegramApiException e) {
+                log.error("Failed to send AI config error message to chat {}: {}", chatId, e.getMessage());
+            }
+            stateService.setExpectedInput(botId, telegramUserId, "ai_input");
+            return null;
+        }
 
         Optional<String> expectedInput = stateService.getExpectedInput(botId, telegramUserId);
 
@@ -56,7 +108,8 @@ public class AiNodeExecutor implements NodeExecutor {
                     new AiMessage("system", "You are an AI assistant in a Telegram chatbot. Your goal is: " + prompt + ". Context: " + context),
                     new AiMessage("user", userInput)
                 );
-                aiResponse = aiProviderRouter.chat(messages, null);
+                aiResponse = aiProviderRouter.chat(messages, null, providerName, customApiKey);
+                analyticsService.logEvent(botId, botUser, AnalyticsEventType.AI_MESSAGE, "USER_QUERY");
             } catch (Exception e) {
                 log.warn("Failed to generate AI response for bot {}, falling back: {}", botId, e.getMessage());
                 aiResponse = "I am processing your request. Please write again shortly.";
@@ -93,7 +146,8 @@ public class AiNodeExecutor implements NodeExecutor {
                 new AiMessage("system", "You are a helpful AI assistant. Greet the user and briefly introduce your goal: " + prompt + ". Context: " + context + ". Keep it short (1-2 sentences)."),
                 new AiMessage("user", "Hello")
             );
-            greeting = aiProviderRouter.chat(messages, null);
+            greeting = aiProviderRouter.chat(messages, null, providerName, customApiKey);
+            analyticsService.logEvent(botId, botUser, AnalyticsEventType.AI_MESSAGE, "GREETING");
         } catch (Exception e) {
             log.warn("Failed to generate AI greeting, falling back: {}", e.getMessage());
             if (prompt != null && !prompt.isBlank()) {

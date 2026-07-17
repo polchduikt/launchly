@@ -55,7 +55,13 @@ public class GeminiClient implements AiProviderClient {
 
     @Override
     public String chat(List<AiMessage> messages, Map<String, Object> responseFormat) {
-        if (!isConfigured()) {
+        return chat(messages, responseFormat, null);
+    }
+
+    @Override
+    public String chat(List<AiMessage> messages, Map<String, Object> responseFormat, String customApiKey) {
+        String keyToUse = (customApiKey != null && !customApiKey.trim().isEmpty()) ? customApiKey : apiKey;
+        if (keyToUse == null || keyToUse.trim().isEmpty()) {
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Gemini API key is not configured");
         }
 
@@ -96,7 +102,7 @@ public class GeminiClient implements AiProviderClient {
             requestBody.put("contents", contents);
             requestBody.put("generationConfig", generationConfig);
 
-            String encodedKey = URLEncoder.encode(apiKey, StandardCharsets.UTF_8);
+            String encodedKey = URLEncoder.encode(keyToUse, StandardCharsets.UTF_8);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/models/" + model + ":generateContent?key=" + encodedKey))
                     .header("Content-Type", "application/json")

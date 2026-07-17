@@ -54,4 +54,28 @@ public interface AnalyticsEventRepository extends JpaRepository<AnalyticsEvent, 
                   "ORDER BY click_count DESC " +
                   "LIMIT :limit", nativeQuery = true)
     List<Object[]> getTopClickedButtonsForBots(@Param("botIds") List<Long> botIds, @Param("startDate") LocalDateTime startDate, @Param("limit") int limit);
+
+    @Query("SELECT COUNT(e) FROM AnalyticsEvent e WHERE e.bot.id = :botId AND e.eventType = 'AI_MESSAGE' AND e.createdAt >= :startDate")
+    long countAiMessagesByBotIdAndCreatedAtAfter(@Param("botId") Long botId, @Param("startDate") LocalDateTime startDate);
+
+    @Query("SELECT COUNT(e) FROM AnalyticsEvent e WHERE e.bot.id IN :botIds AND e.eventType = 'AI_MESSAGE' AND e.createdAt >= :startDate")
+    long countAiMessagesByBotIdsAndCreatedAtAfter(@Param("botIds") List<Long> botIds, @Param("startDate") LocalDateTime startDate);
+
+    @Query(value = "SELECT EXTRACT(DOW FROM created_at) as day_of_week, " +
+                  "EXTRACT(HOUR FROM created_at) as hour_of_day, " +
+                  "COUNT(*) as activity_count " +
+                  "FROM analytics_events " +
+                  "WHERE bot_id = :botId AND created_at >= :startDate " +
+                  "GROUP BY day_of_week, hour_of_day " +
+                  "ORDER BY day_of_week, hour_of_day", nativeQuery = true)
+    List<Object[]> getActivityHeatmap(@Param("botId") Long botId, @Param("startDate") LocalDateTime startDate);
+
+    @Query(value = "SELECT EXTRACT(DOW FROM created_at) as day_of_week, " +
+                  "EXTRACT(HOUR FROM created_at) as hour_of_day, " +
+                  "COUNT(*) as activity_count " +
+                  "FROM analytics_events " +
+                  "WHERE bot_id IN :botIds AND created_at >= :startDate " +
+                  "GROUP BY day_of_week, hour_of_day " +
+                  "ORDER BY day_of_week, hour_of_day", nativeQuery = true)
+    List<Object[]> getActivityHeatmapForBots(@Param("botIds") List<Long> botIds, @Param("startDate") LocalDateTime startDate);
 }

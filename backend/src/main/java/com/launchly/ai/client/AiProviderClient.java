@@ -11,4 +11,8 @@ public interface AiProviderClient {
     boolean isConfigured();
 
     String chat(List<AiMessage> messages, Map<String, Object> responseFormat);
+
+    default String chat(List<AiMessage> messages, Map<String, Object> responseFormat, String customApiKey) {
+        return chat(messages, responseFormat);
+    }
 }

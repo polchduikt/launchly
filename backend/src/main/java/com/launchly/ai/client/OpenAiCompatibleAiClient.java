@@ -45,7 +45,13 @@ public abstract class OpenAiCompatibleAiClient implements AiProviderClient {
 
     @Override
     public String chat(List<AiMessage> messages, Map<String, Object> responseFormat) {
-        if (!isConfigured()) {
+        return chat(messages, responseFormat, null);
+    }
+
+    @Override
+    public String chat(List<AiMessage> messages, Map<String, Object> responseFormat, String customApiKey) {
+        String keyToUse = (customApiKey != null && !customApiKey.trim().isEmpty()) ? customApiKey : apiKey();
+        if (keyToUse == null || keyToUse.trim().isEmpty()) {
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, name() + " API key is not configured");
         }
 
@@ -61,7 +67,7 @@ public abstract class OpenAiCompatibleAiClient implements AiProviderClient {
 
             HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl() + "/chat/completions"))
-                    .header("Authorization", "Bearer " + apiKey())
+                    .header("Authorization", "Bearer " + keyToUse)
                     .header("Content-Type", "application/json");
             applyHeaders(requestBuilder);
 

@@ -20,4 +20,10 @@ public interface BotUserTagRepository extends JpaRepository<BotUserTag, Long> {
     void deleteByBotUserId(Long botUserId);
 
     void deleteByBotUserIdAndTagId(Long botUserId, Long tagId);
+
+    @Query("SELECT but.tag.name, COUNT(but) FROM BotUserTag but WHERE but.tag.bot.id = :botId GROUP BY but.tag.name ORDER BY COUNT(but) DESC")
+    List<Object[]> getTopTagsByBotId(@Param("botId") Long botId);
+
+    @Query("SELECT but.tag.name, COUNT(but) FROM BotUserTag but WHERE but.tag.bot.id IN :botIds GROUP BY but.tag.name ORDER BY COUNT(but) DESC")
+    List<Object[]> getTopTagsByBotIds(@Param("botIds") List<Long> botIds);
 }

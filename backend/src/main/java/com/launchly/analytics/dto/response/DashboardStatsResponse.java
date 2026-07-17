@@ -8,7 +8,13 @@ public record DashboardStatsResponse(
     long clicksCount30d,
     long activeAutomations,
     List<DailyStatsEntry> dailyStats,
-    List<ButtonStatsEntry> topButtons
+    List<ButtonStatsEntry> topButtons,
+    long aiMessagesProcessed,
+    int aiResolutionRate,
+    long aiTimeSavedHours,
+    double aiResponseTimeSeconds,
+    List<TagStatsEntry> topTags,
+    List<HeatmapEntry> activityHeatmap
 ) {
     public record DailyStatsEntry(
         String date,
@@ -19,5 +25,16 @@ public record DashboardStatsResponse(
     public record ButtonStatsEntry(
         String buttonName,
         long clicks
+    ) {}
+
+    public record TagStatsEntry(
+        String tagName,
+        long count
+    ) {}
+
+    public record HeatmapEntry(
+        int dayOfWeek,
+        int hour,
+        long count
     ) {}
 }

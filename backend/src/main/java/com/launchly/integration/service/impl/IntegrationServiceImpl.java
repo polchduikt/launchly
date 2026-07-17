@@ -138,6 +138,8 @@ public class IntegrationServiceImpl implements IntegrationService {
                 configObj = objectMapper.readValue(configStr, WebhookConfig.class);
             } else if (type == IntegrationType.EXCEL) {
                 configObj = objectMapper.readValue(configStr, ExcelConfig.class);
+            } else if (type == IntegrationType.GEMINI || type == IntegrationType.CHATGPT || type == IntegrationType.CLAUDE || type == IntegrationType.DEEPSEEK) {
+                configObj = objectMapper.readValue(configStr, com.launchly.integration.dto.AiProviderConfig.class);
             } else {
                 throw new AppException(HttpStatus.BAD_REQUEST, "Unsupported integration type");
             }
