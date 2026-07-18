@@ -46,6 +46,10 @@ public class Conversation extends BaseEntity {
     @Builder.Default
     private ConversationStatus status = ConversationStatus.OPEN;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean unread = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bot_id", nullable = false)
     private Bot bot;

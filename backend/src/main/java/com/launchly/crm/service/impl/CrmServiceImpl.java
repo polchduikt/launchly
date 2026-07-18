@@ -5,8 +5,10 @@ import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.common.exception.AppException;
+import com.launchly.crm.dto.request.ConversationUpdateRequest;
 import com.launchly.crm.dto.request.LeadUpdateRequest;
 import com.launchly.crm.dto.request.OrderUpdateRequest;
+import com.launchly.crm.dto.request.AddNoteRequest;
 import com.launchly.crm.dto.request.SendMessageRequest;
 import com.launchly.crm.dto.response.ConversationResponse;
 import com.launchly.crm.dto.response.LeadResponse;
@@ -267,6 +269,8 @@ public class CrmServiceImpl implements CrmService {
     @Transactional
     public MessageResponse saveIncomingMessage(Long botId, Long botUserId, String content) {
         Conversation conversation = getOrCreateConversation(botId, botUserId);
+        conversation.setUnread(true);
+        conversation = conversationRepository.save(conversation);
 
         Message message = Message.builder()
                 .content(content)
@@ -354,6 +358,26 @@ public class CrmServiceImpl implements CrmService {
         return response;
     }
 
+    @Override
+    @Transactional
+    public MessageResponse addNote(Long conversationId, AddNoteRequest request, Long userId) {
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Conversation not found"));
+        verifyBotOwnership(conversation.getBot().getId(), userId);
+
+        Message message = Message.builder()
+                .content(request.content())
+                .senderType(SenderType.NOTE)
+                .conversation(conversation)
+                .build();
+        message = messageRepository.save(message);
+        log.info("Owner added note to conversation {} in DB", conversationId);
+
+        MessageResponse response = crmMapper.toMessageResponse(message);
+        webSocketService.notifyNewMessage(conversation.getBot().getId(), response);
+        return response;
+    }
+
 
     private Conversation getOrCreateConversation(Long botId, Long botUserId) {
         return conversationRepository.findByBotIdAndBotUserId(botId, botUserId)
@@ -389,6 +413,7 @@ public class CrmServiceImpl implements CrmService {
         return new ConversationResponse(
                 conversation.getId(),
                 conversation.getStatus(),
+                conversation.isUnread(),
                 botUserName,
                 botUser.getUsername(),
                 botUser.getTelegramId(),
@@ -467,6 +492,36 @@ public class CrmServiceImpl implements CrmService {
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Conversation not found"));
         verifyBotOwnership(conversation.getBot().getId(), userId);
         return toConversationResponse(conversation);
+    }
+
+    @Override
+    @Transactional
+    public ConversationResponse updateConversation(Long conversationId, ConversationUpdateRequest request, Long userId) {
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Conversation not found"));
+        verifyBotOwnership(conversation.getBot().getId(), userId);
+
+        if (request.status() != null) {
+            conversation.setStatus(request.status());
+        }
+        if (request.unread() != null) {
+            conversation.setUnread(request.unread());
+        }
+
+        conversation = conversationRepository.save(conversation);
+        ConversationResponse response = toConversationResponse(conversation);
+        MessageResponse wsNotify = new MessageResponse(
+                -1L,
+                conversation.getId(),
+                "🖱️ status_updated",
+                SenderType.OWNER,
+                null,
+                null,
+                LocalDateTime.now()
+        );
+        webSocketService.notifyNewMessage(conversation.getBot().getId(), wsNotify);
+
+        return response;
     }
 
     private void verifyBotOwnership(Long botId, Long userId) {

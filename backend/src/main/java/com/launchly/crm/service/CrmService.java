@@ -1,5 +1,7 @@
 package com.launchly.crm.service;
 
+import com.launchly.crm.dto.request.AddNoteRequest;
+import com.launchly.crm.dto.request.ConversationUpdateRequest;
 import com.launchly.crm.dto.request.LeadUpdateRequest;
 import com.launchly.crm.dto.request.OrderUpdateRequest;
 import com.launchly.crm.dto.request.SendMessageRequest;
@@ -24,6 +26,8 @@ public interface CrmService {
     List<ConversationResponse> getConversationsByBot(Long botId, Long userId);
     List<ConversationResponse> getAllConversations(Long userId);
     ConversationResponse getConversation(Long conversationId, Long userId);
+    ConversationResponse updateConversation(Long conversationId, ConversationUpdateRequest request, Long userId);
     List<MessageResponse> getMessages(Long conversationId, Long userId);
     MessageResponse sendOwnerMessage(Long conversationId, SendMessageRequest request, Long userId);
+    MessageResponse addNote(Long conversationId, AddNoteRequest request, Long userId);
 }

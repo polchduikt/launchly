@@ -46,6 +46,9 @@ public class FlowDelayScheduler {
     }
 
     private void processUserDelay(BotUser user) throws Exception {
+        if (isAutomationPaused(user)) {
+            return;
+        }
         Long botId = user.getBot().getId();
         String currentNodeId = user.getCurrentNodeId();
         Optional<FlowSchema> schemaOpt = flowSchemaRepository.findByBotId(botId);
@@ -140,5 +143,35 @@ public class FlowDelayScheduler {
             stateService.setSessionData(botId, user.getTelegramId(), delayKey, "");
             flowEngineService.runFlow(botId, user, nextNodeId, null);
         }
+    }
+
+    private boolean isAutomationPaused(BotUser botUser) {
+        if (botUser == null) return false;
+        String metadata = botUser.getMetadata();
+        if (metadata == null || metadata.isBlank() || "{}".equals(metadata)) return false;
+        try {
+            Map<String, Object> meta = objectMapper.readValue(metadata, new TypeReference<Map<String, Object>>() {});
+            if (meta != null && Boolean.TRUE.equals(meta.get("paused"))) {
+                Object pausedUntilObj = meta.get("pausedUntil");
+                if (pausedUntilObj instanceof Number) {
+                    long pausedUntil = ((Number) pausedUntilObj).longValue();
+                    if (System.currentTimeMillis() > pausedUntil) {
+                        return false;
+                    }
+                } else if (pausedUntilObj instanceof String) {
+                    try {
+                        long pausedUntil = Long.parseLong((String) pausedUntilObj);
+                        if (System.currentTimeMillis() > pausedUntil) {
+                            return false;
+                        }
+                    } catch (NumberFormatException e) {
+                    }
+                }
+                return true;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to check if automation is paused for user {}: {}", botUser.getId(), e.getMessage());
+        }
+        return false;
     }
 }

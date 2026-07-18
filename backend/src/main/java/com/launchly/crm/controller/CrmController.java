@@ -1,6 +1,8 @@
 package com.launchly.crm.controller;
 
 import com.launchly.common.security.CustomUserDetails;
+import com.launchly.crm.dto.request.AddNoteRequest;
+import com.launchly.crm.dto.request.ConversationUpdateRequest;
 import com.launchly.crm.dto.request.LeadUpdateRequest;
 import com.launchly.crm.dto.request.OrderUpdateRequest;
 import com.launchly.crm.dto.request.SendMessageRequest;
@@ -92,5 +94,20 @@ public class CrmController {
             @RequestBody @Valid SendMessageRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(crmService.sendOwnerMessage(conversationId, request, userDetails.getId()));
+    }
+
+    @PatchMapping("/conversations/{conversationId}")
+    public ResponseEntity<ConversationResponse> updateConversation(
+            @PathVariable Long conversationId,
+            @RequestBody @Valid ConversationUpdateRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(crmService.updateConversation(conversationId, request, userDetails.getId()));
+    }
+    @PostMapping("/conversations/{conversationId}/notes")
+    public ResponseEntity<MessageResponse> addNote(
+            @PathVariable Long conversationId,
+            @RequestBody @Valid AddNoteRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(crmService.addNote(conversationId, request, userDetails.getId()));
     }
 }

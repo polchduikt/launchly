@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 public record ConversationResponse(
         Long id,
         ConversationStatus status,
+        Boolean unread,
         String botUserName,
         String botUserUsername,
         Long botUserTelegramId,

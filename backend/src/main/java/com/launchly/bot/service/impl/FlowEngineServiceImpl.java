@@ -120,6 +120,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
 
             BotUser botUser = getOrCreateBotUser(bot, update, telegramUserId, client);
+            if (isAutomationPaused(botUser)) {
+                log.info("Automation is paused for user {}, skipping processUpdate", botUser.getId());
+                return;
+            }
 
             analyticsService.logEvent(botId, botUser, com.launchly.analytics.entity.AnalyticsEventType.USER_ACTIVITY, update.hasCallbackQuery() ? "CALLBACK" : "MESSAGE");
             if (update.hasCallbackQuery()) {
@@ -533,6 +537,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
 
     @Override
     public void runFlow(Long botId, BotUser botUser, String startNodeId, Long campaignId) {
+        if (isAutomationPaused(botUser)) {
+            log.info("Automation is paused for user {}, skipping runFlow", botUser.getId());
+            return;
+        }
         try {
             Long telegramUserId = botUser.getTelegramId();
             TelegramClient client = botManager.getTelegramClient(botId);
@@ -1073,5 +1081,35 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         } catch (Exception e) {
             log.error("Failed to send message from system bot: {}", e.getMessage());
         }
+    }
+
+    private boolean isAutomationPaused(BotUser botUser) {
+        if (botUser == null) return false;
+        String metadata = botUser.getMetadata();
+        if (metadata == null || metadata.isBlank() || "{}".equals(metadata)) return false;
+        try {
+            Map<String, Object> meta = objectMapper.readValue(metadata, new TypeReference<Map<String, Object>>() {});
+            if (meta != null && Boolean.TRUE.equals(meta.get("paused"))) {
+                Object pausedUntilObj = meta.get("pausedUntil");
+                if (pausedUntilObj instanceof Number) {
+                    long pausedUntil = ((Number) pausedUntilObj).longValue();
+                    if (System.currentTimeMillis() > pausedUntil) {
+                        return false;
+                    }
+                } else if (pausedUntilObj instanceof String) {
+                    try {
+                        long pausedUntil = Long.parseLong((String) pausedUntilObj);
+                        if (System.currentTimeMillis() > pausedUntil) {
+                            return false;
+                        }
+                    } catch (NumberFormatException e) {
+                    }
+                }
+                return true;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to check if automation is paused for user {}: {}", botUser.getId(), e.getMessage());
+        }
+        return false;
     }
 }
