@@ -88,6 +88,17 @@ export const useChatLocalStorage = ({
     setShowAddLabel(false);
   };
 
+  const addLabelByName = (name: string) => {
+    const trimmed = name.trim();
+    if (trimmed && !labels.includes(trimmed)) {
+      setLabels(prev => [...prev, trimmed]);
+    }
+  };
+
+  const deleteLabelByName = (name: string) => {
+    setLabels(prev => prev.filter(l => l !== name));
+  };
+
   const addTag = () => {
     if (!selectedConvId || !newTagName.trim()) return;
     const cur = contactTags[selectedConvId] || [];
@@ -128,6 +139,8 @@ export const useChatLocalStorage = ({
     markAsRead,
     toggleFavorite,
     addLabel,
+    addLabelByName,
+    deleteLabelByName,
     addTag,
     removeTag,
     saveNote,

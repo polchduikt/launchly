@@ -9,13 +9,15 @@ import {
   getAllConversationsApi,
   getMessagesApi,
   sendOwnerMessageApi,
+  sendNoteApi,
+  updateConversationApi,
 } from '../api/crm';
 import {
   getBotUsersApi,
   updateBotUserApi,
   deleteBotUserApi,
 } from '../../bot/api/bot';
-import type { OrderStatus, LeadStatus } from '../../../types/crm';
+import type { OrderStatus, LeadStatus, ConversationStatus } from '../../../types/crm';
 import type { BotUserUpdateRequest } from '../../../types/bot';
 
 export const useOrdersQuery = (botId: number, enabled: boolean = true) => {
@@ -101,6 +103,18 @@ export const useSendMessageMutation = (conversationId: number, botId: number) =>
   });
 };
 
+export const useSendNoteMutation = (conversationId: number, botId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (content: string) => sendNoteApi(conversationId, content),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
+    },
+  });
+};
+
 export const useBotUsersQuery = (botId: number, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['botUsers', botId],
@@ -122,12 +136,38 @@ export const useUpdateBotUserMutation = (botId: number) => {
   });
 };
 
+export const useUpdateContactMetadataMutation = (botId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, metadata }: { userId: number; metadata: string }) =>
+      updateBotUserApi(botId, userId, { metadata }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['botUsers', botId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
+    },
+  });
+};
+
 export const useDeleteBotUserMutation = (botId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (userId: number) => deleteBotUserApi(botId, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['botUsers', botId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
+    },
+  });
+};
+
+export const useUpdateConversationMutation = (botId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ conversationId, status, unread }: { conversationId: number; status?: ConversationStatus; unread?: boolean }) =>
+      updateConversationApi(conversationId, { status, unread }),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: ['conversation', updated.id] });
       queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
     },

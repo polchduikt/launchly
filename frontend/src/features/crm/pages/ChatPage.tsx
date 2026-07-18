@@ -1,7 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
-import { useConversationsQuery, useConversationQuery, useAllConversationsQuery, useMessagesQuery, useBotUsersQuery } from '../hooks/useCrmQueries';
+import {
+  useConversationsQuery,
+  useConversationQuery,
+  useAllConversationsQuery,
+  useMessagesQuery,
+  useBotUsersQuery,
+  useUpdateContactMetadataMutation,
+  useUpdateConversationMutation,
+  useSendNoteMutation,
+} from '../hooks/useCrmQueries';
 import { useCrmWebSocket } from '../hooks/useCrmWebSocket';
 import { useChatLocalStorage } from '../hooks/useChatLocalStorage';
 import { useChatActions } from '../hooks/useChatActions';
@@ -16,8 +25,9 @@ import { ReplyBar } from '../components/ReplyBar';
 import { ContactInfoPanel } from '../components/ContactInfoPanel';
 import type { BottomTab } from '../types/chat';
 import { useSearchParams } from 'react-router-dom';
-
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
+import { useQueryClient } from '@tanstack/react-query';
+import { updateConversationApi } from '../api/crm';
 
 export const ChatPage: React.FC = () => {
   const { activeBotId, setActiveBotId } = useBotStore();
@@ -29,10 +39,7 @@ export const ChatPage: React.FC = () => {
   const conversationIdParam = searchParams.get('conversationId');
   const parsedConvId = conversationIdParam ? parseInt(conversationIdParam, 10) : 0;
 
-  const { data: targetConversation } = useConversationQuery(
-    parsedConvId,
-    !!parsedConvId
-  );
+  const { data: targetConversation } = useConversationQuery(parsedConvId, !!parsedConvId);
 
   const { data: conversations = [], isLoading: isConvLoading } = useAllConversationsQuery();
   const [selectedConvId, setSelectedConvId] = useState<number | null>(null);
@@ -64,16 +71,101 @@ export const ChatPage: React.FC = () => {
   const [typedNote, setTypedNote] = useState('');
   const ls = useChatLocalStorage({ conversations, selectedConvId });
   const actions = useChatActions({ selectedConvId, botId: currentBotId });
-  const filters = useChatFilters({ conversations, favorites: ls.favorites, unreadConvIds: ls.unreadConvIds });
+  const filters = useChatFilters({
+    conversations,
+    favorites: ls.favorites,
+    unreadConvIds: ls.unreadConvIds,
+    botUsers,
+  });
+
   const currentBotUser = botUsers.find(u => u.telegramId === selectedConversation?.botUserTelegramId);
-  const handleSelectConv = (id: number) => {
+  const updateMetaMut = useUpdateContactMetadataMutation(currentBotId);
+  const updateConvMut = useUpdateConversationMutation(currentBotId);
+  const sendNoteMut = useSendNoteMutation(selectedConvId || 0, currentBotId);
+  const handleSaveNote = useCallback(() => {
+    if (!typedNote.trim() || !selectedConvId) return;
+    sendNoteMut.mutate(typedNote.trim(), {
+      onSuccess: () => setTypedNote(''),
+    });
+  }, [typedNote, selectedConvId, sendNoteMut]);
+  const queryClient = useQueryClient();
+  const handleSelectConv = useCallback((id: number) => {
     setSelectedConvId(id);
     ls.markAsRead(id);
-  };
+    const conv = conversations.find(c => c.id === id);
+    if (conv?.unread) {
+      updateConversationApi(id, { unread: false })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
+        })
+        .catch(() => {});
+    }
+  }, [conversations, ls, queryClient]);
 
   useEffect(() => {
     if (selectedConvId) setTypedNote(ls.contactNotes[selectedConvId] || '');
   }, [selectedConvId]);
+  const parsedMeta: Record<string, unknown> = (() => {
+    try {
+      return currentBotUser?.metadata ? JSON.parse(currentBotUser.metadata) : {};
+    } catch {
+      return {};
+    }
+  })();
+
+  const isPaused = (() => {
+    try {
+      const p = parsedMeta as { paused?: boolean; pausedUntil?: number | null };
+      if (!p.paused) return false;
+      if (p.pausedUntil === null || p.pausedUntil === undefined) return true;
+      return p.pausedUntil > Date.now();
+    } catch {
+      return false;
+    }
+  })();
+
+  const handleUpdateMeta = useCallback((meta: Record<string, unknown>) => {
+    if (!currentBotUser) return;
+    updateMetaMut.mutate({ userId: currentBotUser.id, metadata: JSON.stringify(meta) });
+  }, [currentBotUser, updateMetaMut]);
+
+  const handleAddLabel = useCallback((label: string) => {
+    const labels: string[] = Array.isArray(parsedMeta.labels) ? parsedMeta.labels as string[] : [];
+    if (!labels.includes(label)) {
+      handleUpdateMeta({ ...parsedMeta, labels: [...labels, label] });
+    }
+    ls.addLabelByName(label);
+  }, [parsedMeta, handleUpdateMeta, ls]);
+
+  const handleRemoveLabel = useCallback((label: string) => {
+    const labels: string[] = Array.isArray(parsedMeta.labels) ? parsedMeta.labels as string[] : [];
+    handleUpdateMeta({ ...parsedMeta, labels: labels.filter(l => l !== label) });
+  }, [parsedMeta, handleUpdateMeta]);
+
+  const handleSetReminder = useCallback((reminderTime: number | null) => {
+    handleUpdateMeta({ ...parsedMeta, reminderTime });
+  }, [parsedMeta, handleUpdateMeta]);
+
+  const handlePause = useCallback((durationMs: number | null) => {
+    const pausedUntil = durationMs ? Date.now() + durationMs : null;
+    handleUpdateMeta({ ...parsedMeta, paused: true, pausedUntil });
+  }, [parsedMeta, handleUpdateMeta]);
+
+  const handleResume = useCallback(() => {
+    handleUpdateMeta({ ...parsedMeta, paused: false, pausedUntil: null });
+  }, [parsedMeta, handleUpdateMeta]);
+
+  const handleCloseConversation = useCallback(() => {
+    if (!selectedConvId) return;
+    const newStatus = selectedConversation?.status === 'CLOSED' ? 'OPEN' : 'CLOSED';
+    updateConvMut.mutate({ conversationId: selectedConvId, status: newStatus });
+  }, [selectedConvId, selectedConversation, updateConvMut]);
+
+  const handleMarkUnread = useCallback(() => {
+    if (!selectedConvId) return;
+    updateConvMut.mutate({ conversationId: selectedConvId, unread: true });
+    setSelectedConvId(null);
+  }, [selectedConvId, updateConvMut]);
 
   if (botId === 0) {
     return (
@@ -151,9 +243,25 @@ export const ChatPage: React.FC = () => {
                   <>
                     <MessageArea
                       conversation={selectedConversation}
+                      botUser={currentBotUser}
                       messages={messages}
                       isMsgLoading={isMsgLoading}
                       onButtonClick={(label) => actions.setTypedMessage(label)}
+                      infoPanelOpen={infoPanelOpen}
+                      onToggleInfoPanel={() => setInfoPanelOpen(v => !v)}
+                      onCloseConversation={handleCloseConversation}
+                      onMarkUnread={handleMarkUnread}
+                      onPause={handlePause}
+                      onResume={handleResume}
+                      onAddLabel={handleAddLabel}
+                      onRemoveLabel={handleRemoveLabel}
+                      onDeleteGlobalLabel={ls.deleteLabelByName}
+                      onSetReminder={handleSetReminder}
+                      allLabels={ls.labels}
+                      isPaused={isPaused}
+                      isFavorite={selectedConvId ? ls.favorites.includes(selectedConvId) : false}
+                      onToggleFavorite={() => selectedConvId && ls.toggleFavorite(selectedConvId)}
+                      meta={parsedMeta}
                     />
                     <ReplyBar
                       bottomTab={bottomTab}
@@ -179,7 +287,7 @@ export const ChatPage: React.FC = () => {
                       isFileUploading={actions.fileUpload.isPending}
                       typedNote={typedNote}
                       onTypedNoteChange={setTypedNote}
-                      onSaveNote={() => ls.saveNote(typedNote)}
+                      onSaveNote={handleSaveNote}
                     />
                   </>
                 ) : (

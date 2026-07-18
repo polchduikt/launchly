@@ -5,6 +5,7 @@ import type {
   LeadResponse,
   LeadStatus,
   ConversationResponse,
+  ConversationStatus,
   MessageResponse,
 } from '../../../types/crm';
 
@@ -71,6 +72,25 @@ export const sendOwnerMessageApi = async (
   const response = await apiClient.post<MessageResponse>(
     `/crm/conversations/${conversationId}/messages`,
     { content, mediaUrl, mediaType }
+  );
+  return response.data;
+};
+
+export const updateConversationApi = async (
+  conversationId: number,
+  data: { status?: ConversationStatus; unread?: boolean }
+): Promise<ConversationResponse> => {
+  const response = await apiClient.patch<ConversationResponse>(`/crm/conversations/${conversationId}`, data);
+  return response.data;
+};
+
+export const sendNoteApi = async (
+  conversationId: number,
+  content: string
+): Promise<MessageResponse> => {
+  const response = await apiClient.post<MessageResponse>(
+    `/crm/conversations/${conversationId}/notes`,
+    { content }
   );
   return response.data;
 };

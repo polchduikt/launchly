@@ -2,48 +2,74 @@ import React, { useMemo, useRef, useEffect } from 'react';
 import {
   Loader2,
   MessageSquare,
-  Tag,
-  Clock,
-  Send,
-  Pause,
-  Columns3,
   ExternalLink,
 } from 'lucide-react';
 import type { ConversationResponse, MessageResponse } from '../../../types/crm';
+import type { BotUserResponse } from '../../../types/bot';
 import { UserAvatar } from './UserAvatar';
 import { OwnerAvatar } from './OwnerAvatar';
 import { MessageBubble } from './MessageBubble';
+import { ChatToolbar } from './ChatToolbar';
 import { formatDateSeparator, getDateKey } from '../utils/chat';
+import { t } from '../../../i18n';
 
 interface MessageAreaProps {
   conversation: ConversationResponse | null;
+  botUser?: BotUserResponse;
   messages: MessageResponse[];
   isMsgLoading: boolean;
   onButtonClick: (label: string) => void;
+  infoPanelOpen?: boolean;
+  onToggleInfoPanel?: () => void;
+  onCloseConversation?: () => void;
+  onMarkUnread?: () => void;
+  onPause?: (durationMs: number | null) => void;
+  onResume?: () => void;
+  onAddLabel?: (label: string) => void;
+  onRemoveLabel?: (label: string) => void;
+  onSetReminder?: (ts: number | null) => void;
+  allLabels?: string[];
+  isPaused?: boolean;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
+  onDeleteGlobalLabel?: (label: string) => void;
+  meta?: Record<string, unknown>;
 }
 
 export const MessageArea: React.FC<MessageAreaProps> = ({
   conversation,
+  botUser,
   messages,
   isMsgLoading,
   onButtonClick,
+  infoPanelOpen = true,
+  onToggleInfoPanel = () => {},
+  onCloseConversation = () => {},
+  onMarkUnread = () => {},
+  onPause = () => {},
+  onResume = () => {},
+  onAddLabel = () => {},
+  onRemoveLabel = () => {},
+  onSetReminder = () => {},
+  allLabels = [],
+  isPaused = false,
+  isFavorite = false,
+  onToggleFavorite = () => {},
+  onDeleteGlobalLabel = () => {},
+  meta = {},
 }) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const prevConvIdRef = useRef<number | null>(null);
 
-  const scrollToBottom = (behavior: 'auto' | 'smooth' = 'smooth') => {
+  const scrollToBottom = (behavior: 'auto' | 'smooth' = 'auto') => {
     messagesEndRef.current?.scrollIntoView({ behavior });
   };
 
   useEffect(() => {
     if (!conversation) return;
-    prevConvIdRef.current = conversation.id;
 
-    const behavior = 'smooth';
-    
+    const behavior = 'auto';
     scrollToBottom(behavior);
 
-    // Repeat scroll after small delays to ensure layout settles
     const t1 = setTimeout(() => scrollToBottom(behavior), 50);
     const t2 = setTimeout(() => scrollToBottom(behavior), 150);
 
@@ -54,7 +80,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
   }, [messages, conversation?.id]);
 
   const handleImageLoad = () => {
-    scrollToBottom('smooth');
+    scrollToBottom('auto');
   };
 
   const groupedMessages = useMemo(() => {
@@ -77,8 +103,8 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     return (
       <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-3 bg-white">
         <MessageSquare size={48} strokeWidth={1} className="text-slate-200" />
-        <span className="text-sm font-medium text-slate-400">Select a conversation to start chatting</span>
-        <span className="text-xs text-slate-300">Choose from the list on the left</span>
+        <span className="text-sm font-medium text-slate-400">{t('crm.chat.select_placeholder_title')}</span>
+        <span className="text-xs text-slate-300">{t('crm.chat.select_placeholder_desc')}</span>
       </div>
     );
   }
@@ -100,13 +126,26 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          {[Tag, Clock, Send, MessageSquare, Pause, Columns3].map((Icon, i) => (
-            <button key={i} className="w-8 h-8 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-50 cursor-pointer">
-              <Icon size={15} />
-            </button>
-          ))}
-        </div>
+
+        <ChatToolbar
+          conversation={conversation}
+          botUser={botUser}
+          infoPanelOpen={infoPanelOpen}
+          onToggleInfoPanel={onToggleInfoPanel}
+          onCloseConversation={onCloseConversation}
+          onMarkUnread={onMarkUnread}
+          onPause={onPause}
+          onResume={onResume}
+          onAddLabel={onAddLabel}
+          onRemoveLabel={onRemoveLabel}
+          onDeleteGlobalLabel={onDeleteGlobalLabel}
+          onSetReminder={onSetReminder}
+          allLabels={allLabels}
+          isPaused={isPaused}
+          isFavorite={isFavorite}
+          onToggleFavorite={onToggleFavorite}
+          meta={meta}
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 py-4 bg-white" style={{ scrollbarWidth: 'none' }}>

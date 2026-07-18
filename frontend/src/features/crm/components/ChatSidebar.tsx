@@ -79,8 +79,12 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
               </div>
             )}
             {labels.map(l => (
-              <button key={l} className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium text-slate-500 hover:bg-slate-50 cursor-pointer">
-                <Tag size={13} className="text-slate-400" />{l}
+              <button
+                key={l}
+                onClick={() => onTabChange(l as SidebarTab)}
+                className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all cursor-pointer ${sidebarTab === l ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50'}`}
+              >
+                <Tag size={13} className={sidebarTab === l ? 'text-indigo-500' : 'text-slate-400'} />{l}
               </button>
             ))}
           </div>

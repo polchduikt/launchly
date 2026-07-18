@@ -3,6 +3,7 @@ export type ConversationStatus = 'OPEN' | 'CLOSED';
 export interface ConversationResponse {
   id: number;
   status: ConversationStatus;
+  unread: boolean;
   botUserName: string;
   botUserUsername: string | null;
   botUserTelegramId: number;
@@ -31,7 +32,7 @@ export interface LeadResponse {
   updatedAt: string;
 }
 
-export type SenderType = 'BOT_USER' | 'OWNER';
+export type SenderType = 'BOT_USER' | 'OWNER' | 'NOTE';
 
 export interface MessageResponse {
   id: number;

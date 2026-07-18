@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
+import type { BotUserResponse } from '../../../types/bot';
 import type { ConversationResponse } from '../../../types/crm';
 import type { ChatFilter, SortOrder, SidebarTab } from '../types/chat';
 import { CHAT_FILTER_LABELS } from '../config/chat';
@@ -7,12 +8,14 @@ interface UseChatFiltersParams {
   conversations: ConversationResponse[];
   favorites: number[];
   unreadConvIds: number[];
+  botUsers: BotUserResponse[];
 }
 
 export const useChatFilters = ({
   conversations,
   favorites,
   unreadConvIds,
+  botUsers,
 }: UseChatFiltersParams) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
@@ -48,8 +51,33 @@ export const useChatFilters = ({
       );
     }
 
-    if (showUnreadOnly) list = list.filter(c => unreadConvIds.includes(c.id));
-    if (sidebarTab === 'favorites') list = list.filter(c => favorites.includes(c.id));
+    if (showUnreadOnly) list = list.filter(c => c.unread);
+    
+    if (sidebarTab === 'favorites') {
+      list = list.filter(c => favorites.includes(c.id));
+    } else if (sidebarTab === 'reminders') {
+      list = list.filter(c => {
+        const u = botUsers.find(user => user.telegramId === c.botUserTelegramId);
+        if (!u) return false;
+        try {
+          const meta = u.metadata ? JSON.parse(u.metadata) : {};
+          return meta.reminderTime && meta.reminderTime > Date.now();
+        } catch {
+          return false;
+        }
+      });
+    } else if (sidebarTab !== 'all') {
+      list = list.filter(c => {
+        const u = botUsers.find(user => user.telegramId === c.botUserTelegramId);
+        if (!u) return false;
+        try {
+          const meta = u.metadata ? JSON.parse(u.metadata) : {};
+          return meta.labels && meta.labels.includes(sidebarTab);
+        } catch {
+          return false;
+        }
+      });
+    }
 
     list.sort((a, b) => {
       const tA = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
@@ -58,7 +86,7 @@ export const useChatFilters = ({
     });
 
     return list;
-  }, [conversations, chatFilter, searchQuery, showUnreadOnly, sortOrder, sidebarTab, favorites, unreadConvIds]);
+  }, [conversations, chatFilter, searchQuery, showUnreadOnly, sortOrder, sidebarTab, favorites, botUsers]);
 
   const chatFilterLabel = CHAT_FILTER_LABELS[chatFilter] || 'All Chats';
 

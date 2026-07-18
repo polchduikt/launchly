@@ -15,14 +15,32 @@ interface MessageBubbleProps {
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
   message: m,
-  isOwner,
+  isOwner: _isOwner,
   ownerAvatar,
-  userAvatar,
+  userAvatar: _userAvatar,
   allMessages,
   onButtonClick,
   onImageLoad,
 }) => {
+  const isNote = m.senderType === 'NOTE';
+  const isOwner = isNote ? true : _isOwner;
   const { text: cleanText, buttons } = parseMessageButtons(m.content);
+  if (isNote) {
+    return (
+      <div className="flex items-end gap-2 mb-3 flex-row-reverse">
+        {ownerAvatar}
+        <div className="max-w-[60%]">
+          <div className="px-4 py-2.5 text-[13px] leading-relaxed shadow-sm whitespace-pre-wrap break-words flex flex-col bg-amber-300 text-amber-950 rounded-2xl rounded-br-none w-full">
+            <span>{m.content}</span>
+            <span className="text-[9px] text-right mt-1 opacity-60 self-end shrink-0">
+              {formatMessageTime(m.createdAt)}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
 
   const renderButtons = () => {
     if (buttons.length === 0) return null;
@@ -73,7 +91,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   return (
     <div className={`flex items-end gap-2 mb-3 ${isOwner ? 'flex-row-reverse' : ''}`}>
-      {isOwner ? ownerAvatar : userAvatar}
+      {isOwner ? ownerAvatar : _userAvatar}
       <div className={hasButtons ? 'w-72' : 'max-w-[60%]'}>
         {m.mediaUrl && m.mediaType === 'image' && (
           <div className={`mb-1 rounded-2xl overflow-hidden shadow-sm relative group ${

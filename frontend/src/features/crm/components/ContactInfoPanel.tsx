@@ -17,10 +17,12 @@ import { UserAvatar } from './UserAvatar';
 import { useTagsQuery } from '../../broadcast/hooks/useBroadcastQueries';
 import { useUpdateBotUserMutation } from '../hooks/useCrmQueries';
 import { TagSearchSelect } from '../../bot/components/sidebar/editors/TagSearchSelect';
+import { ChatHistoryModal } from './ChatHistoryModal';
 
 interface BotUserMetadata {
   sequences?: string[];
   paused?: boolean;
+  pausedUntil?: number | null;
   unsubscribed?: boolean;
   customFields?: Record<string, string>;
 }
@@ -51,6 +53,29 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
   const [showAddCustomField, setShowAddCustomField] = useState(false);
   const [customFieldName, setCustomFieldName] = useState('');
   const [customFieldValue, setCustomFieldValue] = useState('');
+
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showPauseMenu, setShowPauseMenu] = useState(false);
+
+  const pauseOptions = [
+    { label: t('crm.panel.automations.duration.30m'), value: 30 * 60 * 1000 },
+    { label: t('crm.panel.automations.duration.1h'), value: 60 * 60 * 1000 },
+    { label: t('crm.panel.automations.duration.3h'), value: 3 * 60 * 60 * 1000 },
+    { label: t('crm.panel.automations.duration.6h'), value: 6 * 60 * 60 * 1000 },
+    { label: t('crm.panel.automations.duration.12h'), value: 12 * 60 * 60 * 1000 },
+    { label: t('crm.panel.automations.duration.1d'), value: 24 * 60 * 60 * 1000 },
+    { label: t('crm.panel.automations.duration.forever'), value: null },
+  ];
+
+  const handlePause = (durationMs: number | null) => {
+    const pausedUntil = durationMs ? Date.now() + durationMs : null;
+    handleUpdateContactMetadata({ ...meta, paused: true, pausedUntil });
+    setShowPauseMenu(false);
+  };
+
+  const handleResume = () => {
+    handleUpdateContactMetadata({ ...meta, paused: false, pausedUntil: null });
+  };
 
   if (!isOpen) {
     return (
@@ -179,31 +204,57 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
         )}
       </div>
       <div className="px-4 py-3 border-b border-slate-100 shrink-0">
-        <button className="w-full py-1.5 border border-slate-200 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+        <button
+          onClick={() => setShowHistoryModal(true)}
+          className="w-full py-1.5 border border-slate-200 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+        >
           {t('crm.panel.history_btn')}
         </button>
       </div>
       
       {botUser && (
         <>
-          <div className="px-4 py-3 border-b border-slate-100 shrink-0">
-            <div className="flex items-center gap-1 mb-2"><h4 className="font-bold text-[13px] text-slate-800">{t('crm.panel.automations_title')}</h4><span className="text-slate-400 cursor-pointer text-xs">ⓘ</span></div>
-            <button
-              onClick={() => handleUpdateContactMetadata({ ...meta, paused: !isPaused })}
-              className="w-full py-2 border border-slate-200 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer flex items-center justify-center gap-2"
-            >
-              {isPaused ? (
-                <>
-                  <Play size={14} className="text-emerald-500" />
-                  <span>{t('crm.panel.automations.resume')}</span>
-                </>
-              ) : (
-                <>
+          <div className="px-4 py-3 border-b border-slate-100 shrink-0 relative">
+            <div className="flex items-center gap-1 mb-2">
+              <h4 className="font-bold text-[13px] text-slate-800">{t('crm.panel.automations_title')}</h4>
+              <span className="text-slate-400 cursor-pointer text-xs">ⓘ</span>
+            </div>
+            {isPaused ? (
+              <button
+                onClick={handleResume}
+                className="w-full py-2 border border-slate-200 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer flex items-center justify-center gap-2"
+              >
+                <Play size={14} className="text-emerald-500" />
+                <span>{t('crm.panel.automations.resume')}</span>
+              </button>
+            ) : (
+              <div className="relative w-full">
+                <button
+                  onClick={() => setShowPauseMenu(!showPauseMenu)}
+                  className="w-full py-2 border border-slate-200 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer flex items-center justify-center gap-2"
+                >
                   <Pause size={14} className="text-slate-500" />
                   <span>{t('crm.panel.automations.pause')}</span>
-                </>
-              )}
-            </button>
+                </button>
+
+                {showPauseMenu && (
+                  <div className="absolute bottom-[110%] left-0 right-0 z-30 bg-white border border-slate-200 rounded-xl shadow-xl py-1 flex flex-col transition-all">
+                    <div className="text-[10px] text-slate-400 font-bold px-3 py-1.5 border-b border-slate-100 uppercase tracking-wider select-none text-left">
+                      {t('crm.panel.automations.duration.title')}
+                    </div>
+                    {pauseOptions.map((opt, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handlePause(opt.value)}
+                        className="px-3 py-2 text-left text-xs font-semibold text-slate-600 hover:bg-indigo-50/50 hover:text-indigo-600 transition-colors w-full cursor-pointer"
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="px-4 py-3 border-b border-slate-100 shrink-0">
@@ -342,6 +393,12 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
             </div>
           </div>
         </>
+      )}
+      {showHistoryModal && (
+        <ChatHistoryModal
+          conversation={conversation}
+          onClose={() => setShowHistoryModal(false)}
+        />
       )}
     </div>
   );

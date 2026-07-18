@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, ChevronDown, Plus } from 'lucide-react';
+import { MessageSquare, ChevronDown } from 'lucide-react';
 import type { ChatFilter, SortOrder } from '../types/chat';
 import { CHAT_FILTER_OPTIONS } from '../config/chat';
 import { t } from '../../../i18n';
@@ -19,7 +19,6 @@ interface ChatFilterBarProps {
   showSortDrop: boolean;
   onShowSortDrop: (show: boolean) => void;
   sortRef: React.RefObject<HTMLDivElement | null>;
-  onResetFilters: () => void;
 }
 
 export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
@@ -37,7 +36,6 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
   showSortDrop,
   onShowSortDrop,
   sortRef,
-  onResetFilters,
 }) => (
   <div className="h-12 border-b border-slate-200 flex items-center justify-between px-4 bg-white shrink-0 select-none relative z-20">
     <div className="flex items-center gap-1.5 py-1">
@@ -90,10 +88,6 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
         )}
       </div>
 
-      <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-dashed border-slate-300 bg-white text-[11px] font-semibold text-slate-500 hover:border-indigo-300 hover:text-indigo-600 cursor-pointer shrink-0">
-        <Plus size={10} /> {t('crm.chat.filter')}
-      </button>
-    </div>
-    <button onClick={onResetFilters} className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer ml-4 shrink-0">{t('crm.chat.reset_filters')}</button>
+      </div>
   </div>
 );

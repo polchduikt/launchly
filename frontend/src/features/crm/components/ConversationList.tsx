@@ -3,6 +3,7 @@ import { Loader2, Heart } from 'lucide-react';
 import type { ConversationResponse } from '../../../types/crm';
 import { UserAvatar } from './UserAvatar';
 import { timeAgo } from '../utils/chat';
+import { t } from '../../../i18n';
 
 interface ConversationListProps {
   conversations: ConversationResponse[];
@@ -33,13 +34,19 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-indigo-600" size={20} /></div>
       ) : conversations.length === 0 ? (
         <div className="p-8 text-center text-xs text-slate-400 italic">
-          {searchQuery ? 'No conversations found.' : `No ${chatFilter !== 'all' ? chatFilter : ''} conversations.`}
+          {searchQuery
+            ? t('crm.list.no_conversations_found')
+            : chatFilter === 'open'
+            ? t('crm.list.no_open_conversations')
+            : chatFilter === 'closed'
+            ? t('crm.list.no_closed_conversations')
+            : t('crm.list.no_conversations')}
         </div>
       ) : (
         conversations.map(c => {
           const isSel = c.id === selectedConvId;
           const isFav = favorites.includes(c.id);
-          const isUnrd = unreadConvIds.includes(c.id);
+          const isUnrd = c.unread || unreadConvIds.includes(c.id);
           return (
             <button
               key={c.id}

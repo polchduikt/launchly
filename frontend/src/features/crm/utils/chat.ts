@@ -1,15 +1,16 @@
 import type { ParsedButtons } from '../types/chat';
+import { t } from '../../../i18n';
 
 export const timeAgo = (dateStr: string | null): string => {
   if (!dateStr) return '';
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'now';
-  if (mins < 60) return `${mins}min`;
+  if (mins < 1) return t('time.now');
+  if (mins < 60) return t('time.mins', { mins });
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h`;
+  if (hrs < 24) return t('time.hrs', { hrs });
   const days = Math.floor(hrs / 24);
-  return `${days}d`;
+  return t('time.days', { days });
 };
 
 export const formatDateSeparator = (dateStr: string): string => {
@@ -19,8 +20,8 @@ export const formatDateSeparator = (dateStr: string): string => {
   yesterday.setDate(yesterday.getDate() - 1);
   const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const dateFormatted = `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
-  if (d.toDateString() === today.toDateString()) return `Today, ${time}`;
-  if (d.toDateString() === yesterday.toDateString()) return `Yesterday, ${time}`;
+  if (d.toDateString() === today.toDateString()) return `${t('time.today')}, ${time}`;
+  if (d.toDateString() === yesterday.toDateString()) return `${t('time.yesterday')}, ${time}`;
   return `${dateFormatted}, ${time}`;
 };
 
