@@ -334,23 +334,32 @@ public class CrmServiceImpl implements CrmService {
             builder.mediaType(request.mediaType() != null ? request.mediaType() : "image");
         }
 
+        if (request.scheduledAt() != null && request.scheduledAt().isAfter(LocalDateTime.now())) {
+            builder.scheduledAt(request.scheduledAt());
+            builder.sent(false);
+        } else {
+            builder.sent(true);
+        }
+
         Message message = builder.build();
         message = messageRepository.save(message);
-        log.info("Owner saved message to conversation {} in DB", conversationId);
+        log.info("Owner saved message to conversation {} in DB (scheduled={})", conversationId, request.scheduledAt() != null);
 
-        if (request.mediaUrl() != null && !request.mediaUrl().isBlank()) {
-            telegramSendService.sendPhoto(
-                    conversation.getBot().getId(),
-                    conversation.getBotUser().getTelegramId(),
-                    request.mediaUrl(),
-                    request.content()
-            );
-        } else {
-            telegramSendService.sendMessage(
-                    conversation.getBot().getId(),
-                    conversation.getBotUser().getTelegramId(),
-                    request.content()
-            );
+        if (message.getSent()) {
+            if (request.mediaUrl() != null && !request.mediaUrl().isBlank()) {
+                telegramSendService.sendPhoto(
+                        conversation.getBot().getId(),
+                        conversation.getBotUser().getTelegramId(),
+                        request.mediaUrl(),
+                        request.content()
+                );
+            } else {
+                telegramSendService.sendMessage(
+                        conversation.getBot().getId(),
+                        conversation.getBotUser().getTelegramId(),
+                        request.content()
+                );
+            }
         }
 
         MessageResponse response = crmMapper.toMessageResponse(message);
@@ -517,7 +526,9 @@ public class CrmServiceImpl implements CrmService {
                 SenderType.OWNER,
                 null,
                 null,
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                null,
+                true
         );
         webSocketService.notifyNewMessage(conversation.getBot().getId(), wsNotify);
 
@@ -527,5 +538,46 @@ public class CrmServiceImpl implements CrmService {
     private void verifyBotOwnership(Long botId, Long userId) {
         botRepository.findByIdAndUserId(botId, userId)
                 .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Access denied to this bot"));
+    }
+
+    @Override
+    @Transactional
+    public void sendScheduledMessages() {
+        List<Message> dueMessages = messageRepository.findBySentFalseAndScheduledAtBefore(LocalDateTime.now());
+        if (dueMessages.isEmpty()) {
+            return;
+        }
+
+        log.info("Found {} scheduled messages ready to send", dueMessages.size());
+
+        for (Message message : dueMessages) {
+            try {
+                Conversation conversation = message.getConversation();
+
+                if (message.getMediaUrl() != null && !message.getMediaUrl().isBlank()) {
+                    telegramSendService.sendPhoto(
+                            conversation.getBot().getId(),
+                            conversation.getBotUser().getTelegramId(),
+                            message.getMediaUrl(),
+                            message.getContent()
+                    );
+                } else {
+                    telegramSendService.sendMessage(
+                            conversation.getBot().getId(),
+                            conversation.getBotUser().getTelegramId(),
+                            message.getContent()
+                    );
+                }
+
+                message.setSent(true);
+                messageRepository.save(message);
+                log.info("Dispatched scheduled message id={}", message.getId());
+
+                MessageResponse response = crmMapper.toMessageResponse(message);
+                webSocketService.notifyNewMessage(conversation.getBot().getId(), response);
+            } catch (Exception e) {
+                log.error("Failed to send scheduled message id={}: {}", message.getId(), e.getMessage(), e);
+            }
+        }
     }
 }

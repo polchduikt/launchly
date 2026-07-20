@@ -10,5 +10,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findByConversationIdOrderByCreatedAtAsc(Long conversationId);
 
     Optional<Message> findFirstByConversationIdOrderByCreatedAtDesc(Long conversationId);
+
+    List<Message> findBySentFalseAndScheduledAtBefore(java.time.LocalDateTime dateTime);
 }
 

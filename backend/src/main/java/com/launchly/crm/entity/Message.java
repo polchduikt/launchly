@@ -1,6 +1,7 @@
 package com.launchly.crm.entity;
 
 import com.launchly.common.entity.BaseEntity;
+import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -40,6 +41,13 @@ public class Message extends BaseEntity {
 
     @Column(name = "media_type", length = 20)
     private String mediaType;
+
+    @Column(name = "scheduled_at")
+    private LocalDateTime scheduledAt;
+
+    @Column(name = "sent", nullable = false)
+    @Builder.Default
+    private Boolean sent = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conversation_id", nullable = false)

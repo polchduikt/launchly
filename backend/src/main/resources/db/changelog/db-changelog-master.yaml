@@ -63,5 +63,7 @@ databaseChangeLog:
       file: db/changelog/changes/V031__add_stats_notifications.sql
   - include:
       file: db/changelog/changes/V032__add_unread_to_conversations.sql
+  - include:
+      file: db/changelog/changes/V033__add_scheduled_to_messages.sql
 
 

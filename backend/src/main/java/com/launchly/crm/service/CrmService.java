@@ -30,4 +30,5 @@ public interface CrmService {
     List<MessageResponse> getMessages(Long conversationId, Long userId);
     MessageResponse sendOwnerMessage(Long conversationId, SendMessageRequest request, Long userId);
     MessageResponse addNote(Long conversationId, AddNoteRequest request, Long userId);
+    void sendScheduledMessages();
 }

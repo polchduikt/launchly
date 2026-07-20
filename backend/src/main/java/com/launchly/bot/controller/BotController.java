@@ -2,6 +2,7 @@ package com.launchly.bot.controller;
 
 import com.launchly.bot.dto.request.BotCreateRequest;
 import com.launchly.bot.dto.request.BotUpdateRequest;
+import com.launchly.bot.dto.request.BotUserCreateRequest;
 import com.launchly.bot.dto.request.BotUserUpdateRequest;
 import com.launchly.bot.dto.request.FlowSchemaRequest;
 import com.launchly.bot.dto.response.BotDetailResponse;
@@ -115,5 +116,12 @@ public class BotController {
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         botService.deleteBotUser(id, userId, userDetails.getId());
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/users")
+    public ResponseEntity<BotUserResponse> createBotUser(@PathVariable Long id,
+                                                         @Valid @RequestBody BotUserCreateRequest request,
+                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(botService.createBotUser(id, request, userDetails.getId()));
     }
 }

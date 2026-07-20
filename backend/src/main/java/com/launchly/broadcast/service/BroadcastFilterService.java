@@ -22,12 +22,28 @@ public class BroadcastFilterService {
     private final LeadRepository leadRepository;
 
     public List<BotUser> filterUsers(Long botId, FilterType filterType, String filterValue) {
-        return switch (filterType) {
+        List<BotUser> users = switch (filterType) {
             case ALL -> botUserRepository.findAllByBotId(botId);
             case BY_TAG -> filterByTag(botId, filterValue);
             case HAS_ORDERS -> filterByOrders(botId);
             case HAS_LEADS -> filterByLeads(botId);
         };
+        return users.stream()
+                .filter(this::isSubscribed)
+                .toList();
+    }
+    
+    private boolean isSubscribed(BotUser user) {
+        try {
+            if (user.getMetadata() == null || user.getMetadata().trim().isEmpty() || "{}".equals(user.getMetadata())) {
+                return true;
+            }
+            String metadata = user.getMetadata();
+            return !metadata.contains("\"telegram_opt_in\":false");
+        } catch (Exception e) {
+            log.warn("Error checking subscription status for user {}: {}", user.getId(), e.getMessage());
+            return true;
+        }
     }
 
     private List<BotUser> filterByTag(Long botId, String tagName) {

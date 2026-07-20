@@ -10,5 +10,7 @@ public record MessageResponse(
         SenderType senderType,
         String mediaUrl,
         String mediaType,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime scheduledAt,
+        Boolean sent
 ) {}
