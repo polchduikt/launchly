@@ -557,19 +557,19 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                     {act.type === 'SET_USER_FIELD' && (
                       <div className="text-xs text-slate-650 font-bold leading-relaxed relative">
                         <div>
-                          Set &nbsp;
+                          {t('editor.action.set')} &nbsp;
                           <span
                             onClick={() => setActivePopoverIndex(activePopoverIndex === index ? null : index)}
                             className="underline decoration-dashed decoration-[#407BFF] cursor-pointer text-[#407BFF] font-bold hover:text-blue-700 select-none"
                           >
-                            {act.fieldName || 'select field'}
+                            {act.fieldName || t('editor.action.select_field')}
                           </span>
-                          &nbsp; to &nbsp;
+                          &nbsp; {t('editor.action.to')} &nbsp;
                           <span
                             onClick={() => setActivePopoverIndex(activePopoverIndex === index ? null : index)}
                             className="underline decoration-dashed decoration-[#407BFF] cursor-pointer text-[#407BFF] font-bold hover:text-blue-700 select-none"
                           >
-                            {act.fieldValue || 'enter value'}
+                            {act.fieldValue || t('editor.action.enter_value')}
                           </span>
                         </div>
 
@@ -593,12 +593,12 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                     {act.type === 'CLEAR_USER_FIELD' && (
                       <div className="text-xs text-slate-650 font-bold leading-relaxed relative">
                         <div>
-                          Clear &nbsp;
+                          {t('editor.action.clear')} &nbsp;
                           <span
                             onClick={() => setActivePopoverIndex(activePopoverIndex === index ? null : index)}
                             className="underline decoration-dashed decoration-[#407BFF] cursor-pointer text-[#407BFF] font-bold hover:text-blue-700 select-none"
                           >
-                            {act.fieldName || 'select field'}
+                            {act.fieldName || t('editor.action.select_field')}
                           </span>
                         </div>
 
@@ -627,11 +627,15 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                           onClick={() => handleOpenSheetsConfigModal(index)}
                           className="underline cursor-pointer text-[#407BFF] font-bold hover:text-blue-700"
                         >
-                          {act.type === 'GS_INSERT_ROW' ? 'Insert Row' : act.type === 'GS_GET_ROW' ? 'Get Row by Value' : 'Update Row'}
+                          {act.type === 'GS_INSERT_ROW'
+                            ? t('editor.action.insert_row')
+                            : act.type === 'GS_GET_ROW'
+                            ? t('editor.action.get_row')
+                            : t('editor.action.update_row')}
                         </span>
                         {act.spreadsheetId && (
                           <span className="text-[10px] text-slate-400 font-medium block mt-0.5">
-                            Sheet: {act.sheetName || 'Sheet1'}
+                            {t('editor.action.sheet_prefix')} {act.sheetName || 'Sheet1'}
                           </span>
                         )}
                       </div>
@@ -640,19 +644,21 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                     
                     {(act.type === 'TELEGRAM_SUBSCRIBE' || act.type === 'TELEGRAM_UNSUBSCRIBE') && (
                       <div className="text-[10px] text-slate-400 font-semibold italic">
-                        {act.type === 'TELEGRAM_SUBSCRIBE' ? 'Subscribe contact to Telegram updates' : 'Unsubscribe contact from Telegram updates'}
+                        {act.type === 'TELEGRAM_SUBSCRIBE'
+                          ? t('editor.action.tg_sub_desc')
+                          : t('editor.action.tg_unsub_desc')}
                       </div>
                     )}
 
                     
                     {act.type === 'MARK_DONE' && (
                       <div className="text-[10px] text-slate-400 font-semibold italic">
-                        Mark the active conversation as done
+                        {t('editor.action.mark_done_desc')}
                       </div>
                     )}
                     {act.type === 'ASSIGN_AGENT' && (
-                                            <div className="text-[10px] text-slate-400 font-semibold italic">
-                        Assign session to live chat support agent
+                      <div className="text-[10px] text-slate-400 font-semibold italic">
+                        {t('editor.action.assign_agent_desc')}
                       </div>
                     )}
                   </div>
@@ -709,7 +715,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                         
             <div className="w-[190px] border-r border-slate-100 bg-white p-5 flex flex-col gap-1 select-none shrink-0">
               <h2 className="text-sm font-extrabold text-slate-800 tracking-tight mb-4 mt-6 leading-snug">
-                Perform next actions...
+                {t('editor.action.perform_actions')}
               </h2>
               {[
                 { id: 'recently_used', name: t('editor.action.categories.recently_used') },
@@ -754,8 +760,8 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
               {searchQuery ? (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Search Results</h3>
-                    <p className="text-[11px] text-slate-500 font-medium mt-0.5">Found {filteredActions.length} matching actions.</p>
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t('editor.action.search_results_title')}</h3>
+                    <p className="text-[11px] text-slate-500 font-medium mt-0.5">{t('editor.action.search_results_desc', { count: filteredActions.length })}</p>
                   </div>
                   <div className="grid grid-cols-1 gap-3">
                     {filteredActions.map((act) => (
@@ -780,7 +786,13 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                               </span>
                             )}
                             <span className="text-[9px] font-extrabold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded ml-auto capitalize">
-                              {act.category === 'sheets' ? 'Google Sheets' : act.category === 'live_chat' ? 'Live Chat' : act.category === 'recently_used' ? 'Recent' : act.category}
+                              {act.category === 'sheets'
+                                ? t('editor.action.google_sheets_title')
+                                : act.category === 'live_chat'
+                                ? t('editor.action.live_chat_title')
+                                : act.category === 'recently_used'
+                                ? t('editor.action.categories.recently_used')
+                                : act.category}
                             </span>
                           </div>
                           <p className="text-xs text-slate-400 font-semibold mt-0.5">{act.desc}</p>
@@ -792,8 +804,8 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                         <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mx-auto text-slate-400 mb-3 border border-slate-100">
                           <Search size={20} />
                         </div>
-                        <p className="text-xs font-bold text-slate-700">No actions found</p>
-                        <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Try searching for another keyword.</p>
+                        <p className="text-xs font-bold text-slate-700">{t('editor.action.no_actions_title')}</p>
+                        <p className="text-[11px] text-slate-400 font-semibold mt-0.5">{t('editor.action.no_actions_desc')}</p>
                       </div>
                     )}
                   </div>
@@ -803,8 +815,8 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                   {selectedCategory === 'recently_used' && (
                     <div className="space-y-4">
                       <div>
-                        <h3 className="text-sm font-extrabold text-slate-800">Recently used</h3>
-                        <p className="text-xs text-slate-400 font-medium mt-0.5">Quickly access your most frequently used actions.</p>
+                        <h3 className="text-sm font-extrabold text-slate-800">{t('editor.action.categories.recently_used')}</h3>
+                        <p className="text-xs text-slate-400 font-medium mt-0.5">{t('editor.action.recently_used_desc')}</p>
                       </div>
                       <div className="grid grid-cols-1 gap-3 animate-in fade-in duration-150">
                         {allActions.filter(a => a.type === 'ADD_TAG' || a.type === 'GS_INSERT_ROW').map((act) => (
@@ -839,8 +851,8 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                   {selectedCategory === 'contact' && (
                     <div className="space-y-4">
                       <div>
-                        <h3 className="text-sm font-extrabold text-slate-800">Contact data</h3>
-                        <p className="text-xs text-slate-400 font-medium mt-0.5">Manage tags and custom user fields.</p>
+                        <h3 className="text-sm font-extrabold text-slate-800">{t('editor.action.contact_data_title')}</h3>
+                        <p className="text-xs text-slate-400 font-medium mt-0.5">{t('editor.action.contact_data_desc')}</p>
                       </div>
                       <div className="grid grid-cols-1 gap-3 animate-in fade-in duration-150">
                         {allActions.filter(a => a.category === 'contact').map((act) => (
@@ -868,8 +880,8 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                   {selectedCategory === 'automation' && (
                     <div className="space-y-4">
                       <div>
-                        <h3 className="text-sm font-extrabold text-slate-800">Automation</h3>
-                        <p className="text-xs text-slate-400 font-medium mt-0.5">Control bot behavior and subscription settings.</p>
+                        <h3 className="text-sm font-extrabold text-slate-800">{t('editor.action.automation_title')}</h3>
+                        <p className="text-xs text-slate-400 font-medium mt-0.5">{t('editor.action.automation_desc')}</p>
                       </div>
                       <div className="grid grid-cols-1 gap-3 animate-in fade-in duration-150">
                         {allActions.filter(a => a.category === 'automation').map((act) => (
@@ -897,8 +909,8 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                   {selectedCategory === 'live_chat' && (
                     <div className="space-y-4">
                       <div>
-                        <h3 className="text-sm font-extrabold text-slate-800">Live Chat</h3>
-                        <p className="text-xs text-slate-400 font-medium mt-0.5">Manage live agent sessions and conversation routing.</p>
+                        <h3 className="text-sm font-extrabold text-slate-800">{t('editor.action.live_chat_title')}</h3>
+                        <p className="text-xs text-slate-400 font-medium mt-0.5">{t('editor.action.live_chat_desc')}</p>
                       </div>
                       <div className="grid grid-cols-1 gap-3 animate-in fade-in duration-150">
                         {allActions.filter(a => a.category === 'live_chat').map((act) => (
@@ -928,9 +940,9 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                   {selectedCategory === 'sheets' && (
                     <div className="space-y-4">
                       <div>
-                        <h3 className="text-sm font-extrabold text-slate-800">Google Sheets</h3>
+                        <h3 className="text-sm font-extrabold text-slate-800">{t('editor.action.google_sheets_title')}</h3>
                         <p className="text-xs text-slate-400 font-medium mt-0.5">
-                          The integration provides you with an ability to save customers data from Launchly bot to Google Sheets.
+                          {t('editor.action.google_sheets_desc')}
                         </p>
                       </div>
                       <div className="grid grid-cols-1 gap-3 animate-in fade-in duration-150">

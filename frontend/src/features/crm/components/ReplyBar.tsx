@@ -9,7 +9,6 @@ import {
   Loader2,
   X,
   RefreshCw,
-  StickyNote,
 } from 'lucide-react';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
@@ -40,6 +39,7 @@ interface ReplyBarProps {
   typedNote: string;
   onTypedNoteChange: (note: string) => void;
   onSaveNote: () => void;
+  onScheduleClick: () => void;
 }
 
 export const ReplyBar: React.FC<ReplyBarProps> = ({
@@ -67,6 +67,7 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
   typedNote,
   onTypedNoteChange,
   onSaveNote,
+  onScheduleClick,
 }) => {
   return (
     <div className="border-t border-slate-200 shrink-0 bg-white">
@@ -130,22 +131,22 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
               <button onClick={onSend} disabled={(!typedMessage.trim() && !pendingImage) || isSending} className="flex items-center gap-2 px-5 py-2.5 bg-[#0088cc] hover:bg-[#007bb8] disabled:opacity-50 text-white text-[12px] font-bold rounded-lg cursor-pointer shadow-sm">
                 {isSending ? <Loader2 className="animate-spin" size={14} /> : <>{t('crm.reply.btn_send')}</>}
               </button>
-              <button className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 cursor-pointer"><RefreshCw size={14} /></button>
+              <button onClick={onScheduleClick} disabled={(!typedMessage.trim() && !pendingImage) || isSending} className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"><RefreshCw size={14} /></button>
             </div>
           </div>
         </>
       ) : (
         <div className="bg-amber-50/60 border-t-0">
-          <div className="px-5 pt-4 pb-2">
+          <div className="px-5 py-3.5">
             <textarea
               value={typedNote}
               onChange={e => onTypedNoteChange(e.target.value)}
               placeholder={t('crm.reply.placeholder_note')}
-              rows={3}
+              rows={2}
               className="w-full text-[13px] text-slate-700 placeholder:text-amber-400/80 resize-none focus:outline-none bg-transparent"
             />
           </div>
-          <div className="px-5 py-2.5 flex items-center justify-between">
+          <div className="px-5 py-2.5 border-t border-amber-100/60 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <button className="w-8 h-8 flex items-center justify-center rounded-md text-amber-400 hover:text-amber-600 hover:bg-amber-100 cursor-pointer">
                 <Smile size={18} />
@@ -155,10 +156,6 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
               </button>
               <button className="w-8 h-8 flex items-center justify-center rounded-md text-amber-400 hover:text-amber-600 hover:bg-amber-100 cursor-pointer">
                 <Paperclip size={18} />
-              </button>
-              <div className="w-px h-5 bg-amber-200 mx-1" />
-              <button className="w-8 h-8 flex items-center justify-center rounded-md text-amber-400 hover:text-amber-600 hover:bg-amber-100 cursor-pointer">
-                <StickyNote size={18} />
               </button>
             </div>
             <button

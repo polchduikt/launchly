@@ -35,6 +35,19 @@ export const useChatActions = ({ selectedConvId, botId }: UseChatActionsParams) 
     setPendingImage(null);
   }, [typedMessage, pendingImage, selectedConvId, sendMessageMut]);
 
+  const handleScheduleSend = useCallback((scheduledAtIso: string) => {
+    if ((!typedMessage.trim() && !pendingImage) || !selectedConvId) return;
+    const content = typedMessage.trim() || (pendingImage ? '📷 Photo' : '');
+    sendMessageMut.mutate({
+      content,
+      mediaUrl: pendingImage?.url,
+      mediaType: pendingImage ? 'image' : undefined,
+      scheduledAt: scheduledAtIso,
+    });
+    setTypedMessage('');
+    setPendingImage(null);
+  }, [typedMessage, pendingImage, selectedConvId, sendMessageMut]);
+
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -124,6 +137,7 @@ export const useChatActions = ({ selectedConvId, botId }: UseChatActionsParams) 
     mediaUpload,
     fileUpload,
     handleSend,
+    handleScheduleSend,
     handleKeyPress,
     handleImageSelect,
     handleFileSelect,

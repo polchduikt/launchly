@@ -42,6 +42,8 @@ export interface MessageResponse {
   mediaUrl: string | null;
   mediaType: string | null;
   createdAt: string;
+  scheduledAt?: string;
+  sent?: boolean;
 }
 
 export type OrderStatus = 'NEW' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';

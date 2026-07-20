@@ -222,6 +222,15 @@ export interface BotUserUpdateRequest {
   tags?: string[];
 }
 
+export interface BotUserCreateRequest {
+  firstName: string;
+  lastName?: string;
+  phone?: string;
+  email?: string;
+  gender?: string;
+  tags?: string[];
+}
+
 export interface ActionItem {
   type: string;
   tagId?: string;

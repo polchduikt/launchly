@@ -39,7 +39,6 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
 }) => (
   <div className="h-12 border-b border-slate-200 flex items-center justify-between px-4 bg-white shrink-0 select-none relative z-20">
     <div className="flex items-center gap-1.5 py-1">
-      <input type="checkbox" className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer w-3.5 h-3.5 mr-1 shrink-0" />
 
       <div ref={filterRef} className="relative shrink-0">
         <button

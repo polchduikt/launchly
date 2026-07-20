@@ -15,10 +15,11 @@ import {
 import {
   getBotUsersApi,
   updateBotUserApi,
+  createBotUserApi,
   deleteBotUserApi,
 } from '../../bot/api/bot';
 import type { OrderStatus, LeadStatus, ConversationStatus } from '../../../types/crm';
-import type { BotUserUpdateRequest } from '../../../types/bot';
+import type { BotUserUpdateRequest, BotUserCreateRequest } from '../../../types/bot';
 
 export const useOrdersQuery = (botId: number, enabled: boolean = true) => {
   return useQuery({
@@ -93,8 +94,8 @@ export const useUpdateLeadMutation = (botId: number) => {
 export const useSendMessageMutation = (conversationId: number, botId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ content, mediaUrl, mediaType }: { content: string; mediaUrl?: string; mediaType?: string }) =>
-      sendOwnerMessageApi(conversationId, content, mediaUrl, mediaType),
+    mutationFn: ({ content, mediaUrl, mediaType, scheduledAt }: { content: string; mediaUrl?: string; mediaType?: string; scheduledAt?: string }) =>
+      sendOwnerMessageApi(conversationId, content, mediaUrl, mediaType, scheduledAt),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
@@ -168,6 +169,18 @@ export const useUpdateConversationMutation = (botId: number) => {
       updateConversationApi(conversationId, { status, unread }),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ['conversation', updated.id] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
+    },
+  });
+};
+
+export const useCreateBotUserMutation = (botId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: BotUserCreateRequest) => createBotUserApi(botId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['botUsers', botId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
     },

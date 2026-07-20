@@ -67,11 +67,12 @@ export const sendOwnerMessageApi = async (
   conversationId: number,
   content: string,
   mediaUrl?: string,
-  mediaType?: string
+  mediaType?: string,
+  scheduledAt?: string
 ): Promise<MessageResponse> => {
   const response = await apiClient.post<MessageResponse>(
     `/crm/conversations/${conversationId}/messages`,
-    { content, mediaUrl, mediaType }
+    { content, mediaUrl, mediaType, scheduledAt }
   );
   return response.data;
 };

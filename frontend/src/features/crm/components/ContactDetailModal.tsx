@@ -55,7 +55,6 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
   const [showAddTagInline, setShowAddTagInline] = useState(false);
   const [newTagVal, setNewTagVal] = useState('');
   const [customTagName, setCustomTagName] = useState('');
-  const [showSubscribeSeqInline, setShowSubscribeSeqInline] = useState(false);
   const [showAddCustomFieldInline, setShowAddCustomFieldInline] = useState(false);
   const [customFieldName, setCustomFieldName] = useState('');
   const [customFieldValue, setCustomFieldValue] = useState('');
@@ -126,26 +125,6 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
     );
   };
 
-  const handleSubscribeSequenceInline = (seqId: string) => {
-    const seqs = meta.sequences || [];
-    if (seqs.includes(seqId)) return;
-
-    handleUpdateContactMetadata({
-      ...meta,
-      sequences: [...seqs, seqId],
-    });
-    setShowSubscribeSeqInline(false);
-  };
-
-  const handleUnsubscribeSequenceInline = (seqId: string) => {
-    const seqs = meta.sequences || [];
-
-    handleUpdateContactMetadata({
-      ...meta,
-      sequences: seqs.filter((s) => s !== seqId),
-    });
-  };
-
   const handleAddCustomFieldInline = () => {
     if (!customFieldName.trim()) return;
     const fields = meta.customFields || {};
@@ -207,7 +186,11 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
   return (
     <div 
-      onClick={onClose}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 select-none animate-fade-in cursor-pointer"
     >
       <div 
@@ -391,51 +374,6 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
               )}
             </div>
           </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between items-center select-none">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{t('crm.contact.sequences_title')}</span>
-              <button
-                onClick={() => setShowSubscribeSeqInline(!showSubscribeSeqInline)}
-                className="text-indigo-600 hover:text-indigo-700 text-xs font-bold cursor-pointer"
-              >
-                {t('crm.contact.subscribe')}
-              </button>
-            </div>
-
-            {showSubscribeSeqInline && (
-              <div className="flex gap-2 max-w-sm animation-slide-in">
-                <select
-                  onChange={(e) => handleSubscribeSequenceInline(e.target.value)}
-                  className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none"
-                  defaultValue=""
-                >
-                  <option value="" disabled>{t('crm.contact.select_sequence')}</option>
-                  <option value="1">{t('crm.contact.sequence_item', { number: 1 })}</option>
-                </select>
-              </div>
-            )}
-
-            <div className="flex flex-wrap gap-1.5">
-              {!(meta.sequences) || meta.sequences.length === 0 ? (
-                <span className="text-xs text-slate-400 italic">{t('crm.contact.no_sequences')}</span>
-              ) : (
-                meta.sequences.map((s) => (
-                  <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-full select-none">
-                    <span>{t('crm.contact.sequence_item', { number: s })}</span>
-                    <button
-                      onClick={() => handleUnsubscribeSequenceInline(s)}
-                      className="text-slate-400 hover:text-slate-600 cursor-pointer"
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))
-              )}
-            </div>
-          </div>
-
-
 
           <div className="space-y-3">
             <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block border-b border-slate-100 pb-1">{t('crm.contact.system_fields')}</span>

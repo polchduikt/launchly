@@ -1,5 +1,5 @@
 import React from 'react';
-import { AudioLines, Play, Paperclip } from 'lucide-react';
+import { AudioLines, Play, Paperclip, Clock } from 'lucide-react';
 import type { MessageResponse } from '../../../types/crm';
 import { formatMessageTime, parseMessageButtons } from '../utils/chat';
 
@@ -27,7 +27,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   const { text: cleanText, buttons } = parseMessageButtons(m.content);
   if (isNote) {
     return (
-      <div className="flex items-end gap-2 mb-3 flex-row-reverse">
+      <div data-message-id={m.id} className="flex items-end gap-2 mb-3 flex-row-reverse">
         {ownerAvatar}
         <div className="max-w-[60%]">
           <div className="px-4 py-2.5 text-[13px] leading-relaxed shadow-sm whitespace-pre-wrap break-words flex flex-col bg-amber-300 text-amber-950 rounded-2xl rounded-br-none w-full">
@@ -90,7 +90,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   const hasButtons = buttons.length > 0;
 
   return (
-    <div className={`flex items-end gap-2 mb-3 ${isOwner ? 'flex-row-reverse' : ''}`}>
+    <div data-message-id={m.id} className={`flex items-end gap-2 mb-3 ${isOwner ? 'flex-row-reverse' : ''}`}>
       {isOwner ? ownerAvatar : _userAvatar}
       <div className={hasButtons ? 'w-72' : 'max-w-[60%]'}>
         {m.mediaUrl && m.mediaType === 'image' && (
@@ -105,8 +105,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               className="max-w-full max-h-[300px] object-cover" 
               onLoad={onImageLoad}
             />
-            <div className="absolute bottom-1.5 right-2 bg-black/40 px-1 py-0.5 rounded text-[9px] text-white backdrop-blur-[1px]">
-              {formatMessageTime(m.createdAt)}
+            <div className="absolute bottom-1.5 right-2 bg-black/40 px-1 py-0.5 rounded text-[9px] text-white backdrop-blur-[1px] flex items-center gap-1">
+              {m.sent === false && <Clock size={10} className="animate-pulse" />}
+              <span>{formatMessageTime(m.scheduledAt || m.createdAt)}</span>
             </div>
           </div>
         )}
@@ -119,8 +120,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             <AudioLines size={16} />
             <span className="text-[13px]">Voice message</span>
             <a href={m.mediaUrl} target="_blank" rel="noreferrer" className="opacity-70 hover:opacity-100"><Play size={14} /></a>
-            <span className="text-[9px] opacity-60 ml-auto self-end shrink-0">
-              {formatMessageTime(m.createdAt)}
+            <span className="text-[9px] opacity-60 ml-auto self-end shrink-0 flex items-center gap-1">
+              {m.sent === false && <Clock size={10} className="animate-pulse" />}
+              <span>{formatMessageTime(m.scheduledAt || m.createdAt)}</span>
             </span>
           </div>
         )}
@@ -132,8 +134,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           }`}>
             <Paperclip size={14} />
             <a href={m.mediaUrl} target="_blank" rel="noreferrer" className="text-[13px] underline truncate max-w-[160px]">{cleanText.replace('📎 ', '')}</a>
-            <span className="text-[9px] opacity-60 ml-auto self-end shrink-0">
-              {formatMessageTime(m.createdAt)}
+            <span className="text-[9px] opacity-60 ml-auto self-end shrink-0 flex items-center gap-1">
+              {m.sent === false && <Clock size={10} className="animate-pulse" />}
+              <span>{formatMessageTime(m.scheduledAt || m.createdAt)}</span>
             </span>
           </div>
         )}
@@ -144,8 +147,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               : (isOwner ? 'bg-[#0088cc] text-white rounded-2xl rounded-br-none' : 'bg-slate-100 text-slate-800 rounded-2xl rounded-bl-none')
           } w-full`}>
             <span>{cleanText}</span>
-            <span className="text-[9px] text-right mt-1 opacity-60 self-end shrink-0">
-              {formatMessageTime(m.createdAt)}
+            <span className="text-[9px] text-right mt-1 opacity-60 self-end shrink-0 flex items-center gap-1">
+              {m.sent === false && <Clock size={10} className="animate-pulse" />}
+              <span>{formatMessageTime(m.scheduledAt || m.createdAt)}</span>
             </span>
           </div>
         )}

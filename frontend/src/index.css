@@ -66,3 +66,18 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.15s ease-out both;
 }
+
+@keyframes highlightPulse {
+  0%, 100% {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+  30%, 70% {
+    outline: 2px solid #fbbf24;
+    outline-offset: 2px;
+  }
+}
+
+.highlight-message {
+  animation: highlightPulse 2s ease-in-out;
+}

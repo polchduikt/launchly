@@ -5,9 +5,10 @@ import { t } from '../../../i18n';
 interface ChatHeaderProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
+  onOpenSettings?: () => void;
 }
 
-export const ChatHeader: React.FC<ChatHeaderProps> = ({ searchQuery, onSearchChange }) => {
+export const ChatHeader: React.FC<ChatHeaderProps> = ({ searchQuery, onSearchChange, onOpenSettings }) => {
   return (
     <header className="h-[56px] min-h-[56px] border-b border-slate-200 flex items-center justify-between px-6 bg-white shrink-0">
       <div className="text-xl font-bold text-slate-800">{t('common.nav.chat')}</div>
@@ -26,7 +27,11 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ searchQuery, onSearchCha
           </button>
         )}
       </div>
-      <button className="p-2 border border-slate-200 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 cursor-pointer">
+      <button
+        onClick={onOpenSettings}
+        title="Notification settings"
+        className="p-2 border border-slate-200 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 cursor-pointer transition-all"
+      >
         <Settings2 size={16} />
       </button>
     </header>

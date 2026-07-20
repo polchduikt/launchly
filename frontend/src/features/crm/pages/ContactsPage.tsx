@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import {
@@ -6,6 +6,7 @@ import {
   useUpdateBotUserMutation,
   useDeleteBotUserMutation,
   useConversationsQuery,
+  useCreateBotUserMutation,
 } from '../hooks/useCrmQueries';
 import { useTagsQuery } from '../../broadcast/hooks/useBroadcastQueries';
 import {
@@ -14,7 +15,6 @@ import {
   ChevronDown,
   Tag,
   X,
-  Plus,
   Pause,
   Play,
   Bookmark,
@@ -22,10 +22,13 @@ import {
   Trash2,
 } from 'lucide-react';
 import type { BotUserResponse } from '../../../types/bot';
-import { ContactsSidebar } from '../components/ContactsSidebar';
 import { ContactsHeader } from '../components/ContactsHeader';
 import { ContactsTable } from '../components/ContactsTable';
 import { ContactDetailModal } from '../components/ContactDetailModal';
+import { BulkActionModal } from '../components/BulkActionModal';
+import { CreateContactModal } from '../components/CreateContactModal';
+import { ContactsFilterBuilder } from '../components/ContactsFilterBuilder';
+import type { FilterCondition } from '../components/ContactsFilterBuilder';
 import { t } from '../../../i18n';
 
 interface BotUserMetadata {
@@ -49,14 +52,45 @@ export const ContactsPage: React.FC = () => {
 
   const updateBotUserMut = useUpdateBotUserMutation(botId);
   const deleteBotUserMut = useDeleteBotUserMutation(botId);
+  const createBotUserMut = useCreateBotUserMutation(botId);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContactIds, setSelectedContactIds] = useState<Set<number>>(new Set());
   const [selectedContact, setSelectedContact] = useState<BotUserResponse | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showFiltersBuilder, setShowFiltersBuilder] = useState(false);
+  const [conditions, setConditions] = useState<FilterCondition[]>([]);
   
   const [showBulkMenu, setShowBulkMenu] = useState(false);
   const [bulkActionType, setBulkActionType] = useState<string | null>(null);
-  const [bulkValue, setBulkValue] = useState('');
+
+  const handleCreateContact = async (data: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email: string;
+    gender: string;
+  }) => {
+    await createBotUserMut.mutateAsync(data);
+    setShowCreateModal(false);
+    refetch();
+  };
+
+  const bulkMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (bulkMenuRef.current && !bulkMenuRef.current.contains(e.target as Node)) {
+        setShowBulkMenu(false);
+      }
+    };
+    if (showBulkMenu) {
+      document.addEventListener('mousedown', handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [showBulkMenu]);
 
   const parseMetadata = (metaStr: string | null): BotUserMetadata => {
     try {
@@ -70,23 +104,86 @@ export const ContactsPage: React.FC = () => {
     return contacts.filter((c) => {
       const fullname = `${c.firstName || ''} ${c.lastName || ''}`.toLowerCase();
       const username = (c.username || '').toLowerCase();
-      const q = searchQuery.toLowerCase();
-      return fullname.includes(q) || username.includes(q) || String(c.telegramId).includes(q);
-    });
-  }, [contacts, searchQuery]);
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch = fullname.includes(q) || username.includes(q) || String(c.telegramId).includes(q);
+      if (!matchesSearch) return false;
+      if (conditions.length === 0) return true;
+      let meta: any = {};
+      try {
+        meta = c.metadata ? JSON.parse(c.metadata) : {};
+      } catch {}
 
-  const sequences = useMemo(() => {
-    const counts: Record<string, number> = { '1': 0 };
-    contacts.forEach((c) => {
-      const meta = parseMetadata(c.metadata);
-      if (meta.sequences) {
-        meta.sequences.forEach((s) => {
-          counts[s] = (counts[s] || 0) + 1;
-        });
-      }
+      return conditions.every((cond) => {
+        let fieldVal = '';
+        
+        if (cond.field === 'tag') {
+          const hasTag = (c.tags || []).includes(cond.value);
+          return cond.operator === 'is' ? hasTag : !hasTag;
+        }
+
+        if (cond.field === 'paused') {
+          const isPaused = !!meta.paused;
+          const target = cond.value === 'true';
+          return cond.operator === 'is' ? (isPaused === target) : (isPaused !== target);
+        }
+
+        if (cond.field === 'optedInTelegram') {
+          const isOptedIn = !meta.unsubscribed;
+          const target = cond.value === 'true';
+          return cond.operator === 'is' ? (isOptedIn === target) : (isOptedIn !== target);
+        }
+
+        if (cond.field === 'firstName') {
+          fieldVal = c.firstName || '';
+        } else if (cond.field === 'lastName') {
+          fieldVal = c.lastName || '';
+        } else if (cond.field === 'fullName') {
+          fieldVal = `${c.firstName || ''} ${c.lastName || ''}`;
+        } else if (cond.field === 'email') {
+          fieldVal = meta.email || meta.customFields?.Email || meta.customFields?.email || '';
+        } else if (cond.field === 'phone') {
+          fieldVal = meta.phone || meta.customFields?.Phone || meta.customFields?.phone || '';
+        } else if (cond.field === 'id') {
+          fieldVal = String(c.id);
+        } else if (cond.field === 'telegramUserId') {
+          fieldVal = String(c.telegramId);
+        } else if (cond.field === 'telegramUsername') {
+          fieldVal = c.username || '';
+        } else if (cond.field === 'createdAt') {
+          fieldVal = c.createdAt ? c.createdAt.split('T')[0] : '';
+        } else if (cond.field.startsWith('custom:')) {
+          const customKey = cond.field.substring(7);
+          fieldVal = meta.customFields?.[customKey] || '';
+        }
+
+        const condVal = cond.value || '';
+        const fieldLower = fieldVal.toLowerCase().trim();
+        const condLower = condVal.toLowerCase().trim();
+        
+        if (cond.operator === 'is') {
+          return fieldLower === condLower;
+        } else if (cond.operator === 'is_not') {
+          return fieldLower !== condLower;
+        } else if (cond.operator === 'contains') {
+          return fieldLower.includes(condLower);
+        } else if (cond.operator === "doesn't contain") {
+          return !fieldLower.includes(condLower);
+        } else if (cond.operator === 'begins with') {
+          return fieldLower.startsWith(condLower);
+        } else if (cond.operator === 'has any value') {
+          return fieldVal.trim() !== '';
+        } else if (cond.operator === 'is unknown') {
+          return fieldVal.trim() === '';
+        } else if (cond.operator === 'after') {
+          return fieldVal > condVal;
+        } else if (cond.operator === 'before') {
+          return fieldVal < condVal;
+        }
+
+        return true;
+      });
     });
-    return Object.entries(counts).map(([id, count]) => ({ id, count }));
-  }, [contacts]);
+  }, [contacts, searchQuery, conditions]);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -106,8 +203,7 @@ export const ContactsPage: React.FC = () => {
     setSelectedContactIds(next);
   };
 
-  const handleApplyBulkAction = async () => {
-    if (!bulkActionType) return;
+  const handleApplyBulkAction = async (actionType: string, actionValue: string) => {
     const ids = Array.from(selectedContactIds);
 
     for (const userId of ids) {
@@ -118,42 +214,34 @@ export const ContactsPage: React.FC = () => {
       const updatedMeta = { ...meta };
       let updatedTags = [...(c.tags || [])];
 
-      if (bulkActionType === 'add-tag') {
-        if (bulkValue && !updatedTags.includes(bulkValue)) {
-          updatedTags.push(bulkValue);
+      if (actionType === 'add-tag') {
+        if (actionValue && !updatedTags.includes(actionValue)) {
+          updatedTags.push(actionValue);
         }
-      } else if (bulkActionType === 'remove-tag') {
-        updatedTags = updatedTags.filter((t) => t !== bulkValue);
-      } else if (bulkActionType === 'sub-seq') {
-        const seqs = meta.sequences || [];
-        if (!seqs.includes(bulkValue)) {
-          updatedMeta.sequences = [...seqs, bulkValue];
-        }
-      } else if (bulkActionType === 'unsub-seq') {
-        const seqs = meta.sequences || [];
-        updatedMeta.sequences = seqs.filter((s) => s !== bulkValue);
-      } else if (bulkActionType === 'pause') {
+      } else if (actionType === 'remove-tag') {
+        updatedTags = updatedTags.filter((t) => t !== actionValue);
+      } else if (actionType === 'pause') {
         updatedMeta.paused = true;
-      } else if (bulkActionType === 'resume') {
+      } else if (actionType === 'resume') {
         updatedMeta.paused = false;
-      } else if (bulkActionType === 'unsub-acc') {
+      } else if (actionType === 'unsub-acc') {
         updatedMeta.unsubscribed = true;
-      } else if (bulkActionType === 'delete') {
+      } else if (actionType === 'delete') {
         await deleteBotUserMut.mutateAsync(userId);
         continue;
-      } else if (bulkActionType === 'set-field') {
-        const [fieldKey, fieldVal] = bulkValue.split(':');
+      } else if (actionType === 'set-field') {
+        const [fieldKey, fieldVal] = actionValue.split(':');
         if (fieldKey) {
           const fields = meta.customFields || {};
           updatedMeta.customFields = { ...fields, [fieldKey.trim()]: (fieldVal || '').trim() };
         }
-      } else if (bulkActionType === 'clear-field') {
+      } else if (actionType === 'clear-field') {
         const fields = meta.customFields || {};
-        delete fields[bulkValue];
+        delete fields[actionValue];
         updatedMeta.customFields = { ...fields };
       }
 
-      if (bulkActionType !== 'delete') {
+      if (actionType !== 'delete') {
         await updateBotUserMut.mutateAsync({
           userId,
           data: {
@@ -166,7 +254,6 @@ export const ContactsPage: React.FC = () => {
 
     setSelectedContactIds(new Set());
     setBulkActionType(null);
-    setBulkValue('');
     setShowBulkMenu(false);
     refetch();
   };
@@ -174,20 +261,23 @@ export const ContactsPage: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="h-[calc(100vh-4rem)] flex bg-slate-50 font-sans">
-        
-        <ContactsSidebar sequences={sequences} />
-
         <main className="flex-1 flex flex-col min-w-0 bg-slate-50 overflow-hidden">
           
           <ContactsHeader
-            onCreateContact={() => alert('Feature coming soon: Manual Contact Creation')}
-            onImport={() => alert('Feature coming soon: Contact Import')}
+            onCreateContact={() => setShowCreateModal(true)}
           />
 
           <div className="px-6 py-3 bg-white border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 select-none">
             <div className="flex items-center gap-3">
-              <button className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl text-xs font-bold text-slate-600 transition-all cursor-pointer shadow-sm">
-                <Filter size={14} className="text-slate-400" />
+              <button
+                onClick={() => setShowFiltersBuilder(!showFiltersBuilder)}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm ${
+                  showFiltersBuilder
+                    ? 'bg-blue-50 border border-blue-200 text-blue-600'
+                    : 'bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600'
+                }`}
+              >
+                <Filter size={14} className={showFiltersBuilder ? 'text-blue-500' : 'text-slate-400'} />
                 <span>{t('crm.contacts.filter')}</span>
               </button>
               <div className="relative w-full sm:w-64">
@@ -206,7 +296,7 @@ export const ContactsPage: React.FC = () => {
               <span className="text-xs font-bold text-slate-500">
                 {t('crm.contacts.selected_count', { count: selectedContactIds.size, total: filteredContacts.length })}
               </span>
-              <div className="relative">
+              <div className="relative" ref={bulkMenuRef}>
                 <button
                   onClick={() => setShowBulkMenu(!showBulkMenu)}
                   disabled={selectedContactIds.size === 0}
@@ -223,12 +313,6 @@ export const ContactsPage: React.FC = () => {
                     </button>
                     <button onClick={() => setBulkActionType('remove-tag')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
                       <X size={13} className="text-slate-400" /> {t('crm.contacts.bulk.remove_tag')}
-                    </button>
-                    <button onClick={() => setBulkActionType('sub-seq')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <Plus size={13} className="text-slate-400" /> {t('crm.contacts.bulk.sub_seq')}
-                    </button>
-                    <button onClick={() => setBulkActionType('unsub-seq')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <X size={13} className="text-slate-400" /> {t('crm.contacts.bulk.unsub_seq')}
                     </button>
                     <button onClick={() => setBulkActionType('pause')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
                       <Pause size={13} className="text-slate-400" /> {t('crm.contacts.bulk.pause')}
@@ -255,104 +339,16 @@ export const ContactsPage: React.FC = () => {
             </div>
           </div>
 
-          {bulkActionType && (
-            <div className="px-6 py-3 bg-indigo-50 border-b border-indigo-100 flex items-center justify-between gap-4 text-xs font-bold text-indigo-950 shrink-0 animation-slide-in">
-              <div className="flex items-center gap-3 flex-1">
-                <span>
-                  {t('crm.contacts.bulk.header', { action: bulkActionType.replace('-', ' ').toUpperCase(), count: selectedContactIds.size })}
-                </span>
-                
-                {['add-tag', 'remove-tag'].includes(bulkActionType) && (
-                  <select
-                    value={bulkValue}
-                    onChange={(e) => setBulkValue(e.target.value)}
-                    className="px-2 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
-                  >
-                    <option value="">{t('crm.contacts.bulk.select_tag')}</option>
-                    {tags.map((t) => (
-                      <option key={t.id} value={t.name}>{t.name}</option>
-                    ))}
-                    {bulkActionType === 'add-tag' && (
-                      <option value="NEW_TAG">{t('crm.contacts.bulk.new_tag_option')}</option>
-                    )}
-                  </select>
-                )}
+          <ContactsFilterBuilder
+            isOpen={showFiltersBuilder}
+            conditions={conditions}
+            setConditions={setConditions}
+            tags={tags}
+            contacts={contacts}
+            botId={botId}
+          />
 
-                {['sub-seq', 'unsub-seq'].includes(bulkActionType) && (
-                  <select
-                    value={bulkValue}
-                    onChange={(e) => setBulkValue(e.target.value)}
-                    className="px-2 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
-                  >
-                    <option value="">{t('crm.contacts.bulk.select_seq')}</option>
-                    <option value="1">Sequence 1</option>
-                  </select>
-                )}
 
-                {bulkActionType === 'add-tag' && bulkValue === 'NEW_TAG' && (
-                  <input
-                    type="text"
-                    placeholder={t('crm.contacts.bulk.enter_tag')}
-                    onChange={(e) => setBulkValue(e.target.value)}
-                    className="px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
-                  />
-                )}
-
-                {bulkActionType === 'set-field' && (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder={t('crm.contacts.bulk.field_name_placeholder')}
-                      id="bulkFieldKey"
-                      className="px-2.5 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs w-36 focus:outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder={t('crm.contacts.bulk.field_value_placeholder')}
-                      id="bulkFieldVal"
-                      className="px-2.5 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs w-36 focus:outline-none"
-                      onBlur={() => {
-                        const k = (document.getElementById('bulkFieldKey') as HTMLInputElement)?.value;
-                        const v = (document.getElementById('bulkFieldVal') as HTMLInputElement)?.value;
-                        if (k) setBulkValue(`${k}:${v}`);
-                      }}
-                    />
-                  </div>
-                )}
-
-                {bulkActionType === 'clear-field' && (
-                  <input
-                    type="text"
-                    placeholder={t('crm.contacts.bulk.field_clear_placeholder')}
-                    value={bulkValue}
-                    onChange={(e) => setBulkValue(e.target.value)}
-                    className="px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
-                  />
-                )}
-
-                {['pause', 'resume', 'unsub-acc', 'delete'].includes(bulkActionType) && (
-                  <span className="text-slate-400 italic font-semibold">{t('crm.contacts.bulk.no_val_needed')}</span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleApplyBulkAction}
-                  className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer transition-all"
-                >
-                  {t('crm.contacts.bulk.btn_apply')}
-                </button>
-                <button
-                  onClick={() => {
-                    setBulkActionType(null);
-                    setBulkValue('');
-                  }}
-                  className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-all"
-                >
-                  {t('crm.contacts.bulk.btn_cancel')}
-                </button>
-              </div>
-            </div>
-          )}
 
           <ContactsTable
             botId={botId}
@@ -377,6 +373,27 @@ export const ContactsPage: React.FC = () => {
           onContactDeleted={() => setSelectedContact(null)}
         />
       )}
+
+      {bulkActionType && (
+        <BulkActionModal
+          isOpen={true}
+          onClose={() => {
+            setBulkActionType(null);
+          }}
+          actionType={bulkActionType}
+          selectedCount={selectedContactIds.size}
+          tags={tags}
+          onApply={(value) => {
+            handleApplyBulkAction(bulkActionType, value);
+          }}
+        />
+      )}
+
+      <CreateContactModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleCreateContact}
+      />
     </DashboardLayout>
   );
 };

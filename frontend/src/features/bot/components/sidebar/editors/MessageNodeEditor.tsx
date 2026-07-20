@@ -28,7 +28,7 @@ import type { ButtonData } from '../../../../../types/bot';
 import { useNodeEditor, getBlocks } from '../../../hooks/useNodeEditor';
 import { useBotStore } from '../../../../../store/useBotStore';
 import { useTagsQuery } from '../../../../broadcast/hooks/useBroadcastQueries';
-import { t } from '../../../../../i18n';
+import { t, getLanguage } from '../../../../../i18n';
 import { FieldVariableSelector } from './FieldVariableSelector';
 import emojiData from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
@@ -617,7 +617,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                         setActiveBlockId(block.id || '');
                       }}
                       onClick={(e) => handleContentEditableClick(e, block.id || '')}
-                      data-placeholder="Enter your text..."
+                      data-placeholder={t('editor.message.text_placeholder')}
                       className="w-full text-xs font-semibold text-slate-800 focus:outline-none bg-transparent min-h-[80px] cursor-text break-words outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 empty:before:pointer-events-none"
                     />
                     
@@ -688,7 +688,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       <div className="absolute top-full mt-2 left-3 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 w-72 text-slate-800 space-y-3 text-left before:content-[''] before:absolute before:bottom-full before:left-10 before:border-[6px] before:border-transparent before:border-b-white">
                         <div className="flex justify-between items-center pb-1">
                           <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
-                            When This Link is Clicked
+                            {t('editor.message.link_clicked')}
                           </span>
                           <button
                             type="button"
@@ -707,7 +707,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                               className="flex items-center gap-2.5 w-full p-3 border border-indigo-100 hover:bg-indigo-50/20 rounded-xl text-xs font-bold text-indigo-700 transition-colors text-left cursor-pointer"
                             >
                               <LinkIcon size={14} />
-                              <span>Open website</span>
+                              <span>{t('editor.edit_button.action.open_website')}</span>
                             </button>
                             <button
                               type="button"
@@ -715,7 +715,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                               className="flex items-center gap-2.5 w-full p-3 border border-slate-100 bg-slate-50/50 text-slate-400 rounded-xl text-xs font-bold text-left cursor-not-allowed opacity-60"
                             >
                               <MessageSquare size={14} />
-                              <span>Open Messenger</span>
+                              <span>{t('editor.message.open_messenger')}</span>
                             </button>
                           </div>
                         ) : (
@@ -723,7 +723,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                             <div className="flex items-center justify-between bg-indigo-50/40 border border-indigo-100/60 rounded-xl px-3 py-2 text-xs text-indigo-750 font-bold">
                               <div className="flex items-center gap-2">
                                 <LinkIcon size={12} />
-                                <span>Open website</span>
+                                <span>{t('editor.edit_button.action.open_website')}</span>
                               </div>
                               <button
                                 type="button"
@@ -946,12 +946,12 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                           ) : (
                             <ImageIcon size={13} className="text-indigo-500" />
                           )}
-                          <span>Upload File</span>
+                          <span>{t('editor.message.upload_file')}</span>
                         </button>
                       </div>
                       <input
                         type="text"
-                        placeholder="Or paste image URL link..."
+                        placeholder={t('editor.message.paste_image_url')}
                         value={block.imageUrl || ''}
                         onChange={(e) => updateBlockContent(block.id, { imageUrl: e.target.value })}
                         className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
@@ -1017,7 +1017,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
 
               {block.type === 'delay' && (
                 <div className="p-4 flex items-center justify-between gap-4">
-                  <span className="text-xs text-slate-600 font-semibold">Delay duration:</span>
+                  <span className="text-xs text-slate-600 font-semibold">{t('editor.message.delay_duration')}</span>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -1027,7 +1027,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       onChange={(e) => updateBlockContent(block.id, { delaySeconds: Math.max(1, parseInt(e.target.value) || 3) })}
                       className="w-16 px-2.5 py-1.5 border border-slate-205 rounded-xl text-xs font-bold text-center bg-slate-50/50 focus:outline-none focus:border-indigo-500"
                     />
-                    <span className="text-xs text-slate-500 font-bold">seconds</span>
+                    <span className="text-xs text-slate-500 font-bold">{t('editor.message.seconds')}</span>
                   </div>
                 </div>
               )}
@@ -1035,11 +1035,13 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
               {block.type === 'data_collection' && (
                 <div className="p-4 space-y-3">
                   <div>
-                    <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Question to ask</label>
+                    <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">
+                      {t('editor.message.question_to_ask')}
+                    </label>
                     <textarea
                       value={block.text || ''}
                       onChange={(e) => updateBlockContent(block.id, { text: e.target.value })}
-                      placeholder="e.g. What is your email address?"
+                      placeholder={t('editor.message.question_placeholder')}
                       rows={2}
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20 resize-none"
                     />
@@ -1056,10 +1058,10 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       className="px-4 py-2 bg-indigo-50/30 hover:bg-indigo-50 border border-dashed border-indigo-400 text-indigo-700 text-[11px] font-extrabold rounded-2xl transition-all cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
                     >
                       <Database size={12} />
-                      <span>Contact's reply: {block.replyType || 'Text'}</span>
+                      <span>{t('editor.message.contact_reply', { type: block.replyType || 'Text' })}</span>
                     </button>
                     <span className="text-[9px] font-semibold text-slate-400 mt-2 block text-center leading-normal">
-                      Note: Automation pauses until contact replies
+                      {t('editor.message.reply_note')}
                     </span>
                   </div>
                 </div>
@@ -1103,12 +1105,12 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                           ) : (
                             <Paperclip size={13} className="text-slate-500" />
                           )}
-                          <span>Upload File</span>
+                          <span>{t('editor.message.upload_file')}</span>
                         </button>
                       </div>
                       <input
                         type="text"
-                        placeholder="Or paste file URL link..."
+                        placeholder={getLanguage() === 'uk' ? 'Або вставте URL-посилання на файл...' : 'Or paste file URL link...'}
                         value={block.fileUrl || ''}
                         onChange={(e) => updateBlockContent(block.id, { fileUrl: e.target.value })}
                         className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
@@ -1208,12 +1210,12 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                           ) : (
                             <Volume2 size={13} className="text-violet-500" />
                           )}
-                          <span>Upload File</span>
+                          <span>{t('editor.message.upload_file')}</span>
                         </button>
                       </div>
                       <input
                         type="text"
-                        placeholder="Or paste audio URL link..."
+                        placeholder={getLanguage() === 'uk' ? 'Або вставте URL-посилання на аудіо...' : 'Or paste audio URL link...'}
                         value={block.audioUrl || ''}
                         onChange={(e) => updateBlockContent(block.id, { audioUrl: e.target.value })}
                         className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
@@ -1313,12 +1315,12 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                           ) : (
                             <Video size={13} className="text-rose-500" />
                           )}
-                          <span>Upload File</span>
+                          <span>{t('editor.message.upload_file')}</span>
                         </button>
                       </div>
                       <input
                         type="text"
-                        placeholder="Or paste video URL link..."
+                        placeholder={getLanguage() === 'uk' ? 'Або вставте URL-посилання на відео...' : 'Or paste video URL link...'}
                         value={block.videoUrl || ''}
                         onChange={(e) => updateBlockContent(block.id, { videoUrl: e.target.value })}
                         className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { getLanguage, t } from '../../../../../i18n';
 import {
   User,
   Phone,
@@ -93,17 +94,19 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
   }, [isOpen]);
 
   
+  const isUk = getLanguage() === 'uk';
+
   const systemFields = useMemo(() => [
-    { key: 'first_name', name: 'First Name', val: 'first_name', icon: <User size={13} className="text-slate-400" /> },
-    { key: 'last_name', name: 'Last Name', val: 'last_name', icon: <User size={13} className="text-slate-400" /> },
-    { key: 'phone', name: 'Phone', val: 'phone', icon: <Phone size={13} className="text-slate-400" /> },
-    { key: 'email', name: 'Email', val: 'email', icon: <User size={13} className="text-slate-400" /> },
-    { key: 'contact_id', name: 'Contact Id', val: 'contact_id', icon: <Hash size={13} className="text-slate-400" /> },
-    { key: 'subscribed', name: 'Subscribed', val: 'subscribed', icon: <Clock size={13} className="text-slate-400" /> },
-    { key: 'last_reply_type', name: 'Last Reply Type', val: 'last_reply_type', icon: <MessageSquare size={13} className="text-slate-400" /> },
-    { key: 'telegram_user_id', name: 'Telegram User ID', val: 'telegram_user_id', icon: <Hash size={13} className="text-slate-400" /> },
-    { key: 'telegram_username', name: 'Telegram Username', val: 'telegram_username', icon: <Send size={13} className="text-sky-500" /> },
-    { key: 'opted_in_telegram', name: 'Opted-in for Telegram', val: 'telegram_opt_in', icon: <CheckSquare size={13} className="text-slate-400" /> }
+    { key: 'first_name', name: t('editor.gs.fields.first_name'), val: 'first_name', icon: <User size={13} className="text-slate-400" /> },
+    { key: 'last_name', name: t('editor.gs.fields.last_name'), val: 'last_name', icon: <User size={13} className="text-slate-400" /> },
+    { key: 'phone', name: t('editor.gs.fields.phone'), val: 'phone', icon: <Phone size={13} className="text-slate-400" /> },
+    { key: 'email', name: t('editor.gs.fields.email'), val: 'email', icon: <User size={13} className="text-slate-400" /> },
+    { key: 'contact_id', name: t('editor.gs.fields.contact_id'), val: 'contact_id', icon: <Hash size={13} className="text-slate-400" /> },
+    { key: 'subscribed', name: t('editor.gs.fields.subscribed'), val: 'subscribed', icon: <Clock size={13} className="text-slate-400" /> },
+    { key: 'last_reply_type', name: t('editor.gs.fields.last_reply_type'), val: 'last_reply_type', icon: <MessageSquare size={13} className="text-slate-400" /> },
+    { key: 'telegram_user_id', name: t('editor.gs.fields.tg_id'), val: 'telegram_user_id', icon: <Hash size={13} className="text-slate-400" /> },
+    { key: 'telegram_username', name: t('editor.gs.fields.username'), val: 'telegram_username', icon: <Send size={13} className="text-sky-500" /> },
+    { key: 'opted_in_telegram', name: t('editor.gs.fields.opted_in_telegram'), val: 'telegram_opt_in', icon: <CheckSquare size={13} className="text-slate-400" /> }
   ], []);
 
   
@@ -192,7 +195,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                 selectedCategory === 'system' ? 'bg-white text-indigo-700 shadow-xs border border-slate-200/50' : 'text-slate-650 hover:bg-slate-200/50'
               }`}
             >
-              System Fields
+              {t('editor.gs.system_fields')}
             </button>
             <button
               type="button"
@@ -204,7 +207,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                 selectedCategory === 'custom' ? 'bg-white text-indigo-700 shadow-xs border border-slate-200/50' : 'text-slate-650 hover:bg-slate-200/50'
               }`}
             >
-              Custom User Fields
+              {t('editor.gs.custom_fields')}
             </button>
             {mode === 'variable' && (
               <button
@@ -217,7 +220,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                   selectedCategory === 'tags' ? 'bg-white text-indigo-700 shadow-xs border border-slate-200/50' : 'text-slate-650 hover:bg-slate-200/50'
                 }`}
               >
-                Tags
+                {t('editor.gs.tags')}
               </button>
             )}
           </div>
@@ -229,7 +232,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
               <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder={isUk ? 'Пошук...' : 'Search...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-7 pr-3 py-1.5 border border-slate-200 rounded-lg text-[10px] focus:outline-none focus:border-indigo-400 bg-slate-50/20 font-semibold"
@@ -253,7 +256,9 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                     </button>
                   ))}
                   {filteredSystemFields.length === 0 && (
-                    <span className="text-[10px] text-slate-400 italic text-center py-6 font-medium">No fields found</span>
+                    <span className="text-[10px] text-slate-400 italic text-center py-6 font-medium">
+                      {isUk ? 'Нічого не знайдено' : 'No fields found'}
+                    </span>
                   )}
                 </>
               )}
@@ -271,14 +276,14 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                           className="w-full px-2.5 py-1.5 bg-indigo-50/50 hover:bg-indigo-50 border border-dashed border-indigo-200 text-indigo-700 rounded-lg text-left text-[10px] font-extrabold flex items-center gap-1.5 cursor-pointer transition-all"
                         >
                           <Plus size={12} />
-                          <span>Create Custom Field</span>
+                          <span>{isUk ? 'Створити поле користувача' : 'Create Custom Field'}</span>
                         </button>
                       ) : (
                         <form onSubmit={handleCreateField} className="flex gap-1.5 items-center">
                           <input
                             type="text"
                             required
-                            placeholder="Field key (e.g. Рыба)"
+                            placeholder={isUk ? 'Ключ поля (наприклад, Рыба)' : 'Field key (e.g. Рыба)'}
                             autoFocus
                             value={newFieldName}
                             onChange={(e) => setNewFieldName(e.target.value)}
@@ -314,7 +319,9 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                     </button>
                   ))}
                   {filteredCustomFields.length === 0 && !showCreateFieldInput && (
-                    <span className="text-[10px] text-slate-400 italic text-center py-6 font-medium">No custom fields</span>
+                    <span className="text-[10px] text-slate-400 italic text-center py-6 font-medium">
+                      {isUk ? 'Немає користувацьких полів' : 'No custom fields'}
+                    </span>
                   )}
                 </>
               )}
@@ -334,7 +341,9 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                     </button>
                   ))}
                   {filteredTags.length === 0 && (
-                    <span className="text-[10px] text-slate-400 italic text-center py-6 font-medium">No tags found</span>
+                    <span className="text-[10px] text-slate-400 italic text-center py-6 font-medium">
+                      {isUk ? 'Тегів не знайдено' : 'No tags found'}
+                    </span>
                   )}
                 </>
               )}

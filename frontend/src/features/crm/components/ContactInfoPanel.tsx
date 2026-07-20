@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { t } from '../../../i18n';
+import React, { useState, useRef, useEffect } from 'react';
+import { t, getLanguage } from '../../../i18n';
 import {
   Hash,
   Send,
@@ -11,13 +11,14 @@ import {
   Users,
   Check,
 } from 'lucide-react';
-import type { ConversationResponse } from '../../../types/crm';
+import type { ConversationResponse, MessageResponse } from '../../../types/crm';
 import type { BotUserResponse } from '../../../types/bot';
 import { UserAvatar } from './UserAvatar';
 import { useTagsQuery } from '../../broadcast/hooks/useBroadcastQueries';
-import { useUpdateBotUserMutation } from '../hooks/useCrmQueries';
+import { useUpdateBotUserMutation, useDeleteBotUserMutation } from '../hooks/useCrmQueries';
 import { TagSearchSelect } from '../../bot/components/sidebar/editors/TagSearchSelect';
 import { ChatHistoryModal } from './ChatHistoryModal';
+import { ConfirmActionModal } from './ConfirmActionModal';
 
 interface BotUserMetadata {
   sequences?: string[];
@@ -25,12 +26,16 @@ interface BotUserMetadata {
   pausedUntil?: number | null;
   unsubscribed?: boolean;
   customFields?: Record<string, string>;
+  notes?: string;
+  telegram_opt_in?: boolean;
 }
 
 interface ContactInfoPanelProps {
   botId: number;
   conversation: ConversationResponse;
   botUser?: BotUserResponse;
+  messages?: MessageResponse[];
+  onScrollToNote?: (noteId: number) => void;
   isOpen: boolean;
   onClose: () => void;
   onOpen: () => void;
@@ -40,12 +45,68 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
   botId,
   conversation,
   botUser,
+  messages = [],
+  onScrollToNote,
   isOpen,
   onClose,
   onOpen,
 }) => {
   const { data: tags = [] } = useTagsQuery(botId);
   const updateBotUserMut = useUpdateBotUserMutation(botId);
+  const deleteBotUserMut = useDeleteBotUserMutation(botId);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setShowMoreMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const isUk = getLanguage() === 'uk';
+
+  type ActiveConfirmAction = 'unsubscribe_account' | 'unsubscribe_telegram' | 'delete_contact' | null;
+  const [activeConfirm, setActiveConfirm] = useState<ActiveConfirmAction>(null);
+
+  const handleUnsubscribeAccount = () => {
+    if (!botUser) return;
+    setActiveConfirm('unsubscribe_account');
+  };
+
+  const handleUnsubscribeTelegram = () => {
+    if (!botUser) return;
+    setActiveConfirm('unsubscribe_telegram');
+  };
+
+  const handleDeleteContact = () => {
+    if (!botUser) return;
+    setActiveConfirm('delete_contact');
+  };
+
+  const handleConfirmAction = () => {
+    if (!botUser || !activeConfirm) return;
+
+    if (activeConfirm === 'unsubscribe_telegram') {
+      handleUpdateContactMetadata({
+        ...meta,
+        telegram_opt_in: false,
+      });
+      setActiveConfirm(null);
+      setShowMoreMenu(false);
+    } else {
+      deleteBotUserMut.mutate(botUser.id, {
+        onSuccess: () => {
+          setActiveConfirm(null);
+          setShowMoreMenu(false);
+          onClose();
+        },
+      });
+    }
+  };
 
   const [showAddTag, setShowAddTag] = useState(false);
   const [newTagVal, setNewTagVal] = useState('');
@@ -94,7 +155,6 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
   })() : {};
 
   const isPaused = meta.paused;
-  const isUnsubscribed = meta.unsubscribed;
 
   const handleUpdateContactMetadata = (updatedMeta: BotUserMetadata) => {
     if (!botUser) return;
@@ -162,13 +222,45 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
     });
   };
 
+  const noteMessages = messages.filter(m => m.senderType === 'NOTE');
+
   return (
     <div className="w-[280px] border-l border-slate-200 bg-white flex flex-col shrink-0 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
       <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-100 shrink-0">
         <span className="font-bold text-sm text-slate-800">{conversation.botUserName}</span>
-        <div className="flex items-center gap-2">
-          <button className="text-slate-400 hover:text-slate-600 cursor-pointer"><MoreVertical size={16} /></button>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 cursor-pointer"><X size={16} /></button>
+        <div className="flex items-center gap-2 relative" ref={moreMenuRef}>
+          <button
+            onClick={() => setShowMoreMenu(!showMoreMenu)}
+            className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 rounded hover:bg-slate-50 transition-all"
+          >
+            <MoreVertical size={16} />
+          </button>
+          {showMoreMenu && (
+            <div className="absolute right-0 top-8 w-56 bg-white border border-slate-100 rounded-xl shadow-lg py-1.5 z-50 animate-fade-in-down">
+              <button
+                onClick={handleUnsubscribeAccount}
+                className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-all cursor-pointer flex items-center gap-2"
+              >
+                {isUk ? 'Відписати від акаунта' : 'Unsubscribe from Account'}
+              </button>
+              <button
+                onClick={handleUnsubscribeTelegram}
+                className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-all cursor-pointer flex items-center gap-2"
+              >
+                {isUk ? 'Відписати від Telegram' : 'Unsubscribe from Telegram'}
+              </button>
+              <div className="border-t border-slate-100 my-1" />
+              <button
+                onClick={handleDeleteContact}
+                className="w-full text-left px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-all cursor-pointer flex items-center gap-2"
+              >
+                {isUk ? 'Видалити контакт' : 'Delete Contact'}
+              </button>
+            </div>
+          )}
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 rounded hover:bg-slate-50 transition-all">
+            <X size={16} />
+          </button>
         </div>
       </div>
       <div className="flex flex-col items-center px-4 py-6 shrink-0">
@@ -178,17 +270,9 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
       <div className="px-4 space-y-2.5 pb-4 border-b border-slate-100 text-[12px] shrink-0">
         <div className="flex items-center justify-between text-slate-600">
           <div className="flex items-center gap-2">
-            <span className={isUnsubscribed ? 'text-rose-500' : 'text-emerald-500'}>✓</span>
-            <span>{isUnsubscribed ? t('crm.panel.status.unsubscribed') : t('crm.panel.status.subscribed')}</span>
+            <span className={meta.telegram_opt_in === false ? 'text-rose-500' : 'text-emerald-500'}>✓</span>
+            <span>{meta.telegram_opt_in === false ? t('crm.panel.status.unsubscribed') : t('crm.panel.status.subscribed')}</span>
           </div>
-          {botUser && (
-            <button
-              onClick={() => handleUpdateContactMetadata({ ...meta, unsubscribed: !isUnsubscribed })}
-              className="text-indigo-600 hover:text-indigo-700 underline text-[11px] cursor-pointer"
-            >
-              {isUnsubscribed ? t('crm.panel.action.subscribe') : t('crm.panel.action.unsubscribe')}
-            </button>
-          )}
         </div>
         <div className="flex items-center gap-2 text-slate-600"><Hash size={13} /><span>{conversation.botUserTelegramId}</span></div>
         {conversation.botUserUsername && (
@@ -333,13 +417,6 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
             </div>
           </div>
 
-          <div className="px-4 py-3 border-b border-slate-100 shrink-0">
-            <h4 className="font-bold text-[13px] text-slate-800 mb-1">{t('crm.panel.sequences_title')}</h4>
-            <button className="text-[12px] font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer">
-              {t('crm.panel.sequences.subscribe')}
-            </button>
-          </div>
-
           <div className="px-4 py-3 border-b border-slate-100 shrink-0 space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="font-bold text-[13px] text-slate-800">{t('crm.panel.fields_title')}</h4>
@@ -392,6 +469,28 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
               )}
             </div>
           </div>
+
+          {noteMessages.length > 0 && (
+            <div className="px-4 py-3 border-b border-slate-100 shrink-0 space-y-2">
+              <h4 className="font-bold text-[13px] text-slate-800">{t('crm.panel.notes_title')}</h4>
+              <div className="space-y-2 max-h-[250px] overflow-y-auto custom-scrollbar" style={{ scrollbarWidth: 'none' }}>
+                {noteMessages.map((note) => {
+                  const date = new Date(note.createdAt);
+                  const formattedDate = `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+                  return (
+                    <div
+                      key={note.id}
+                      onClick={() => onScrollToNote?.(note.id)}
+                      className="p-2.5 bg-amber-50/70 border border-amber-100/60 rounded-xl hover:bg-amber-100/50 active:bg-amber-100 transition-all cursor-pointer space-y-1 animate-fade-in"
+                    >
+                      <p className="text-xs text-slate-700 font-medium leading-relaxed break-words whitespace-pre-wrap">{note.content}</p>
+                      <div className="text-[10px] text-slate-400 font-semibold">{formattedDate}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </>
       )}
       {showHistoryModal && (
@@ -400,6 +499,39 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
           onClose={() => setShowHistoryModal(false)}
         />
       )}
+      <ConfirmActionModal
+        isOpen={activeConfirm !== null}
+        onClose={() => setActiveConfirm(null)}
+        onConfirm={handleConfirmAction}
+        isLoading={deleteBotUserMut.isPending || updateBotUserMut.isPending}
+        isDanger={activeConfirm === 'delete_contact' || activeConfirm === 'unsubscribe_account'}
+        title={
+          activeConfirm === 'unsubscribe_account'
+            ? (isUk ? 'Відписати від акаунта' : 'Unsubscribe from Account')
+            : activeConfirm === 'unsubscribe_telegram'
+            ? (isUk ? 'Відписати від Telegram' : 'Unsubscribe from Telegram')
+            : (isUk ? 'Видалити контакт' : 'Delete Contact')
+        }
+        message={
+          activeConfirm === 'unsubscribe_account'
+            ? (isUk
+                ? 'Ви впевнені, що хочете відписати цього контакту від акаунта? Це видалить його з списку чатів.'
+                : 'Are you sure you want to unsubscribe this contact from the account? This will remove them from the chat list.')
+            : activeConfirm === 'unsubscribe_telegram'
+            ? (isUk
+                ? 'Ви впевнені, що хочете відписати цього контакту від Telegram? Він перестане отримувати автоматизації та розсилки.'
+                : 'Are you sure you want to unsubscribe this contact from Telegram? They will stop receiving automations and broadcasts.')
+            : (isUk
+                ? 'Ви впевнені, що хочете видалити цей контакт?'
+                : 'Are you sure you want to delete this contact?')
+        }
+        confirmText={
+          activeConfirm === 'delete_contact'
+            ? (isUk ? 'Видалити' : 'Delete')
+            : (isUk ? 'Відписати' : 'Unsubscribe')
+        }
+        cancelText={isUk ? 'Скасувати' : 'Cancel'}
+      />
     </div>
   );
 };

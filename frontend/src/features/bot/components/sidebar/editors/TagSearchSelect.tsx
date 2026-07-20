@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus } from 'lucide-react';
+import { t } from '../../../../../i18n';
 
 export interface TagSearchSelectProps {
   tagName: string;
@@ -40,7 +41,7 @@ export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({
     <div className="relative w-full" ref={dropdownRef}>
       <input
         type="text"
-        placeholder="Select or search tag..."
+        placeholder={t('crm.tags.placeholder_select_or_search')}
         value={isOpen ? search : (tagName || '')}
         onChange={(e) => {
           setSearch(e.target.value);
@@ -61,7 +62,7 @@ export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({
             className="w-full text-left px-2.5 py-1.5 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 rounded-lg text-xs font-extrabold flex items-center gap-1 transition-all cursor-pointer"
           >
             <Plus size={12} />
-            <span>Create new tag...</span>
+            <span>{t('crm.tags.create_new_tag')}</span>
           </button>
 
           {filteredTags.map((tag) => {
@@ -87,7 +88,7 @@ export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({
                 <span>{tag.name}</span>
                 {isAssigned && (
                   <span className="text-[9px] bg-slate-200/60 text-slate-500 px-1.5 py-0.5 rounded font-extrabold">
-                    Added
+                    {t('crm.tags.added_label')}
                   </span>
                 )}
               </button>
@@ -102,7 +103,7 @@ export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({
               }}
               className="w-full text-left px-2.5 py-1.5 text-slate-400 italic text-xs font-semibold cursor-pointer"
             >
-              No tag matches "{search}". Create it?
+              {t('crm.tags.no_match_create', { search })}
             </button>
           )}
         </div>

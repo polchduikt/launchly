@@ -17,12 +17,14 @@ import { useChatActions } from '../hooks/useChatActions';
 import { useChatFilters } from '../hooks/useChatFilters';
 import { AlertCircle } from 'lucide-react';
 import { ChatHeader } from '../components/ChatHeader';
+import { SettingsModal } from '../../../components/shared/SettingsModal';
 import { ChatSidebar } from '../components/ChatSidebar';
 import { ChatFilterBar } from '../components/ChatFilterBar';
 import { ConversationList } from '../components/ConversationList';
 import { MessageArea } from '../components/MessageArea';
 import { ReplyBar } from '../components/ReplyBar';
 import { ContactInfoPanel } from '../components/ContactInfoPanel';
+import { ScheduleMessageModal } from '../components/ScheduleMessageModal';
 import type { BottomTab } from '../types/chat';
 import { useSearchParams } from 'react-router-dom';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
@@ -67,8 +69,10 @@ export const ChatPage: React.FC = () => {
   const { data: messages = [], isLoading: isMsgLoading } = useMessagesQuery(selectedConvId || 0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [infoPanelOpen, setInfoPanelOpen] = useState(true);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [bottomTab, setBottomTab] = useState<BottomTab>('reply');
   const [typedNote, setTypedNote] = useState('');
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const ls = useChatLocalStorage({ conversations, selectedConvId });
   const actions = useChatActions({ selectedConvId, botId: currentBotId });
   const filters = useChatFilters({
@@ -189,7 +193,7 @@ export const ChatPage: React.FC = () => {
           .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
         `}</style>
 
-        <ChatHeader searchQuery={filters.searchQuery} onSearchChange={filters.setSearchQuery} />
+        <ChatHeader searchQuery={filters.searchQuery} onSearchChange={filters.setSearchQuery} onOpenSettings={() => setIsSettingsModalOpen(true)} />
 
         <div className="flex-1 flex overflow-hidden w-full">
           <ChatSidebar
@@ -288,6 +292,7 @@ export const ChatPage: React.FC = () => {
                       typedNote={typedNote}
                       onTypedNoteChange={setTypedNote}
                       onSaveNote={handleSaveNote}
+                      onScheduleClick={() => setShowScheduleModal(true)}
                     />
                   </>
                 ) : (
@@ -302,6 +307,15 @@ export const ChatPage: React.FC = () => {
               botId={currentBotId}
               conversation={selectedConversation}
               botUser={currentBotUser}
+              messages={messages}
+              onScrollToNote={(noteId) => {
+                const noteEl = document.querySelector(`[data-message-id="${noteId}"]`);
+                if (noteEl) {
+                  noteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  noteEl.classList.add('highlight-message');
+                  setTimeout(() => noteEl.classList.remove('highlight-message'), 2000);
+                }
+              }}
               isOpen={infoPanelOpen}
               onClose={() => setInfoPanelOpen(false)}
               onOpen={() => setInfoPanelOpen(true)}
@@ -309,6 +323,17 @@ export const ChatPage: React.FC = () => {
           )}
         </div>
       </div>
+
+     <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} initialTab="notifications" />
+     <ScheduleMessageModal
+       isOpen={showScheduleModal}
+       onClose={() => setShowScheduleModal(false)}
+       initialText={actions.typedMessage}
+       onSchedule={(dateTime) => {
+         actions.handleScheduleSend(dateTime);
+         setShowScheduleModal(false);
+       }}
+     />
     </DashboardLayout>
   );
 };
