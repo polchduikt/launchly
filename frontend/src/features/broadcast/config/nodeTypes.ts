@@ -8,6 +8,7 @@ import {
   RandomizerNode,
   CommentNode,
   StartAutomationNode,
+  AiNode,
 } from '../../bot/components/nodes';
 import { StartBroadcastNode } from '../components/nodes';
 
@@ -25,4 +26,5 @@ export const NODE_TYPES = {
   RANDOMIZER: RandomizerNode,
   COMMENT: CommentNode,
   START_AUTOMATION: StartAutomationNode,
+  AI: AiNode,
 };

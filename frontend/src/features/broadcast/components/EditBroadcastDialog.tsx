@@ -29,7 +29,7 @@ export const EditBroadcastDialog: React.FC<EditBroadcastDialogProps> = ({
     if (campaign && isOpen) {
       setName(campaign.name);
       setMessage(campaign.message || '');
-      setSelectedAutomation('ALL');
+      setSelectedAutomation(campaign.targetAllBots ? 'ALL' : String(campaign.botId));
     }
   }, [campaign, isOpen]);
 
@@ -55,6 +55,8 @@ export const EditBroadcastDialog: React.FC<EditBroadcastDialogProps> = ({
           filterValue: campaign.filterValue,
           nodes: campaign.nodes,
           edges: campaign.edges,
+          botId: selectedAutomation === 'ALL' ? undefined : Number(selectedAutomation),
+          targetAllBots: selectedAutomation === 'ALL',
         },
       },
       {

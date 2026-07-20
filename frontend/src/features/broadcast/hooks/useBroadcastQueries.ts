@@ -41,7 +41,7 @@ export const useCreateCampaignMutation = (botId: number) => {
   return useMutation({
     mutationFn: (req: CreateCampaignRequest) => createCampaignApi(botId, req),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns', botId] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
     },
   });
 };
@@ -52,7 +52,7 @@ export const useUpdateCampaignMutation = (botId: number) => {
     mutationFn: ({ campaignId, req }: { campaignId: number; req: CreateCampaignRequest }) =>
       updateCampaignApi(botId, campaignId, req),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns', botId] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
     },
   });
 };
@@ -66,9 +66,8 @@ export const useSendCampaignMutation = (botId?: number) => {
       }
       return sendCampaignApi(params.botId, params.campaignId);
     },
-    onSuccess: (_, params) => {
-      const targetBotId = typeof params === 'number' ? botId : params.botId;
-      queryClient.invalidateQueries({ queryKey: ['campaigns', targetBotId] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
     },
   });
 };
@@ -102,9 +101,8 @@ export const useDeleteCampaignMutation = (botId?: number) => {
       }
       return deleteCampaignApi(params.botId, params.campaignId);
     },
-    onSuccess: (_, params) => {
-      const targetBotId = typeof params === 'number' ? botId : params.botId;
-      queryClient.invalidateQueries({ queryKey: ['campaigns', targetBotId] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
     },
   });
 };
@@ -118,9 +116,8 @@ export const useCancelScheduleMutation = (botId?: number) => {
       }
       return cancelScheduleApi(params.botId, params.campaignId);
     },
-    onSuccess: (_, params) => {
-      const targetBotId = typeof params === 'number' ? botId : params.botId;
-      queryClient.invalidateQueries({ queryKey: ['campaigns', targetBotId] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
     },
   });
 };

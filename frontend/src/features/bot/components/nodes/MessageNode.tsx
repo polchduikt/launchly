@@ -452,7 +452,7 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
           className="w-full py-2 border border-dashed border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 nodrag shadow-sm"
         >
           <Plus size={13} />
-          <span>{t('flow_builder.add_button')}</span>
+          <span>{t('flow_builder.btn_add_button')}</span>
         </button>
       </div>
 

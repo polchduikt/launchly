@@ -200,15 +200,7 @@ export const UserFieldsPanel: React.FC = () => {
       )}
 
       <div className="flex justify-between items-center select-none">
-        <div className="flex border-b border-slate-200">
-          <button className="px-4 py-2 text-xs font-bold border-b-2 border-blue-600 text-slate-800 cursor-pointer">
-            {t('settings.fields.user_fields_tab')}
-          </button>
-          <button className="px-4 py-2 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 cursor-pointer">
-            {t('settings.fields.bot_fields_tab')}
-          </button>
-        </div>
-        <div className="relative w-64">
+        <div className="relative w-64 text-left">
           <input
             type="text"
             placeholder={t('settings.fields.search_placeholder')}

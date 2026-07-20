@@ -41,7 +41,6 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
         className="bg-white rounded-2xl shadow-xl border border-slate-200/80 w-full max-w-sm overflow-hidden animate-fade-in-down"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-start gap-3 px-5 pt-5 pb-4">
           <div className={`p-2 rounded-xl shrink-0 ${
             variant === 'danger' ? 'bg-rose-50' : variant === 'warning' ? 'bg-amber-50' : 'bg-indigo-50'
@@ -56,11 +55,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             <p className="text-xs text-slate-500 mt-1 leading-relaxed">{message}</p>
           </div>
         </div>
-
-        {/* Divider */}
         <div className="h-px bg-slate-100 mx-5" />
-
-        {/* Actions */}
         <div className="flex items-center justify-end gap-2 px-5 py-3.5">
           <button
             onClick={onCancel}

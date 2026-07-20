@@ -1,16 +1,18 @@
+import { t } from '../../../i18n';
+
 export interface SelectionOption {
   value: string;
   label: string;
 }
 
-export const CONDITION_OPERATORS: SelectionOption[] = [
-  { value: 'is', label: 'is' },
-  { value: 'isn_t', label: "isn't" },
-  { value: 'has_any_value', label: 'has any value' },
-  { value: 'contains', label: 'contains' },
-  { value: 'doesn_t_contain', label: "doesn't contain" },
-  { value: 'begins_with', label: 'begins with' },
-  { value: 'is_unknown', label: 'is unknown' },
+export const CONDITION_OPERATORS = [
+  { value: 'is', get label() { return t('operator.is'); } },
+  { value: 'isn_t', get label() { return t('operator.isn_t'); } },
+  { value: 'has_any_value', get label() { return t('operator.has_any_value'); } },
+  { value: 'contains', get label() { return t('operator.contains'); } },
+  { value: 'doesn_t_contain', get label() { return t('operator.doesn_t_contain'); } },
+  { value: 'begins_with', get label() { return t('operator.begins_with'); } },
+  { value: 'is_unknown', get label() { return t('operator.is_unknown'); } },
 ];
 
 export const ORDER_CURRENCIES: SelectionOption[] = [
@@ -37,22 +39,22 @@ export const getOperatorLabel = (op: string): string => {
   switch (op.toLowerCase()) {
     case 'is':
     case 'equals':
-      return 'is';
+      return t('operator.is');
     case 'isn_t':
     case 'not_equals':
-      return "isn't";
+      return t('operator.isn_t');
     case 'has_any_value':
     case 'not_empty':
-      return 'has any value';
+      return t('operator.has_any_value');
     case 'contains':
-      return 'contains';
+      return t('operator.contains');
     case 'doesn_t_contain':
-      return "doesn't contain";
+      return t('operator.doesn_t_contain');
     case 'begins_with':
-      return 'begins with';
+      return t('operator.begins_with');
     case 'is_unknown':
     case 'empty':
-      return 'is unknown';
+      return t('operator.is_unknown');
     default:
       return op;
   }

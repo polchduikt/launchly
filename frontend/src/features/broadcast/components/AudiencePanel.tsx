@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { UserCheck, ChevronDown, ChevronUp, X, Plus, Search, User, Tag, Sparkles, Globe, CreditCard, GitFork, Shuffle, Phone, Mail, Hash, Clock } from 'lucide-react';
+import { UserCheck, ChevronDown, ChevronUp, X, Plus, Search, User, Tag, Sparkles, Globe, CreditCard, GitFork, Shuffle, Phone, Mail, Hash, Clock, Send } from 'lucide-react';
 import type { AudienceCondition, TagResponse } from '../types';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 import { useBotStore } from '../../../store/useBotStore';
-import { t } from '../../../i18n';
+import { t, getLanguage } from '../../../i18n';
 
 
 interface AudiencePanelProps {
@@ -97,29 +97,26 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
 
   const filteredItems = useMemo(() => {
     const search = dropdownSearch.toLowerCase().trim();
+    const isUk = getLanguage() === 'uk';
 
     if (selectedCategory === 'general') {
       const items = [
-        { type: 'tag', label: 'Tag', val: '', icon: Tag },
-        { type: 'opt_in', label: 'Opted-In Through Widget', val: 'Widget', icon: CreditCard },
-        { type: 'opt_in', label: 'Opted-In Through Ad', val: 'Ad', icon: Sparkles },
-        { type: 'opt_in', label: 'Opted-In Through API', val: 'API', icon: Globe },
-        { type: 'opt_in', label: 'Sequence subscription', val: 'Sequence', icon: GitFork },
-        { type: 'opt_in', label: 'Segment', val: 'Segment', icon: Shuffle },
-        { type: 'order', label: 'Has Orders', val: 'Any Order', icon: CreditCard },
-        { type: 'lead', label: 'Has Leads', val: 'Any Lead', icon: UserCheck },
+        { type: 'tag', label: isUk ? 'Тег' : 'Tag', val: '', icon: Tag },
       ];
       return items.filter(i => i.label.toLowerCase().includes(search));
     }
 
     if (selectedCategory === 'system') {
       const items = [
-        { type: 'system', label: 'First Name', icon: User },
-        { type: 'system', label: 'Last Name', icon: User },
-        { type: 'system', label: 'Phone', icon: Phone },
+        { type: 'system', label: isUk ? "Ім'я" : 'First Name', icon: User },
+        { type: 'system', label: isUk ? 'Прізвище' : 'Last Name', icon: User },
+        { type: 'system', label: isUk ? "Повне ім'я" : 'Full Name', icon: User },
         { type: 'system', label: 'Email', icon: Mail },
-        { type: 'system', label: 'Contact Id', icon: Hash },
-        { type: 'system', label: 'Subscribed', icon: Clock },
+        { type: 'system', label: isUk ? 'Телефон' : 'Phone', icon: Phone },
+        { type: 'system', label: isUk ? 'Дата підписки' : 'Subscribed', icon: Clock },
+        { type: 'system', label: 'Contact ID', icon: Hash },
+        { type: 'system', label: 'Telegram User ID', icon: Hash },
+        { type: 'system', label: 'Telegram Username', icon: Send },
       ];
       return items.filter(i => i.label.toLowerCase().includes(search));
     }
@@ -225,13 +222,15 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
 
   const getConditionDisplayValue = (cond: AudienceCondition) => {
     const val = cond.value || '';
+    const isUk = getLanguage() === 'uk';
     if (cond.field === 'lead') {
       if (val.startsWith('System:') || val.startsWith('Field:')) {
         const parts = val.split(':');
-        return parts[2] || 'Select...';
+        const display = parts[2] || '';
+        return display === 'Select...' || display === '' ? (isUk ? 'Оберіть...' : 'Select...') : display;
       }
     }
-    return cond.value || 'Select...';
+    return cond.value === 'Select...' || !cond.value ? (isUk ? 'Оберіть...' : 'Select...') : cond.value;
   };
 
   return (

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { X, Plus, Search, Tag, User, Phone, Mail, Hash, Clock, Pause, Send, CheckSquare, Sparkles } from 'lucide-react';
+import { X, Plus, Search, Tag, User, Phone, Mail, Hash, Clock, Pause, Send, Sparkles } from 'lucide-react';
 import { getLanguage } from '../../../i18n';
 
 export interface FilterCondition {
@@ -100,7 +100,6 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
         { type: 'system', label: 'Contact ID', field: 'id', icon: Hash },
         { type: 'system', label: 'Telegram User ID', field: 'telegramUserId', icon: Hash },
         { type: 'system', label: 'Telegram Username', field: 'telegramUsername', icon: Send },
-        { type: 'system', label: isUk ? 'Opted-in для Telegram' : 'Opted-in for Telegram', field: 'optedInTelegram', icon: CheckSquare },
       ];
       return items.filter((i) => i.label.toLowerCase().includes(q));
     }

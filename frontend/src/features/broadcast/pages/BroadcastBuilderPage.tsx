@@ -29,14 +29,14 @@ import type { FlowBlock } from '../../../types/bot';
 import { useFlowCollaboration } from '../../bot/hooks/useFlowCollaboration';
 
 const BROADCAST_CONTEXT_MENU_OPTIONS = [
-  { type: 'MESSAGE', label: '+ Telegram', isPro: false, isAi: false },
-  { type: 'API_CALL', label: '+ API Integration', isPro: false, isAi: false },
-  { type: 'ACTION', label: '+ Actions', isPro: false, isAi: false },
-  { type: 'CONDITION', label: '+ Condition', isPro: true, isAi: false },
-  { type: 'RANDOMIZER', label: '+ Randomizer', isPro: true, isAi: false },
-  { type: 'SMART_DELAY', label: '+ Smart Delay', isPro: true, isAi: false },
-  { type: 'START_AUTOMATION', label: '+ Start Automation', isPro: false, isAi: false },
-  { type: 'AI', label: '+ AI Step', isPro: false, isAi: true },
+  { type: 'MESSAGE', get label() { return t('context_menu.MESSAGE'); }, isPro: false, isAi: false },
+  { type: 'API_CALL', get label() { return t('context_menu.API_CALL'); }, isPro: false, isAi: false },
+  { type: 'ACTION', get label() { return t('context_menu.ACTION'); }, isPro: false, isAi: false },
+  { type: 'CONDITION', get label() { return t('context_menu.CONDITION'); }, isPro: true, isAi: false },
+  { type: 'RANDOMIZER', get label() { return t('context_menu.RANDOMIZER'); }, isPro: true, isAi: false },
+  { type: 'SMART_DELAY', get label() { return t('context_menu.SMART_DELAY'); }, isPro: true, isAi: false },
+  { type: 'START_AUTOMATION', get label() { return t('context_menu.START_AUTOMATION'); }, isPro: false, isAi: false },
+  { type: 'AI', get label() { return t('context_menu.AI'); }, isPro: false, isAi: true },
 ];
 
 import {
@@ -54,9 +54,12 @@ import {
   Spline,
   Undo2,
   Redo2,
+  Sparkles,
 } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { t } from '../../../i18n';
+import { useAiStore } from '../../../store/useAiStore';
+import { AiAssistantDrawer } from '../../../features/ai/components/AiAssistantDrawer';
 
 
 const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
@@ -115,13 +118,19 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedu
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs select-none">
-      <div className="bg-white border border-slate-200 rounded-3xl shadow-xl w-96 p-6 animate-in fade-in zoom-in-95 duration-150 animate-duration-150">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 select-none"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white border border-slate-200 rounded-3xl shadow-xl w-96 p-6 animate-in fade-in zoom-in-95 duration-150 animate-duration-150"
+      >
         <h3 className="font-extrabold text-sm text-slate-800 uppercase tracking-wider mb-2">
-          Schedule Broadcast
+          {t('broadcast.schedule.title')}
         </h3>
         <p className="text-xs text-slate-400 font-semibold mb-4 leading-relaxed">
-          Select the date and time to automatically send this campaign to your target audience.
+          {t('broadcast.schedule.description')}
         </p>
 
         <input
@@ -136,7 +145,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedu
             onClick={onClose}
             className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-500 font-bold text-xs rounded-xl transition-all cursor-pointer"
           >
-            Cancel
+            {t('broadcast.schedule.cancel')}
           </button>
           <button
             onClick={() => {
@@ -148,7 +157,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedu
             disabled={!dateTime}
             className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Schedule
+            {t('broadcast.schedule.submit')}
           </button>
         </div>
       </div>
@@ -255,6 +264,23 @@ const BroadcastBuilderInner: React.FC = () => {
 
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isAddDropdownOpen, setIsAddDropdownOpen] = useState(false);
+
+  const { setOnGenerate, setHasExistingNodes } = useAiStore();
+
+  React.useEffect(() => {
+    setOnGenerate((newNodes, newEdges) => {
+      setNodes(newNodes);
+      setEdges(newEdges);
+      setSelectedNodeId(null);
+    });
+    return () => {
+      setOnGenerate(null);
+    };
+  }, [setOnGenerate, setNodes, setEdges, setSelectedNodeId]);
+
+  React.useEffect(() => {
+    setHasExistingNodes(nodes.length > 1 || (nodes.length === 1 && nodes[0].type !== 'START_BROADCAST'));
+  }, [nodes, setHasExistingNodes]);
 
   const currentUser = useAuthStore((state) => state.user);
   const {
@@ -605,6 +631,20 @@ const BroadcastBuilderInner: React.FC = () => {
           </button>
 
           {!isViewer && (
+            <button
+              onClick={() => {
+                useAiStore.getState().setIsOpen(true);
+                useAiStore.getState().setActiveTab('generator');
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 text-xs font-bold rounded-xl transition-all border border-indigo-100 cursor-pointer shadow-3xs"
+              title="Generate flow with AI"
+            >
+              <Sparkles size={14} className="animate-pulse" />
+              <span>{t('flow_builder.ai_gen')}</span>
+            </button>
+          )}
+
+          {!isViewer && (
             <div className="flex items-center gap-2 select-none">
               <button
                 onClick={handleSendCampaign}
@@ -821,17 +861,17 @@ const BroadcastBuilderInner: React.FC = () => {
                     </span>
                     <div>
                       <span className="text-[9px] font-bold text-slate-450 uppercase tracking-widest leading-none mb-1 block">
-                        Editing Node
+                        {t('broadcast.builder.node.editing')}
                       </span>
                       <h2 className="font-extrabold text-sm text-slate-850 uppercase tracking-wider block">
-                        Trigger Settings
+                        {t('broadcast.builder.node.trigger_settings')}
                       </h2>
                     </div>
                   </div>
 
                   <div className="bg-slate-50 border border-slate-200/50 rounded-2xl p-4.5">
                     <p className="text-xs text-slate-550 leading-relaxed font-semibold">
-                      This is the starting block of your broadcast campaign. It triggers sending your message to targeted subscribers when you click Send Now.
+                      {t('broadcast.builder.node.trigger_description')}
                     </p>
                   </div>
                 </div>
@@ -948,6 +988,8 @@ const BroadcastBuilderInner: React.FC = () => {
         edges={edges}
         startNodeType="START_BROADCAST"
       />
+
+      <AiAssistantDrawer />
 
       <ScheduleModal
         isOpen={isScheduleModalOpen}

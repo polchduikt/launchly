@@ -55,9 +55,11 @@ export const BroadcastsPage: React.FC = () => {
   });
 
   const campaigns = useMemo(() => {
-    return campaignQueries
-      .flatMap((q) => q.data || [])
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const list = campaignQueries.flatMap((q) => q.data || []);
+    const uniqueMap = new Map<number, CampaignResponse>();
+    list.forEach((c) => uniqueMap.set(c.id, c));
+    const uniqueList = Array.from(uniqueMap.values());
+    return uniqueList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [campaignQueries]);
 
   const isCampaignsLoading = campaignQueries.some((q) => q.isLoading);
@@ -221,8 +223,8 @@ export const BroadcastsPage: React.FC = () => {
                             {camp.message}
                           </div>
                         </td>
-                        <td className="py-4 px-4 text-xs font-bold text-slate-550">
-                          {campaignBot ? campaignBot.name : '—'}
+                        <td className="py-4 px-4 text-xs font-bold text-slate-555">
+                          {camp.targetAllBots ? t('broadcast.dialog.all_automations') : (campaignBot ? campaignBot.name : '—')}
                         </td>
                         <td className="py-4 px-4 text-sm text-slate-500 font-medium">
                           <span className="flex items-center gap-1.5">

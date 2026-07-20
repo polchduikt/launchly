@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useLoginMutation } from './useLoginMutation';
+import { ROUTES } from '../../../constants/routes';
 
 export const loginSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
@@ -29,8 +30,15 @@ export const useLoginForm = () => {
   const onSubmit = async (data: LoginFields) => {
     setApiError(null);
     try {
-      await loginMutate(data);
-      navigate('/home', { replace: true });
+      const res = await loginMutate(data);
+      const role = res?.user?.role;
+      const isAdminOrManager = role === 'ROLE_ADMIN' || role === 'ROLE_MANAGER';
+
+      if (isAdminOrManager) {
+        navigate(ROUTES.ADMIN_HOME, { replace: true });
+      } else {
+        navigate(ROUTES.HOME, { replace: true });
+      }
     } catch (error: unknown) {
       const msg = axios.isAxiosError(error)
         ? (error.response?.data?.message ?? 'Invalid email or password. Please try again.')

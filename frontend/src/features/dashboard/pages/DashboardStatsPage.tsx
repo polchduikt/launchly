@@ -12,6 +12,7 @@ import {
   Loader2, 
   AlertCircle, 
   TrendingUp, 
+  TrendingDown, 
   ChevronDown,
   MessageSquare,
   Brain,
@@ -713,9 +714,12 @@ export const DashboardStatsPage: React.FC = () => {
                     <span className="text-2xl font-black text-slate-900 tracking-tight block">
                       {stats?.totalSubscribers ?? 0}
                     </span>
-                    <span className="text-[10px] font-bold text-indigo-600 flex items-center gap-1 mt-0.5">
-                      <TrendingUp size={12} />
-                      <span>+10.2% vs last week</span>
+                    <span className={`text-[10px] font-bold flex items-center gap-1 mt-0.5 ${(stats?.subscribersGrowth ?? 0) >= 0 ? 'text-indigo-600' : 'text-rose-500'}`}>
+                      {(stats?.subscribersGrowth ?? 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                      <span>
+                        {(stats?.subscribersGrowth ?? 0) >= 0 ? '+' : ''}
+                        {stats?.subscribersGrowth ?? 0}% {t('dashboard.stats.growth.vs_last_week')}
+                      </span>
                     </span>
                   </div>
                   <div className="mt-1 flex justify-between items-end border-t border-slate-50 pt-2.5">
@@ -735,9 +739,12 @@ export const DashboardStatsPage: React.FC = () => {
                     <span className="text-2xl font-black text-slate-900 tracking-tight block">
                       {stats?.activeUsers24h ?? 0}
                     </span>
-                    <span className="text-[10px] font-bold text-violet-600 flex items-center gap-1 mt-0.5">
-                      <TrendingUp size={12} />
-                      <span>+5.3% vs yesterday</span>
+                    <span className={`text-[10px] font-bold flex items-center gap-1 mt-0.5 ${(stats?.activeUsersGrowth ?? 0) >= 0 ? 'text-violet-600' : 'text-rose-500'}`}>
+                      {(stats?.activeUsersGrowth ?? 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                      <span>
+                        {(stats?.activeUsersGrowth ?? 0) >= 0 ? '+' : ''}
+                        {stats?.activeUsersGrowth ?? 0}% {t('dashboard.stats.growth.vs_yesterday')}
+                      </span>
                     </span>
                   </div>
                   <div className="mt-1 flex justify-between items-end border-t border-slate-50 pt-2.5">
@@ -757,9 +764,12 @@ export const DashboardStatsPage: React.FC = () => {
                     <span className="text-2xl font-black text-slate-900 tracking-tight block">
                       {stats?.clicksCount30d ?? 0}
                     </span>
-                    <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
-                      <TrendingUp size={12} />
-                      <span>+12.4% vs last month</span>
+                    <span className={`text-[10px] font-bold flex items-center gap-1 mt-0.5 ${(stats?.clicksGrowth ?? 0) >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                      {(stats?.clicksGrowth ?? 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                      <span>
+                        {(stats?.clicksGrowth ?? 0) >= 0 ? '+' : ''}
+                        {stats?.clicksGrowth ?? 0}% {t('dashboard.stats.growth.vs_last_month')}
+                      </span>
                     </span>
                   </div>
                   <div className="mt-1 flex justify-between items-end border-t border-slate-50 pt-2.5">
@@ -779,9 +789,12 @@ export const DashboardStatsPage: React.FC = () => {
                     <span className="text-2xl font-black text-slate-900 tracking-tight block">
                       {stats?.activeAutomations ?? 0}
                     </span>
-                    <span className="text-[10px] font-bold text-amber-600 flex items-center gap-1 mt-0.5">
-                      <TrendingUp size={12} />
-                      <span>+8.5% vs last week</span>
+                    <span className={`text-[10px] font-bold flex items-center gap-1 mt-0.5 ${(stats?.automationsGrowth ?? 0) >= 0 ? 'text-amber-600' : 'text-rose-500'}`}>
+                      {(stats?.automationsGrowth ?? 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                      <span>
+                        {(stats?.automationsGrowth ?? 0) >= 0 ? '+' : ''}
+                        {stats?.automationsGrowth ?? 0}% {t('dashboard.stats.growth.vs_last_week')}
+                      </span>
                     </span>
                   </div>
                   <div className="mt-1 flex justify-between items-end border-t border-slate-50 pt-2.5">

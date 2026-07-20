@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { getCurrentUserApi } from '../api/auth';
+import { ROUTES } from '../../../constants/routes';
 import { Loader2 } from 'lucide-react';
 
 const OAuth2Callback: React.FC = () => {
@@ -23,7 +24,13 @@ const OAuth2Callback: React.FC = () => {
         useAuthStore.setState({ accessToken, refreshToken });
         const user = await getCurrentUserApi();
         login(accessToken, refreshToken, user);
-        navigate('/home', { replace: true });
+
+        const isAdminOrManager = user.role === 'ROLE_ADMIN' || user.role === 'ROLE_MANAGER';
+        if (isAdminOrManager) {
+          navigate(ROUTES.ADMIN_HOME, { replace: true });
+        } else {
+          navigate(ROUTES.HOME, { replace: true });
+        }
       } catch (error) {
         useAuthStore.getState().logout();
         navigate('/login', { replace: true });

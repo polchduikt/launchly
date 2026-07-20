@@ -173,6 +173,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 </div>
 
                 <div className="space-y-1.5 pb-3 border-b border-slate-100">
+                  {(user.role === 'ROLE_ADMIN' || user.role === 'ROLE_MANAGER') && (
+                    <button
+                      onClick={() => navigate(ROUTES.ADMIN_HOME)}
+                      className="w-full flex items-center gap-3 px-2.5 py-2 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-xl transition-all text-left cursor-pointer"
+                    >
+                      <HelpCircle size={16} className="text-purple-600 shrink-0" />
+                      <span>Admin Panel</span>
+                    </button>
+                  )}
                   <button className="w-full flex items-center gap-3 px-2 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer">
                     <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

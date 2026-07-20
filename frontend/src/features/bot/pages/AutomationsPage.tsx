@@ -709,7 +709,7 @@ export const AutomationsPage: React.FC = () => {
             top: menuCoords.top,
             left: menuCoords.left,
           }}
-          className="w-48 bg-white border border-slate-200 rounded-2xl shadow-xl z-[100] py-1.5 text-left"
+          className="w-56 bg-white border border-slate-200 rounded-2xl shadow-xl z-[100] py-1.5 text-left"
           onClick={(e) => e.stopPropagation()}
         >
           {(() => {
@@ -964,10 +964,10 @@ export const AutomationsPage: React.FC = () => {
             className="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-xl animate-in fade-in duration-200 cursor-default"
           >
             <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900">Edit Automation</h3>
+              <h3 className="text-lg font-bold text-slate-900">{t('automations.edit_modal.title')}</h3>
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                className="text-slate-400 hover:text-slate-655 transition-colors"
               >
                 <X size={18} />
               </button>
@@ -975,19 +975,19 @@ export const AutomationsPage: React.FC = () => {
             <div className="p-6 space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-                  Automation Name
+                  {t('automations.edit_modal.name_label')}
                 </label>
                 <input
                   type="text"
                   value={editBotName}
                   onChange={(e) => setEditBotName(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
-                  placeholder="Enter automation name"
+                  placeholder={t('automations.edit_modal.name_placeholder')}
                 />
               </div>
               <div className="relative">
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-                  Telegram Bot Connection
+                  {t('automations.edit_modal.bot_connection')}
                 </label>
                 <button
                   type="button"
@@ -998,15 +998,15 @@ export const AutomationsPage: React.FC = () => {
                     {(() => {
                       if (editBotOption === 'current') {
                         const currentBot = bots.find(b => b.id === editBotId);
-                        return currentBot ? `${currentBot.name} ${currentBot.username ? `@${currentBot.username}` : ''}` : 'Connected bot';
+                        return currentBot ? `${currentBot.name} ${currentBot.username ? `@${currentBot.username}` : ''}` : t('automations.edit_modal.connected_bot');
                       }
-                      if (editBotOption === 'nobot') return 'Without bot';
-                      if (editBotOption === 'new') return 'Connect new bot';
+                      if (editBotOption === 'nobot') return t('automations.edit_modal.without_bot');
+                      if (editBotOption === 'new') return t('automations.edit_modal.connect_new_bot');
                       const selectedBot = bots.find(b => String(b.id) === editBotOption);
                       if (selectedBot) {
                         return `${selectedBot.name} ${selectedBot.username ? `@${selectedBot.username}` : ''}`;
                       }
-                      return 'Without bot';
+                      return t('automations.edit_modal.without_bot');
                     })()}
                   </span>
                   <ChevronDown size={16} className={`text-slate-500 transition-transform ${isEditBotSelectOpen ? 'rotate-180' : ''}`} />
@@ -1047,7 +1047,7 @@ export const AutomationsPage: React.FC = () => {
                         }}
                         className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between ${editBotOption === 'nobot' ? 'bg-indigo-50/50 text-indigo-600 font-bold' : 'text-slate-700 font-medium'}`}
                       >
-                        <span>Without bot</span>
+                        <span>{t('automations.edit_modal.without_bot')}</span>
                       </button>
                       <button
                         type="button"
@@ -1058,7 +1058,7 @@ export const AutomationsPage: React.FC = () => {
                         }}
                         className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors flex items-center justify-between ${editBotOption === 'new' ? 'bg-indigo-50/50 text-indigo-600 font-bold' : 'text-slate-700 font-medium'}`}
                       >
-                        <span>Connect new bot</span>
+                        <span>{t('automations.edit_modal.connect_new_bot')}</span>
                       </button>
 
                       {(() => {
@@ -1068,7 +1068,7 @@ export const AutomationsPage: React.FC = () => {
                           <>
                             <div className="border-t border-slate-100 my-1" />
                             <div className="px-4 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                              Use existing bot token
+                              {t('automations.edit_modal.use_existing_token')}
                             </div>
                             {existingRealBots.map((b) => (
                               <button
@@ -1099,7 +1099,7 @@ export const AutomationsPage: React.FC = () => {
               {editBotOption === 'new' && (
                 <div className="animate-in slide-in-from-top-1 duration-150">
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-                    Telegram Bot Token
+                    {t('automations.edit_modal.bot_token')}
                   </label>
                   <input
                     type="text"
@@ -1112,13 +1112,13 @@ export const AutomationsPage: React.FC = () => {
               )}
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-                  Description (Optional)
+                  {t('automations.edit_modal.desc_label')}
                 </label>
                 <textarea
                   value={editBotDesc}
                   onChange={(e) => setEditBotDesc(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50 min-h-[80px] resize-none"
-                  placeholder="What does this automation do?"
+                  placeholder={t('automations.edit_modal.desc_placeholder')}
                 />
               </div>
               {editBotError && (
@@ -1133,7 +1133,7 @@ export const AutomationsPage: React.FC = () => {
                 onClick={() => setIsEditModalOpen(false)}
                 className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
               >
-                Cancel
+                {t('automations.edit_modal.cancel')}
               </button>
               <button
                 onClick={handleEditBot}
@@ -1143,10 +1143,10 @@ export const AutomationsPage: React.FC = () => {
                 {updateBotMutation.isPending ? (
                   <>
                     <Loader2 size={14} className="animate-spin" />
-                    <span>Saving...</span>
+                    <span>{t('automations.edit_modal.saving')}</span>
                   </>
                 ) : (
-                  <span>Save</span>
+                  <span>{t('automations.edit_modal.save')}</span>
                 )}
               </button>
             </div>
@@ -1164,22 +1164,22 @@ export const AutomationsPage: React.FC = () => {
             className="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-xl overflow-hidden animate-in fade-in duration-200 cursor-default"
           >
             <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900">Move to Folder</h3>
+              <h3 className="text-lg font-bold text-slate-900">{t('automations.move_modal.title')}</h3>
               <button
                 onClick={() => setIsMoveModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                className="text-slate-400 hover:text-slate-655 transition-colors"
               >
                 <X size={18} />
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Select Folder</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">{t('automations.move_modal.select_folder')}</label>
               <select
                 value={tempFolderId}
                 onChange={(e) => setTempFolderId(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
               >
-                <option value="">No Folder (Root)</option>
+                <option value="">{t('automations.move_modal.no_folder')}</option>
                 {folders.map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.name}
@@ -1192,13 +1192,13 @@ export const AutomationsPage: React.FC = () => {
                 onClick={() => setIsMoveModalOpen(false)}
                 className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
               >
-                Cancel
+                {t('automations.move_modal.cancel')}
               </button>
               <button
                 onClick={handleMoveBot}
                 className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
               >
-                Save
+                {t('automations.move_modal.save')}
               </button>
             </div>
           </div>

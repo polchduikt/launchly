@@ -65,17 +65,17 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
               <button onClick={() => onShowAddLabel(true)} className="text-slate-400 hover:text-indigo-600 cursor-pointer"><Plus size={14} /></button>
             </div>
             {showAddLabel && (
-              <div className="px-3 py-1 flex gap-1">
+              <div className="px-3 py-1 flex gap-1 items-center">
                 <input
                   value={newLabelName}
                   onChange={e => onNewLabelNameChange(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && onAddLabel()}
                   placeholder={t('common.label_name_placeholder')}
                   autoFocus
-                  className="flex-1 text-xs border border-slate-200 rounded px-2 py-1 focus:outline-none focus:border-indigo-400"
+                  className="flex-1 w-0 min-w-0 text-[11px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-indigo-400"
                 />
-                <button onClick={onAddLabel} className="text-indigo-600 cursor-pointer"><Plus size={14} /></button>
-                <button onClick={() => { onShowAddLabel(false); onNewLabelNameChange(''); }} className="text-slate-400 cursor-pointer"><X size={14} /></button>
+                <button onClick={onAddLabel} className="text-indigo-600 cursor-pointer shrink-0"><Plus size={14} /></button>
+                <button onClick={() => { onShowAddLabel(false); onNewLabelNameChange(''); }} className="text-slate-400 cursor-pointer shrink-0"><X size={14} /></button>
               </div>
             )}
             {labels.map(l => (

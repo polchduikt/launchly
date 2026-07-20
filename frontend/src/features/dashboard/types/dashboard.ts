@@ -33,4 +33,8 @@ export interface DashboardStatsResponse {
   aiResponseTimeSeconds: number;
   topTags: TagStatsEntry[];
   activityHeatmap: HeatmapEntry[];
+  subscribersGrowth: number;
+  activeUsersGrowth: number;
+  clicksGrowth: number;
+  automationsGrowth: number;
 }

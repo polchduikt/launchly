@@ -1,5 +1,6 @@
 import React from 'react';
 import { Send } from 'lucide-react';
+import { getLanguage } from '../../../i18n';
 
 interface TelegramPreviewModalProps {
   isPreviewOpen: boolean;
@@ -14,8 +15,10 @@ export const TelegramPreviewModal: React.FC<TelegramPreviewModalProps> = ({
 }) => {
   if (!isPreviewOpen) return null;
 
+  const isUk = getLanguage() === 'uk';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
       <div className="bg-slate-900 rounded-[3rem] border-8 border-slate-800 shadow-2xl max-w-sm w-full h-[600px] flex flex-col overflow-hidden relative animate-in fade-in zoom-in-95 duration-200">
         <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-5 rounded-full bg-slate-800 flex items-center justify-center gap-1 z-20">
           <span className="w-8 h-1 bg-slate-700 rounded-full" />
@@ -36,14 +39,14 @@ export const TelegramPreviewModal: React.FC<TelegramPreviewModalProps> = ({
             onClick={() => setIsPreviewOpen(false)}
             className="text-slate-400 hover:text-white p-1 hover:bg-slate-700 rounded-xl transition-all cursor-pointer"
           >
-            Close
+            {isUk ? 'Закрити' : 'Close'}
           </button>
         </div>
 
-        <div className="flex-1 p-4 bg-slate-950 flex flex-col justify-end space-y-4 overflow-y-auto">
+        <div className="flex-1 p-4 bg-slate-955 flex flex-col justify-end space-y-4 overflow-y-auto">
           <div className="flex flex-col space-y-1 max-w-[85%] self-start animate-in slide-in-from-bottom-2 duration-150">
             <div className="bg-slate-800 text-white rounded-2xl rounded-tl-none py-2 px-3.5 text-xs leading-relaxed font-sans shadow-sm whitespace-pre-wrap">
-              {messageText || 'Add message text to preview...'}
+              {messageText || (isUk ? 'Додайте текст повідомлення для попереднього перегляду...' : 'Add message text to preview...')}
             </div>
             <span className="text-[8px] text-slate-500 font-bold self-end pr-1">12:00 PM</span>
           </div>

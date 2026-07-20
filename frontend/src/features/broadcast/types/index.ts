@@ -20,6 +20,7 @@ export interface CampaignResponse {
   botId: number;
   nodes?: string;
   edges?: string;
+  targetAllBots: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -32,6 +33,8 @@ export interface CreateCampaignRequest {
   scheduledAt?: string;
   nodes?: string;
   edges?: string;
+  botId?: number;
+  targetAllBots?: boolean;
 }
 
 export interface TagResponse {

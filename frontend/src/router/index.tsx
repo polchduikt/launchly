@@ -6,6 +6,8 @@ import PublicRoute from '../components/shared/PublicRoute';
 import { AuthLayout } from '../components/layouts';
 import { Loader2 } from 'lucide-react';
 
+import AdminRoute from '../components/shared/AdminRoute';
+
 const LoginPage = lazy(() => import('../features/auth/pages/LoginPage'));
 const RegisterPage = lazy(() => import('../features/auth/pages/RegisterPage'));
 const OAuth2Callback = lazy(() => import('../features/auth/pages/OAuth2Callback'));
@@ -26,6 +28,12 @@ const CheckoutSuccessPage = lazy(() => import('../features/billing/pages/Checkou
 const CheckoutCancelPage = lazy(() => import('../features/billing/pages/CheckoutCancelPage'));
 const BlogPage = lazy(() => import('../features/dashboard/pages/BlogPage'));
 const BlogDetailPage = lazy(() => import('../features/dashboard/pages/BlogDetailPage'));
+
+const AdminStatsPage = lazy(() => import('../features/admin/pages/AdminStatsPage'));
+const AdminUsersPage = lazy(() => import('../features/admin/pages/AdminUsersPage'));
+const AdminAutomationsPage = lazy(() => import('../features/admin/pages/AdminAutomationsPage'));
+const AdminBroadcastsPage = lazy(() => import('../features/admin/pages/AdminBroadcastsPage'));
+const AdminLogsPage = lazy(() => import('../features/admin/pages/AdminLogsPage'));
 
 const LoadingSpinner = () => (
   <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -64,6 +72,15 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.BROADCAST_BUILDER} element={<BroadcastBuilderPage />} />
             <Route path={ROUTES.BILLING_SUCCESS} element={<CheckoutSuccessPage />} />
             <Route path={ROUTES.BILLING_CANCEL} element={<CheckoutCancelPage />} />
+          </Route>
+
+          <Route element={<AdminRoute />}>
+            <Route path={ROUTES.ADMIN_HOME} element={<AdminStatsPage />} />
+            <Route path={ROUTES.ADMIN_STATS} element={<AdminStatsPage />} />
+            <Route path={ROUTES.ADMIN_USERS} element={<AdminUsersPage />} />
+            <Route path={ROUTES.ADMIN_AUTOMATIONS} element={<AdminAutomationsPage />} />
+            <Route path={ROUTES.ADMIN_BROADCASTS} element={<AdminBroadcastsPage />} />
+            <Route path={ROUTES.ADMIN_LOGS} element={<AdminLogsPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />

@@ -33,12 +33,12 @@ const EndNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected 
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
-      <NodeHandle
-        type="target"
-        position={Position.Left}
-        isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
-      />
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/50 select-none rounded-t-[22px]">
+      <div className="relative flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/50 select-none rounded-t-[22px]">
+        <NodeHandle
+          type="target"
+          position={Position.Left}
+          isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
+        />
         <span className="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
           <Octagon size={14} strokeWidth={2.5} />
         </span>
