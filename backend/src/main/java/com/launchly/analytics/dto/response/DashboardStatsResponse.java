@@ -14,7 +14,11 @@ public record DashboardStatsResponse(
     long aiTimeSavedHours,
     double aiResponseTimeSeconds,
     List<TagStatsEntry> topTags,
-    List<HeatmapEntry> activityHeatmap
+    List<HeatmapEntry> activityHeatmap,
+    double subscribersGrowth,
+    double activeUsersGrowth,
+    double clicksGrowth,
+    double automationsGrowth
 ) {
     public record DailyStatsEntry(
         String date,

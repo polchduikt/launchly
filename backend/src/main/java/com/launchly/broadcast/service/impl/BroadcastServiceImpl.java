@@ -25,6 +25,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.ArrayList;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.entity.BotMember;
 
@@ -86,6 +87,7 @@ public class BroadcastServiceImpl implements BroadcastService {
                 .scheduledAt(request.scheduledAt())
                 .nodes(request.nodes() != null ? request.nodes() : "[]")
                 .edges(request.edges() != null ? request.edges() : "[]")
+                .targetAllBots(request.targetAllBots() != null ? request.targetAllBots() : false)
                 .bot(bot)
                 .build();
 
@@ -107,6 +109,13 @@ public class BroadcastServiceImpl implements BroadcastService {
             throw new AppException(HttpStatus.BAD_REQUEST, "Campaign does not belong to this bot");
         }
 
+        if (request.botId() != null && !request.botId().equals(campaign.getBot().getId())) {
+            validateWriteAccess(request.botId(), userId);
+            validateBotOwnership(request.botId(), userId);
+            Bot newBot = botRepository.findById(request.botId())
+                    .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "New bot not found"));
+            campaign.setBot(newBot);
+        }
 
         String messageText = extractFirstMessageText(request.nodes(), request.edges(), request.message());
 
@@ -115,6 +124,7 @@ public class BroadcastServiceImpl implements BroadcastService {
         campaign.setFilterType(request.filterType());
         campaign.setFilterValue(request.filterValue());
         campaign.setScheduledAt(request.scheduledAt());
+        campaign.setTargetAllBots(request.targetAllBots() != null ? request.targetAllBots() : false);
         campaign.setNodes(request.nodes() != null ? request.nodes() : "[]");
         campaign.setEdges(request.edges() != null ? request.edges() : "[]");
 
@@ -201,10 +211,31 @@ public class BroadcastServiceImpl implements BroadcastService {
             return;
         }
 
-        Long botId = campaign.getBot().getId();
-        List<BotUser> targetUsers = broadcastFilterService.filterUsers(
-                botId, campaign.getFilterType(), campaign.getFilterValue()
-        );
+        List<BotUser> targetUsers = new ArrayList<>();
+        if (Boolean.TRUE.equals(campaign.getTargetAllBots())) {
+            Long ownerId = campaign.getBot().getUser().getId();
+            List<Bot> userBots = new ArrayList<>(botRepository.findAllByUserId(ownerId));
+            List<BotMember> memberships = botMemberRepository.findByUserId(ownerId);
+            for (BotMember bm : memberships) {
+                com.launchly.auth.entity.User owner = bm.getBot().getUser();
+                List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
+                for (Bot b : ownerBots) {
+                    if (userBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
+                        userBots.add(b);
+                    }
+                }
+            }
+            for (Bot b : userBots) {
+                targetUsers.addAll(broadcastFilterService.filterUsers(
+                        b.getId(), campaign.getFilterType(), campaign.getFilterValue()
+                ));
+            }
+        } else {
+            Long botId = campaign.getBot().getId();
+            targetUsers.addAll(broadcastFilterService.filterUsers(
+                    botId, campaign.getFilterType(), campaign.getFilterValue()
+            ));
+        }
 
         campaign.setStatus(CampaignStatus.IN_PROGRESS);
         campaign.setTotalCount(campaign.getTotalCount() + targetUsers.size());
@@ -250,18 +281,19 @@ public class BroadcastServiceImpl implements BroadcastService {
 
         for (int i = 0; i < targetUsers.size(); i++) {
             BotUser user = targetUsers.get(i);
+            Long userBotId = user.getBot().getId();
             try {
                 if (connectedNodeId != null) {
-                    flowEngineService.runFlow(botId, user, connectedNodeId, campaignId);
+                    flowEngineService.runFlow(userBotId, user, connectedNodeId, campaignId);
                 } else if (campaign.getMessage() != null && !campaign.getMessage().trim().isEmpty()) {
                     String sanitizedText = SanitizationUtil.sanitizeForTelegram(campaign.getMessage());
-                    telegramSendService.sendMessage(botId, user.getTelegramId(), sanitizedText);
+                    telegramSendService.sendMessage(userBotId, user.getTelegramId(), sanitizedText);
                 }
                 sent++;
             } catch (Exception e) {
                 failed++;
-                log.error("Failed to execute broadcast for telegramId={}: {}",
-                        user.getTelegramId(), e.getMessage());
+                log.error("Failed to execute broadcast for telegramId={} on botId={}: {}",
+                        user.getTelegramId(), userBotId, e.getMessage());
             }
 
             if ((i + 1) % BATCH_SIZE == 0 && i + 1 < targetUsers.size()) {

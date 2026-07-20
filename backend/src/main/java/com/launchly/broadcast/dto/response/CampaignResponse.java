@@ -18,6 +18,7 @@ public record CampaignResponse(
         Long botId,
         String nodes,
         String edges,
+        Boolean targetAllBots,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {}

@@ -77,6 +77,10 @@ public class BroadcastCampaign extends BaseEntity {
     @Builder.Default
     private String edges = "[]";
 
+    @Column(name = "target_all_bots")
+    @Builder.Default
+    private Boolean targetAllBots = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bot_id", nullable = false)
     private Bot bot;

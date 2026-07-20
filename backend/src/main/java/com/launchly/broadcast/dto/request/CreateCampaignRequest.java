@@ -20,5 +20,9 @@ public record CreateCampaignRequest(
 
         String nodes,
 
-        String edges
+        String edges,
+
+        Long botId,
+ 
+        Boolean targetAllBots
 ) {}

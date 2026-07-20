@@ -68,15 +68,24 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     @Override
     @Transactional(readOnly = true)
     public DashboardStatsResponse getDashboardStats(Long botId, int days, Long userId) {
-        LocalDateTime startActivityDate = LocalDateTime.now().minusDays(days);
-        LocalDateTime startClicks30d = LocalDateTime.now().minusDays(30);
-        LocalDateTime start24h = LocalDateTime.now().minusHours(24);
+        LocalDateTime nowTime = LocalDateTime.now();
+        LocalDateTime startActivityDate = nowTime.minusDays(days);
+        LocalDateTime startClicks30d = nowTime.minusDays(30);
+        LocalDateTime startClicks60d = nowTime.minusDays(60);
+        LocalDateTime start24h = nowTime.minusHours(24);
+        LocalDateTime startYesterday = nowTime.minusHours(48);
+        LocalDateTime lastWeekDate = nowTime.minusDays(7);
 
         List<Long> botIds = new ArrayList<>();
         long totalSubscribers = 0;
         long activeUsers24h = 0;
         long clicksCount30d = 0;
         long activeAutomations = 0;
+
+        double subscribersGrowth = 0.0;
+        double activeUsersGrowth = 0.0;
+        double clicksGrowth = 0.0;
+        double automationsGrowth = 0.0;
 
         List<Object[]> rawDaily = new ArrayList<>();
         List<Object[]> rawButtons = new ArrayList<>();
@@ -96,7 +105,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             }
 
             if (userBots.isEmpty()) {
-                return new DashboardStatsResponse(0L, 0L, 0L, 0L, new ArrayList<>(), new ArrayList<>(), 0L, 0, 0L, 0.0, new ArrayList<>(), new ArrayList<>());
+                return new DashboardStatsResponse(0L, 0L, 0L, 0L, new ArrayList<>(), new ArrayList<>(), 0L, 0, 0L, 0.0, new ArrayList<>(), new ArrayList<>(), 0.0, 0.0, 0.0, 0.0);
             }
             botIds = userBots.stream().map(Bot::getId).toList();
 
@@ -104,6 +113,19 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             activeUsers24h = analyticsEventRepository.countActiveUsersByBotIdsAndCreatedAtAfter(botIds, start24h);
             clicksCount30d = analyticsEventRepository.countClicksByBotIdsAndCreatedAtAfter(botIds, startClicks30d);
             activeAutomations = userBots.stream().filter(Bot::isActive).count();
+
+            long totalSubscribersLastWeek = botUserRepository.countByBotIdInAndCreatedAtBefore(botIds, lastWeekDate);
+            long activeUsersYesterday = analyticsEventRepository.countActiveUsersByBotIdsAndCreatedAtBetween(botIds, startYesterday, start24h);
+            long clicksCountLastMonth = analyticsEventRepository.countClicksByBotIdsAndCreatedAtBetween(botIds, startClicks60d, startClicks30d);
+            long activeAutomationsLastWeek = userBots.stream()
+                    .filter(Bot::isActive)
+                    .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().isBefore(lastWeekDate))
+                    .count();
+
+            subscribersGrowth = calculateGrowth(totalSubscribersLastWeek, totalSubscribers);
+            activeUsersGrowth = calculateGrowth(activeUsersYesterday, activeUsers24h);
+            clicksGrowth = calculateGrowth(clicksCountLastMonth, clicksCount30d);
+            automationsGrowth = calculateGrowth(activeAutomationsLastWeek, activeAutomations);
 
             rawDaily = analyticsEventRepository.getDailyActivityStatsForBots(botIds, startActivityDate);
             rawButtons = analyticsEventRepository.getTopClickedButtonsForBots(botIds, startActivityDate, 10);
@@ -132,6 +154,19 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             activeAutomations = userBots.stream()
                     .filter(Bot::isActive)
                     .count();
+
+            long totalSubscribersLastWeek = botUserRepository.countByBotIdAndCreatedAtBefore(botId, lastWeekDate);
+            long activeUsersYesterday = analyticsEventRepository.countActiveUsersByBotIdAndCreatedAtBetween(botId, startYesterday, start24h);
+            long clicksCountLastMonth = analyticsEventRepository.countClicksByBotIdAndCreatedAtBetween(botId, startClicks60d, startClicks30d);
+            long activeAutomationsLastWeek = userBots.stream()
+                    .filter(Bot::isActive)
+                    .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().isBefore(lastWeekDate))
+                    .count();
+
+            subscribersGrowth = calculateGrowth(totalSubscribersLastWeek, totalSubscribers);
+            activeUsersGrowth = calculateGrowth(activeUsersYesterday, activeUsers24h);
+            clicksGrowth = calculateGrowth(clicksCountLastMonth, clicksCount30d);
+            automationsGrowth = calculateGrowth(activeAutomationsLastWeek, activeAutomations);
 
             rawDaily = analyticsEventRepository.getDailyActivityStats(botId, startActivityDate);
             rawButtons = analyticsEventRepository.getTopClickedButtons(botId, startActivityDate, 10);
@@ -216,7 +251,11 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 aiTimeSavedHours,
                 aiResponseTimeSeconds,
                 topTags,
-                activityHeatmap
+                activityHeatmap,
+                subscribersGrowth,
+                activeUsersGrowth,
+                clicksGrowth,
+                automationsGrowth
         );
     }
 
@@ -273,5 +312,14 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             }
         }
         return callbackData;
+    }
+
+    private double calculateGrowth(long prev, long curr) {
+        if (prev == 0) {
+            return curr * 100.0;
+        }
+        double diff = (double) curr - prev;
+        double growth = (diff / prev) * 100.0;
+        return Math.round(growth * 10.0) / 10.0;
     }
 }

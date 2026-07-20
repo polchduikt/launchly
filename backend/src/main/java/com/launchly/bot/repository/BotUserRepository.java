@@ -17,6 +17,10 @@ public interface BotUserRepository extends JpaRepository<BotUser, Long> {
 
     long countByBotIdIn(List<Long> botIds);
 
+    long countByBotIdAndCreatedAtBefore(Long botId, java.time.LocalDateTime date);
+
+    long countByBotIdInAndCreatedAtBefore(List<Long> botIds, java.time.LocalDateTime date);
+
     List<BotUser> findByCurrentNodeIdIsNotNull();
 
     @Query("SELECT MIN(bu.telegramId) FROM BotUser bu WHERE bu.bot.id = :botId")

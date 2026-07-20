@@ -27,6 +27,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     @Value("${app.oauth2.redirect-uri}")
     private String redirectUri;
 
+    @Value("${app.security.super-admin-email:}")
+    private String superAdminEmail;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
@@ -36,20 +39,31 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String name = oAuth2User.getAttribute("name");
         String avatar = oAuth2User.getAttribute("picture");
 
+        boolean isSuperAdmin = email != null && superAdminEmail != null && !superAdminEmail.isBlank()
+                && email.trim().equalsIgnoreCase(superAdminEmail.trim());
+
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
             user = userRepository.save(User.builder()
                     .email(email)
                     .name(name)
                     .avatar(avatar)
-                    .role(Role.ROLE_OWNER)
+                    .role(isSuperAdmin ? Role.ROLE_ADMIN : Role.ROLE_OWNER)
                     .provider(Provider.GOOGLE)
                     .active(true)
                     .emailVerified(true)
                     .build());
         } else {
+            boolean updated = false;
+            if (isSuperAdmin && user.getRole() != Role.ROLE_ADMIN) {
+                user.setRole(Role.ROLE_ADMIN);
+                updated = true;
+            }
             if (avatar != null && (user.getAvatar() == null || !avatar.equals(user.getAvatar()))) {
                 user.setAvatar(avatar);
+                updated = true;
+            }
+            if (updated) {
                 user = userRepository.save(user);
             }
         }

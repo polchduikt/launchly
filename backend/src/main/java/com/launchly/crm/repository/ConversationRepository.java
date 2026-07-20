@@ -15,4 +15,6 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     List<Conversation> findByBotUserIdOrderByUpdatedAtDesc(@Param("userId") Long userId);
 
     Optional<Conversation> findByBotIdAndBotUserId(Long botId, Long botUserId);
+
+    long countByBotId(Long botId);
 }

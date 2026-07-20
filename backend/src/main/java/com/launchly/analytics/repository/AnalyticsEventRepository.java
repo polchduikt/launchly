@@ -78,4 +78,16 @@ public interface AnalyticsEventRepository extends JpaRepository<AnalyticsEvent, 
                   "GROUP BY day_of_week, hour_of_day " +
                   "ORDER BY day_of_week, hour_of_day", nativeQuery = true)
     List<Object[]> getActivityHeatmapForBots(@Param("botIds") List<Long> botIds, @Param("startDate") LocalDateTime startDate);
+
+    @Query("SELECT COUNT(e) FROM AnalyticsEvent e WHERE e.bot.id = :botId AND e.eventType = 'CLICK' AND e.createdAt >= :startDate AND e.createdAt < :endDate")
+    long countClicksByBotIdAndCreatedAtBetween(@Param("botId") Long botId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT COUNT(e) FROM AnalyticsEvent e WHERE e.bot.id IN :botIds AND e.eventType = 'CLICK' AND e.createdAt >= :startDate AND e.createdAt < :endDate")
+    long countClicksByBotIdsAndCreatedAtBetween(@Param("botIds") List<Long> botIds, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT COUNT(DISTINCT e.botUser.id) FROM AnalyticsEvent e WHERE e.bot.id = :botId AND e.eventType = 'USER_ACTIVITY' AND e.createdAt >= :startDate AND e.createdAt < :endDate")
+    long countActiveUsersByBotIdAndCreatedAtBetween(@Param("botId") Long botId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT COUNT(DISTINCT e.botUser.id) FROM AnalyticsEvent e WHERE e.bot.id IN :botIds AND e.eventType = 'USER_ACTIVITY' AND e.createdAt >= :startDate AND e.createdAt < :endDate")
+    long countActiveUsersByBotIdsAndCreatedAtBetween(@Param("botIds") List<Long> botIds, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }
