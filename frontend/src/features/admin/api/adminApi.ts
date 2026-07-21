@@ -1,14 +1,67 @@
 import apiClient from '../../../lib/axios';
 
+export interface PlanDistribution {
+  name: string;
+  value: number;
+  color: string;
+}
+
 export interface AdminStats {
   totalUsers: number;
+  totalOwners: number;
+  totalOwnersChange: string;
+  activeOwners: number;
+  activeOwnersChange: string;
+  totalBotUsers: number;
+  totalBotUsersChange: string;
   activeBots: number;
+  activeBotsChange: string;
   totalAutomations: number;
+  totalAutomationsChange: string;
   totalMessagesSent: number;
+  totalMessagesSentChange: string;
   systemUptimeSeconds: number;
   activeManagers: number;
-  userGrowth: { date: string; count: number }[];
+  userGrowth: {
+    date: string;
+    registeredCount: number;
+    activeCount: number;
+    clientsCount: number;
+    botsCount: number;
+    automationsCount: number;
+    messagesCount: number;
+  }[];
   botActivity: { date: string; messagesCount: number }[];
+  mrr: number;
+  mrrChange: string;
+  ltv: number;
+  ltvChange: string;
+  planDistribution: PlanDistribution[];
+  integrationsPopularity: {
+    name: string;
+    count: number;
+    percentage: number;
+    change: string;
+  }[];
+  geographyAndLanguages: {
+    name: string;
+    count: number;
+    percentage: number;
+    change: string;
+  }[];
+  latestLogs: {
+    id: string;
+    level: string;
+    service: string;
+    message: string;
+    userEmail: string;
+    timestamp: string;
+  }[];
+  performanceMetrics: {
+    time: string;
+    errorRate: number;
+    latency: number;
+  }[];
 }
 
 export interface AdminUser {
@@ -57,8 +110,19 @@ export interface AdminLog {
   timestamp: string;
 }
 
-export const fetchAdminStatsApi = async (): Promise<AdminStats> => {
-  const response = await apiClient.get<AdminStats>('/admin/stats');
+export const fetchAdminStatsApi = async (
+  search = '',
+  period = '',
+  startDate = '',
+  endDate = ''
+): Promise<AdminStats> => {
+  const params: Record<string, string> = {};
+  if (search) params.search = search;
+  if (period) params.period = period;
+  if (startDate) params.startDate = startDate;
+  if (endDate) params.endDate = endDate;
+
+  const response = await apiClient.get<AdminStats>('/admin/stats', { params });
   return response.data;
 };
 

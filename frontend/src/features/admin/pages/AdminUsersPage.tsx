@@ -64,15 +64,8 @@ export const AdminUsersPage: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6 max-w-[1300px] mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-              <Users className="text-indigo-600" size={24} />
-              <span>{t('admin.users_title')}</span>
-            </h2>
-          </div>
-        </div>
+      <div className="space-y-6 w-full">
+
 
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
           <div className="relative w-full sm:w-80">

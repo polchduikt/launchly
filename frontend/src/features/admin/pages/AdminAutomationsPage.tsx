@@ -25,15 +25,8 @@ export const AdminAutomationsPage: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6 max-w-[1300px] mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-              <Workflow className="text-indigo-600" size={24} />
-              <span>{t('admin.automations_title')}</span>
-            </h2>
-          </div>
-        </div>
+      <div className="space-y-6 w-full">
+
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20">

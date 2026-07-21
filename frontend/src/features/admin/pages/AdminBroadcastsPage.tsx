@@ -36,20 +36,14 @@ export const AdminBroadcastsPage: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6 max-w-[1300px] mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-              <Radio className="text-indigo-600" size={24} />
-              <span>{t('admin.broadcasts_title')}</span>
-            </h2>
-          </div>
+      <div className="space-y-6 w-full">
+        <div className="flex justify-end">
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center space-x-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-extrabold shadow-md shadow-indigo-100 transition cursor-pointer"
+            className="flex items-center space-x-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-bold transition shadow-sm cursor-pointer"
           >
             <Plus size={16} />
-            <span>{t('admin.create_broadcast_btn')}</span>
+            <span>{t('admin.create_broadcast')}</span>
           </button>
         </div>
         <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">

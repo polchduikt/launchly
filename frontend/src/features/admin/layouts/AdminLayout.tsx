@@ -30,6 +30,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   if (!user) return null;
 
   const isAdmin = user.role === 'ROLE_ADMIN';
+  const isManager = user.role === 'ROLE_MANAGER';
 
   const navItems = [
     {
@@ -69,6 +70,23 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     },
   ];
 
+  const getPageTitle = () => {
+    switch (location.pathname) {
+      case ROUTES.ADMIN_USERS:
+        return t('admin.users_title');
+      case ROUTES.ADMIN_AUTOMATIONS:
+        return t('admin.automations_title');
+      case ROUTES.ADMIN_BROADCASTS:
+        return t('admin.broadcasts_title');
+      case ROUTES.ADMIN_LOGS:
+        return t('admin.logs_title');
+      case ROUTES.ADMIN_STATS:
+      case ROUTES.ADMIN_HOME:
+      default:
+        return t('admin.system_stats_title');
+    }
+  };
+
   const handleLanguageSelect = (selectedLang: 'uk' | 'en') => {
     if (selectedLang !== lang) {
       changeLanguage(selectedLang);
@@ -96,9 +114,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           </div>
 
           <div className="p-3 space-y-1.5">
-            <div className="px-3 py-2 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
-              {t('admin.management_modules')}
-            </div>
             {navItems.filter(item => item.allowed).map((item) => {
               const isActive = location.pathname === item.path || (item.path === ROUTES.ADMIN_STATS && location.pathname === ROUTES.ADMIN_HOME);
               const IconComponent = item.icon;
@@ -141,14 +156,26 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 </div>
               )}
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-bold text-slate-800 truncate">{user.name}</span>
+                <div className="flex items-center space-x-1.5 min-w-0">
+                  <span className="text-xs font-bold text-slate-800 truncate">{user.name}</span>
+                  {isAdmin && (
+                    <span className="px-1.5 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-700 text-[9px] font-black shrink-0">
+                      Super Admin
+                    </span>
+                  )}
+                  {isManager && (
+                    <span className="px-1.5 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-700 text-[9px] font-black shrink-0">
+                      Manager
+                    </span>
+                  )}
+                </div>
                 <span className="text-[10px] text-slate-400 font-semibold truncate">{user.email}</span>
               </div>
             </div>
 
             <button
               onClick={handleLogout}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer shrink-0 ml-1"
               title="Logout"
             >
               <LogOut size={16} />
@@ -156,12 +183,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           </div>
         </div>
       </aside>
-
       <div className="flex-1 flex flex-col min-w-0 h-full bg-slate-50 overflow-hidden">
         <header className="h-16 border-b border-slate-200 px-8 flex items-center justify-between bg-white shrink-0">
           <div className="flex items-center space-x-3">
             <h1 className="text-lg font-black text-slate-900 tracking-tight">
-              {t('admin.control_panel')}
+              {getPageTitle()}
             </h1>
           </div>
 
@@ -193,6 +219,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             </div>
           </div>
         </header>
+
         <main className="flex-1 overflow-y-auto p-8 bg-slate-50 text-slate-800">
           {children}
         </main>
