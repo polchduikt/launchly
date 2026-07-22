@@ -43,7 +43,12 @@ public class AdminUserController {
 
     @PatchMapping("/{userId}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AdminUserDto> toggleUserStatus(@PathVariable Long userId) {
-        return ResponseEntity.ok(adminUserService.toggleUserStatus(userId));
+    public ResponseEntity<AdminUserDto> toggleUserStatus(
+            @PathVariable Long userId,
+            @RequestBody(required = false) com.launchly.admin.dto.BlockUserRequest request
+    ) {
+        String reason = request != null ? request.getReason() : null;
+        String details = request != null ? request.getDetails() : null;
+        return ResponseEntity.ok(adminUserService.toggleUserStatus(userId, reason, details));
     }
 }

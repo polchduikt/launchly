@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,6 +53,8 @@ public class AdminUserServiceImpl implements AdminUserService {
                         .avatar(u.getAvatar())
                         .role(u.getRole())
                         .active(u.isActive())
+                        .blockReason(u.getBlockReason())
+                        .blockedAt(u.getBlockedAt())
                         .provider(u.getProvider())
                         .createdAt(u.getCreatedAt())
                         .botsCount((int) botRepository.countByUserId(u.getId()))
@@ -61,14 +64,14 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         int start = Math.min(page * size, filtered.size());
         int end = Math.min(start + size, filtered.size());
-
         List<AdminUserDto> pageContent = filtered.subList(start, end);
+
         return new PageImpl<>(pageContent, PageRequest.of(page, size), filtered.size());
     }
 
     @Override
     @Transactional
-    public AdminUserDto updateUserRole(Long userId, Role role, String currentUserEmail) {
+    public AdminUserDto updateUserRole(Long userId, Role newRole, String currentUserEmail) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -76,7 +79,7 @@ public class AdminUserServiceImpl implements AdminUserService {
             throw new AppException(HttpStatus.BAD_REQUEST, "You cannot change your own administrative role");
         }
 
-        user.setRole(role);
+        user.setRole(newRole);
         user = userRepository.save(user);
 
         return AdminUserDto.builder()
@@ -86,6 +89,8 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .avatar(user.getAvatar())
                 .role(user.getRole())
                 .active(user.isActive())
+                .blockReason(user.getBlockReason())
+                .blockedAt(user.getBlockedAt())
                 .provider(user.getProvider())
                 .createdAt(user.getCreatedAt())
                 .botsCount((int) botRepository.countByUserId(user.getId()))
@@ -96,10 +101,30 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional
     public AdminUserDto toggleUserStatus(Long userId) {
+        return toggleUserStatus(userId, null, null);
+    }
+
+    @Override
+    @Transactional
+    public AdminUserDto toggleUserStatus(Long userId, String reason, String details) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
 
-        user.setActive(!user.isActive());
+        boolean willBeActive = !user.isActive();
+        user.setActive(willBeActive);
+
+        if (!willBeActive) {
+            String fullReason = (reason != null && !reason.isBlank()) ? reason.trim() : "Порушення правил платформи";
+            if (details != null && !details.isBlank()) {
+                fullReason += ": " + details.trim();
+            }
+            user.setBlockReason(fullReason);
+            user.setBlockedAt(LocalDateTime.now());
+        } else {
+            user.setBlockReason(null);
+            user.setBlockedAt(null);
+        }
+
         user = userRepository.save(user);
 
         return AdminUserDto.builder()
@@ -109,6 +134,8 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .avatar(user.getAvatar())
                 .role(user.getRole())
                 .active(user.isActive())
+                .blockReason(user.getBlockReason())
+                .blockedAt(user.getBlockedAt())
                 .provider(user.getProvider())
                 .createdAt(user.getCreatedAt())
                 .botsCount((int) botRepository.countByUserId(user.getId()))

@@ -19,6 +19,8 @@ public class AdminUserDto {
     private String avatar;
     private Role role;
     private boolean active;
+    private String blockReason;
+    private LocalDateTime blockedAt;
     private Provider provider;
     private LocalDateTime createdAt;
     private int botsCount;

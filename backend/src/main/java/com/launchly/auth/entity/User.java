@@ -12,6 +12,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -44,6 +46,12 @@ public class User extends BaseEntity {
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private boolean active = true;
+
+    @Column(name = "block_reason")
+    private String blockReason;
+
+    @Column(name = "blocked_at")
+    private LocalDateTime blockedAt;
 
     @Column(name = "is_email_verified", nullable = false)
     @Builder.Default

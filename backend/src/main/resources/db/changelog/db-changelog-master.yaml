@@ -67,5 +67,7 @@ databaseChangeLog:
       file: db/changelog/changes/V033__add_scheduled_to_messages.sql
   - include:
       file: db/changelog/changes/V034__add_target_all_bots_to_broadcast_campaigns.sql
+  - include:
+      file: db/changelog/changes/V035__add_block_reason_to_users.sql
 
 

@@ -47,7 +47,6 @@ public class PerformanceMonitoringFilter implements Filter {
                 uri = ((HttpServletRequest) request).getRequestURI();
             }
 
-            // Exclude static asset resources, websocket, etc. to monitor API and page requests
             if (!uri.contains("/assets/") && !uri.contains("/webjars/") && !uri.endsWith(".png") && !uri.endsWith(".js") && !uri.endsWith(".css")) {
                 String hourBucket = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00"));
                 HourlyMetric metric = hourlyMetrics.computeIfAbsent(hourBucket, k -> new HourlyMetric());

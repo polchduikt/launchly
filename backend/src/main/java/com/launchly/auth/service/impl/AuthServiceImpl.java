@@ -71,6 +71,11 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
 
+        if (!user.isActive()) {
+            String reason = user.getBlockReason() != null ? user.getBlockReason() : "Порушення правил платформи";
+            throw new AppException(HttpStatus.FORBIDDEN, reason);
+        }
+
         if (user.getPassword() == null || !passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new AppException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
@@ -84,6 +89,9 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse refreshToken(String refreshTokenStr) {
         RefreshToken refreshToken = tokenService.verifyRefreshToken(refreshTokenStr);
         User user = refreshToken.getUser();
+        if (!user.isActive()) {
+            throw new AppException(HttpStatus.FORBIDDEN, "Ваш акаунт заблоковано. Зверніться до адміністратора.");
+        }
         tokenService.deleteRefreshToken(refreshTokenStr);
         String newAccessToken = tokenService.generateAccessToken(user);
         String newRefreshToken = tokenService.generateRefreshToken(user);
@@ -101,6 +109,9 @@ public class AuthServiceImpl implements AuthService {
     public UserResponse getCurrentUser(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        if (!user.isActive()) {
+            throw new AppException(HttpStatus.FORBIDDEN, "Ваш акаунт заблоковано. Зверніться до адміністратора.");
+        }
         return authMapper.toUserResponse(user);
     }
 

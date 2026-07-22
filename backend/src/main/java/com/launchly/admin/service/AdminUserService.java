@@ -8,4 +8,5 @@ public interface AdminUserService {
     Page<AdminUserDto> getUsers(String search, Role roleFilter, int page, int size);
     AdminUserDto updateUserRole(Long userId, Role role, String currentUserEmail);
     AdminUserDto toggleUserStatus(Long userId);
+    AdminUserDto toggleUserStatus(Long userId, String reason, String details);
 }

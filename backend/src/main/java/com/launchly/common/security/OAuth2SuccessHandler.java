@@ -15,6 +15,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
@@ -29,6 +31,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     @Value("${app.security.super-admin-email:}")
     private String superAdminEmail;
+
+    @Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -54,6 +59,14 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                     .emailVerified(true)
                     .build());
         } else {
+            if (!user.isActive()) {
+                String reason = user.getBlockReason() != null ? user.getBlockReason() : "admin.reason_rules";
+                String targetUrl = org.springframework.web.util.UriComponentsBuilder.fromUriString(frontendUrl + "/blocked")
+                        .queryParam("code", URLEncoder.encode(reason, StandardCharsets.UTF_8))
+                        .build().toUriString();
+                response.sendRedirect(targetUrl);
+                return;
+            }
             boolean updated = false;
             if (isSuperAdmin && user.getRole() != Role.ROLE_ADMIN) {
                 user.setRole(Role.ROLE_ADMIN);

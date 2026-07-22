@@ -34,6 +34,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
+            if (!userDetails.isEnabled()) {
+                String reason = (userDetails instanceof CustomUserDetails cud && cud.getBlockReason() != null)
+                        ? cud.getBlockReason()
+                        : "Порушення правил платформи";
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"ACCOUNT_BLOCKED\",\"reason\":\"" + reason.replace("\"", "\\\"") + "\"}");
+                return;
+            }
+
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
