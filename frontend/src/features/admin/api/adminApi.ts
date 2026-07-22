@@ -71,6 +71,8 @@ export interface AdminUser {
   avatar: string | null;
   role: 'ROLE_OWNER' | 'ROLE_ADMIN' | 'ROLE_MANAGER';
   active: boolean;
+  blockReason?: string;
+  blockedAt?: string;
   provider: string;
   createdAt: string;
   botsCount: number;
@@ -145,8 +147,8 @@ export const updateUserRoleApi = async (userId: number, role: string): Promise<A
   return response.data;
 };
 
-export const toggleUserStatusApi = async (userId: number): Promise<AdminUser> => {
-  const response = await apiClient.patch<AdminUser>(`/admin/users/${userId}/status`);
+export const toggleUserStatusApi = async (userId: number, blockData?: { reason: string; details?: string }): Promise<AdminUser> => {
+  const response = await apiClient.patch<AdminUser>(`/admin/users/${userId}/status`, blockData);
   return response.data;
 };
 

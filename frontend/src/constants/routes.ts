@@ -20,6 +20,7 @@ export const ROUTES = {
   BILLING_CANCEL: '/billing/cancel',
   BLOG: '/blog',
   BLOG_DETAIL: '/blog/:id',
+  BLOCKED: '/blocked',
   ADMIN_HOME: '/admin',
   ADMIN_STATS: '/admin/stats',
   ADMIN_USERS: '/admin/users',

@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchAdminUsersApi, updateUserRoleApi, toggleUserStatusApi } from '../api/adminApi';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
 import {
-  Users,
   Search,
-  Filter,
+  ChevronDown,
   Shield,
+  ShieldAlert,
   UserCheck,
   UserX,
   Bot,
@@ -23,11 +23,41 @@ export const AdminUsersPage: React.FC = () => {
 
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
-  const [page, setPage] = useState(0);
+  const [page] = useState(0);
 
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [newRole, setNewRole] = useState<'ROLE_OWNER' | 'ROLE_ADMIN' | 'ROLE_MANAGER'>('ROLE_OWNER');
+
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [userToBlock, setUserToBlock] = useState<any | null>(null);
+  const [blockReasonOption, setBlockReasonOption] = useState<string>('Підозріла активність');
+  const [customBlockReason, setCustomBlockReason] = useState<string>('');
+
+  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const roleDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target as Node)) {
+        setIsRoleDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const roleOptions = [
+    { value: '', label: t('admin.all_roles') !== 'admin.all_roles' ? t('admin.all_roles') : 'Всі ролі' },
+    { value: 'ROLE_OWNER', label: t('admin.owners') !== 'admin.owners' ? t('admin.owners') : 'Овнер' },
+    { value: 'ROLE_MANAGER', label: t('admin.managers') !== 'admin.managers' ? t('admin.managers') : 'Менеджер' },
+    { value: 'ROLE_ADMIN', label: t('admin.admins') !== 'admin.admins' ? t('admin.admins') : 'Адмін' },
+  ];
+
+  const getRoleLabel = (role: string) => {
+    const found = roleOptions.find((r) => r.value === role);
+    return found ? found.label : (t('admin.all_roles') !== 'admin.all_roles' ? t('admin.all_roles') : 'Всі ролі');
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['adminUsers', search, roleFilter, page],
@@ -44,9 +74,13 @@ export const AdminUsersPage: React.FC = () => {
   });
 
   const statusMutation = useMutation({
-    mutationFn: (userId: number) => toggleUserStatusApi(userId),
+    mutationFn: ({ userId, blockData }: { userId: number; blockData?: { reason: string; details?: string } }) =>
+      toggleUserStatusApi(userId, blockData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
+      setShowBlockModal(false);
+      setUserToBlock(null);
+      setCustomBlockReason('');
     },
   });
 
@@ -55,6 +89,31 @@ export const AdminUsersPage: React.FC = () => {
     setNewRole(user.role);
     setShowRoleModal(true);
   };
+
+  const handleOpenBlockModal = (user: any) => {
+    if (user.active) {
+      setUserToBlock(user);
+      setBlockReasonOption('SUSPICIOUS_ACTIVITY');
+      setCustomBlockReason('');
+      setShowBlockModal(true);
+    } else {
+      statusMutation.mutate({ userId: user.id });
+    }
+  };
+
+  const handleConfirmBlock = () => {
+    if (userToBlock) {
+      statusMutation.mutate({
+        userId: userToBlock.id,
+        blockData: {
+          reason: blockReasonOption,
+          details: customBlockReason
+        }
+      });
+    }
+  };
+
+
 
   const handleSaveRole = () => {
     if (selectedUser) {
@@ -66,31 +125,49 @@ export const AdminUsersPage: React.FC = () => {
     <AdminLayout>
       <div className="space-y-6 w-full">
 
-
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
               type="text"
-              placeholder={t('admin.search_users_placeholder')}
+              placeholder={t('admin.search_users_placeholder') !== 'admin.search_users_placeholder' ? t('admin.search_users_placeholder') : 'Пошук пошти, імені або Telegram...'}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all shadow-xs"
             />
           </div>
 
-          <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
-            <Filter size={15} className="text-slate-400" />
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all cursor-pointer"
+          <div className="relative w-full sm:w-auto flex justify-end" ref={roleDropdownRef}>
+            <button
+              type="button"
+              onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+              className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-xs min-w-[140px] cursor-pointer"
             >
-              <option value="">{t('admin.all_roles')}</option>
-              <option value="ROLE_OWNER">{t('admin.owners')}</option>
-              <option value="ROLE_MANAGER">{t('admin.managers')}</option>
-              <option value="ROLE_ADMIN">{t('admin.admins')}</option>
-            </select>
+              <span>{getRoleLabel(roleFilter)}</span>
+              <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isRoleDropdownOpen && (
+              <div className="absolute right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150">
+                {roleOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      setRoleFilter(opt.value);
+                      setIsRoleDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors ${
+                      roleFilter === opt.value
+                        ? 'bg-indigo-50 text-indigo-600'
+                        : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -193,14 +270,14 @@ export const AdminUsersPage: React.FC = () => {
 
                             {isAdmin && (
                               <button
-                                onClick={() => statusMutation.mutate(u.id)}
+                                onClick={() => handleOpenBlockModal(u)}
                                 disabled={isSelf}
                                 className={`p-1.5 rounded-xl border transition cursor-pointer disabled:opacity-40 ${
                                   u.active
                                     ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
                                     : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100'
                                 }`}
-                                title={u.active ? 'Block User' : 'Unblock User'}
+                                title={u.active ? 'Заблокувати користувача' : 'Розблокувати користувача'}
                               >
                                 {u.active ? <UserX size={15} /> : <UserCheck size={15} />}
                               </button>
@@ -216,7 +293,7 @@ export const AdminUsersPage: React.FC = () => {
           )}
         </div>
         {showRoleModal && selectedUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 p-4 animate-in fade-in duration-150">
             <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 space-y-6 shadow-2xl">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
@@ -301,6 +378,91 @@ export const AdminUsersPage: React.FC = () => {
                 >
                   {roleMutation.isPending && <Loader2 size={14} className="animate-spin" />}
                   <span>{t('admin.save_role')}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showBlockModal && userToBlock && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 p-4 animate-in fade-in duration-150">
+            <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-6 space-y-6 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                  <ShieldAlert size={20} className="text-rose-600" />
+                  <span>{t('admin.block_user_title')}</span>
+                </h3>
+                <button
+                  onClick={() => setShowBlockModal(false)}
+                  className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs text-slate-600 space-y-1">
+                  <div>User: <strong className="text-slate-900 font-bold">{userToBlock.name}</strong></div>
+                  <div className="text-slate-500">{userToBlock.email}</div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-700 block">{t('admin.select_block_reason')}</label>
+                  {[
+                    { code: 'SUSPICIOUS_ACTIVITY', key: 'admin.reason_suspicious' },
+                    { code: 'VIOLATION_OF_RULES', key: 'admin.reason_rules' },
+                    { code: 'SPAM', key: 'admin.reason_spam' },
+                    { code: 'OTHER', key: 'admin.reason_other' }
+                  ].map((r) => (
+                    <label
+                      key={r.code}
+                      onClick={() => setBlockReasonOption(r.code)}
+                      className={`flex items-center space-x-3 p-3.5 rounded-2xl border cursor-pointer transition ${
+                        blockReasonOption === r.code
+                          ? 'bg-rose-50 border-rose-400 text-rose-900 font-bold shadow-xs'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="blockReason"
+                        checked={blockReasonOption === r.code}
+                        onChange={() => setBlockReasonOption(r.code)}
+                        className="accent-rose-600"
+                      />
+                      <span className="text-xs">{t(r.key)}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {blockReasonOption === 'OTHER' && (
+                  <div className="space-y-1.5 pt-1">
+                    <label className="text-xs font-bold text-slate-700 block">{t('admin.specify_block_reason')}</label>
+                    <textarea
+                      value={customBlockReason}
+                      onChange={(e) => setCustomBlockReason(e.target.value)}
+                      placeholder="..."
+                      rows={3}
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:outline-none focus:border-rose-500 focus:bg-white transition"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+                <button
+                  onClick={() => setShowBlockModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 cursor-pointer"
+                >
+                  {t('admin.cancel')}
+                </button>
+                <button
+                  onClick={handleConfirmBlock}
+                  disabled={statusMutation.isPending}
+                  className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-100 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {statusMutation.isPending && <Loader2 size={14} className="animate-spin" />}
+                  <span>{t('admin.confirm_block')}</span>
                 </button>
               </div>
             </div>

@@ -40,6 +40,12 @@ export const useLoginForm = () => {
         navigate(ROUTES.HOME, { replace: true });
       }
     } catch (error: unknown) {
+      if (axios.isAxiosError(error) && (error.response?.status === 403 || error.response?.data?.error === 'ACCOUNT_BLOCKED')) {
+        const reason = error.response?.data?.reason || error.response?.data?.message || 'Порушення правил платформи';
+        localStorage.setItem('launchly_block_reason', reason);
+        navigate(ROUTES.BLOCKED, { replace: true });
+        return;
+      }
       const msg = axios.isAxiosError(error)
         ? (error.response?.data?.message ?? 'Invalid email or password. Please try again.')
         : (error instanceof Error ? error.message : 'Something went wrong');

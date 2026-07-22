@@ -28,6 +28,7 @@ const CheckoutSuccessPage = lazy(() => import('../features/billing/pages/Checkou
 const CheckoutCancelPage = lazy(() => import('../features/billing/pages/CheckoutCancelPage'));
 const BlogPage = lazy(() => import('../features/dashboard/pages/BlogPage'));
 const BlogDetailPage = lazy(() => import('../features/dashboard/pages/BlogDetailPage'));
+const BlockedPage = lazy(() => import('../features/auth/pages/BlockedPage'));
 
 const AdminStatsPage = lazy(() => import('../features/admin/pages/AdminStatsPage'));
 const AdminUsersPage = lazy(() => import('../features/admin/pages/AdminUsersPage'));
@@ -49,6 +50,7 @@ export const AppRouter: React.FC = () => {
           <Route path={ROUTES.LANDING} element={<LandingPage />} />
           <Route path={ROUTES.BLOG} element={<BlogPage />} />
           <Route path={ROUTES.BLOG_DETAIL} element={<BlogDetailPage />} />
+          <Route path={ROUTES.BLOCKED} element={<BlockedPage />} />
 
           <Route element={<PublicRoute />}>
             <Route path={ROUTES.LOGIN} element={<AuthLayout><LoginPage /></AuthLayout>} />

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useLoginForm } from '../hooks/useLoginForm';
 import { AuthPageLayout } from '../components/AuthPageLayout';
 import { FormInput } from '../components/FormInput';
@@ -14,6 +14,10 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
 
+  const [searchParams] = useSearchParams();
+  const isBlockedError = searchParams.get('error') === 'blocked';
+  const displayError = apiError || (isBlockedError ? 'Ваш акаунт заблоковано. Зверніться до адміністратора.' : null);
+
   const handleGoogleLogin = () => {
     window.location.href = GOOGLE_OAUTH_URL;
   };
@@ -25,9 +29,9 @@ const LoginPage: React.FC = () => {
         <p className="text-sm text-on-surface-variant">Enter your credentials to access your workspace</p>
       </div>
 
-      {apiError && (
+      {displayError && (
         <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-600 text-sm font-medium">
-          {apiError}
+          {displayError}
         </div>
       )}
 
