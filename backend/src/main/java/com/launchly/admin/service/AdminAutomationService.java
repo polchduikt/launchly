@@ -1,9 +1,11 @@
 package com.launchly.admin.service;
 
+import com.launchly.admin.dto.AdminAutomationDetailDto;
 import com.launchly.admin.dto.AdminAutomationDto;
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface AdminAutomationService {
-    List<AdminAutomationDto> getAutomations();
+    Page<AdminAutomationDto> getAutomations(String search, String status, int page, int size);
+    AdminAutomationDetailDto getAutomationDetails(Long automationId, String period, int page, int size);
     void toggleAutomation(Long automationId);
 }

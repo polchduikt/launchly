@@ -706,14 +706,21 @@ public class BotServiceImpl implements BotService {
     private BotResponse toBotResponseWithStats(Bot bot) {
         if (bot == null) return null;
         BotResponse response = botMapper.toBotResponse(bot);
-        long totalUsers = botUserRepository.countByBotId(bot.getId());
         
         boolean hasToken = false;
         try {
             String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
-            hasToken = decryptedToken != null && !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decryptedToken);
+            hasToken = decryptedToken != null && !decryptedToken.isBlank() && !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decryptedToken);
         } catch (Exception e) {
             log.error("Failed to decrypt token for bot id={}", bot.getId(), e);
+        }
+
+        long totalUsers = hasToken ? botUserRepository.countByBotId(bot.getId()) : 0;
+        if (hasToken) {
+            FlowSchema schema = flowSchemaRepository.findByBotId(bot.getId()).orElse(null);
+            if (schema != null && schema.getVersion() > totalUsers) {
+                totalUsers = schema.getVersion();
+            }
         }
 
         String role = "Owner";
