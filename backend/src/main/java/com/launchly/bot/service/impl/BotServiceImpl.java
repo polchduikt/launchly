@@ -52,6 +52,7 @@ import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
+import com.launchly.admin.service.UserAuditService;
 
 @Slf4j
 @Service
@@ -72,6 +73,7 @@ public class BotServiceImpl implements BotService {
     private final BotUserTagRepository botUserTagRepository;
     private final TagRepository tagRepository;
     private final BotMemberRepository botMemberRepository;
+    private final UserAuditService userAuditService;
 
     @Override
     @Transactional
@@ -116,6 +118,8 @@ public class BotServiceImpl implements BotService {
                 .bot(bot)
                 .build();
         flowSchemaRepository.save(schema);
+
+        userAuditService.logBotConnected(user, bot.getId(), bot.getName(), bot.getCreatedAt());
 
         return toBotResponseWithStats(bot);
     }
@@ -341,6 +345,8 @@ public class BotServiceImpl implements BotService {
         redisTemplate.delete("launchly:bot:schema:" + botId);
 
         bot.setUpdatedAt(LocalDateTime.now());
+
+        userAuditService.logAutomationModified(bot.getUser(), bot.getId(), bot.getName(), bot.getUpdatedAt());
         if (!bot.isActive()) {
             boolean hasRealToken = false;
             try {

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import com.launchly.admin.service.UserAuditService;
 
 @Component
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final UserRepository userRepository;
     private final TokenService tokenService;
     private final BillingService billingService;
+    private final UserAuditService userAuditService;
 
     @Value("${app.oauth2.redirect-uri}")
     private String redirectUri;
@@ -37,7 +39,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws IOException {
+                                         Authentication authentication) throws IOException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
         String email = oAuth2User.getAttribute("email");
@@ -47,8 +49,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         boolean isSuperAdmin = email != null && superAdminEmail != null && !superAdminEmail.isBlank()
                 && email.trim().equalsIgnoreCase(superAdminEmail.trim());
 
+        boolean isNew = false;
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
+            isNew = true;
             user = userRepository.save(User.builder()
                     .email(email)
                     .name(name)
@@ -82,6 +86,11 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         }
 
         billingService.createFreeSubscription(user.getId());
+
+        if (isNew) {
+            userAuditService.logRegistration(user, "GOOGLE", user.getCreatedAt());
+        }
+        userAuditService.logLogin(user, "GOOGLE");
 
         String accessToken = tokenService.generateAccessToken(user);
         String refreshToken = tokenService.generateRefreshToken(user);

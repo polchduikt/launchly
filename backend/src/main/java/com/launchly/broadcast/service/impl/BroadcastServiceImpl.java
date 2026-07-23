@@ -29,6 +29,9 @@ import java.util.ArrayList;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.entity.BotMember;
 
+import com.launchly.admin.service.UserAuditService;
+import java.time.LocalDateTime;
+
 @Service
 @Slf4j
 public class BroadcastServiceImpl implements BroadcastService {
@@ -44,6 +47,7 @@ public class BroadcastServiceImpl implements BroadcastService {
     private final ObjectMapper objectMapper;
     private final FlowEngineService flowEngineService;
     private final BotMemberRepository botMemberRepository;
+    private final UserAuditService userAuditService;
 
     public BroadcastServiceImpl(BroadcastCampaignRepository campaignRepository,
                                 BotRepository botRepository,
@@ -53,7 +57,8 @@ public class BroadcastServiceImpl implements BroadcastService {
                                 PlanLimitService planLimitService,
                                 ObjectMapper objectMapper,
                                 @Lazy FlowEngineService flowEngineService,
-                                BotMemberRepository botMemberRepository) {
+                                BotMemberRepository botMemberRepository,
+                                UserAuditService userAuditService) {
         this.campaignRepository = campaignRepository;
         this.botRepository = botRepository;
         this.broadcastFilterService = broadcastFilterService;
@@ -63,6 +68,7 @@ public class BroadcastServiceImpl implements BroadcastService {
         this.objectMapper = objectMapper;
         this.flowEngineService = flowEngineService;
         this.botMemberRepository = botMemberRepository;
+        this.userAuditService = userAuditService;
     }
 
     @Override
@@ -334,6 +340,7 @@ public class BroadcastServiceImpl implements BroadcastService {
                     "Campaign is already IN_PROGRESS, please wait for it to complete.");
         }
 
+        userAuditService.logBroadcastLaunched(campaign.getBot().getUser(), campaign.getId(), campaign.getName(), "FINISHED", LocalDateTime.now());
         CampaignResponse response = broadcastMapper.toCampaignResponse(campaign);
         sendCampaign(campaignId);
         return response;

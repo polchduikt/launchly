@@ -10,6 +10,8 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
 
     List<Bot> findAllByUserId(Long userId);
 
+    List<Bot> findByUserId(Long userId);
+
     long countByUserId(Long userId);
 
     List<Bot> findAllByActiveTrue();

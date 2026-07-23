@@ -1,0 +1,3 @@
+ALTER TABLE user_audit_logs ADD COLUMN IF NOT EXISTS action_type VARCHAR(50);
+ALTER TABLE user_audit_logs ADD COLUMN IF NOT EXISTS target_id BIGINT;
+ALTER TABLE user_audit_logs ADD COLUMN IF NOT EXISTS target_name VARCHAR(255);

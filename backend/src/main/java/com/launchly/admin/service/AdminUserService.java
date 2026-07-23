@@ -9,4 +9,5 @@ public interface AdminUserService {
     AdminUserDto updateUserRole(Long userId, Role role, String currentUserEmail);
     AdminUserDto toggleUserStatus(Long userId);
     AdminUserDto toggleUserStatus(Long userId, String reason, String details);
+    com.launchly.admin.dto.AdminUserDetailDto getUserDetails(Long userId, String period, String category, int page, int size);
 }

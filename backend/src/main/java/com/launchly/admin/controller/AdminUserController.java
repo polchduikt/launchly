@@ -51,4 +51,16 @@ public class AdminUserController {
         String details = request != null ? request.getDetails() : null;
         return ResponseEntity.ok(adminUserService.toggleUserStatus(userId, reason, details));
     }
+
+    @GetMapping("/{userId}/details")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public ResponseEntity<com.launchly.admin.dto.AdminUserDetailDto> getUserDetails(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "all") String period,
+            @RequestParam(defaultValue = "all") String category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return ResponseEntity.ok(adminUserService.getUserDetails(userId, period, category, page, size));
+    }
 }

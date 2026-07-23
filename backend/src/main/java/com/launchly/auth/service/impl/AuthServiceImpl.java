@@ -38,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final BillingService billingService;
     private final TelegramAuthSessionRepository telegramAuthSessionRepository;
+    private final com.launchly.admin.service.UserAuditService userAuditService;
 
     @Value("${telegram.system-bot-username:}")
     private String systemBotUsername;
@@ -60,6 +61,10 @@ public class AuthServiceImpl implements AuthService {
 
         user = userRepository.save(user);
         billingService.createFreeSubscription(user.getId());
+
+        userAuditService.logRegistration(user, "LOCAL", user.getCreatedAt());
+        userAuditService.logLogin(user, "LOCAL");
+
         String accessToken = tokenService.generateAccessToken(user);
         String refreshToken = tokenService.generateRefreshToken(user);
         return new AuthResponse(accessToken, refreshToken, authMapper.toUserResponse(user));
@@ -72,13 +77,16 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
 
         if (!user.isActive()) {
-            String reason = user.getBlockReason() != null ? user.getBlockReason() : "Порушення правил платформи";
+            String reason = user.getBlockReason() != null ? user.getBlockReason() : "admin.reason_rules";
             throw new AppException(HttpStatus.FORBIDDEN, reason);
         }
 
         if (user.getPassword() == null || !passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new AppException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
+
+        userAuditService.logLogin(user, user.getProvider() != null ? user.getProvider().name() : "LOCAL");
+
         String accessToken = tokenService.generateAccessToken(user);
         String refreshToken = tokenService.generateRefreshToken(user);
         return new AuthResponse(accessToken, refreshToken, authMapper.toUserResponse(user));

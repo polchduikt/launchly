@@ -69,5 +69,11 @@ databaseChangeLog:
       file: db/changelog/changes/V034__add_target_all_bots_to_broadcast_campaigns.sql
   - include:
       file: db/changelog/changes/V035__add_block_reason_to_users.sql
+  - include:
+      file: db/changelog/changes/V036__create_user_audit_logs.sql
+  - include:
+      file: db/changelog/changes/V037__add_action_type_to_user_audit_logs.sql
+  - include:
+      file: db/changelog/changes/V038__deduplicate_user_audit_logs.sql
 
 
