@@ -76,6 +76,11 @@ export interface AdminUser {
   provider: string;
   createdAt: string;
   botsCount: number;
+  automationsCount?: number;
+  broadcastsCount?: number;
+  contactsCount?: number;
+  messagesCount?: number;
+  planName?: string;
   telegramUsername: string | null;
 }
 
@@ -186,5 +191,55 @@ export const fetchAdminLogsApi = async (
   if (search) params.search = search;
 
   const response = await apiClient.get<AdminLog[]>('/admin/logs', { params });
+  return response.data;
+};
+
+export interface UserActivity {
+  id: number;
+  title: string;
+  description: string;
+  category: 'automations' | 'broadcasts' | 'system';
+  badge: string;
+  timestamp: string;
+}
+
+export interface AdminUserDetail {
+  id: number;
+  email: string;
+  name: string;
+  avatar: string | null;
+  role: 'ROLE_OWNER' | 'ROLE_ADMIN' | 'ROLE_MANAGER';
+  active: boolean;
+  blockReason?: string;
+  blockedAt?: string;
+  provider: string;
+  createdAt: string;
+  telegramUsername: string | null;
+  botsCount: number;
+  automationsCount: number;
+  broadcastsCount: number;
+  contactsCount: number;
+  messagesCount: number;
+  planName: string;
+  planStatus: string;
+  lastActivity: string;
+  activities: {
+    content: UserActivity[];
+    totalElements: number;
+    totalPages: number;
+    number: number;
+    size: number;
+  };
+}
+
+export const fetchAdminUserDetailsApi = async (
+  userId: number,
+  period = 'all',
+  category = 'all',
+  page = 0,
+  size = 20
+): Promise<AdminUserDetail> => {
+  const params: Record<string, string | number> = { period, category, page, size };
+  const response = await apiClient.get<AdminUserDetail>(`/admin/users/${userId}/details`, { params });
   return response.data;
 };
