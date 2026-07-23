@@ -157,8 +157,63 @@ export const toggleUserStatusApi = async (userId: number, blockData?: { reason: 
   return response.data;
 };
 
-export const fetchAdminAutomationsApi = async (): Promise<AdminAutomation[]> => {
-  const response = await apiClient.get<AdminAutomation[]>('/admin/automations');
+export interface fetchAdminAutomationDetailsApiParams {
+  automationId: number;
+  period?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface AdminAutomationDetail {
+  id: number;
+  name: string;
+  triggerType: string;
+  botId: number | null;
+  botName: string;
+  botActive: boolean;
+  ownerId: number | null;
+  ownerName: string;
+  ownerEmail: string;
+  ownerAvatar: string | null;
+  nodesCount: number;
+  edgesCount: number;
+  integrationsCount: number;
+  version: number;
+  triggerCount: number;
+  errorCount: number;
+  createdAt: string;
+  updatedAt: string;
+  activities: {
+    content: UserActivity[];
+    totalElements: number;
+    totalPages: number;
+    number: number;
+    size: number;
+  };
+}
+
+export const fetchAdminAutomationsApi = async (
+  search = '',
+  status = '',
+  page = 0,
+  size = 30
+): Promise<{ content: AdminAutomation[]; totalElements: number; totalPages: number }> => {
+  const params: Record<string, string | number> = { page, size };
+  if (search) params.search = search;
+  if (status) params.status = status;
+
+  const response = await apiClient.get<{ content: AdminAutomation[]; totalElements: number; totalPages: number }>('/admin/automations', { params });
+  return response.data;
+};
+
+export const fetchAdminAutomationDetailsApi = async (
+  automationId: number,
+  period = 'all',
+  page = 0,
+  size = 20
+): Promise<AdminAutomationDetail> => {
+  const params: Record<string, string | number> = { period, page, size };
+  const response = await apiClient.get<AdminAutomationDetail>(`/admin/automations/${automationId}/details`, { params });
   return response.data;
 };
 

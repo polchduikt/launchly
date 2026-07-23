@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { fetchAdminUsersApi, updateUserRoleApi, toggleUserStatusApi, fetchAdminUserDetailsApi } from '../api/adminApi';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
@@ -26,13 +27,24 @@ import {
 import { t } from '../../../i18n';
 
 export const AdminUsersPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+
   const queryClient = useQueryClient();
   const currentUser = useAuthStore((state) => state.user);
   const isAdmin = currentUser?.role === 'ROLE_ADMIN';
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
   const [roleFilter, setRoleFilter] = useState('');
-  const [page] = useState(0);
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    const param = searchParams.get('search');
+    if (param !== null) {
+      setSearch(param);
+      setPage(0);
+    }
+  }, [searchParams]);
 
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
