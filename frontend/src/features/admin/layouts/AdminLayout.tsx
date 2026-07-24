@@ -17,9 +17,10 @@ import { getLanguage, changeLanguage, t } from '../../../i18n';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
+  noPadding?: boolean;
 }
 
-export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
@@ -220,7 +221,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-8 bg-slate-50 text-slate-800">
+        <main className={`flex-1 overflow-y-auto bg-slate-50 text-slate-800 ${noPadding ? 'p-0 flex h-full min-h-0 overflow-hidden' : 'p-8'}`}>
           {children}
         </main>
       </div>

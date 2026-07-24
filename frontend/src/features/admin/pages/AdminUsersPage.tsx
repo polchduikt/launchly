@@ -38,12 +38,19 @@ export const AdminUsersPage: React.FC = () => {
 
   const [search, setSearch] = useState(initialSearch);
   const [roleFilter, setRoleFilter] = useState('');
+  const [planFilter, setPlanFilter] = useState('');
   const [sortFilter, setSortFilter] = useState<'desc' | 'asc'>('desc');
   const [page, setPage] = useState(0);
 
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+  const [isBulkActionOpen, setIsBulkActionOpen] = useState(false);
+  const bulkActionDropdownRef = useRef<HTMLDivElement>(null);
+
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const [isPlanDropdownOpen, setIsPlanDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const roleDropdownRef = useRef<HTMLDivElement>(null);
+  const planDropdownRef = useRef<HTMLDivElement>(null);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,8 +58,14 @@ export const AdminUsersPage: React.FC = () => {
       if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target as Node)) {
         setIsRoleDropdownOpen(false);
       }
+      if (planDropdownRef.current && !planDropdownRef.current.contains(event.target as Node)) {
+        setIsPlanDropdownOpen(false);
+      }
       if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
         setIsSortDropdownOpen(false);
+      }
+      if (bulkActionDropdownRef.current && !bulkActionDropdownRef.current.contains(event.target as Node)) {
+        setIsBulkActionOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -60,9 +73,60 @@ export const AdminUsersPage: React.FC = () => {
   }, []);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['adminUsers', search, roleFilter, sortFilter, page],
-    queryFn: () => fetchAdminUsersApi(search, roleFilter, sortFilter, page, 30),
+    queryKey: ['adminUsers', search, roleFilter, planFilter, sortFilter, page],
+    queryFn: () => fetchAdminUsersApi(search, roleFilter, planFilter, sortFilter, page, 30),
   });
+
+  const allUserIdsOnPage = data?.content?.map((u: any) => u.id) || [];
+  const isAllSelected = allUserIdsOnPage.length > 0 && allUserIdsOnPage.every((id: number) => selectedUserIds.includes(id));
+
+  const handleToggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedUserIds([]);
+    } else {
+      setSelectedUserIds(allUserIdsOnPage);
+    }
+  };
+
+  const handleToggleSelectUser = (id: number) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkChangeRole = () => {
+    setIsBulkActionOpen(false);
+    if (selectedUserIds.length === 0) return;
+    const firstUser = data?.content?.find((u: any) => selectedUserIds.includes(u.id));
+    if (firstUser) {
+      setSelectedUser(firstUser);
+      setNewRole(firstUser.role);
+      setShowRoleModal(true);
+    }
+  };
+
+  const handleBulkBlock = () => {
+    setIsBulkActionOpen(false);
+    if (selectedUserIds.length === 0) return;
+    const activeSelectedUsers = data?.content?.filter((u: any) => selectedUserIds.includes(u.id) && u.active) || [];
+    if (activeSelectedUsers.length === 0) return;
+
+    setUserToBlock(activeSelectedUsers[0]);
+    setBlockReasonOption('SUSPICIOUS_ACTIVITY');
+    setCustomBlockReason('');
+    setShowBlockModal(true);
+  };
+
+  const handleBulkUnblock = () => {
+    setIsBulkActionOpen(false);
+    if (selectedUserIds.length === 0) return;
+    // Only unblock users who are currently BLOCKED (!u.active)
+    const blockedSelectedUsers = data?.content?.filter((u: any) => selectedUserIds.includes(u.id) && !u.active) || [];
+    blockedSelectedUsers.forEach((u: any) => {
+      statusMutation.mutate({ userId: u.id });
+    });
+    setSelectedUserIds([]);
+  };
 
   useEffect(() => {
     const param = searchParams.get('search');
@@ -192,6 +256,19 @@ export const AdminUsersPage: React.FC = () => {
     return found ? found.label : (t('admin.all_roles') !== 'admin.all_roles' ? t('admin.all_roles') : 'Всі ролі');
   };
 
+  const planOptions = [
+    { value: '', label: t('admin.all_plans') !== 'admin.all_plans' ? t('admin.all_plans') : 'Всі тарифи' },
+    { value: 'FREE', label: t('admin.plan_free') !== 'admin.plan_free' ? t('admin.plan_free') : 'Free' },
+    { value: 'STARTER', label: t('admin.plan_starter') !== 'admin.plan_starter' ? t('admin.plan_starter') : 'Starter' },
+    { value: 'PRO', label: t('admin.plan_pro') !== 'admin.plan_pro' ? t('admin.plan_pro') : 'Pro' },
+    { value: 'BUSINESS', label: t('admin.plan_business') !== 'admin.plan_business' ? t('admin.plan_business') : 'Business' },
+  ];
+
+  const getPlanLabel = (plan: string) => {
+    const found = planOptions.find((p) => p.value === plan);
+    return found ? found.label : (t('admin.all_plans') !== 'admin.all_plans' ? t('admin.all_plans') : 'Всі тарифи');
+  };
+
   const roleMutation = useMutation({
     mutationFn: ({ userId, role }: { userId: number; role: string }) => updateUserRoleApi(userId, role),
     onSuccess: () => {
@@ -230,7 +307,19 @@ export const AdminUsersPage: React.FC = () => {
   };
 
   const handleConfirmBlock = () => {
-    if (userToBlock) {
+    if (selectedUserIds.length > 1) {
+      const activeSelectedUsers = data?.content?.filter((u: any) => selectedUserIds.includes(u.id) && u.active) || [];
+      activeSelectedUsers.forEach((u: any) => {
+        statusMutation.mutate({
+          userId: u.id,
+          blockData: {
+            reason: blockReasonOption,
+            details: customBlockReason
+          }
+        });
+      });
+      setSelectedUserIds([]);
+    } else if (userToBlock) {
       statusMutation.mutate({
         userId: userToBlock.id,
         blockData: {
@@ -242,301 +331,421 @@ export const AdminUsersPage: React.FC = () => {
   };
 
   const handleSaveRole = () => {
-    if (selectedUser) {
+    if (selectedUserIds.length > 1) {
+      selectedUserIds.forEach((id) => {
+        roleMutation.mutate({ userId: id, role: newRole });
+      });
+      setSelectedUserIds([]);
+    } else if (selectedUser) {
       roleMutation.mutate({ userId: selectedUser.id, role: newRole });
     }
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6 w-full">
-
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input
-              type="text"
-              placeholder={t('admin.search_users_placeholder') !== 'admin.search_users_placeholder' ? t('admin.search_users_placeholder') : 'Пошук пошти, імені або Telegram...'}
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(0);
-              }}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all shadow-xs"
-            />
-          </div>
-
-          <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
-            <div className="relative w-full sm:w-auto flex justify-end" ref={roleDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-                className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-2xs min-w-[140px] cursor-pointer"
-              >
-                <span>{getRoleLabel(roleFilter)}</span>
-                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isRoleDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
-                  {roleOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setRoleFilter(opt.value);
-                        setPage(0);
-                        setIsRoleDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-2 text-xs font-semibold flex items-center justify-between transition-colors ${
-                        roleFilter === opt.value
-                          ? 'bg-indigo-50 text-indigo-600 font-bold'
-                          : 'text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
+    <AdminLayout noPadding>
+      <div className="flex h-full w-full overflow-hidden">
+        
+        {/* Flush Sub-sidebar for Filters */}
+        <aside className="w-56 lg:w-60 bg-white border-r border-slate-200 h-full p-4 space-y-5 overflow-y-auto shrink-0 flex flex-col justify-between z-10">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                <Filter size={14} className="text-indigo-600" />
+                <span>{t('admin.filters_title')}</span>
+              </h3>
+              {(roleFilter || planFilter || sortFilter !== 'desc') && (
+                <button
+                  onClick={() => {
+                    setRoleFilter('');
+                    setPlanFilter('');
+                    setSortFilter('desc');
+                    setPage(0);
+                  }}
+                  className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                >
+                  {t('admin.reset_filters')}
+                </button>
               )}
             </div>
 
-            <div className="relative w-full sm:w-auto flex justify-end" ref={sortDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-2xs cursor-pointer"
-              >
-                <span>{sortFilter === 'asc' ? (t('admin.sort_oldest') || 'Спочатку старі') : (t('admin.sort_newest') || 'Спочатку нові')}</span>
-                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
+            {/* Role Filter */}
+            <div className="space-y-1" ref={roleDropdownRef}>
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.user_role_label')}</label>
+              <div className="relative w-full">
+                <button
+                  type="button"
+                  onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
+                >
+                  <span>{getRoleLabel(roleFilter)}</span>
+                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
 
-              {isSortDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
-                  {[
-                    { value: 'desc', label: t('admin.sort_newest') || 'Спочатку нові' },
-                    { value: 'asc', label: t('admin.sort_oldest') || 'Спочатку старі' },
-                  ].map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setSortFilter(opt.value as 'desc' | 'asc');
-                        setPage(0);
-                        setIsSortDropdownOpen(false);
-                      }}
-                      className={`w-full px-4 py-2 text-left text-xs font-semibold flex items-center justify-between hover:bg-slate-50 transition cursor-pointer ${
-                        sortFilter === opt.value ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
-                      }`}
-                    >
-                      <span>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="animate-spin text-indigo-600" size={32} />
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
-                  <tr>
-                    <th className="py-4 px-4 text-center">ID</th>
-                    <th className="py-4 px-4">{t('admin.user_col')}</th>
-                    <th className="py-4 px-4">{t('admin.role_col')}</th>
-                    <th className="py-4 px-4">{t('admin.provider_col')}</th>
-                    <th className="py-4 px-4 text-center">{t('admin.bots_col')}</th>
-                    <th className="py-4 px-4 text-center">{t('admin.cat_automations')}</th>
-                    <th className="py-4 px-4 text-center">{t('admin.cat_broadcasts')}</th>
-                    <th className="py-4 px-4 text-center">{t('admin.subscribers')}</th>
-                    <th className="py-4 px-4 text-center">{t('admin.messages_sent')}</th>
-                    <th className="py-4 px-4 text-center">{t('admin.subscription_plan')}</th>
-                    <th className="py-4 px-4 text-center">{t('admin.status_col')}</th>
-                    <th className="py-4 px-4 text-right">{t('admin.actions_col')}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {data?.content?.map((u) => {
-                    const isSelf = u.id === currentUser?.id;
-                    return (
-                      <tr key={u.id} className="hover:bg-slate-50/80 transition">
-                        <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-500 text-xs">#{u.id}</td>
-                        <td className="py-3.5 px-4">
-                          <div
-                            onClick={() => handleOpenDetailModal(u)}
-                            className="flex items-center space-x-3 cursor-pointer group"
-                            title="Переглянути деталі та статистику користувача"
-                          >
-                            {u.avatar ? (
-                              <img src={u.avatar} alt={u.name} referrerPolicy="no-referrer" className="w-9 h-9 rounded-full object-cover border border-slate-200 shadow-xs group-hover:border-indigo-400 transition" />
-                            ) : (
-                              <div className="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center font-extrabold text-indigo-700 text-xs shadow-xs group-hover:bg-indigo-600 group-hover:text-white transition">
-                                {u.name ? u.name[0].toUpperCase() : 'U'}
-                              </div>
-                            )}
-                            <div className="flex flex-col">
-                              <span className="font-bold text-slate-900 text-xs group-hover:text-indigo-600 transition">{u.name}</span>
-                              <span className="text-slate-500 text-[11px] font-medium">{u.email}</span>
-                              {u.telegramUsername && (
-                                <span className="text-cyan-600 text-[10px] font-mono">@{u.telegramUsername}</span>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-
-                        <td className="py-3.5 px-4">
-                          {u.role === 'ROLE_ADMIN' && (
-                            <span className="px-2.5 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 font-extrabold text-[10px]">
-                              Super Admin
-                            </span>
-                          )}
-                          {u.role === 'ROLE_MANAGER' && (
-                            <span className="px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-extrabold text-[10px]">
-                              Manager
-                            </span>
-                          )}
-                          {u.role === 'ROLE_OWNER' && (
-                            <span className="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-extrabold text-[10px]">
-                              Owner
-                            </span>
-                          )}
-                        </td>
-
-                        <td className="py-3.5 px-4 text-slate-500 uppercase font-mono text-[10px] font-bold">
-                          {(() => {
-                            const main = u.provider || 'LOCAL';
-                            if (main === 'TELEGRAM') return 'TELEGRAM';
-                            return u.telegramUsername ? `${main}, TELEGRAM` : main;
-                          })()}
-                        </td>
-
-                        <td className="py-3.5 px-4 text-center">
-                          <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
-                            <Bot size={13} className="text-indigo-600" />
-                            <span>{u.botsCount || 0}</span>
-                          </div>
-                        </td>
-
-                        <td className="py-3.5 px-4 text-center">
-                          <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
-                            <Workflow size={13} className="text-purple-600" />
-                            <span>{u.automationsCount || 0}</span>
-                          </div>
-                        </td>
-
-                        <td className="py-3.5 px-4 text-center">
-                          <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
-                            <Send size={13} className="text-blue-600" />
-                            <span>{u.broadcastsCount || 0}</span>
-                          </div>
-                        </td>
-
-                        <td className="py-3.5 px-4 text-center">
-                          <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
-                            <Users size={13} className="text-emerald-600" />
-                            <span>{u.contactsCount || 0}</span>
-                          </div>
-                        </td>
-
-                        <td className="py-3.5 px-4 text-center">
-                          <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
-                            <MessageSquare size={13} className="text-cyan-600" />
-                            <span>{u.messagesCount || 0}</span>
-                          </div>
-                        </td>
-
-                        <td className="py-3.5 px-4 text-center">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold text-[10px]">
-                            {u.planName || 'FREE'}
-                          </span>
-                        </td>
-
-                        <td className="py-3.5 px-4 text-center">
-                          {u.active ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
-                              {t('admin.active')}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-red-50 text-red-700 border border-red-200">
-                              {t('admin.blocked')}
-                            </span>
-                          )}
-                        </td>
-
-                        <td className="py-3.5 px-5 text-right">
-                          <div className="flex items-center justify-end space-x-2">
-                            {isAdmin && (
-                              <button
-                                onClick={() => handleOpenRoleModal(u)}
-                                disabled={isSelf}
-                                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-[11px] font-bold text-slate-700 disabled:opacity-40 transition cursor-pointer"
-                              >
-                                {t('admin.edit_role')}
-                              </button>
-                            )}
-
-                            {isAdmin && (
-                              <button
-                                onClick={() => handleOpenBlockModal(u)}
-                                disabled={isSelf}
-                                className={`p-1.5 rounded-xl border transition cursor-pointer disabled:opacity-40 ${
-                                  u.active
-                                    ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
-                                    : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100'
-                                }`}
-                                title={u.active ? t('admin.block') : t('admin.unblock')}
-                              >
-                                {u.active ? <UserX size={15} /> : <UserCheck size={15} />}
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-slate-50/70 border-t border-slate-200 text-xs text-slate-500 font-medium">
-                <div>
-                  {t('admin.showing') !== 'admin.showing' ? t('admin.showing') : 'Показано'} <span className="font-bold text-slate-900">{data?.content?.length || 0}</span> {t('admin.of') !== 'admin.of' ? t('admin.of') : 'з'} <span className="font-bold text-slate-900">{data?.totalElements || 0}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                    disabled={page === 0}
-                    className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
-                  >
-                    <ChevronLeft size={14} />
-                    <span>{t('admin.prev') !== 'admin.prev' ? t('admin.prev') : 'Назад'}</span>
-                  </button>
-
-                  <div className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold font-mono text-slate-800 shadow-2xs">
-                    <span className="text-indigo-600">{page + 1}</span>
-                    <span className="text-slate-400">/</span>
-                    <span>{data?.totalPages || 1}</span>
+                {isRoleDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                    {roleOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setRoleFilter(opt.value);
+                          setPage(0);
+                          setIsRoleDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-1.5 text-xs font-semibold flex items-center justify-between transition-colors ${
+                          roleFilter === opt.value
+                            ? 'bg-indigo-50 text-indigo-600 font-bold'
+                            : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
                   </div>
-
-                  <button
-                    onClick={() => setPage((prev) => Math.min(prev + 1, (data?.totalPages || 1) - 1))}
-                    disabled={!data || page >= data.totalPages - 1}
-                    className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
-                  >
-                    <span>{t('admin.next') !== 'admin.next' ? t('admin.next') : 'Далі'}</span>
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
+                )}
               </div>
             </div>
-          )}
-        </div>
+
+            {/* Plan Filter */}
+            <div className="space-y-1" ref={planDropdownRef}>
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.plan_filter_label') !== 'admin.plan_filter_label' ? t('admin.plan_filter_label') : 'Тарифний план'}</label>
+              <div className="relative w-full">
+                <button
+                  type="button"
+                  onClick={() => setIsPlanDropdownOpen(!isPlanDropdownOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
+                >
+                  <span>{getPlanLabel(planFilter)}</span>
+                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isPlanDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isPlanDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                    {planOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setPlanFilter(opt.value);
+                          setPage(0);
+                          setIsPlanDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-1.5 text-xs font-semibold flex items-center justify-between transition-colors ${
+                          planFilter === opt.value
+                            ? 'bg-indigo-50 text-indigo-600 font-bold'
+                            : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Sort Filter */}
+            <div className="space-y-1" ref={sortDropdownRef}>
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.sorting_label')}</label>
+              <div className="relative w-full">
+                <button
+                  type="button"
+                  onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
+                >
+                  <span>{sortFilter === 'asc' ? (t('admin.sort_oldest') || 'Спочатку старі') : (t('admin.sort_newest') || 'Спочатку нові')}</span>
+                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isSortDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                    {[
+                      { value: 'desc', label: t('admin.sort_newest') || 'Спочатку нові' },
+                      { value: 'asc', label: t('admin.sort_oldest') || 'Спочатку старі' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setSortFilter(opt.value as 'desc' | 'asc');
+                          setPage(0);
+                          setIsSortDropdownOpen(false);
+                        }}
+                        className={`w-full px-3 py-1.5 text-left text-xs font-semibold flex items-center justify-between hover:bg-slate-50 transition cursor-pointer ${
+                          sortFilter === opt.value ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Users Table Content */}
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-slate-50 space-y-4">
+          
+          {/* Top Action Bar for Search & Bulk Actions */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-3 flex-1 max-w-md">
+              <div className="relative w-full">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                <input
+                  type="text"
+                  placeholder={t('admin.search_users_placeholder') !== 'admin.search_users_placeholder' ? t('admin.search_users_placeholder') : 'Search email, name...'}
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(0);
+                  }}
+                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all shadow-2xs"
+                />
+              </div>
+              {selectedUserIds.length > 0 && (
+                <span className="px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-extrabold text-xs animate-in fade-in duration-150 shrink-0">
+                  {t('admin.selected_count', { count: selectedUserIds.length })}
+                </span>
+              )}
+            </div>
+
+            {/* Bulk Actions Dropdown */}
+            <div className="relative" ref={bulkActionDropdownRef}>
+              <button
+                type="button"
+                disabled={selectedUserIds.length === 0}
+                onClick={() => setIsBulkActionOpen(!isBulkActionOpen)}
+                className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-xs font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+              >
+                <span>{t('admin.bulk_actions')}</span>
+                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isBulkActionOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isBulkActionOpen && selectedUserIds.length > 0 && (
+                <div className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={handleBulkChangeRole}
+                      className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 flex items-center space-x-2.5 transition cursor-pointer"
+                    >
+                      <Shield size={14} className="text-indigo-600" />
+                      <span>{t('admin.bulk_change_role')}</span>
+                    </button>
+                  )}
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={handleBulkBlock}
+                      className="w-full text-left px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center space-x-2.5 transition cursor-pointer"
+                    >
+                      <UserX size={14} className="text-rose-600" />
+                      <span>{t('admin.bulk_block')}</span>
+                    </button>
+                  )}
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={handleBulkUnblock}
+                      className="w-full text-left px-4 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-50 flex items-center space-x-2.5 transition cursor-pointer"
+                    >
+                      <UserCheck size={14} className="text-emerald-600" />
+                      <span>{t('admin.bulk_unblock')}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="animate-spin text-indigo-600" size={32} />
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
+                      <tr>
+                        <th className="py-4 px-4 text-center w-12">
+                          <input
+                            type="checkbox"
+                            checked={isAllSelected}
+                            onChange={handleToggleSelectAll}
+                            className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                          />
+                        </th>
+                        <th className="py-4 px-4">{t('admin.user_col')}</th>
+                        <th className="py-4 px-4">{t('admin.role_col')}</th>
+                        <th className="py-4 px-4">{t('admin.provider_col')}</th>
+                        <th className="py-4 px-4 text-center">{t('admin.bots_col')}</th>
+                        <th className="py-4 px-4 text-center">{t('admin.cat_automations')}</th>
+                        <th className="py-4 px-4 text-center">{t('admin.cat_broadcasts')}</th>
+                        <th className="py-4 px-4 text-center">{t('admin.subscribers')}</th>
+                        <th className="py-4 px-4 text-center">{t('admin.messages_sent')}</th>
+                        <th className="py-4 px-4 text-center">{t('admin.subscription_plan')}</th>
+                        <th className="py-4 px-4 text-center">{t('admin.status_col')}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {data?.content?.map((u) => {
+                        const isSelected = selectedUserIds.includes(u.id);
+                        return (
+                          <tr key={u.id} className={`hover:bg-slate-50/80 transition ${isSelected ? 'bg-indigo-50/40' : ''}`}>
+                            <td className="py-3.5 px-4 text-center">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToggleSelectUser(u.id)}
+                                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                              />
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div
+                                onClick={() => handleOpenDetailModal(u)}
+                                className="flex items-center space-x-3 cursor-pointer group"
+                                title="Переглянути деталі та статистику користувача"
+                              >
+                                {u.avatar ? (
+                                  <img src={u.avatar} alt={u.name} referrerPolicy="no-referrer" className="w-9 h-9 rounded-full object-cover border border-slate-200 shadow-xs group-hover:border-indigo-400 transition shrink-0" />
+                                ) : (
+                                  <div className="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center font-extrabold text-indigo-700 text-xs shadow-xs group-hover:bg-indigo-600 group-hover:text-white transition shrink-0">
+                                    {u.name ? u.name[0].toUpperCase() : 'U'}
+                                  </div>
+                                )}
+                                <div className="flex flex-col min-w-0">
+                                  <span className="font-bold text-slate-900 text-xs group-hover:text-indigo-600 transition truncate">{u.name}</span>
+                                  <span className="text-slate-500 text-[11px] font-medium truncate">{u.email}</span>
+                                  {u.telegramUsername && (
+                                    <span className="text-cyan-600 text-[10px] font-mono truncate">@{u.telegramUsername}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="py-3.5 px-4">
+                              {u.role === 'ROLE_ADMIN' && (
+                                <span className="px-2.5 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 font-extrabold text-[10px]">
+                                  Super Admin
+                                </span>
+                              )}
+                              {u.role === 'ROLE_MANAGER' && (
+                                <span className="px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-extrabold text-[10px]">
+                                  Manager
+                                </span>
+                              )}
+                              {u.role === 'ROLE_OWNER' && (
+                                <span className="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-extrabold text-[10px]">
+                                  Owner
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="py-3.5 px-4 text-slate-500 uppercase font-mono text-[10px] font-bold">
+                              {(() => {
+                                const main = u.provider || 'LOCAL';
+                                if (main === 'TELEGRAM') return 'TELEGRAM';
+                                return u.telegramUsername ? `${main}, TELEGRAM` : main;
+                              })()}
+                            </td>
+
+                            <td className="py-3.5 px-4 text-center">
+                              <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
+                                <Bot size={13} className="text-indigo-600" />
+                                <span>{u.botsCount || 0}</span>
+                              </div>
+                            </td>
+
+                            <td className="py-3.5 px-4 text-center">
+                              <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
+                                <Workflow size={13} className="text-purple-600" />
+                                <span>{u.automationsCount || 0}</span>
+                              </div>
+                            </td>
+
+                            <td className="py-3.5 px-4 text-center">
+                              <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
+                                <Send size={13} className="text-blue-600" />
+                                <span>{u.broadcastsCount || 0}</span>
+                              </div>
+                            </td>
+
+                            <td className="py-3.5 px-4 text-center">
+                              <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
+                                <Users size={13} className="text-emerald-600" />
+                                <span>{u.contactsCount || 0}</span>
+                              </div>
+                            </td>
+
+                            <td className="py-3.5 px-4 text-center">
+                              <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
+                                <MessageSquare size={13} className="text-cyan-600" />
+                                <span>{u.messagesCount || 0}</span>
+                              </div>
+                            </td>
+
+                            <td className="py-3.5 px-4 text-center">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold text-[10px]">
+                                {u.planName || 'FREE'}
+                              </span>
+                            </td>
+
+                            <td className="py-3.5 px-4 text-center">
+                              {u.active ? (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                  {t('admin.active')}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-red-50 text-red-700 border border-red-200">
+                                  {t('admin.blocked')}
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-slate-50/70 border-t border-slate-200 text-xs text-slate-500 font-medium">
+                  <div>
+                    {t('admin.showing') !== 'admin.showing' ? t('admin.showing') : 'Показано'} <span className="font-bold text-slate-900">{data?.content?.length || 0}</span> {t('admin.of') !== 'admin.of' ? t('admin.of') : 'з'} <span className="font-bold text-slate-900">{data?.totalElements || 0}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                      disabled={page === 0}
+                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+                    >
+                      <ChevronLeft size={14} />
+                      <span>{t('admin.prev') !== 'admin.prev' ? t('admin.prev') : 'Назад'}</span>
+                    </button>
+
+                    <div className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold font-mono text-slate-800 shadow-2xs">
+                      <span className="text-indigo-600">{page + 1}</span>
+                      <span className="text-slate-400">/</span>
+                      <span>{data?.totalPages || 1}</span>
+                    </div>
+
+                    <button
+                      onClick={() => setPage((prev) => Math.min(prev + 1, (data?.totalPages || 1) - 1))}
+                      disabled={!data || page >= data.totalPages - 1}
+                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+                    >
+                      <span>{t('admin.next') !== 'admin.next' ? t('admin.next') : 'Далі'}</span>
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </main>
 
         {showRoleModal && selectedUser && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 p-4 animate-in fade-in duration-150">

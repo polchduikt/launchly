@@ -212,6 +212,7 @@ export const fetchAdminStatsApi = async (
 export const fetchAdminUsersApi = async (
   search = '',
   role = '',
+  plan = '',
   sort = 'desc',
   page = 0,
   size = 20
@@ -219,6 +220,7 @@ export const fetchAdminUsersApi = async (
   const params: Record<string, string | number> = { page, size };
   if (search) params.search = search;
   if (role) params.role = role;
+  if (plan) params.plan = plan;
   if (sort) params.sort = sort;
 
   const response = await apiClient.get<{ content: AdminUser[]; totalElements: number; totalPages: number }>('/admin/users', { params });
