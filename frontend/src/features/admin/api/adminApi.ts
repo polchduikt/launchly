@@ -258,16 +258,25 @@ export interface UserActivity {
   timestamp: string;
 }
 
+export interface UserAutomationSummary {
+  id: number;
+  name: string;
+  botName: string;
+  active: boolean;
+  triggerCount: number;
+  triggerType: string;
+}
+
 export interface AdminUserDetail {
   id: number;
   email: string;
   name: string;
   avatar: string | null;
-  role: 'ROLE_OWNER' | 'ROLE_ADMIN' | 'ROLE_MANAGER';
+  role: 'OWNER' | 'ADMIN' | 'MANAGER' | 'USER';
   active: boolean;
-  blockReason?: string;
-  blockedAt?: string;
-  provider: string;
+  blockReason: string | null;
+  blockedAt: string | null;
+  provider: 'LOCAL' | 'GOOGLE';
   createdAt: string;
   telegramUsername: string | null;
   botsCount: number;
@@ -285,6 +294,7 @@ export interface AdminUserDetail {
     number: number;
     size: number;
   };
+  automations?: UserAutomationSummary[];
 }
 
 export const fetchAdminUserDetailsApi = async (

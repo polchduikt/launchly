@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchAdminAutomationsApi, fetchAdminAutomationDetailsApi, toggleAutomationApi } from '../api/adminApi';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
@@ -12,15 +12,26 @@ const PAGE_SIZE = 30;
 
 export const AdminAutomationsPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+
   const queryClient = useQueryClient();
   const currentUser = useAuthStore((state) => state.user);
   const isAdmin = currentUser?.role === 'ROLE_ADMIN';
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused'>('all');
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const statusDropdownRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    const param = searchParams.get('search');
+    if (param !== null) {
+      setSearch(param);
+      setPage(0);
+    }
+  }, [searchParams]);
 
   const [selectedDetailAutomation, setSelectedDetailAutomation] = useState<any | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);

@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { fetchAdminUsersApi, updateUserRoleApi, toggleUserStatusApi, fetchAdminUserDetailsApi } from '../api/adminApi';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
+import { ROUTES } from '../../../constants/routes';
 import {
   Search,
   ChevronDown,
@@ -27,6 +28,7 @@ import {
 import { t } from '../../../i18n';
 
 export const AdminUsersPage: React.FC = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
 
@@ -859,45 +861,113 @@ export const AdminUsersPage: React.FC = () => {
                   <span className="font-bold">{t('blocked.reason_title')}</span> {selectedDetailUser.blockReason}
                 </div>
               )}
-              <div className="flex-1 overflow-y-auto min-h-0 border border-slate-200 rounded-xl bg-slate-50/50 p-3 space-y-2 custom-scrollbar">
-                <div className="flex items-center justify-between pb-1 border-b border-slate-200 text-xs font-bold text-slate-700">
-                  <span>{t('admin.activity_history')}</span>
-                  {userDetailData?.activities && (
-                    <span className="text-[11px] font-mono text-slate-500 font-normal">
-                      {t('admin.total_records')} {userDetailData.activities.totalElements}
-                    </span>
-                  )}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 flex-1 min-h-0 overflow-hidden">
+                <div className="md:col-span-5 border border-slate-200 rounded-xl bg-slate-50/50 p-3 flex flex-col min-h-0">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 text-xs font-bold text-slate-700 shrink-0">
+                    <div className="flex items-center gap-1.5">
+                      <span>{t('admin.automations')}</span>
+                    </div>
+                    {userDetailData?.automations && (
+                      <span className="text-[11px] font-mono text-slate-500 font-normal">
+                        {t('admin.total')}: {userDetailData.automations.length}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pt-2 pr-1">
+                    {isDetailLoading ? (
+                      <div className="flex items-center justify-center py-8 text-slate-400 text-xs">
+                        <Loader2 size={16} className="animate-spin mr-2" />
+                        {t('admin.loading_history')}
+                      </div>
+                    ) : !userDetailData?.automations?.length ? (
+                      <div className="text-center py-8 text-slate-400 text-xs font-medium">
+                        {t('admin.no_records')}
+                      </div>
+                    ) : (
+                      userDetailData.automations.map((auto) => (
+                        <div
+                          key={auto.id}
+                          onClick={() => {
+                            setShowDetailModal(false);
+                            navigate(`${ROUTES.ADMIN_AUTOMATIONS}?search=${encodeURIComponent(auto.name)}`);
+                          }}
+                          className="bg-white border border-slate-200 rounded-xl p-2.5 hover:border-indigo-400 hover:shadow-xs cursor-pointer transition group flex flex-col justify-between"
+                          title="Перейти до цієї автоматизації на сторінці Автоматизацій"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center space-x-2 min-w-0">
+                              <span
+                                className={`w-2 h-2 rounded-full shrink-0 ${
+                                  auto.active ? 'bg-emerald-500 shadow-xs shadow-emerald-500/50' : 'bg-slate-300'
+                                }`}
+                              />
+                              <span className="font-bold text-slate-800 text-xs truncate group-hover:text-indigo-600 transition">
+                                {auto.name}
+                              </span>
+                            </div>
+                            <ChevronRight size={14} className="text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition shrink-0 mt-0.5" />
+                          </div>
+
+                          <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-100 text-[10px] font-mono">
+                            {auto.botName && auto.botName !== '—' ? (
+                              <span className="flex items-center gap-1 text-slate-700 font-semibold truncate max-w-[120px]">
+                                <Bot size={11} className="text-indigo-600 shrink-0" />
+                                <span className="truncate">{auto.botName}</span>
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 font-bold">—</span>
+                            )}
+                            <span className="font-bold text-slate-600">RUNS: {auto.triggerCount}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
 
-                {isDetailLoading ? (
-                  <div className="flex items-center justify-center py-8 text-slate-400 text-xs">
-                    <Loader2 size={16} className="animate-spin mr-2" />
-                    {t('admin.loading_history')}
+                <div className="md:col-span-7 border border-slate-200 rounded-xl bg-slate-50/50 p-3 flex flex-col min-h-0">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 text-xs font-bold text-slate-700 shrink-0">
+                    <span>{t('admin.activity_history')}</span>
+                    {userDetailData?.activities && (
+                      <span className="text-[11px] font-mono text-slate-500 font-normal">
+                        {t('admin.total_records')} {userDetailData.activities.totalElements}
+                      </span>
+                    )}
                   </div>
-                ) : userDetailData?.activities?.content && userDetailData.activities.content.length > 0 ? (
-                  <div className="space-y-1.5">
-                    {userDetailData.activities.content.map((act) => (
-                      <div key={act.id} className="bg-white border border-slate-200 rounded-lg p-2.5 flex items-start justify-between text-xs hover:border-slate-300 transition">
-                        <div className="space-y-0.5">
-                          <div className="font-bold text-slate-900 flex items-center space-x-2">
-                            <span>{translateAuditTitle(act.title)}</span>
-                            <span className="px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-600 font-mono text-[9px] uppercase font-bold">
-                              {act.badge}
-                            </span>
-                          </div>
-                          <div className="text-slate-600 text-[11px]">{translateAuditDescription(act.description)}</div>
-                        </div>
-                        <div className="text-[11px] text-slate-400 font-mono shrink-0 ml-3">
-                          {formatEuroDateTime(act.timestamp)}
-                        </div>
+
+                  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pt-2 pr-1">
+                    {isDetailLoading ? (
+                      <div className="flex items-center justify-center py-8 text-slate-400 text-xs">
+                        <Loader2 size={16} className="animate-spin mr-2" />
+                        {t('admin.loading_history')}
                       </div>
-                    ))}
+                    ) : userDetailData?.activities?.content && userDetailData.activities.content.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {userDetailData.activities.content.map((act) => (
+                          <div key={act.id} className="bg-white border border-slate-200 rounded-lg p-2.5 flex items-start justify-between text-xs hover:border-slate-300 transition">
+                            <div className="space-y-0.5 min-w-0">
+                              <div className="font-bold text-slate-900 flex items-center space-x-2 truncate">
+                                <span className="truncate">{translateAuditTitle(act.title)}</span>
+                                <span className="px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-600 font-mono text-[9px] uppercase font-bold shrink-0">
+                                  {act.badge}
+                                </span>
+                              </div>
+                              <div className="text-slate-600 text-[11px] line-clamp-2">{translateAuditDescription(act.description)}</div>
+                            </div>
+                            <div className="text-[11px] text-slate-400 font-mono shrink-0 ml-2">
+                              {formatEuroDateTime(act.timestamp)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-slate-400 text-xs font-medium">
+                        {t('admin.no_records')}
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center py-8 text-slate-400 text-xs font-medium">
-                    {t('admin.no_records')}
-                  </div>
-                )}
+                </div>
               </div>
 
               <div className="flex items-center justify-between pt-3 border-t border-slate-200 shrink-0">
