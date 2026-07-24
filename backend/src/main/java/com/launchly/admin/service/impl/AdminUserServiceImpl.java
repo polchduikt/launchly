@@ -163,7 +163,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AdminUserDto> getUsers(String search, Role roleFilter, int page, int size) {
+    public Page<AdminUserDto> getUsers(String search, Role roleFilter, String sort, int page, int size) {
         List<User> allUsers = userRepository.findAll();
 
         List<AdminUserDto> filtered = allUsers.stream()
@@ -216,6 +216,20 @@ public class AdminUserServiceImpl implements AdminUserService {
                             .build();
                 })
                 .collect(Collectors.toList());
+
+        if ("asc".equalsIgnoreCase(sort)) {
+            filtered.sort((a, b) -> {
+                LocalDateTime t1 = a.getCreatedAt() != null ? a.getCreatedAt() : LocalDateTime.MIN;
+                LocalDateTime t2 = b.getCreatedAt() != null ? b.getCreatedAt() : LocalDateTime.MIN;
+                return t1.compareTo(t2);
+            });
+        } else {
+            filtered.sort((a, b) -> {
+                LocalDateTime t1 = a.getCreatedAt() != null ? a.getCreatedAt() : LocalDateTime.MIN;
+                LocalDateTime t2 = b.getCreatedAt() != null ? b.getCreatedAt() : LocalDateTime.MIN;
+                return t2.compareTo(t1);
+            });
+        }
 
         int start = Math.min(page * size, filtered.size());
         int end = Math.min(start + size, filtered.size());

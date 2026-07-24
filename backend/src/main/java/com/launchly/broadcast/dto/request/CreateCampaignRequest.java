@@ -1,5 +1,6 @@
 package com.launchly.broadcast.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.launchly.broadcast.entity.FilterType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,6 +17,7 @@ public record CreateCampaignRequest(
 
         String filterValue,
 
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm[:ss][.SSS]")
         LocalDateTime scheduledAt,
 
         String nodes,
@@ -23,6 +25,6 @@ public record CreateCampaignRequest(
         String edges,
 
         Long botId,
- 
+
         Boolean targetAllBots
 ) {}

@@ -21,10 +21,11 @@ public class AdminAutomationController {
     public ResponseEntity<Page<AdminAutomationDto>> getAutomations(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "desc") String sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "30") int size
     ) {
-        return ResponseEntity.ok(adminAutomationService.getAutomations(search, status, page, size));
+        return ResponseEntity.ok(adminAutomationService.getAutomations(search, status, sort, page, size));
     }
 
     @GetMapping("/{automationId}/details")

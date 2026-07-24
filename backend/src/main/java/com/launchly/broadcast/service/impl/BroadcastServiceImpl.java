@@ -26,9 +26,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.entity.BotMember;
-
 import com.launchly.admin.service.UserAuditService;
 import java.time.LocalDateTime;
 
@@ -100,7 +100,7 @@ public class BroadcastServiceImpl implements BroadcastService {
         campaign = campaignRepository.save(campaign);
         log.info("Created campaign '{}' (id={}) for botId={} with status={}",
                 campaign.getName(), campaign.getId(), botId, initialStatus);
-        return broadcastMapper.toCampaignResponse(campaign);
+        return toResponse(campaign);
     }
 
     @Override
@@ -110,6 +110,10 @@ public class BroadcastServiceImpl implements BroadcastService {
         validateBotOwnership(botId, userId);
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
+
+        if (campaign.isBlocked() || campaign.getStatus() == CampaignStatus.BLOCKED) {
+            throw new AppException(HttpStatus.FORBIDDEN, "Broadcast campaign is blocked by administrator.");
+        }
 
         if (!campaign.getBot().getId().equals(botId)) {
             throw new AppException(HttpStatus.BAD_REQUEST, "Campaign does not belong to this bot");
@@ -129,23 +133,20 @@ public class BroadcastServiceImpl implements BroadcastService {
         campaign.setMessage(messageText);
         campaign.setFilterType(request.filterType());
         campaign.setFilterValue(request.filterValue());
-        campaign.setScheduledAt(request.scheduledAt());
+        
+        if (request.scheduledAt() != null) {
+            campaign.setScheduledAt(request.scheduledAt());
+            campaign.setStatus(CampaignStatus.SCHEDULED);
+        }
+
         campaign.setTargetAllBots(request.targetAllBots() != null ? request.targetAllBots() : false);
         campaign.setNodes(request.nodes() != null ? request.nodes() : "[]");
         campaign.setEdges(request.edges() != null ? request.edges() : "[]");
 
-        if (campaign.getStatus() == CampaignStatus.DRAFT || campaign.getStatus() == CampaignStatus.SCHEDULED) {
-            if (request.scheduledAt() != null) {
-                campaign.setStatus(CampaignStatus.SCHEDULED);
-            } else {
-                campaign.setStatus(CampaignStatus.DRAFT);
-            }
-        }
-
         campaign = campaignRepository.save(campaign);
         log.info("Updated campaign '{}' (id={}) for botId={}",
                 campaign.getName(), campaign.getId(), botId);
-        return broadcastMapper.toCampaignResponse(campaign);
+        return toResponse(campaign);
     }
 
     private String extractFirstMessageText(String nodesJson, String edgesJson, String defaultMessage) {
@@ -201,9 +202,8 @@ public class BroadcastServiceImpl implements BroadcastService {
     @Transactional(readOnly = true)
     public List<CampaignResponse> getCampaigns(Long botId, Long userId) {
         validateBotOwnership(botId, userId);
-        return broadcastMapper.toCampaignResponseList(
-                campaignRepository.findByBotIdOrderByCreatedAtDesc(botId)
-        );
+        List<BroadcastCampaign> list = campaignRepository.findByBotIdOrderByCreatedAtDesc(botId);
+        return list.stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     @Override
@@ -211,6 +211,11 @@ public class BroadcastServiceImpl implements BroadcastService {
     public void sendCampaign(Long campaignId) {
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
+
+        if (campaign.isBlocked() || campaign.getStatus() == CampaignStatus.BLOCKED) {
+            log.warn("Campaign {} is BLOCKED by administrator — skipping execution", campaignId);
+            return;
+        }
 
         if (campaign.getStatus() == CampaignStatus.IN_PROGRESS) {
             log.warn("Campaign {} is already IN_PROGRESS — skipping", campaignId);
@@ -333,6 +338,10 @@ public class BroadcastServiceImpl implements BroadcastService {
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
 
+        if (campaign.isBlocked() || campaign.getStatus() == CampaignStatus.BLOCKED) {
+            throw new AppException(HttpStatus.FORBIDDEN, "Broadcast campaign is blocked by administrator.");
+        }
+
         validateWriteAccess(campaign.getBot().getId(), userId);
 
         if (campaign.getStatus() == CampaignStatus.IN_PROGRESS) {
@@ -341,7 +350,7 @@ public class BroadcastServiceImpl implements BroadcastService {
         }
 
         userAuditService.logBroadcastLaunched(campaign.getBot().getUser(), campaign.getId(), campaign.getName(), "FINISHED", LocalDateTime.now());
-        CampaignResponse response = broadcastMapper.toCampaignResponse(campaign);
+        CampaignResponse response = toResponse(campaign);
         sendCampaign(campaignId);
         return response;
     }
@@ -351,6 +360,10 @@ public class BroadcastServiceImpl implements BroadcastService {
     public CampaignResponse cancelSchedule(Long campaignId, Long userId) {
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
+
+        if (campaign.isBlocked() || campaign.getStatus() == CampaignStatus.BLOCKED) {
+            throw new AppException(HttpStatus.FORBIDDEN, "Broadcast campaign is blocked by administrator.");
+        }
 
         validateWriteAccess(campaign.getBot().getId(), userId);
 
@@ -363,7 +376,7 @@ public class BroadcastServiceImpl implements BroadcastService {
         campaign.setScheduledAt(null);
         campaignRepository.save(campaign);
         log.info("Cancelled schedule for campaignId={} userId={}", campaignId, userId);
-        return broadcastMapper.toCampaignResponse(campaign);
+        return toResponse(campaign);
     }
 
     @Override
@@ -376,6 +389,30 @@ public class BroadcastServiceImpl implements BroadcastService {
 
         campaignRepository.delete(campaign);
         log.info("Deleted campaignId={} for userId={}", campaignId, userId);
+    }
+
+    private CampaignResponse toResponse(BroadcastCampaign campaign) {
+        return new CampaignResponse(
+                campaign.getId(),
+                campaign.getName(),
+                campaign.getMessage(),
+                campaign.isBlocked() ? CampaignStatus.BLOCKED : campaign.getStatus(),
+                campaign.isBlocked(),
+                campaign.getBlockReason(),
+                campaign.getBlockedAt(),
+                campaign.getFilterType(),
+                campaign.getFilterValue(),
+                campaign.getScheduledAt(),
+                campaign.getSentCount(),
+                campaign.getFailedCount(),
+                campaign.getTotalCount(),
+                campaign.getBot().getId(),
+                campaign.getNodes(),
+                campaign.getEdges(),
+                campaign.getTargetAllBots(),
+                campaign.getCreatedAt(),
+                campaign.getUpdatedAt()
+        );
     }
 
     private Bot validateBotOwnership(Long botId, Long userId) {

@@ -32,4 +32,13 @@ public interface UserAuditLogRepository extends JpaRepository<UserAuditLog, Long
             @Param("cutoffDate") LocalDateTime cutoffDate,
             Pageable pageable
     );
+
+    @Query("SELECT u FROM UserAuditLog u WHERE u.targetId = :campaignId " +
+           "AND u.createdAt >= :cutoffDate " +
+           "ORDER BY u.createdAt DESC")
+    Page<UserAuditLog> findBroadcastLogs(
+            @Param("campaignId") Long campaignId,
+            @Param("cutoffDate") LocalDateTime cutoffDate,
+            Pageable pageable
+    );
 }

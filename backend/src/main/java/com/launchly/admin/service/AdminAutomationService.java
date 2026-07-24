@@ -5,7 +5,11 @@ import com.launchly.admin.dto.AdminAutomationDto;
 import org.springframework.data.domain.Page;
 
 public interface AdminAutomationService {
-    Page<AdminAutomationDto> getAutomations(String search, String status, int page, int size);
+    Page<AdminAutomationDto> getAutomations(String search, String status, String sort, int page, int size);
+
+    default Page<AdminAutomationDto> getAutomations(String search, String status, int page, int size) {
+        return getAutomations(search, status, "desc", page, size);
+    }
     AdminAutomationDetailDto getAutomationDetails(Long automationId, String period, int page, int size);
     void toggleAutomation(Long automationId);
     void blockAutomation(Long automationId, String reason);

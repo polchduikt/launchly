@@ -2,20 +2,23 @@ package com.launchly.admin.entity;
 
 import com.launchly.admin.enums.AuditActionType;
 import com.launchly.auth.entity.User;
-import com.launchly.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_audit_logs", indexes = {
     @Index(name = "idx_user_audit_logs_user_date", columnList = "user_id, created_at")
 })
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserAuditLog extends BaseEntity {
+public class UserAuditLog {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -42,4 +45,14 @@ public class UserAuditLog extends BaseEntity {
 
     @Column(name = "badge", nullable = false, length = 50)
     private String badge;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }

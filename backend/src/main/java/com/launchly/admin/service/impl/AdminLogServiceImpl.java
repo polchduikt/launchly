@@ -1,19 +1,20 @@
 package com.launchly.admin.service.impl;
 
 import com.launchly.admin.dto.AdminLogDto;
+import com.launchly.admin.entity.UserAuditLog;
+import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminLogService;
-import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
-import com.launchly.bot.entity.Bot;
-import com.launchly.bot.repository.BotRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -21,31 +22,32 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminLogServiceImpl implements AdminLogService {
 
-    private final UserRepository userRepository;
-    private final BotRepository botRepository;
+    private final UserAuditLogRepository userAuditLogRepository;
 
     @Override
     @Transactional(readOnly = true)
-    public List<AdminLogDto> getSystemLogs(String level, String serviceFilter, String search) {
-        List<User> users = userRepository.findAll();
-        List<Bot> bots = botRepository.findAll();
+    public Page<AdminLogDto> getSystemLogs(String level, String serviceFilter, String search, String sort, int page, int size) {
         List<AdminLogDto> logs = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
 
-        String sampleUserEmail = users.isEmpty() ? "system@launchly.ai" : users.get(0).getEmail();
-        String sampleBotName = bots.isEmpty() ? "LaunchlyBot" : bots.get(0).getName();
+        Sort.Direction direction = "asc".equalsIgnoreCase(sort) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        List<UserAuditLog> dbLogs = userAuditLogRepository.findAll(Sort.by(direction, "createdAt"));
+        long counter = 1;
+        for (UserAuditLog dbLog : dbLogs) {
+            String uEmail = dbLog.getUser() != null ? dbLog.getUser().getEmail() : "system";
+            String logLevel = dbLog.getBadge() != null ? dbLog.getBadge().toUpperCase() : "INFO";
+            String logService = dbLog.getCategory() != null ? dbLog.getCategory().toUpperCase() : "SYSTEM";
+            String msg = dbLog.getTitle() + (dbLog.getDescription() != null && !dbLog.getDescription().isBlank() ? " - " + dbLog.getDescription() : "");
+            
+            logs.add(new AdminLogDto(String.valueOf(counter++), logLevel, logService, msg, uEmail, dbLog.getCreatedAt() != null ? dbLog.getCreatedAt() : now));
+        }
 
-        logs.add(new AdminLogDto(UUID.randomUUID().toString(), "INFO", "AUTH", "User authenticated via Google OAuth", sampleUserEmail, now.minusMinutes(2)));
-        logs.add(new AdminLogDto(UUID.randomUUID().toString(), "INFO", "BOT_ENGINE", "Telegram webhook received for bot @" + sampleBotName, sampleUserEmail, now.minusMinutes(5)));
-        logs.add(new AdminLogDto(UUID.randomUUID().toString(), "WARN", "BROADCAST", "Broadcast campaign queue processed", "system@launchly.ai", now.minusMinutes(12)));
-        logs.add(new AdminLogDto(UUID.randomUUID().toString(), "INFO", "SYSTEM", "Automatic database health check completed", "system@launchly.ai", now.minusMinutes(40)));
-
-        return logs.stream()
+        List<AdminLogDto> filtered = logs.stream()
                 .filter(l -> {
-                    if (level != null && !level.isBlank() && !l.getLevel().equalsIgnoreCase(level)) {
+                    if (level != null && !level.isBlank() && !level.equalsIgnoreCase("all") && !l.getLevel().equalsIgnoreCase(level)) {
                         return false;
                     }
-                    if (serviceFilter != null && !serviceFilter.isBlank() && !l.getService().equalsIgnoreCase(serviceFilter)) {
+                    if (serviceFilter != null && !serviceFilter.isBlank() && !serviceFilter.equalsIgnoreCase("all") && !l.getService().equalsIgnoreCase(serviceFilter)) {
                         return false;
                     }
                     if (search != null && !search.isBlank()) {
@@ -55,5 +57,13 @@ public class AdminLogServiceImpl implements AdminLogService {
                     return true;
                 })
                 .collect(Collectors.toList());
+
+        int safeSize = size <= 0 ? 100 : size;
+        int safePage = Math.max(page, 0);
+        int fromIndex = Math.min(safePage * safeSize, filtered.size());
+        int toIndex = Math.min(fromIndex + safeSize, filtered.size());
+
+        List<AdminLogDto> pagedContent = filtered.subList(fromIndex, toIndex);
+        return new PageImpl<>(pagedContent, PageRequest.of(safePage, safeSize), filtered.size());
     }
 }

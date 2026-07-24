@@ -88,6 +88,45 @@ public class UserAuditService {
     }
 
     @Transactional
+    public void logBroadcastCancelled(User user, Long campaignId, String campaignName) {
+        logAction(
+                user,
+                AuditActionType.BROADCAST_LAUNCHED,
+                campaignId,
+                campaignName,
+                getMsg("audit.broadcast_cancelled.title", "Broadcast Cancelled"),
+                getMsg("audit.broadcast_cancelled.desc", new Object[]{campaignName}, "Broadcast campaign '" + campaignName + "' cancelled by administration"),
+                null
+        );
+    }
+
+    @Transactional
+    public void logBroadcastBlocked(User user, Long campaignId, String campaignName, String reason) {
+        logAction(
+                user,
+                AuditActionType.USER_BLOCKED,
+                campaignId,
+                campaignName,
+                getMsg("audit.admin_block.title", "Administrative Block"),
+                getMsg("audit.admin_block.desc", new Object[]{reason}, "Reason: " + reason),
+                null
+        );
+    }
+
+    @Transactional
+    public void logBroadcastUnblocked(User user, Long campaignId, String campaignName) {
+        logAction(
+                user,
+                AuditActionType.USER_UNBLOCKED,
+                campaignId,
+                campaignName,
+                getMsg("audit.admin_unblock.title", "Administrative Unblock"),
+                getMsg("audit.admin_unblock.desc", "Broadcast restored by administration"),
+                null
+        );
+    }
+
+    @Transactional
     public void logRoleChanged(User user, String newRole) {
         logAction(
                 user,

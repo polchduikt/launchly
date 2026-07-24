@@ -1,6 +1,8 @@
 package com.launchly.admin.controller;
 
+import com.launchly.admin.dto.AdminUserDetailDto;
 import com.launchly.admin.dto.AdminUserDto;
+import com.launchly.admin.dto.BlockUserRequest;
 import com.launchly.admin.dto.UpdateUserRoleRequest;
 import com.launchly.admin.service.AdminUserService;
 import com.launchly.auth.entity.Role;
@@ -25,10 +27,11 @@ public class AdminUserController {
     public ResponseEntity<Page<AdminUserDto>> getUsers(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Role role,
+            @RequestParam(defaultValue = "desc") String sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        return ResponseEntity.ok(adminUserService.getUsers(search, role, page, size));
+        return ResponseEntity.ok(adminUserService.getUsers(search, role, sort, page, size));
     }
 
     @PatchMapping("/{userId}/role")
@@ -45,7 +48,7 @@ public class AdminUserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminUserDto> toggleUserStatus(
             @PathVariable Long userId,
-            @RequestBody(required = false) com.launchly.admin.dto.BlockUserRequest request
+            @RequestBody(required = false) BlockUserRequest request
     ) {
         String reason = request != null ? request.getReason() : null;
         String details = request != null ? request.getDetails() : null;
@@ -54,7 +57,7 @@ public class AdminUserController {
 
     @GetMapping("/{userId}/details")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<com.launchly.admin.dto.AdminUserDetailDto> getUserDetails(
+    public ResponseEntity<AdminUserDetailDto> getUserDetails(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "all") String period,
             @RequestParam(defaultValue = "all") String category,

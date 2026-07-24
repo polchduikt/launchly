@@ -81,6 +81,16 @@ public class BroadcastCampaign extends BaseEntity {
     @Builder.Default
     private Boolean targetAllBots = false;
 
+    @Column(name = "is_blocked", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean blocked = false;
+
+    @Column(name = "block_reason")
+    private String blockReason;
+
+    @Column(name = "blocked_at")
+    private LocalDateTime blockedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bot_id", nullable = false)
     private Bot bot;

@@ -61,7 +61,7 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AdminAutomationDto> getAutomations(String search, String status, int page, int size) {
+    public Page<AdminAutomationDto> getAutomations(String search, String status, String sort, int page, int size) {
         List<FlowSchema> schemas = flowSchemaRepository.findAll();
         List<AdminAutomationDto> allDtos = schemas.stream()
                 .map(f -> {
@@ -106,6 +106,20 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
                     return true;
                 })
                 .collect(Collectors.toList());
+
+        if ("asc".equalsIgnoreCase(sort)) {
+            allDtos.sort((a, b) -> {
+                LocalDateTime t1 = a.getLastExecutedAt() != null ? a.getLastExecutedAt() : LocalDateTime.MIN;
+                LocalDateTime t2 = b.getLastExecutedAt() != null ? b.getLastExecutedAt() : LocalDateTime.MIN;
+                return t1.compareTo(t2);
+            });
+        } else {
+            allDtos.sort((a, b) -> {
+                LocalDateTime t1 = a.getLastExecutedAt() != null ? a.getLastExecutedAt() : LocalDateTime.MIN;
+                LocalDateTime t2 = b.getLastExecutedAt() != null ? b.getLastExecutedAt() : LocalDateTime.MIN;
+                return t2.compareTo(t1);
+            });
+        }
 
         int start = Math.min(page * size, allDtos.size());
         int end = Math.min(start + size, allDtos.size());
