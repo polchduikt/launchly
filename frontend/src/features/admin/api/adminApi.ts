@@ -328,6 +328,8 @@ export const fetchAdminLogsApi = async (
   level = '',
   service = '',
   search = '',
+  startDate = '',
+  endDate = '',
   sort = 'desc',
   page = 0,
   size = 100
@@ -336,6 +338,8 @@ export const fetchAdminLogsApi = async (
   if (level) params.level = level;
   if (service) params.service = service;
   if (search) params.search = search;
+  if (startDate) params.startDate = startDate;
+  if (endDate) params.endDate = endDate;
   if (sort) params.sort = sort;
 
   const response = await apiClient.get<any>('/admin/logs', { params });
