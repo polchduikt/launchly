@@ -48,7 +48,11 @@ export const AdminBroadcastsPage: React.FC = () => {
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
   const [page, setPage] = useState(0);
-  const size = 10;
+  const size = 30;
+
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isBulkActionOpen, setIsBulkActionOpen] = useState(false);
+  const bulkActionDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -57,6 +61,9 @@ export const AdminBroadcastsPage: React.FC = () => {
       }
       if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
         setIsSortDropdownOpen(false);
+      }
+      if (bulkActionDropdownRef.current && !bulkActionDropdownRef.current.contains(event.target as Node)) {
+        setIsBulkActionOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -96,6 +103,48 @@ export const AdminBroadcastsPage: React.FC = () => {
   const broadcasts = data?.content || [];
   const totalElements = data?.totalElements || 0;
   const totalPages = Math.max(data?.totalPages || 1, 1);
+
+  const allIdsOnPage = broadcasts.map((b: any) => b.id);
+  const isAllSelected = allIdsOnPage.length > 0 && allIdsOnPage.every((id: number) => selectedIds.includes(id));
+
+  const handleToggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(allIdsOnPage);
+    }
+  };
+
+  const handleToggleSelectRow = (id: number) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter((item) => item !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
+
+  const handleBulkCancel = () => {
+    const targets = broadcasts.filter(
+      (b: any) => selectedIds.includes(b.id) && !b.isBlocked && b.status !== 'BLOCKED' && b.status !== 'COMPLETED' && b.status !== 'CANCELLED'
+    );
+    targets.forEach((b: any) => cancelMutation.mutate(b.id));
+    setSelectedIds([]);
+    setIsBulkActionOpen(false);
+  };
+
+  const handleBulkBlock = () => {
+    const targets = broadcasts.filter((b: any) => selectedIds.includes(b.id) && !b.isBlocked && b.status !== 'BLOCKED');
+    targets.forEach((b: any) => blockMutation.mutate({ broadcastId: b.id, reason: 'Bulk admin action' }));
+    setSelectedIds([]);
+    setIsBulkActionOpen(false);
+  };
+
+  const handleBulkUnblock = () => {
+    const targets = broadcasts.filter((b: any) => selectedIds.includes(b.id) && (b.isBlocked || b.status === 'BLOCKED'));
+    targets.forEach((b: any) => unblockMutation.mutate(b.id));
+    setSelectedIds([]);
+    setIsBulkActionOpen(false);
+  };
 
   const { data: detailsData, isLoading: isDetailsLoading } = useQuery({
     queryKey: ['adminBroadcastDetails', selectedBroadcast?.id, selectedPeriod, detailsPage],
@@ -263,271 +312,318 @@ export const AdminBroadcastsPage: React.FC = () => {
   ];
 
   return (
-    <AdminLayout>
-      <div className="space-y-6 w-full">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input
-              type="text"
-              placeholder={t('admin.search_broadcasts_placeholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-9 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all shadow-xs"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition p-0.5 rounded-md hover:bg-slate-100 cursor-pointer"
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
-            <div className="relative w-full sm:w-auto flex justify-end" ref={statusDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-2xs min-w-[150px] cursor-pointer"
-              >
-                <span>{getStatusLabel(statusFilter)}</span>
-                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isStatusDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
-                  {statusOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setStatusFilter(opt.value as any);
-                        setPage(0);
-                        setIsStatusDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-2 text-xs font-semibold flex items-center justify-between transition-colors ${
-                        statusFilter === opt.value
-                          ? 'bg-indigo-50 text-indigo-600 font-bold'
-                          : 'text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
+    <AdminLayout noPadding>
+      <div className="flex h-full w-full overflow-hidden">
+        
+        <aside className="w-56 lg:w-60 bg-white border-r border-slate-200 h-full p-4 space-y-5 overflow-y-auto shrink-0 flex flex-col justify-between z-10">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                <Filter size={14} className="text-indigo-600" />
+                <span>{t('admin.filters_title')}</span>
+              </h3>
+              {(statusFilter !== 'all' || sortFilter !== 'desc') && (
+                <button
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setSortFilter('desc');
+                    setPage(0);
+                  }}
+                  className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                >
+                  {t('admin.reset_filters')}
+                </button>
               )}
             </div>
 
-            <div className="relative w-full sm:w-auto flex justify-end" ref={sortDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-2xs cursor-pointer"
-              >
-                <span>{sortFilter === 'asc' ? (t('admin.sort_oldest') || 'Спочатку старі') : (t('admin.sort_newest') || 'Спочатку нові')}</span>
-                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
+            <div className="space-y-1" ref={statusDropdownRef}>
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.status_filter_label')}</label>
+              <div className="relative w-full">
+                <button
+                  type="button"
+                  onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
+                >
+                  <span>{getStatusLabel(statusFilter)}</span>
+                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
 
-              {isSortDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
-                  {[
-                    { value: 'desc', label: t('admin.sort_newest') || 'Спочатку нові' },
-                    { value: 'asc', label: t('admin.sort_oldest') || 'Спочатку старі' },
-                  ].map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setSortFilter(opt.value as 'desc' | 'asc');
-                        setPage(0);
-                        setIsSortDropdownOpen(false);
-                      }}
-                      className={`w-full px-4 py-2 text-left text-xs font-semibold flex items-center justify-between hover:bg-slate-50 transition cursor-pointer ${
-                        sortFilter === opt.value ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
-                      }`}
-                    >
-                      <span>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="animate-spin text-indigo-600" size={32} />
-          </div>
-        ) : (
-          <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
-                  <tr>
-                    <th className="py-4 px-5 text-center">ID</th>
-                    <th className="py-4 px-5">{t('admin.title_col')}</th>
-                    <th className="py-4 px-5">{t('admin.audience_col')}</th>
-                    <th className="py-4 px-5 text-center">{t('admin.delivered_col')}</th>
-                    <th className="py-4 px-5">{t('admin.created_by_col')}</th>
-                    <th className="py-4 px-5">{t('admin.date_col')}</th>
-                    <th className="py-4 px-5 text-center">{t('admin.status_col')}</th>
-                    <th className="py-4 px-5 text-right">{t('admin.actions_col')}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {broadcasts.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
-                        {t('admin.no_broadcasts_found')}
-                      </td>
-                    </tr>
-                  ) : (
-                    broadcasts.map((b) => {
-                      const isBlocked = b.blocked || b.status === 'BLOCKED';
-                      const isCancelable = (b.status === 'SCHEDULED' || b.status === 'RUNNING' || b.status === 'IN_PROGRESS') && !isBlocked;
-
-                      return (
-                        <tr
-                          key={b.id}
-                          onClick={() => handleOpenDetailModal(b)}
-                          className={`transition cursor-pointer group ${
-                            isBlocked
-                              ? 'bg-slate-100/80 hover:bg-slate-200/60 border-slate-200'
-                              : 'hover:bg-slate-50/80'
-                          }`}
-                          title="Переглянути деталі розсилки"
-                        >
-                          <td className="py-4 px-5 text-center font-mono font-bold text-slate-500 text-xs">#{b.id}</td>
-                          <td className="py-4 px-5">
-                            <div className="flex flex-col">
-                              <span className="font-bold text-slate-900 group-hover:text-indigo-600 transition text-xs">{b.title}</span>
-                              <span className="text-[11px] text-slate-400 line-clamp-1 font-medium mt-0.5">{b.content}</span>
-                            </div>
-                          </td>
-
-                          <td className="py-4 px-5">
-                            <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px]">
-                              <Users size={12} className="text-indigo-600" />
-                              <span>
-                                {b.targetAudience === 'ALL_USERS' ? t('admin.target_audience_all') : (b.botName || t('admin.target_audience_bot'))}
-                              </span>
-                            </span>
-                          </td>
-
-                          <td className="py-4 px-5 text-center font-mono font-bold text-slate-800">
-                            {b.sentCount}
-                          </td>
-
-                          <td className="py-4 px-5">
-                            <div
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`${ROUTES.ADMIN_USERS}?search=${encodeURIComponent(b.createdByEmail)}`);
-                              }}
-                              className="flex flex-col cursor-pointer group/author inline-flex hover:opacity-80 transition"
-                              title="Переглянути профіль користувача"
-                            >
-                              <span className="font-bold text-slate-800 group-hover/author:text-indigo-600 text-xs">
-                                {b.authorName || b.createdByEmail.split('@')[0]}
-                              </span>
-                              <span className="text-[10px] text-slate-400 font-mono">
-                                {b.createdByEmail}
-                              </span>
-                            </div>
-                          </td>
-
-                          <td className="py-4 px-5 text-slate-500 font-mono text-[11px] font-bold">
-                            {formatDateShort(b.createdAt)}
-                          </td>
-
-                          <td className="py-4 px-5 text-center">
-                            {getStatusBadge(b.status, isBlocked)}
-                          </td>
-
-                          <td className="py-4 px-5 text-right">
-                            <div className="flex items-center justify-end space-x-1.5" onClick={(e) => e.stopPropagation()}>
-                              <button
-                                type="button"
-                                onClick={() => isCancelable && cancelMutation.mutate(b.id)}
-                                disabled={!isCancelable || cancelMutation.isPending}
-                                className={`p-2 rounded-xl border transition-all ${
-                                  isCancelable
-                                    ? 'border-amber-200 bg-amber-50 text-amber-600 hover:bg-amber-100 hover:border-amber-300 cursor-pointer shadow-2xs active:scale-95'
-                                    : 'border-slate-200 bg-slate-50 text-slate-300 opacity-40 cursor-not-allowed'
-                                }`}
-                                title={isCancelable ? t('admin.cancel_broadcast') : t('admin.cancel_unavailable')}
-                              >
-                                {cancelMutation.isPending ? <Loader2 size={15} className="animate-spin" /> : <Ban size={15} />}
-                              </button>
-
-                              {isBlocked ? (
-                                <button
-                                  type="button"
-                                  onClick={() => unblockMutation.mutate(b.id)}
-                                  disabled={unblockMutation.isPending}
-                                  className="p-2 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer shadow-2xs active:scale-95"
-                                  title={t('admin.unblock_broadcast')}
-                                >
-                                  {unblockMutation.isPending ? <Loader2 size={15} className="animate-spin" /> : <Unlock size={15} />}
-                                </button>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenBlockModal(b)}
-                                  className="p-2 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:border-rose-300 transition-all cursor-pointer shadow-2xs active:scale-95"
-                                  title={t('admin.block_broadcast')}
-                                >
-                                  <Lock size={15} />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-slate-50/70 border-t border-slate-200 text-xs text-slate-500 font-medium">
-                <div>
-                  {t('admin.showing')}{' '}
-                  <span className="font-bold text-slate-900">{broadcasts.length}</span>{' '}
-                  {t('admin.of')}{' '}
-                  <span className="font-bold text-slate-900">{totalElements}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                    disabled={page === 0}
-                    className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
-                  >
-                    <ChevronLeft size={14} />
-                    <span>{t('admin.prev')}</span>
-                  </button>
-
-                  <div className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold font-mono text-slate-800 shadow-2xs">
-                    <span className="text-indigo-600">{page + 1}</span>
-                    <span className="text-slate-400">/</span>
-                    <span>{totalPages}</span>
+                {isStatusDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                    {statusOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setStatusFilter(opt.value as any);
+                          setPage(0);
+                          setIsStatusDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-1.5 text-xs font-semibold flex items-center justify-between transition-colors ${
+                          statusFilter === opt.value
+                            ? 'bg-indigo-50 text-indigo-600 font-bold'
+                            : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
                   </div>
+                )}
+              </div>
+            </div>
 
-                  <button
-                    onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
-                    disabled={page >= totalPages - 1}
-                    className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
-                  >
-                    <span>{t('admin.next')}</span>
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
+            <div className="space-y-1" ref={sortDropdownRef}>
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.sorting_label')}</label>
+              <div className="relative w-full">
+                <button
+                  type="button"
+                  onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
+                >
+                  <span>{sortFilter === 'asc' ? (t('admin.sort_oldest') || 'Спочатку старі') : (t('admin.sort_newest') || 'Спочатку нові')}</span>
+                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isSortDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                    {[
+                      { value: 'desc', label: t('admin.sort_newest') || 'Спочатку нові' },
+                      { value: 'asc', label: t('admin.sort_oldest') || 'Спочатку старі' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setSortFilter(opt.value as 'desc' | 'asc');
+                          setPage(0);
+                          setIsSortDropdownOpen(false);
+                        }}
+                        className={`w-full px-3 py-1.5 text-left text-xs font-semibold flex items-center justify-between hover:bg-slate-50 transition cursor-pointer ${
+                          sortFilter === opt.value ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        )}
+        </aside>
+
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-slate-50 space-y-4">
+          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-3 flex-1 max-w-md">
+              <div className="relative w-full">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                <input
+                  type="text"
+                  placeholder={t('admin.search_broadcasts_placeholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all shadow-2xs"
+                />
+              </div>
+              {selectedIds.length > 0 && (
+                <span className="px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-extrabold text-xs animate-in fade-in duration-150 shrink-0">
+                  {t('admin.selected_count', { count: selectedIds.length })}
+                </span>
+              )}
+            </div>
+
+            <div className="relative shrink-0" ref={bulkActionDropdownRef}>
+              <button
+                type="button"
+                disabled={selectedIds.length === 0}
+                onClick={() => setIsBulkActionOpen(!isBulkActionOpen)}
+                className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-xs font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+              >
+                <span>{t('admin.bulk_actions')}</span>
+                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isBulkActionOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isBulkActionOpen && selectedIds.length > 0 && (
+                <div className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                  <button
+                    type="button"
+                    onClick={handleBulkCancel}
+                    className="w-full text-left px-4 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50 flex items-center space-x-2.5 transition cursor-pointer"
+                  >
+                    <Ban size={14} className="text-amber-500" />
+                    <span>{t('admin.bulk_cancel')}</span>
+                  </button>
+                  <div className="my-1 border-t border-slate-100" />
+                  <button
+                    type="button"
+                    onClick={handleBulkBlock}
+                    className="w-full text-left px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center space-x-2.5 transition cursor-pointer"
+                  >
+                    <Lock size={14} />
+                    <span>{t('admin.bulk_block')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBulkUnblock}
+                    className="w-full text-left px-4 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-50 flex items-center space-x-2.5 transition cursor-pointer"
+                  >
+                    <Unlock size={14} />
+                    <span>{t('admin.bulk_unblock')}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20 bg-white border border-slate-200 rounded-3xl">
+              <Loader2 className="animate-spin text-indigo-600" size={32} />
+            </div>
+          ) : (
+            <>
+              <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
+                      <tr>
+                        <th className="py-3.5 px-4 text-center w-10">
+                          <input
+                            type="checkbox"
+                            checked={isAllSelected}
+                            onChange={handleToggleSelectAll}
+                            className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
+                          />
+                        </th>
+                        <th className="py-3.5 px-4">{t('admin.title_col')}</th>
+                        <th className="py-3.5 px-4">{t('admin.audience_col')}</th>
+                        <th className="py-3.5 px-4 text-center">{t('admin.delivered_col')}</th>
+                        <th className="py-3.5 px-4">{t('admin.created_by_col')}</th>
+                        <th className="py-3.5 px-4">{t('admin.date_col')}</th>
+                        <th className="py-3.5 px-4 text-center">{t('admin.status_col')}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {broadcasts.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="py-12 text-center text-slate-400 font-semibold">
+                            {t('admin.no_broadcasts_found')}
+                          </td>
+                        </tr>
+                      ) : (
+                        broadcasts.map((b) => {
+                          const isBlocked = b.blocked || b.status === 'BLOCKED';
+
+                          return (
+                            <tr
+                              key={b.id}
+                              onClick={() => handleOpenDetailModal(b)}
+                              className={`transition cursor-pointer group ${
+                                isBlocked
+                                  ? 'bg-slate-100/80 hover:bg-slate-200/60 border-slate-200'
+                                  : 'hover:bg-slate-50/80'
+                              }`}
+                              title="Переглянути деталі розсилки"
+                            >
+                              <td className="py-3.5 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedIds.includes(b.id)}
+                                  onChange={() => handleToggleSelectRow(b.id)}
+                                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
+                                />
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-slate-900 group-hover:text-indigo-600 transition text-xs">{b.title}</span>
+                                  <span className="text-[11px] text-slate-400 line-clamp-1 font-medium mt-0.5">{b.content}</span>
+                                </div>
+                              </td>
+
+                              <td className="py-3.5 px-4">
+                                <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px]">
+                                  <Users size={12} className="text-indigo-600" />
+                                  <span>
+                                    {b.targetAudience === 'ALL_USERS' ? t('admin.target_audience_all') : (b.botName || t('admin.target_audience_bot'))}
+                                  </span>
+                                </span>
+                              </td>
+
+                              <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-800">
+                                {b.sentCount}
+                              </td>
+
+                              <td className="py-3.5 px-4">
+                                <div
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`${ROUTES.ADMIN_USERS}?search=${encodeURIComponent(b.createdByEmail)}`);
+                                  }}
+                                  className="flex flex-col cursor-pointer group/author inline-flex hover:opacity-80 transition"
+                                  title="Переглянути профіль користувача"
+                                >
+                                  <span className="font-bold text-slate-800 group-hover/author:text-indigo-600 text-xs">
+                                    {b.authorName || b.createdByEmail.split('@')[0]}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400 font-mono">
+                                    {b.createdByEmail}
+                                  </span>
+                                </div>
+                              </td>
+
+                              <td className="py-3.5 px-4 text-slate-500 font-mono text-[11px] font-bold">
+                                {formatDateShort(b.createdAt)}
+                              </td>
+
+                              <td className="py-3.5 px-4 text-center">
+                                {getStatusBadge(b.status, isBlocked)}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-slate-50/70 border-t border-slate-200 text-xs text-slate-500 font-medium">
+                  <div>
+                    {t('admin.showing')}{' '}
+                    <span className="font-bold text-slate-900">{broadcasts.length}</span>{' '}
+                    {t('admin.of')}{' '}
+                    <span className="font-bold text-slate-900">{totalElements}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                      disabled={page === 0}
+                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+                    >
+                      <ChevronLeft size={14} />
+                      <span>{t('admin.prev')}</span>
+                    </button>
+
+                    <div className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold font-mono text-slate-800 shadow-2xs">
+                      <span className="text-indigo-600">{page + 1}</span>
+                      <span className="text-slate-400">/</span>
+                      <span>{totalPages}</span>
+                    </div>
+
+                    <button
+                      onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
+                      disabled={page >= totalPages - 1}
+                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+                    >
+                      <span>{t('admin.next')}</span>
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </main>
 
         {showDetailModal && selectedBroadcast && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-150">
