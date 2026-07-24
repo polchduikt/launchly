@@ -21,6 +21,7 @@ import { EditDataCollectionDrawer } from '../../bot/components/sidebar/drawers/E
 import { useNodeEditor } from '../../bot/hooks/useNodeEditor';
 import { getAutoLayoutedElements } from '../../bot/utils/flowLayout';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { NODE_TYPES } from '../config/nodeTypes';
 import { BROADCAST_BLOCKS } from '../config/broadcastBlocks';
 import { ROUTES } from '../../../constants/routes';
@@ -114,8 +115,35 @@ interface ScheduleModalProps {
 
 const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedule }) => {
   const [dateTime, setDateTime] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      const now = new Date();
+      now.setHours(now.getHours() + 1);
+      const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16);
+      setDateTime(localIso);
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const handleScheduleSubmit = async () => {
+    if (!dateTime || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const formattedIso = dateTime.length === 16 ? `${dateTime}:00` : dateTime;
+      await onSchedule(formattedIso);
+      onClose();
+    } catch (e) {
+      console.error('Schedule failed:', e);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div
@@ -124,7 +152,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedu
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white border border-slate-200 rounded-3xl shadow-xl w-96 p-6 animate-in fade-in zoom-in-95 duration-150 animate-duration-150"
+        className="bg-white border border-slate-200 rounded-3xl shadow-xl w-96 p-6 animate-in fade-in zoom-in-95 duration-150"
       >
         <h3 className="font-extrabold text-sm text-slate-800 uppercase tracking-wider mb-2">
           {t('broadcast.schedule.title')}
@@ -137,27 +165,24 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedu
           type="datetime-local"
           value={dateTime}
           onChange={(e) => setDateTime(e.target.value)}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-250 rounded-2xl text-xs font-semibold focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all text-slate-800 mb-6"
+          className="w-full px-4 py-3 bg-slate-50 border border-slate-250 rounded-2xl text-xs font-semibold focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all text-slate-800 mb-6 cursor-pointer"
         />
 
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-500 font-bold text-xs rounded-xl transition-all cursor-pointer"
+            disabled={isSubmitting}
+            className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-500 font-bold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50"
           >
             {t('broadcast.schedule.cancel')}
           </button>
           <button
-            onClick={() => {
-              if (dateTime) {
-                const iso = new Date(dateTime).toISOString();
-                onSchedule(iso);
-              }
-            }}
-            disabled={!dateTime}
-            className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleScheduleSubmit}
+            disabled={!dateTime || isSubmitting}
+            className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
           >
-            {t('broadcast.schedule.submit')}
+            {isSubmitting && <Loader2 size={12} className="animate-spin" />}
+            <span>{t('broadcast.schedule.submit')}</span>
           </button>
         </div>
       </div>
@@ -263,6 +288,7 @@ const BroadcastBuilderInner: React.FC = () => {
   const isViewer = activeBot?.role === 'Viewer';
 
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isSendConfirmOpen, setIsSendConfirmOpen] = useState(false);
   const [isAddDropdownOpen, setIsAddDropdownOpen] = useState(false);
 
   const { setOnGenerate, setHasExistingNodes } = useAiStore();
@@ -647,7 +673,7 @@ const BroadcastBuilderInner: React.FC = () => {
           {!isViewer && (
             <div className="flex items-center gap-2 select-none">
               <button
-                onClick={handleSendCampaign}
+                onClick={() => setIsSendConfirmOpen(true)}
                 disabled={sendCampaignMut.isPending || updateCampaignMut.isPending}
                 className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-750 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
               >
@@ -995,6 +1021,20 @@ const BroadcastBuilderInner: React.FC = () => {
         isOpen={isScheduleModalOpen}
         onClose={() => setIsScheduleModalOpen(false)}
         onSchedule={handleScheduleCampaign}
+      />
+
+      <ConfirmModal
+        isOpen={isSendConfirmOpen}
+        title={t('broadcasts.alert.send_title') || 'Надіслати розсилку зараз'}
+        message={t('broadcasts.alert.send_confirm', { name: campaignName }) || `Ви впевнені, що хочете надіслати розсилку "${campaignName}" зараз?`}
+        variant="default"
+        confirmLabel={t('broadcasts.btn.send') || 'Надіслати'}
+        cancelLabel={t('broadcasts.btn.cancel') || 'Скасувати'}
+        onConfirm={() => {
+          setIsSendConfirmOpen(false);
+          handleSendCampaign();
+        }}
+        onCancel={() => setIsSendConfirmOpen(false)}
       />
       </div>
     </DashboardLayout>

@@ -21,9 +21,13 @@ export const AdminAutomationsPage: React.FC = () => {
 
   const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused' | 'blocked'>('all');
-  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
-  const statusDropdownRef = useRef<HTMLDivElement>(null);
+  const [sortFilter, setSortFilter] = useState<'desc' | 'asc'>('desc');
   const [page, setPage] = useState(0);
+
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const statusDropdownRef = useRef<HTMLDivElement>(null);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
 
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [selectedBlockAutomation, setSelectedBlockAutomation] = useState<any | null>(null);
@@ -48,14 +52,17 @@ export const AdminAutomationsPage: React.FC = () => {
       if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
         setIsStatusDropdownOpen(false);
       }
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
+        setIsSortDropdownOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['adminAutomations', search, statusFilter, page],
-    queryFn: () => fetchAdminAutomationsApi(search, statusFilter, page, 30),
+    queryKey: ['adminAutomations', search, statusFilter, sortFilter, page],
+    queryFn: () => fetchAdminAutomationsApi(search, statusFilter, sortFilter, page, 30),
   });
 
   const automations = data?.content || [];
@@ -103,13 +110,13 @@ export const AdminAutomationsPage: React.FC = () => {
     if (!selectedBlockAutomation) return;
     let finalReason = '';
     if (blockReasonOption === 'SUSPICIOUS') {
-      finalReason = t('admin.reason_suspicious');
+      finalReason = 'Suspicious activity';
     } else if (blockReasonOption === 'RULES') {
-      finalReason = t('admin.reason_rules');
+      finalReason = 'Violation of platform rules';
     } else if (blockReasonOption === 'SPAM') {
-      finalReason = t('admin.reason_spam');
+      finalReason = 'Spam or unauthorized bulk messaging';
     } else {
-      finalReason = customBlockReason.trim() || t('admin.reason_other');
+      finalReason = customBlockReason.trim() || 'Other reason';
     }
     blockMutation.mutate({ id: selectedBlockAutomation.id, reason: finalReason });
   };
@@ -198,38 +205,75 @@ export const AdminAutomationsPage: React.FC = () => {
             />
           </div>
 
-          <div className="relative w-full sm:w-auto flex justify-end" ref={statusDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-              className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-xs min-w-[140px] cursor-pointer"
-            >
-              <span>{getStatusLabel(statusFilter)}</span>
-              <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
+          <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
+            <div className="relative w-full sm:w-auto flex justify-end" ref={statusDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-2xs min-w-[140px] cursor-pointer"
+              >
+                <span>{getStatusLabel(statusFilter)}</span>
+                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-            {isStatusDropdownOpen && (
-              <div className="absolute right-0 mt-1.5 w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150">
-                {statusOptions.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => {
-                      setStatusFilter(opt.value as any);
-                      setPage(0);
-                      setIsStatusDropdownOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors ${
-                      statusFilter === opt.value
-                        ? 'bg-indigo-50 text-indigo-600'
-                        : 'text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
+              {isStatusDropdownOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                  {statusOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        setStatusFilter(opt.value as any);
+                        setPage(0);
+                        setIsStatusDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-xs font-semibold flex items-center justify-between transition-colors ${
+                        statusFilter === opt.value
+                          ? 'bg-indigo-50 text-indigo-600 font-bold'
+                          : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span>{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="relative w-full sm:w-auto flex justify-end" ref={sortDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-2xs cursor-pointer"
+              >
+                <span>{sortFilter === 'asc' ? (t('admin.sort_oldest') || 'Спочатку старі') : (t('admin.sort_newest') || 'Спочатку нові')}</span>
+                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isSortDropdownOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                  {[
+                    { value: 'desc', label: t('admin.sort_newest') || 'Спочатку нові' },
+                    { value: 'asc', label: t('admin.sort_oldest') || 'Спочатку старі' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        setSortFilter(opt.value as 'desc' | 'asc');
+                        setPage(0);
+                        setIsSortDropdownOpen(false);
+                      }}
+                      className={`w-full px-4 py-2 text-left text-xs font-semibold flex items-center justify-between hover:bg-slate-50 transition cursor-pointer ${
+                        sortFilter === opt.value ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
+                      }`}
+                    >
+                      <span>{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -243,6 +287,7 @@ export const AdminAutomationsPage: React.FC = () => {
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
                   <tr>
+                    <th className="py-4 px-5 text-center">ID</th>
                     <th className="py-4 px-5">{t('admin.flow_schema_col')}</th>
                     <th className="py-4 px-5 text-center">{t('admin.owner_col')}</th>
                     <th className="py-4 px-5 text-center">{t('admin.target_bot_col')}</th>
@@ -264,6 +309,7 @@ export const AdminAutomationsPage: React.FC = () => {
                       }`}
                       title="Переглянути деталі та статистику автоматизації"
                     >
+                      <td className="py-4 px-5 text-center font-mono font-bold text-slate-500 text-xs">#{item.id}</td>
                       <td className="py-4 px-5">
                         <div className="flex flex-col">
                           <span className="font-bold text-slate-900 group-hover:text-indigo-600 transition">{item.name}</span>
@@ -288,7 +334,6 @@ export const AdminAutomationsPage: React.FC = () => {
                       <td className="py-4 px-5 text-center">
                         {item.botName && item.botName !== '—' && item.botName !== 'Unassigned Bot' ? (
                           <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-semibold">
-                            <Bot size={15} className="text-indigo-600" />
                             <span>{item.botName}</span>
                           </div>
                         ) : (
@@ -315,15 +360,15 @@ export const AdminAutomationsPage: React.FC = () => {
                       <td className="py-4 px-5 text-center">
                         <div className="flex items-center justify-center">
                           {item.blocked ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-rose-50 text-rose-700 border border-rose-200">
                               {t('admin.status_blocked') !== 'admin.status_blocked' ? t('admin.status_blocked') : 'Blocked'}
                             </span>
                           ) : item.active ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
                               {t('admin.status_active') !== 'admin.status_active' ? t('admin.status_active') : 'Active'}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">
                               {t('admin.status_paused') !== 'admin.status_paused' ? t('admin.status_paused') : 'Paused'}
                             </span>
                           )}
@@ -430,7 +475,7 @@ export const AdminAutomationsPage: React.FC = () => {
                       <span className="px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-mono font-bold text-[10px]">
                         Trigger: {selectedDetailAutomation.triggerType}
                       </span>
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${
                         selectedDetailAutomation.blocked || automationDetailData?.blocked
                           ? 'bg-rose-50 text-rose-700 border-rose-200'
                           : selectedDetailAutomation.active
@@ -447,7 +492,7 @@ export const AdminAutomationsPage: React.FC = () => {
 
                     <div className="text-xs text-slate-500 font-mono flex items-center space-x-3">
                       {selectedDetailAutomation.botName && selectedDetailAutomation.botName !== '—' && selectedDetailAutomation.botName !== 'Unassigned Bot' ? (
-                        <span className="flex items-center gap-1"><Bot size={13} className="text-indigo-600" /> {selectedDetailAutomation.botName}</span>
+                        <span className="flex items-center gap-1">{selectedDetailAutomation.botName}</span>
                       ) : (
                         <span className="text-slate-400 font-semibold">—</span>
                       )}

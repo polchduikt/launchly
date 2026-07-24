@@ -1097,9 +1097,6 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
 
   const handleSendCampaign = async () => {
     if (!campaign) return;
-    if (!window.confirm(`Are you sure you want to send the campaign "${campaignName}" now?`)) {
-      return;
-    }
 
     try {
       const { filterType, filterValue } = resolveFilter(conditions);

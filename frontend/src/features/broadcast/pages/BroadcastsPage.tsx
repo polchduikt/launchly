@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueries } from '@tanstack/react-query';
 import { useBotStore } from '../../../store/useBotStore';
-import { t } from '../../../i18n';
+import { t, getLanguage } from '../../../i18n';
 import { ROUTES } from '../../../constants/routes';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
@@ -28,6 +28,8 @@ import {
   Trash2,
   Pencil,
   CalendarX,
+  ShieldAlert,
+  X,
 } from 'lucide-react';
 
 export const BroadcastsPage: React.FC = () => {
@@ -39,6 +41,7 @@ export const BroadcastsPage: React.FC = () => {
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<CampaignResponse | null>(null);
+  const [blockedDetailsCampaign, setBlockedDetailsCampaign] = useState<CampaignResponse | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{
     title: string;
     message: string;
@@ -106,6 +109,67 @@ export const BroadcastsPage: React.FC = () => {
     });
   };
 
+  const formatDateShort = (dateStr?: string | null) => {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const lang = getLanguage();
+      return d.toLocaleDateString(lang === 'uk' ? 'uk-UA' : 'en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
+  const formatScheduledDate = (dateStr?: string | null) => {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${day}.${month}, ${hours}:${minutes}`;
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
+  const translateBlockReason = (reason?: string | null) => {
+    if (!reason) return '';
+    const lang = getLanguage();
+    const ukMap: Record<string, string> = {
+      'Suspicious activity': 'Підозріла активність',
+      'Violation of platform rules': 'Порушення правил платформи',
+      'Spam or unauthorized bulk messaging': 'Спам або несанкціонована розсилка',
+      'Other reason': 'Інша причина',
+      'Підозріла активність': 'Підозріла активність',
+      'Порушення правил платформи': 'Порушення правил платформи',
+      'Спам або несанкціонована розсилка': 'Спам або несанкціонована розсилка',
+      'Інша причина': 'Інша причина',
+    };
+    const enMap: Record<string, string> = {
+      'Suspicious activity': 'Suspicious activity',
+      'Violation of platform rules': 'Violation of platform rules',
+      'Spam or unauthorized bulk messaging': 'Spam or unauthorized bulk messaging',
+      'Other reason': 'Other reason',
+      'Підозріла активність': 'Suspicious activity',
+      'Порушення правил платформи': 'Violation of platform rules',
+      'Спам або несанкціонована розсилка': 'Spam or unauthorized bulk messaging',
+      'Інша причина': 'Other reason',
+    };
+    if (lang === 'uk') {
+      return ukMap[reason] || t(reason) || reason;
+    }
+    return enMap[reason] || t(reason) || reason;
+  };
+
   if (bots.length === 0) {
     return (
       <DashboardLayout>
@@ -146,7 +210,7 @@ export const BroadcastsPage: React.FC = () => {
         <div className="flex items-center justify-between pb-6 border-b border-slate-200">
           <div>
             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('broadcasts.title')}</h1>
-            <p className="text-xs text-slate-550 font-semibold mt-1">
+            <p className="text-xs text-slate-555 font-semibold mt-1">
               {t('broadcasts.subtitle')}
             </p>
           </div>
@@ -180,7 +244,7 @@ export const BroadcastsPage: React.FC = () => {
             </div>
 
             <h2 className="text-lg font-bold text-slate-900 tracking-tight mb-2">{t('broadcasts.empty.title')}</h2>
-            <p className="text-sm text-slate-550 max-w-md mx-auto mb-6 leading-relaxed">
+            <p className="text-sm text-slate-555 max-w-md mx-auto mb-6 leading-relaxed">
               {t('broadcasts.empty.desc')}
             </p>
 
@@ -209,18 +273,32 @@ export const BroadcastsPage: React.FC = () => {
                 <tbody className="divide-y divide-slate-100">
                   {campaigns.map((camp) => {
                     const campaignBot = bots.find((b) => b.id === camp.botId);
+                    const isBlocked = camp.blocked || camp.status === 'BLOCKED';
+
                     return (
                       <tr
                         key={camp.id}
-                        onClick={() => navigate(ROUTES.BROADCAST_BUILDER.replace(':id', String(camp.id)))}
-                        className="hover:bg-slate-50/50 transition-all cursor-pointer group"
+                        onClick={() => {
+                          if (isBlocked) {
+                            setBlockedDetailsCampaign(camp);
+                            return;
+                          }
+                          navigate(ROUTES.BROADCAST_BUILDER.replace(':id', String(camp.id)));
+                        }}
+                        className={`transition-all ${
+                          isBlocked
+                            ? 'bg-slate-100/80 border-slate-200 opacity-90 cursor-pointer'
+                            : 'hover:bg-slate-50/50 cursor-pointer group'
+                        }`}
                       >
                         <td className="py-4 px-4">
                           <div className="font-semibold text-sm text-slate-800 group-hover:text-indigo-600 transition-all">
                             {camp.name}
                           </div>
                           <div className="text-xs text-slate-400 truncate max-w-xs mt-0.5">
-                            {camp.message}
+                            {isBlocked
+                              ? translateBlockReason(camp.blockReason)
+                              : camp.message}
                           </div>
                         </td>
                         <td className="py-4 px-4 text-xs font-bold text-slate-555">
@@ -233,27 +311,29 @@ export const BroadcastsPage: React.FC = () => {
                           </span>
                         </td>
                         <td className="py-4 px-4">
-                          <StatusBadge status={camp.status} />
+                          <StatusBadge status={isBlocked ? 'BLOCKED' : camp.status} />
                         </td>
                         <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
-                          <div className="text-xs text-slate-550 font-bold mb-1.5">
-                            {camp.status === 'SCHEDULED' && camp.sentCount === 0 && camp.totalCount === 0
-                              ? t('broadcasts.table.pending')
+                          <div className="text-xs text-slate-555 font-bold mb-1.5 whitespace-nowrap">
+                            {camp.status === 'SCHEDULED'
+                              ? `${t('status.scheduled') || 'Заплановано'} (${formatScheduledDate(camp.scheduledAt)})`
                               : t('broadcasts.table.sent', { sent: camp.sentCount, total: camp.totalCount })}
                           </div>
                           <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                             <div
                               className={`h-full rounded-full transition-all ${
-                                camp.status === 'FAILED'
+                                isBlocked
+                                  ? 'bg-rose-400 opacity-60'
+                                  : camp.status === 'FAILED'
                                   ? 'bg-rose-500'
                                   : camp.status === 'IN_PROGRESS'
                                   ? 'bg-amber-400 animate-pulse'
                                   : camp.status === 'SCHEDULED'
-                                  ? 'bg-slate-300'
+                                  ? 'bg-indigo-400'
                                   : 'bg-emerald-500'
                               }`}
                               style={{
-                                width: camp.status === 'SCHEDULED' && camp.sentCount === 0 && camp.totalCount === 0
+                                width: camp.status === 'SCHEDULED'
                                   ? '100%'
                                   : `${camp.totalCount > 0 ? (camp.sentCount / camp.totalCount) * 100 : 0}%`,
                               }}
@@ -261,12 +341,7 @@ export const BroadcastsPage: React.FC = () => {
                           </div>
                         </td>
                         <td className="py-4 px-4 text-xs text-slate-500 font-medium">
-                          {new Date(camp.createdAt).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                          {formatDateShort(camp.createdAt)}
                         </td>
                         <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1.5">
@@ -275,35 +350,36 @@ export const BroadcastsPage: React.FC = () => {
                             ) : (
                               <>
                                 <button
-                                  onClick={() => handleSendNow(camp.id, camp.botId, camp.name)}
-                                  disabled={sendCampaignMut.isPending}
+                                  onClick={() => !isBlocked && handleSendNow(camp.id, camp.botId, camp.name)}
+                                  disabled={isBlocked || sendCampaignMut.isPending}
                                   title={t('broadcasts.tooltip.send_now')}
-                                  className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border border-transparent hover:border-emerald-100 rounded-xl transition-all cursor-pointer shrink-0"
+                                  className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border border-transparent hover:border-emerald-100 rounded-xl transition-all cursor-pointer shrink-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                                 >
                                   <Play size={14} className="fill-current" />
                                 </button>
                                 <button
-                                  onClick={() => setEditingCampaign(camp)}
+                                  onClick={() => !isBlocked && setEditingCampaign(camp)}
+                                  disabled={isBlocked}
                                   title={t('broadcasts.tooltip.edit')}
-                                  className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 rounded-xl transition-all cursor-pointer shrink-0"
+                                  className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 rounded-xl transition-all cursor-pointer shrink-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                                 >
                                   <Pencil size={14} />
                                 </button>
                                 {camp.status === 'SCHEDULED' && (
                                   <button
-                                    onClick={() => handleCancelSchedule(camp.id, camp.botId, camp.name)}
-                                    disabled={cancelScheduleMut.isPending}
+                                    onClick={() => !isBlocked && handleCancelSchedule(camp.id, camp.botId, camp.name)}
+                                    disabled={isBlocked || cancelScheduleMut.isPending}
                                     title={t('broadcasts.tooltip.cancel_schedule')}
-                                    className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-transparent hover:border-amber-100 rounded-xl transition-all cursor-pointer shrink-0"
+                                    className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-transparent hover:border-amber-100 rounded-xl transition-all cursor-pointer shrink-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                                   >
                                     <CalendarX size={14} />
                                   </button>
                                 )}
                                 <button
-                                  onClick={() => handleDeleteCampaign(camp.id, camp.botId, camp.name)}
-                                  disabled={deleteCampaignMut.isPending}
+                                  onClick={() => !isBlocked && handleDeleteCampaign(camp.id, camp.botId, camp.name)}
+                                  disabled={isBlocked || deleteCampaignMut.isPending}
                                   title={t('broadcasts.tooltip.delete')}
-                                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 rounded-xl transition-all cursor-pointer shrink-0"
+                                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 rounded-xl transition-all cursor-pointer shrink-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                                 >
                                   <Trash2 size={14} />
                                 </button>
@@ -337,7 +413,77 @@ export const BroadcastsPage: React.FC = () => {
           bots={bots}
           botId={editingCampaign?.botId || botId}
         />
+
+        {blockedDetailsCampaign && (
+          <div
+            onClick={() => setBlockedDetailsCampaign(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-150 select-none"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white border border-slate-200 rounded-3xl shadow-2xl w-full max-w-md p-6 space-y-5 animate-in zoom-in-95 duration-200"
+            >
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 font-bold shrink-0">
+                    <ShieldAlert size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 leading-snug">
+                      {t('broadcast.blocked_modal_title') !== 'broadcast.blocked_modal_title' ? t('broadcast.blocked_modal_title') : 'Розсилка заблокована'}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium">
+                      {blockedDetailsCampaign.name}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setBlockedDetailsCampaign(null)}
+                  className="text-slate-400 hover:text-slate-700 p-1.5 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {t('broadcast.blocked_modal_desc') !== 'broadcast.blocked_modal_desc' ? t('broadcast.blocked_modal_desc') : 'Ця розсилка заблокована адміністрацією платформи і недоступна для запуску або редагування.'}
+                </p>
+
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2.5">
+                  <div className="flex items-start justify-between text-xs">
+                    <span className="text-slate-500 font-medium">{t('broadcast.blocked_modal_reason') !== 'broadcast.blocked_modal_reason' ? t('broadcast.blocked_modal_reason') : 'Причина блокування:'}</span>
+                    <span className="font-bold text-slate-800 text-right max-w-[200px]">
+                      {translateBlockReason(blockedDetailsCampaign.blockReason)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs border-t border-slate-200/60 pt-2">
+                    <span className="text-slate-500 font-medium">{t('broadcast.blocked_modal_date') !== 'broadcast.blocked_modal_date' ? t('broadcast.blocked_modal_date') : 'Дата блокування:'}</span>
+                    <span className="font-semibold text-slate-700">
+                      {formatDateShort(blockedDetailsCampaign.blockedAt || blockedDetailsCampaign.updatedAt)}
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-slate-400 leading-relaxed italic">
+                  {t('broadcast.blocked_modal_support') !== 'broadcast.blocked_modal_support' ? t('broadcast.blocked_modal_support') : 'Якщо ви вважаєте, що це сталося помилково, будь ласка, зверніться до нашої підтримки.'}
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex justify-end">
+                <button
+                  onClick={() => setBlockedDetailsCampaign(null)}
+                  className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-sm"
+                >
+                  {t('broadcast.blocked_modal_close') !== 'broadcast.blocked_modal_close' ? t('broadcast.blocked_modal_close') : 'Зрозуміло'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
 };
+
+export default BroadcastsPage;

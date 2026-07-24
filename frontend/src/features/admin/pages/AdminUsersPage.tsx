@@ -38,7 +38,31 @@ export const AdminUsersPage: React.FC = () => {
 
   const [search, setSearch] = useState(initialSearch);
   const [roleFilter, setRoleFilter] = useState('');
+  const [sortFilter, setSortFilter] = useState<'desc' | 'asc'>('desc');
   const [page, setPage] = useState(0);
+
+  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const roleDropdownRef = useRef<HTMLDivElement>(null);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target as Node)) {
+        setIsRoleDropdownOpen(false);
+      }
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
+        setIsSortDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['adminUsers', search, roleFilter, sortFilter, page],
+    queryFn: () => fetchAdminUsersApi(search, roleFilter, sortFilter, page, 30),
+  });
 
   useEffect(() => {
     const param = searchParams.get('search');
@@ -156,19 +180,6 @@ export const AdminUsersPage: React.FC = () => {
     return desc;
   };
 
-  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
-  const roleDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target as Node)) {
-        setIsRoleDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const roleOptions = [
     { value: '', label: t('admin.all_roles') !== 'admin.all_roles' ? t('admin.all_roles') : 'Всі ролі' },
     { value: 'ROLE_OWNER', label: t('admin.owners') !== 'admin.owners' ? t('admin.owners') : 'Овнер' },
@@ -180,11 +191,6 @@ export const AdminUsersPage: React.FC = () => {
     const found = roleOptions.find((r) => r.value === role);
     return found ? found.label : (t('admin.all_roles') !== 'admin.all_roles' ? t('admin.all_roles') : 'Всі ролі');
   };
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['adminUsers', search, roleFilter, page],
-    queryFn: () => fetchAdminUsersApi(search, roleFilter, page, 30),
-  });
 
   const roleMutation = useMutation({
     mutationFn: ({ userId, role }: { userId: number; role: string }) => updateUserRoleApi(userId, role),
@@ -260,38 +266,75 @@ export const AdminUsersPage: React.FC = () => {
             />
           </div>
 
-          <div className="relative w-full sm:w-auto flex justify-end" ref={roleDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-              className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-xs min-w-[140px] cursor-pointer"
-            >
-              <span>{getRoleLabel(roleFilter)}</span>
-              <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
+          <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
+            <div className="relative w-full sm:w-auto flex justify-end" ref={roleDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-2xs min-w-[140px] cursor-pointer"
+              >
+                <span>{getRoleLabel(roleFilter)}</span>
+                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-            {isRoleDropdownOpen && (
-              <div className="absolute right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150">
-                {roleOptions.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => {
-                      setRoleFilter(opt.value);
-                      setPage(0);
-                      setIsRoleDropdownOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors ${
-                      roleFilter === opt.value
-                        ? 'bg-indigo-50 text-indigo-600'
-                        : 'text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
+              {isRoleDropdownOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                  {roleOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        setRoleFilter(opt.value);
+                        setPage(0);
+                        setIsRoleDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-xs font-semibold flex items-center justify-between transition-colors ${
+                        roleFilter === opt.value
+                          ? 'bg-indigo-50 text-indigo-600 font-bold'
+                          : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span>{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="relative w-full sm:w-auto flex justify-end" ref={sortDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-2xs cursor-pointer"
+              >
+                <span>{sortFilter === 'asc' ? (t('admin.sort_oldest') || 'Спочатку старі') : (t('admin.sort_newest') || 'Спочатку нові')}</span>
+                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isSortDropdownOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                  {[
+                    { value: 'desc', label: t('admin.sort_newest') || 'Спочатку нові' },
+                    { value: 'asc', label: t('admin.sort_oldest') || 'Спочатку старі' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        setSortFilter(opt.value as 'desc' | 'asc');
+                        setPage(0);
+                        setIsSortDropdownOpen(false);
+                      }}
+                      className={`w-full px-4 py-2 text-left text-xs font-semibold flex items-center justify-between hover:bg-slate-50 transition cursor-pointer ${
+                        sortFilter === opt.value ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
+                      }`}
+                    >
+                      <span>{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -305,6 +348,7 @@ export const AdminUsersPage: React.FC = () => {
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
                   <tr>
+                    <th className="py-4 px-4 text-center">ID</th>
                     <th className="py-4 px-4">{t('admin.user_col')}</th>
                     <th className="py-4 px-4">{t('admin.role_col')}</th>
                     <th className="py-4 px-4">{t('admin.provider_col')}</th>
@@ -323,6 +367,7 @@ export const AdminUsersPage: React.FC = () => {
                     const isSelf = u.id === currentUser?.id;
                     return (
                       <tr key={u.id} className="hover:bg-slate-50/80 transition">
+                        <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-500 text-xs">#{u.id}</td>
                         <td className="py-3.5 px-4">
                           <div
                             onClick={() => handleOpenDetailModal(u)}
@@ -409,20 +454,17 @@ export const AdminUsersPage: React.FC = () => {
 
                         <td className="py-3.5 px-4 text-center">
                           <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold text-[10px]">
-                            <Sparkles size={11} className="mr-1 text-indigo-600" />
                             {u.planName || 'FREE'}
                           </span>
                         </td>
 
                         <td className="py-3.5 px-4 text-center">
                           {u.active ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
                               {t('admin.active')}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">
-                              <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span>
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-red-50 text-red-700 border border-red-200">
                               {t('admin.blocked')}
                             </span>
                           )}
@@ -697,7 +739,7 @@ export const AdminUsersPage: React.FC = () => {
                       <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-bold text-[10px] uppercase">
                         {selectedDetailUser.role}
                       </span>
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${
                         selectedDetailUser.active
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                           : 'bg-rose-50 text-rose-700 border-rose-200'
@@ -912,7 +954,6 @@ export const AdminUsersPage: React.FC = () => {
                           <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-100 text-[10px] font-mono">
                             {auto.botName && auto.botName !== '—' ? (
                               <span className="flex items-center gap-1 text-slate-700 font-semibold truncate max-w-[120px]">
-                                <Bot size={11} className="text-indigo-600 shrink-0" />
                                 <span className="truncate">{auto.botName}</span>
                               </span>
                             ) : (

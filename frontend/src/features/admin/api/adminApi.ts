@@ -105,11 +105,84 @@ export interface AdminBroadcast {
   title: string;
   content: string;
   targetAudience: string;
+  botName?: string;
   sentCount: number;
+  failedCount: number;
+  totalCount: number;
   status: string;
+  blocked?: boolean;
+  blockReason?: string;
+  blockedAt?: string;
   createdByEmail: string;
+  authorName?: string;
   createdAt: string;
 }
+
+export interface AdminBroadcastDetail {
+  id: number;
+  title: string;
+  content: string;
+  targetAudience: string;
+  botName?: string;
+  sentCount: number;
+  failedCount: number;
+  totalCount: number;
+  status: string;
+  blocked?: boolean;
+  blockReason?: string;
+  blockedAt?: string;
+  createdByEmail: string;
+  authorName?: string;
+  authorId?: number;
+  createdAt: string;
+  scheduledAt?: string;
+  activities: {
+    content: UserActivity[];
+    totalElements: number;
+    totalPages: number;
+    number: number;
+    size: number;
+  };
+}
+
+export const fetchAdminBroadcastsApi = async (
+  search = '',
+  status = 'all',
+  sort = 'desc',
+  page = 0,
+  size = 10
+): Promise<{ content: AdminBroadcast[]; totalElements: number; totalPages: number }> => {
+  const params: Record<string, string | number> = { page, size };
+  if (search) params.search = search;
+  if (status) params.status = status;
+  if (sort) params.sort = sort;
+
+  const response = await apiClient.get<{ content: AdminBroadcast[]; totalElements: number; totalPages: number }>('/admin/broadcasts', { params });
+  return response.data;
+};
+
+export const fetchAdminBroadcastDetailsApi = async (
+  broadcastId: number,
+  period = 'all',
+  page = 0,
+  size = 10
+): Promise<AdminBroadcastDetail> => {
+  const params: Record<string, string | number> = { period, page, size };
+  const response = await apiClient.get<AdminBroadcastDetail>(`/admin/broadcasts/${broadcastId}/details`, { params });
+  return response.data;
+};
+
+export const cancelAdminBroadcastApi = async (broadcastId: number): Promise<void> => {
+  await apiClient.post(`/admin/broadcasts/${broadcastId}/cancel`);
+};
+
+export const blockAdminBroadcastApi = async (broadcastId: number, reason: string): Promise<void> => {
+  await apiClient.post(`/admin/broadcasts/${broadcastId}/block`, { reason });
+};
+
+export const unblockAdminBroadcastApi = async (broadcastId: number): Promise<void> => {
+  await apiClient.post(`/admin/broadcasts/${broadcastId}/unblock`);
+};
 
 export interface AdminLog {
   id: string;
@@ -139,12 +212,14 @@ export const fetchAdminStatsApi = async (
 export const fetchAdminUsersApi = async (
   search = '',
   role = '',
+  sort = 'desc',
   page = 0,
   size = 20
 ): Promise<{ content: AdminUser[]; totalElements: number; totalPages: number }> => {
   const params: Record<string, string | number> = { page, size };
   if (search) params.search = search;
   if (role) params.role = role;
+  if (sort) params.sort = sort;
 
   const response = await apiClient.get<{ content: AdminUser[]; totalElements: number; totalPages: number }>('/admin/users', { params });
   return response.data;
@@ -201,12 +276,14 @@ export interface AdminAutomationDetail {
 export const fetchAdminAutomationsApi = async (
   search = '',
   status = '',
+  sort = 'desc',
   page = 0,
   size = 30
 ): Promise<{ content: AdminAutomation[]; totalElements: number; totalPages: number }> => {
   const params: Record<string, string | number> = { page, size };
   if (search) params.search = search;
   if (status) params.status = status;
+  if (sort) params.sort = sort;
 
   const response = await apiClient.get<{ content: AdminAutomation[]; totalElements: number; totalPages: number }>('/admin/automations', { params });
   return response.data;
@@ -235,32 +312,42 @@ export const unblockAutomationApi = async (automationId: number): Promise<void> 
   await apiClient.post(`/admin/automations/${automationId}/unblock`);
 };
 
-export const fetchAdminBroadcastsApi = async (): Promise<AdminBroadcast[]> => {
-  const response = await apiClient.get<AdminBroadcast[]>('/admin/broadcasts');
-  return response.data;
-};
 
-export const createAdminBroadcastApi = async (data: {
-  title: string;
-  content: string;
-  targetAudience: string;
-}): Promise<AdminBroadcast> => {
-  const response = await apiClient.post<AdminBroadcast>('/admin/broadcasts', data);
-  return response.data;
-};
+
+export interface AdminLogsResponse {
+  content: AdminLog[];
+  totalPages: number;
+  totalElements: number;
+  number: number;
+  size: number;
+}
 
 export const fetchAdminLogsApi = async (
   level = '',
   service = '',
-  search = ''
-): Promise<AdminLog[]> => {
-  const params: Record<string, string> = {};
+  search = '',
+  sort = 'desc',
+  page = 0,
+  size = 100
+): Promise<AdminLogsResponse> => {
+  const params: Record<string, any> = { page, size };
   if (level) params.level = level;
   if (service) params.service = service;
   if (search) params.search = search;
+  if (sort) params.sort = sort;
 
-  const response = await apiClient.get<AdminLog[]>('/admin/logs', { params });
-  return response.data;
+  const response = await apiClient.get<any>('/admin/logs', { params });
+  const data = response.data;
+  if (Array.isArray(data)) {
+    return {
+      content: data,
+      totalPages: 1,
+      totalElements: data.length,
+      number: 0,
+      size: 100
+    };
+  }
+  return data;
 };
 
 export interface UserActivity {

@@ -19,10 +19,12 @@ import {
   AlertCircle,
   Loader2,
   ChevronDown,
+  ShieldAlert,
+  Lock,
 } from 'lucide-react';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../hooks/useBotsQuery';
-import { t } from '../../../i18n';
+import { t, getLanguage } from '../../../i18n';
 import {
   useCreateBotMutation,
   useDeleteBotMutation,
@@ -133,6 +135,7 @@ export const AutomationsPage: React.FC = () => {
   const [moveBotId, setMoveBotId] = useState<number | null>(null);
   const [tempFolderId, setTempFolderId] = useState('');
   const [tempFolderName, setTempFolderName] = useState('');
+  const [blockedDetailsBot, setBlockedDetailsBot] = useState<any | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{
     title: string;
     message: string;
@@ -140,6 +143,52 @@ export const AutomationsPage: React.FC = () => {
     confirmLabel?: string;
     onConfirm: () => void;
   } | null>(null);
+
+  const formatDateShort = (dateStr?: string | null) => {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const lang = getLanguage();
+      return d.toLocaleDateString(lang === 'uk' ? 'uk-UA' : 'en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
+  const translateBlockReason = (reason?: string | null) => {
+    if (!reason) return '';
+    const lang = getLanguage();
+    const ukMap: Record<string, string> = {
+      'Suspicious activity': 'Підозріла активність',
+      'Violation of platform rules': 'Порушення правил платформи',
+      'Spam or unauthorized bulk messaging': 'Спам або несанкціонована розсилка',
+      'Other reason': 'Інша причина',
+      'Підозріла активність': 'Підозріла активність',
+      'Порушення правил платформи': 'Порушення правил платформи',
+      'Спам або несанкціонована розсилка': 'Спам або несанкціонована розсилка',
+      'Інша причина': 'Інша причина',
+    };
+    const enMap: Record<string, string> = {
+      'Suspicious activity': 'Suspicious activity',
+      'Violation of platform rules': 'Violation of platform rules',
+      'Spam or unauthorized bulk messaging': 'Spam or unauthorized bulk messaging',
+      'Other reason': 'Other reason',
+      'Підозріла активність': 'Suspicious activity',
+      'Порушення правил платформи': 'Violation of platform rules',
+      'Спам або несанкціонована розсилка': 'Spam or unauthorized bulk messaging',
+      'Інша причина': 'Other reason',
+    };
+    if (lang === 'uk') {
+      return ukMap[reason] || t(reason) || reason;
+    }
+    return enMap[reason] || t(reason) || reason;
+  };
 
   useEffect(() => {
     localStorage.setItem('launchly_folders', JSON.stringify(folders));
@@ -584,13 +633,7 @@ export const AutomationsPage: React.FC = () => {
                           key={bot.id}
                           onClick={() => {
                             if (bot.blocked) {
-                              setConfirmDialog({
-                                title: 'Автоматизацію заблоковано',
-                                message: `Адміністрацією заблоковано цю автоматизацію. Причина: ${bot.blockReason || 'Порушення правил платформи'}. Ви можете тільки видалити її.`,
-                                variant: 'danger',
-                                confirmLabel: 'Зрозуміло',
-                                onConfirm: () => setConfirmDialog(null),
-                              });
+                              setBlockedDetailsBot(bot);
                               return;
                             }
                             setActiveBotId(bot.id);
@@ -625,22 +668,25 @@ export const AutomationsPage: React.FC = () => {
                               />
                               <div className="flex flex-col min-w-0">
                                 <div className="flex items-center space-x-2">
-                                  <span className={`font-semibold text-sm transition-all truncate max-w-xs md:max-w-md ${
-                                    bot.blocked ? 'text-slate-600 group-hover:text-slate-800' : 'text-slate-800 hover:text-indigo-600'
-                                  }`}>
+                                  <span className="font-semibold text-sm text-slate-800 hover:text-indigo-600 transition-all truncate max-w-xs md:max-w-md">
                                     {bot.name}
                                   </span>
                                   {bot.blocked && (
-                                    <span className="px-2 py-0.5 rounded-full bg-rose-100/80 border border-rose-300 text-rose-700 text-[10px] font-extrabold uppercase shrink-0">
-                                      Заблоковано
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300 shadow-xs shrink-0">
+                                      <Lock size={12} />
+                                      {t('status.blocked') || t('admin.status_blocked') || 'Blocked'}
                                     </span>
                                   )}
                                 </div>
-                                {bot.description && (
+                                {bot.blocked ? (
+                                  <span className="text-xs text-slate-400 font-normal truncate max-w-xs md:max-w-md mt-0.5">
+                                    {translateBlockReason(bot.blockReason)}
+                                  </span>
+                                ) : bot.description ? (
                                   <span className="text-xs text-slate-400 font-normal line-clamp-1 max-w-xs md:max-w-md mt-0.5">
                                     {bot.description}
                                   </span>
-                                )}
+                                ) : null}
                               </div>
                             </div>
                           </td>
@@ -671,13 +717,7 @@ export const AutomationsPage: React.FC = () => {
                       key={bot.id}
                       onClick={() => {
                         if (bot.blocked) {
-                          setConfirmDialog({
-                            title: 'Автоматизацію заблоковано',
-                            message: `Адміністрацією заблоковано цю автоматизацію. Причина: ${bot.blockReason || 'Порушення правил платформи'}. Ви можете тільки видалити її.`,
-                            variant: 'danger',
-                            confirmLabel: 'Зрозуміло',
-                            onConfirm: () => setConfirmDialog(null),
-                          });
+                          setBlockedDetailsBot(bot);
                           return;
                         }
                         setActiveBotId(bot.id);
@@ -705,8 +745,9 @@ export const AutomationsPage: React.FC = () => {
                               {bot.name}
                             </h3>
                             {bot.blocked && (
-                              <span className="px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-[10px] font-extrabold uppercase shrink-0">
-                                Заблоковано
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300 shadow-xs shrink-0">
+                                <Lock size={12} />
+                                {t('status.blocked') || t('admin.status_blocked') || 'Blocked'}
                               </span>
                             )}
                           </div>
@@ -722,7 +763,9 @@ export const AutomationsPage: React.FC = () => {
                           )}
                         </div>
                         <p className="text-xs text-slate-400 mt-2 line-clamp-2">
-                          {bot.description || t('automations.no_description')}
+                          {bot.blocked
+                            ? translateBlockReason(bot.blockReason)
+                            : bot.description || t('automations.no_description')}
                         </p>
                       </div>
 
@@ -1299,6 +1342,88 @@ export const AutomationsPage: React.FC = () => {
                 className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
               >
                 {t('automations.folder.create')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {blockedDetailsBot && (
+        <div
+          onClick={() => setBlockedDetailsBot(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-150 select-none"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 rounded-3xl shadow-2xl w-full max-w-md p-6 space-y-5 animate-in zoom-in-95 duration-200"
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 font-bold shrink-0">
+                  <ShieldAlert size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 leading-snug">
+                    {t('automations.blocked_modal_title') !== 'automations.blocked_modal_title' ? t('automations.blocked_modal_title') : 'Автоматизація заблокована'}
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    {blockedDetailsBot.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setBlockedDetailsBot(null)}
+                className="text-slate-400 hover:text-slate-700 p-1.5 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {t('automations.blocked_modal_desc') !== 'automations.blocked_modal_desc' ? t('automations.blocked_modal_desc') : 'Ця автоматизація заблокована адміністрацією платформи і недоступна для запуску або редагування.'}
+              </p>
+
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2.5">
+                <div className="flex items-start justify-between text-xs">
+                  <span className="text-slate-500 font-medium">
+                    {t('broadcast.blocked_modal_reason') !== 'broadcast.blocked_modal_reason'
+                      ? t('broadcast.blocked_modal_reason')
+                      : (getLanguage() === 'uk' ? 'Причина блокування:' : 'Reason for blocking:')}
+                  </span>
+                  <span className="font-bold text-slate-800 text-right max-w-[200px]">
+                    {translateBlockReason(blockedDetailsBot.blockReason)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs border-t border-slate-200/60 pt-2">
+                  <span className="text-slate-500 font-medium">
+                    {t('broadcast.blocked_modal_date') !== 'broadcast.blocked_modal_date'
+                      ? t('broadcast.blocked_modal_date')
+                      : (getLanguage() === 'uk' ? 'Дата блокування:' : 'Blocked date:')}
+                  </span>
+                  <span className="font-semibold text-slate-700">
+                    {formatDateShort(blockedDetailsBot.blockedAt || blockedDetailsBot.updatedAt)}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-400 leading-relaxed italic">
+                {t('automations.blocked_modal_support') !== 'automations.blocked_modal_support'
+                  ? t('automations.blocked_modal_support')
+                  : (getLanguage() === 'uk'
+                      ? 'Якщо ви вважаєте, що це сталося помилково, будь ласка, зверніться до нашої підтримки.'
+                      : 'If you believe this automation was blocked in error, please contact support.')}
+              </p>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => setBlockedDetailsBot(null)}
+                className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-sm"
+              >
+                {t('broadcast.blocked_modal_close') !== 'broadcast.blocked_modal_close'
+                  ? t('broadcast.blocked_modal_close')
+                  : (getLanguage() === 'uk' ? 'Зрозуміло' : 'Got it')}
               </button>
             </div>
           </div>
