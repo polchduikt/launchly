@@ -120,7 +120,6 @@ export const AdminUsersPage: React.FC = () => {
   const handleBulkUnblock = () => {
     setIsBulkActionOpen(false);
     if (selectedUserIds.length === 0) return;
-    // Only unblock users who are currently BLOCKED (!u.active)
     const blockedSelectedUsers = data?.content?.filter((u: any) => selectedUserIds.includes(u.id) && !u.active) || [];
     blockedSelectedUsers.forEach((u: any) => {
       statusMutation.mutate({ userId: u.id });
@@ -919,7 +918,7 @@ export const AdminUsersPage: React.FC = () => {
 
         {showDetailModal && selectedDetailUser && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-150">
-            <div className="bg-white border border-slate-300 rounded-2xl w-full max-w-4xl h-[710px] p-6 sm:p-7 shadow-2xl flex flex-col justify-between space-y-4 overflow-hidden">
+            <div className="bg-white border border-slate-300 rounded-3xl w-full max-w-6xl h-[780px] max-h-[92vh] p-6 sm:p-7 shadow-2xl flex flex-col justify-between space-y-4 overflow-hidden">
               <div className="flex items-center justify-between border-b border-slate-200 pb-3.5 shrink-0">
                 <div className="flex items-center space-x-3.5">
                   {selectedDetailUser.avatar ? (
@@ -1105,72 +1104,127 @@ export const AdminUsersPage: React.FC = () => {
                   <span className="font-bold">{t('blocked.reason_title')}</span> {selectedDetailUser.blockReason}
                 </div>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 flex-1 min-h-0 overflow-hidden">
-                <div className="md:col-span-5 border border-slate-200 rounded-xl bg-slate-50/50 p-3 flex flex-col min-h-0">
-                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 text-xs font-bold text-slate-700 shrink-0">
-                    <div className="flex items-center gap-1.5">
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 flex-1 min-h-0 overflow-hidden">
+                <div className="lg:col-span-5 flex flex-col space-y-3 min-h-0 h-full overflow-hidden">
+                  
+                  <div className="flex-1 flex flex-col min-h-0 border border-slate-200 rounded-2xl bg-slate-50/50 p-3 overflow-hidden">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200 text-xs font-bold text-slate-800 shrink-0">
                       <span>{t('admin.automations')}</span>
+                      {userDetailData?.automations && (
+                        <span className="text-[11px] font-mono text-slate-500 font-normal">
+                          {t('admin.total')}: {userDetailData.automations.length}
+                        </span>
+                      )}
                     </div>
-                    {userDetailData?.automations && (
-                      <span className="text-[11px] font-mono text-slate-500 font-normal">
-                        {t('admin.total')}: {userDetailData.automations.length}
-                      </span>
-                    )}
-                  </div>
 
-                  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pt-2 pr-1">
-                    {isDetailLoading ? (
-                      <div className="flex items-center justify-center py-8 text-slate-400 text-xs">
-                        <Loader2 size={16} className="animate-spin mr-2" />
-                        {t('admin.loading_history')}
-                      </div>
-                    ) : !userDetailData?.automations?.length ? (
-                      <div className="text-center py-8 text-slate-400 text-xs font-medium">
-                        {t('admin.no_records')}
-                      </div>
-                    ) : (
-                      userDetailData.automations.map((auto) => (
-                        <div
-                          key={auto.id}
-                          onClick={() => {
-                            setShowDetailModal(false);
-                            navigate(`${ROUTES.ADMIN_AUTOMATIONS}?search=${encodeURIComponent(auto.name)}`);
-                          }}
-                          className="bg-white border border-slate-200 rounded-xl p-2.5 hover:border-indigo-400 hover:shadow-xs cursor-pointer transition group flex flex-col justify-between"
-                          title="Перейти до цієї автоматизації на сторінці Автоматизацій"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center space-x-2 min-w-0">
-                              <span
-                                className={`w-2 h-2 rounded-full shrink-0 ${
-                                  auto.active ? 'bg-emerald-500 shadow-xs shadow-emerald-500/50' : 'bg-slate-300'
-                                }`}
-                              />
-                              <span className="font-bold text-slate-800 text-xs truncate group-hover:text-indigo-600 transition">
-                                {auto.name}
-                              </span>
-                            </div>
-                            <ChevronRight size={14} className="text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition shrink-0 mt-0.5" />
-                          </div>
-
-                          <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-100 text-[10px] font-mono">
-                            {auto.botName && auto.botName !== '—' ? (
-                              <span className="flex items-center gap-1 text-slate-700 font-semibold truncate max-w-[120px]">
-                                <span className="truncate">{auto.botName}</span>
-                              </span>
-                            ) : (
-                              <span className="text-slate-400 font-bold">—</span>
-                            )}
-                            <span className="font-bold text-slate-600">RUNS: {auto.triggerCount}</span>
-                          </div>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pt-2 pr-1">
+                      {isDetailLoading ? (
+                        <div className="flex items-center justify-center py-6 text-slate-400 text-xs">
+                          <Loader2 size={16} className="animate-spin mr-2" />
+                          {t('admin.loading_history')}
                         </div>
-                      ))
-                    )}
+                      ) : !userDetailData?.automations?.length ? (
+                        <div className="text-center py-6 text-slate-400 text-xs font-medium">
+                          {t('admin.no_records')}
+                        </div>
+                      ) : (
+                        userDetailData.automations.map((auto) => (
+                          <div
+                            key={auto.id}
+                            onClick={() => {
+                              setShowDetailModal(false);
+                              navigate(`${ROUTES.ADMIN_AUTOMATIONS}?search=${encodeURIComponent(auto.name)}`);
+                            }}
+                            className="bg-white border border-slate-200 rounded-xl p-2.5 hover:border-indigo-400 hover:shadow-xs cursor-pointer transition group flex flex-col justify-between"
+                            title="Перейти до цієї автоматизації"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-center space-x-2 min-w-0">
+                                <span
+                                  className={`w-2 h-2 rounded-full shrink-0 ${
+                                    auto.active ? 'bg-emerald-500 shadow-xs shadow-emerald-500/50' : 'bg-slate-300'
+                                  }`}
+                                />
+                                <span className="font-bold text-slate-800 text-xs truncate group-hover:text-indigo-600 transition">
+                                  {auto.name}
+                                </span>
+                              </div>
+                              <ChevronRight size={14} className="text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition shrink-0 mt-0.5" />
+                            </div>
+
+                            <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-100 text-[10px] font-mono">
+                              {auto.botName && auto.botName !== '—' ? (
+                                <span className="flex items-center gap-1 text-slate-700 font-semibold truncate max-w-[120px]">
+                                  <span className="truncate">{auto.botName}</span>
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 font-bold">—</span>
+                              )}
+                              <span className="font-bold text-slate-600">RUNS: {auto.triggerCount}</span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
+
+                  <div className="flex-1 flex flex-col min-h-0 border border-slate-200 rounded-2xl bg-slate-50/50 p-3 overflow-hidden">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200 text-xs font-bold text-slate-800 shrink-0">
+                      <span>{t('admin.cat_broadcasts')}</span>
+                      {userDetailData?.broadcasts && (
+                        <span className="text-[11px] font-mono text-slate-500 font-normal">
+                          {t('admin.total')}: {userDetailData.broadcasts.length}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pt-2 pr-1">
+                      {isDetailLoading ? (
+                        <div className="flex items-center justify-center py-6 text-slate-400 text-xs">
+                          <Loader2 size={16} className="animate-spin mr-2" />
+                          {t('admin.loading_history')}
+                        </div>
+                      ) : !userDetailData?.broadcasts?.length ? (
+                        <div className="text-center py-6 text-slate-400 text-xs font-medium">
+                          {t('admin.no_records')}
+                        </div>
+                      ) : (
+                        userDetailData.broadcasts.map((bc) => (
+                          <div
+                            key={bc.id}
+                            onClick={() => {
+                              setShowDetailModal(false);
+                              navigate(`${ROUTES.ADMIN_BROADCASTS}?search=${encodeURIComponent(bc.name)}`);
+                            }}
+                            className="bg-white border border-slate-200 rounded-xl p-2.5 hover:border-blue-400 hover:shadow-xs cursor-pointer transition group flex flex-col justify-between"
+                            title="Перейти до цієї розсилки"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-center space-x-2 min-w-0">
+                                <span className="font-bold text-slate-800 text-xs truncate group-hover:text-blue-600 transition">
+                                  {bc.name}
+                                </span>
+                              </div>
+                              <ChevronRight size={14} className="text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition shrink-0 mt-0.5" />
+                            </div>
+
+                            <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-100 text-[10px] font-mono">
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-bold uppercase">
+                                {bc.status}
+                              </span>
+                              <span className="font-bold text-slate-600">DELIVERED: {bc.sentCount}</span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
                 </div>
 
-                <div className="md:col-span-7 border border-slate-200 rounded-xl bg-slate-50/50 p-3 flex flex-col min-h-0">
-                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 text-xs font-bold text-slate-700 shrink-0">
+                <div className="lg:col-span-7 border border-slate-200 rounded-2xl bg-slate-50/50 p-3.5 flex flex-col min-h-0 h-full overflow-hidden">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200 text-xs font-bold text-slate-800 shrink-0">
                     <span>{t('admin.activity_history')}</span>
                     {userDetailData?.activities && (
                       <span className="text-[11px] font-mono text-slate-500 font-normal">
@@ -1181,31 +1235,31 @@ export const AdminUsersPage: React.FC = () => {
 
                   <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pt-2 pr-1">
                     {isDetailLoading ? (
-                      <div className="flex items-center justify-center py-8 text-slate-400 text-xs">
+                      <div className="flex items-center justify-center py-12 text-slate-400 text-xs">
                         <Loader2 size={16} className="animate-spin mr-2" />
                         {t('admin.loading_history')}
                       </div>
                     ) : userDetailData?.activities?.content && userDetailData.activities.content.length > 0 ? (
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
                         {userDetailData.activities.content.map((act) => (
-                          <div key={act.id} className="bg-white border border-slate-200 rounded-lg p-2.5 flex items-start justify-between text-xs hover:border-slate-300 transition">
-                            <div className="space-y-0.5 min-w-0">
+                          <div key={act.id} className="bg-white border border-slate-200 rounded-xl p-3 flex items-start justify-between text-xs hover:border-slate-300 transition shadow-2xs">
+                            <div className="space-y-1 min-w-0 pr-2">
                               <div className="font-bold text-slate-900 flex items-center space-x-2 truncate">
                                 <span className="truncate">{translateAuditTitle(act.title)}</span>
                                 <span className="px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-600 font-mono text-[9px] uppercase font-bold shrink-0">
                                   {act.badge}
                                 </span>
                               </div>
-                              <div className="text-slate-600 text-[11px] line-clamp-2">{translateAuditDescription(act.description)}</div>
+                              <div className="text-slate-600 text-[11px] leading-relaxed">{translateAuditDescription(act.description)}</div>
                             </div>
-                            <div className="text-[11px] text-slate-400 font-mono shrink-0 ml-2">
+                            <div className="text-[11px] text-slate-400 font-mono shrink-0">
                               {formatEuroDateTime(act.timestamp)}
                             </div>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-8 text-slate-400 text-xs font-medium">
+                      <div className="text-center py-12 text-slate-400 text-xs font-medium">
                         {t('admin.no_records')}
                       </div>
                     )}

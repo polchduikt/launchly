@@ -374,6 +374,15 @@ export interface UserAutomationSummary {
   triggerType: string;
 }
 
+export interface UserBroadcastSummary {
+  id: number;
+  name: string;
+  botName: string;
+  status: string;
+  sentCount: number;
+  createdAt: string;
+}
+
 export interface AdminUserDetail {
   id: number;
   email: string;
@@ -402,6 +411,7 @@ export interface AdminUserDetail {
     size: number;
   };
   automations?: UserAutomationSummary[];
+  broadcasts?: UserBroadcastSummary[];
 }
 
 export const fetchAdminUserDetailsApi = async (
