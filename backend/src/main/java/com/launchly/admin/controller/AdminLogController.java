@@ -21,10 +21,12 @@ public class AdminLogController {
             @RequestParam(required = false) String level,
             @RequestParam(required = false) String service,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "desc") String sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "100") int size
     ) {
-        return ResponseEntity.ok(adminLogService.getSystemLogs(level, service, search, sort, page, size));
+        return ResponseEntity.ok(adminLogService.getSystemLogs(level, service, search, startDate, endDate, sort, page, size));
     }
 }

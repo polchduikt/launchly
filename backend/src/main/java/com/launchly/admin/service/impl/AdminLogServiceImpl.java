@@ -26,9 +26,35 @@ public class AdminLogServiceImpl implements AdminLogService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AdminLogDto> getSystemLogs(String level, String serviceFilter, String search, String sort, int page, int size) {
+    public Page<AdminLogDto> getSystemLogs(String level, String serviceFilter, String search, String startDate, String endDate, String sort, int page, int size) {
         List<AdminLogDto> logs = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime parsedStart = null;
+        LocalDateTime parsedEnd = null;
+
+        if (startDate != null && !startDate.isBlank()) {
+            try {
+                parsedStart = LocalDateTime.parse(startDate);
+            } catch (Exception e) {
+                try {
+                    parsedStart = java.time.LocalDate.parse(startDate).atStartOfDay();
+                } catch (Exception ignored) {}
+            }
+        }
+
+        if (endDate != null && !endDate.isBlank()) {
+            try {
+                parsedEnd = LocalDateTime.parse(endDate);
+            } catch (Exception e) {
+                try {
+                    parsedEnd = java.time.LocalDate.parse(endDate).atTime(java.time.LocalTime.MAX);
+                } catch (Exception ignored) {}
+            }
+        }
+
+        LocalDateTime finalStart = parsedStart;
+        LocalDateTime finalEnd = parsedEnd;
 
         Sort.Direction direction = "asc".equalsIgnoreCase(sort) ? Sort.Direction.ASC : Sort.Direction.DESC;
         List<UserAuditLog> dbLogs = userAuditLogRepository.findAll(Sort.by(direction, "createdAt"));
@@ -52,7 +78,15 @@ public class AdminLogServiceImpl implements AdminLogService {
                     }
                     if (search != null && !search.isBlank()) {
                         String q = search.toLowerCase();
-                        return l.getMessage().toLowerCase().contains(q) || l.getUserEmail().toLowerCase().contains(q);
+                        if (!l.getMessage().toLowerCase().contains(q) && !l.getUserEmail().toLowerCase().contains(q)) {
+                            return false;
+                        }
+                    }
+                    if (finalStart != null && l.getTimestamp() != null && l.getTimestamp().isBefore(finalStart)) {
+                        return false;
+                    }
+                    if (finalEnd != null && l.getTimestamp() != null && l.getTimestamp().isAfter(finalEnd)) {
+                        return false;
                     }
                     return true;
                 })

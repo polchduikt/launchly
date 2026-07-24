@@ -5,7 +5,11 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface AdminLogService {
-    Page<AdminLogDto> getSystemLogs(String level, String serviceFilter, String search, String sort, int page, int size);
+    Page<AdminLogDto> getSystemLogs(String level, String serviceFilter, String search, String startDate, String endDate, String sort, int page, int size);
+
+    default Page<AdminLogDto> getSystemLogs(String level, String serviceFilter, String search, String sort, int page, int size) {
+        return getSystemLogs(level, serviceFilter, search, null, null, sort, page, size);
+    }
 
     default Page<AdminLogDto> getSystemLogs(String level, String serviceFilter, String search, int page, int size) {
         return getSystemLogs(level, serviceFilter, search, "desc", page, size);
