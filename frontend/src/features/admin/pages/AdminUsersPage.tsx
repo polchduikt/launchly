@@ -345,7 +345,6 @@ export const AdminUsersPage: React.FC = () => {
     <AdminLayout noPadding>
       <div className="flex h-full w-full overflow-hidden">
         
-        {/* Flush Sub-sidebar for Filters */}
         <aside className="w-56 lg:w-60 bg-white border-r border-slate-200 h-full p-4 space-y-5 overflow-y-auto shrink-0 flex flex-col justify-between z-10">
           <div className="space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -368,7 +367,6 @@ export const AdminUsersPage: React.FC = () => {
               )}
             </div>
 
-            {/* Role Filter */}
             <div className="space-y-1" ref={roleDropdownRef}>
               <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.user_role_label')}</label>
               <div className="relative w-full">
@@ -406,7 +404,6 @@ export const AdminUsersPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Plan Filter */}
             <div className="space-y-1" ref={planDropdownRef}>
               <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.plan_filter_label') !== 'admin.plan_filter_label' ? t('admin.plan_filter_label') : 'Тарифний план'}</label>
               <div className="relative w-full">
@@ -444,7 +441,6 @@ export const AdminUsersPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Sort Filter */}
             <div className="space-y-1" ref={sortDropdownRef}>
               <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.sorting_label')}</label>
               <div className="relative w-full">
@@ -485,10 +481,8 @@ export const AdminUsersPage: React.FC = () => {
           </div>
         </aside>
 
-        {/* Main Users Table Content */}
         <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-slate-50 space-y-4">
           
-          {/* Top Action Bar for Search & Bulk Actions */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-3 flex-1 max-w-md">
               <div className="relative w-full">
@@ -511,7 +505,6 @@ export const AdminUsersPage: React.FC = () => {
               )}
             </div>
 
-            {/* Bulk Actions Dropdown */}
             <div className="relative" ref={bulkActionDropdownRef}>
               <button
                 type="button"

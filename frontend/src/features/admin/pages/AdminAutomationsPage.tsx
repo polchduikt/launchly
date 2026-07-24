@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchAdminAutomationsApi, fetchAdminAutomationDetailsApi, toggleAutomationApi, blockAutomationApi, unblockAutomationApi } from '../api/adminApi';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { Bot, Play, Pause, Loader2, Search, ChevronDown, ChevronLeft, ChevronRight, X, Workflow, Layers, Zap, AlertTriangle, Calendar, Clock, ShieldAlert, Lock, Unlock } from 'lucide-react';
+import { Bot, Play, Pause, Loader2, Search, ChevronDown, ChevronLeft, ChevronRight, X, Workflow, Layers, Zap, AlertTriangle, Calendar, Clock, ShieldAlert, Lock, Unlock, Filter } from 'lucide-react';
 import { t } from '../../../i18n';
 import { ROUTES } from '../../../constants/routes';
 
@@ -23,6 +23,10 @@ export const AdminAutomationsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused' | 'blocked'>('all');
   const [sortFilter, setSortFilter] = useState<'desc' | 'asc'>('desc');
   const [page, setPage] = useState(0);
+
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isBulkActionOpen, setIsBulkActionOpen] = useState(false);
+  const bulkActionDropdownRef = useRef<HTMLDivElement>(null);
 
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
@@ -55,6 +59,9 @@ export const AdminAutomationsPage: React.FC = () => {
       if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
         setIsSortDropdownOpen(false);
       }
+      if (bulkActionDropdownRef.current && !bulkActionDropdownRef.current.contains(event.target as Node)) {
+        setIsBulkActionOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -68,6 +75,53 @@ export const AdminAutomationsPage: React.FC = () => {
   const automations = data?.content || [];
   const totalElements = data?.totalElements || 0;
   const totalPages = data?.totalPages || 1;
+
+  const allIdsOnPage = automations.map((a: any) => a.id);
+  const isAllSelected = allIdsOnPage.length > 0 && allIdsOnPage.every((id: number) => selectedIds.includes(id));
+
+  const handleToggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(allIdsOnPage);
+    }
+  };
+
+  const handleToggleSelectRow = (id: number) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter((item) => item !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
+
+  const handleBulkPause = () => {
+    const targets = automations.filter((a: any) => selectedIds.includes(a.id) && !a.blocked && a.active);
+    targets.forEach((a: any) => toggleMutation.mutate(a.id));
+    setSelectedIds([]);
+    setIsBulkActionOpen(false);
+  };
+
+  const handleBulkResume = () => {
+    const targets = automations.filter((a: any) => selectedIds.includes(a.id) && !a.blocked && !a.active);
+    targets.forEach((a: any) => toggleMutation.mutate(a.id));
+    setSelectedIds([]);
+    setIsBulkActionOpen(false);
+  };
+
+  const handleBulkBlock = () => {
+    const targets = automations.filter((a: any) => selectedIds.includes(a.id) && !a.blocked);
+    targets.forEach((a: any) => blockMutation.mutate({ id: a.id, reason: 'Bulk admin action' }));
+    setSelectedIds([]);
+    setIsBulkActionOpen(false);
+  };
+
+  const handleBulkUnblock = () => {
+    const targets = automations.filter((a: any) => selectedIds.includes(a.id) && a.blocked);
+    targets.forEach((a: any) => unblockMutation.mutate(a.id));
+    setSelectedIds([]);
+    setIsBulkActionOpen(false);
+  };
 
   const { data: automationDetailData, isLoading: isDetailLoading } = useQuery({
     queryKey: ['adminAutomationDetails', selectedDetailAutomation?.id, detailPeriod, activityPage],
@@ -188,277 +242,340 @@ export const AdminAutomationsPage: React.FC = () => {
   ];
 
   return (
-    <AdminLayout>
-      <div className="space-y-6 w-full">
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input
-              type="text"
-              placeholder={t('admin.search_automations_placeholder') !== 'admin.search_automations_placeholder' ? t('admin.search_automations_placeholder') : 'Пошук назви, власника або бота...'}
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(0);
-              }}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all shadow-xs"
-            />
-          </div>
-
-          <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
-            <div className="relative w-full sm:w-auto flex justify-end" ref={statusDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-2xs min-w-[140px] cursor-pointer"
-              >
-                <span>{getStatusLabel(statusFilter)}</span>
-                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isStatusDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
-                  {statusOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setStatusFilter(opt.value as any);
-                        setPage(0);
-                        setIsStatusDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-2 text-xs font-semibold flex items-center justify-between transition-colors ${
-                        statusFilter === opt.value
-                          ? 'bg-indigo-50 text-indigo-600 font-bold'
-                          : 'text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
+    <AdminLayout noPadding>
+      <div className="flex h-full w-full overflow-hidden">
+        
+        <aside className="w-56 lg:w-60 bg-white border-r border-slate-200 h-full p-4 space-y-5 overflow-y-auto shrink-0 flex flex-col justify-between z-10">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                <Filter size={14} className="text-indigo-600" />
+                <span>{t('admin.filters_title')}</span>
+              </h3>
+              {(statusFilter !== 'all' || sortFilter !== 'desc') && (
+                <button
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setSortFilter('desc');
+                    setPage(0);
+                  }}
+                  className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                >
+                  {t('admin.reset_filters')}
+                </button>
               )}
             </div>
 
-            <div className="relative w-full sm:w-auto flex justify-end" ref={sortDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-2xs cursor-pointer"
-              >
-                <span>{sortFilter === 'asc' ? (t('admin.sort_oldest') || 'Спочатку старі') : (t('admin.sort_newest') || 'Спочатку нові')}</span>
-                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
+            <div className="space-y-1" ref={statusDropdownRef}>
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.status_filter_label')}</label>
+              <div className="relative w-full">
+                <button
+                  type="button"
+                  onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
+                >
+                  <span>{getStatusLabel(statusFilter)}</span>
+                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
 
-              {isSortDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
-                  {[
-                    { value: 'desc', label: t('admin.sort_newest') || 'Спочатку нові' },
-                    { value: 'asc', label: t('admin.sort_oldest') || 'Спочатку старі' },
-                  ].map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setSortFilter(opt.value as 'desc' | 'asc');
-                        setPage(0);
-                        setIsSortDropdownOpen(false);
-                      }}
-                      className={`w-full px-4 py-2 text-left text-xs font-semibold flex items-center justify-between hover:bg-slate-50 transition cursor-pointer ${
-                        sortFilter === opt.value ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
-                      }`}
-                    >
-                      <span>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="animate-spin text-indigo-600" size={32} />
-          </div>
-        ) : (
-          <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
-                  <tr>
-                    <th className="py-4 px-5 text-center">ID</th>
-                    <th className="py-4 px-5">{t('admin.flow_schema_col')}</th>
-                    <th className="py-4 px-5 text-center">{t('admin.owner_col')}</th>
-                    <th className="py-4 px-5 text-center">{t('admin.target_bot_col')}</th>
-                    <th className="py-4 px-5 text-center">{t('admin.executions_col')}</th>
-                    <th className="py-4 px-5 text-center">{t('admin.errors_col')}</th>
-                    <th className="py-4 px-5 text-center">{t('admin.status_col')}</th>
-                    {isAdmin && <th className="py-4 px-5 text-right">{t('admin.actions_col')}</th>}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {automations.map((item) => (
-                    <tr
-                      key={item.id}
-                      onClick={() => handleOpenDetailModal(item)}
-                      className={`transition cursor-pointer group ${
-                        item.blocked
-                          ? 'bg-slate-100/80 border-b border-slate-200 hover:bg-slate-200/60'
-                          : 'hover:bg-slate-50/80'
-                      }`}
-                      title="Переглянути деталі та статистику автоматизації"
-                    >
-                      <td className="py-4 px-5 text-center font-mono font-bold text-slate-500 text-xs">#{item.id}</td>
-                      <td className="py-4 px-5">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-slate-900 group-hover:text-indigo-600 transition">{item.name}</span>
-                          <span className="text-[10px] font-bold text-indigo-600 font-mono">Trigger: {item.triggerType}</span>
-                        </div>
-                      </td>
-
-                      <td className="py-4 px-5 text-center">
-                        <div
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`${ROUTES.ADMIN_USERS}?search=${encodeURIComponent(item.ownerEmail)}`);
-                          }}
-                          className="flex flex-col items-center justify-center cursor-pointer group/owner inline-flex hover:opacity-80 transition"
-                          title={t('admin.view_owner') !== 'admin.view_owner' ? t('admin.view_owner') : 'Переглянути користувача'}
-                        >
-                          <span className="text-slate-800 font-semibold group-hover/owner:text-indigo-600 transition">{item.ownerName}</span>
-                          <span className="text-slate-400 text-[11px] font-medium group-hover/owner:text-indigo-500 transition">{item.ownerEmail}</span>
-                        </div>
-                      </td>
-
-                      <td className="py-4 px-5 text-center">
-                        {item.botName && item.botName !== '—' && item.botName !== 'Unassigned Bot' ? (
-                          <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-semibold">
-                            <span>{item.botName}</span>
-                          </div>
-                        ) : (
-                          <span className="text-slate-400 font-bold text-sm">—</span>
-                        )}
-                      </td>
-
-                      <td className="py-4 px-5 text-center font-mono font-bold text-slate-800">
-                        {item.triggerCount}
-                      </td>
-
-                      <td className="py-4 px-5 text-center">
-                        <div className="flex items-center justify-center">
-                          {item.errorCount > 0 ? (
-                            <span className="inline-flex items-center space-x-1 text-red-600 font-bold bg-red-50 border border-red-200 px-2.5 py-1 rounded-full text-[10px]">
-                              <span>{item.errorCount} errors</span>
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 font-mono font-bold text-[11px]">0</span>
-                          )}
-                        </div>
-                      </td>
-
-                      <td className="py-4 px-5 text-center">
-                        <div className="flex items-center justify-center">
-                          {item.blocked ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-rose-50 text-rose-700 border border-rose-200">
-                              {t('admin.status_blocked') !== 'admin.status_blocked' ? t('admin.status_blocked') : 'Blocked'}
-                            </span>
-                          ) : item.active ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
-                              {t('admin.status_active') !== 'admin.status_active' ? t('admin.status_active') : 'Active'}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">
-                              {t('admin.status_paused') !== 'admin.status_paused' ? t('admin.status_paused') : 'Paused'}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {isAdmin && (
-                        <td className="py-4 px-5 text-right">
-                          <div className="flex items-center justify-end space-x-1.5" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              disabled={item.blocked}
-                              onClick={() => toggleMutation.mutate(item.id)}
-                              className={`p-2 rounded-xl border text-xs font-bold transition ${
-                                item.blocked
-                                  ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200'
-                                  : item.active
-                                  ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 cursor-pointer'
-                                  : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 cursor-pointer'
-                              }`}
-                              title={item.blocked ? 'Automation is blocked' : item.active ? 'Pause Automation' : 'Resume Automation'}
-                            >
-                              {item.active ? <Pause size={14} /> : <Play size={14} />}
-                            </button>
-
-                            {item.blocked ? (
-                              <button
-                                onClick={() => unblockMutation.mutate(item.id)}
-                                className="p-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-xl text-xs font-bold transition cursor-pointer"
-                                title="Розблокувати автоматизацію"
-                              >
-                                <Unlock size={14} />
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => {
-                                  setSelectedBlockAutomation(item);
-                                  setBlockReasonOption('SUSPICIOUS');
-                                  setCustomBlockReason('');
-                                  setShowBlockModal(true);
-                                }}
-                                className="p-2 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 rounded-xl text-xs font-bold transition cursor-pointer"
-                                title="Заблокувати автоматизацію"
-                              >
-                                <Lock size={14} />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-slate-50/70 border-t border-slate-200 text-xs text-slate-500 font-medium">
-                <div>
-                  {t('admin.showing') !== 'admin.showing' ? t('admin.showing') : 'Показано'}{' '}
-                  <span className="font-bold text-slate-900">{automations.length}</span>{' '}
-                  {t('admin.of') !== 'admin.of' ? t('admin.of') : 'з'}{' '}
-                  <span className="font-bold text-slate-900">{totalElements}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                    disabled={page === 0}
-                    className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
-                  >
-                    <ChevronLeft size={14} />
-                    <span>{t('admin.prev') !== 'admin.prev' ? t('admin.prev') : 'Назад'}</span>
-                  </button>
-
-                  <div className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold font-mono text-slate-800 shadow-2xs">
-                    <span className="text-indigo-600">{page + 1}</span>
-                    <span className="text-slate-400">/</span>
-                    <span>{totalPages}</span>
+                {isStatusDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                    {statusOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setStatusFilter(opt.value as any);
+                          setPage(0);
+                          setIsStatusDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-1.5 text-xs font-semibold flex items-center justify-between transition-colors ${
+                          statusFilter === opt.value
+                            ? 'bg-indigo-50 text-indigo-600 font-bold'
+                            : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
                   </div>
+                )}
+              </div>
+            </div>
 
-                  <button
-                    onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
-                    disabled={page >= totalPages - 1}
-                    className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
-                  >
-                    <span>{t('admin.next') !== 'admin.next' ? t('admin.next') : 'Далі'}</span>
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
+            <div className="space-y-1" ref={sortDropdownRef}>
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.sorting_label')}</label>
+              <div className="relative w-full">
+                <button
+                  type="button"
+                  onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
+                >
+                  <span>{sortFilter === 'asc' ? (t('admin.sort_oldest') || 'Спочатку старі') : (t('admin.sort_newest') || 'Спочатку нові')}</span>
+                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isSortDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                    {[
+                      { value: 'desc', label: t('admin.sort_newest') || 'Спочатку нові' },
+                      { value: 'asc', label: t('admin.sort_oldest') || 'Спочатку старі' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setSortFilter(opt.value as 'desc' | 'asc');
+                          setPage(0);
+                          setIsSortDropdownOpen(false);
+                        }}
+                        className={`w-full px-3 py-1.5 text-left text-xs font-semibold flex items-center justify-between hover:bg-slate-50 transition cursor-pointer ${
+                          sortFilter === opt.value ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        )}
+        </aside>
+
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-slate-50 space-y-4">
+          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-3 flex-1 max-w-md">
+              <div className="relative w-full">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                <input
+                  type="text"
+                  placeholder={t('admin.search_automations_placeholder') !== 'admin.search_automations_placeholder' ? t('admin.search_automations_placeholder') : 'Пошук назви, власника або бота...'}
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(0);
+                  }}
+                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all shadow-2xs"
+                />
+              </div>
+              {selectedIds.length > 0 && (
+                <span className="px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-extrabold text-xs animate-in fade-in duration-150 shrink-0">
+                  {t('admin.selected_count', { count: selectedIds.length })}
+                </span>
+              )}
+            </div>
+
+            <div className="relative shrink-0" ref={bulkActionDropdownRef}>
+              <button
+                type="button"
+                disabled={selectedIds.length === 0}
+                onClick={() => setIsBulkActionOpen(!isBulkActionOpen)}
+                className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-xs font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+              >
+                <span>{t('admin.bulk_actions')}</span>
+                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isBulkActionOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isBulkActionOpen && selectedIds.length > 0 && (
+                <div className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                  <button
+                    type="button"
+                    onClick={handleBulkPause}
+                    className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-amber-50 hover:text-amber-600 flex items-center space-x-2.5 transition cursor-pointer"
+                  >
+                    <Pause size={14} className="text-amber-500" />
+                    <span>{t('admin.bulk_pause')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBulkResume}
+                    className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 flex items-center space-x-2.5 transition cursor-pointer"
+                  >
+                    <Play size={14} className="text-emerald-500" />
+                    <span>{t('admin.bulk_resume')}</span>
+                  </button>
+                  {isAdmin && (
+                    <>
+                      <div className="my-1 border-t border-slate-100" />
+                      <button
+                        type="button"
+                        onClick={handleBulkBlock}
+                        className="w-full text-left px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center space-x-2.5 transition cursor-pointer"
+                      >
+                        <Lock size={14} />
+                        <span>{t('admin.bulk_block')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleBulkUnblock}
+                        className="w-full text-left px-4 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-50 flex items-center space-x-2.5 transition cursor-pointer"
+                      >
+                        <Unlock size={14} />
+                        <span>{t('admin.bulk_unblock')}</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20 bg-white border border-slate-200 rounded-3xl">
+            <Loader2 className="animate-spin text-indigo-600" size={32} />
+          </div>
+        ) : (
+          <>
+            <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xs">
+              <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
+                      <tr>
+                        <th className="py-3.5 px-4 text-center w-10">
+                          <input
+                            type="checkbox"
+                            checked={isAllSelected}
+                            onChange={handleToggleSelectAll}
+                            className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
+                          />
+                        </th>
+                        <th className="py-3.5 px-4">{t('admin.flow_schema_col')}</th>
+                        <th className="py-3.5 px-4 text-center">{t('admin.owner_col')}</th>
+                        <th className="py-3.5 px-4 text-center">{t('admin.target_bot_col')}</th>
+                        <th className="py-3.5 px-4 text-center">{t('admin.executions_col')}</th>
+                        <th className="py-3.5 px-4 text-center">{t('admin.errors_col')}</th>
+                        <th className="py-3.5 px-4 text-center">{t('admin.status_col')}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {automations.map((item) => (
+                        <tr
+                          key={item.id}
+                          onClick={() => handleOpenDetailModal(item)}
+                          className={`transition cursor-pointer group ${
+                            item.blocked
+                              ? 'bg-slate-100/80 border-b border-slate-200 hover:bg-slate-200/60'
+                              : 'hover:bg-slate-50/80'
+                          }`}
+                          title="Переглянути деталі та статистику автоматизації"
+                        >
+                          <td className="py-3.5 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.includes(item.id)}
+                              onChange={() => handleToggleSelectRow(item.id)}
+                              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
+                            />
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="flex flex-col">
+                              <span className="font-bold text-slate-900 group-hover:text-indigo-600 transition">{item.name}</span>
+                              <span className="text-[10px] font-bold text-indigo-600 font-mono">Trigger: {item.triggerType}</span>
+                            </div>
+                          </td>
+
+                          <td className="py-3.5 px-4 text-center">
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`${ROUTES.ADMIN_USERS}?search=${encodeURIComponent(item.ownerEmail)}`);
+                              }}
+                              className="flex flex-col items-center justify-center cursor-pointer group/owner inline-flex hover:opacity-80 transition"
+                              title={t('admin.view_owner') !== 'admin.view_owner' ? t('admin.view_owner') : 'Переглянути користувача'}
+                            >
+                              <span className="text-slate-800 font-semibold group-hover/owner:text-indigo-600 transition">{item.ownerName}</span>
+                              <span className="text-slate-400 text-[11px] font-medium group-hover/owner:text-indigo-500 transition">{item.ownerEmail}</span>
+                            </div>
+                          </td>
+
+                          <td className="py-3.5 px-4 text-center">
+                            {item.botName && item.botName !== '—' && item.botName !== 'Unassigned Bot' ? (
+                              <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-semibold">
+                                <span>{item.botName}</span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 font-bold text-sm">—</span>
+                            )}
+                          </td>
+
+                          <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-800">
+                            {item.triggerCount}
+                          </td>
+
+                          <td className="py-3.5 px-4 text-center">
+                            <div className="flex items-center justify-center">
+                              {item.errorCount > 0 ? (
+                                <span className="inline-flex items-center space-x-1 text-red-600 font-bold bg-red-50 border border-red-200 px-2.5 py-1 rounded-full text-[10px]">
+                                  <span>{item.errorCount} errors</span>
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 font-mono font-bold text-[11px]">0</span>
+                              )}
+                            </div>
+                          </td>
+
+                          <td className="py-3.5 px-4 text-center">
+                            <div className="flex items-center justify-center">
+                              {item.blocked ? (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-rose-50 text-rose-700 border border-rose-200">
+                                  {t('admin.status_blocked') !== 'admin.status_blocked' ? t('admin.status_blocked') : 'Blocked'}
+                                </span>
+                              ) : item.active ? (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                  {t('admin.status_active') !== 'admin.status_active' ? t('admin.status_active') : 'Active'}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">
+                                  {t('admin.status_paused') !== 'admin.status_paused' ? t('admin.status_paused') : 'Paused'}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-slate-50/70 border-t border-slate-200 text-xs text-slate-500 font-medium">
+                  <div>
+                    {t('admin.showing') !== 'admin.showing' ? t('admin.showing') : 'Показано'}{' '}
+                    <span className="font-bold text-slate-900">{automations.length}</span>{' '}
+                    {t('admin.of') !== 'admin.of' ? t('admin.of') : 'з'}{' '}
+                    <span className="font-bold text-slate-900">{totalElements}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                      disabled={page === 0}
+                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+                    >
+                      <ChevronLeft size={14} />
+                      <span>{t('admin.prev') !== 'admin.prev' ? t('admin.prev') : 'Назад'}</span>
+                    </button>
+
+                    <div className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold font-mono text-slate-800 shadow-2xs">
+                      <span className="text-indigo-600">{page + 1}</span>
+                      <span className="text-slate-400">/</span>
+                      <span>{totalPages}</span>
+                    </div>
+
+                    <button
+                      onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
+                      disabled={page >= totalPages - 1}
+                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+                    >
+                      <span>{t('admin.next') !== 'admin.next' ? t('admin.next') : 'Далі'}</span>
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </main>
 
         {showDetailModal && selectedDetailAutomation && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-150">
