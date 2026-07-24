@@ -17,6 +17,8 @@ export interface BotResponse {
   avatar: string | null;
   avatarPublicId: string | null;
   active: boolean;
+  blocked?: boolean;
+  blockReason?: string | null;
   createdAt: string;
   updatedAt?: string;
   totalUsers: number;

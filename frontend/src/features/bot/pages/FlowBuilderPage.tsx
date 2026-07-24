@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { t } from '../../../i18n';
-import {ReactFlow, Controls, Background, ReactFlowProvider, getBezierPath, getSmoothStepPath, ConnectionLineType,} from '@xyflow/react';
+import { ReactFlow, Controls, Background, ReactFlowProvider, getBezierPath, getSmoothStepPath, ConnectionLineType } from '@xyflow/react';
 import type { ConnectionLineComponentProps } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useBotStore } from '../../../store/useBotStore';
@@ -26,7 +26,7 @@ import { ChooseNextStepDrawer } from '../components/sidebar/drawers/ChooseNextSt
 import { AiAssistantDrawer } from '../../../features/ai/components/AiAssistantDrawer';
 import { EditDataCollectionDrawer } from '../components/sidebar/drawers/EditDataCollectionDrawer';
 import { useTagsQuery } from '../../broadcast/hooks/useBroadcastQueries';
-import type {FlowBlock} from "../../../types/bot.ts";
+import type { FlowBlock } from "../../../types/bot";
 import { useFlowCollaboration } from '../hooks/useFlowCollaboration';
 
 const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
@@ -205,6 +205,16 @@ const FlowBuilderInner: React.FC = () => {
     
     return hasChanges ? result : displayNodes;
   }, [displayNodes, collaborators]);
+
+  const { data: userBotsList = [] } = useBotsQuery();
+  const currentBot = useMemo(() => userBotsList.find((b) => b.id === activeBotId), [userBotsList, activeBotId]);
+
+  useEffect(() => {
+    if (currentBot && currentBot.blocked) {
+      alert(`Автоматизацію заблоковано адміністрацією. Причина: ${currentBot.blockReason || 'Порушення правил платформи'}`);
+      navigate(ROUTES.AUTOMATIONS, { replace: true });
+    }
+  }, [currentBot, navigate]);
 
   const filteredContextMenuOptions = useMemo(() => {
     if (!contextMenu) return CONTEXT_MENU_OPTIONS;
@@ -781,7 +791,14 @@ const ControlsStyles: React.FC = React.memo(() => (
 ));
 
 export const FlowBuilderPage: React.FC = () => {
+  const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
+
+  useEffect(() => {
+    if (!activeBotId) {
+      navigate(ROUTES.AUTOMATIONS, { replace: true });
+    }
+  }, [activeBotId, navigate]);
 
   if (!activeBotId) {
     return null;

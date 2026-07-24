@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { fetchAdminAutomationsApi, fetchAdminAutomationDetailsApi, toggleAutomationApi } from '../api/adminApi';
+import { fetchAdminAutomationsApi, fetchAdminAutomationDetailsApi, toggleAutomationApi, blockAutomationApi, unblockAutomationApi } from '../api/adminApi';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { Bot, Play, Pause, Loader2, Search, ChevronDown, ChevronLeft, ChevronRight, X, Workflow, Layers, Zap, AlertTriangle, Calendar, Clock } from 'lucide-react';
+import { Bot, Play, Pause, Loader2, Search, ChevronDown, ChevronLeft, ChevronRight, X, Workflow, Layers, Zap, AlertTriangle, Calendar, Clock, ShieldAlert, Lock, Unlock } from 'lucide-react';
 import { t } from '../../../i18n';
 import { ROUTES } from '../../../constants/routes';
 
@@ -20,10 +20,15 @@ export const AdminAutomationsPage: React.FC = () => {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN';
 
   const [search, setSearch] = useState(initialSearch);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused' | 'blocked'>('all');
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const statusDropdownRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
+
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [selectedBlockAutomation, setSelectedBlockAutomation] = useState<any | null>(null);
+  const [blockReasonOption, setBlockReasonOption] = useState('SUSPICIOUS');
+  const [customBlockReason, setCustomBlockReason] = useState('');
 
   useEffect(() => {
     const param = searchParams.get('search');
@@ -76,6 +81,39 @@ export const AdminAutomationsPage: React.FC = () => {
     },
   });
 
+  const blockMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason: string }) => blockAutomationApi(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminAutomations'] });
+      queryClient.invalidateQueries({ queryKey: ['adminAutomationDetails'] });
+      setShowBlockModal(false);
+      setSelectedBlockAutomation(null);
+    },
+  });
+
+  const unblockMutation = useMutation({
+    mutationFn: (id: number) => unblockAutomationApi(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminAutomations'] });
+      queryClient.invalidateQueries({ queryKey: ['adminAutomationDetails'] });
+    },
+  });
+
+  const handleConfirmBlockAutomation = () => {
+    if (!selectedBlockAutomation) return;
+    let finalReason = '';
+    if (blockReasonOption === 'SUSPICIOUS') {
+      finalReason = t('admin.reason_suspicious');
+    } else if (blockReasonOption === 'RULES') {
+      finalReason = t('admin.reason_rules');
+    } else if (blockReasonOption === 'SPAM') {
+      finalReason = t('admin.reason_spam');
+    } else {
+      finalReason = customBlockReason.trim() || t('admin.reason_other');
+    }
+    blockMutation.mutate({ id: selectedBlockAutomation.id, reason: finalReason });
+  };
+
   const formatEuroDateTime = (dateStr?: string) => {
     if (!dateStr) return '—';
     const d = new Date(dateStr);
@@ -127,12 +165,20 @@ export const AdminAutomationsPage: React.FC = () => {
     { value: 'all', label: t('admin.all_statuses') !== 'admin.all_statuses' ? t('admin.all_statuses') : 'Всі статуси' },
     { value: 'active', label: t('admin.status_active') !== 'admin.status_active' ? t('admin.status_active') : 'Активні' },
     { value: 'paused', label: t('admin.status_paused') !== 'admin.status_paused' ? t('admin.status_paused') : 'На паузі' },
+    { value: 'blocked', label: t('admin.status_blocked') !== 'admin.status_blocked' ? t('admin.status_blocked') : 'Заблоковані' },
   ];
 
   const getStatusLabel = (val: string) => {
     const found = statusOptions.find((o) => o.value === val);
     return found ? found.label : (t('admin.all_statuses') !== 'admin.all_statuses' ? t('admin.all_statuses') : 'Всі статуси');
   };
+
+  const blockReasonsList = [
+    { code: 'SUSPICIOUS', key: 'admin.reason_suspicious' },
+    { code: 'RULES', key: 'admin.reason_rules' },
+    { code: 'SPAM', key: 'admin.reason_spam' },
+    { code: 'OTHER', key: 'admin.reason_other' },
+  ];
 
   return (
     <AdminLayout>
@@ -211,7 +257,11 @@ export const AdminAutomationsPage: React.FC = () => {
                     <tr
                       key={item.id}
                       onClick={() => handleOpenDetailModal(item)}
-                      className="hover:bg-slate-50/80 transition cursor-pointer group"
+                      className={`transition cursor-pointer group ${
+                        item.blocked
+                          ? 'bg-slate-100/80 border-b border-slate-200 hover:bg-slate-200/60'
+                          : 'hover:bg-slate-50/80'
+                      }`}
                       title="Переглянути деталі та статистику автоматизації"
                     >
                       <td className="py-4 px-5">
@@ -264,7 +314,11 @@ export const AdminAutomationsPage: React.FC = () => {
 
                       <td className="py-4 px-5 text-center">
                         <div className="flex items-center justify-center">
-                          {item.active ? (
+                          {item.blocked ? (
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                              {t('admin.status_blocked') !== 'admin.status_blocked' ? t('admin.status_blocked') : 'Blocked'}
+                            </span>
+                          ) : item.active ? (
                             <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                               {t('admin.status_active') !== 'admin.status_active' ? t('admin.status_active') : 'Active'}
                             </span>
@@ -278,20 +332,45 @@ export const AdminAutomationsPage: React.FC = () => {
 
                       {isAdmin && (
                         <td className="py-4 px-5 text-right">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleMutation.mutate(item.id);
-                            }}
-                            className={`p-2 rounded-xl border text-xs font-bold transition cursor-pointer ${
-                              item.active
-                                ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
-                                : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                            }`}
-                            title={item.active ? 'Pause Automation' : 'Resume Automation'}
-                          >
-                            {item.active ? <Pause size={14} /> : <Play size={14} />}
-                          </button>
+                          <div className="flex items-center justify-end space-x-1.5" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              disabled={item.blocked}
+                              onClick={() => toggleMutation.mutate(item.id)}
+                              className={`p-2 rounded-xl border text-xs font-bold transition ${
+                                item.blocked
+                                  ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200'
+                                  : item.active
+                                  ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 cursor-pointer'
+                                  : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 cursor-pointer'
+                              }`}
+                              title={item.blocked ? 'Automation is blocked' : item.active ? 'Pause Automation' : 'Resume Automation'}
+                            >
+                              {item.active ? <Pause size={14} /> : <Play size={14} />}
+                            </button>
+
+                            {item.blocked ? (
+                              <button
+                                onClick={() => unblockMutation.mutate(item.id)}
+                                className="p-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-xl text-xs font-bold transition cursor-pointer"
+                                title="Розблокувати автоматизацію"
+                              >
+                                <Unlock size={14} />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setSelectedBlockAutomation(item);
+                                  setBlockReasonOption('SUSPICIOUS');
+                                  setCustomBlockReason('');
+                                  setShowBlockModal(true);
+                                }}
+                                className="p-2 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 rounded-xl text-xs font-bold transition cursor-pointer"
+                                title="Заблокувати автоматизацію"
+                              >
+                                <Lock size={14} />
+                              </button>
+                            )}
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -352,11 +431,17 @@ export const AdminAutomationsPage: React.FC = () => {
                         Trigger: {selectedDetailAutomation.triggerType}
                       </span>
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
-                        selectedDetailAutomation.active
+                        selectedDetailAutomation.blocked || automationDetailData?.blocked
+                          ? 'bg-rose-50 text-rose-700 border-rose-200'
+                          : selectedDetailAutomation.active
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                           : 'bg-slate-100 text-slate-500 border-slate-200'
                       }`}>
-                        {selectedDetailAutomation.active ? (t('admin.status_active') !== 'admin.status_active' ? t('admin.status_active') : 'Active') : (t('admin.status_paused') !== 'admin.status_paused' ? t('admin.status_paused') : 'Paused')}
+                        {selectedDetailAutomation.blocked || automationDetailData?.blocked
+                          ? (t('admin.status_blocked') !== 'admin.status_blocked' ? t('admin.status_blocked') : 'Blocked')
+                          : selectedDetailAutomation.active
+                          ? (t('admin.status_active') !== 'admin.status_active' ? t('admin.status_active') : 'Active')
+                          : (t('admin.status_paused') !== 'admin.status_paused' ? t('admin.status_paused') : 'Paused')}
                       </span>
                     </div>
 
@@ -389,20 +474,50 @@ export const AdminAutomationsPage: React.FC = () => {
 
                 <div className="flex items-center space-x-2">
                   {isAdmin && (
-                    <button
-                      onClick={() => {
-                        toggleMutation.mutate(selectedDetailAutomation.id);
-                        setSelectedDetailAutomation((prev: any) => prev ? { ...prev, active: !prev.active } : null);
-                      }}
-                      className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center space-x-1.5 ${
-                        selectedDetailAutomation.active
-                          ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                      }`}
-                    >
-                      {selectedDetailAutomation.active ? <Pause size={14} /> : <Play size={14} />}
-                      <span>{selectedDetailAutomation.active ? (t('admin.pause_button') !== 'admin.pause_button' ? t('admin.pause_button') : 'Зупинити') : (t('admin.resume_button') !== 'admin.resume_button' ? t('admin.resume_button') : 'Запустити')}</span>
-                    </button>
+                    <>
+                      <button
+                        disabled={selectedDetailAutomation.blocked || automationDetailData?.blocked}
+                        onClick={() => {
+                          toggleMutation.mutate(selectedDetailAutomation.id);
+                          setSelectedDetailAutomation((prev: any) => prev ? { ...prev, active: !prev.active } : null);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition ${
+                          selectedDetailAutomation.blocked || automationDetailData?.blocked
+                            ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200'
+                            : selectedDetailAutomation.active
+                            ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 cursor-pointer'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 cursor-pointer'
+                        }`}
+                      >
+                        {selectedDetailAutomation.active ? <Pause size={14} /> : <Play size={14} />}
+                      </button>
+
+                      {selectedDetailAutomation.blocked || automationDetailData?.blocked ? (
+                        <button
+                          onClick={() => {
+                            unblockMutation.mutate(selectedDetailAutomation.id);
+                            setSelectedDetailAutomation((prev: any) => prev ? { ...prev, blocked: false } : null);
+                          }}
+                          className="px-3 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition cursor-pointer flex items-center space-x-1.5"
+                        >
+                          <Unlock size={14} />
+                          <span>Розблокувати</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setSelectedBlockAutomation(selectedDetailAutomation);
+                            setBlockReasonOption('SUSPICIOUS');
+                            setCustomBlockReason('');
+                            setShowBlockModal(true);
+                          }}
+                          className="px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs font-bold transition cursor-pointer flex items-center space-x-1.5"
+                        >
+                          <Lock size={14} />
+                          <span>Заблокувати</span>
+                        </button>
+                      )}
+                    </>
                   )}
 
                   <button
@@ -413,6 +528,15 @@ export const AdminAutomationsPage: React.FC = () => {
                   </button>
                 </div>
               </div>
+
+              {(selectedDetailAutomation.blocked || automationDetailData?.blocked) && (
+                <div className="bg-rose-50 border border-rose-200 rounded-xl p-2.5 text-xs text-rose-800 shrink-0 flex items-center space-x-2">
+                  <ShieldAlert size={16} className="text-rose-600 shrink-0" />
+                  <div>
+                    <span className="font-bold">Заблоковано адміністрацією:</span> {automationDetailData?.blockReason || selectedDetailAutomation.blockReason || 'Порушення правил платформи'}
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center space-x-3">
@@ -569,6 +693,92 @@ export const AdminAutomationsPage: React.FC = () => {
                   className="px-4 py-1.5 rounded-lg text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 cursor-pointer transition shadow-xs"
                 >
                   {t('admin.close')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {showBlockModal && selectedBlockAutomation && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-150">
+            <div className="bg-white border border-slate-300 rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 font-bold">
+                    <ShieldAlert size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 leading-snug">
+                      {t('admin.block_automation_title') !== 'admin.block_automation_title' ? t('admin.block_automation_title') : 'Блокування автоматизації'}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-mono">
+                      {selectedBlockAutomation.name} (#{selectedBlockAutomation.id})
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowBlockModal(false)}
+                  className="text-slate-400 hover:text-slate-700 p-1.5 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-xs font-bold text-slate-700 block">
+                  {t('admin.select_block_reason')}
+                </label>
+
+                <div className="space-y-2">
+                  {blockReasonsList.map((r) => (
+                    <label
+                      key={r.code}
+                      onClick={() => setBlockReasonOption(r.code)}
+                      className={`flex items-center space-x-3 p-3.5 rounded-2xl border cursor-pointer transition ${
+                        blockReasonOption === r.code
+                          ? 'bg-rose-50 border-rose-400 text-rose-900 font-bold shadow-xs'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="blockReason"
+                        checked={blockReasonOption === r.code}
+                        onChange={() => setBlockReasonOption(r.code)}
+                        className="accent-rose-600"
+                      />
+                      <span className="text-xs">{t(r.key)}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {blockReasonOption === 'OTHER' && (
+                  <div className="space-y-1.5 pt-1">
+                    <label className="text-xs font-bold text-slate-700 block">{t('admin.specify_block_reason')}</label>
+                    <textarea
+                      value={customBlockReason}
+                      onChange={(e) => setCustomBlockReason(e.target.value)}
+                      placeholder="..."
+                      rows={3}
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:outline-none focus:border-rose-500 focus:bg-white transition"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+                <button
+                  onClick={() => setShowBlockModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+                >
+                  {t('admin.cancel')}
+                </button>
+                <button
+                  onClick={handleConfirmBlockAutomation}
+                  disabled={blockMutation.isPending}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 active:scale-98 transition shadow-sm cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
+                >
+                  {blockMutation.isPending && <Loader2 size={14} className="animate-spin" />}
+                  <span>{t('admin.confirm_block_automation') !== 'admin.confirm_block_automation' ? t('admin.confirm_block_automation') : 'Заблокувати автоматизацію'}</span>
                 </button>
               </div>
             </div>

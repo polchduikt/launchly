@@ -583,10 +583,24 @@ export const AutomationsPage: React.FC = () => {
                         <tr
                           key={bot.id}
                           onClick={() => {
+                            if (bot.blocked) {
+                              setConfirmDialog({
+                                title: 'Автоматизацію заблоковано',
+                                message: `Адміністрацією заблоковано цю автоматизацію. Причина: ${bot.blockReason || 'Порушення правил платформи'}. Ви можете тільки видалити її.`,
+                                variant: 'danger',
+                                confirmLabel: 'Зрозуміло',
+                                onConfirm: () => setConfirmDialog(null),
+                              });
+                              return;
+                            }
                             setActiveBotId(bot.id);
                             navigate('/builder');
                           }}
-                          className="border-b border-slate-100 hover:bg-slate-50/50 transition-all group cursor-pointer"
+                          className={`border-b transition-all group cursor-pointer ${
+                            bot.blocked
+                              ? 'bg-slate-100/80 border-slate-200 hover:bg-slate-200/60'
+                              : 'border-slate-100 hover:bg-slate-50/50'
+                          }`}
                         >
                           <td className="py-4 px-4 w-12 text-center" onClick={(e) => e.stopPropagation()}>
                             {bot.role !== 'Viewer' && (
@@ -602,13 +616,26 @@ export const AutomationsPage: React.FC = () => {
                             <div className="flex items-center gap-2.5">
                               <span
                                 className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                                  bot.active ? 'bg-emerald-500 shadow-sm shadow-emerald-500/55' : 'bg-slate-300'
+                                  bot.blocked
+                                    ? 'bg-rose-500 shadow-sm shadow-rose-500/55'
+                                    : bot.active
+                                    ? 'bg-emerald-500 shadow-sm shadow-emerald-500/55'
+                                    : 'bg-slate-300'
                                 }`}
                               />
                               <div className="flex flex-col min-w-0">
-                                <span className="font-semibold text-sm text-slate-800 hover:text-indigo-600 transition-all truncate max-w-xs md:max-w-md">
-                                  {bot.name}
-                                </span>
+                                <div className="flex items-center space-x-2">
+                                  <span className={`font-semibold text-sm transition-all truncate max-w-xs md:max-w-md ${
+                                    bot.blocked ? 'text-slate-600 group-hover:text-slate-800' : 'text-slate-800 hover:text-indigo-600'
+                                  }`}>
+                                    {bot.name}
+                                  </span>
+                                  {bot.blocked && (
+                                    <span className="px-2 py-0.5 rounded-full bg-rose-100/80 border border-rose-300 text-rose-700 text-[10px] font-extrabold uppercase shrink-0">
+                                      Заблоковано
+                                    </span>
+                                  )}
+                                </div>
                                 {bot.description && (
                                   <span className="text-xs text-slate-400 font-normal line-clamp-1 max-w-xs md:max-w-md mt-0.5">
                                     {bot.description}
@@ -626,7 +653,7 @@ export const AutomationsPage: React.FC = () => {
                             {bot.role !== 'Viewer' && (
                               <button
                                 onClick={(e) => handleMenuClick(e, bot.id)}
-                                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all cursor-pointer"
+                                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200/60 transition-all cursor-pointer"
                               >
                                 <MoreVertical size={16} />
                               </button>
@@ -643,22 +670,45 @@ export const AutomationsPage: React.FC = () => {
                     <div
                       key={bot.id}
                       onClick={() => {
+                        if (bot.blocked) {
+                          setConfirmDialog({
+                            title: 'Автоматизацію заблоковано',
+                            message: `Адміністрацією заблоковано цю автоматизацію. Причина: ${bot.blockReason || 'Порушення правил платформи'}. Ви можете тільки видалити її.`,
+                            variant: 'danger',
+                            confirmLabel: 'Зрозуміло',
+                            onConfirm: () => setConfirmDialog(null),
+                          });
+                          return;
+                        }
                         setActiveBotId(bot.id);
                         navigate('/builder');
                       }}
-                      className="bg-white border border-slate-200 rounded-3xl p-5 hover:border-indigo-500 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between relative group min-h-[160px]"
+                      className={`rounded-3xl p-5 border transition-all cursor-pointer flex flex-col justify-between relative group min-h-[160px] ${
+                        bot.blocked
+                          ? 'bg-slate-100/80 border-slate-200 hover:bg-slate-200/60 hover:border-slate-300'
+                          : 'bg-white border-slate-200 hover:border-indigo-500 hover:shadow-md'
+                      }`}
                     >
                       <div>
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-center gap-2 min-w-0">
                             <span
                               className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                                bot.active ? 'bg-emerald-500 shadow-sm shadow-emerald-500/55' : 'bg-slate-300'
+                                bot.blocked
+                                  ? 'bg-rose-500 shadow-sm shadow-rose-500/55'
+                                  : bot.active
+                                  ? 'bg-emerald-500 shadow-sm shadow-emerald-500/55'
+                                  : 'bg-slate-300'
                               }`}
                             />
                             <h3 className="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors text-base truncate">
                               {bot.name}
                             </h3>
+                            {bot.blocked && (
+                              <span className="px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-[10px] font-extrabold uppercase shrink-0">
+                                Заблоковано
+                              </span>
+                            )}
                           </div>
                           {bot.role !== 'Viewer' && (
                             <div className="relative inline-block text-left shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -717,53 +767,57 @@ export const AutomationsPage: React.FC = () => {
             if (!activeMenuBot) return null;
             return (
               <>
-                {activeMenuBot.active ? (
-                  <button
-                    onClick={() => handleStopBot(activeMenuBot.id)}
-                    className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
-                  >
-                    <Square size={13} className="text-slate-500 fill-slate-500" />
-                    <span>{t('automations.menu.stop')}</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleStartBot(activeMenuBot.id)}
-                    className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
-                  >
-                    <Play size={13} className="text-emerald-500 fill-emerald-500" />
-                    <span>{t('automations.menu.start')}</span>
-                  </button>
+                {!activeMenuBot.blocked && (
+                  <>
+                    {activeMenuBot.active ? (
+                      <button
+                        onClick={() => handleStopBot(activeMenuBot.id)}
+                        className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
+                      >
+                        <Square size={13} className="text-slate-500 fill-slate-500" />
+                        <span>{t('automations.menu.stop')}</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleStartBot(activeMenuBot.id)}
+                        className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
+                      >
+                        <Play size={13} className="text-emerald-500 fill-emerald-500" />
+                        <span>{t('automations.menu.start')}</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        setEditBotId(activeMenuBot.id);
+                        setEditBotName(activeMenuBot.name);
+                        setEditBotDesc(activeMenuBot.description || '');
+                        setEditBotOption(activeMenuBot.username ? 'current' : 'nobot');
+                        setEditBotToken('');
+                        setIsEditModalOpen(true);
+                        setActiveMenuBotId(null);
+                        setMenuCoords(null);
+                      }}
+                      className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
+                    >
+                      <Pencil size={13} className="text-slate-500" />
+                      <span>{t('automations.menu.edit')}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMoveBotId(activeMenuBot.id);
+                        setTempFolderId(botFolders[activeMenuBot.id] || '');
+                        setIsMoveModalOpen(true);
+                        setActiveMenuBotId(null);
+                        setMenuCoords(null);
+                      }}
+                      className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
+                    >
+                      <Folder size={13} className="text-slate-500" />
+                      <span>{t('automations.menu.move')}</span>
+                    </button>
+                    <div className="h-px bg-slate-100 my-1" />
+                  </>
                 )}
-                <button
-                  onClick={() => {
-                    setEditBotId(activeMenuBot.id);
-                    setEditBotName(activeMenuBot.name);
-                    setEditBotDesc(activeMenuBot.description || '');
-                    setEditBotOption(activeMenuBot.username ? 'current' : 'nobot');
-                    setEditBotToken('');
-                    setIsEditModalOpen(true);
-                    setActiveMenuBotId(null);
-                    setMenuCoords(null);
-                  }}
-                  className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
-                >
-                  <Pencil size={13} className="text-slate-500" />
-                  <span>{t('automations.menu.edit')}</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setMoveBotId(activeMenuBot.id);
-                    setTempFolderId(botFolders[activeMenuBot.id] || '');
-                    setIsMoveModalOpen(true);
-                    setActiveMenuBotId(null);
-                    setMenuCoords(null);
-                  }}
-                  className="w-full px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer"
-                >
-                  <Folder size={13} className="text-slate-500" />
-                  <span>{t('automations.menu.move')}</span>
-                </button>
-                <div className="h-px bg-slate-100 my-1" />
                 <button
                   onClick={() => handleDeleteBot(activeMenuBot.id)}
                   className="w-full px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2 transition-all cursor-pointer"

@@ -92,6 +92,9 @@ export interface AdminAutomation {
   ownerName: string;
   botName: string;
   active: boolean;
+  blocked?: boolean;
+  blockReason?: string;
+  blockedAt?: string;
   triggerCount: number;
   errorCount: number;
   lastExecutedAt: string;
@@ -171,6 +174,9 @@ export interface AdminAutomationDetail {
   botId: number | null;
   botName: string;
   botActive: boolean;
+  blocked?: boolean;
+  blockReason?: string;
+  blockedAt?: string;
   ownerId: number | null;
   ownerName: string;
   ownerEmail: string;
@@ -219,6 +225,14 @@ export const fetchAdminAutomationDetailsApi = async (
 
 export const toggleAutomationApi = async (automationId: number): Promise<void> => {
   await apiClient.post(`/admin/automations/${automationId}/toggle`);
+};
+
+export const blockAutomationApi = async (automationId: number, reason: string): Promise<void> => {
+  await apiClient.post(`/admin/automations/${automationId}/block`, { reason });
+};
+
+export const unblockAutomationApi = async (automationId: number): Promise<void> => {
+  await apiClient.post(`/admin/automations/${automationId}/unblock`);
 };
 
 export const fetchAdminBroadcastsApi = async (): Promise<AdminBroadcast[]> => {
