@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -34,5 +35,6 @@ public class AdminUserDetailDto {
     private String planStatus;
     private LocalDateTime lastActivity;
     private Page<UserActivityDto> activities;
-    private java.util.List<UserAutomationSummaryDto> automations;
+    private List<UserAutomationSummaryDto> automations;
+    private List<UserBroadcastSummaryDto> broadcasts;
 }

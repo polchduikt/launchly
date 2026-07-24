@@ -4,6 +4,7 @@ import com.launchly.admin.dto.AdminUserDetailDto;
 import com.launchly.admin.dto.AdminUserDto;
 import com.launchly.admin.dto.UserActivityDto;
 import com.launchly.admin.dto.UserAutomationSummaryDto;
+import com.launchly.admin.dto.UserBroadcastSummaryDto;
 import com.launchly.admin.entity.UserAuditLog;
 import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminUserService;
@@ -136,6 +137,18 @@ public class AdminUserServiceImpl implements AdminUserService {
                 })
                 .collect(Collectors.toList());
 
+        List<UserBroadcastSummaryDto> userBroadcasts = userBots.stream()
+                .flatMap(b -> broadcastCampaignRepository.findByBotIdOrderByCreatedAtDesc(b.getId()).stream())
+                .map(bc -> UserBroadcastSummaryDto.builder()
+                        .id(bc.getId())
+                        .name(bc.getName())
+                        .botName(bc.getBot() != null ? bc.getBot().getName() : "—")
+                        .status(bc.getStatus() != null ? bc.getStatus().name() : "DRAFT")
+                        .sentCount(bc.getSentCount() != null ? bc.getSentCount() : 0)
+                        .createdAt(bc.getCreatedAt() != null ? bc.getCreatedAt().toString() : "")
+                        .build())
+                .collect(Collectors.toList());
+
         return AdminUserDetailDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -158,6 +171,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .lastActivity(lastActivity)
                 .activities(activityPage)
                 .automations(userAutomations)
+                .broadcasts(userBroadcasts)
                 .build();
     }
 
