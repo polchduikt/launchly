@@ -5,10 +5,14 @@ import com.launchly.auth.entity.Role;
 import org.springframework.data.domain.Page;
 
 public interface AdminUserService {
-    Page<AdminUserDto> getUsers(String search, Role roleFilter, String sort, int page, int size);
+    Page<AdminUserDto> getUsers(String search, Role roleFilter, String planFilter, String sort, int page, int size);
+
+    default Page<AdminUserDto> getUsers(String search, Role roleFilter, String sort, int page, int size) {
+        return getUsers(search, roleFilter, null, sort, page, size);
+    }
 
     default Page<AdminUserDto> getUsers(String search, Role roleFilter, int page, int size) {
-        return getUsers(search, roleFilter, "desc", page, size);
+        return getUsers(search, roleFilter, null, "desc", page, size);
     }
     AdminUserDto updateUserRole(Long userId, Role role, String currentUserEmail);
     AdminUserDto toggleUserStatus(Long userId);

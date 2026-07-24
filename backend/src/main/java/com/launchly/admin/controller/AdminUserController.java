@@ -27,11 +27,12 @@ public class AdminUserController {
     public ResponseEntity<Page<AdminUserDto>> getUsers(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Role role,
+            @RequestParam(required = false) String plan,
             @RequestParam(defaultValue = "desc") String sort,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "30") int size
     ) {
-        return ResponseEntity.ok(adminUserService.getUsers(search, role, sort, page, size));
+        return ResponseEntity.ok(adminUserService.getUsers(search, role, plan, sort, page, size));
     }
 
     @PatchMapping("/{userId}/role")

@@ -163,7 +163,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AdminUserDto> getUsers(String search, Role roleFilter, String sort, int page, int size) {
+    public Page<AdminUserDto> getUsers(String search, Role roleFilter, String planFilter, String sort, int page, int size) {
         List<User> allUsers = userRepository.findAll();
 
         List<AdminUserDto> filtered = allUsers.stream()
@@ -176,7 +176,17 @@ public class AdminUserServiceImpl implements AdminUserService {
                         boolean matchName = u.getName() != null && u.getName().toLowerCase().contains(q);
                         boolean matchEmail = u.getEmail() != null && u.getEmail().toLowerCase().contains(q);
                         boolean matchTg = u.getTelegramUsername() != null && u.getTelegramUsername().toLowerCase().contains(q);
-                        return matchName || matchEmail || matchTg;
+                        if (!matchName && !matchEmail && !matchTg) {
+                            return false;
+                        }
+                    }
+                    if (planFilter != null && !planFilter.isBlank()) {
+                        String pName = subscriptionRepository.findByUserId(u.getId())
+                                .map(sub -> sub.getPlan() != null ? sub.getPlan().getName() : "PRO")
+                                .orElse("FREE");
+                        if (!pName.equalsIgnoreCase(planFilter.trim())) {
+                            return false;
+                        }
                     }
                     return true;
                 })
