@@ -12,4 +12,7 @@ public interface FlowSchemaRepository extends JpaRepository<FlowSchema, Long> {
 
     @Query("SELECT COUNT(fs) FROM FlowSchema fs WHERE fs.bot.user.id = :userId")
     long countByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT fs FROM FlowSchema fs WHERE fs.bot.user.id = :userId")
+    java.util.List<FlowSchema> findAllByUserId(@Param("userId") Long userId);
 }

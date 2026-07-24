@@ -3,8 +3,8 @@ package com.launchly.admin.service.impl;
 import com.launchly.admin.dto.AdminUserDetailDto;
 import com.launchly.admin.dto.AdminUserDto;
 import com.launchly.admin.dto.UserActivityDto;
+import com.launchly.admin.dto.UserAutomationSummaryDto;
 import com.launchly.admin.entity.UserAuditLog;
-import com.launchly.admin.enums.AuditActionType;
 import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminUserService;
 import com.launchly.admin.service.UserAuditService;
@@ -13,13 +13,13 @@ import com.launchly.auth.entity.User;
 import com.launchly.auth.repository.UserRepository;
 import com.launchly.billing.repository.SubscriptionRepository;
 import com.launchly.bot.entity.Bot;
-import com.launchly.bot.entity.FlowSchema;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
-import com.launchly.broadcast.entity.BroadcastCampaign;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.common.exception.AppException;
+import com.launchly.common.utils.EncryptionUtil;
+import com.launchly.crm.repository.ConversationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -46,6 +45,20 @@ public class AdminUserServiceImpl implements AdminUserService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserAuditLogRepository userAuditLogRepository;
     private final UserAuditService userAuditService;
+    private final ConversationRepository conversationRepository;
+    private final EncryptionUtil encryptionUtil;
+
+    private boolean isBotConnected(Bot bot) {
+        if (bot == null) return false;
+        String rawToken = bot.getTelegramToken();
+        if (rawToken == null || rawToken.isBlank()) return false;
+        try {
+            String decrypted = encryptionUtil.decrypt(rawToken);
+            return decrypted != null && !decrypted.isBlank() && !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decrypted);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     @Override
     @Transactional
@@ -61,25 +74,20 @@ public class AdminUserServiceImpl implements AdminUserService {
         } else if ("3months".equalsIgnoreCase(period)) {
             cutoff = LocalDateTime.now().minusDays(90);
         }
-        final LocalDateTime cutoffDate = cutoff;
-        final boolean isAllPeriod = "all".equalsIgnoreCase(period) || period == null;
+
+        LocalDateTime cutoffDate = cutoff;
 
         List<Bot> userBots = botRepository.findByUserId(userId);
-        List<Bot> filteredBots = userBots.stream()
-                .filter(b -> isAllPeriod || (b.getCreatedAt() != null && !b.getCreatedAt().isBefore(cutoffDate)) || (b.getUpdatedAt() != null && !b.getUpdatedAt().isBefore(cutoffDate)))
-                .collect(Collectors.toList());
+        long botsCount = userBots.size();
 
-        long botsCount = isAllPeriod ? userBots.size() : filteredBots.size();
         long automationsCount = flowSchemaRepository.countByUserId(userId);
 
         long broadcastsCount = userBots.stream()
-                .mapToLong(bot -> broadcastCampaignRepository.findByBotIdOrderByCreatedAtDesc(bot.getId()).stream()
-                        .filter(c -> isAllPeriod || (c.getCreatedAt() != null && !c.getCreatedAt().isBefore(cutoffDate)))
-                        .count())
+                .mapToLong(b -> broadcastCampaignRepository.findByBotIdOrderByCreatedAtDesc(b.getId()).size())
                 .sum();
 
         long contactsCount = userBots.stream()
-                .mapToLong(bot -> botUserRepository.countByBotId(bot.getId()))
+                .mapToLong(b -> botUserRepository.countByBotId(b.getId()))
                 .sum();
 
         long messagesCount = contactsCount * 3L + automationsCount * 2L;
@@ -110,6 +118,24 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .timestamp(l.getCreatedAt())
                 .build());
 
+        List<UserAutomationSummaryDto> userAutomations = flowSchemaRepository.findAllByUserId(userId).stream()
+                .map(f -> {
+                    Bot bot = f.getBot();
+                    boolean connected = isBotConnected(bot);
+                    long execCount = (bot != null && connected) ? conversationRepository.countByBotId(bot.getId()) : 0;
+                    int runs = connected ? Math.max((int) execCount, f.getVersion()) : 0;
+                    String bName = (connected && bot.getName() != null && !bot.getName().isBlank()) ? bot.getName() : "—";
+                    return UserAutomationSummaryDto.builder()
+                            .id(f.getId())
+                            .name(bot != null ? bot.getName() : "Flow #" + f.getId())
+                            .botName(bName)
+                            .active(bot != null && bot.isActive() && connected)
+                            .triggerCount(runs)
+                            .triggerType("KEYWORD")
+                            .build();
+                })
+                .collect(Collectors.toList());
+
         return AdminUserDetailDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -131,6 +157,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .planStatus(planStatus)
                 .lastActivity(lastActivity)
                 .activities(activityPage)
+                .automations(userAutomations)
                 .build();
     }
 

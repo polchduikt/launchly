@@ -34,4 +34,5 @@ public class AdminUserDetailDto {
     private String planStatus;
     private LocalDateTime lastActivity;
     private Page<UserActivityDto> activities;
+    private java.util.List<UserAutomationSummaryDto> automations;
 }
