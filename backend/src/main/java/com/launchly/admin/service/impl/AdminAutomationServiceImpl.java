@@ -7,6 +7,7 @@ import com.launchly.admin.dto.UserActivityDto;
 import com.launchly.admin.entity.UserAuditLog;
 import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminAutomationService;
+import com.launchly.admin.service.UserAuditService;
 import com.launchly.auth.entity.User;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.FlowSchema;
@@ -37,6 +38,7 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
     private final BotRepository botRepository;
     private final ConversationRepository conversationRepository;
     private final UserAuditLogRepository userAuditLogRepository;
+    private final UserAuditService userAuditService;
     private final EncryptionUtil encryptionUtil;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -77,7 +79,10 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
                             .ownerEmail(owner != null ? owner.getEmail() : "N/A")
                             .ownerName(owner != null ? owner.getName() : "N/A")
                             .botName(botName)
-                            .active(bot != null && bot.isActive() && botConnected)
+                            .active(bot != null && bot.isActive() && botConnected && !bot.isBlocked())
+                            .blocked(bot != null && bot.isBlocked())
+                            .blockReason(bot != null ? bot.getBlockReason() : null)
+                            .blockedAt(bot != null ? bot.getBlockedAt() : null)
                             .triggerCount(runsCount)
                             .errorCount(0)
                             .lastExecutedAt(f.getUpdatedAt() != null ? f.getUpdatedAt() : LocalDateTime.now())
@@ -85,8 +90,9 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
                 })
                 .filter(dto -> {
                     if (status != null && !status.isBlank() && !"all".equalsIgnoreCase(status)) {
-                        if ("active".equalsIgnoreCase(status) && !dto.isActive()) return false;
-                        if ("paused".equalsIgnoreCase(status) && dto.isActive()) return false;
+                        if ("blocked".equalsIgnoreCase(status) && !dto.isBlocked()) return false;
+                        if ("active".equalsIgnoreCase(status) && (!dto.isActive() || dto.isBlocked())) return false;
+                        if ("paused".equalsIgnoreCase(status) && (dto.isActive() || dto.isBlocked())) return false;
                     }
                     if (search != null && !search.isBlank()) {
                         String q = search.toLowerCase().trim();
@@ -201,7 +207,10 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
                 .triggerType("KEYWORD")
                 .botId(bot != null ? bot.getId() : null)
                 .botName(botName)
-                .botActive(bot != null && bot.isActive())
+                .botActive(bot != null && bot.isActive() && !bot.isBlocked())
+                .blocked(bot != null && bot.isBlocked())
+                .blockReason(bot != null ? bot.getBlockReason() : null)
+                .blockedAt(bot != null ? bot.getBlockedAt() : null)
                 .ownerId(owner != null ? owner.getId() : null)
                 .ownerName(owner != null ? owner.getName() : "N/A")
                 .ownerEmail(owner != null ? owner.getEmail() : "N/A")
@@ -225,8 +234,44 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Automation flow not found"));
         if (schema.getBot() != null) {
             Bot bot = schema.getBot();
+            if (bot.isBlocked()) {
+                throw new AppException(HttpStatus.BAD_REQUEST, "Automation is blocked by administration");
+            }
             bot.setActive(!bot.isActive());
             botRepository.save(bot);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void blockAutomation(Long automationId, String reason) {
+        FlowSchema schema = flowSchemaRepository.findById(automationId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Automation flow not found"));
+        Bot bot = schema.getBot();
+        if (bot != null) {
+            bot.setBlocked(true);
+            bot.setActive(false);
+            bot.setBlockReason(reason != null && !reason.isBlank() ? reason : "Administrative Block");
+            bot.setBlockedAt(LocalDateTime.now());
+            botRepository.save(bot);
+
+            userAuditService.logAutomationBlocked(bot.getUser(), bot.getId(), bot.getName(), bot.getBlockReason());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void unblockAutomation(Long automationId) {
+        FlowSchema schema = flowSchemaRepository.findById(automationId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Automation flow not found"));
+        Bot bot = schema.getBot();
+        if (bot != null) {
+            bot.setBlocked(false);
+            bot.setBlockReason(null);
+            bot.setBlockedAt(null);
+            botRepository.save(bot);
+
+            userAuditService.logAutomationUnblocked(bot.getUser(), bot.getId(), bot.getName());
         }
     }
 }

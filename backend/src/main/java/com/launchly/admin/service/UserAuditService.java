@@ -126,6 +126,32 @@ public class UserAuditService {
         );
     }
 
+    @Transactional
+    public void logAutomationBlocked(User user, Long botId, String botName, String reason) {
+        logAction(
+                user,
+                AuditActionType.USER_BLOCKED,
+                botId,
+                botName,
+                getMsg("audit.admin_block.title", "Administrative Block"),
+                getMsg("audit.admin_block.desc", new Object[]{reason}, "Reason: " + reason),
+                null
+        );
+    }
+
+    @Transactional
+    public void logAutomationUnblocked(User user, Long botId, String botName) {
+        logAction(
+                user,
+                AuditActionType.USER_UNBLOCKED,
+                botId,
+                botName,
+                getMsg("audit.admin_unblock.title", "Administrative Unblock"),
+                getMsg("audit.admin_unblock.desc", "Account restored by administration"),
+                null
+        );
+    }
+
     private String getMsg(String key, String defaultMsg) {
         return getMsg(key, null, defaultMsg);
     }

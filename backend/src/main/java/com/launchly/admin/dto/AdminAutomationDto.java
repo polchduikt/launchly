@@ -18,6 +18,9 @@ public class AdminAutomationDto {
     private String ownerName;
     private String botName;
     private boolean active;
+    private boolean blocked;
+    private String blockReason;
+    private LocalDateTime blockedAt;
     private long triggerCount;
     private long errorCount;
     private LocalDateTime lastExecutedAt;

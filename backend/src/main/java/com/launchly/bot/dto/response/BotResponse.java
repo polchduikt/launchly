@@ -10,6 +10,8 @@ public record BotResponse(
         String avatar,
         String avatarPublicId,
         boolean active,
+        boolean blocked,
+        String blockReason,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         long totalUsers,

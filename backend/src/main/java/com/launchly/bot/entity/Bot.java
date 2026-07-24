@@ -50,6 +50,16 @@ public class Bot extends BaseEntity {
     @Builder.Default
     private Long orderSequence = 1000L;
 
+    @Column(name = "is_blocked", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean blocked = false;
+
+    @Column(name = "block_reason")
+    private String blockReason;
+
+    @Column(name = "blocked_at")
+    private java.time.LocalDateTime blockedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

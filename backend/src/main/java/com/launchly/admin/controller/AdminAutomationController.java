@@ -44,4 +44,22 @@ public class AdminAutomationController {
         adminAutomationService.toggleAutomation(automationId);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{automationId}/block")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> blockAutomation(
+            @PathVariable Long automationId,
+            @RequestBody(required = false) java.util.Map<String, String> payload
+    ) {
+        String reason = payload != null ? payload.get("reason") : "Administrative Block";
+        adminAutomationService.blockAutomation(automationId, reason);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{automationId}/unblock")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> unblockAutomation(@PathVariable Long automationId) {
+        adminAutomationService.unblockAutomation(automationId);
+        return ResponseEntity.ok().build();
+    }
 }
