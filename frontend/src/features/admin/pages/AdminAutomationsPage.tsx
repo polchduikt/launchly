@@ -5,12 +5,13 @@ import { fetchAdminAutomationsApi, fetchAdminAutomationDetailsApi, toggleAutomat
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { Bot, Play, Pause, Loader2, Search, ChevronDown, ChevronLeft, ChevronRight, X, Workflow, Layers, Zap, AlertTriangle, Calendar, Clock, ShieldAlert, Lock, Unlock, Filter } from 'lucide-react';
-import { t } from '../../../i18n';
+import { useTranslation } from '../../../i18n';
 import { ROUTES } from '../../../constants/routes';
 
 const PAGE_SIZE = 30;
 
 export const AdminAutomationsPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialSearch = searchParams.get('search') || '';

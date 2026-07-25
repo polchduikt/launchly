@@ -3,7 +3,7 @@ import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { useDashboardStatsQuery } from '../hooks/useDashboardStatsQuery';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 import { useBotUsersQuery } from '../../crm/hooks/useCrmQueries';
-import { t } from '../../../i18n';
+import { t, useTranslation } from '../../../i18n';
 import { 
   Users, 
   Activity, 
@@ -124,6 +124,7 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({ data, total }) => {
 
 
 export const DashboardStatsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [selectedBotId, setSelectedBotId] = useState<number>(0);
   const [days, setDays] = useState<number>(7);
   const [isBotSelectorOpen, setIsBotSelectorOpen] = useState(false);

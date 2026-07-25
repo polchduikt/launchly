@@ -25,9 +25,10 @@ import {
   MessageSquare,
   Sparkles
 } from 'lucide-react';
-import { t } from '../../../i18n';
+import { useTranslation } from '../../../i18n';
 
 export const AdminUsersPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialSearch = searchParams.get('search') || '';

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import logoL from '../../assets/logo-l.png';
 import { NAV_ITEMS } from './config/navItems';
-import { t, getLanguage, changeLanguage } from '../../i18n';
+import { useTranslation } from '../../i18n';
 import type { DashboardLayoutProps } from '../../types/shared';
 import { HelpCircle, BookOpen, Users, Briefcase, Lightbulb, ClipboardList, FileText } from 'lucide-react';
 import { useBotStore } from '../../store/useBotStore';
@@ -23,7 +23,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
-  const language = getLanguage();
+  const { currentLanguage: language, changeLanguage, t } = useTranslation();
   const logout = useAuthStore((state) => state.logout);
   const [showPricing, setShowPricing] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);

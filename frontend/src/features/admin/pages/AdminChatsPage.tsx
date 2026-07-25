@@ -48,8 +48,10 @@ import {
 import { useAuthStore } from '../../../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import { useTranslation } from '../../../i18n';
 
 export const AdminChatsPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user: currentUser } = useAuthStore();

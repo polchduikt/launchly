@@ -3,13 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchAdminLogsApi } from '../api/adminApi';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { Search, ChevronDown, ChevronLeft, ChevronRight, Loader2, Filter } from 'lucide-react';
-import { t } from '../../../i18n';
+import { useTranslation } from '../../../i18n';
 
 import { useAuthStore } from '../../../store/useAuthStore';
 import { Navigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 
 export const AdminLogsPage: React.FC = () => {
+  const { t } = useTranslation();
   const { user: currentUser } = useAuthStore();
 
   if (currentUser?.role === 'ROLE_MANAGER') {

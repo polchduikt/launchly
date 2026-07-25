@@ -14,7 +14,7 @@ import {
   ChevronRight,
   Globe
 } from 'lucide-react';
-import { getLanguage, changeLanguage, t } from '../../../i18n';
+import { useTranslation } from '../../../i18n';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -25,8 +25,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
-  const currentLang = getLanguage();
-  const [lang, setLang] = useState<'uk' | 'en'>(currentLang as 'uk' | 'en');
+  const { currentLanguage, changeLanguage, t } = useTranslation();
   const [avatarError, setAvatarError] = useState(false);
 
   if (!user) return null;
@@ -99,9 +98,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
   };
 
   const handleLanguageSelect = (selectedLang: 'uk' | 'en') => {
-    if (selectedLang !== lang) {
+    if (selectedLang !== currentLanguage) {
       changeLanguage(selectedLang);
-      setLang(selectedLang);
     }
   };
 
@@ -209,7 +207,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
                 type="button"
                 onClick={() => handleLanguageSelect('uk')}
                 className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                  lang === 'uk'
+                  currentLanguage === 'uk'
                     ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/60'
                     : 'text-slate-400 hover:text-slate-700'
                 }`}
@@ -220,7 +218,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
                 type="button"
                 onClick={() => handleLanguageSelect('en')}
                 className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                  lang === 'en'
+                  currentLanguage === 'en'
                     ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/60'
                     : 'text-slate-400 hover:text-slate-700'
                 }`}

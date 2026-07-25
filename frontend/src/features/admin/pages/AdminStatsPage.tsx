@@ -21,11 +21,12 @@ import {
   DollarSign,
   CreditCard
 } from 'lucide-react';
-import { getLanguage, t } from '../../../i18n';
+import { getLanguage, useTranslation } from '../../../i18n';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
 
 export const AdminStatsPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user: currentUser } = useAuthStore();
   const isManager = currentUser?.role === 'ROLE_MANAGER';

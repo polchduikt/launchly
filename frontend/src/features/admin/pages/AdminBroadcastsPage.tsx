@@ -28,11 +28,12 @@ import {
   ShieldAlert,
   Filter
 } from 'lucide-react';
-import { t } from '../../../i18n';
+import { useTranslation } from '../../../i18n';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../constants/routes';
 
 export const AdminBroadcastsPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user: currentUser } = useAuthStore();
   const isAdmin = currentUser?.role === 'ROLE_ADMIN';
