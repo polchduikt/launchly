@@ -29,10 +29,13 @@ import {
   Filter
 } from 'lucide-react';
 import { t } from '../../../i18n';
+import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../constants/routes';
 
 export const AdminBroadcastsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user: currentUser } = useAuthStore();
+  const isAdmin = currentUser?.role === 'ROLE_ADMIN';
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -455,23 +458,27 @@ export const AdminBroadcastsPage: React.FC = () => {
                     <Ban size={14} className="text-amber-500" />
                     <span>{t('admin.bulk_cancel')}</span>
                   </button>
-                  <div className="my-1 border-t border-slate-100" />
-                  <button
-                    type="button"
-                    onClick={handleBulkBlock}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center space-x-2.5 transition cursor-pointer"
-                  >
-                    <Lock size={14} />
-                    <span>{t('admin.bulk_block')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleBulkUnblock}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-50 flex items-center space-x-2.5 transition cursor-pointer"
-                  >
-                    <Unlock size={14} />
-                    <span>{t('admin.bulk_unblock')}</span>
-                  </button>
+                  {isAdmin && (
+                    <>
+                      <div className="my-1 border-t border-slate-100" />
+                      <button
+                        type="button"
+                        onClick={handleBulkBlock}
+                        className="w-full text-left px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center space-x-2.5 transition cursor-pointer"
+                      >
+                        <Lock size={14} />
+                        <span>{t('admin.bulk_block')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleBulkUnblock}
+                        className="w-full text-left px-4 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-50 flex items-center space-x-2.5 transition cursor-pointer"
+                      >
+                        <Unlock size={14} />
+                        <span>{t('admin.bulk_unblock')}</span>
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -661,30 +668,32 @@ export const AdminBroadcastsPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  {selectedBroadcast.blocked ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        unblockMutation.mutate(selectedBroadcast.id);
-                        setShowDetailModal(false);
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-xs flex items-center space-x-1.5 hover:bg-emerald-100 transition cursor-pointer"
-                    >
-                      <Unlock size={14} />
-                      <span>{t('admin.unblock_broadcast')}</span>
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowDetailModal(false);
-                        handleOpenBlockModal(selectedBroadcast);
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-bold text-xs flex items-center space-x-1.5 hover:bg-rose-100 transition cursor-pointer"
-                    >
-                      <Lock size={14} />
-                      <span>{t('admin.block_broadcast')}</span>
-                    </button>
+                  {isAdmin && (
+                    selectedBroadcast.blocked ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          unblockMutation.mutate(selectedBroadcast.id);
+                          setShowDetailModal(false);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-xs flex items-center space-x-1.5 hover:bg-emerald-100 transition cursor-pointer"
+                      >
+                        <Unlock size={14} />
+                        <span>{t('admin.unblock_broadcast')}</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowDetailModal(false);
+                          handleOpenBlockModal(selectedBroadcast);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-bold text-xs flex items-center space-x-1.5 hover:bg-rose-100 transition cursor-pointer"
+                      >
+                        <Lock size={14} />
+                        <span>{t('admin.block_broadcast')}</span>
+                      </button>
+                    )
                   )}
 
                   <button

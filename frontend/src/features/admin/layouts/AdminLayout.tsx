@@ -5,6 +5,7 @@ import logoL from '../../../assets/logo-l.png';
 import { ROUTES } from '../../../constants/routes';
 import {
   BarChart3,
+  MessageSquare,
   Users,
   Workflow,
   Radio,
@@ -42,6 +43,13 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
       allowed: true,
     },
     {
+      id: 'chats',
+      label: t('admin.support_chats'),
+      path: ROUTES.ADMIN_CHATS,
+      icon: MessageSquare,
+      allowed: isManager,
+    },
+    {
       id: 'users',
       label: t('admin.users'),
       path: ROUTES.ADMIN_USERS,
@@ -73,6 +81,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
 
   const getPageTitle = () => {
     switch (location.pathname) {
+      case ROUTES.ADMIN_CHATS:
+        return t('admin.chats_title');
       case ROUTES.ADMIN_USERS:
         return t('admin.users_title');
       case ROUTES.ADMIN_AUTOMATIONS:

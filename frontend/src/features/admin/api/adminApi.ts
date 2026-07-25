@@ -425,3 +425,87 @@ export const fetchAdminUserDetailsApi = async (
   const response = await apiClient.get<AdminUserDetail>(`/admin/users/${userId}/details`, { params });
   return response.data;
 };
+
+export interface AdminSupportMessage {
+  id: number;
+  ticketId: number;
+  sender: 'USER' | 'MANAGER';
+  senderName: string;
+  text: string;
+  timestamp: string;
+}
+
+export interface AdminSupportTicket {
+  id: number;
+  userId: number;
+  userName: string;
+  userEmail: string;
+  userAvatar: string | null;
+  userPlan: string;
+  userRole: string;
+  unread: boolean;
+  isFavorite: boolean;
+  status: 'ACTIVE' | 'RESOLVED';
+  lastMessage: string;
+  lastMessageTime: string;
+  messages: AdminSupportMessage[];
+  botsCount: number;
+  automationsCount: number;
+  broadcastsCount: number;
+  contactsCount?: number;
+  messagesCount?: number;
+  registeredAt?: string;
+  lastActivityAt?: string;
+  accountActive?: boolean;
+  telegramUserId?: number | null;
+  authProvider?: string;
+  assignedManagerId?: number | null;
+  assignedManagerName?: string | null;
+  assignedManagerEmail?: string | null;
+}
+
+export interface PaginatedSupportTickets {
+  content: AdminSupportTicket[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export const fetchAdminSupportTicketsApi = async (
+  filter = 'all',
+  period = 'all',
+  search = '',
+  page = 0,
+  size = 50
+): Promise<PaginatedSupportTickets> => {
+  const params: Record<string, string | number> = { filter, period, search, page, size };
+  const response = await apiClient.get<PaginatedSupportTickets>('/admin/support-chats', { params });
+  return response.data;
+};
+
+export const fetchAdminSupportTicketDetailApi = async (id: number): Promise<AdminSupportTicket> => {
+  const response = await apiClient.get<AdminSupportTicket>(`/admin/support-chats/${id}`);
+  return response.data;
+};
+
+export const sendAdminSupportMessageApi = async (id: number, text: string): Promise<AdminSupportMessage> => {
+  const response = await apiClient.post<AdminSupportMessage>(`/admin/support-chats/${id}/messages`, { text });
+  return response.data;
+};
+
+export const toggleAdminSupportTicketFavoriteApi = async (id: number): Promise<AdminSupportTicket> => {
+  const response = await apiClient.patch<AdminSupportTicket>(`/admin/support-chats/${id}/favorite`);
+  return response.data;
+};
+
+export const toggleAdminSupportTicketStatusApi = async (id: number, status?: string): Promise<AdminSupportTicket> => {
+  const params = status ? { status } : {};
+  const response = await apiClient.patch<AdminSupportTicket>(`/admin/support-chats/${id}/status`, null, { params });
+  return response.data;
+};
+
+export const claimAdminSupportTicketApi = async (id: number): Promise<AdminSupportTicket> => {
+  const response = await apiClient.post<AdminSupportTicket>(`/admin/support-chats/${id}/claim`);
+  return response.data;
+};

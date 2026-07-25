@@ -23,6 +23,7 @@ export const ROUTES = {
   BLOCKED: '/blocked',
   ADMIN_HOME: '/admin',
   ADMIN_STATS: '/admin/stats',
+  ADMIN_CHATS: '/admin/chats',
   ADMIN_USERS: '/admin/users',
   ADMIN_AUTOMATIONS: '/admin/automations',
   ADMIN_BROADCASTS: '/admin/broadcasts',

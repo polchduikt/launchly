@@ -31,6 +31,7 @@ const BlogDetailPage = lazy(() => import('../features/dashboard/pages/BlogDetail
 const BlockedPage = lazy(() => import('../features/auth/pages/BlockedPage'));
 
 const AdminStatsPage = lazy(() => import('../features/admin/pages/AdminStatsPage'));
+const AdminChatsPage = lazy(() => import('../features/admin/pages/AdminChatsPage'));
 const AdminUsersPage = lazy(() => import('../features/admin/pages/AdminUsersPage'));
 const AdminAutomationsPage = lazy(() => import('../features/admin/pages/AdminAutomationsPage'));
 const AdminBroadcastsPage = lazy(() => import('../features/admin/pages/AdminBroadcastsPage'));
@@ -79,6 +80,7 @@ export const AppRouter: React.FC = () => {
           <Route element={<AdminRoute />}>
             <Route path={ROUTES.ADMIN_HOME} element={<AdminStatsPage />} />
             <Route path={ROUTES.ADMIN_STATS} element={<AdminStatsPage />} />
+            <Route path={ROUTES.ADMIN_CHATS} element={<AdminChatsPage />} />
             <Route path={ROUTES.ADMIN_USERS} element={<AdminUsersPage />} />
             <Route path={ROUTES.ADMIN_AUTOMATIONS} element={<AdminAutomationsPage />} />
             <Route path={ROUTES.ADMIN_BROADCASTS} element={<AdminBroadcastsPage />} />

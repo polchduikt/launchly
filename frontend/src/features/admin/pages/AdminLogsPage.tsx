@@ -5,7 +5,17 @@ import { AdminLayout } from '../layouts/AdminLayout';
 import { Search, ChevronDown, ChevronLeft, ChevronRight, Loader2, Filter } from 'lucide-react';
 import { t } from '../../../i18n';
 
+import { useAuthStore } from '../../../store/useAuthStore';
+import { Navigate } from 'react-router-dom';
+import { ROUTES } from '../../../constants/routes';
+
 export const AdminLogsPage: React.FC = () => {
+  const { user: currentUser } = useAuthStore();
+
+  if (currentUser?.role === 'ROLE_MANAGER') {
+    return <Navigate to={ROUTES.ADMIN_STATS} replace />;
+  }
+
   const [levelFilter, setLevelFilter] = useState<string>('all');
   const [serviceFilter, setServiceFilter] = useState<string>('all');
   const [startDate, setStartDate] = useState<string>('');

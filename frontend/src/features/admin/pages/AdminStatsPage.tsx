@@ -23,9 +23,13 @@ import {
 } from 'lucide-react';
 import { getLanguage, t } from '../../../i18n';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../../store/useAuthStore';
 
 export const AdminStatsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user: currentUser } = useAuthStore();
+  const isManager = currentUser?.role === 'ROLE_MANAGER';
+
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [hoveredPerfIdx, setHoveredPerfIdx] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -845,7 +849,7 @@ export const AdminStatsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-4">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 ${isManager ? 'xl:grid-cols-7' : 'xl:grid-cols-8'} gap-4`}>
               <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
                 <div className="flex items-center justify-between text-slate-400 mb-2">
                   <span className="text-[11px] font-bold text-slate-500">{t('admin.site_owners')}</span>
@@ -968,18 +972,20 @@ export const AdminStatsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold text-slate-500">{t('admin.system_uptime')}</span>
-                  <div className="p-1.5 rounded-xl bg-cyan-50 text-cyan-600">
-                    <Clock size={15} />
+              {!isManager && (
+                <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                  <div className="flex items-center justify-between text-slate-400 mb-2">
+                    <span className="text-[11px] font-bold text-slate-500">{t('admin.system_uptime')}</span>
+                    <div className="p-1.5 rounded-xl bg-cyan-50 text-cyan-600">
+                      <Clock size={15} />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-black text-slate-900">{formatUptime(stats?.systemUptimeSeconds)}</div>
+                  <div className="text-[10px] text-cyan-700 font-bold flex items-center mt-2 truncate">
+                    <span className="truncate">{t('admin.online_status')}</span>
                   </div>
                 </div>
-                <div className="text-2xl font-black text-slate-900">{formatUptime(stats?.systemUptimeSeconds)}</div>
-                <div className="text-[10px] text-cyan-700 font-bold flex items-center mt-2 truncate">
-                  <span className="truncate">{t('admin.online_status')}</span>
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
@@ -1041,7 +1047,7 @@ export const AdminStatsPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full">
-              <div className="lg:col-span-3 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+              <div className={`${isManager ? 'lg:col-span-4' : 'lg:col-span-3'} bg-white border border-slate-200 rounded-3xl p-6 shadow-sm`}>
                 <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
                   <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 shrink-0">
                     <TrendingUp size={18} className="text-indigo-600" />
@@ -1068,60 +1074,62 @@ export const AdminStatsPage: React.FC = () => {
                 {renderTrendChart()}
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 mb-6 flex items-center gap-2">
-                    <Server size={18} className="text-emerald-600" />
-                    <span>{t('admin.server_status')}</span>
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                      <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
-                        <span className={`w-2 h-2 rounded-full ${stats?.serverHealth?.dbHealthy !== false ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
-                        <span>PostgreSQL Database</span>
+              {!isManager && (
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 mb-6 flex items-center gap-2">
+                      <Server size={18} className="text-emerald-600" />
+                      <span>{t('admin.server_status')}</span>
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
+                          <span className={`w-2 h-2 rounded-full ${stats?.serverHealth?.dbHealthy !== false ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                          <span>PostgreSQL Database</span>
+                        </div>
+                        <span className={`text-[11px] font-mono font-bold flex items-center ${stats?.serverHealth?.dbHealthy !== false ? 'text-emerald-600' : 'text-red-600'}`}>
+                          <CheckCircle2 size={13} className="mr-1" /> {stats?.serverHealth?.dbStatus || 'Connected'}
+                        </span>
                       </div>
-                      <span className={`text-[11px] font-mono font-bold flex items-center ${stats?.serverHealth?.dbHealthy !== false ? 'text-emerald-600' : 'text-red-600'}`}>
-                        <CheckCircle2 size={13} className="mr-1" /> {stats?.serverHealth?.dbStatus || 'Connected'}
-                      </span>
-                    </div>
 
-                    <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                      <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
-                        <span className={`w-2 h-2 rounded-full ${stats?.serverHealth?.telegramHealthy !== false ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-                        <span>Telegram Bot Engine</span>
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
+                          <span className={`w-2 h-2 rounded-full ${stats?.serverHealth?.telegramHealthy !== false ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                          <span>Telegram Bot Engine</span>
+                        </div>
+                        <span className="text-[11px] font-mono font-bold text-emerald-600 flex items-center">
+                          <CheckCircle2 size={13} className="mr-1" /> {stats?.serverHealth?.telegramStatus || 'Polling Active'}
+                        </span>
                       </div>
-                      <span className="text-[11px] font-mono font-bold text-emerald-600 flex items-center">
-                        <CheckCircle2 size={13} className="mr-1" /> {stats?.serverHealth?.telegramStatus || 'Polling Active'}
-                      </span>
-                    </div>
 
-                    <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                      <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span>AI Provider Pipeline</span>
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          <span>AI Provider Pipeline</span>
+                        </div>
+                        <span className="text-[11px] font-mono font-bold text-emerald-600 flex items-center">
+                          <CheckCircle2 size={13} className="mr-1" /> {stats?.serverHealth?.aiStatus || 'Operational'}
+                        </span>
                       </div>
-                      <span className="text-[11px] font-mono font-bold text-emerald-600 flex items-center">
-                        <CheckCircle2 size={13} className="mr-1" /> {stats?.serverHealth?.aiStatus || 'Operational'}
-                      </span>
-                    </div>
 
-                    <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                      <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span>Broadcast Engine</span>
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          <span>Broadcast Engine</span>
+                        </div>
+                        <span className="text-[11px] font-mono font-bold text-emerald-600 flex items-center">
+                          <CheckCircle2 size={13} className="mr-1" /> {stats?.serverHealth?.broadcastStatus || 'Ready'}
+                        </span>
                       </div>
-                      <span className="text-[11px] font-mono font-bold text-emerald-600 flex items-center">
-                        <CheckCircle2 size={13} className="mr-1" /> {stats?.serverHealth?.broadcastStatus || 'Ready'}
-                      </span>
                     </div>
                   </div>
-                </div>
 
-                <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-bold text-slate-400 flex items-center justify-between">
-                  <span>EU-Central (Frankfurt)</span>
-                  <span className="font-mono text-indigo-600">v1.4.0-admin</span>
+                  <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-bold text-slate-400 flex items-center justify-between">
+                    <span>EU-Central (Frankfurt)</span>
+                    <span className="font-mono text-indigo-600">v1.4.0-admin</span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <style>{`
@@ -1264,77 +1272,79 @@ export const AdminStatsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full mt-6">
-              <div className="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                      <Activity size={18} className="text-indigo-600 animate-pulse" />
-                      <span>{t('admin.error_latency_title').replace(/\s*\(.*\)/g, '')}</span>
-                    </h3>
-                    <div className="flex items-center gap-3.5 text-[10px] font-bold text-slate-500">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#6366f1]" />
-                        <span>{t('admin.latency') || 'Затримка'} (ms)</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#f43f5e]" />
-                        <span>{t('admin.error_rate') || 'Помилки'} (%)</span>
+            {!isManager && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full mt-6">
+                <div className="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                        <Activity size={18} className="text-indigo-600 animate-pulse" />
+                        <span>{t('admin.error_latency_title').replace(/\s*\(.*\)/g, '')}</span>
+                      </h3>
+                      <div className="flex items-center gap-3.5 text-[10px] font-bold text-slate-500">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#6366f1]" />
+                          <span>{t('admin.latency') || 'Затримка'} (ms)</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#f43f5e]" />
+                          <span>{t('admin.error_rate') || 'Помилки'} (%)</span>
+                        </div>
                       </div>
                     </div>
+                    {renderPerformanceChart()}
                   </div>
-                  {renderPerformanceChart()}
                 </div>
-              </div>
 
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
-                <div className="flex flex-col h-full justify-between">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                      <MessageSquare size={18} className="text-slate-600" />
-                      <span>{t('admin.latest_logs_title')}</span>
-                    </h3>
-                    <button
-                      onClick={() => navigate('/admin/logs')}
-                      className="px-2.5 py-1 bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-all"
-                    >
-                      {t('admin.explore_more') === 'admin.explore_more' 
-                        ? (getLanguage() === 'uk' ? 'Детальніше' : 'Explore more') 
-                        : t('admin.explore_more')}
-                    </button>
-                  </div>
-                  <div className="flex-1 bg-slate-50/70 border border-slate-100/60 rounded-2xl p-4 font-mono text-[10.5px] text-slate-700 max-h-[210px] overflow-y-auto custom-scrollbar flex flex-col gap-2">
-                    {(!stats?.latestLogs || stats.latestLogs.length === 0) ? (
-                      <div className="flex items-center justify-center h-full text-slate-400 font-bold py-10">
-                        No system logs found
-                      </div>
-                    ) : (
-                      stats.latestLogs.map((log, idx) => {
-                        const isError = log.level === 'ERROR';
-                        const isWarn = log.level === 'WARN';
-                        const timeStr = log.timestamp ? log.timestamp.split('T')[1]?.substring(0, 8) || '' : '';
-                        return (
-                          <div key={idx} className="flex items-start gap-2 hover:bg-slate-100/60 p-2 rounded-xl border border-slate-100/30 transition-all shadow-2xs bg-white">
-                            <span className="text-slate-400 shrink-0 select-none font-bold">[{timeStr}]</span>
-                            <span className={`shrink-0 select-none text-[9px] px-1.5 py-0.5 rounded-md font-extrabold border ${
-                              isError ? 'bg-red-50 text-red-700 border-red-200/50' : 
-                              isWarn ? 'bg-amber-50 text-amber-700 border-amber-200/50' : 
-                              'bg-emerald-50 text-emerald-700 border-emerald-200/50'
-                            }`}>
-                              {log.level}
-                            </span>
-                            <span className="bg-slate-100 text-slate-600 text-[9px] px-1.5 py-0.5 rounded-md font-extrabold border border-slate-200/40 shrink-0 select-none">
-                              {log.service}
-                            </span>
-                            <span className="text-slate-800 break-all font-semibold">{log.message}</span>
-                          </div>
-                        );
-                      })
-                    )}
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+                  <div className="flex flex-col h-full justify-between">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                        <MessageSquare size={18} className="text-slate-600" />
+                        <span>{t('admin.latest_logs_title')}</span>
+                      </h3>
+                      <button
+                        onClick={() => navigate('/admin/logs')}
+                        className="px-2.5 py-1 bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-all"
+                      >
+                        {t('admin.explore_more') === 'admin.explore_more' 
+                          ? (getLanguage() === 'uk' ? 'Детальніше' : 'Explore more') 
+                          : t('admin.explore_more')}
+                      </button>
+                    </div>
+                    <div className="flex-1 bg-slate-50/70 border border-slate-100/60 rounded-2xl p-4 font-mono text-[10.5px] text-slate-700 max-h-[210px] overflow-y-auto custom-scrollbar flex flex-col gap-2">
+                      {(!stats?.latestLogs || stats.latestLogs.length === 0) ? (
+                        <div className="flex items-center justify-center h-full text-slate-400 font-bold py-10">
+                          No system logs found
+                        </div>
+                      ) : (
+                        stats.latestLogs.map((log, idx) => {
+                          const isError = log.level === 'ERROR';
+                          const isWarn = log.level === 'WARN';
+                          const timeStr = log.timestamp ? log.timestamp.split('T')[1]?.substring(0, 8) || '' : '';
+                          return (
+                            <div key={idx} className="flex items-start gap-2 hover:bg-slate-100/60 p-2 rounded-xl border border-slate-100/30 transition-all shadow-2xs bg-white">
+                              <span className="text-slate-400 shrink-0 select-none font-bold">[{timeStr}]</span>
+                              <span className={`shrink-0 select-none text-[9px] px-1.5 py-0.5 rounded-md font-extrabold border ${
+                                isError ? 'bg-red-50 text-red-700 border-red-200/50' : 
+                                isWarn ? 'bg-amber-50 text-amber-700 border-amber-200/50' : 
+                                'bg-emerald-50 text-emerald-700 border-emerald-200/50'
+                              }`}>
+                                {log.level}
+                              </span>
+                              <span className="bg-slate-100 text-slate-600 text-[9px] px-1.5 py-0.5 rounded-md font-extrabold border border-slate-200/40 shrink-0 select-none">
+                                {log.service}
+                              </span>
+                              <span className="text-slate-800 break-all font-semibold">{log.message}</span>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </div>

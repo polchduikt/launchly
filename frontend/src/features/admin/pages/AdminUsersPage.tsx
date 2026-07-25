@@ -497,27 +497,27 @@ export const AdminUsersPage: React.FC = () => {
                   className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all shadow-2xs"
                 />
               </div>
-              {selectedUserIds.length > 0 && (
+              {isAdmin && selectedUserIds.length > 0 && (
                 <span className="px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-extrabold text-xs animate-in fade-in duration-150 shrink-0">
                   {t('admin.selected_count', { count: selectedUserIds.length })}
                 </span>
               )}
             </div>
 
-            <div className="relative" ref={bulkActionDropdownRef}>
-              <button
-                type="button"
-                disabled={selectedUserIds.length === 0}
-                onClick={() => setIsBulkActionOpen(!isBulkActionOpen)}
-                className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-xs font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
-              >
-                <span>{t('admin.bulk_actions')}</span>
-                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isBulkActionOpen ? 'rotate-180' : ''}`} />
-              </button>
+            {isAdmin && (
+              <div className="relative" ref={bulkActionDropdownRef}>
+                <button
+                  type="button"
+                  disabled={selectedUserIds.length === 0}
+                  onClick={() => setIsBulkActionOpen(!isBulkActionOpen)}
+                  className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-xs font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+                >
+                  <span>{t('admin.bulk_actions')}</span>
+                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isBulkActionOpen ? 'rotate-180' : ''}`} />
+                </button>
 
-              {isBulkActionOpen && selectedUserIds.length > 0 && (
-                <div className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
-                  {isAdmin && (
+                {isBulkActionOpen && selectedUserIds.length > 0 && (
+                  <div className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
                     <button
                       type="button"
                       onClick={handleBulkChangeRole}
@@ -526,8 +526,6 @@ export const AdminUsersPage: React.FC = () => {
                       <Shield size={14} className="text-indigo-600" />
                       <span>{t('admin.bulk_change_role')}</span>
                     </button>
-                  )}
-                  {isAdmin && (
                     <button
                       type="button"
                       onClick={handleBulkBlock}
@@ -536,8 +534,6 @@ export const AdminUsersPage: React.FC = () => {
                       <UserX size={14} className="text-rose-600" />
                       <span>{t('admin.bulk_block')}</span>
                     </button>
-                  )}
-                  {isAdmin && (
                     <button
                       type="button"
                       onClick={handleBulkUnblock}
@@ -546,10 +542,10 @@ export const AdminUsersPage: React.FC = () => {
                       <UserCheck size={14} className="text-emerald-600" />
                       <span>{t('admin.bulk_unblock')}</span>
                     </button>
-                  )}
-                </div>
-              )}
-            </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
@@ -563,14 +559,16 @@ export const AdminUsersPage: React.FC = () => {
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
                       <tr>
-                        <th className="py-4 px-4 text-center w-12">
-                          <input
-                            type="checkbox"
-                            checked={isAllSelected}
-                            onChange={handleToggleSelectAll}
-                            className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                          />
-                        </th>
+                        {isAdmin && (
+                          <th className="py-4 px-4 text-center w-12">
+                            <input
+                              type="checkbox"
+                              checked={isAllSelected}
+                              onChange={handleToggleSelectAll}
+                              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                            />
+                          </th>
+                        )}
                         <th className="py-4 px-4">{t('admin.user_col')}</th>
                         <th className="py-4 px-4">{t('admin.role_col')}</th>
                         <th className="py-4 px-4">{t('admin.provider_col')}</th>
@@ -588,14 +586,16 @@ export const AdminUsersPage: React.FC = () => {
                         const isSelected = selectedUserIds.includes(u.id);
                         return (
                           <tr key={u.id} className={`hover:bg-slate-50/80 transition ${isSelected ? 'bg-indigo-50/40' : ''}`}>
-                            <td className="py-3.5 px-4 text-center">
-                              <input
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={() => handleToggleSelectUser(u.id)}
-                                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                              />
-                            </td>
+                            {isAdmin && (
+                              <td className="py-3.5 px-4 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => handleToggleSelectUser(u.id)}
+                                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                />
+                              </td>
+                            )}
                             <td className="py-3.5 px-4">
                               <div
                                 onClick={() => handleOpenDetailModal(u)}
