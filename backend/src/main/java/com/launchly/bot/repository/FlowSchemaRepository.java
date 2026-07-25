@@ -2,11 +2,12 @@ package com.launchly.bot.repository;
 
 import com.launchly.bot.entity.FlowSchema;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
-public interface FlowSchemaRepository extends JpaRepository<FlowSchema, Long> {
+public interface FlowSchemaRepository extends JpaRepository<FlowSchema, Long>, JpaSpecificationExecutor<FlowSchema> {
 
     Optional<FlowSchema> findByBotId(Long botId);
 

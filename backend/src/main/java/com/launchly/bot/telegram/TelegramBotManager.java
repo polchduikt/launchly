@@ -81,6 +81,11 @@ public class TelegramBotManager {
         try {
             String token = encryptionUtil.decrypt(bot.getTelegramToken());
 
+            if (token == null || token.isBlank() || "0000000000:dummyTokenPlaceholderForNoBotConfig".equals(token)) {
+                log.info("Skipping registration for bot {} (id={}): dummy token placeholder", bot.getName(), bot.getId());
+                return;
+            }
+
             if (bot.getUsername() == null || bot.getUsername().isBlank()) {
                 try {
                     String url = "https://api.telegram.org/bot" + token + "/getMe";

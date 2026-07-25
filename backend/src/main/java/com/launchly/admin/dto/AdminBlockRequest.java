@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BlockUserRequest {
+public class AdminBlockRequest {
     private String reason;
     private String details;
 }

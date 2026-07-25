@@ -2,19 +2,21 @@ package com.launchly.admin.service.impl;
 
 import com.launchly.admin.dto.AdminBroadcastDetailDto;
 import com.launchly.admin.dto.AdminBroadcastDto;
+import com.launchly.admin.dto.AdminBlockRequest;
 import com.launchly.admin.dto.UserActivityDto;
 import com.launchly.admin.entity.UserAuditLog;
 import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminBroadcastService;
 import com.launchly.admin.service.UserAuditService;
+import com.launchly.admin.util.AdminPeriodResolver;
 import com.launchly.auth.entity.User;
 import com.launchly.bot.entity.Bot;
 import com.launchly.broadcast.entity.BroadcastCampaign;
 import com.launchly.broadcast.entity.CampaignStatus;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.common.exception.AppException;
+import com.launchly.common.utils.MessageUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminBroadcastServiceImpl implements AdminBroadcastService {
@@ -32,6 +33,8 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
     private final BroadcastCampaignRepository broadcastCampaignRepository;
     private final UserAuditLogRepository userAuditLogRepository;
     private final UserAuditService userAuditService;
+    private final AdminPeriodResolver periodResolver;
+    private final MessageUtils messageUtils;
 
     @Override
     @Transactional(readOnly = true)
@@ -43,46 +46,18 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
 
         Page<BroadcastCampaign> campaignPage = broadcastCampaignRepository.findAdminBroadcasts(searchFilter, statusFilter, pageable);
 
-        return campaignPage.map(c -> {
-            Bot bot = c.getBot();
-            User creator = bot != null ? bot.getUser() : null;
-            String email = creator != null ? creator.getEmail() : "system";
-            String name = creator != null ? creator.getName() : "System";
-            String botName = bot != null ? bot.getName() : null;
-
-            return AdminBroadcastDto.builder()
-                    .id(c.getId())
-                    .title(c.getName())
-                    .content(c.getMessage())
-                    .targetAudience(Boolean.TRUE.equals(c.getTargetAllBots()) ? "ALL_USERS" : "SPECIFIC_BOT")
-                    .botName(botName)
-                    .sentCount(c.getSentCount() != null ? c.getSentCount() : 0)
-                    .failedCount(c.getFailedCount() != null ? c.getFailedCount() : 0)
-                    .totalCount(c.getTotalCount() != null ? c.getTotalCount() : 0)
-                    .status(c.isBlocked() ? "BLOCKED" : (c.getStatus() != null ? c.getStatus().name() : "COMPLETED"))
-                    .blocked(c.isBlocked())
-                    .blockReason(c.getBlockReason())
-                    .blockedAt(c.getBlockedAt())
-                    .createdByEmail(email)
-                    .authorName(name)
-                    .createdAt(c.getCreatedAt() != null ? c.getCreatedAt() : LocalDateTime.now())
-                    .build();
-        });
+        return campaignPage.map(this::mapToListDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public AdminBroadcastDetailDto getBroadcastDetails(Long broadcastId, String period, int page, int size) {
-        BroadcastCampaign campaign = broadcastCampaignRepository.findById(broadcastId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Broadcast campaign not found with ID: " + broadcastId));
+        BroadcastCampaign campaign = findCampaignOrThrow(broadcastId);
 
         Bot bot = campaign.getBot();
         User creator = bot != null ? bot.getUser() : null;
-        String email = creator != null ? creator.getEmail() : "system";
-        String name = creator != null ? creator.getName() : "System";
-        String botName = bot != null ? bot.getName() : null;
 
-        LocalDateTime cutoffDate = getCutoffDate(period);
+        LocalDateTime cutoffDate = periodResolver.resolve(period);
         Pageable pageable = PageRequest.of(page, size);
         Page<UserAuditLog> logPage = userAuditLogRepository.findBroadcastLogs(broadcastId, cutoffDate, pageable);
 
@@ -100,16 +75,16 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
                 .title(campaign.getName())
                 .content(campaign.getMessage())
                 .targetAudience(Boolean.TRUE.equals(campaign.getTargetAllBots()) ? "ALL_USERS" : "SPECIFIC_BOT")
-                .botName(botName)
+                .botName(bot != null ? bot.getName() : null)
                 .sentCount(campaign.getSentCount() != null ? campaign.getSentCount() : 0)
                 .failedCount(campaign.getFailedCount() != null ? campaign.getFailedCount() : 0)
                 .totalCount(campaign.getTotalCount() != null ? campaign.getTotalCount() : 0)
-                .status(campaign.isBlocked() ? "BLOCKED" : (campaign.getStatus() != null ? campaign.getStatus().name() : "COMPLETED"))
+                .status(resolveStatus(campaign))
                 .blocked(campaign.isBlocked())
                 .blockReason(campaign.getBlockReason())
                 .blockedAt(campaign.getBlockedAt())
-                .createdByEmail(email)
-                .authorName(name)
+                .createdByEmail(creator != null ? creator.getEmail() : messageUtils.getMessage("admin.support_team"))
+                .authorName(creator != null ? creator.getName() : messageUtils.getMessage("admin.support_team"))
                 .authorId(creator != null ? creator.getId() : null)
                 .createdAt(campaign.getCreatedAt() != null ? campaign.getCreatedAt() : LocalDateTime.now())
                 .scheduledAt(campaign.getScheduledAt())
@@ -120,11 +95,10 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
     @Override
     @Transactional
     public void cancelBroadcast(Long broadcastId) {
-        BroadcastCampaign campaign = broadcastCampaignRepository.findById(broadcastId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Broadcast campaign not found with ID: " + broadcastId));
+        BroadcastCampaign campaign = findCampaignOrThrow(broadcastId);
 
         if (campaign.isBlocked()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Cannot cancel a blocked broadcast campaign");
+            throw new AppException(HttpStatus.BAD_REQUEST, messageUtils.getMessage("admin.support.dialog_closed_err"));
         }
 
         campaign.setStatus(CampaignStatus.CANCELLED);
@@ -136,14 +110,13 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
 
     @Override
     @Transactional
-    public void blockBroadcast(Long broadcastId, String reason) {
-        BroadcastCampaign campaign = broadcastCampaignRepository.findById(broadcastId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Broadcast campaign not found with ID: " + broadcastId));
+    public void blockBroadcast(Long broadcastId, AdminBlockRequest request) {
+        BroadcastCampaign campaign = findCampaignOrThrow(broadcastId);
+        String reason = request != null ? request.getReason() : null;
 
         campaign.setBlocked(true);
-        campaign.setBlockReason(reason != null && !reason.isBlank() ? reason.trim() : "Violation of platform rules");
+        campaign.setBlockReason(reason != null && !reason.isBlank() ? reason.trim() : messageUtils.getMessage("admin.reason_rules"));
         campaign.setBlockedAt(LocalDateTime.now());
-        campaign.setStatus(CampaignStatus.BLOCKED);
 
         broadcastCampaignRepository.save(campaign);
 
@@ -154,13 +127,11 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
     @Override
     @Transactional
     public void unblockBroadcast(Long broadcastId) {
-        BroadcastCampaign campaign = broadcastCampaignRepository.findById(broadcastId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Broadcast campaign not found with ID: " + broadcastId));
+        BroadcastCampaign campaign = findCampaignOrThrow(broadcastId);
 
         campaign.setBlocked(false);
         campaign.setBlockReason(null);
         campaign.setBlockedAt(null);
-        campaign.setStatus(CampaignStatus.COMPLETED);
 
         broadcastCampaignRepository.save(campaign);
 
@@ -168,13 +139,36 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
         userAuditService.logBroadcastUnblocked(creator, campaign.getId(), campaign.getName());
     }
 
-    private LocalDateTime getCutoffDate(String period) {
-        if (period == null) return LocalDateTime.now().minusYears(10);
-        return switch (period.toLowerCase()) {
-            case "7d" -> LocalDateTime.now().minusDays(7);
-            case "30d" -> LocalDateTime.now().minusDays(30);
-            case "90d" -> LocalDateTime.now().minusDays(90);
-            default -> LocalDateTime.now().minusYears(10);
-        };
+    private BroadcastCampaign findCampaignOrThrow(Long id) {
+        return broadcastCampaignRepository.findById(id)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, messageUtils.getMessage("common.error.not_found")));
+    }
+
+    private AdminBroadcastDto mapToListDto(BroadcastCampaign c) {
+        Bot bot = c.getBot();
+        User creator = bot != null ? bot.getUser() : null;
+
+        return AdminBroadcastDto.builder()
+                .id(c.getId())
+                .title(c.getName())
+                .content(c.getMessage())
+                .targetAudience(Boolean.TRUE.equals(c.getTargetAllBots()) ? "ALL_USERS" : "SPECIFIC_BOT")
+                .botName(bot != null ? bot.getName() : null)
+                .sentCount(c.getSentCount() != null ? c.getSentCount() : 0)
+                .failedCount(c.getFailedCount() != null ? c.getFailedCount() : 0)
+                .totalCount(c.getTotalCount() != null ? c.getTotalCount() : 0)
+                .status(resolveStatus(c))
+                .blocked(c.isBlocked())
+                .blockReason(c.getBlockReason())
+                .blockedAt(c.getBlockedAt())
+                .createdByEmail(creator != null ? creator.getEmail() : messageUtils.getMessage("admin.support_team"))
+                .authorName(creator != null ? creator.getName() : messageUtils.getMessage("admin.support_team"))
+                .createdAt(c.getCreatedAt() != null ? c.getCreatedAt() : LocalDateTime.now())
+                .build();
+    }
+
+    private String resolveStatus(BroadcastCampaign c) {
+        if (c.isBlocked()) return "BLOCKED";
+        return c.getStatus() != null ? c.getStatus().name() : "DRAFT";
     }
 }

@@ -15,6 +15,9 @@ public interface BroadcastCampaignRepository extends JpaRepository<BroadcastCamp
 
     List<BroadcastCampaign> findByBotIdOrderByCreatedAtDesc(Long botId);
 
+    @Query("SELECT COUNT(c) FROM BroadcastCampaign c WHERE c.bot.user.id = :userId")
+    long countByUserId(@Param("userId") Long userId);
+
     List<BroadcastCampaign> findByStatusAndScheduledAtBefore(CampaignStatus status, LocalDateTime dateTime);
 
     @Query("SELECT COUNT(c) FROM BroadcastCampaign c WHERE c.bot.user.id = :userId AND c.status = :status AND c.updatedAt >= :startDate")

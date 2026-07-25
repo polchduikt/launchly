@@ -2,6 +2,7 @@ package com.launchly.admin.service.impl;
 
 import com.launchly.admin.dto.AdminUserDetailDto;
 import com.launchly.admin.dto.AdminUserDto;
+import com.launchly.admin.dto.AdminBlockRequest;
 import com.launchly.admin.dto.UserActivityDto;
 import com.launchly.admin.dto.UserAutomationSummaryDto;
 import com.launchly.admin.dto.UserBroadcastSummaryDto;
@@ -9,6 +10,8 @@ import com.launchly.admin.entity.UserAuditLog;
 import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminUserService;
 import com.launchly.admin.service.UserAuditService;
+import com.launchly.admin.util.AdminPeriodResolver;
+import com.launchly.admin.util.BotTokenValidator;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.repository.UserRepository;
@@ -19,10 +22,9 @@ import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.common.exception.AppException;
-import com.launchly.common.utils.EncryptionUtil;
+import com.launchly.common.utils.MessageUtils;
 import com.launchly.crm.repository.ConversationRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -33,7 +35,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminUserServiceImpl implements AdminUserService {
@@ -47,19 +48,9 @@ public class AdminUserServiceImpl implements AdminUserService {
     private final UserAuditLogRepository userAuditLogRepository;
     private final UserAuditService userAuditService;
     private final ConversationRepository conversationRepository;
-    private final EncryptionUtil encryptionUtil;
-
-    private boolean isBotConnected(Bot bot) {
-        if (bot == null) return false;
-        String rawToken = bot.getTelegramToken();
-        if (rawToken == null || rawToken.isBlank()) return false;
-        try {
-            String decrypted = encryptionUtil.decrypt(rawToken);
-            return decrypted != null && !decrypted.isBlank() && !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decrypted);
-        } catch (Exception e) {
-            return false;
-        }
-    }
+    private final BotTokenValidator botTokenValidator;
+    private final AdminPeriodResolver periodResolver;
+    private final MessageUtils messageUtils;
 
     @Override
     @Transactional
@@ -67,36 +58,20 @@ public class AdminUserServiceImpl implements AdminUserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
 
-        LocalDateTime cutoff = LocalDateTime.of(1970, 1, 1, 0, 0);
-        if ("week".equalsIgnoreCase(period)) {
-            cutoff = LocalDateTime.now().minusDays(7);
-        } else if ("month".equalsIgnoreCase(period)) {
-            cutoff = LocalDateTime.now().minusDays(30);
-        } else if ("3months".equalsIgnoreCase(period)) {
-            cutoff = LocalDateTime.now().minusDays(90);
-        }
-
-        LocalDateTime cutoffDate = cutoff;
+        LocalDateTime cutoff = periodResolver.resolve(period);
 
         List<Bot> userBots = botRepository.findByUserId(userId);
         long botsCount = userBots.size();
-
         long automationsCount = flowSchemaRepository.countByUserId(userId);
-
-        long broadcastsCount = userBots.stream()
-                .mapToLong(b -> broadcastCampaignRepository.findByBotIdOrderByCreatedAtDesc(b.getId()).size())
-                .sum();
+        long broadcastsCount = broadcastCampaignRepository.countByUserId(userId);
 
         long contactsCount = userBots.stream()
                 .mapToLong(b -> botUserRepository.countByBotId(b.getId()))
                 .sum();
 
-        long messagesCount = contactsCount * 3L + automationsCount * 2L;
-
         String planName = subscriptionRepository.findByUserId(userId)
-                .map(sub -> sub.getPlan() != null ? sub.getPlan().getName() : "Pro Plan")
+                .map(sub -> sub.getPlan() != null ? sub.getPlan().getName() : "FREE")
                 .orElse("FREE");
-        String planStatus = "ACTIVE";
 
         LocalDateTime lastActivity = userBots.stream()
                 .map(b -> b.getUpdatedAt() != null ? b.getUpdatedAt() : b.getCreatedAt())
@@ -106,7 +81,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         Page<UserAuditLog> logPage = userAuditLogRepository.findUserLogs(
                 userId,
                 category != null ? category : "all",
-                cutoffDate,
+                cutoff,
                 PageRequest.of(page, size)
         );
 
@@ -122,14 +97,13 @@ public class AdminUserServiceImpl implements AdminUserService {
         List<UserAutomationSummaryDto> userAutomations = flowSchemaRepository.findAllByUserId(userId).stream()
                 .map(f -> {
                     Bot bot = f.getBot();
-                    boolean connected = isBotConnected(bot);
+                    boolean connected = botTokenValidator.isConnected(bot);
                     long execCount = (bot != null && connected) ? conversationRepository.countByBotId(bot.getId()) : 0;
                     int runs = connected ? Math.max((int) execCount, f.getVersion()) : 0;
-                    String bName = (connected && bot.getName() != null && !bot.getName().isBlank()) ? bot.getName() : "—";
                     return UserAutomationSummaryDto.builder()
                             .id(f.getId())
                             .name(bot != null ? bot.getName() : "Flow #" + f.getId())
-                            .botName(bName)
+                            .botName(botTokenValidator.resolveBotName(bot))
                             .active(bot != null && bot.isActive() && connected)
                             .triggerCount(runs)
                             .triggerType("KEYWORD")
@@ -142,7 +116,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .map(bc -> UserBroadcastSummaryDto.builder()
                         .id(bc.getId())
                         .name(bc.getName())
-                        .botName(bc.getBot() != null ? bc.getBot().getName() : "—")
+                        .botName(bc.getBot() != null ? bc.getBot().getName() : "\u2014")
                         .status(bc.getStatus() != null ? bc.getStatus().name() : "DRAFT")
                         .sentCount(bc.getSentCount() != null ? bc.getSentCount() : 0)
                         .createdAt(bc.getCreatedAt() != null ? bc.getCreatedAt().toString() : "")
@@ -165,9 +139,9 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .automationsCount(automationsCount)
                 .broadcastsCount(broadcastsCount)
                 .contactsCount(contactsCount)
-                .messagesCount(messagesCount)
+                .messagesCount(0)
                 .planName(planName)
-                .planStatus(planStatus)
+                .planStatus("ACTIVE")
                 .lastActivity(lastActivity)
                 .activities(activityPage)
                 .automations(userAutomations)
@@ -181,85 +155,21 @@ public class AdminUserServiceImpl implements AdminUserService {
         List<User> allUsers = userRepository.findAll();
 
         List<AdminUserDto> filtered = allUsers.stream()
-                .filter(u -> {
-                    if (roleFilter != null && u.getRole() != roleFilter) {
-                        return false;
-                    }
-                    if (search != null && !search.isBlank()) {
-                        String q = search.toLowerCase().trim();
-                        boolean matchName = u.getName() != null && u.getName().toLowerCase().contains(q);
-                        boolean matchEmail = u.getEmail() != null && u.getEmail().toLowerCase().contains(q);
-                        boolean matchTg = u.getTelegramUsername() != null && u.getTelegramUsername().toLowerCase().contains(q);
-                        if (!matchName && !matchEmail && !matchTg) {
-                            return false;
-                        }
-                    }
-                    if (planFilter != null && !planFilter.isBlank()) {
-                        String pName = subscriptionRepository.findByUserId(u.getId())
-                                .map(sub -> sub.getPlan() != null ? sub.getPlan().getName() : "PRO")
-                                .orElse("FREE");
-                        if (!pName.equalsIgnoreCase(planFilter.trim())) {
-                            return false;
-                        }
-                    }
-                    return true;
-                })
-                .map(u -> {
-                    List<Bot> uBots = botRepository.findByUserId(u.getId());
-                    int bCount = uBots.size();
-                    long aCount = flowSchemaRepository.countByUserId(u.getId());
-                    long brCount = uBots.stream()
-                            .mapToLong(b -> broadcastCampaignRepository.findByBotIdOrderByCreatedAtDesc(b.getId()).size())
-                            .sum();
-                    long cCount = uBots.stream()
-                            .mapToLong(b -> botUserRepository.countByBotId(b.getId()))
-                            .sum();
-                    long mCount = cCount * 3L + aCount * 2L;
-                    String pName = subscriptionRepository.findByUserId(u.getId())
-                            .map(sub -> sub.getPlan() != null ? sub.getPlan().getName() : "Pro Plan")
-                            .orElse("FREE");
-
-                    return AdminUserDto.builder()
-                            .id(u.getId())
-                            .email(u.getEmail())
-                            .name(u.getName())
-                            .avatar(u.getAvatar())
-                            .role(u.getRole())
-                            .active(u.isActive())
-                            .blockReason(u.getBlockReason())
-                            .blockedAt(u.getBlockedAt())
-                            .provider(u.getProvider())
-                            .createdAt(u.getCreatedAt())
-                            .botsCount(bCount)
-                            .automationsCount(aCount)
-                            .broadcastsCount(brCount)
-                            .contactsCount(cCount)
-                            .messagesCount(mCount)
-                            .planName(pName)
-                            .telegramUsername(u.getTelegramUsername())
-                            .build();
-                })
+                .filter(u -> matchesRole(u, roleFilter))
+                .filter(u -> matchesSearch(u, search))
+                .filter(u -> matchesPlan(u, planFilter))
+                .map(this::mapToUserDto)
                 .collect(Collectors.toList());
 
-        if ("asc".equalsIgnoreCase(sort)) {
-            filtered.sort((a, b) -> {
-                LocalDateTime t1 = a.getCreatedAt() != null ? a.getCreatedAt() : LocalDateTime.MIN;
-                LocalDateTime t2 = b.getCreatedAt() != null ? b.getCreatedAt() : LocalDateTime.MIN;
-                return t1.compareTo(t2);
-            });
-        } else {
-            filtered.sort((a, b) -> {
-                LocalDateTime t1 = a.getCreatedAt() != null ? a.getCreatedAt() : LocalDateTime.MIN;
-                LocalDateTime t2 = b.getCreatedAt() != null ? b.getCreatedAt() : LocalDateTime.MIN;
-                return t2.compareTo(t1);
-            });
-        }
+        filtered.sort((a, b) -> {
+            LocalDateTime t1 = a.getCreatedAt() != null ? a.getCreatedAt() : LocalDateTime.MIN;
+            LocalDateTime t2 = b.getCreatedAt() != null ? b.getCreatedAt() : LocalDateTime.MIN;
+            return "asc".equalsIgnoreCase(sort) ? t1.compareTo(t2) : t2.compareTo(t1);
+        });
 
         int start = Math.min(page * size, filtered.size());
         int end = Math.min(start + size, filtered.size());
-        List<AdminUserDto> pageContent = filtered.subList(start, end);
-
-        return new PageImpl<>(pageContent, PageRequest.of(page, size), filtered.size());
+        return new PageImpl<>(filtered.subList(start, end), PageRequest.of(page, size), filtered.size());
     }
 
     @Override
@@ -274,34 +184,19 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         user.setRole(newRole);
         user = userRepository.save(user);
-
         userAuditService.logRoleChanged(user, newRole.name());
-
-        return AdminUserDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .avatar(user.getAvatar())
-                .role(user.getRole())
-                .active(user.isActive())
-                .blockReason(user.getBlockReason())
-                .blockedAt(user.getBlockedAt())
-                .provider(user.getProvider())
-                .createdAt(user.getCreatedAt())
-                .botsCount((int) botRepository.countByUserId(user.getId()))
-                .telegramUsername(user.getTelegramUsername())
-                .build();
+        return mapToUserDto(user);
     }
 
     @Override
     @Transactional
     public AdminUserDto toggleUserStatus(Long userId) {
-        return toggleUserStatus(userId, null, null);
+        return toggleUserStatus(userId, (AdminBlockRequest) null);
     }
 
     @Override
     @Transactional
-    public AdminUserDto toggleUserStatus(Long userId, String reason, String details) {
+    public AdminUserDto toggleUserStatus(Long userId, AdminBlockRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -309,8 +204,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         user.setActive(willBeActive);
 
         if (!willBeActive) {
-            String defaultReasonKey = "admin.reason_rules";
-            String fullReason = (reason != null && !reason.isBlank()) ? reason.trim() : defaultReasonKey;
+            String reason = request != null ? request.getReason() : null;
+            String details = request != null ? request.getDetails() : null;
+            String fullReason = (reason != null && !reason.isBlank()) ? reason.trim() : messageUtils.getMessage("admin.reason_rules");
             if (details != null && !details.isBlank()) {
                 fullReason += ": " + details.trim();
             }
@@ -324,20 +220,57 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
 
         user = userRepository.save(user);
+        return mapToUserDto(user);
+    }
+
+    private AdminUserDto mapToUserDto(User u) {
+        List<Bot> uBots = botRepository.findByUserId(u.getId());
+        long aCount = flowSchemaRepository.countByUserId(u.getId());
+        long brCount = broadcastCampaignRepository.countByUserId(u.getId());
+        long cCount = uBots.stream().mapToLong(b -> botUserRepository.countByBotId(b.getId())).sum();
+
+        String pName = subscriptionRepository.findByUserId(u.getId())
+                .map(sub -> sub.getPlan() != null ? sub.getPlan().getName() : "FREE")
+                .orElse("FREE");
 
         return AdminUserDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .avatar(user.getAvatar())
-                .role(user.getRole())
-                .active(user.isActive())
-                .blockReason(user.getBlockReason())
-                .blockedAt(user.getBlockedAt())
-                .provider(user.getProvider())
-                .createdAt(user.getCreatedAt())
-                .botsCount((int) botRepository.countByUserId(user.getId()))
-                .telegramUsername(user.getTelegramUsername())
+                .id(u.getId())
+                .email(u.getEmail())
+                .name(u.getName())
+                .avatar(u.getAvatar())
+                .role(u.getRole())
+                .active(u.isActive())
+                .blockReason(u.getBlockReason())
+                .blockedAt(u.getBlockedAt())
+                .provider(u.getProvider())
+                .createdAt(u.getCreatedAt())
+                .botsCount(uBots.size())
+                .automationsCount(aCount)
+                .broadcastsCount(brCount)
+                .contactsCount(cCount)
+                .messagesCount(0)
+                .planName(pName)
+                .telegramUsername(u.getTelegramUsername())
                 .build();
+    }
+
+    private boolean matchesRole(User u, Role roleFilter) {
+        return roleFilter == null || u.getRole() == roleFilter;
+    }
+
+    private boolean matchesSearch(User u, String search) {
+        if (search == null || search.isBlank()) return true;
+        String q = search.toLowerCase().trim();
+        return (u.getName() != null && u.getName().toLowerCase().contains(q)) ||
+               (u.getEmail() != null && u.getEmail().toLowerCase().contains(q)) ||
+               (u.getTelegramUsername() != null && u.getTelegramUsername().toLowerCase().contains(q));
+    }
+
+    private boolean matchesPlan(User u, String planFilter) {
+        if (planFilter == null || planFilter.isBlank()) return true;
+        String pName = subscriptionRepository.findByUserId(u.getId())
+                .map(sub -> sub.getPlan() != null ? sub.getPlan().getName() : "FREE")
+                .orElse("FREE");
+        return pName.equalsIgnoreCase(planFilter.trim());
     }
 }

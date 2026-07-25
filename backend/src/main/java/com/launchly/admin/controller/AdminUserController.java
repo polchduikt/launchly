@@ -2,7 +2,7 @@ package com.launchly.admin.controller;
 
 import com.launchly.admin.dto.AdminUserDetailDto;
 import com.launchly.admin.dto.AdminUserDto;
-import com.launchly.admin.dto.BlockUserRequest;
+import com.launchly.admin.dto.AdminBlockRequest;
 import com.launchly.admin.dto.UpdateUserRoleRequest;
 import com.launchly.admin.service.AdminUserService;
 import com.launchly.auth.entity.Role;
@@ -30,8 +30,7 @@ public class AdminUserController {
             @RequestParam(required = false) String plan,
             @RequestParam(defaultValue = "desc") String sort,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "30") int size
-    ) {
+            @RequestParam(defaultValue = "30") int size) {
         return ResponseEntity.ok(adminUserService.getUsers(search, role, plan, sort, page, size));
     }
 
@@ -40,8 +39,7 @@ public class AdminUserController {
     public ResponseEntity<AdminUserDto> updateUserRole(
             @PathVariable Long userId,
             @Valid @RequestBody UpdateUserRoleRequest request,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(adminUserService.updateUserRole(userId, request.getRole(), userDetails.getUsername()));
     }
 
@@ -49,11 +47,8 @@ public class AdminUserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminUserDto> toggleUserStatus(
             @PathVariable Long userId,
-            @RequestBody(required = false) BlockUserRequest request
-    ) {
-        String reason = request != null ? request.getReason() : null;
-        String details = request != null ? request.getDetails() : null;
-        return ResponseEntity.ok(adminUserService.toggleUserStatus(userId, reason, details));
+            @RequestBody(required = false) AdminBlockRequest request) {
+        return ResponseEntity.ok(adminUserService.toggleUserStatus(userId, request));
     }
 
     @GetMapping("/{userId}/details")
@@ -63,8 +58,7 @@ public class AdminUserController {
             @RequestParam(defaultValue = "all") String period,
             @RequestParam(defaultValue = "all") String category,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
+            @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(adminUserService.getUserDetails(userId, period, category, page, size));
     }
 }

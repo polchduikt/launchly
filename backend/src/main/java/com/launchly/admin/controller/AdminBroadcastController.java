@@ -2,7 +2,7 @@ package com.launchly.admin.controller;
 
 import com.launchly.admin.dto.AdminBroadcastDetailDto;
 import com.launchly.admin.dto.AdminBroadcastDto;
-import com.launchly.admin.dto.BlockBroadcastRequest;
+import com.launchly.admin.dto.AdminBlockRequest;
 import com.launchly.admin.service.AdminBroadcastService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,8 +24,7 @@ public class AdminBroadcastController {
             @RequestParam(required = false, defaultValue = "all") String status,
             @RequestParam(defaultValue = "desc") String sort,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(adminBroadcastService.getBroadcasts(search, status, sort, page, size));
     }
 
@@ -35,8 +34,7 @@ public class AdminBroadcastController {
             @PathVariable Long broadcastId,
             @RequestParam(defaultValue = "all") String period,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(adminBroadcastService.getBroadcastDetails(broadcastId, period, page, size));
     }
 
@@ -51,10 +49,8 @@ public class AdminBroadcastController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<Void> blockBroadcast(
             @PathVariable Long broadcastId,
-            @RequestBody(required = false) BlockBroadcastRequest request
-    ) {
-        String reason = request != null ? request.getReason() : null;
-        adminBroadcastService.blockBroadcast(broadcastId, reason);
+            @RequestBody(required = false) AdminBlockRequest request) {
+        adminBroadcastService.blockBroadcast(broadcastId, request);
         return ResponseEntity.ok().build();
     }
 

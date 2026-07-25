@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BlockBroadcastRequest {
-    private String reason;
+public class CreateMessageRequest {
+    private String text;
 }

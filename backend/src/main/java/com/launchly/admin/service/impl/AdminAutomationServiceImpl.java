@@ -3,21 +3,23 @@ package com.launchly.admin.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.launchly.admin.dto.AdminAutomationDetailDto;
 import com.launchly.admin.dto.AdminAutomationDto;
+import com.launchly.admin.dto.AdminBlockRequest;
 import com.launchly.admin.dto.UserActivityDto;
 import com.launchly.admin.entity.UserAuditLog;
 import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminAutomationService;
 import com.launchly.admin.service.UserAuditService;
+import com.launchly.admin.util.AdminPeriodResolver;
+import com.launchly.admin.util.BotTokenValidator;
 import com.launchly.auth.entity.User;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.FlowSchema;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
 import com.launchly.common.exception.AppException;
-import com.launchly.common.utils.EncryptionUtil;
+import com.launchly.common.utils.MessageUtils;
 import com.launchly.crm.repository.ConversationRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -29,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminAutomationServiceImpl implements AdminAutomationService {
@@ -39,93 +40,30 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
     private final ConversationRepository conversationRepository;
     private final UserAuditLogRepository userAuditLogRepository;
     private final UserAuditService userAuditService;
-    private final EncryptionUtil encryptionUtil;
+    private final BotTokenValidator botTokenValidator;
+    private final AdminPeriodResolver periodResolver;
+    private final MessageUtils messageUtils;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    private boolean isBotConnected(Bot bot) {
-        if (bot == null) return false;
-        String rawToken = bot.getTelegramToken();
-        if (rawToken == null || rawToken.isBlank()) return false;
-        try {
-            String decrypted = encryptionUtil.decrypt(rawToken);
-            return decrypted != null && !decrypted.isBlank() && !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decrypted);
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private String resolveBotName(Bot bot) {
-        if (!isBotConnected(bot)) return "—";
-        return bot.getName() != null && !bot.getName().isBlank() ? bot.getName() : "—";
-    }
 
     @Override
     @Transactional(readOnly = true)
     public Page<AdminAutomationDto> getAutomations(String search, String status, String sort, int page, int size) {
         List<FlowSchema> schemas = flowSchemaRepository.findAll();
         List<AdminAutomationDto> allDtos = schemas.stream()
-                .map(f -> {
-                    Bot bot = f.getBot();
-                    User owner = bot != null ? bot.getUser() : null;
-                    boolean botConnected = isBotConnected(bot);
-                    long execCount = (bot != null && botConnected) ? conversationRepository.countByBotId(bot.getId()) : 0;
-                    int runsCount = botConnected ? Math.max((int) execCount, f.getVersion()) : 0;
-                    String botName = resolveBotName(bot);
-
-                    return AdminAutomationDto.builder()
-                            .id(f.getId())
-                            .name(bot != null ? bot.getName() : "Flow #" + f.getId())
-                            .triggerType("KEYWORD")
-                            .ownerEmail(owner != null ? owner.getEmail() : "N/A")
-                            .ownerName(owner != null ? owner.getName() : "N/A")
-                            .botName(botName)
-                            .active(bot != null && bot.isActive() && botConnected && !bot.isBlocked())
-                            .blocked(bot != null && bot.isBlocked())
-                            .blockReason(bot != null ? bot.getBlockReason() : null)
-                            .blockedAt(bot != null ? bot.getBlockedAt() : null)
-                            .triggerCount(runsCount)
-                            .errorCount(0)
-                            .lastExecutedAt(f.getUpdatedAt() != null ? f.getUpdatedAt() : LocalDateTime.now())
-                            .build();
-                })
-                .filter(dto -> {
-                    if (status != null && !status.isBlank() && !"all".equalsIgnoreCase(status)) {
-                        if ("blocked".equalsIgnoreCase(status) && !dto.isBlocked()) return false;
-                        if ("active".equalsIgnoreCase(status) && (!dto.isActive() || dto.isBlocked())) return false;
-                        if ("paused".equalsIgnoreCase(status) && (dto.isActive() || dto.isBlocked())) return false;
-                    }
-                    if (search != null && !search.isBlank()) {
-                        String q = search.toLowerCase().trim();
-                        boolean matchName = dto.getName() != null && dto.getName().toLowerCase().contains(q);
-                        boolean matchOwnerName = dto.getOwnerName() != null && dto.getOwnerName().toLowerCase().contains(q);
-                        boolean matchOwnerEmail = dto.getOwnerEmail() != null && dto.getOwnerEmail().toLowerCase().contains(q);
-                        boolean matchBot = dto.getBotName() != null && dto.getBotName().toLowerCase().contains(q);
-                        boolean matchTrigger = dto.getTriggerType() != null && dto.getTriggerType().toLowerCase().contains(q);
-                        return matchName || matchOwnerName || matchOwnerEmail || matchBot || matchTrigger;
-                    }
-                    return true;
-                })
+                .map(this::mapToListDto)
+                .filter(dto -> matchesStatus(dto, status))
+                .filter(dto -> matchesSearch(dto, search))
                 .collect(Collectors.toList());
 
-        if ("asc".equalsIgnoreCase(sort)) {
-            allDtos.sort((a, b) -> {
-                LocalDateTime t1 = a.getLastExecutedAt() != null ? a.getLastExecutedAt() : LocalDateTime.MIN;
-                LocalDateTime t2 = b.getLastExecutedAt() != null ? b.getLastExecutedAt() : LocalDateTime.MIN;
-                return t1.compareTo(t2);
-            });
-        } else {
-            allDtos.sort((a, b) -> {
-                LocalDateTime t1 = a.getLastExecutedAt() != null ? a.getLastExecutedAt() : LocalDateTime.MIN;
-                LocalDateTime t2 = b.getLastExecutedAt() != null ? b.getLastExecutedAt() : LocalDateTime.MIN;
-                return t2.compareTo(t1);
-            });
-        }
+        allDtos.sort((a, b) -> {
+            LocalDateTime t1 = a.getLastExecutedAt() != null ? a.getLastExecutedAt() : LocalDateTime.MIN;
+            LocalDateTime t2 = b.getLastExecutedAt() != null ? b.getLastExecutedAt() : LocalDateTime.MIN;
+            return "asc".equalsIgnoreCase(sort) ? t1.compareTo(t2) : t2.compareTo(t1);
+        });
 
         int start = Math.min(page * size, allDtos.size());
         int end = Math.min(start + size, allDtos.size());
-        List<AdminAutomationDto> pageContent = allDtos.subList(start, end);
-
-        return new PageImpl<>(pageContent, PageRequest.of(page, size), allDtos.size());
+        return new PageImpl<>(allDtos.subList(start, end), PageRequest.of(page, size), allDtos.size());
     }
 
     @Override
@@ -136,91 +74,48 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
 
         Bot bot = schema.getBot();
         User owner = bot != null ? bot.getUser() : null;
-        boolean botConnected = isBotConnected(bot);
-        long execCount = (bot != null && botConnected) ? conversationRepository.countByBotId(bot.getId()) : 0;
-        int runsCount = botConnected ? Math.max((int) execCount, schema.getVersion()) : 0;
-        String botName = resolveBotName(bot);
+        boolean connected = botTokenValidator.isConnected(bot);
+        long execCount = (bot != null && connected) ? conversationRepository.countByBotId(bot.getId()) : 0;
+        int runsCount = connected ? Math.max((int) execCount, schema.getVersion()) : 0;
 
         int nodesCount = 0;
         int edgesCount = 0;
         int integrationsCount = 0;
 
-        if (objectMapper != null) {
-            try {
-                if (schema.getNodes() != null && !schema.getNodes().isBlank()) {
-                    List<?> nodeArray = objectMapper.readValue(schema.getNodes(), List.class);
-                    nodesCount = nodeArray.size();
-                    for (Object nodeObj : nodeArray) {
-                        if (nodeObj instanceof Map<?, ?> nodeMap) {
-                            Object typeObj = nodeMap.get("type");
-                            String typeStr = typeObj != null ? typeObj.toString().toLowerCase() : "";
-
-                            if ("ai".equals(typeStr) || "api_call".equals(typeStr) || "google_sheets".equals(typeStr) || "webhook".equals(typeStr) || "integration".equals(typeStr)) {
-                                integrationsCount++;
-                                continue;
-                            }
-
-                            Object dataObj = nodeMap.get("data");
-                            if (dataObj instanceof Map<?, ?> dataMap) {
-                                Object actionsObj = dataMap.get("actions");
-                                if (actionsObj instanceof List<?> actionsList) {
-                                    for (Object act : actionsList) {
-                                        if (act instanceof Map<?, ?> actMap) {
-                                            Object actType = actMap.get("type");
-                                            if (actType != null) {
-                                                String actTypeStr = actType.toString().toUpperCase();
-                                                if (actTypeStr.startsWith("GS_") || actTypeStr.startsWith("WEBHOOK") || actTypeStr.startsWith("INTEGRATION")) {
-                                                    integrationsCount++;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (schema.getEdges() != null && !schema.getEdges().isBlank()) {
-                    List<?> edgeArray = objectMapper.readValue(schema.getEdges(), List.class);
-                    edgesCount = edgeArray.size();
-                }
-            } catch (Exception e) {
-                log.warn("Failed to parse flow schema nodes/edges for id {}", automationId, e);
+        try {
+            if (schema.getNodes() != null && !schema.getNodes().isBlank()) {
+                List<?> nodeArray = objectMapper.readValue(schema.getNodes(), List.class);
+                nodesCount = nodeArray.size();
+                integrationsCount = countIntegrations(nodeArray);
             }
+            if (schema.getEdges() != null && !schema.getEdges().isBlank()) {
+                List<?> edgeArray = objectMapper.readValue(schema.getEdges(), List.class);
+                edgesCount = edgeArray.size();
+            }
+        } catch (Exception ignored) {
         }
 
-        LocalDateTime cutoff = LocalDateTime.of(1970, 1, 1, 0, 0);
-        if ("week".equalsIgnoreCase(period) || "7_days".equalsIgnoreCase(period)) {
-            cutoff = LocalDateTime.now().minusDays(7);
-        } else if ("month".equalsIgnoreCase(period) || "30_days".equalsIgnoreCase(period)) {
-            cutoff = LocalDateTime.now().minusDays(30);
-        } else if ("3months".equalsIgnoreCase(period) || "90_days".equalsIgnoreCase(period)) {
-            cutoff = LocalDateTime.now().minusDays(90);
-        }
-
+        LocalDateTime cutoff = periodResolver.resolve(period);
         Page<UserAuditLog> logPage = Page.empty();
         if (bot != null) {
             logPage = userAuditLogRepository.findAutomationLogs(bot.getId(), cutoff, PageRequest.of(page, size));
         }
 
-        List<UserActivityDto> activitiesList = logPage.getContent().stream().map(l -> UserActivityDto.builder()
+        Page<UserActivityDto> activityPage = logPage.map(l -> UserActivityDto.builder()
                 .id(l.getId())
                 .title(l.getTitle())
                 .description(l.getDescription())
                 .category(l.getCategory())
                 .badge(l.getBadge())
                 .timestamp(l.getCreatedAt())
-                .build()).collect(Collectors.toList());
-
-        Page<UserActivityDto> activityPage = new PageImpl<>(activitiesList, PageRequest.of(page, size), logPage.getTotalElements());
+                .build());
 
         return AdminAutomationDetailDto.builder()
                 .id(schema.getId())
                 .name(bot != null ? bot.getName() : "Flow #" + schema.getId())
                 .triggerType("KEYWORD")
                 .botId(bot != null ? bot.getId() : null)
-                .botName(botName)
+                .botName(botTokenValidator.resolveBotName(bot))
                 .botActive(bot != null && bot.isActive() && !bot.isBlocked())
                 .blocked(bot != null && bot.isBlocked())
                 .blockReason(bot != null ? bot.getBlockReason() : null)
@@ -258,17 +153,17 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
 
     @Override
     @Transactional
-    public void blockAutomation(Long automationId, String reason) {
+    public void blockAutomation(Long automationId, AdminBlockRequest request) {
         FlowSchema schema = flowSchemaRepository.findById(automationId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Automation flow not found"));
         Bot bot = schema.getBot();
         if (bot != null) {
+            String reason = request != null ? request.getReason() : null;
             bot.setBlocked(true);
             bot.setActive(false);
-            bot.setBlockReason(reason != null && !reason.isBlank() ? reason : "Administrative Block");
+            bot.setBlockReason(reason != null && !reason.isBlank() ? reason : messageUtils.getMessage("admin.reason_rules"));
             bot.setBlockedAt(LocalDateTime.now());
             botRepository.save(bot);
-
             userAuditService.logAutomationBlocked(bot.getUser(), bot.getId(), bot.getName(), bot.getBlockReason());
         }
     }
@@ -284,8 +179,73 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
             bot.setBlockReason(null);
             bot.setBlockedAt(null);
             botRepository.save(bot);
-
             userAuditService.logAutomationUnblocked(bot.getUser(), bot.getId(), bot.getName());
         }
+    }
+
+    private AdminAutomationDto mapToListDto(FlowSchema f) {
+        Bot bot = f.getBot();
+        User owner = bot != null ? bot.getUser() : null;
+        boolean connected = botTokenValidator.isConnected(bot);
+        long execCount = (bot != null && connected) ? conversationRepository.countByBotId(bot.getId()) : 0;
+        int runsCount = connected ? Math.max((int) execCount, f.getVersion()) : 0;
+
+        return AdminAutomationDto.builder()
+                .id(f.getId())
+                .name(bot != null ? bot.getName() : "Flow #" + f.getId())
+                .triggerType("KEYWORD")
+                .ownerEmail(owner != null ? owner.getEmail() : "N/A")
+                .ownerName(owner != null ? owner.getName() : "N/A")
+                .botName(botTokenValidator.resolveBotName(bot))
+                .active(bot != null && bot.isActive() && connected && !bot.isBlocked())
+                .blocked(bot != null && bot.isBlocked())
+                .blockReason(bot != null ? bot.getBlockReason() : null)
+                .blockedAt(bot != null ? bot.getBlockedAt() : null)
+                .triggerCount(runsCount)
+                .errorCount(0)
+                .lastExecutedAt(f.getUpdatedAt() != null ? f.getUpdatedAt() : LocalDateTime.now())
+                .build();
+    }
+
+    private boolean matchesStatus(AdminAutomationDto dto, String status) {
+        if (status == null || status.isBlank() || "all".equalsIgnoreCase(status)) return true;
+        if ("blocked".equalsIgnoreCase(status)) return dto.isBlocked();
+        if ("active".equalsIgnoreCase(status)) return dto.isActive() && !dto.isBlocked();
+        if ("paused".equalsIgnoreCase(status)) return !dto.isActive() && !dto.isBlocked();
+        return true;
+    }
+
+    private boolean matchesSearch(AdminAutomationDto dto, String search) {
+        if (search == null || search.isBlank()) return true;
+        String q = search.toLowerCase().trim();
+        return (dto.getName() != null && dto.getName().toLowerCase().contains(q)) ||
+               (dto.getOwnerName() != null && dto.getOwnerName().toLowerCase().contains(q)) ||
+               (dto.getOwnerEmail() != null && dto.getOwnerEmail().toLowerCase().contains(q)) ||
+               (dto.getBotName() != null && dto.getBotName().toLowerCase().contains(q)) ||
+               (dto.getTriggerType() != null && dto.getTriggerType().toLowerCase().contains(q));
+    }
+
+    private int countIntegrations(List<?> nodeArray) {
+        int count = 0;
+        for (Object nodeObj : nodeArray) {
+            if (!(nodeObj instanceof Map<?, ?> nodeMap)) continue;
+            String typeStr = nodeMap.get("type") != null ? nodeMap.get("type").toString().toLowerCase() : "";
+            if ("ai".equals(typeStr) || "api_call".equals(typeStr) || "google_sheets".equals(typeStr) || "webhook".equals(typeStr) || "integration".equals(typeStr)) {
+                count++;
+                continue;
+            }
+            if (nodeMap.get("data") instanceof Map<?, ?> dataMap && dataMap.get("actions") instanceof List<?> actionsList) {
+                for (Object act : actionsList) {
+                    if (act instanceof Map<?, ?> actMap && actMap.get("type") != null) {
+                        String actTypeStr = actMap.get("type").toString().toUpperCase();
+                        if (actTypeStr.startsWith("GS_") || actTypeStr.startsWith("WEBHOOK") || actTypeStr.startsWith("INTEGRATION")) {
+                            count++;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return count;
     }
 }

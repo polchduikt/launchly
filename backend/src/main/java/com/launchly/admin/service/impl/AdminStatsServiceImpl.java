@@ -1,7 +1,10 @@
 package com.launchly.admin.service.impl;
 
+import com.launchly.admin.dto.AdminLogDto;
 import com.launchly.admin.dto.AdminStatsDto;
+import com.launchly.admin.service.AdminLogService;
 import com.launchly.admin.service.AdminStatsService;
+import com.launchly.admin.util.AdminPeriodResolver;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.repository.UserRepository;
@@ -18,23 +21,20 @@ import com.launchly.billing.entity.Subscription;
 import com.launchly.billing.entity.SubscriptionStatus;
 import com.launchly.billing.repository.PlanRepository;
 import com.launchly.billing.repository.SubscriptionRepository;
+import com.launchly.common.metric.PerformanceMonitoringFilter;
 import com.launchly.integration.entity.Integration;
 import com.launchly.integration.entity.IntegrationType;
 import com.launchly.integration.repository.IntegrationRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminStatsServiceImpl implements AdminStatsService {
@@ -47,47 +47,26 @@ public class AdminStatsServiceImpl implements AdminStatsService {
     private final PlanRepository planRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final IntegrationRepository integrationRepository;
-    private final com.launchly.admin.service.AdminLogService adminLogService;
+    private final AdminLogService adminLogService;
+    private final AdminPeriodResolver periodResolver;
 
     private static final long START_TIME = System.currentTimeMillis();
+
+    private static final Map<IntegrationType, String> INTEGRATION_DISPLAY_NAMES = Map.of(
+            IntegrationType.GOOGLE_SHEETS, "Google Sheets",
+            IntegrationType.EXCEL, "Excel",
+            IntegrationType.WEBHOOK, "Webhook",
+            IntegrationType.CHATGPT, "ChatGPT",
+            IntegrationType.CLAUDE, "Claude",
+            IntegrationType.DEEPSEEK, "DeepSeek",
+            IntegrationType.GEMINI, "Gemini"
+    );
 
     @Override
     @Transactional(readOnly = true)
     public AdminStatsDto getStats(String search, String period, LocalDateTime startDate, LocalDateTime endDate) {
         LocalDateTime resolvedEnd = endDate != null ? endDate : LocalDateTime.now();
-        LocalDateTime resolvedStart;
-
-        if (period == null) {
-            period = "week";
-        }
-
-        switch (period.toLowerCase()) {
-            case "day":
-                resolvedStart = resolvedEnd.minusDays(1);
-                break;
-            case "week":
-                resolvedStart = resolvedEnd.minusDays(7);
-                break;
-            case "2weeks":
-                resolvedStart = resolvedEnd.minusDays(14);
-                break;
-            case "month":
-                resolvedStart = resolvedEnd.minusDays(30);
-                break;
-            case "2months":
-                resolvedStart = resolvedEnd.minusDays(60);
-                break;
-            case "3months":
-                resolvedStart = resolvedEnd.minusDays(90);
-                break;
-            case "custom":
-                resolvedStart = startDate != null ? startDate : resolvedEnd.minusDays(7);
-                break;
-            case "all":
-            default:
-                resolvedStart = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
-                break;
-        }
+        LocalDateTime resolvedStart = periodResolver.resolve(period, startDate);
 
         List<User> allUsers = userRepository.findAll();
         List<Bot> allBots = botRepository.findAll();
@@ -98,47 +77,27 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         if (search != null && !search.trim().isEmpty()) {
             String q = search.trim().toLowerCase();
             allUsers = allUsers.stream()
-                    .filter(u -> (u.getName() != null && u.getName().toLowerCase().contains(q)) ||
-                                 (u.getEmail() != null && u.getEmail().toLowerCase().contains(q)) ||
-                                 (u.getTelegramUsername() != null && u.getTelegramUsername().toLowerCase().contains(q)))
+                    .filter(u -> contains(u.getName(), q) || contains(u.getEmail(), q) || contains(u.getTelegramUsername(), q))
                     .collect(Collectors.toList());
-
             allBots = allBots.stream()
-                    .filter(b -> (b.getName() != null && b.getName().toLowerCase().contains(q)) ||
-                                 (b.getUsername() != null && b.getUsername().toLowerCase().contains(q)))
+                    .filter(b -> contains(b.getName(), q) || contains(b.getUsername(), q))
                     .collect(Collectors.toList());
-
             allSchemas = allSchemas.stream()
-                    .filter(s -> s.getBot() != null && s.getBot().getName() != null && s.getBot().getName().toLowerCase().contains(q))
+                    .filter(s -> s.getBot() != null && contains(s.getBot().getName(), q))
                     .collect(Collectors.toList());
-
             allBroadcasts = allBroadcasts.stream()
-                    .filter(bc -> bc.getName() != null && bc.getName().toLowerCase().contains(q))
+                    .filter(bc -> contains(bc.getName(), q))
                     .collect(Collectors.toList());
         }
 
         final LocalDateTime finalStart = resolvedStart;
         final LocalDateTime finalEnd = resolvedEnd;
 
-        List<User> rangeUsers = allUsers.stream()
-                .filter(u -> u.getCreatedAt() != null && u.getCreatedAt().isAfter(finalStart) && u.getCreatedAt().isBefore(finalEnd))
-                .collect(Collectors.toList());
-
-        List<Bot> rangeBots = allBots.stream()
-                .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().isAfter(finalStart) && b.getCreatedAt().isBefore(finalEnd))
-                .collect(Collectors.toList());
-
-        List<BotUser> rangeBotUsers = allBotUsers.stream()
-                .filter(bu -> bu.getCreatedAt() != null && bu.getCreatedAt().isAfter(finalStart) && bu.getCreatedAt().isBefore(finalEnd))
-                .collect(Collectors.toList());
-
-        List<FlowSchema> rangeSchemas = allSchemas.stream()
-                .filter(s -> s.getCreatedAt() != null && s.getCreatedAt().isAfter(finalStart) && s.getCreatedAt().isBefore(finalEnd))
-                .collect(Collectors.toList());
-
-        List<BroadcastCampaign> rangeBroadcasts = allBroadcasts.stream()
-                .filter(bc -> bc.getCreatedAt() != null && bc.getCreatedAt().isAfter(finalStart) && bc.getCreatedAt().isBefore(finalEnd))
-                .collect(Collectors.toList());
+        List<User> rangeUsers = filterByDateRange(allUsers, u -> u.getCreatedAt(), finalStart, finalEnd);
+        List<Bot> rangeBots = filterByDateRange(allBots, b -> b.getCreatedAt(), finalStart, finalEnd);
+        List<BotUser> rangeBotUsers = filterByDateRange(allBotUsers, bu -> bu.getCreatedAt(), finalStart, finalEnd);
+        List<FlowSchema> rangeSchemas = filterByDateRange(allSchemas, s -> s.getCreatedAt(), finalStart, finalEnd);
+        List<BroadcastCampaign> rangeBroadcasts = filterByDateRange(allBroadcasts, bc -> bc.getCreatedAt(), finalStart, finalEnd);
 
         long totalUsers = rangeUsers.size();
         long totalOwners = rangeUsers.stream()
@@ -149,9 +108,6 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         long activeOwners = allUsers.stream()
                 .filter(u -> u.isActive() && u.getUpdatedAt() != null && u.getUpdatedAt().isAfter(fifteenMinsAgo))
                 .count();
-        if (activeOwners == 0 && allUsers.size() > 0) {
-            activeOwners = 1;
-        }
 
         long totalBotUsers = rangeBotUsers.size();
         long activeBots = rangeBots.stream().filter(Bot::isActive).count();
@@ -166,99 +122,177 @@ public class AdminStatsServiceImpl implements AdminStatsService {
                 .count();
 
         long uptimeSeconds = (System.currentTimeMillis() - START_TIME) / 1000;
+
+        List<AdminStatsDto.GrowthMetric> growth = buildGrowthMetrics(
+                finalStart, finalEnd, rangeUsers, rangeBotUsers, rangeBots, rangeSchemas, rangeBroadcasts, activeOwners);
+
+        AdminStatsDto.ServerHealthDto serverHealth = buildServerHealth(activeBots, allBots);
+
+        List<Subscription> allSubscriptions = subscriptionRepository.findAll();
+        double mrrVal = calculateMrr(allSubscriptions);
+        double ltvVal = calculateLtv(allSubscriptions);
+
+        LocalDateTime previousStart = resolvedStart.minus(Duration.between(resolvedStart, resolvedEnd));
+        List<User> prevUsers = filterByDateRange(allUsers, u -> u.getCreatedAt(), previousStart, finalStart);
+        List<BotUser> prevBotUsers = filterByDateRange(allBotUsers, bu -> bu.getCreatedAt(), previousStart, finalStart);
+        List<Bot> prevBots = filterByDateRange(allBots, b -> b.getCreatedAt(), previousStart, finalStart);
+        List<FlowSchema> prevSchemas = filterByDateRange(allSchemas, s -> s.getCreatedAt(), previousStart, finalStart);
+        List<BroadcastCampaign> prevBroadcasts = filterByDateRange(allBroadcasts, bc -> bc.getCreatedAt(), previousStart, finalStart);
+
+        long prevOwners = prevUsers.stream().filter(u -> u.getRole() == Role.ROLE_OWNER || u.getRole() == Role.ROLE_ADMIN).count();
+        long prevBotUsersCount = prevBotUsers.size();
+        long prevActiveBots = prevBots.stream().filter(Bot::isActive).count();
+        long prevAutomations = prevSchemas.size();
+        long prevMessages = prevBroadcasts.stream().mapToLong(c -> c.getSentCount() != null ? c.getSentCount() : 0).sum();
+
+        List<AdminStatsDto.PlanDistributionDto> planDistribution = buildPlanDistribution(allUsers, allSubscriptions);
+        List<AdminStatsDto.IntegrationPopularityDto> integrationsPopularity = buildIntegrationsPopularity(previousStart, finalStart);
+        List<AdminStatsDto.ClientGeoLangDto> geographyAndLanguages = buildGeography(allBotUsers, previousStart, finalStart);
+
+        List<AdminLogDto> latestLogs = adminLogService.getSystemLogs(null, null, null, null, null, "desc", 0, 10).getContent();
+
+        List<AdminStatsDto.PerformanceMetricDto> performanceMetrics = buildPerformanceMetrics();
+
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isManagerUser = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
+
+        if (isManagerUser) {
+            serverHealth = null;
+            latestLogs = Collections.emptyList();
+            performanceMetrics = Collections.emptyList();
+            uptimeSeconds = 0;
+        }
+
+        return AdminStatsDto.builder()
+                .totalUsers(totalUsers)
+                .totalOwners(totalOwners)
+                .totalOwnersChange(calcChange(totalOwners, prevOwners))
+                .activeOwners(activeOwners)
+                .activeOwnersChange("+0.0%")
+                .totalBotUsers(totalBotUsers)
+                .totalBotUsersChange(calcChange(totalBotUsers, prevBotUsersCount))
+                .activeBots(activeBots)
+                .activeBotsChange(calcChange(activeBots, prevActiveBots))
+                .totalAutomations(totalAutomations)
+                .totalAutomationsChange(calcChange(totalAutomations, prevAutomations))
+                .totalMessagesSent(totalMessagesSent)
+                .totalMessagesSentChange(calcChange(totalMessagesSent, prevMessages))
+                .systemUptimeSeconds(uptimeSeconds)
+                .activeManagers(activeManagers)
+                .userGrowth(growth)
+                .serverHealth(serverHealth)
+                .mrr(mrrVal)
+                .mrrChange("+0.0%")
+                .ltv(ltvVal)
+                .ltvChange("+0.0%")
+                .planDistribution(planDistribution)
+                .integrationsPopularity(integrationsPopularity)
+                .geographyAndLanguages(geographyAndLanguages)
+                .latestLogs(latestLogs)
+                .performanceMetrics(performanceMetrics)
+                .build();
+    }
+
+    private String calcChange(long current, long previous) {
+        if (previous == 0 && current == 0) return "+0.0%";
+        if (previous == 0) return "+100.0%";
+        double change = ((double) (current - previous) / previous) * 100.0;
+        change = Math.round(change * 10.0) / 10.0;
+        return (change >= 0 ? "+" : "") + change + "%";
+    }
+
+    private <T> List<T> filterByDateRange(List<T> items, java.util.function.Function<T, LocalDateTime> dateExtractor,
+                                          LocalDateTime start, LocalDateTime end) {
+        return items.stream()
+                .filter(item -> {
+                    LocalDateTime dt = dateExtractor.apply(item);
+                    return dt != null && dt.isAfter(start) && dt.isBefore(end);
+                })
+                .collect(Collectors.toList());
+    }
+
+    private boolean contains(String value, String query) {
+        return value != null && value.toLowerCase().contains(query);
+    }
+
+    private List<AdminStatsDto.GrowthMetric> buildGrowthMetrics(
+            LocalDateTime start, LocalDateTime end,
+            List<User> users, List<BotUser> botUsers, List<Bot> bots,
+            List<FlowSchema> schemas, List<BroadcastCampaign> broadcasts, long activeOwners) {
+
         List<AdminStatsDto.GrowthMetric> growth = new ArrayList<>();
-        long daysDiff = Duration.between(finalStart, finalEnd).toDays();
+        long daysDiff = Duration.between(start, end).toDays();
 
         if (daysDiff <= 1) {
-            Map<Integer, Long> regByHour = rangeUsers.stream()
+            Map<Integer, Long> regByHour = users.stream()
                     .filter(u -> u.getRole() == Role.ROLE_OWNER || u.getRole() == Role.ROLE_ADMIN)
                     .collect(Collectors.groupingBy(u -> u.getCreatedAt().getHour(), Collectors.counting()));
-
-            Map<Integer, Long> clientsByHour = rangeBotUsers.stream()
+            Map<Integer, Long> clientsByHour = botUsers.stream()
                     .collect(Collectors.groupingBy(bu -> bu.getCreatedAt().getHour(), Collectors.counting()));
-
-            Map<Integer, Long> botsByHour = rangeBots.stream()
+            Map<Integer, Long> botsByHour = bots.stream()
                     .collect(Collectors.groupingBy(b -> b.getCreatedAt().getHour(), Collectors.counting()));
-
-            Map<Integer, Long> schemasByHour = rangeSchemas.stream()
+            Map<Integer, Long> schemasByHour = schemas.stream()
                     .collect(Collectors.groupingBy(s -> s.getCreatedAt().getHour(), Collectors.counting()));
-
-            Map<Integer, Long> messagesByHour = rangeBroadcasts.stream()
+            Map<Integer, Long> messagesByHour = broadcasts.stream()
                     .collect(Collectors.groupingBy(
                             bc -> bc.getCreatedAt().getHour(),
-                            Collectors.summingLong(bc -> bc.getSentCount() != null ? bc.getSentCount() : 0)
-                    ));
+                            Collectors.summingLong(bc -> bc.getSentCount() != null ? bc.getSentCount() : 0)));
 
-            LocalDateTime current = finalStart;
             for (int i = 0; i <= 24; i++) {
-                LocalDateTime pointTime = current.plusHours(i);
-                if (pointTime.isAfter(finalEnd)) break;
+                LocalDateTime pointTime = start.plusHours(i);
+                if (pointTime.isAfter(end)) break;
                 String label = pointTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:00:00"));
                 int hour = pointTime.getHour();
 
-                long regCount = regByHour.getOrDefault(hour, 0L);
-                long actCount = hour == LocalDateTime.now().getHour() ? activeOwners : Math.min(regCount, 1);
-                long clientsCount = clientsByHour.getOrDefault(hour, 0L);
-                long botsCount = botsByHour.getOrDefault(hour, 0L);
-                long automationsCount = schemasByHour.getOrDefault(hour, 0L);
-                long messagesCount = messagesByHour.getOrDefault(hour, 0L);
-
                 growth.add(AdminStatsDto.GrowthMetric.builder()
                         .date(label)
-                        .registeredCount(regCount)
-                        .activeCount(actCount)
-                        .clientsCount(clientsCount)
-                        .botsCount(botsCount)
-                        .automationsCount(automationsCount)
-                        .messagesCount(messagesCount)
+                        .registeredCount(regByHour.getOrDefault(hour, 0L))
+                        .activeCount(hour == LocalDateTime.now().getHour() ? activeOwners : Math.min(regByHour.getOrDefault(hour, 0L), 1))
+                        .clientsCount(clientsByHour.getOrDefault(hour, 0L))
+                        .botsCount(botsByHour.getOrDefault(hour, 0L))
+                        .automationsCount(schemasByHour.getOrDefault(hour, 0L))
+                        .messagesCount(messagesByHour.getOrDefault(hour, 0L))
                         .build());
             }
         } else {
-            Map<LocalDate, Long> regByDate = rangeUsers.stream()
+            Map<LocalDate, Long> regByDate = users.stream()
                     .filter(u -> u.getRole() == Role.ROLE_OWNER || u.getRole() == Role.ROLE_ADMIN)
                     .collect(Collectors.groupingBy(u -> u.getCreatedAt().toLocalDate(), Collectors.counting()));
-
-            Map<LocalDate, Long> clientsByDate = rangeBotUsers.stream()
+            Map<LocalDate, Long> clientsByDate = botUsers.stream()
                     .collect(Collectors.groupingBy(bu -> bu.getCreatedAt().toLocalDate(), Collectors.counting()));
-
-            Map<LocalDate, Long> botsByDate = rangeBots.stream()
+            Map<LocalDate, Long> botsByDate = bots.stream()
                     .collect(Collectors.groupingBy(b -> b.getCreatedAt().toLocalDate(), Collectors.counting()));
-
-            Map<LocalDate, Long> schemasByDate = rangeSchemas.stream()
+            Map<LocalDate, Long> schemasByDate = schemas.stream()
                     .collect(Collectors.groupingBy(s -> s.getCreatedAt().toLocalDate(), Collectors.counting()));
-
-            Map<LocalDate, Long> messagesByDate = rangeBroadcasts.stream()
+            Map<LocalDate, Long> messagesByDate = broadcasts.stream()
                     .collect(Collectors.groupingBy(
                             bc -> bc.getCreatedAt().toLocalDate(),
-                            Collectors.summingLong(bc -> bc.getSentCount() != null ? bc.getSentCount() : 0)
-                    ));
+                            Collectors.summingLong(bc -> bc.getSentCount() != null ? bc.getSentCount() : 0)));
 
-            LocalDate startLocalDate = finalStart.toLocalDate();
-            LocalDate endLocalDate = finalEnd.toLocalDate();
-            LocalDate current = startLocalDate;
+            LocalDate current = start.toLocalDate();
+            LocalDate endDate = end.toLocalDate();
 
-            while (!current.isAfter(endLocalDate)) {
-                String label = current.toString() + "T19:00:00";
+            while (!current.isAfter(endDate)) {
+                String label = current + "T19:00:00";
                 long regCount = regByDate.getOrDefault(current, 0L);
-                long actCount = current.equals(LocalDate.now()) ? activeOwners : Math.min(regCount, 1);
-                long clientsCount = clientsByDate.getOrDefault(current, 0L);
-                long botsCount = botsByDate.getOrDefault(current, 0L);
-                long automationsCount = schemasByDate.getOrDefault(current, 0L);
-                long messagesCount = messagesByDate.getOrDefault(current, 0L);
 
                 growth.add(AdminStatsDto.GrowthMetric.builder()
                         .date(label)
                         .registeredCount(regCount)
-                        .activeCount(actCount)
-                        .clientsCount(clientsCount)
-                        .botsCount(botsCount)
-                        .automationsCount(automationsCount)
-                        .messagesCount(messagesCount)
+                        .activeCount(current.equals(LocalDate.now()) ? activeOwners : Math.min(regCount, 1))
+                        .clientsCount(clientsByDate.getOrDefault(current, 0L))
+                        .botsCount(botsByDate.getOrDefault(current, 0L))
+                        .automationsCount(schemasByDate.getOrDefault(current, 0L))
+                        .messagesCount(messagesByDate.getOrDefault(current, 0L))
                         .build());
                 current = current.plusDays(1);
             }
         }
+        return growth;
+    }
 
+    private AdminStatsDto.ServerHealthDto buildServerHealth(long activeBots, List<Bot> allBots) {
         boolean dbHealthy = true;
         String dbStatus = "Connected";
         try {
@@ -268,55 +302,47 @@ public class AdminStatsServiceImpl implements AdminStatsService {
             dbStatus = "Error";
         }
 
-        boolean telegramHealthy = activeBots > 0 || !allBots.isEmpty();
-        String telegramStatus = activeBots > 0 ? "Polling Active" : "Idle";
-
-        boolean aiHealthy = true;
-        String aiStatus = "Operational";
-
-        boolean broadcastHealthy = true;
-        String broadcastStatus = "Ready";
-
-        AdminStatsDto.ServerHealthDto serverHealth = AdminStatsDto.ServerHealthDto.builder()
+        return AdminStatsDto.ServerHealthDto.builder()
                 .dbStatus(dbStatus)
                 .dbHealthy(dbHealthy)
-                .telegramStatus(telegramStatus)
-                .telegramHealthy(telegramHealthy)
-                .aiStatus(aiStatus)
-                .aiHealthy(aiHealthy)
-                .broadcastStatus(broadcastStatus)
-                .broadcastHealthy(broadcastHealthy)
+                .telegramStatus(activeBots > 0 ? "Polling Active" : "Idle")
+                .telegramHealthy(activeBots > 0 || !allBots.isEmpty())
+                .aiStatus("Operational")
+                .aiHealthy(true)
+                .broadcastStatus("Ready")
+                .broadcastHealthy(true)
                 .build();
+    }
 
-        List<Plan> allPlans = planRepository.findAll();
-        List<Subscription> allSubscriptions = subscriptionRepository.findAll();
-
-        double mrrVal = allSubscriptions.stream()
+    private double calculateMrr(List<Subscription> subscriptions) {
+        return subscriptions.stream()
                 .filter(sub -> sub.getStatus() == SubscriptionStatus.ACTIVE)
                 .mapToDouble(sub -> sub.getPlan() != null && sub.getPlan().getPrice() != null ? sub.getPlan().getPrice().doubleValue() : 0.0)
                 .sum();
+    }
 
-        double ltvVal = 0.0;
-        List<Subscription> payingSubscriptions = allSubscriptions.stream()
+    private double calculateLtv(List<Subscription> subscriptions) {
+        List<Subscription> paying = subscriptions.stream()
                 .filter(sub -> sub.getPlan() != null && sub.getPlan().getPrice() != null && sub.getPlan().getPrice().doubleValue() > 0.0)
                 .collect(Collectors.toList());
 
-        if (!payingSubscriptions.isEmpty()) {
-            double totalRevenue = 0.0;
-            for (Subscription sub : payingSubscriptions) {
-                LocalDateTime start = sub.getCreatedAt() != null ? sub.getCreatedAt() : LocalDateTime.now();
-                LocalDateTime end = (sub.getStatus() == SubscriptionStatus.CANCELLED && sub.getUpdatedAt() != null) 
-                        ? sub.getUpdatedAt() 
-                        : LocalDateTime.now();
+        if (paying.isEmpty()) return 0.0;
 
-                long months = Duration.between(start, end).toDays() / 30;
-                if (months < 1) months = 1;
+        double totalRevenue = 0.0;
+        for (Subscription sub : paying) {
+            LocalDateTime subStart = sub.getCreatedAt() != null ? sub.getCreatedAt() : LocalDateTime.now();
+            LocalDateTime subEnd = (sub.getStatus() == SubscriptionStatus.CANCELLED && sub.getUpdatedAt() != null)
+                    ? sub.getUpdatedAt()
+                    : LocalDateTime.now();
 
-                totalRevenue += sub.getPlan().getPrice().doubleValue() * months;
-            }
-            ltvVal = totalRevenue / payingSubscriptions.size();
+            long months = Duration.between(subStart, subEnd).toDays() / 30;
+            if (months < 1) months = 1;
+            totalRevenue += sub.getPlan().getPrice().doubleValue() * months;
         }
+        return totalRevenue / paying.size();
+    }
 
+    private List<AdminStatsDto.PlanDistributionDto> buildPlanDistribution(List<User> allUsers, List<Subscription> allSubscriptions) {
         long totalOwnersCount = allUsers.stream()
                 .filter(u -> u.getRole() == Role.ROLE_OWNER || u.getRole() == Role.ROLE_ADMIN)
                 .count();
@@ -331,211 +357,134 @@ public class AdminStatsServiceImpl implements AdminStatsService {
                 .sum();
         long freeCount = Math.max(0, totalOwnersCount - activePaidSubsCount);
 
-        List<AdminStatsDto.PlanDistributionDto> planDistribution = new ArrayList<>();
-        planDistribution.add(new AdminStatsDto.PlanDistributionDto("Free", freeCount, "#64748b"));
-        
+        List<AdminStatsDto.PlanDistributionDto> distribution = new ArrayList<>();
+        distribution.add(new AdminStatsDto.PlanDistributionDto("Free", freeCount, "#64748b"));
+
+        List<Plan> allPlans = planRepository.findAll();
         for (Plan plan : allPlans) {
             String displayName = plan.getDisplayName();
             long count = subCountsByPlan.getOrDefault(displayName, 0L);
-            if (count > 0 || !displayName.equalsIgnoreCase("Free")) {
-                String color = "#6366f1";
-                if (displayName.toLowerCase().contains("pro")) {
-                    color = "#6366f1";
-                } else if (displayName.toLowerCase().contains("enterprise") || displayName.toLowerCase().contains("бізнес") || displayName.toLowerCase().contains("business")) {
-                    color = "#f59e0b";
-                } else if (displayName.toLowerCase().contains("starter") || displayName.toLowerCase().contains("старт")) {
-                    color = "#10b981";
-                }
-                
-                if (!displayName.equalsIgnoreCase("Free")) {
-                    planDistribution.add(new AdminStatsDto.PlanDistributionDto(displayName, count, color));
-                }
+            if (!displayName.equalsIgnoreCase("Free") && (count > 0 || true)) {
+                String color = resolvePlanColor(displayName);
+                distribution.add(new AdminStatsDto.PlanDistributionDto(displayName, count, color));
             }
         }
+        return distribution;
+    }
 
+    private String resolvePlanColor(String displayName) {
+        String lower = displayName.toLowerCase();
+        if (lower.contains("enterprise") || lower.contains("business")) return "#f59e0b";
+        if (lower.contains("starter")) return "#10b981";
+        return "#6366f1";
+    }
+
+    private List<AdminStatsDto.IntegrationPopularityDto> buildIntegrationsPopularity(LocalDateTime prevStart, LocalDateTime currentStart) {
         List<Integration> allIntegrations = integrationRepository.findAll();
-        long totalIntegrationsCount = allIntegrations.size();
+        long totalCount = allIntegrations.size();
 
-        Map<IntegrationType, Long> integrationCounts = allIntegrations.stream()
+        Map<IntegrationType, Long> currentCounts = allIntegrations.stream()
                 .collect(Collectors.groupingBy(Integration::getType, Collectors.counting()));
 
-        List<AdminStatsDto.IntegrationPopularityDto> integrationsPopularity = new ArrayList<>();
-        String[] integrationNames = {
-            "Google Sheets",
-            "Hotmart",
-            "ChatGPT",
-            "Claude",
-            "DeepSeek",
-            "Gemini",
-            "MailChimp",
-            "HubSpot CRM",
-            "Webhook",
-            "Excel"
-        };
+        List<Integration> prevIntegrations = allIntegrations.stream()
+                .filter(i -> i.getCreatedAt() != null && i.getCreatedAt().isBefore(currentStart))
+                .collect(Collectors.toList());
+        Map<IntegrationType, Long> prevCounts = prevIntegrations.stream()
+                .collect(Collectors.groupingBy(Integration::getType, Collectors.counting()));
 
-        for (String name : integrationNames) {
-            long count = 0;
-            if (name.equals("Google Sheets")) {
-                count = integrationCounts.getOrDefault(IntegrationType.GOOGLE_SHEETS, 0L);
-            } else if (name.equals("Excel")) {
-                count = integrationCounts.getOrDefault(IntegrationType.EXCEL, 0L);
-            } else if (name.equals("Webhook")) {
-                count = integrationCounts.getOrDefault(IntegrationType.WEBHOOK, 0L);
-            } else if (name.equals("ChatGPT")) {
-                count = integrationCounts.getOrDefault(IntegrationType.CHATGPT, 0L);
-            } else if (name.equals("Claude")) {
-                count = integrationCounts.getOrDefault(IntegrationType.CLAUDE, 0L);
-            } else if (name.equals("DeepSeek")) {
-                count = integrationCounts.getOrDefault(IntegrationType.DEEPSEEK, 0L);
-            } else if (name.equals("Gemini")) {
-                count = integrationCounts.getOrDefault(IntegrationType.GEMINI, 0L);
-            }
+        List<AdminStatsDto.IntegrationPopularityDto> result = new ArrayList<>();
 
-            double pct = totalIntegrationsCount > 0 ? (count * 100.0 / totalIntegrationsCount) : 0.0;
-            pct = Math.round(pct * 100.0) / 100.0;
-
-            String change = "0.0%";
-            if (count > 0) {
-                long hash = Math.abs(name.hashCode());
-                change = (hash % 2 == 0 ? "+" : "-") + (hash % 5) + "." + (hash % 100) + "%";
-            }
-
-            integrationsPopularity.add(new AdminStatsDto.IntegrationPopularityDto(name, count, pct, change));
+        for (IntegrationType type : IntegrationType.values()) {
+            long count = currentCounts.getOrDefault(type, 0L);
+            double pct = totalCount > 0 ? Math.round(count * 10000.0 / totalCount) / 100.0 : 0.0;
+            long prev = prevCounts.getOrDefault(type, 0L);
+            String change = calcChange(count, prev);
+            String name = INTEGRATION_DISPLAY_NAMES.getOrDefault(type, type.name());
+            result.add(new AdminStatsDto.IntegrationPopularityDto(name, count, pct, change));
         }
-        integrationsPopularity.sort((a, b) -> Long.compare(b.getCount(), a.getCount()));
+
+        result.sort((a, b) -> Long.compare(b.getCount(), a.getCount()));
+        return result;
+    }
+
+    private List<AdminStatsDto.ClientGeoLangDto> buildGeography(List<BotUser> allBotUsers, LocalDateTime prevStart, LocalDateTime currentStart) {
         long totalBotUsersCount = allBotUsers.size();
 
-        Map<String, Long> clientLangCounts = new java.util.HashMap<>();
+        Map<String, Long> currentLangCounts = new HashMap<>();
         for (BotUser bu : allBotUsers) {
-            String lang = parseLang(bu.getMetadata());
-            if (lang.equals("uk")) {
-                clientLangCounts.put("Ukraine", clientLangCounts.getOrDefault("Ukraine", 0L) + 1);
-            } else if (lang.equals("en")) {
-                clientLangCounts.put("United States", clientLangCounts.getOrDefault("United States", 0L) + 1);
-            } else if (lang.equals("pl")) {
-                clientLangCounts.put("Poland", clientLangCounts.getOrDefault("Poland", 0L) + 1);
-            } else {
-                clientLangCounts.put("Other", clientLangCounts.getOrDefault("Other", 0L) + 1);
-            }
+            String region = langToRegion(parseLang(bu.getMetadata()));
+            currentLangCounts.merge(region, 1L, Long::sum);
         }
 
-        List<AdminStatsDto.ClientGeoLangDto> geographyAndLanguages = new ArrayList<>();
-        String[] countries = {"Ukraine", "United States", "Poland", "Germany", "Other"};
-
-        for (String country : countries) {
-            long count = clientLangCounts.getOrDefault(country, 0L);
-            double pct = totalBotUsersCount > 0 ? (count * 100.0 / totalBotUsersCount) : 0.0;
-            pct = Math.round(pct * 100.0) / 100.0;
-
-            String change = "0.0%";
-            if (count > 0) {
-                long hash = Math.abs(country.hashCode());
-                change = (hash % 2 == 0 ? "+" : "-") + (hash % 5) + "." + (hash % 100) + "%";
-            }
-
-            geographyAndLanguages.add(new AdminStatsDto.ClientGeoLangDto(country, count, pct, change));
+        List<BotUser> prevBotUsers = allBotUsers.stream()
+                .filter(bu -> bu.getCreatedAt() != null && bu.getCreatedAt().isBefore(currentStart))
+                .collect(Collectors.toList());
+        Map<String, Long> prevLangCounts = new HashMap<>();
+        for (BotUser bu : prevBotUsers) {
+            String region = langToRegion(parseLang(bu.getMetadata()));
+            prevLangCounts.merge(region, 1L, Long::sum);
         }
-        geographyAndLanguages.sort((a, b) -> Long.compare(b.getCount(), a.getCount()));
 
-        List<com.launchly.admin.dto.AdminLogDto> latestLogs = adminLogService.getSystemLogs(null, null, null);
+        String[] regions = {"Ukraine", "United States", "Poland", "Other"};
+        List<AdminStatsDto.ClientGeoLangDto> result = new ArrayList<>();
 
-        Map<String, com.launchly.common.metric.PerformanceMonitoringFilter.HourlyMetric> performanceData = 
-                com.launchly.common.metric.PerformanceMonitoringFilter.getHourlyMetrics();
+        for (String region : regions) {
+            long count = currentLangCounts.getOrDefault(region, 0L);
+            double pct = totalBotUsersCount > 0 ? Math.round(count * 10000.0 / totalBotUsersCount) / 100.0 : 0.0;
+            long prev = prevLangCounts.getOrDefault(region, 0L);
+            result.add(new AdminStatsDto.ClientGeoLangDto(region, count, pct, calcChange(count, prev)));
+        }
 
-        List<AdminStatsDto.PerformanceMetricDto> performanceMetrics = new ArrayList<>();
+        result.sort((a, b) -> Long.compare(b.getCount(), a.getCount()));
+        return result;
+    }
+
+    private String langToRegion(String lang) {
+        return switch (lang) {
+            case "uk" -> "Ukraine";
+            case "en" -> "United States";
+            case "pl" -> "Poland";
+            default -> "Other";
+        };
+    }
+
+    private List<AdminStatsDto.PerformanceMetricDto> buildPerformanceMetrics() {
+        Map<String, PerformanceMonitoringFilter.HourlyMetric> performanceData = PerformanceMonitoringFilter.getHourlyMetrics();
+        List<AdminStatsDto.PerformanceMetricDto> metrics = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
+
         for (int i = 6; i >= 0; i--) {
             LocalDateTime t = now.minusHours(i);
             String timeBucket = t.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00"));
             String isoTime = t.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:00:00"));
-            
-            com.launchly.common.metric.PerformanceMonitoringFilter.HourlyMetric metric = performanceData.get(timeBucket);
-            
+
+            PerformanceMonitoringFilter.HourlyMetric metric = performanceData.get(timeBucket);
+
             double errorRate = 0.0;
             int latency = 0;
-            
+
             if (metric != null && metric.requestCount.get() > 0) {
                 int totalReqs = metric.requestCount.get();
-                int errors = metric.errorCount.get();
-                long latencySum = metric.totalLatency.get();
-                
-                errorRate = (errors * 100.0) / totalReqs;
-                errorRate = Math.round(errorRate * 100.0) / 100.0;
-                
-                latency = (int) (latencySum / totalReqs);
-            } else {
-                int hash = Math.abs(timeBucket.hashCode());
-                latency = 60 + (hash % 20);
-                errorRate = 0.0;
+                errorRate = Math.round((metric.errorCount.get() * 10000.0) / totalReqs) / 100.0;
+                latency = (int) (metric.totalLatency.get() / totalReqs);
             }
-            performanceMetrics.add(new AdminStatsDto.PerformanceMetricDto(isoTime, errorRate, latency));
+
+            metrics.add(new AdminStatsDto.PerformanceMetricDto(isoTime, errorRate, latency));
         }
-
-        String totalOwnersChange = totalOwners > 0 ? "+" + (Math.abs(Long.hashCode(totalOwners) % 8) + 1) + ".2%" : "+0.0%";
-        String activeOwnersChange = activeOwners > 0 ? "+" + (Math.abs(Long.hashCode(activeOwners) % 5) + 1) + ".0%" : "+0.0%";
-        String totalBotUsersChange = totalBotUsers > 0 ? "+" + (Math.abs(Long.hashCode(totalBotUsers) % 12) + 2) + ".4%" : "+0.0%";
-        String activeBotsChange = activeBots > 0 ? "+" + (Math.abs(Long.hashCode(activeBots) % 3) + 1) + ".0%" : "+0.0%";
-        String totalAutomationsChange = totalAutomations > 0 ? "+" + (Math.abs(Long.hashCode(totalAutomations) % 10) + 1) + ".5%" : "+0.0%";
-        String totalMessagesSentChange = totalMessagesSent > 0 ? "+" + (Math.abs(Long.hashCode(totalMessagesSent) % 15) + 3) + ".8%" : "+0.0%";
-        String mrrChange = mrrVal > 0 ? "+" + (Math.abs(Double.hashCode(mrrVal) % 15) + 4) + ".0%" : "+0.0%";
-        String ltvChange = ltvVal > 0 ? "+" + (Math.abs(Double.hashCode(ltvVal) % 10) + 2) + ".5%" : "+0.0%";
-
-        return AdminStatsDto.builder()
-                .totalUsers(totalUsers)
-                .totalOwners(totalOwners)
-                .totalOwnersChange(totalOwnersChange)
-                .activeOwners(activeOwners)
-                .activeOwnersChange(activeOwnersChange)
-                .totalBotUsers(totalBotUsers)
-                .totalBotUsersChange(totalBotUsersChange)
-                .activeBots(activeBots)
-                .activeBotsChange(activeBotsChange)
-                .totalAutomations(totalAutomations)
-                .totalAutomationsChange(totalAutomationsChange)
-                .totalMessagesSent(totalMessagesSent)
-                .totalMessagesSentChange(totalMessagesSentChange)
-                .systemUptimeSeconds(uptimeSeconds)
-                .activeManagers(activeManagers)
-                .userGrowth(growth)
-                .serverHealth(serverHealth)
-                .mrr(mrrVal)
-                .mrrChange(mrrChange)
-                .ltv(ltvVal)
-                .ltvChange(ltvChange)
-                .planDistribution(planDistribution)
-                .integrationsPopularity(integrationsPopularity)
-                .geographyAndLanguages(geographyAndLanguages)
-                .latestLogs(latestLogs)
-                .performanceMetrics(performanceMetrics)
-                .build();
+        return metrics;
     }
 
     private String parseLang(String metadata) {
-        if (metadata == null || metadata.isEmpty()) {
-            return "unknown";
-        }
-        if (metadata.contains("\"language_code\"")) {
-            int idx = metadata.indexOf("\"language_code\"");
-            int valStart = metadata.indexOf(":", idx) + 1;
-            int quoteStart = metadata.indexOf("\"", valStart);
-            if (quoteStart != -1) {
-                int quoteEnd = metadata.indexOf("\"", quoteStart + 1);
-                if (quoteEnd != -1) {
-                    return metadata.substring(quoteStart + 1, quoteEnd).toLowerCase();
-                }
-            }
-        }
-        if (metadata.contains("\"languageCode\"")) {
-            int idx = metadata.indexOf("\"languageCode\"");
-            int valStart = metadata.indexOf(":", idx) + 1;
-            int quoteStart = metadata.indexOf("\"", valStart);
-            if (quoteStart != -1) {
-                int quoteEnd = metadata.indexOf("\"", quoteStart + 1);
-                if (quoteEnd != -1) {
-                    return metadata.substring(quoteStart + 1, quoteEnd).toLowerCase();
-                }
-            }
-        }
-        return "unknown";
+        if (metadata == null || metadata.isEmpty()) return "unknown";
+        String langKey = metadata.contains("\"language_code\"") ? "\"language_code\"" :
+                         metadata.contains("\"languageCode\"") ? "\"languageCode\"" : null;
+        if (langKey == null) return "unknown";
+        int idx = metadata.indexOf(langKey);
+        int valStart = metadata.indexOf(":", idx) + 1;
+        int quoteStart = metadata.indexOf("\"", valStart);
+        if (quoteStart == -1) return "unknown";
+        int quoteEnd = metadata.indexOf("\"", quoteStart + 1);
+        if (quoteEnd == -1) return "unknown";
+        return metadata.substring(quoteStart + 1, quoteEnd).toLowerCase();
     }
 }

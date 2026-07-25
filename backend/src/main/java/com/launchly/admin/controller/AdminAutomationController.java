@@ -2,6 +2,7 @@ package com.launchly.admin.controller;
 
 import com.launchly.admin.dto.AdminAutomationDetailDto;
 import com.launchly.admin.dto.AdminAutomationDto;
+import com.launchly.admin.dto.AdminBlockRequest;
 import com.launchly.admin.service.AdminAutomationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,8 +24,7 @@ public class AdminAutomationController {
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "desc") String sort,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "30") int size
-    ) {
+            @RequestParam(defaultValue = "30") int size) {
         return ResponseEntity.ok(adminAutomationService.getAutomations(search, status, sort, page, size));
     }
 
@@ -34,8 +34,7 @@ public class AdminAutomationController {
             @PathVariable Long automationId,
             @RequestParam(defaultValue = "all") String period,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
+            @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(adminAutomationService.getAutomationDetails(automationId, period, page, size));
     }
 
@@ -50,10 +49,8 @@ public class AdminAutomationController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> blockAutomation(
             @PathVariable Long automationId,
-            @RequestBody(required = false) java.util.Map<String, String> payload
-    ) {
-        String reason = payload != null ? payload.get("reason") : "Administrative Block";
-        adminAutomationService.blockAutomation(automationId, reason);
+            @RequestBody(required = false) AdminBlockRequest request) {
+        adminAutomationService.blockAutomation(automationId, request);
         return ResponseEntity.ok().build();
     }
 
