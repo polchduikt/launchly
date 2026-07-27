@@ -125,6 +125,10 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
   }, [nodes, edges]);
 
   const onNodeDragStop = useCallback(() => {
+    if (isLocalChangeRef) {
+      isLocalChangeRef.current = true;
+    }
+    setIsDirty(true);
     if (!dragStartStateRef.current) return;
     const startKey = getFlowKey(dragStartStateRef.current.nodes, dragStartStateRef.current.edges);
     const currentKey = getFlowKey(nodes, edges);
@@ -140,12 +144,9 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
         return [...p, startState];
       });
       setFuture([]);
-      if (isLocalChangeRef) {
-        isLocalChangeRef.current = true;
-      }
     }
     dragStartStateRef.current = null;
-  }, [nodes, edges, setPast, setFuture, isLocalChangeRef]);
+  }, [nodes, edges, setPast, setFuture, isLocalChangeRef, setIsDirty]);
 
   const triggerSaveError = (msg: string) => {
     setSaveError(msg);
@@ -188,10 +189,10 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
       if (isLocalChangeRef) {
-        const hasStructuralChange = changes.some(
-          (c) => c.type !== 'position' && c.type !== 'dimensions' && c.type !== 'select'
+        const hasRelevantChange = changes.some(
+          (c) => c.type !== 'select' && c.type !== 'dimensions'
         );
-        if (hasStructuralChange) {
+        if (hasRelevantChange) {
           isLocalChangeRef.current = true;
         }
       }
@@ -524,6 +525,9 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
     }
 
     takeSnapshot();
+    if (isLocalChangeRef) {
+      isLocalChangeRef.current = true;
+    }
     const newNodeId = `node_${type.toLowerCase()}_${Date.now()}`;
     const newNode: Node = {
       id: newNodeId,
@@ -566,6 +570,9 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
 
   const handleUpdateNodeData = useCallback(
     (nodeId: string, newData: Record<string, unknown>) => {
+      if (isLocalChangeRef) {
+        isLocalChangeRef.current = true;
+      }
       takeSnapshotBeforeEdit();
       setNodes((nds) =>
         nds.map((node) => {
@@ -576,11 +583,14 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
         })
       );
     },
-    [setNodes, takeSnapshotBeforeEdit]
+    [setNodes, takeSnapshotBeforeEdit, isLocalChangeRef]
   );
 
   const handleAddAndConnectNode = useCallback((sourceNodeId: string, type: string, sourceHandle?: string) => {
     takeSnapshot();
+    if (isLocalChangeRef) {
+      isLocalChangeRef.current = true;
+    }
     const id = `node_${type.toLowerCase()}_${Date.now()}`;
     const sourceNode = nodes.find((n) => n.id === sourceNodeId);
     
@@ -618,7 +628,7 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
     setTimeout(() => {
       fitView({ nodes: [{ id }], duration: 300, padding: 0.5 });
     }, 50);
-  }, [nodes, setNodes, setEdges, edgeType, takeSnapshot, fitView, setSelectedNodeId]);
+  }, [nodes, setNodes, setEdges, edgeType, takeSnapshot, fitView, setSelectedNodeId, isLocalChangeRef]);
 
   const handleAddNode = (type: string) => {
     if (type === 'START') {
@@ -630,6 +640,9 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
     }
 
     takeSnapshot();
+    if (isLocalChangeRef) {
+      isLocalChangeRef.current = true;
+    }
     const id = `node_${type.toLowerCase()}_${Date.now()}`;
     const viewportCenter = screenToFlowPosition({
       x: window.innerWidth / 2,
@@ -660,6 +673,9 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
     }
 
     takeSnapshot();
+    if (isLocalChangeRef) {
+      isLocalChangeRef.current = true;
+    }
     const removedEdges = edges.filter((e) => e.source === selectedNodeId || e.target === selectedNodeId);
     const nextNodes = getNodesAfterRemovingEdges(
       nodes.filter((n) => n.id !== selectedNodeId),

@@ -41,10 +41,12 @@ export const useFlowAutoSave = (
     if (!isInitialLoadDoneRef.current) return;
 
     const currentKey = getFlowKey(nodes, edges);
-    if (currentKey === lastSavedKeyRef.current) return;
-    if (isLocalChangeRef && !isLocalChangeRef.current) {
-      lastSavedKeyRef.current = currentKey;
+    if (currentKey === lastSavedKeyRef.current) {
       setIsDirty(false);
+      return;
+    }
+
+    if (isLocalChangeRef && !isLocalChangeRef.current) {
       return;
     }
 
@@ -55,7 +57,10 @@ export const useFlowAutoSave = (
     if (!isInitialLoadDoneRef.current) return;
 
     const currentKey = getFlowKey(nodes, edges);
-    if (currentKey === lastSavedKeyRef.current) return;
+    if (currentKey === lastSavedKeyRef.current) {
+      setIsDirty(false);
+      return;
+    }
 
     if (isLocalChangeRef && !isLocalChangeRef.current) {
       return;

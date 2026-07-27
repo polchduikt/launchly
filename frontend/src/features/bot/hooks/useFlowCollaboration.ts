@@ -226,10 +226,6 @@ export const useFlowCollaboration = (
             edges: edgesRef.current,
           }),
         });
-
-        if (isLocalChangeRef) {
-          isLocalChangeRef.current = false;
-        }
       }
     }, STATE_UPDATE_DEBOUNCE_MS);
 

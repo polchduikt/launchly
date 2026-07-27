@@ -272,6 +272,10 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
   }, [nodes, edges]);
 
   const onNodeDragStop = useCallback(() => {
+    if (isLocalChangeRef) {
+      isLocalChangeRef.current = true;
+    }
+    setIsDirty(true);
     if (!dragStartStateRef.current) return;
     const startKey = getFlowKey(dragStartStateRef.current.nodes, dragStartStateRef.current.edges);
     const currentKey = getFlowKey(nodes, edges);
@@ -287,12 +291,9 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
         return [...p, startState];
       });
       setFuture([]);
-      if (isLocalChangeRef) {
-        isLocalChangeRef.current = true;
-      }
     }
     dragStartStateRef.current = null;
-  }, [nodes, edges, setPast, setFuture, isLocalChangeRef]);
+  }, [nodes, edges, setPast, setFuture, isLocalChangeRef, setIsDirty]);
 
   const [contextMenuState, setContextMenuState] = useState<{
     isOpen: boolean;
@@ -457,14 +458,15 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
   useEffect(() => {
     if (!isInitialLoadDoneRef.current) return;
     const currentKey = `${getFlowKey(nodes, edges)}|${campaignName}|${JSON.stringify(conditions)}`;
-    if (currentKey === lastSavedKeyRef.current) return;
-    if (isLocalChangeRef && !isLocalChangeRef.current) {
-      lastSavedKeyRef.current = currentKey;
+    if (currentKey === lastSavedKeyRef.current) {
       setIsDirty(false);
       return;
     }
+    if (isLocalChangeRef && !isLocalChangeRef.current) {
+      return;
+    }
 
-    setIsDirty(currentKey !== lastSavedKeyRef.current);
+    setIsDirty(true);
   }, [nodes, edges, campaignName, conditions, isLocalChangeRef]);
 
   useEffect(() => {
@@ -499,6 +501,9 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
       });
       lastSavedKeyRef.current = currentKey;
       setIsDirty(false);
+      if (isLocalChangeRef) {
+        isLocalChangeRef.current = false;
+      }
     }, 1500);
 
     return () => clearTimeout(timer);
