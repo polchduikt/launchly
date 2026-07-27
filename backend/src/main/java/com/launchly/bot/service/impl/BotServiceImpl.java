@@ -716,12 +716,6 @@ public class BotServiceImpl implements BotService {
         }
 
         long totalUsers = hasToken ? botUserRepository.countByBotId(bot.getId()) : 0;
-        if (hasToken) {
-            FlowSchema schema = flowSchemaRepository.findByBotId(bot.getId()).orElse(null);
-            if (schema != null && schema.getVersion() > totalUsers) {
-                totalUsers = schema.getVersion();
-            }
-        }
 
         String role = "Owner";
         try {

@@ -12,36 +12,50 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Provides backend-generated translations to the frontend.
+ * Only returns keys that the backend itself produces:
+ *   - API error messages      (messages_errors*.properties)
+ *   - Audit logs & system messages (messages_system*.properties)
+ *
+ * Frontend UI strings are bundled directly in the frontend JSON files
+ * and must NOT be served from here.
+ */
 @Service
 @Slf4j
 public class I18nService {
+
+    private static final String[] BACKEND_FILES = {
+            "classpath:messages_errors.properties",
+            "classpath:messages_system.properties"
+    };
+    private static final String[] BACKEND_FILES_LANG_PATTERN = {
+            "classpath:messages_errors_{lang}.properties",
+            "classpath:messages_system_{lang}.properties"
+    };
 
     private final ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
 
     public Map<String, String> getTranslations(String lang) {
         Map<String, String> translations = new HashMap<>();
-        loadProperties(translations, "classpath:messages_*.properties", false);
+        // Load English (default) base
+        for (String pattern : BACKEND_FILES) {
+            loadResource(translations, pattern);
+        }
+        // Override with language-specific if not English
         if (lang != null && !"en".equalsIgnoreCase(lang)) {
-            loadProperties(translations, "classpath:messages_*_" + lang + ".properties", true);
+            for (String pattern : BACKEND_FILES_LANG_PATTERN) {
+                loadResource(translations, pattern.replace("{lang}", lang.toLowerCase()));
+            }
         }
         return translations;
     }
 
-    private void loadProperties(Map<String, String> targetMap, String pattern, boolean isLangSpecific) {
+    private void loadResource(Map<String, String> targetMap, String location) {
         try {
-            Resource[] resources = resourceResolver.getResources(pattern);
+            Resource[] resources = resourceResolver.getResources(location);
             for (Resource resource : resources) {
-                String filename = resource.getFilename();
-                if (filename == null) continue;
-
-                if (!isLangSpecific) {
-                    String nameWithoutExt = filename.substring(0, filename.lastIndexOf('.'));
-                    String[] parts = nameWithoutExt.split("_");
-                    if (parts.length > 2) {
-                        continue;
-                    }
-                }
-
+                if (!resource.exists()) continue;
                 Properties props = new Properties();
                 try (InputStream is = resource.getInputStream();
                      InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
@@ -52,7 +66,7 @@ public class I18nService {
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to load properties files for pattern: {}", pattern, e);
+            log.debug("Could not load resource '{}': {}", location, e.getMessage());
         }
     }
 }
