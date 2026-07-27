@@ -4,7 +4,7 @@ import type { FlowBlock } from '../../../../../types/bot';
 import type { Node, Edge } from '@xyflow/react';
 import { NODE_TITLES } from '../../../config/nodeDisplay';
 import { FieldVariableSelector } from '../editors/FieldVariableSelector';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 export interface EditDataCollectionDrawerProps {
   onClose: () => void;

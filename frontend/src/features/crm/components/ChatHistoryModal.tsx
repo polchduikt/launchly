@@ -5,7 +5,7 @@ import { UserAvatar } from './UserAvatar';
 import { OwnerAvatar } from './OwnerAvatar';
 import { MessageBubble } from './MessageBubble';
 import { formatDateSeparator, getDateKey } from '../utils/chat';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import type { ConversationResponse } from '../../../types/crm';
 
 interface ChatHistoryModalProps {

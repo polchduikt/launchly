@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Info, Clock, Calendar, ChevronDown } from 'lucide-react';
 import type { SmartDelayNodeEditorProps } from '../../../../../types/bot';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 interface EditorStateLocal {
   setIsNextStepDrawerOpen: (open: boolean) => void;

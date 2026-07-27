@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useAiAssistant } from '../hooks/useAiAssistant';
 import { QUICK_QUESTIONS, AI_FLOW_TEMPLATES } from '../config';
 import { Sparkles, X, Send, Bot, User, Loader2, RefreshCw, AlertCircle, AlertTriangle } from 'lucide-react';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 
 export const AiAssistantDrawer: React.FC = () => {

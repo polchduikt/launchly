@@ -6,7 +6,7 @@ import { CONDITION_OPERATORS, getOperatorLabel } from '../../../config/editorOpt
 import { FieldVariableSelector } from './FieldVariableSelector';
 import { useBotStore } from '../../../../../store/useBotStore';
 import { useTagsQuery } from '../../../../broadcast/hooks/useBroadcastQueries';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 interface EditorStateLocal {
   setIsNextStepDrawerOpen: (open: boolean) => void;

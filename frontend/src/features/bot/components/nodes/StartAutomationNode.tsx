@@ -8,7 +8,7 @@ import type { CustomNodeData } from '../../../../types/bot';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 import { useBotStore } from '../../../../store/useBotStore';
-import { t } from '../../../../i18n';
+import { t } from '../../../../i18n/config';
 
 const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const sourceConns = useNodeConnections({ handleType: 'source' });

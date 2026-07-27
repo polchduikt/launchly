@@ -1,6 +1,6 @@
 import React from 'react';
 import type { CustomNodeData } from '../../../../../types/bot';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 interface CommentNodeEditorProps {
   data: CustomNodeData;

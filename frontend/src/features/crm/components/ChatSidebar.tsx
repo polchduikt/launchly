@@ -10,7 +10,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import type { SidebarTab } from '../types/chat';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 interface ChatSidebarProps {
   sidebarTab: SidebarTab;

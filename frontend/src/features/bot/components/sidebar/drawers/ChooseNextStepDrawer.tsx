@@ -2,7 +2,7 @@ import React from 'react';
 import { X, ArrowLeft } from 'lucide-react';
 import type { ChooseNextStepDrawerProps } from '../../../../../types/bot';
 import { STEP_OPTIONS } from '../../../config/stepOptions';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 export const ChooseNextStepDrawer: React.FC<ChooseNextStepDrawerProps> = ({ onClose, onSelectStep, isNested }) => {
   return (

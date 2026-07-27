@@ -58,7 +58,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import { useAiStore } from '../../../store/useAiStore';
 import { AiAssistantDrawer } from '../../../features/ai/components/AiAssistantDrawer';
 

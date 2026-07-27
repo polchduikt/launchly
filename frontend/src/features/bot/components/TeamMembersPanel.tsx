@@ -3,7 +3,7 @@ import { X, HelpCircle, Check, Users, Plus } from 'lucide-react';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../hooks/useBotsQuery';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import {
   getTeamMembersApi,
   inviteMemberApi,

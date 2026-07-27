@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Calendar } from 'lucide-react';
-import { getLanguage } from '../../../i18n';
+import { useTranslation } from '../../../i18n/config';
 
 interface ScheduleMessageModalProps {
   isOpen: boolean;
@@ -15,7 +15,7 @@ export const ScheduleMessageModal: React.FC<ScheduleMessageModalProps> = ({
   onSchedule,
   initialText,
 }) => {
-  const isUk = getLanguage() === 'uk';
+  const { t } = useTranslation();
   const [dateTimeValue, setDateTimeValue] = useState(() => {
     const d = new Date();
     d.setMinutes(d.getMinutes() + 10);
@@ -50,7 +50,7 @@ export const ScheduleMessageModal: React.FC<ScheduleMessageModalProps> = ({
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
           <h3 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             <Calendar size={18} className="text-indigo-500 shrink-0" />
-            {isUk ? 'Відкласти повідомлення' : 'Schedule Message'}
+            {t('crm.reply.schedule_title')}
           </h3>
           <button
             type="button"
@@ -64,7 +64,7 @@ export const ScheduleMessageModal: React.FC<ScheduleMessageModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              {isUk ? 'Текст відповіді' : 'Reply message'}
+              {t('crm.reply.schedule_text')}
             </label>
             <textarea
               readOnly
@@ -76,7 +76,7 @@ export const ScheduleMessageModal: React.FC<ScheduleMessageModalProps> = ({
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              {isUk ? 'Дата та час відправлення' : 'Date and time'}
+              {t('crm.reply.schedule_datetime')}
             </label>
             <input
               type="datetime-local"
@@ -87,9 +87,7 @@ export const ScheduleMessageModal: React.FC<ScheduleMessageModalProps> = ({
               className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white font-semibold text-slate-700 cursor-pointer"
             />
             <span className="text-[10px] text-slate-400 font-medium block">
-              {isUk
-                ? 'Повідомлення буде надіслано за часовим поясом Europe/Kiev.'
-                : 'Message will be sent according to timezone Europe/Kiev.'}
+              {t('crm.reply.schedule_tz_note')}
             </span>
           </div>
 
@@ -99,13 +97,13 @@ export const ScheduleMessageModal: React.FC<ScheduleMessageModalProps> = ({
               onClick={onClose}
               className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-xl transition-all cursor-pointer"
             >
-              {isUk ? 'Скасувати' : 'Cancel'}
+              {t('crm.contacts.bulk.btn_cancel')}
             </button>
             <button
               type="submit"
               className="px-5 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
             >
-              {isUk ? 'Відкласти' : 'Schedule'}
+              {t('crm.reply.schedule_btn')}
             </button>
           </div>
         </form>

@@ -5,7 +5,7 @@ import { fetchAdminAutomationsApi, fetchAdminAutomationDetailsApi, toggleAutomat
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { Bot, Play, Pause, Loader2, Search, ChevronDown, ChevronLeft, ChevronRight, X, Workflow, Layers, Zap, AlertTriangle, Calendar, Clock, ShieldAlert, Lock, Unlock, Filter } from 'lucide-react';
-import { useTranslation } from '../../../i18n';
+import { useTranslation } from '../../../i18n/config';
 import { ROUTES } from '../../../constants/routes';
 
 const PAGE_SIZE = 30;
@@ -312,15 +312,15 @@ export const AdminAutomationsPage: React.FC = () => {
                   onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
                   className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
                 >
-                  <span>{sortFilter === 'asc' ? (t('admin.sort_oldest') || 'Спочатку старі') : (t('admin.sort_newest') || 'Спочатку нові')}</span>
+                  <span>{sortFilter === 'asc' ? t('admin.sort_oldest') : t('admin.sort_newest')}</span>
                   <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isSortDropdownOpen && (
                   <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
                     {[
-                      { value: 'desc', label: t('admin.sort_newest') || 'Спочатку нові' },
-                      { value: 'asc', label: t('admin.sort_oldest') || 'Спочатку старі' },
+                      { value: 'desc', label: t('admin.sort_newest') },
+                      { value: 'asc', label: t('admin.sort_oldest') },
                     ].map((opt) => (
                       <button
                         key={opt.value}
@@ -696,7 +696,7 @@ export const AdminAutomationsPage: React.FC = () => {
                 <div className="bg-rose-50 border border-rose-200 rounded-xl p-2.5 text-xs text-rose-800 shrink-0 flex items-center space-x-2">
                   <ShieldAlert size={16} className="text-rose-600 shrink-0" />
                   <div>
-                    <span className="font-bold">Заблоковано адміністрацією:</span> {automationDetailData?.blockReason || selectedDetailAutomation.blockReason || 'Порушення правил платформи'}
+                    <span className="font-bold">{t('admin.blocked_by_admin')}</span> {automationDetailData?.blockReason || selectedDetailAutomation.blockReason || t('admin.block_reason_rules')}
                   </div>
                 </div>
               )}

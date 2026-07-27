@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRequireBots } from '../hooks/useRequireBots';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { t, useTranslation } from '../../../i18n';
+import { t, useTranslation } from '../../../i18n/config';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 import { createBotApi, saveFlowSchemaApi } from '../../bot/api/bot';

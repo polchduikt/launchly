@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 export const DisplayPanel: React.FC = () => {
   const [showTemplatesModal, setShowTemplatesModal] = useState(true);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { t } from '../../../../i18n';
+import { t } from '../../../../i18n/config';
 import { Handle, Position, useReactFlow, useNodeConnections, useUpdateNodeInternals, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Send, Plus, Image as ImageIcon, Paperclip, Volume2, Video, Clock, Database, MessageSquare, Zap, AlertCircle } from 'lucide-react';

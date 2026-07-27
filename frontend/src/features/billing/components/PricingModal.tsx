@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import { X, Loader2, Sparkles, HelpCircle } from 'lucide-react';
 import {
   usePlansQuery,

@@ -4,7 +4,7 @@ import { GoogleSheetsCard } from './GoogleSheetsCard';
 import { PremiumIntegrationCard } from './PremiumIntegrationCard';
 import { Loader2 } from 'lucide-react';
 import { SiClaude, SiGooglegemini, SiMailchimp, SiHubspot } from '@icons-pack/react-simple-icons';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 interface IntegrationsPanelProps {
   botId: number;

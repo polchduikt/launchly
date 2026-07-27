@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getLanguage, subscribeLanguageChange } from '../i18n';
+import { getLanguage, subscribeLanguageChange } from '../i18n/config';
 
 interface LanguageContextType {
   language: 'en' | 'uk';

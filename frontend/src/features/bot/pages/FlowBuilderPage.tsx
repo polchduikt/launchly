@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import { ReactFlow, Controls, Background, ReactFlowProvider, getBezierPath, getSmoothStepPath, ConnectionLineType } from '@xyflow/react';
 import type { ConnectionLineComponentProps } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';

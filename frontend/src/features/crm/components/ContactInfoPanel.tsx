@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { t, getLanguage } from '../../../i18n';
+import { useTranslation } from '../../../i18n/config';
 import {
   Hash,
   Send,
@@ -67,7 +67,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const isUk = getLanguage() === 'uk';
+  const { t } = useTranslation();
 
   type ActiveConfirmAction = 'unsubscribe_account' | 'unsubscribe_telegram' | 'delete_contact' | null;
   const [activeConfirm, setActiveConfirm] = useState<ActiveConfirmAction>(null);
@@ -241,20 +241,20 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
                 onClick={handleUnsubscribeAccount}
                 className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-all cursor-pointer flex items-center gap-2"
               >
-                {isUk ? 'Відписати від акаунта' : 'Unsubscribe from Account'}
+                {t('crm.contact.unsub_acc')}
               </button>
               <button
                 onClick={handleUnsubscribeTelegram}
                 className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-all cursor-pointer flex items-center gap-2"
               >
-                {isUk ? 'Відписати від Telegram' : 'Unsubscribe from Telegram'}
+                {t('crm.contact.unsub_tg')}
               </button>
               <div className="border-t border-slate-100 my-1" />
               <button
                 onClick={handleDeleteContact}
                 className="w-full text-left px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-all cursor-pointer flex items-center gap-2"
               >
-                {isUk ? 'Видалити контакт' : 'Delete Contact'}
+                {t('crm.contact.delete_tooltip')}
               </button>
             </div>
           )}
@@ -507,30 +507,24 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
         isDanger={activeConfirm === 'delete_contact' || activeConfirm === 'unsubscribe_account'}
         title={
           activeConfirm === 'unsubscribe_account'
-            ? (isUk ? 'Відписати від акаунта' : 'Unsubscribe from Account')
+            ? t('crm.contact.unsub_acc')
             : activeConfirm === 'unsubscribe_telegram'
-            ? (isUk ? 'Відписати від Telegram' : 'Unsubscribe from Telegram')
-            : (isUk ? 'Видалити контакт' : 'Delete Contact')
+            ? t('crm.contact.unsub_tg')
+            : t('crm.contact.delete_tooltip')
         }
         message={
           activeConfirm === 'unsubscribe_account'
-            ? (isUk
-                ? 'Ви впевнені, що хочете відписати цього контакту від акаунта? Це видалить його з списку чатів.'
-                : 'Are you sure you want to unsubscribe this contact from the account? This will remove them from the chat list.')
+            ? t('crm.contact.confirm_unsub_acc_msg')
             : activeConfirm === 'unsubscribe_telegram'
-            ? (isUk
-                ? 'Ви впевнені, що хочете відписати цього контакту від Telegram? Він перестане отримувати автоматизації та розсилки.'
-                : 'Are you sure you want to unsubscribe this contact from Telegram? They will stop receiving automations and broadcasts.')
-            : (isUk
-                ? 'Ви впевнені, що хочете видалити цей контакт?'
-                : 'Are you sure you want to delete this contact?')
+            ? t('crm.contact.confirm_unsub_tg_msg')
+            : t('crm.contact.confirm_delete_msg')
         }
         confirmText={
           activeConfirm === 'delete_contact'
-            ? (isUk ? 'Видалити' : 'Delete')
-            : (isUk ? 'Відписати' : 'Unsubscribe')
+            ? t('crm.contacts.bulk.delete')
+            : t('crm.contact.unsubscribe')
         }
-        cancelText={isUk ? 'Скасувати' : 'Cancel'}
+        cancelText={t('crm.contacts.bulk.btn_cancel')}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import { 
   CheckCircle2, 
   HelpCircle, 

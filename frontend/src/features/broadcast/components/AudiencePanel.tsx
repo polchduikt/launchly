@@ -3,8 +3,7 @@ import { UserCheck, ChevronDown, ChevronUp, X, Plus, Search, User, Tag, Sparkles
 import type { AudienceCondition, TagResponse } from '../types';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 import { useBotStore } from '../../../store/useBotStore';
-import { t, getLanguage } from '../../../i18n';
-
+import { useTranslation } from '../../../i18n/config';
 
 interface AudiencePanelProps {
   isAudienceOpen: boolean;
@@ -97,23 +96,22 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
 
   const filteredItems = useMemo(() => {
     const search = dropdownSearch.toLowerCase().trim();
-    const isUk = getLanguage() === 'uk';
 
     if (selectedCategory === 'general') {
       const items = [
-        { type: 'tag', label: isUk ? 'Тег' : 'Tag', val: '', icon: Tag },
+        { type: 'tag', label: t('audience.panel.field.tag'), val: '', icon: Tag },
       ];
       return items.filter(i => i.label.toLowerCase().includes(search));
     }
 
     if (selectedCategory === 'system') {
       const items = [
-        { type: 'system', label: isUk ? "Ім'я" : 'First Name', icon: User },
-        { type: 'system', label: isUk ? 'Прізвище' : 'Last Name', icon: User },
-        { type: 'system', label: isUk ? "Повне ім'я" : 'Full Name', icon: User },
+        { type: 'system', label: t('crm.contact.first_name'), icon: User },
+        { type: 'system', label: t('crm.contact.last_name'), icon: User },
+        { type: 'system', label: t('editor.gs.fields.username'), icon: User },
         { type: 'system', label: 'Email', icon: Mail },
-        { type: 'system', label: isUk ? 'Телефон' : 'Phone', icon: Phone },
-        { type: 'system', label: isUk ? 'Дата підписки' : 'Subscribed', icon: Clock },
+        { type: 'system', label: t('editor.gs.fields.phone'), icon: Phone },
+        { type: 'system', label: t('audience.panel.field.subscribed'), icon: Clock },
         { type: 'system', label: 'Contact ID', icon: Hash },
         { type: 'system', label: 'Telegram User ID', icon: Hash },
         { type: 'system', label: 'Telegram Username', icon: Send },
@@ -222,15 +220,14 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
 
   const getConditionDisplayValue = (cond: AudienceCondition) => {
     const val = cond.value || '';
-    const isUk = getLanguage() === 'uk';
     if (cond.field === 'lead') {
       if (val.startsWith('System:') || val.startsWith('Field:')) {
         const parts = val.split(':');
         const display = parts[2] || '';
-        return display === 'Select...' || display === '' ? (isUk ? 'Оберіть...' : 'Select...') : display;
+        return display === 'Select...' || display === '' ? t('audience.panel.search_ellipsis') : display;
       }
     }
-    return cond.value === 'Select...' || !cond.value ? (isUk ? 'Оберіть...' : 'Select...') : cond.value;
+    return cond.value === 'Select...' || !cond.value ? t('audience.panel.search_ellipsis') : cond.value;
   };
 
   return (

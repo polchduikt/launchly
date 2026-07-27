@@ -1,5 +1,5 @@
 import type { ParsedButtons } from '../types/chat';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 export const timeAgo = (dateStr: string | null): string => {
   if (!dateStr) return '';

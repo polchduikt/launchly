@@ -13,7 +13,7 @@ import { SubscriptionsPanel } from '../../features/billing/components/Subscripti
 import { PaymentsPanel } from '../../features/billing/components/PaymentsPanel';
 import { useBotStore } from '../../store/useBotStore';
 import { AlertCircle } from 'lucide-react';
-import { t } from '../../i18n';
+import { t } from '../../i18n/config';
 
 interface SettingsModalProps {
   isOpen: boolean;

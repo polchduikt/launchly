@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { t } from '../../../../i18n';
+import { t } from '../../../../i18n/config';
 import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Shuffle } from 'lucide-react';

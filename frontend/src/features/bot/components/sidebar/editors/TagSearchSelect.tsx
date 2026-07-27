@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus } from 'lucide-react';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 export interface TagSearchSelectProps {
   tagName: string;

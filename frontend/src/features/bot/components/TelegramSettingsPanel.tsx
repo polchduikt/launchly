@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate as useRoutingNavigate } from 'react-router-dom';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import {
   Send,
   Loader2,

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { CustomNodeData } from '../../../../../types/bot';
 import { API_METHODS } from '../../../config/editorOptions';
 import { Plus, Trash2, HelpCircle } from 'lucide-react';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 interface ApiCallNodeEditorProps {
   data: CustomNodeData;

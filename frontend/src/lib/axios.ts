@@ -38,7 +38,7 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     if (error.response?.status === 403 || error.response?.data?.error === 'ACCOUNT_BLOCKED') {
-      const reason = error.response?.data?.reason || 'Порушення правил платформи';
+      const reason = error.response?.data?.reason || 'Violation of platform rules';
       localStorage.setItem('launchly_block_reason', reason);
       window.location.href = '/blocked';
       return Promise.reject(error);

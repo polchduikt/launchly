@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { getLanguage } from '../../../i18n';
+import { useTranslation } from '../../../i18n/config';
 
 interface CreateContactModalProps {
   isOpen: boolean;
@@ -30,7 +30,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const isUk = getLanguage() === 'uk';
+  const { t } = useTranslation();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [countryIndex, setCountryIndex] = useState(0);
@@ -80,7 +80,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
       >
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
           <h3 className="text-base font-extrabold text-slate-900 tracking-tight select-none">
-            {isUk ? 'Створити новий контакт' : 'Create New Contact'}
+            {t('crm.contacts.btn.create')}
           </h3>
           <button
             type="button"
@@ -93,14 +93,12 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="text-xs font-semibold text-slate-400 leading-relaxed select-none">
-            {isUk
-              ? 'Щоб додати контакт, необхідно вказати електронну пошту або номер телефону.'
-              : 'To add a contact, you need to add an email or a phone number.'}
+            {t('crm.contact.create_desc')}
           </div>
 
           <div className="space-y-1.5">
             <label className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider select-none">
-              {isUk ? "Ім'я" : 'First Name'}
+              {t('crm.contact.first_name')}
             </label>
             <input
               type="text"
@@ -113,7 +111,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
 
           <div className="space-y-1.5">
             <label className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider select-none">
-              {isUk ? 'Прізвище' : 'Last Name'}
+              {t('crm.contact.last_name')}
             </label>
             <input
               type="text"
@@ -125,7 +123,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
 
           <div className="space-y-1.5">
             <label className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider select-none">
-              {isUk ? 'Номер телефону' : 'Phone Number'}
+              {t('crm.contact.phone_number')}
             </label>
             <div className="flex gap-2">
               <div className="relative">
@@ -150,7 +148,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
                 </span>
                 <input
                   type="text"
-                  placeholder={isUk ? 'Введіть телефон' : 'Enter phone'}
+                  placeholder={t('crm.contact.enter_phone')}
                   value={phoneBody}
                   onChange={(e) => setPhoneBody(e.target.value.replace(/[^0-9]/g, ''))}
                   className="flex-1 px-3 py-2.5 text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none bg-white"
@@ -173,17 +171,17 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
 
           <div className="space-y-1.5">
             <label className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider select-none">
-              {isUk ? 'Стать' : 'Gender'}
+              {t('crm.contact.gender')}
             </label>
             <select
               value={gender}
               onChange={(e) => setGender(e.target.value)}
               className="w-full px-3 py-2.5 border border-slate-200 focus:border-indigo-500 rounded-xl text-xs font-semibold text-slate-700 bg-white focus:outline-none cursor-pointer"
             >
-              <option value="">{isUk ? 'Оберіть стать' : 'Select a gender'}</option>
-              <option value="Male">{isUk ? 'Чоловіча' : 'Male'}</option>
-              <option value="Female">{isUk ? 'Жіноча' : 'Female'}</option>
-              <option value="Other">{isUk ? 'Інша' : 'Other'}</option>
+              <option value="">{t('crm.contact.select_gender')}</option>
+              <option value="Male">{t('crm.contact.gender_male')}</option>
+              <option value="Female">{t('crm.contact.gender_female')}</option>
+              <option value="Other">{t('crm.contact.gender_other')}</option>
             </select>
           </div>
 
@@ -195,9 +193,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
               className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
             />
             <span>
-              {isUk
-                ? 'Я підтверджую, що ми отримали належну згоду на надсилання SMS, електронних листів чи інших типів повідомлень від створюваних або імпортованих контактів відповідно до чинного законодавства та Умов надання послуг.'
-                : "I confirm that we have obtained appropriate consent to send SMS, email, or other types of messages from contact(s) being created or imported in compliance with applicable laws and regulations and Manychat's Terms of Service."}
+              {t('crm.contact.consent_confirmation')}
             </span>
           </label>
 
@@ -207,14 +203,14 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
               onClick={onClose}
               className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-xl transition-all cursor-pointer"
             >
-              {isUk ? 'Скасувати' : 'Cancel'}
+              {t('crm.contacts.bulk.btn_cancel')}
             </button>
             <button
               type="submit"
               disabled={!isFormValid}
               className="px-5 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-md shadow-indigo-600/10 cursor-pointer"
             >
-              {isUk ? 'Створити' : 'Create'}
+              {t('crm.contacts.btn.create')}
             </button>
           </div>
         </form>

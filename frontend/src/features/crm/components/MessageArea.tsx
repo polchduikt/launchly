@@ -11,7 +11,7 @@ import { OwnerAvatar } from './OwnerAvatar';
 import { MessageBubble } from './MessageBubble';
 import { ChatToolbar } from './ChatToolbar';
 import { formatDateSeparator, getDateKey } from '../utils/chat';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 interface MessageAreaProps {
   conversation: ConversationResponse | null;

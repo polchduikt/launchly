@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useAiStore } from '../../../store/useAiStore';
 import { useAiAssistant } from '../hooks/useAiAssistant';
 import { QUICK_QUESTIONS } from '../config';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { Sparkles, Send, Bot, User, Loader2, RefreshCw, AlertCircle, Trash2 } from 'lucide-react';
 

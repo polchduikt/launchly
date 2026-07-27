@@ -4,7 +4,7 @@ import { useConnection } from '@xyflow/react';
 import type { CustomNodeData } from '../../../../types/bot';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
-import { t } from '../../../../i18n';
+import { t } from '../../../../i18n/config';
 
 const CommentNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const { showToolbar, bindHover } = useNodeHover();

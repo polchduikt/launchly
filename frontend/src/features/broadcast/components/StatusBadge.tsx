@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckCircle2, Loader2, Clock, AlertTriangle, Calendar, Lock, Ban } from 'lucide-react';
 import type { StatusBadgeProps } from '../types';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   switch (status) {

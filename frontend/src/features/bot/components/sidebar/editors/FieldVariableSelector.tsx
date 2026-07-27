@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { getLanguage, t } from '../../../../../i18n';
+import { getLanguage, t } from '../../../../../i18n/config';
 import {
   User,
   Phone,
@@ -92,9 +92,6 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
-
-  
-  const isUk = getLanguage() === 'uk';
 
   const systemFields = useMemo(() => [
     { key: 'first_name', name: t('editor.gs.fields.first_name'), val: 'first_name', icon: <User size={13} className="text-slate-400" /> },
@@ -232,7 +229,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
               <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
                 type="text"
-                placeholder={isUk ? 'Пошук...' : 'Search...'}
+                placeholder={t('common.search_placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-7 pr-3 py-1.5 border border-slate-200 rounded-lg text-[10px] focus:outline-none focus:border-indigo-400 bg-slate-50/20 font-semibold"
@@ -257,7 +254,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                   ))}
                   {filteredSystemFields.length === 0 && (
                     <span className="text-[10px] text-slate-400 italic text-center py-6 font-medium">
-                      {isUk ? 'Нічого не знайдено' : 'No fields found'}
+                      {t('editor.action.no_actions_title')}
                     </span>
                   )}
                 </>
@@ -276,14 +273,14 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                           className="w-full px-2.5 py-1.5 bg-indigo-50/50 hover:bg-indigo-50 border border-dashed border-indigo-200 text-indigo-700 rounded-lg text-left text-[10px] font-extrabold flex items-center gap-1.5 cursor-pointer transition-all"
                         >
                           <Plus size={12} />
-                          <span>{isUk ? 'Створити поле користувача' : 'Create Custom Field'}</span>
+                          <span>{t('settings.fields.create_field_title')}</span>
                         </button>
                       ) : (
                         <form onSubmit={handleCreateField} className="flex gap-1.5 items-center">
                           <input
                             type="text"
                             required
-                            placeholder={isUk ? 'Ключ поля (наприклад, Рыба)' : 'Field key (e.g. Рыба)'}
+                            placeholder={t('settings.fields.placeholder_field_name')}
                             autoFocus
                             value={newFieldName}
                             onChange={(e) => setNewFieldName(e.target.value)}
@@ -291,16 +288,9 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                           />
                           <button
                             type="submit"
-                            className="p-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer"
+                            className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-lg text-[10px] cursor-pointer"
                           >
-                            <Plus size={11} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setShowCreateFieldInput(false)}
-                            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-lg cursor-pointer"
-                          >
-                            <X size={11} />
+                            <Check size={12} />
                           </button>
                         </form>
                       )}
@@ -309,18 +299,18 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
 
                   {filteredCustomFields.map((field) => (
                     <button
-                      key={field}
+                      key={field.id}
                       type="button"
-                      onClick={() => handleItemSelect(field, 'custom')}
+                      onClick={() => handleItemSelect(field.name, 'custom')}
                       className="w-full px-2.5 py-1.5 hover:bg-slate-50 rounded-lg text-left text-[11px] font-bold text-slate-700 flex items-center gap-2 cursor-pointer transition-colors"
                     >
-                      <Type size={13} className="text-sky-500" />
-                      <span>{field}</span>
+                      <Sparkles size={12} className="text-indigo-500" />
+                      <span className="truncate">{field.name}</span>
                     </button>
                   ))}
                   {filteredCustomFields.length === 0 && !showCreateFieldInput && (
                     <span className="text-[10px] text-slate-400 italic text-center py-6 font-medium">
-                      {isUk ? 'Немає користувацьких полів' : 'No custom fields'}
+                      {t('crm.panel.fields.no_fields')}
                     </span>
                   )}
                 </>
@@ -342,7 +332,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                   ))}
                   {filteredTags.length === 0 && (
                     <span className="text-[10px] text-slate-400 italic text-center py-6 font-medium">
-                      {isUk ? 'Тегів не знайдено' : 'No tags found'}
+                      {t('crm.panel.tags.no_tags')}
                     </span>
                   )}
                 </>

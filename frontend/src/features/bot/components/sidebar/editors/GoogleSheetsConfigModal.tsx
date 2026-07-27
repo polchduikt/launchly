@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, FileSpreadsheet, AlertTriangle, Info, ChevronDown, RefreshCw } from 'lucide-react';
 import { FieldVariableSelector } from './FieldVariableSelector';
 import type { GoogleSheetsConfigModalProps } from '../../../../../types/bot';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 export const GoogleSheetsConfigModal: React.FC<GoogleSheetsConfigModalProps> = ({
   isOpen,

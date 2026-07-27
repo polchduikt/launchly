@@ -15,7 +15,7 @@ import type { BotUserResponse, BotUserUpdateRequest } from '../../../types/bot';
 import { ContactAvatar } from './ContactAvatar';
 import { useUpdateBotUserMutation, useDeleteBotUserMutation } from '../hooks/useCrmQueries';
 import { ROUTES } from '../../../constants/routes';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import { TagSearchSelect } from '../../bot/components/sidebar/editors/TagSearchSelect';
 
 import type { ConversationResponse } from '../../../types/crm';

@@ -2,7 +2,7 @@ import React from 'react';
 import { Position, useConnection, useNodeConnections } from '@xyflow/react';
 import { Send } from 'lucide-react';
 import { NodeHandle } from '../../../bot/components/nodes/NodeHandle';
-import { t } from '../../../../i18n';
+import { t } from '../../../../i18n/config';
 
 const StartBroadcastNodeInner: React.FC = () => {
   const connection = useConnection();

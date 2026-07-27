@@ -14,7 +14,7 @@ import {
   ChevronRight,
   Globe
 } from 'lucide-react';
-import { useTranslation } from '../../../i18n';
+import { useTranslation } from '../../../i18n/config';
 
 interface AdminLayoutProps {
   children: React.ReactNode;

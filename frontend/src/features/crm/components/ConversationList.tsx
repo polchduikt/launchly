@@ -3,7 +3,7 @@ import { Loader2, Heart } from 'lucide-react';
 import type { ConversationResponse } from '../../../types/crm';
 import { UserAvatar } from './UserAvatar';
 import { timeAgo } from '../utils/chat';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 interface ConversationListProps {
   conversations: ConversationResponse[];

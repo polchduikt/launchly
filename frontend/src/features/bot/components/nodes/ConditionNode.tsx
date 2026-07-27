@@ -7,7 +7,7 @@ import type { CustomNodeData, ConditionBranch } from '../../../../types/bot';
 import { getOperatorLabel } from '../../config/editorOptions';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
-import { t } from '../../../../i18n';
+import { t } from '../../../../i18n/config';
 
 const ConditionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const sourceConns = useNodeConnections({ handleType: 'source' });

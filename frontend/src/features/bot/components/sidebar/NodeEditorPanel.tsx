@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Node } from '@xyflow/react';
-import { t } from '../../../../i18n';
+import { t } from '../../../../i18n/config';
 import { useNodeEditor } from '../../hooks/useNodeEditor';
 import { NODE_TITLES, NODE_ICONS } from '../../config/nodeDisplay';
 import { StartNodeEditor } from './editors/StartNodeEditor';

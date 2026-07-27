@@ -3,7 +3,7 @@ import { HelpCircle } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { updateNotificationsApi, unlinkTelegramApi } from '../../auth/api/auth';
 import { TelegramLoginModal } from '../../auth/components/TelegramLoginModal';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 export const NotificationsPanel: React.FC = () => {
   const { user, setUser } = useAuthStore();

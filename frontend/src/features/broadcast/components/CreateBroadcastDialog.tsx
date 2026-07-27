@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AlertTriangle, Send, Loader2, X, User } from 'lucide-react';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import type { CreateBroadcastDialogProps } from '../types';
 
 export const CreateBroadcastDialog: React.FC<CreateBroadcastDialogProps> = ({

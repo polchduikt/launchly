@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, MoreVertical, HelpCircle, X, Folder, ChevronRight, Edit2 } from 'lucide-react';
 import { useBotStore } from '../../../store/useBotStore';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 interface UserField {
   name: string;

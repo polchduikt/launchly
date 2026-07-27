@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueries } from '@tanstack/react-query';
 import { useBotStore } from '../../../store/useBotStore';
-import { t, getLanguage } from '../../../i18n';
+import { t, getLanguage } from '../../../i18n/config';
 import { ROUTES } from '../../../constants/routes';
 import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
@@ -201,8 +201,8 @@ export const BroadcastsPage: React.FC = () => {
         title={confirmDialog?.title ?? ''}
         message={confirmDialog?.message ?? ''}
         variant="danger"
-        confirmLabel={confirmDialog?.confirmLabel ?? 'Підтвердити'}
-        cancelLabel="Скасувати"
+        confirmLabel={confirmDialog?.confirmLabel ?? t('common.confirm')}
+        cancelLabel={t('common.cancel')}
         onConfirm={() => confirmDialog?.onConfirm()}
         onCancel={() => setConfirmDialog(null)}
       />

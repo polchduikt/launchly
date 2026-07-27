@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEdges, useNodes } from '@xyflow/react';
 import { Plus, Trash2 } from 'lucide-react';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 import type { RandomizerNodeEditorProps } from '../../../../../types/bot';
 import { VARIATION_COLORS } from '../../../config/constants';
 

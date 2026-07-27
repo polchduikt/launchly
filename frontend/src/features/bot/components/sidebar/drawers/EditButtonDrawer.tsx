@@ -3,7 +3,7 @@ import { X, Trash2, Send, Sparkles, Globe, CreditCard, Zap, GitFork, Shuffle, Cl
 import type { EditButtonDrawerProps } from '../../../../../types/bot';
 import type { Node, Edge } from '@xyflow/react';
 import { NODE_TITLES } from '../../../config/nodeDisplay';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 const mapNodeTypeToActionType = (nodeType?: string): string => {
   switch (nodeType) {

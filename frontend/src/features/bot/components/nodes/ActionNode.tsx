@@ -6,7 +6,7 @@ import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData, ActionItem } from '../../../../types/bot';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
-import { t } from '../../../../i18n';
+import { t } from '../../../../i18n/config';
 
 const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const sourceConns = useNodeConnections({ handleType: 'source' });

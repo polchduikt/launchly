@@ -1,5 +1,5 @@
 import React from 'react';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 export const EndNodeEditor: React.FC = () => {
   return (

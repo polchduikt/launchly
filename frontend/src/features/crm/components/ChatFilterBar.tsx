@@ -2,7 +2,7 @@ import React from 'react';
 import { MessageSquare, ChevronDown } from 'lucide-react';
 import type { ChatFilter, SortOrder } from '../types/chat';
 import { CHAT_FILTER_OPTIONS } from '../config/chat';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 interface ChatFilterBarProps {
   chatFilter: ChatFilter;

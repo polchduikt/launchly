@@ -6,7 +6,7 @@ import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../types/bot';
 import { useNodeHover } from '../../hooks/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
-import { t } from '../../../../i18n';
+import { t } from '../../../../i18n/config';
 
 const EndNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected }) => {
   const targetConns = useNodeConnections({ handleType: 'target' });

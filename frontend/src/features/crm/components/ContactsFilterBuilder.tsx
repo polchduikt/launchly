@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { X, Plus, Search, Tag, User, Phone, Mail, Hash, Clock, Pause, Send, Sparkles } from 'lucide-react';
-import { getLanguage } from '../../../i18n';
+import { useTranslation } from '../../../i18n/config';
 
 export interface FilterCondition {
   id: string;
@@ -27,7 +27,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
   contacts,
   botId,
 }) => {
-  const isUk = getLanguage() === 'uk';
+  const { t } = useTranslation();
   const [isAddDropdownOpen, setIsAddDropdownOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<'general' | 'system' | 'custom'>('system');
   const [dropdownSearch, setDropdownSearch] = useState('');
@@ -83,20 +83,20 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
 
     if (selectedCategory === 'general') {
       const items = [
-        { type: 'tag', label: isUk ? 'Тег' : 'Tag', field: 'tag', icon: Tag },
-        { type: 'paused', label: isUk ? 'Призупинити автоматизації назавжди' : 'Paused Automations Forever', field: 'paused', icon: Pause },
+        { type: 'tag', label: t('audience.panel.field.tag'), field: 'tag', icon: Tag },
+        { type: 'paused', label: t('crm.contacts.filter_paused_forever'), field: 'paused', icon: Pause },
       ];
       return items.filter((i) => i.label.toLowerCase().includes(q));
     }
 
     if (selectedCategory === 'system') {
       const items = [
-        { type: 'system', label: isUk ? "Ім'я" : 'First Name', field: 'firstName', icon: User },
-        { type: 'system', label: isUk ? 'Прізвище' : 'Last Name', field: 'lastName', icon: User },
-        { type: 'system', label: isUk ? 'Повне ім\'я' : 'Full Name', field: 'fullName', icon: User },
+        { type: 'system', label: t('crm.contact.first_name'), field: 'firstName', icon: User },
+        { type: 'system', label: t('crm.contact.last_name'), field: 'lastName', icon: User },
+        { type: 'system', label: t('editor.gs.fields.username'), field: 'fullName', icon: User },
         { type: 'system', label: 'Email', field: 'email', icon: Mail },
-        { type: 'system', label: isUk ? 'Телефон' : 'Phone', field: 'phone', icon: Phone },
-        { type: 'system', label: isUk ? 'Дата підписки' : 'Subscribed', field: 'createdAt', icon: Clock },
+        { type: 'system', label: t('editor.gs.fields.phone'), field: 'phone', icon: Phone },
+        { type: 'system', label: t('audience.panel.field.subscribed'), field: 'createdAt', icon: Clock },
         { type: 'system', label: 'Contact ID', field: 'id', icon: Hash },
         { type: 'system', label: 'Telegram User ID', field: 'telegramUserId', icon: Hash },
         { type: 'system', label: 'Telegram Username', field: 'telegramUsername', icon: Send },
@@ -116,7 +116,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
     }
 
     return [];
-  }, [selectedCategory, dropdownSearch, allCustomFields, isUk]);
+  }, [selectedCategory, dropdownSearch, allCustomFields, t]);
 
   const handleAddCondition = (item: { field: string; label: string; type: string }) => {
     setIsAddDropdownOpen(false);
@@ -157,9 +157,9 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
       case 'is unknown':
         return 'is unknown';
       case 'after':
-        return isUk ? 'після' : 'after';
+        return t('crm.contacts.operator_after');
       case 'before':
-        return isUk ? 'до' : 'before';
+        return t('crm.contacts.operator_before');
       default:
         return op;
     }
@@ -206,9 +206,9 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
       <div className="flex flex-wrap items-center gap-2">
         {conditions.length > 0 && (
           <div className="text-[11px] font-bold text-slate-500 mr-2 flex items-center gap-1">
-            <span>{isUk ? 'Тільки контакти, що відповідають' : 'Only contacts, that match'}</span>
+            <span>{t('crm.contacts.filter_only_matching')}</span>
             <span className="underline decoration-slate-300 underline-offset-2 font-extrabold text-slate-700">
-              {isUk ? 'усім наступним умовам:' : 'all of the following conditions:'}
+              {t('crm.contacts.filter_all_conditions')}
             </span>
           </div>
         )}
@@ -248,13 +248,9 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                     <span className="text-slate-700 hover:text-indigo-650 font-bold border-b border-dashed border-slate-300 pb-0.5 truncate max-w-28">
                       {isPaused
                         ? cond.value === 'true'
-                          ? isUk
-                            ? 'Так'
-                            : 'Yes'
-                          : isUk
-                          ? 'Ні'
-                          : 'No'
-                        : cond.value || (isUk ? 'Оберіть...' : 'Select...')}
+                          ? t('editor.fields.type_boolean_true')
+                          : t('editor.fields.type_boolean_false')
+                        : cond.value || t('audience.panel.search_ellipsis')}
                     </span>
                   )}
                 </button>
@@ -311,7 +307,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                                     : 'hover:bg-slate-50'
                                 }`}
                               >
-                                {isUk ? 'Так' : 'Yes'}
+                                {t('editor.fields.type_boolean_true')}
                               </button>
                               <button
                                 type="button"
@@ -327,26 +323,26 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                                     : 'hover:bg-slate-50'
                                 }`}
                               >
-                                {isUk ? 'Ні' : 'No'}
+                                {t('editor.fields.type_boolean_false')}
                               </button>
                             </div>
                           ) : isTag ? (
                             <div className="flex flex-col gap-0.5 max-h-36 overflow-y-auto custom-scrollbar">
-                              {tags.map((t) => (
+                              {tags.map((tItem) => (
                                 <button
-                                  key={t.id}
+                                  key={tItem.id}
                                   type="button"
                                   onClick={() => {
                                     setConditions((prev) =>
-                                      prev.map((c) => (c.id === cond.id ? { ...c, value: t.name } : c))
+                                      prev.map((c) => (c.id === cond.id ? { ...c, value: tItem.name } : c))
                                     );
                                     setActivePopoverId(null);
                                   }}
                                   className={`w-full text-left px-2 py-1 text-xs font-bold rounded-lg cursor-pointer truncate ${
-                                    cond.value === t.name ? 'bg-indigo-50/60 text-indigo-600' : 'hover:bg-slate-50'
+                                    cond.value === tItem.name ? 'bg-indigo-50/60 text-indigo-600' : 'hover:bg-slate-50'
                                   }`}
                                 >
-                                  {t.name}
+                                  {tItem.name}
                                 </button>
                               ))}
                             </div>
@@ -365,7 +361,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                             <>
                               <input
                                 type="text"
-                                placeholder={isUk ? 'Введіть текст' : 'Enter text'}
+                                placeholder={t('audience.panel.type_value')}
                                 value={cond.value}
                                 onChange={(e) => {
                                   setConditions((prev) =>
@@ -418,7 +414,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
             className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-250 border-dashed rounded-xl text-xs font-extrabold text-slate-600 transition-all cursor-pointer shadow-xs"
           >
             <Plus size={14} className="text-slate-400" />
-            <span>{isUk ? 'Умова' : 'Condition'}</span>
+            <span>{t('audience.panel.add_condition')}</span>
           </button>
 
           {isAddDropdownOpen && (
@@ -433,7 +429,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                       : 'text-slate-500 hover:bg-slate-100'
                   }`}
                 >
-                  {isUk ? 'Системні' : 'System Fields'}
+                  {t('audience.panel.system_fields')}
                 </button>
                 <button
                   type="button"
@@ -444,7 +440,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                       : 'text-slate-500 hover:bg-slate-100'
                   }`}
                 >
-                  {isUk ? 'Користувацькі' : 'Custom User Fields'}
+                  {t('audience.panel.custom_fields')}
                 </button>
                 <button
                   type="button"
@@ -455,7 +451,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                       : 'text-slate-500 hover:bg-slate-100'
                   }`}
                 >
-                  {isUk ? 'Теги та інше' : 'Tags & general'}
+                  {t('audience.panel.general_filters')}
                 </button>
               </div>
 
@@ -464,7 +460,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                   <Search size={12} className="text-slate-400" />
                   <input
                     type="text"
-                    placeholder={isUk ? 'Пошук...' : 'Search...'}
+                    placeholder={t('common.search_placeholder')}
                     value={dropdownSearch}
                     onChange={(e) => setDropdownSearch(e.target.value)}
                     className="w-full text-xs focus:outline-none"
@@ -488,7 +484,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                   })}
                   {filteredItems.length === 0 && (
                     <div className="text-center py-6 text-slate-400 text-xs italic">
-                      {isUk ? 'Нічого не знайдено' : 'No fields found'}
+                      {t('editor.action.no_actions_title')}
                     </div>
                   )}
                 </div>

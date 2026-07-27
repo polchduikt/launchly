@@ -3,7 +3,7 @@ import { DashboardLayout } from '../../../components/layouts/DashboardLayout';
 import { useDashboardStatsQuery } from '../hooks/useDashboardStatsQuery';
 import { useBotsQuery } from '../../bot/hooks/useBotsQuery';
 import { useBotUsersQuery } from '../../crm/hooks/useCrmQueries';
-import { t, useTranslation } from '../../../i18n';
+import { t, useTranslation } from '../../../i18n/config';
 import { 
   Users, 
   Activity, 
@@ -517,14 +517,14 @@ export const DashboardStatsPage: React.FC = () => {
             <div className="flex items-center justify-between gap-4 text-xs mt-1 select-none">
               <span className="flex items-center gap-1.5 font-semibold text-slate-350">
                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                {t('dashboard.stats.active_users_legend', 'Активні користувачі')}
+                {t('dashboard.stats.active_users_legend')}
               </span>
               <span className="font-extrabold text-slate-50">{data[hoveredIdx].activeUsers}</span>
             </div>
             <div className="flex items-center justify-between gap-4 text-xs select-none">
               <span className="flex items-center gap-1.5 font-semibold text-slate-350">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                {t('dashboard.stats.button_clicks_legend', 'Кліки на кнопки')}
+                {t('dashboard.stats.button_clicks_legend')}
               </span>
               <span className="font-extrabold text-slate-50">{data[hoveredIdx].clicks}</span>
             </div>
@@ -538,13 +538,13 @@ export const DashboardStatsPage: React.FC = () => {
     if (!stats) return null;
 
     const daysOfWeek = [
-      t('dashboard.stats.heatmap.days.sun', 'Нд'),
-      t('dashboard.stats.heatmap.days.mon', 'Пн'),
-      t('dashboard.stats.heatmap.days.tue', 'Вт'),
-      t('dashboard.stats.heatmap.days.wed', 'Ср'),
-      t('dashboard.stats.heatmap.days.thu', 'Чт'),
-      t('dashboard.stats.heatmap.days.fri', 'Пт'),
-      t('dashboard.stats.heatmap.days.sat', 'Сб')
+      t('dashboard.stats.heatmap.days.sun'),
+      t('dashboard.stats.heatmap.days.mon'),
+      t('dashboard.stats.heatmap.days.tue'),
+      t('dashboard.stats.heatmap.days.wed'),
+      t('dashboard.stats.heatmap.days.thu'),
+      t('dashboard.stats.heatmap.days.fri'),
+      t('dashboard.stats.heatmap.days.sat')
     ];
 
     const orderedDayIndexes = [1, 2, 3, 4, 5, 6, 0];
@@ -588,7 +588,7 @@ export const DashboardStatsPage: React.FC = () => {
                           key={hour}
                           className="flex-1 rounded-[2px] transition-all duration-300 hover:scale-110 hover:shadow-2xs cursor-pointer"
                           style={{ backgroundColor, height: '11px', minHeight: '11px' }}
-                          title={`${dayName}, ${String(hour).padStart(2, '0')}:00 — ${count} ${t('dashboard.stats.actions_count_label', 'дій')}`}
+                          title={`${dayName}, ${String(hour).padStart(2, '0')}:00 — ${count} ${t('dashboard.stats.actions_count_label')}`}
                         />
                       );
                     })}
@@ -599,12 +599,12 @@ export const DashboardStatsPage: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-end gap-1.5 mt-4 text-[9px] font-bold text-slate-400 pr-1">
-            <span>{t('dashboard.stats.heatmap.less', 'Менше')}</span>
+            <span>{t('dashboard.stats.heatmap.less')}</span>
             <div className="w-2.5 h-2.5 bg-slate-100 rounded-sm" />
             <div className="w-2.5 h-2.5 bg-indigo-100/50 rounded-sm" />
             <div className="w-2.5 h-2.5 bg-indigo-300/80 rounded-sm" />
             <div className="w-2.5 h-2.5 bg-indigo-500 rounded-sm" />
-            <span>{t('dashboard.stats.heatmap.more', 'Більше')}</span>
+            <span>{t('dashboard.stats.heatmap.more')}</span>
           </div>
         </div>
       </div>
@@ -971,8 +971,8 @@ export const DashboardStatsPage: React.FC = () => {
                 <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-3xs flex flex-col justify-between h-full lg:col-span-6">
                   <div>
                     <div className="mb-4">
-                      <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">{t('dashboard.stats.activity_heatmap_title', 'Час пікової активності')}</h2>
-                      <p className="text-[10px] text-slate-400 mt-1">{t('dashboard.stats.activity_heatmap_desc', 'Аналітика активності підписників по годинах та днях тижня для планування розсилок')}</p>
+                      <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">{t('dashboard.stats.activity_heatmap_title')}</h2>
+                      <p className="text-[10px] text-slate-400 mt-1">{t('dashboard.stats.activity_heatmap_desc')}</p>
                     </div>
                     {renderActivityHeatmap()}
                   </div>

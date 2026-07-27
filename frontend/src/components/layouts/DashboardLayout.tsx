@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import logoL from '../../assets/logo-l.png';
 import { NAV_ITEMS } from './config/navItems';
-import { useTranslation } from '../../i18n';
+import { useTranslation } from '../../i18n/config';
 import type { DashboardLayoutProps } from '../../types/shared';
 import { HelpCircle, BookOpen, Users, Briefcase, Lightbulb, ClipboardList, FileText } from 'lucide-react';
 import { useBotStore } from '../../store/useBotStore';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Check } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
-import { t } from '../../i18n';
+import { t } from '../../i18n/config';
 import { GOOGLE_OAUTH_URL } from '../../constants/auth';
 import { TelegramLoginModal } from '../../features/auth/components/TelegramLoginModal';
 import { unlinkTelegramApi } from '../../features/auth/api/auth';

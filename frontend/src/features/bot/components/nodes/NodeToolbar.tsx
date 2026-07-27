@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Trash2 } from 'lucide-react';
-import { t } from '../../../../i18n';
+import { t } from '../../../../i18n/config';
 
 interface NodeToolbarProps {
   nodeId: string;

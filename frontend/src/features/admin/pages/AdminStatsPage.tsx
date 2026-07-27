@@ -21,7 +21,7 @@ import {
   DollarSign,
   CreditCard
 } from 'lucide-react';
-import { getLanguage, useTranslation } from '../../../i18n';
+import { getLanguage, useTranslation } from '../../../i18n/config';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
 
@@ -241,14 +241,14 @@ export const AdminStatsPage: React.FC = () => {
 
   const getPeriodLabel = (p: string) => {
     switch (p) {
-      case 'day': return getLanguage() === 'uk' ? 'За останній день' : 'Last day';
-      case 'week': return getLanguage() === 'uk' ? '7 днів' : '7 days';
-      case '2weeks': return getLanguage() === 'uk' ? '14 днів' : '14 days';
-      case 'month': return getLanguage() === 'uk' ? '30 днів' : '30 days';
-      case '2months': return getLanguage() === 'uk' ? '60 днів' : '60 days';
-      case '3months': return getLanguage() === 'uk' ? '90 днів' : '90 days';
-      case 'all': return getLanguage() === 'uk' ? 'За весь час' : 'All time';
-      case 'custom': return getLanguage() === 'uk' ? 'Кастомний період' : 'Custom period';
+      case 'day': return t('admin.period_day');
+      case 'week': return t('admin.7_days');
+      case '2weeks': return t('admin.period_2weeks');
+      case 'month': return t('admin.30_days');
+      case '2months': return t('admin.period_2months');
+      case '3months': return t('admin.90_days');
+      case 'all': return t('admin.all_time');
+      case 'custom': return t('admin.period_custom');
       default: return p;
     }
   };
@@ -806,11 +806,11 @@ export const AdminStatsPage: React.FC = () => {
                   {isPickerOpen && (
                     <div className="absolute right-0 mt-1.5 w-72 bg-white border border-slate-150 rounded-2xl shadow-xl z-50 p-4 flex flex-col gap-3.5 animate-in fade-in-50 slide-in-from-top-1 duration-150">
                       <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">
-                        {getLanguage() === 'uk' ? 'Кастомний період' : 'Custom Period'}
+                        {t('admin.period_custom')}
                       </div>
                       <div className="flex flex-col gap-3 text-left">
                         <label className="flex flex-col gap-1 text-[11px] font-bold text-slate-500">
-                          {getLanguage() === 'uk' ? 'Початок' : 'Start'}
+                          {t('admin.start')}
                           <input
                             type="datetime-local"
                             value={tempStart}
@@ -819,7 +819,7 @@ export const AdminStatsPage: React.FC = () => {
                           />
                         </label>
                         <label className="flex flex-col gap-1 text-[11px] font-bold text-slate-500">
-                          {getLanguage() === 'uk' ? 'Кінець' : 'End'}
+                          {t('admin.end')}
                           <input
                             type="datetime-local"
                             value={tempEnd}
@@ -834,13 +834,13 @@ export const AdminStatsPage: React.FC = () => {
                           onClick={() => setIsPickerOpen(false)}
                           className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-lg transition-all"
                         >
-                          {t('admin.cancel') || 'Cancel'}
+                          {t('admin.cancel')}
                         </button>
                         <button
                           onClick={handleApplyCustomDates}
                           className="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-all"
                         >
-                          {getLanguage() === 'uk' ? 'Застосувати' : 'Apply'}
+                          {t('admin.apply')}
                         </button>
                       </div>
                     </div>
@@ -1159,11 +1159,7 @@ export const AdminStatsPage: React.FC = () => {
                     </h3>
                     <div className="flex items-center space-x-2 text-slate-400">
                       <button className="px-2.5 py-1 bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-all flex items-center gap-1">
-                        <span>
-                          {t('admin.explore_more') === 'admin.explore_more' 
-                            ? (getLanguage() === 'uk' ? 'Детальніше' : 'Explore more') 
-                            : t('admin.explore_more')}
-                        </span>
+                        <span>{t('admin.explore_more')}</span>
                       </button>
                     </div>
                   </div>
@@ -1172,9 +1168,9 @@ export const AdminStatsPage: React.FC = () => {
                     <table className="w-full text-xs font-bold text-slate-600">
                       <thead>
                         <tr className="border-b border-slate-100 text-slate-400 font-extrabold text-[10px] uppercase tracking-wider text-left sticky top-0 bg-white z-10">
-                          <th className="pb-3 w-1/2 bg-white sticky top-0">{getLanguage() === 'uk' ? 'Назва' : 'Name'}</th>
-                          <th className="pb-3 text-right bg-white sticky top-0">{getLanguage() === 'uk' ? 'Використань' : 'Usage'}</th>
-                          <th className="pb-3 text-right bg-white sticky top-0">{getLanguage() === 'uk' ? 'Зміна / %' : 'Changes / %'}</th>
+                          <th className="pb-3 w-1/2 bg-white sticky top-0">{t('admin.name_col')}</th>
+                          <th className="pb-3 text-right bg-white sticky top-0">{t('admin.usage_col')}</th>
+                          <th className="pb-3 text-right bg-white sticky top-0">{t('admin.change_pct_col')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-50">
@@ -1195,7 +1191,7 @@ export const AdminStatsPage: React.FC = () => {
                                     {item.change}
                                   </span>
                                   <span className="text-[9px] text-slate-400">
-                                    {item.percentage}% {getLanguage() === 'uk' ? 'від заг.' : 'of total'}
+                                    {item.percentage}% {t('admin.of_total')}
                                   </span>
                                 </div>
                               </td>
@@ -1217,11 +1213,7 @@ export const AdminStatsPage: React.FC = () => {
                     </h3>
                     <div className="flex items-center space-x-2 text-slate-400">
                       <button className="px-2.5 py-1 bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-all flex items-center gap-1">
-                        <span>
-                          {t('admin.explore_more') === 'admin.explore_more' 
-                            ? (getLanguage() === 'uk' ? 'Детальніше' : 'Explore more') 
-                            : t('admin.explore_more')}
-                        </span>
+                        <span>{t('admin.explore_more')}</span>
                       </button>
                     </div>
                   </div>
@@ -1230,24 +1222,27 @@ export const AdminStatsPage: React.FC = () => {
                     <table className="w-full text-xs font-bold text-slate-600">
                       <thead>
                         <tr className="border-b border-slate-100 text-slate-400 font-extrabold text-[10px] uppercase tracking-wider text-left sticky top-0 bg-white z-10">
-                          <th className="pb-3 w-1/2 bg-white sticky top-0">{getLanguage() === 'uk' ? 'Країна' : 'Country'}</th>
-                          <th className="pb-3 text-right bg-white sticky top-0">{getLanguage() === 'uk' ? 'Підписників' : 'Subscribers'}</th>
-                          <th className="pb-3 text-right bg-white sticky top-0">{getLanguage() === 'uk' ? 'Зміна / %' : 'Changes / %'}</th>
+                          <th className="pb-3 w-1/2 bg-white sticky top-0">{t('admin.country_col')}</th>
+                          <th className="pb-3 text-right bg-white sticky top-0">{t('admin.subscribers_col')}</th>
+                          <th className="pb-3 text-right bg-white sticky top-0">{t('admin.change_pct_col')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-50">
                         {stats?.geographyAndLanguages?.map((item, idx) => {
                           const isPositive = item.change.startsWith('+');
+                          const countryNameMap: Record<string, string> = {
+                            'Ukraine': t('admin.country_ukraine'),
+                            'United States': t('admin.country_usa'),
+                            'Poland': t('admin.country_poland'),
+                            'Germany': t('admin.country_germany'),
+                            'Other': t('admin.country_other'),
+                          };
                           return (
                             <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                               <td className="py-3 flex items-center space-x-2.5">
                                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.name === 'Ukraine' ? '#0284c7' : item.name === 'United States' ? '#ef4444' : item.name === 'Poland' ? '#d946ef' : item.name === 'Germany' ? '#10b981' : '#64748b' }} />
                                 <span className="text-slate-800 font-semibold">
-                                  {item.name === 'Ukraine' && getLanguage() === 'uk' ? 'Україна' : 
-                                   item.name === 'United States' && getLanguage() === 'uk' ? 'США' :
-                                   item.name === 'Poland' && getLanguage() === 'uk' ? 'Польща' :
-                                   item.name === 'Germany' && getLanguage() === 'uk' ? 'Німеччина' :
-                                   item.name === 'Other' && getLanguage() === 'uk' ? 'Інші країни' : item.name}
+                                  {countryNameMap[item.name] || item.name}
                                 </span>
                               </td>
                               <td className="py-3 text-right text-slate-900 font-mono font-bold">
@@ -1259,7 +1254,7 @@ export const AdminStatsPage: React.FC = () => {
                                     {item.change}
                                   </span>
                                   <span className="text-[9px] text-slate-400">
-                                    {item.percentage}% {getLanguage() === 'uk' ? 'від заг.' : 'of total'}
+                                    {item.percentage}% {t('admin.of_total')}
                                   </span>
                                 </div>
                               </td>
@@ -1308,9 +1303,7 @@ export const AdminStatsPage: React.FC = () => {
                         onClick={() => navigate('/admin/logs')}
                         className="px-2.5 py-1 bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-all"
                       >
-                        {t('admin.explore_more') === 'admin.explore_more' 
-                          ? (getLanguage() === 'uk' ? 'Детальніше' : 'Explore more') 
-                          : t('admin.explore_more')}
+                        {t('admin.explore_more')}
                       </button>
                     </div>
                     <div className="flex-1 bg-slate-50/70 border border-slate-100/60 rounded-2xl p-4 font-mono text-[10.5px] text-slate-700 max-h-[210px] overflow-y-auto custom-scrollbar flex flex-col gap-2">

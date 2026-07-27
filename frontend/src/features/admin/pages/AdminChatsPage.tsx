@@ -35,7 +35,7 @@ import {
   UserCheck,
   Lock
 } from 'lucide-react';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import {
   fetchAdminSupportTicketsApi,
   fetchAdminSupportTicketDetailApi,
@@ -48,7 +48,7 @@ import {
 import { useAuthStore } from '../../../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
-import { useTranslation } from '../../../i18n';
+import { useTranslation } from '../../../i18n/config';
 
 export const AdminChatsPage: React.FC = () => {
   const { t } = useTranslation();

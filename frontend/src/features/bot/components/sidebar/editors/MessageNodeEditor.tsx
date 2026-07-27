@@ -28,7 +28,7 @@ import type { ButtonData } from '../../../../../types/bot';
 import { useNodeEditor, getBlocks } from '../../../hooks/useNodeEditor';
 import { useBotStore } from '../../../../../store/useBotStore';
 import { useTagsQuery } from '../../../../broadcast/hooks/useBroadcastQueries';
-import { t, getLanguage } from '../../../../../i18n';
+import { t, getLanguage } from '../../../../../i18n/config';
 import { FieldVariableSelector } from './FieldVariableSelector';
 import emojiData from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
@@ -1110,7 +1110,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       </div>
                       <input
                         type="text"
-                        placeholder={getLanguage() === 'uk' ? 'Або вставте URL-посилання на файл...' : 'Or paste file URL link...'}
+                        placeholder={t('editor.message.paste_file_url')}
                         value={block.fileUrl || ''}
                         onChange={(e) => updateBlockContent(block.id, { fileUrl: e.target.value })}
                         className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
@@ -1215,7 +1215,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       </div>
                       <input
                         type="text"
-                        placeholder={getLanguage() === 'uk' ? 'Або вставте URL-посилання на аудіо...' : 'Or paste audio URL link...'}
+                        placeholder={t('editor.message.paste_audio_url')}
                         value={block.audioUrl || ''}
                         onChange={(e) => updateBlockContent(block.id, { audioUrl: e.target.value })}
                         className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
@@ -1320,7 +1320,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       </div>
                       <input
                         type="text"
-                        placeholder={getLanguage() === 'uk' ? 'Або вставте URL-посилання на відео...' : 'Or paste video URL link...'}
+                        placeholder={t('editor.message.paste_video_url')}
                         value={block.videoUrl || ''}
                         onChange={(e) => updateBlockContent(block.id, { videoUrl: e.target.value })}
                         className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"

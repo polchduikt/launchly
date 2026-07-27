@@ -1,10 +1,40 @@
 import { useState, useEffect } from 'react';
-import ukFallback from './locales/uk.json';
-import enFallback from './locales/en.json';
+import enAdmin       from './locales/en/admin.json';
+import enAi          from './locales/en/ai.json';
+import enAuth        from './locales/en/auth.json';
+import enAutomations from './locales/en/automations.json';
+import enBilling     from './locales/en/billing.json';
+import enBroadcasts  from './locales/en/broadcasts.json';
+import enCommon      from './locales/en/common.json';
+import enCrm         from './locales/en/crm.json';
+import enDashboard   from './locales/en/dashboard.json';
+import enEditor      from './locales/en/editor.json';
+import enFlowBuilder from './locales/en/flow_builder.json';
+import enSettings    from './locales/en/settings.json';
+import ukAdmin       from './locales/uk/admin.json';
+import ukAi          from './locales/uk/ai.json';
+import ukAuth        from './locales/uk/auth.json';
+import ukAutomations from './locales/uk/automations.json';
+import ukBilling     from './locales/uk/billing.json';
+import ukBroadcasts  from './locales/uk/broadcasts.json';
+import ukCommon      from './locales/uk/common.json';
+import ukCrm         from './locales/uk/crm.json';
+import ukDashboard   from './locales/uk/dashboard.json';
+import ukEditor      from './locales/uk/editor.json';
+import ukFlowBuilder from './locales/uk/flow_builder.json';
+import ukSettings    from './locales/uk/settings.json';
 
 const fallbacks: Record<'en' | 'uk', Record<string, string>> = {
-  en: enFallback,
-  uk: ukFallback
+  en: {
+    ...enAdmin, ...enAi, ...enAuth, ...enAutomations, ...enBilling,
+    ...enBroadcasts, ...enCommon, ...enCrm, ...enDashboard,
+    ...enEditor, ...enFlowBuilder, ...enSettings,
+  },
+  uk: {
+    ...ukAdmin, ...ukAi, ...ukAuth, ...ukAutomations, ...ukBilling,
+    ...ukBroadcasts, ...ukCommon, ...ukCrm, ...ukDashboard,
+    ...ukEditor, ...ukFlowBuilder, ...ukSettings,
+  },
 };
 
 let currentLanguage: 'en' | 'uk' = 'en';

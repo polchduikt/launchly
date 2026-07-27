@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ShieldAlert, Send, CheckCircle2, LogOut, Loader2, Mail } from 'lucide-react';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import { useAuthStore } from '../../../store/useAuthStore';
 import logo from '../../../assets/logo.png';
 import axios from 'axios';

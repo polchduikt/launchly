@@ -16,7 +16,7 @@ const LoginPage: React.FC = () => {
 
   const [searchParams] = useSearchParams();
   const isBlockedError = searchParams.get('error') === 'blocked';
-  const displayError = apiError || (isBlockedError ? 'Ваш акаунт заблоковано. Зверніться до адміністратора.' : null);
+  const displayError = apiError || (isBlockedError ? t('auth.account_blocked_error') : null);
 
   const handleGoogleLogin = () => {
     window.location.href = GOOGLE_OAUTH_URL;

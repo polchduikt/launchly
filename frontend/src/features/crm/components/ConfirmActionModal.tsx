@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertTriangle, Loader2, X } from 'lucide-react';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 interface ConfirmActionModalProps {
   isOpen: boolean;

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import {
   useCreateIntegrationMutation,
   useUpdateIntegrationMutation,
@@ -17,7 +17,6 @@ interface WebhookCardProps {
   integration: IntegrationResponse | undefined;
 }
 
-// Type definition for form fields
 type WebhookFields = {
   url: string;
   events: ('ORDER_CREATED' | 'LEAD_CREATED')[];

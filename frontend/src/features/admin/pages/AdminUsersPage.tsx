@@ -25,7 +25,7 @@ import {
   MessageSquare,
   Sparkles
 } from 'lucide-react';
-import { useTranslation } from '../../../i18n';
+import { useTranslation } from '../../../i18n/config';
 
 export const AdminUsersPage: React.FC = () => {
   const { t } = useTranslation();
@@ -449,15 +449,15 @@ export const AdminUsersPage: React.FC = () => {
                   onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
                   className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
                 >
-                  <span>{sortFilter === 'asc' ? (t('admin.sort_oldest') || 'Спочатку старі') : (t('admin.sort_newest') || 'Спочатку нові')}</span>
+                  <span>{sortFilter === 'asc' ? t('admin.sort_oldest') : t('admin.sort_newest')}</span>
                   <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isSortDropdownOpen && (
                   <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
                     {[
-                      { value: 'desc', label: t('admin.sort_newest') || 'Спочатку нові' },
-                      { value: 'asc', label: t('admin.sort_oldest') || 'Спочатку старі' },
+                      { value: 'desc', label: t('admin.sort_newest') },
+                      { value: 'asc', label: t('admin.sort_oldest') },
                     ].map((opt) => (
                       <button
                         key={opt.value}

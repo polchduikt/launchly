@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import type { ActionItem, ActionNodeEditorProps } from '../../../../../types/bot';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 interface EditorStateLocal {
   setIsNextStepDrawerOpen: (open: boolean) => void;

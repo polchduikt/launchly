@@ -16,7 +16,7 @@ import { TagsSettingsPanel } from '../components/TagsSettingsPanel';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { TelegramLoginModal } from '../../auth/components/TelegramLoginModal';
 import { unlinkTelegramApi } from '../../auth/api/auth';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 import { Loader2, AlertCircle, CheckCircle2, X } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {

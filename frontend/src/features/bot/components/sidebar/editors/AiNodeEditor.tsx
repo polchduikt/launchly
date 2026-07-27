@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, HelpCircle, Send, RotateCcw, Pencil, Plus, Trash2, ChevronDown, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SiClaude, SiGooglegemini } from '@icons-pack/react-simple-icons';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 interface AiNodeEditorProps {
   data: Record<string, any>;

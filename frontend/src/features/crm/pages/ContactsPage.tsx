@@ -29,7 +29,7 @@ import { BulkActionModal } from '../components/BulkActionModal';
 import { CreateContactModal } from '../components/CreateContactModal';
 import { ContactsFilterBuilder } from '../components/ContactsFilterBuilder';
 import type { FilterCondition } from '../components/ContactsFilterBuilder';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 interface BotUserMetadata {
   sequences?: string[];

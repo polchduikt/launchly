@@ -7,7 +7,7 @@ import { useFlowSchemaQuery } from '../../../hooks/useFlowSchema';
 import { useBotStore } from '../../../../../store/useBotStore';
 import { InlineFlowPreview } from './InlineFlowPreview';
 import type { Node, Edge } from '@xyflow/react';
-import { t } from '../../../../../i18n';
+import { t } from '../../../../../i18n/config';
 
 interface StartAutomationNodeEditorProps {
   node?: Node;

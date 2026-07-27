@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import type { ConversationResponse } from '../../../types/crm';
 import type { BotUserResponse } from '../../../types/bot';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 interface ChatToolbarProps {
   conversation: ConversationResponse;

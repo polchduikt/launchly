@@ -41,7 +41,7 @@ export const useLoginForm = () => {
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && (error.response?.status === 403 || error.response?.data?.error === 'ACCOUNT_BLOCKED')) {
-        const reason = error.response?.data?.reason || error.response?.data?.message || 'Порушення правил платформи';
+        const reason = error.response?.data?.reason || error.response?.data?.message || 'Violation of platform rules';
         localStorage.setItem('launchly_block_reason', reason);
         navigate(ROUTES.BLOCKED, { replace: true });
         return;

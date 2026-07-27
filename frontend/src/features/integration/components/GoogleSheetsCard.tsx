@@ -5,7 +5,7 @@ import {
 import { useAuthStore } from '../../../store/useAuthStore';
 import { SiGooglesheets } from '@icons-pack/react-simple-icons';
 import type { IntegrationResponse } from '../types';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 interface GoogleSheetsCardProps {
   botId: number;

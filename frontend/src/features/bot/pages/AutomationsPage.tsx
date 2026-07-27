@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../hooks/useBotsQuery';
-import { t, getLanguage } from '../../../i18n';
+import { t, getLanguage } from '../../../i18n/config';
 import {
   useCreateBotMutation,
   useDeleteBotMutation,
@@ -449,8 +449,8 @@ export const AutomationsPage: React.FC = () => {
         title={confirmDialog?.title ?? ''}
         message={confirmDialog?.message ?? ''}
         variant={confirmDialog?.variant ?? 'danger'}
-        confirmLabel={confirmDialog?.confirmLabel ?? 'Підтвердити'}
-        cancelLabel="Скасувати"
+        confirmLabel={confirmDialog?.confirmLabel ?? t('common.confirm')}
+        cancelLabel={t('common.cancel')}
         onConfirm={() => confirmDialog?.onConfirm()}
         onCancel={() => setConfirmDialog(null)}
       />
@@ -1387,9 +1387,7 @@ export const AutomationsPage: React.FC = () => {
               <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2.5">
                 <div className="flex items-start justify-between text-xs">
                   <span className="text-slate-500 font-medium">
-                    {t('broadcast.blocked_modal_reason') !== 'broadcast.blocked_modal_reason'
-                      ? t('broadcast.blocked_modal_reason')
-                      : (getLanguage() === 'uk' ? 'Причина блокування:' : 'Reason for blocking:')}
+                    {t('broadcast.blocked_modal_reason')}
                   </span>
                   <span className="font-bold text-slate-800 text-right max-w-[200px]">
                     {translateBlockReason(blockedDetailsBot.blockReason)}
@@ -1397,9 +1395,7 @@ export const AutomationsPage: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between text-xs border-t border-slate-200/60 pt-2">
                   <span className="text-slate-500 font-medium">
-                    {t('broadcast.blocked_modal_date') !== 'broadcast.blocked_modal_date'
-                      ? t('broadcast.blocked_modal_date')
-                      : (getLanguage() === 'uk' ? 'Дата блокування:' : 'Blocked date:')}
+                    {t('broadcast.blocked_modal_date')}
                   </span>
                   <span className="font-semibold text-slate-700">
                     {formatDateShort(blockedDetailsBot.blockedAt || blockedDetailsBot.updatedAt)}
@@ -1408,11 +1404,7 @@ export const AutomationsPage: React.FC = () => {
               </div>
 
               <p className="text-[11px] text-slate-400 leading-relaxed italic">
-                {t('automations.blocked_modal_support') !== 'automations.blocked_modal_support'
-                  ? t('automations.blocked_modal_support')
-                  : (getLanguage() === 'uk'
-                      ? 'Якщо ви вважаєте, що це сталося помилково, будь ласка, зверніться до нашої підтримки.'
-                      : 'If you believe this automation was blocked in error, please contact support.')}
+                {t('automations.blocked_modal_support')}
               </p>
             </div>
 
@@ -1421,9 +1413,7 @@ export const AutomationsPage: React.FC = () => {
                 onClick={() => setBlockedDetailsBot(null)}
                 className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-sm"
               >
-                {t('broadcast.blocked_modal_close') !== 'broadcast.blocked_modal_close'
-                  ? t('broadcast.blocked_modal_close')
-                  : (getLanguage() === 'uk' ? 'Зрозуміло' : 'Got it')}
+                {t('broadcast.blocked_modal_close')}
               </button>
             </div>
           </div>

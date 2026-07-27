@@ -4,7 +4,7 @@ import type { NodeProps, Node } from '@xyflow/react';
 import { Zap, Plus } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../types/bot';
-import { t } from '../../../../i18n';
+import { t } from '../../../../i18n/config';
 
 const StartNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const sourceConns = useNodeConnections({ handleType: 'source' });

@@ -2,7 +2,7 @@ import React from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { BotUserResponse } from '../../../types/bot';
 import { ContactAvatar } from './ContactAvatar';
-import { t } from '../../../i18n';
+import { t } from '../../../i18n/config';
 
 interface ContactsTableProps {
   botId: number;
