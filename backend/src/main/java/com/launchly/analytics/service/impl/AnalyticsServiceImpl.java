@@ -109,12 +109,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             }
             botIds = userBots.stream().map(Bot::getId).toList();
 
-            totalSubscribers = botUserRepository.countByBotIdIn(botIds);
+            totalSubscribers = botUserRepository.countDistinctTelegramIdByBotIdIn(botIds);
             activeUsers24h = analyticsEventRepository.countActiveUsersByBotIdsAndCreatedAtAfter(botIds, start24h);
             clicksCount30d = analyticsEventRepository.countClicksByBotIdsAndCreatedAtAfter(botIds, startClicks30d);
             activeAutomations = userBots.stream().filter(Bot::isActive).count();
 
-            long totalSubscribersLastWeek = botUserRepository.countByBotIdInAndCreatedAtBefore(botIds, lastWeekDate);
+            long totalSubscribersLastWeek = botUserRepository.countDistinctTelegramIdByBotIdInAndCreatedAtBefore(botIds, lastWeekDate);
             long activeUsersYesterday = analyticsEventRepository.countActiveUsersByBotIdsAndCreatedAtBetween(botIds, startYesterday, start24h);
             long clicksCountLastMonth = analyticsEventRepository.countClicksByBotIdsAndCreatedAtBetween(botIds, startClicks60d, startClicks30d);
             long activeAutomationsLastWeek = userBots.stream()

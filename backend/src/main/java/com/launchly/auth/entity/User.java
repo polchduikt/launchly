@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import java.time.LocalDateTime;
 
@@ -103,4 +104,8 @@ public class User extends BaseEntity {
     @Column(name = "stats_notify_telegram", nullable = false)
     @Builder.Default
     private boolean statsNotifyTelegram = false;
+
+    @JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(name = "automation_folders", columnDefinition = "jsonb")
+    private String automationFolders;
 }

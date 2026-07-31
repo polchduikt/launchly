@@ -15,6 +15,7 @@ import com.launchly.common.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -123,5 +124,29 @@ public class BotController {
                                                          @Valid @RequestBody BotUserCreateRequest request,
                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.status(HttpStatus.CREATED).body(botService.createBotUser(id, request, userDetails.getId()));
+    }
+
+    @GetMapping(value = "/{id}/custom-fields", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> getCustomFields(@PathVariable Long id,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(botService.getCustomFields(id, userDetails.getId()));
+    }
+
+    @PutMapping(value = "/{id}/custom-fields", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> saveCustomFields(@PathVariable Long id,
+                                                    @RequestBody String customFieldsJson,
+                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(botService.saveCustomFields(id, customFieldsJson, userDetails.getId()));
+    }
+
+    @GetMapping(value = "/automation-folders", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> getAutomationFolders(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(botService.getAutomationFolders(userDetails.getId()));
+    }
+
+    @PutMapping(value = "/automation-folders", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> saveAutomationFolders(@RequestBody String foldersJson,
+                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(botService.saveAutomationFolders(foldersJson, userDetails.getId()));
     }
 }

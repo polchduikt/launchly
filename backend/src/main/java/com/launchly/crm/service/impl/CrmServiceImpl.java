@@ -64,7 +64,9 @@ public class CrmServiceImpl implements CrmService {
     private final EncryptionUtil encryptionUtil;
     private final Cloudinary cloudinary;
     private final com.launchly.notification.service.NotificationService notificationService;
- 
+    private final com.launchly.crm.repository.CrmLabelRepository crmLabelRepository;
+    private final com.launchly.auth.repository.UserRepository userRepository;
+
     @Autowired
     public CrmServiceImpl(OrderRepository orderRepository,
                           LeadRepository leadRepository,
@@ -79,7 +81,9 @@ public class CrmServiceImpl implements CrmService {
                           @Lazy TelegramBotManager botManager,
                           EncryptionUtil encryptionUtil,
                           Cloudinary cloudinary,
-                          com.launchly.notification.service.NotificationService notificationService) {
+                          com.launchly.notification.service.NotificationService notificationService,
+                          com.launchly.crm.repository.CrmLabelRepository crmLabelRepository,
+                          com.launchly.auth.repository.UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.leadRepository = leadRepository;
         this.conversationRepository = conversationRepository;
@@ -94,6 +98,8 @@ public class CrmServiceImpl implements CrmService {
         this.encryptionUtil = encryptionUtil;
         this.cloudinary = cloudinary;
         this.notificationService = notificationService;
+        this.crmLabelRepository = crmLabelRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -423,6 +429,9 @@ public class CrmServiceImpl implements CrmService {
                 conversation.getId(),
                 conversation.getStatus(),
                 conversation.isUnread(),
+                conversation.isFavorite(),
+                conversation.getTags() != null ? conversation.getTags() : List.of(),
+                conversation.getNotes(),
                 botUserName,
                 botUser.getUsername(),
                 botUser.getTelegramId(),
@@ -516,6 +525,15 @@ public class CrmServiceImpl implements CrmService {
         if (request.unread() != null) {
             conversation.setUnread(request.unread());
         }
+        if (request.favorite() != null) {
+            conversation.setFavorite(request.favorite());
+        }
+        if (request.tags() != null) {
+            conversation.setTags(request.tags());
+        }
+        if (request.notes() != null) {
+            conversation.setNotes(request.notes());
+        }
 
         conversation = conversationRepository.save(conversation);
         ConversationResponse response = toConversationResponse(conversation);
@@ -533,6 +551,40 @@ public class CrmServiceImpl implements CrmService {
         webSocketService.notifyNewMessage(conversation.getBot().getId(), wsNotify);
 
         return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> getLabels(Long userId) {
+        return crmLabelRepository.findByUserId(userId).stream()
+                .map(com.launchly.crm.entity.CrmLabel::getName)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public List<String> addLabel(String name, Long userId) {
+        if (name != null && !name.isBlank()) {
+            String trimmed = name.trim();
+            if (crmLabelRepository.findByUserIdAndName(userId, trimmed).isEmpty()) {
+                com.launchly.auth.entity.User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+                crmLabelRepository.save(com.launchly.crm.entity.CrmLabel.builder()
+                        .name(trimmed)
+                        .user(user)
+                        .build());
+            }
+        }
+        return getLabels(userId);
+    }
+
+    @Override
+    @Transactional
+    public List<String> deleteLabel(String name, Long userId) {
+        if (name != null && !name.isBlank()) {
+            crmLabelRepository.deleteByUserIdAndName(userId, name.trim());
+        }
+        return getLabels(userId);
     }
 
     private void verifyBotOwnership(Long botId, Long userId) {

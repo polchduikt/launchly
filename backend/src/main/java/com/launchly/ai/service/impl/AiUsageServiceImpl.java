@@ -25,22 +25,48 @@ public class AiUsageServiceImpl implements AiUsageService {
     private final AiUsageRepository aiUsageRepository;
     private final UserRepository userRepository;
     private final StringRedisTemplate redisTemplate;
-    private static final String AI_USAGE_KEY = "launchly:ai:usage:%d:%s";
+
+    private static final String AI_TOKENS_KEY = "launchly:ai:tokens:%d:%s";
     private static final Duration AI_USAGE_TTL = Duration.ofHours(25);
-    private static final int FREE_PLAN_LIMIT = 20;
+
+    public static long getPlanTokenLimit(Plan plan) {
+        if (plan == null || plan.getName() == null) return 20000L;
+        String planName = plan.getName().trim().toUpperCase();
+        return switch (planName) {
+            case "FREE" -> 20000L;
+            case "STARTER" -> 50000L;
+            case "PRO" -> 120000L;
+            case "BUSINESS" -> 250000L;
+            default -> 20000L;
+        };
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void checkTokenLimit(Long userId, Plan plan) {
+        long limit = getPlanTokenLimit(plan);
+        long used = getTokensUsedToday(userId);
+        if (used >= limit) {
+            throw new AppException(
+                HttpStatus.PAYMENT_REQUIRED,
+                "Daily AI token limit reached (0% remaining). Upgrade your plan for more tokens."
+            );
+        }
+    }
 
     @Override
     @Transactional
-    public void checkAndIncrement(Long userId, Plan plan) {
-        String key = String.format(AI_USAGE_KEY, userId, LocalDate.now());
-        Long count = redisTemplate.opsForValue().increment(key);
-        if (count != null && count == 1) {
+    public void recordTokenUsage(Long userId, Plan plan, int tokensConsumed) {
+        if (tokensConsumed <= 0) {
+            tokensConsumed = 1500; // Fallback estimate if API response didn't report exact token usage
+        }
+        
+        String key = String.format(AI_TOKENS_KEY, userId, LocalDate.now());
+        Long totalUsedInRedis = redisTemplate.opsForValue().increment(key, tokensConsumed);
+        if (totalUsedInRedis != null && totalUsedInRedis == tokensConsumed) {
             redisTemplate.expire(key, AI_USAGE_TTL);
         }
-        if ("FREE".equalsIgnoreCase(plan.getName()) && count != null && count > FREE_PLAN_LIMIT) {
-            throw new AppException(HttpStatus.PAYMENT_REQUIRED,
-                "Daily AI limit reached. Upgrade your plan for unlimited access.");
-        }
+
         LocalDate today = LocalDate.now();
         AiUsage aiUsage = aiUsageRepository.findByUserIdAndDate(userId, today)
                 .orElseGet(() -> {
@@ -50,27 +76,43 @@ public class AiUsageServiceImpl implements AiUsageService {
                             .user(user)
                             .date(today)
                             .requestCount(0)
+                            .tokensUsed(0L)
                             .build();
                 });
-        aiUsage.setRequestCount(count != null ? count.intValue() : aiUsage.getRequestCount() + 1);
+        aiUsage.setRequestCount(aiUsage.getRequestCount() + 1);
+        aiUsage.setTokensUsed(totalUsedInRedis != null ? totalUsedInRedis : aiUsage.getTokensUsed() + tokensConsumed);
         aiUsageRepository.save(aiUsage);
     }
 
     @Override
     @Transactional(readOnly = true)
     public AiUsageResponse getUsage(Long userId, Plan plan) {
-        String key = String.format(AI_USAGE_KEY, userId, LocalDate.now());
+        long limit = getPlanTokenLimit(plan);
+        long used = getTokensUsedToday(userId);
+        long remaining = Math.max(0L, limit - used);
+        int remainingPercentage = Math.max(0, Math.min(100, (int) Math.round((double) remaining / limit * 100)));
+
+        return new AiUsageResponse(
+            used,
+            limit,
+            remaining,
+            remainingPercentage,
+            LocalDate.now().plusDays(1).atStartOfDay().toString()
+        );
+    }
+
+    private long getTokensUsedToday(Long userId) {
+        String key = String.format(AI_TOKENS_KEY, userId, LocalDate.now());
         String value = redisTemplate.opsForValue().get(key);
-        int used;
         if (value != null) {
-            used = Integer.parseInt(value);
-        } else {
-            used = aiUsageRepository.findByUserIdAndDate(userId, LocalDate.now())
-                    .map(AiUsage::getRequestCount)
-                    .orElse(0);
-            redisTemplate.opsForValue().set(key, String.valueOf(used), AI_USAGE_TTL);
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException ignored) {}
         }
-        int limit = "FREE".equalsIgnoreCase(plan.getName()) ? FREE_PLAN_LIMIT : -1;
-        return new AiUsageResponse(used, limit, LocalDate.now().plusDays(1).atStartOfDay().toString());
+        long dbUsed = aiUsageRepository.findByUserIdAndDate(userId, LocalDate.now())
+                .map(AiUsage::getTokensUsed)
+                .orElse(0L);
+        redisTemplate.opsForValue().set(key, String.valueOf(dbUsed), AI_USAGE_TTL);
+        return dbUsed;
     }
 }

@@ -41,4 +41,12 @@ public class AiUsage extends BaseEntity {
     @Column(name = "request_count", nullable = false)
     @Builder.Default
     private int requestCount = 0;
+
+    @Column(name = "tokens_used", columnDefinition = "bigint default 0")
+    @Builder.Default
+    private Long tokensUsed = 0L;
+
+    public long getTokensUsed() {
+        return tokensUsed != null ? tokensUsed : 0L;
+    }
 }

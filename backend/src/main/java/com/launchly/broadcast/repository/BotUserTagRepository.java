@@ -24,6 +24,6 @@ public interface BotUserTagRepository extends JpaRepository<BotUserTag, Long> {
     @Query("SELECT but.tag.name, COUNT(but) FROM BotUserTag but WHERE but.tag.bot.id = :botId GROUP BY but.tag.name ORDER BY COUNT(but) DESC")
     List<Object[]> getTopTagsByBotId(@Param("botId") Long botId);
 
-    @Query("SELECT but.tag.name, COUNT(but) FROM BotUserTag but WHERE but.tag.bot.id IN :botIds GROUP BY but.tag.name ORDER BY COUNT(but) DESC")
+    @Query("SELECT but.tag.name, COUNT(DISTINCT but.botUser.telegramId) FROM BotUserTag but WHERE but.tag.bot.id IN :botIds GROUP BY but.tag.name ORDER BY COUNT(DISTINCT but.botUser.telegramId) DESC")
     List<Object[]> getTopTagsByBotIds(@Param("botIds") List<Long> botIds);
 }

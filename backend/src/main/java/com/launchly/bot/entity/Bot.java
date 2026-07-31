@@ -14,6 +14,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "bots", indexes = {
@@ -59,6 +61,10 @@ public class Bot extends BaseEntity {
 
     @Column(name = "blocked_at")
     private java.time.LocalDateTime blockedAt;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "custom_fields_data", columnDefinition = "jsonb")
+    private String customFieldsData;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

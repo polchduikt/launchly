@@ -5,7 +5,9 @@ import com.launchly.ai.dto.response.AiUsageResponse;
 
 public interface AiUsageService {
 
-    void checkAndIncrement(Long userId, Plan plan);
+    void checkTokenLimit(Long userId, Plan plan);
+
+    void recordTokenUsage(Long userId, Plan plan, int tokensConsumed);
 
     AiUsageResponse getUsage(Long userId, Plan plan);
 }

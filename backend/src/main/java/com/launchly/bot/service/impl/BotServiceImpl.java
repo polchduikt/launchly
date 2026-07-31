@@ -750,6 +750,41 @@ public class BotServiceImpl implements BotService {
         );
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public String getCustomFields(Long botId, Long userId) {
+        Bot bot = findBotByIdAndUser(botId, userId);
+        return bot.getCustomFieldsData() != null ? bot.getCustomFieldsData() : "{}";
+    }
+
+    @Override
+    @Transactional
+    public String saveCustomFields(Long botId, String customFieldsJson, Long userId) {
+        Bot bot = findBotByIdAndUser(botId, userId);
+        validateWriteAccess(bot, userId);
+        bot.setCustomFieldsData(customFieldsJson);
+        botRepository.save(bot);
+        return bot.getCustomFieldsData();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String getAutomationFolders(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        return user.getAutomationFolders() != null ? user.getAutomationFolders() : "{}";
+    }
+
+    @Override
+    @Transactional
+    public String saveAutomationFolders(String foldersJson, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        user.setAutomationFolders(foldersJson);
+        userRepository.save(user);
+        return user.getAutomationFolders();
+    }
+
     private void validateWriteAccess(Bot bot, Long userId) {
         if (!bot.getUser().getId().equals(userId)) {
             BotMember member = getWorkspaceMembership(bot, userId)

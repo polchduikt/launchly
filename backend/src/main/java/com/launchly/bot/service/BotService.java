@@ -41,4 +41,12 @@ public interface BotService {
     BotUserResponse createBotUser(Long botId, BotUserCreateRequest request, Long userId);
 
     void deleteBotUser(Long botId, Long botUserId, Long userId);
+
+    String getCustomFields(Long botId, Long userId);
+
+    String saveCustomFields(Long botId, String customFieldsJson, Long userId);
+
+    String getAutomationFolders(Long userId);
+
+    String saveAutomationFolders(String foldersJson, Long userId);
 }

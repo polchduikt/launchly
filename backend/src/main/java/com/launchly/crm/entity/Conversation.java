@@ -22,6 +22,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +59,18 @@ public class Conversation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bot_user_id", nullable = false)
     private BotUser botUser;
+
+    @Column(name = "is_favorite", columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean favorite = false;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    @Builder.Default
+    private List<String> tags = new ArrayList<>();
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("createdAt ASC")

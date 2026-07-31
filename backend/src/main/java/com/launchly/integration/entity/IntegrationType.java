@@ -7,5 +7,7 @@ public enum IntegrationType {
     CHATGPT,
     CLAUDE,
     DEEPSEEK,
-    GEMINI
+    GEMINI,
+    STRIPE,
+    PAYPAL
 }

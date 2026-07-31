@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 @RestController
 @RequestMapping("/api/v1/crm")
@@ -30,6 +31,26 @@ import java.util.List;
 public class CrmController {
 
     private final CrmService crmService;
+
+    @GetMapping("/labels")
+    public ResponseEntity<List<String>> getLabels(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(crmService.getLabels(userDetails.getId()));
+    }
+
+    @PostMapping("/labels")
+    public ResponseEntity<List<String>> addLabel(
+            @RequestBody java.util.Map<String, String> request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(crmService.addLabel(request.get("name"), userDetails.getId()));
+    }
+
+    @DeleteMapping("/labels/{name}")
+    public ResponseEntity<List<String>> deleteLabel(
+            @PathVariable String name,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(crmService.deleteLabel(name, userDetails.getId()));
+    }
 
     @GetMapping("/bots/{botId}/orders")
     public ResponseEntity<List<OrderResponse>> getOrders(

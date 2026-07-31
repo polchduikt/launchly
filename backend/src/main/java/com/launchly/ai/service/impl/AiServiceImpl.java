@@ -38,7 +38,6 @@ public class AiServiceImpl implements AiService {
     private final AiUsageService aiUsageService;
     private final PlanLimitService planLimitService;
     private final ObjectMapper objectMapper;
-    private static final int DAILY_LIMIT = 20;
 
     @Value("classpath:prompts/chat-system.txt")
     private Resource chatPromptResource;
@@ -63,23 +62,29 @@ public class AiServiceImpl implements AiService {
     @Override
     public AiChatResponse chat(AiChatRequest request, Long userId) {
         Plan plan = planLimitService.getActivePlan(userId);
-        aiUsageService.checkAndIncrement(userId, plan);
+        aiUsageService.checkTokenLimit(userId, plan);
+
         List<AiMessage> messages = new ArrayList<>();
         messages.add(new AiMessage("system", chatSystemPrompt));
         if (request.history() != null) {
             messages.addAll(request.history());
         }
         messages.add(new AiMessage("user", request.message()));
+
         String reply = aiProviderRouter.chat(messages, null);
+
+        int estimatedTokens = Math.max(500, (chatSystemPrompt.length() + request.message().length() + (reply != null ? reply.length() : 0)) / 3);
+        aiUsageService.recordTokenUsage(userId, plan, estimatedTokens);
+
         AiUsageResponse usage = aiUsageService.getUsage(userId, plan);
-        int limit = "FREE".equalsIgnoreCase(plan.getName()) ? DAILY_LIMIT : 999999;
-        return new AiChatResponse(reply, usage.requestsUsed(), limit);
+        return new AiChatResponse(reply, usage);
     }
 
     @Override
     public AiSchemaResponse generateSchema(AiSchemaRequest request, Long userId) {
         Plan plan = planLimitService.getActivePlan(userId);
-        aiUsageService.checkAndIncrement(userId, plan);
+        aiUsageService.checkTokenLimit(userId, plan);
+
         List<AiMessage> messages = new ArrayList<>();
         messages.add(new AiMessage("system", schemaSystemPrompt));
 
@@ -111,9 +116,11 @@ public class AiServiceImpl implements AiService {
             nodesNode = normalizeUsernameActions(nodesNode);
         }
 
+        int estimatedTokens = Math.max(1200, (schemaSystemPrompt.length() + request.description().length() + cleanJson.length()) / 3);
+        aiUsageService.recordTokenUsage(userId, plan, estimatedTokens);
+
         AiUsageResponse usage = aiUsageService.getUsage(userId, plan);
-        int limit = "FREE".equalsIgnoreCase(plan.getName()) ? DAILY_LIMIT : 999999;
-        return new AiSchemaResponse(nodesNode, edgesNode, usage.requestsUsed(), limit);
+        return new AiSchemaResponse(nodesNode, edgesNode, usage);
     }
 
     private String cleanJson(String rawResponse) {
