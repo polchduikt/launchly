@@ -26,14 +26,12 @@ export const useChatLocalStorage = ({
   const [contactNotes, setContactNotes] = useState<Record<number, string>>({});
   const [unreadConvIds, setUnreadConvIds] = useState<number[]>([]);
 
-  // Fetch labels from API on mount
   useEffect(() => {
     getLabelsApi()
       .then(setLabels)
       .catch((err) => console.error('Failed to load CRM labels:', err));
   }, []);
 
-  // Sync favorites, contactTags, contactNotes, unread from conversations prop
   useEffect(() => {
     const newFavs: number[] = [];
     const newTags: Record<number, string[]> = {};

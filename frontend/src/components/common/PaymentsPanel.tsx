@@ -15,6 +15,7 @@ import {
 } from '../../hooks/integration/useIntegrationQueries';
 import type { PaymentOrder } from '../../types/billing';
 import type { IntegrationResponse } from '../../types';
+import { paypalConfigSchema } from '../../schemas';
 
 export const PaymentsPanel: React.FC = () => {
   const activeBotId = useBotStore((state) => state.activeBotId) || 0;
@@ -38,29 +39,28 @@ export const PaymentsPanel: React.FC = () => {
   const [orders, setOrders] = useState<PaymentOrder[]>([]);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  const stripeActive = stripeIntegration?.active;
+  const paypalIntegrationId = paypalIntegration?.id;
+
   useEffect(() => {
-    if (stripeIntegration) {
-      setIsStripeConnected(stripeIntegration.active);
-    } else {
-      setIsStripeConnected(false);
-    }
+    setIsStripeConnected(!!stripeActive);
 
     if (paypalIntegration) {
       setIsPaypalConnected(paypalIntegration.active);
       const cfg = paypalIntegration.config || {};
-      if (cfg.paypalClientId) setPaypalClientId(cfg.paypalClientId);
-      if (cfg.paypalWebhookId) setPaypalWebhookId(cfg.paypalWebhookId);
-      if (cfg.paypalLiveClientId) setPaypalLiveClientId(cfg.paypalLiveClientId);
-      if (cfg.paypalLiveWebhookId) setPaypalLiveWebhookId(cfg.paypalLiveWebhookId);
-      if (cfg.currency) setCurrency(cfg.currency);
-      if (typeof cfg.notifyMessenger === 'boolean') setNotifyMessenger(cfg.notifyMessenger);
-      if (typeof cfg.notifyEmail === 'boolean') setNotifyEmail(cfg.notifyEmail);
-      if (typeof cfg.sendReceiptEmail === 'boolean') setSendReceiptEmail(cfg.sendReceiptEmail);
-      if (Array.isArray(cfg.orders)) setOrders(cfg.orders);
+      setPaypalClientId(cfg.paypalClientId || '');
+      setPaypalWebhookId(cfg.paypalWebhookId || '');
+      setPaypalLiveClientId(cfg.paypalLiveClientId || '');
+      setPaypalLiveWebhookId(cfg.paypalLiveWebhookId || '');
+      setCurrency(cfg.currency || 'USD');
+      setNotifyMessenger(!!cfg.notifyMessenger);
+      setNotifyEmail(!!cfg.notifyEmail);
+      setSendReceiptEmail(!!cfg.sendReceiptEmail);
+      setOrders(Array.isArray(cfg.orders) ? cfg.orders : []);
     } else {
       setIsPaypalConnected(false);
     }
-  }, [stripeIntegration, paypalIntegration]);
+  }, [stripeActive, paypalIntegrationId]);
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
@@ -116,7 +116,19 @@ export const PaymentsPanel: React.FC = () => {
       return;
     }
 
-    if (!paypalClientId.trim() || !paypalWebhookId.trim() || !paypalLiveClientId.trim() || !paypalLiveWebhookId.trim()) {
+    const payload = {
+      paypalClientId: paypalClientId.trim(),
+      paypalWebhookId: paypalWebhookId.trim(),
+      paypalLiveClientId: paypalLiveClientId.trim(),
+      paypalLiveWebhookId: paypalLiveWebhookId.trim(),
+      currency,
+      notifyMessenger,
+      notifyEmail,
+      sendReceiptEmail,
+    };
+
+    const validation = paypalConfigSchema.safeParse(payload);
+    if (!validation.success || !paypalClientId.trim() || !paypalWebhookId.trim() || !paypalLiveClientId.trim() || !paypalLiveWebhookId.trim()) {
       showNotification('error', t('settings.payments.paypal.error_fill'));
       return;
     }
@@ -128,14 +140,7 @@ export const PaymentsPanel: React.FC = () => {
         type: 'PAYPAL' as IntegrationResponse['type'],
         botId: activeBotId,
         config: {
-          paypalClientId: paypalClientId.trim(),
-          paypalWebhookId: paypalWebhookId.trim(),
-          paypalLiveClientId: paypalLiveClientId.trim(),
-          paypalLiveWebhookId: paypalLiveWebhookId.trim(),
-          currency,
-          notifyMessenger,
-          notifyEmail,
-          sendReceiptEmail,
+          ...payload,
           orders,
         },
       });

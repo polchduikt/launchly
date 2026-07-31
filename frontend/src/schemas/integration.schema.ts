@@ -13,3 +13,23 @@ export const webhookSchema = z.object({
 });
 
 export type WebhookSchemaType = z.infer<typeof webhookSchema>;
+
+export const stripeConfigSchema = z.object({
+  connected: z.boolean().optional(),
+  apiKey: z.string().optional(),
+});
+
+export type StripeConfigSchemaType = z.infer<typeof stripeConfigSchema>;
+
+export const paypalConfigSchema = z.object({
+  paypalClientId: z.string().optional(),
+  paypalWebhookId: z.string().optional(),
+  paypalLiveClientId: z.string().optional(),
+  paypalLiveWebhookId: z.string().optional(),
+  currency: z.string().optional(),
+  notifyMessenger: z.boolean().optional(),
+  notifyEmail: z.boolean().optional(),
+  sendReceiptEmail: z.boolean().optional(),
+});
+
+export type PaypalConfigSchemaType = z.infer<typeof paypalConfigSchema>;

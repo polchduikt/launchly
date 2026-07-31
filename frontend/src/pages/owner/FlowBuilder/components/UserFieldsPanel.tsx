@@ -4,6 +4,7 @@ import { useBotStore } from '../../../../store/useBotStore';
 import { t } from '../../../../i18n/config';
 import type { UserField, UserFieldFolder } from '../../../../types/bot';
 import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../api/bot';
+import { customFieldSchema, automationFolderSchema } from '../../../../schemas';
 
 export const UserFieldsPanel: React.FC = () => {
   const activeBotId = useBotStore((state) => state.activeBotId);
@@ -72,6 +73,9 @@ export const UserFieldsPanel: React.FC = () => {
       folder: activeFolderId
     };
 
+    const validation = customFieldSchema.safeParse(newField);
+    if (!validation.success) return;
+
     const updated = [...fields.filter(f => f.name !== newField.name), newField];
     saveFieldsData(updated, archivedFields, folders);
     setIsFieldModalOpen(false);
@@ -88,6 +92,9 @@ export const UserFieldsPanel: React.FC = () => {
       id: Math.random().toString(36).substring(7),
       name: newFolderName.trim()
     };
+
+    const folderValidation = automationFolderSchema.safeParse(newFolder);
+    if (!folderValidation.success) return;
 
     const updatedFolders = [...folders, newFolder];
     saveFieldsData(fields, archivedFields, updatedFolders);

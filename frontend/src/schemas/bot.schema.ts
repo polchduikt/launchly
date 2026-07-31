@@ -19,3 +19,19 @@ export const botSchema = z.object({
 });
 
 export type BotSchemaType = z.infer<typeof botSchema>;
+
+export const customFieldSchema = z.object({
+  name: z.string().min(1),
+  type: z.string().default('Text'),
+  description: z.string().optional(),
+  folder: z.string().nullable().optional(),
+});
+
+export type CustomFieldSchemaType = z.infer<typeof customFieldSchema>;
+
+export const automationFolderSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1),
+});
+
+export type AutomationFolderSchemaType = z.infer<typeof automationFolderSchema>;
