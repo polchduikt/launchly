@@ -1,13 +1,20 @@
+import React from 'react';
+import type { UseFormRegisterReturn } from 'react-hook-form';
+
+import type { UserRole } from '../enums/auth.enums';
+export type { UserRole };
+
 export interface User {
   id: number;
   email: string;
   name: string;
   avatar: string | null;
-  role: string;
+  role: UserRole | string;
   telegramUserId: number | null;
   telegramUsername: string | null;
   telegramName: string | null;
   telegramPhotoUrl: string | null;
+  provider?: string | null;
   notifyEmail: boolean;
   notifyTelegram: boolean;
   notificationEmail: string | null;
@@ -48,3 +55,20 @@ export interface AuthState {
   setAccessToken: (token: string) => void;
 }
 
+export interface AuthPageLayoutProps {
+  leftTitle?: string;
+  leftDescription?: string;
+  rightContent: React.ReactNode;
+}
+
+export interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  icon?: React.ReactNode;
+  error?: string;
+  registration: Partial<UseFormRegisterReturn>;
+  rightElement?: React.ReactNode;
+}
+
+export interface GoogleLoginButtonProps {
+  onClick: () => void;
+}

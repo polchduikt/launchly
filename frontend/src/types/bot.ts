@@ -4,10 +4,9 @@ import type { Position, Node, Edge } from '@xyflow/react';
 export interface FlowSchemaResponse {
   id: number;
   version: number;
-  nodes: Record<string, unknown>[];
-  edges: Record<string, unknown>[];
+  nodes: Node[];
+  edges: Edge[];
 }
-
 
 export interface BotResponse {
   id: number;
@@ -19,9 +18,16 @@ export interface BotResponse {
   active: boolean;
   blocked?: boolean;
   blockReason?: string | null;
+  blockedAt?: string;
   createdAt: string;
   updatedAt?: string;
   totalUsers: number;
+  stats?: {
+    users?: number;
+    messages?: number;
+    broadcasts?: number;
+    [key: string]: unknown;
+  };
   hasTelegramToken: boolean;
   role?: string | null;
 }
@@ -191,7 +197,7 @@ export interface EditButtonDrawerProps {
 
 export interface FlowBlock {
   [key: string]: unknown;
-  id?: string;
+  id: string;
   type: string;
   text?: string;
   imageUrl?: string;
@@ -335,6 +341,49 @@ export interface TagSearchSelectProps {
   tags: Array<{ id: number | string; name: string }>;
   onChange: (tag: { id: number | string; name: string }) => void;
   onCreateTag: () => void;
+}
+
+export interface Folder {
+  id: number | string;
+  name: string;
+}
+
+export interface TagFolder {
+  id: string;
+  name: string;
+  tagsCount?: number;
+}
+
+export interface UserField {
+  id?: number | string;
+  name: string;
+  type: string;
+  description?: string;
+  folderId?: string | null;
+  folder?: string | null;
+}
+
+export interface UserFieldFolder {
+  id: string;
+  name: string;
+  fieldsCount?: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  text: string;
+  imageUrl?: string;
+  buttons?: ButtonData[];
+  buttonsConsumed?: boolean;
+  isUser?: boolean;
+  nodeId?: string;
+}
+
+export interface PathChoice {
+  title: string;
+  subtitle: string;
+  options: Array<{ label: string; value: string; percentage?: number; color?: string }>;
+  sourceNodeId: string;
 }
 
 

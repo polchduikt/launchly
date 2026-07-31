@@ -94,5 +94,8 @@
   "broadcasts.tooltip.cancel_schedule": "Скасувати розклад",
   "broadcasts.tooltip.delete": "Видалити розсилку",
   "broadcasts.tooltip.edit": "Редагувати розсилку",
-  "broadcasts.tooltip.send_now": "Надіслати зараз"
+  "broadcasts.tooltip.send_now": "Надіслати зараз",
+  "broadcasts.create.error_name": "Назва кампанії є обов'язковою",
+  "broadcasts.create.error_message": "Текст повідомлення є обов'язковим",
+  "broadcasts.create.error_tag_required": "Назва тегу є обов'язковою при фільтрації за тегом"
 }

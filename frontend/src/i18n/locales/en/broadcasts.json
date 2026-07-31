@@ -94,5 +94,8 @@
   "broadcasts.tooltip.cancel_schedule": "Cancel Schedule",
   "broadcasts.tooltip.delete": "Delete Broadcast",
   "broadcasts.tooltip.edit": "Edit Broadcast",
-  "broadcasts.tooltip.send_now": "Send Now"
+  "broadcasts.tooltip.send_now": "Send Now",
+  "broadcasts.create.error_name": "Campaign name is required",
+  "broadcasts.create.error_message": "Message text is required",
+  "broadcasts.create.error_tag_required": "Tag name is required when filtering by tag"
 }

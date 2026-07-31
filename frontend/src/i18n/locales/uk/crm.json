@@ -179,5 +179,7 @@
   "crm.tags.no_match_create": "Не знайдено тегів, що відповідають \"{search}\". Створити?",
   "crm.tags.placeholder_select_or_search": "Оберіть або знайдіть тег...",
   "crm.toolbar.labels": "Керувати ярликами",
-  "crm.toolbar.remind_me_in": "Нагадати через"
+  "crm.toolbar.remind_me_in": "Нагадати через",
+  "crm.contacts.create.error_firstname": "Ім'я є обов'язковим",
+  "crm.contacts.create.error_email": "Некоректна електронна пошта"
 }

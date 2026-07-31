@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { User, AuthState } from '../types/auth';
-import { queryClient } from '../lib/queryClient';
+import { queryClient } from '../api/queryClient';
 import { useBotStore } from './useBotStore';
 
 export const useAuthStore = create<AuthState>((set) => {

@@ -295,6 +295,7 @@
   "audit.admin_unblock.title": "Administrative Unblock",
   "audit.automation_modified.desc": "Updated flow schema structure and funnel node triggers",
   "audit.automation_modified.title": "Automation Modified: {botName}",
+  "audit.automation_modified.title_simple": "Automation Modified",
   "audit.bot_connected.desc": "Created and activated bot in the system (Bot ID: #{botId})",
   "audit.bot_connected.title": "Bot Connected: {botName}",
   "audit.bot_created.title": "Bot Created",

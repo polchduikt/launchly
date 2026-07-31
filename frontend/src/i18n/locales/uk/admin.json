@@ -294,6 +294,7 @@
   "audit.admin_unblock.title": "Адміністративне розблокування",
   "audit.automation_modified.desc": "Оновлено структуру бот-схеми та тригери нодів воронки",
   "audit.automation_modified.title": "Модифікація автоматизації: {botName}",
+  "audit.automation_modified.title_simple": "Модифікація автоматизації",
   "audit.bot_connected.desc": "Створено та активовано бота у системі (Bot ID: #{botId})",
   "audit.bot_connected.title": "Підключення бота: {botName}",
   "audit.bot_created.title": "Створено бота",

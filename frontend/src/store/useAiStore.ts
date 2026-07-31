@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AiState } from '../features/ai/types';
+import type { AiState } from '../types/ai';
 
 export const useAiStore = create<AiState>((set) => ({
   isOpen: false,

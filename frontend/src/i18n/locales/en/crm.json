@@ -179,5 +179,7 @@
   "crm.tags.no_match_create": "No tag matches \"{search}\". Create it?",
   "crm.tags.placeholder_select_or_search": "Select or search tag...",
   "crm.toolbar.labels": "Manage labels",
-  "crm.toolbar.remind_me_in": "Remind me in"
+  "crm.toolbar.remind_me_in": "Remind me in",
+  "crm.contacts.create.error_firstname": "First name is required",
+  "crm.contacts.create.error_email": "Invalid email address"
 }
