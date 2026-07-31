@@ -1,0 +1,16 @@
+{
+  "blog.hero.badge": "LAUNCHLY INSIGHTS & RESOURCES",
+  "blog.hero.title": "OUR BLOG",
+  "blog.hero.subtitle": "Guides, tutorials, product updates, and automation strategies for modern Telegram businesses.",
+  "blog.search.placeholder": "SEARCH ARTICLES...",
+  "blog.card.read": "READ",
+  "blog.empty.title": "No Articles Found",
+  "blog.empty.desc": "Try searching for a different keyword or topic.",
+  "blog.empty.clear": "Clear Search",
+  "blog.detail.back": "Back to Blog",
+  "blog.detail.share": "Share Article",
+  "blog.detail.copied": "Link Copied!",
+  "blog.detail.loading": "Loading article...",
+  "blog.detail.not_found": "Article Not Found",
+  "blog.detail.read_time": "{min} min read"
+}

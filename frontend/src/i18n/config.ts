@@ -11,6 +11,9 @@ import enDashboard   from './locales/en/dashboard.json';
 import enEditor      from './locales/en/editor.json';
 import enFlowBuilder from './locales/en/flow_builder.json';
 import enSettings    from './locales/en/settings.json';
+import enLanding    from './locales/en/landing.json';
+import enLegal      from './locales/en/legal.json';
+import enBlog       from './locales/en/blog.json';
 import ukAdmin       from './locales/uk/admin.json';
 import ukAi          from './locales/uk/ai.json';
 import ukAuth        from './locales/uk/auth.json';
@@ -23,17 +26,22 @@ import ukDashboard   from './locales/uk/dashboard.json';
 import ukEditor      from './locales/uk/editor.json';
 import ukFlowBuilder from './locales/uk/flow_builder.json';
 import ukSettings    from './locales/uk/settings.json';
+import ukLanding    from './locales/uk/landing.json';
+import ukLegal      from './locales/uk/legal.json';
+import ukBlog       from './locales/uk/blog.json';
 
 const fallbacks: Record<'en' | 'uk', Record<string, string>> = {
   en: {
     ...enAdmin, ...enAi, ...enAuth, ...enAutomations, ...enBilling,
     ...enBroadcasts, ...enCommon, ...enCrm, ...enDashboard,
     ...enEditor, ...enFlowBuilder, ...enSettings,
+    ...enLanding, ...enLegal, ...enBlog,
   },
   uk: {
     ...ukAdmin, ...ukAi, ...ukAuth, ...ukAutomations, ...ukBilling,
     ...ukBroadcasts, ...ukCommon, ...ukCrm, ...ukDashboard,
     ...ukEditor, ...ukFlowBuilder, ...ukSettings,
+    ...ukLanding, ...ukLegal, ...ukBlog,
   },
 };
 

@@ -26,6 +26,10 @@ const CheckoutSuccessPage = lazy(() => import('../pages/owner/CheckoutSuccess/Ch
 const CheckoutCancelPage = lazy(() => import('../pages/owner/CheckoutCancel/CheckoutCancelPage'));
 const BlogPage = lazy(() => import('../pages/public/Blog/BlogPage'));
 const BlogDetailPage = lazy(() => import('../pages/public/BlogDetail/BlogDetailPage'));
+const TermsOfServicePage = lazy(() => import('../pages/public/Terms/TermsOfServicePage'));
+const PrivacyPolicyPage = lazy(() => import('../pages/public/Privacy/PrivacyPolicyPage'));
+const AcceptableUsePolicyPage = lazy(() => import('../pages/public/Legal/AcceptableUsePolicyPage'));
+const AiTermsPage = lazy(() => import('../pages/public/Legal/AiTermsPage'));
 const BlockedPage = lazy(() => import('../pages/public/Blocked/BlockedPage'));
 
 const AdminStatsPage = lazy(() => import('../pages/admin/AdminStats/AdminStatsPage'));
@@ -121,6 +125,10 @@ export const AppRouter: React.FC = () => {
           <Route path={ROUTES.LANDING} element={<LandingPage />} />
           <Route path={ROUTES.BLOG} element={<BlogPage />} />
           <Route path={ROUTES.BLOG_DETAIL} element={<BlogDetailPage />} />
+          <Route path={ROUTES.TERMS} element={<TermsOfServicePage />} />
+          <Route path={ROUTES.PRIVACY} element={<PrivacyPolicyPage />} />
+          <Route path={ROUTES.ACCEPTABLE_USE} element={<AcceptableUsePolicyPage />} />
+          <Route path={ROUTES.AI_TERMS} element={<AiTermsPage />} />
           <Route path={ROUTES.BLOCKED} element={<BlockedPage />} />
 
           <Route element={<PublicOnlyRoute />}>

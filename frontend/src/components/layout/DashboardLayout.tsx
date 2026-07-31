@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import logoL from '../../assets/images/logo-l.png';
 import { NAV_ITEMS } from './config/navItems';
 import { useTranslation } from '../../i18n/config';
 import type { DashboardLayoutProps } from '../../types/shared';
-import { HelpCircle, BookOpen, Users, Briefcase, Lightbulb, ClipboardList, FileText } from 'lucide-react';
+import { HelpCircle, BookOpen, ClipboardList, FileText } from 'lucide-react';
 import { useBotStore } from '../../store/useBotStore';
 import { useBotUsersQuery } from '../../hooks/crm/useCrmQueries';
 import { useSubscriptionQuery } from '../../hooks/bot/useBillingQueries';
@@ -276,81 +276,45 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     href="https://knowledgebase.launchly.so"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
+                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-655 rounded-xl transition-all text-left cursor-pointer"
                   >
                     <BookOpen size={16} className="text-slate-400 shrink-0" />
                     {t('help.menu.knowledge_base')}
                   </a>
                   <a
-                    href="https://community.launchly.so"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
-                  >
-                    <Users size={16} className="text-slate-400 shrink-0" />
-                    {t('help.menu.ask_community')}
-                  </a>
-                  <a
-                    href="https://agencies.launchly.so"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
-                  >
-                    <Briefcase size={16} className="text-slate-400 shrink-0" />
-                    {t('help.menu.hire_agency')}
-                  </a>
-                  <a
-                    href="https://ideas.launchly.so"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
-                  >
-                    <Lightbulb size={16} className="text-slate-400 shrink-0" />
-                    {t('help.menu.share_idea')}
-                  </a>
-                  <a
                     href="https://changelog.launchly.so"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
+                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-655 rounded-xl transition-all text-left cursor-pointer"
                   >
                     <ClipboardList size={16} className="text-slate-400 shrink-0" />
                     {t('help.menu.changelog')}
                   </a>
-                  <a
-                    href="https://blog.launchly.so"
+                  <Link
+                    to={ROUTES.BLOG}
                     target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-650 rounded-xl transition-all text-left cursor-pointer"
+                    className="flex items-center gap-3 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-indigo-655 rounded-xl transition-all text-left cursor-pointer"
                   >
                     <FileText size={16} className="text-slate-400 shrink-0" />
                     {t('help.menu.blog')}
-                  </a>
+                  </Link>
                 </div>
 
-                <div className="space-y-1.5 pt-1">
-                  <a
-                    href="https://launchly.so/terms"
+                <div className="space-y-1.5 pt-1 border-t border-slate-100">
+                  <Link
+                    to={ROUTES.TERMS}
                     target="_blank"
-                    rel="noopener noreferrer"
                     className="block px-2.5 py-1 text-xs font-bold text-slate-600 hover:text-indigo-655 transition-colors text-left"
                   >
                     {t('help.menu.terms')}
-                  </a>
-                  <a
-                    href="https://launchly.so/privacy"
+                  </Link>
+                  <Link
+                    to={ROUTES.PRIVACY}
                     target="_blank"
-                    rel="noopener noreferrer"
                     className="block px-2.5 py-1 text-xs font-bold text-slate-600 hover:text-indigo-655 transition-colors text-left"
                   >
                     {t('help.menu.privacy_policy')}
-                  </a>
-                  <button
-                    onClick={() => console.log('Privacy settings clicked')}
-                    className="w-full px-2.5 py-1 text-xs font-bold text-slate-600 hover:text-indigo-655 transition-colors text-left cursor-pointer"
-                  >
-                    {t('help.menu.privacy_settings')}
-                  </button>
+                  </Link>
                 </div>
               </div>
             )}

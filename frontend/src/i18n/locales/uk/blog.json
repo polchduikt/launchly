@@ -1,0 +1,16 @@
+{
+  "blog.hero.badge": "БЛОГ ТА РЕСУРСИ LAUNCHLY",
+  "blog.hero.title": "НАШ БЛОГ",
+  "blog.hero.subtitle": "Інструкції, гайди, оновлення продукту та стратегії автоматизації для сучасного бізнесу в Telegram.",
+  "blog.search.placeholder": "ПОШУК СТАТЕЙ...",
+  "blog.card.read": "ЧИТАТИ",
+  "blog.empty.title": "Статей Не Знайдено",
+  "blog.empty.desc": "Спробуйте змінити ключове слово або тему пошуку.",
+  "blog.empty.clear": "Очистити Пошук",
+  "blog.detail.back": "Назад до Блогу",
+  "blog.detail.share": "Поділитися Статтею",
+  "blog.detail.copied": "Посилання скопійовано!",
+  "blog.detail.loading": "Завантаження статті...",
+  "blog.detail.not_found": "Статтю не знайдено",
+  "blog.detail.read_time": "{min} хв читання"
+}

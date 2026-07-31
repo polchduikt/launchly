@@ -1,246 +1,330 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { BLOG_ARTICLES } from '../../../const/blogData';
 import { useBlogArticleDetailQuery } from '../../../hooks/dashboard/useBlogQueries';
-import { ArrowLeft, Link, Share2, Calendar, User, Clock, Loader2 } from 'lucide-react';
-import logoL from '../../../assets/images/logo-l.png';
-
-const BlogFooter: React.FC = () => {
-  return (
-    <footer className="w-full bg-slate-950 text-white py-16 px-6 md:px-16 mt-20 select-none">
-      <div className="max-w-[1650px] w-[95%] mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
-          <div className="space-y-4">
-            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Product</h4>
-            <ul className="space-y-2.5 text-xs text-slate-400 font-semibold">
-              <li><a href="#" className="hover:text-white transition-colors">Visual Flows</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Automations</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Smart Chats</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Launchly AI</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Integrations</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-            </ul>
-          </div>
-          <div className="space-y-4">
-            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Resources</h4>
-            <ul className="space-y-2.5 text-xs text-slate-400 font-semibold">
-              <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Community</a></li>
-              <li><a href="/blog" className="hover:text-white transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">How to</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Video Course</a></li>
-            </ul>
-          </div>
-          <div className="space-y-4">
-            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Launchly</h4>
-            <ul className="space-y-2.5 text-xs text-slate-400 font-semibold">
-              <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Manifesto</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Press</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacy & Security</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div className="max-w-[1650px] w-[95%] mx-auto border-t border-slate-900 mt-16 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
-        <div className="flex items-center gap-2">
-          <span className="text-white font-black tracking-tight text-sm">Launchly</span>
-        </div>
-        <span>© 2026, LAUNCHLY, INC. ALL RIGHTS RESERVED.</span>
-      </div>
-    </footer>
-  );
-};
+import { ArrowLeft, Share2, Calendar, User, Clock, Loader2, Check, ShieldCheck, Lock } from 'lucide-react';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { ROUTES } from '../../../routes/paths';
+import { useTranslation } from '../../../i18n/config';
+import logo from '../../../assets/images/logo.png';
 
 export const BlogDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((state) => !!state.accessToken);
+  const { t, currentLanguage, changeLanguage } = useTranslation();
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState<boolean>(false);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
 
   const { data: article = BLOG_ARTICLES.find((a) => a.id === id), isLoading } = useBlogArticleDetailQuery(id);
 
+  const handleShareArticle = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2500);
+  };
+
   if (isLoading) {
     return (
-      <div className="flex-1 bg-white flex flex-col items-center justify-center p-8 min-h-screen">
-        <Loader2 className="animate-spin text-indigo-600" size={24} />
-        <span className="text-xs font-semibold text-slate-500 mt-2">Loading article...</span>
+      <div className="min-h-screen bg-[#F2EBDD] flex flex-col items-center justify-center p-8">
+        <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
+        <span className="font-['JetBrains_Mono',monospace] text-xs font-bold text-[#0A0A0A] mt-3 uppercase tracking-wider">
+          {t('blog.detail.loading', 'Loading article...')}
+        </span>
       </div>
     );
   }
 
   if (!article) {
     return (
-      <div className="flex-1 bg-white flex flex-col items-center justify-center p-8 min-h-screen">
-        <h2 className="text-xl font-bold text-slate-800">Article not found</h2>
+      <div className="min-h-screen bg-[#F2EBDD] flex flex-col items-center justify-center p-8 space-y-4">
+        <h2 className="font-['Anybody',sans-serif] text-3xl font-black uppercase text-[#0A0A0A]">
+          {t('blog.detail.not_found', 'Article Not Found')}
+        </h2>
         <button
-          onClick={() => navigate('/blog')}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold"
+          onClick={() => navigate(ROUTES.BLOG)}
+          className="bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-3 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer"
         >
-          Back to Blog
+          {t('blog.detail.back', 'Back to Blog')}
         </button>
       </div>
     );
   }
 
-  const handleShareArticle = () => {
-    navigator.clipboard.writeText(window.location.href);
-    alert('Article link copied to clipboard!');
-  };
-
   return (
-    <div className="flex-1 bg-white overflow-y-auto font-sans min-h-screen relative flex flex-col justify-between w-full">
+    <div className="min-h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased flex flex-col justify-between relative z-0 selection:bg-[#0A0A0A] selection:text-[#F2EBDD]">
+      <div
+        className="fixed inset-0 z-[-1] pointer-events-none opacity-5"
+        style={{
+          backgroundColor: '#F2EBDD',
+          backgroundImage: `
+            linear-gradient(#0A0A0A 1px, transparent 1px),
+            linear-gradient(90deg, #0A0A0A 1px, transparent 1px)
+          `,
+          backgroundSize: '20px 20px',
+          backgroundPosition: '-1px -1px'
+        }}
+      />
+
       <div>
-        <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-100 py-4 px-6 md:px-12 flex items-center justify-between shrink-0">
-          <div className="max-w-[1650px] w-full mx-auto flex items-center justify-between">
-            <div className="flex items-center cursor-pointer" onClick={() => navigate('/blog')}>
-               <img src={logoL} alt="Logo" className="h-8 w-auto object-contain" />
-            </div>
-            <nav className="hidden md:flex items-center gap-8 text-xs font-bold text-slate-600 uppercase tracking-wider">
-              <a href="#" className="hover:text-slate-900 transition-colors">Product</a>
-              <a href="#" className="hover:text-slate-900 transition-colors">Solutions</a>
-              <a href="#" className="hover:text-slate-900 transition-colors">Agencies</a>
-              <a href="#" className="hover:text-slate-900 transition-colors">Pricing</a>
-              <a href="/blog" className="text-indigo-600 hover:text-indigo-700 transition-colors">Resources</a>
-            </nav>
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => navigate('/login')}
-                className="px-5 py-2 border border-slate-900 hover:bg-slate-50 text-slate-900 text-xs font-bold rounded-full transition-all cursor-pointer"
+        <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] fixed top-0 w-full z-50 flex justify-between items-center h-20 px-6 md:px-12 lg:px-16 relative">
+          
+          <div className="flex items-center gap-4">
+            <Link to={ROUTES.LANDING} className="flex items-center">
+              <img src={logo} alt="Launchly Logo" className="h-10 sm:h-12 w-auto object-contain cursor-pointer" />
+            </Link>
+
+            <div className="relative ml-2">
+              <button
+                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                onBlur={() => setTimeout(() => setIsLangDropdownOpen(false), 200)}
+                className="flex items-center gap-1 font-['JetBrains_Mono',monospace] text-sm font-bold text-[#0A0A0A] border-b-2 border-[#0A0A0A] pb-0.5 transition-all cursor-pointer select-none"
               >
-                Get Started
+                <span>{currentLanguage === 'uk' ? 'Uk' : 'En'}</span>
+                <span className="text-[10px] tracking-tighter">▼</span>
               </button>
-              <button 
-                onClick={() => navigate('/login')}
-                className="text-xs font-bold text-slate-600 hover:text-slate-955 transition-colors cursor-pointer"
-              >
-                Sign In
-              </button>
+
+              {isLangDropdownOpen && (
+                <div className="absolute top-full left-0 mt-2 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] py-1 min-w-[75px] z-50">
+                  <button
+                    onClick={() => {
+                      changeLanguage('en');
+                      setIsLangDropdownOpen(false);
+                    }}
+                    className={`w-full px-3 py-1 text-left font-['JetBrains_Mono',monospace] text-xs font-bold hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors cursor-pointer ${
+                      currentLanguage === 'en' ? 'bg-[#0A0A0A]/10 font-black' : ''
+                    }`}
+                  >
+                    En
+                  </button>
+                  <button
+                    onClick={() => {
+                      changeLanguage('uk');
+                      setIsLangDropdownOpen(false);
+                    }}
+                    className={`w-full px-3 py-1 text-left font-['JetBrains_Mono',monospace] text-xs font-bold hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors cursor-pointer ${
+                      currentLanguage === 'uk' ? 'bg-[#0A0A0A]/10 font-black' : ''
+                    }`}
+                  >
+                    Uk
+                  </button>
+                </div>
+              )}
             </div>
+          </div>
+
+          <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+            <Link 
+              to={`${ROUTES.LANDING}#features`} 
+              className="text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors duration-200 px-2.5 py-1"
+            >
+              {t('landing.nav.product', 'PRODUCT')}
+            </Link>
+            <Link 
+              to={`${ROUTES.LANDING}#features`} 
+              className="text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors duration-200 px-2.5 py-1"
+            >
+              {t('landing.nav.features', 'FEATURES')}
+            </Link>
+            <Link 
+              to={`${ROUTES.LANDING}#pricing`} 
+              className="text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors duration-200 px-2.5 py-1"
+            >
+              {t('landing.nav.pricing', 'PRICING')}
+            </Link>
+            <Link 
+              to={ROUTES.BLOG} 
+              className="text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider bg-[#0A0A0A] text-[#F2EBDD] px-2.5 py-1"
+            >
+              {t('landing.nav.blog', 'BLOG')}
+            </Link>
+          </nav>
+
+          <div className="flex items-center gap-4">
+            {isAuthenticated ? (
+              <button
+                onClick={() => navigate(ROUTES.HOME)}
+                className="bg-[#0A0A0A] text-[#F2EBDD] font-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-2.5 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer"
+              >
+                {t('landing.nav.dashboard', 'DASHBOARD')}
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate(ROUTES.LOGIN)}
+                  className="font-['JetBrains_Mono',monospace] text-xs font-bold text-[#0A0A0A] uppercase tracking-wider hover:underline underline-offset-4 cursor-pointer"
+                >
+                  {t('landing.nav.login', 'LOGIN')}
+                </button>
+                <button
+                  onClick={() => navigate(ROUTES.REGISTER)}
+                  className="bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-2.5 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer"
+                >
+                  {t('landing.nav.signup', 'SIGN UP')}
+                </button>
+              </>
+            )}
           </div>
         </header>
-        <div className="max-w-[1650px] w-[95%] mx-auto px-4 md:px-8 pt-24 pb-6 border-b border-slate-100 flex items-center justify-between">
-          <button
-            onClick={() => navigate('/blog')}
-            className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
-          >
-            <ArrowLeft size={14} />
-            <span>Back to Blog</span>
-          </button>
-          <div className="flex items-center gap-2">
+
+        <div className="max-w-4xl mx-auto px-6 pt-28 pb-16 space-y-8">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate(ROUTES.BLOG)}
+              className="bg-[#F2EBDD] text-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all px-4 py-2 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase flex items-center gap-2 cursor-pointer"
+            >
+              <ArrowLeft size={14} />
+              <span>{t('blog.detail.back', 'Back to Blog')}</span>
+            </button>
+
             <button
               onClick={handleShareArticle}
-              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"
-              title="Copy Link"
+              className="bg-[#F2EBDD] text-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all px-4 py-2 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase flex items-center gap-2 cursor-pointer"
             >
-              <Link size={15} />
-            </button>
-            <button
-              onClick={handleShareArticle}
-              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"
-              title="Share"
-            >
-              <Share2 size={15} />
+              {isCopied ? <Check size={14} className="text-emerald-600" /> : <Share2 size={14} />}
+              <span>{isCopied ? t('blog.detail.copied', 'Link Copied!') : t('blog.detail.share', 'Share Article')}</span>
             </button>
           </div>
-        </div>
 
-        <article className="max-w-4xl mx-auto px-6 py-12 space-y-8">
-          <div className="flex items-center gap-2 text-[10px] font-extrabold tracking-widest text-indigo-600 uppercase">
-            <span>{article.category}</span>
-            <span className="w-1 h-1 bg-slate-300 rounded-full" />
-            <span>Blog</span>
-          </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-955 leading-tight tracking-tight">
-            {article.title}
-          </h1>
-          <div className="flex flex-wrap items-center gap-6 text-xs text-slate-500 font-bold border-y border-slate-100 py-4">
-            <div className="flex items-center gap-1.5">
-              <User size={14} className="text-slate-400" />
-              <span>Written by {article.author}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Clock size={14} className="text-slate-400" />
-              <span>{article.readTime}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Calendar size={14} className="text-slate-400" />
-              <span>{article.date}</span>
-            </div>
-          </div>
-
-          <div className="aspect-[16/9] w-full rounded-[32px] overflow-hidden border border-slate-100 bg-slate-50 shadow-md">
-            <img src={article.coverImage} alt={article.title} className="w-full h-full object-cover" />
-          </div>
-          <div className="space-y-6 pt-4">
-            {article.contentBlocks.map((block, idx) => {
-              if (block.type === 'paragraph') {
-                return (
-                  <p key={idx} className="text-slate-800 text-lg leading-relaxed font-normal">
-                    {block.text}
-                  </p>
-                );
-              }
-              if (block.type === 'heading') {
-                const Tag = (`h${Math.min(6, Math.max(1, block.level || 2))}` as unknown) as React.ElementType;
-                const sizeClass =
-                  block.level === 1
-                    ? 'text-3xl font-black text-slate-900 mt-10'
-                    : 'text-2xl font-extrabold text-slate-900 mt-8';
-                return (
-                  <Tag key={idx} className={`${sizeClass} tracking-tight`}>
-                    {block.text}
-                  </Tag>
-                );
-              }
-              if (block.type === 'quote') {
-                return (
-                  <div key={idx} className="border-l-4 border-indigo-650 bg-indigo-50/20 rounded-r-3xl p-8 my-8">
-                    <p className="italic text-slate-900 text-xl font-bold leading-relaxed">
-                      "{block.text}"
-                    </p>
-                    {block.author && (
-                      <p className="text-xs font-bold text-slate-400 mt-2">— {block.author}</p>
-                    )}
-                  </div>
-                );
-              }
-              if (block.type === 'list') {
-                return (
-                  <ul key={idx} className="list-disc pl-6 space-y-2 text-slate-800 text-lg leading-relaxed font-normal">
-                    {block.items.map((item, itemIdx) => (
-                      <li key={itemIdx}>{item}</li>
-                    ))}
-                  </ul>
-                );
-              }
-              if (block.type === 'image') {
-                return (
-                  <div key={idx} className="my-8 space-y-2 max-w-4xl mx-auto w-full">
-                    <div className="rounded-[32px] overflow-hidden border border-slate-100 shadow-md">
-                      <img src={block.url} alt={block.caption || 'Inline Image'} className="w-full h-full object-cover" />
-                    </div>
-                    {block.caption && (
-                      <p className="text-xs font-semibold text-slate-400 text-center italic mt-2">{block.caption}</p>
-                    )}
-                  </div>
-                );
-              }
-              return null;
-            })}
-          </div>
-          <div className="pt-8 border-t border-slate-100 flex flex-wrap gap-2">
-            {article.tags.map((tag) => (
-              <span
-                key={tag}
-                className="text-[10px] font-extrabold tracking-wider text-slate-500 uppercase border border-slate-200 px-3 py-1 rounded-full"
-              >
-                #{tag}
+          <article className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] p-6 sm:p-10 lg:p-12 space-y-8">
+            
+            <div className="space-y-4 border-b-2 border-[#0A0A0A] pb-6">
+              <span className="bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-widest px-3 py-1 inline-block border border-white">
+                {article.category}
               </span>
-            ))}
-          </div>
-        </article>
+
+              <h1 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl font-black uppercase text-[#0A0A0A] leading-tight tracking-tight">
+                {article.title}
+              </h1>
+
+              <div className="flex flex-wrap items-center justify-between gap-4 font-['JetBrains_Mono',monospace] text-xs font-bold text-[#0A0A0A] pt-2">
+                <div className="flex items-center gap-4">
+                  <span className="flex items-center gap-1.5">
+                    <User size={14} />
+                    <span>{article.author}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Calendar size={14} />
+                    <span>{article.date}</span>
+                  </span>
+                </div>
+                <span className="flex items-center gap-1.5 bg-white border border-[#0A0A0A] px-2.5 py-1">
+                  <Clock size={14} />
+                  <span>{article.readTime || t('blog.detail.read_time', { min: 5 })}</span>
+                </span>
+              </div>
+            </div>
+
+            <div className="aspect-[16/9] w-full border-2 border-[#0A0A0A] overflow-hidden bg-slate-200 shadow-[4px_4px_0px_#0A0A0A]">
+              <img
+                src={article.coverImage}
+                alt={article.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            <div className="space-y-6 font-['Geist',sans-serif] text-base text-[#0A0A0A] leading-relaxed font-medium">
+              {article.contentBlocks?.map((block, idx) => {
+                if (block.type === 'paragraph') {
+                  return <p key={idx}>{block.text}</p>;
+                }
+                if (block.type === 'heading') {
+                  return (
+                    <h2 key={idx} className="font-['Anybody',sans-serif] text-2xl font-black uppercase text-[#0A0A0A] pt-4 border-b border-[#0A0A0A]/20 pb-2">
+                      {block.text}
+                    </h2>
+                  );
+                }
+                if (block.type === 'quote') {
+                  return (
+                    <blockquote key={idx} className="bg-[#0A0A0A] text-[#F2EBDD] p-6 border-l-8 border-[#F2EBDD] font-['JetBrains_Mono',monospace] text-sm font-bold my-4 shadow-[4px_4px_0px_#0A0A0A]">
+                      "{block.text}"
+                      {block.author && <span className="block mt-2 text-xs opacity-75">— {block.author}</span>}
+                    </blockquote>
+                  );
+                }
+                if (block.type === 'list') {
+                  return (
+                    <ul key={idx} className="list-disc pl-6 space-y-2">
+                      {block.items.map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  );
+                }
+                if (block.type === 'image') {
+                  return (
+                    <div key={idx} className="my-6 border-2 border-[#0A0A0A] bg-slate-200 overflow-hidden shadow-[4px_4px_0px_#0A0A0A]">
+                      <img src={block.url} alt={block.caption || 'Article image'} className="w-full h-auto object-cover" />
+                      {block.caption && <p className="p-2 text-center text-xs font-mono font-bold bg-[#0A0A0A] text-[#F2EBDD]">{block.caption}</p>}
+                    </div>
+                  );
+                }
+                return null;
+              })}
+            </div>
+
+          </article>
+
+        </div>
       </div>
-      <BlogFooter />
+
+      <footer className="bg-[#0A0A0A] text-[#F2EBDD] w-full py-12 px-6 lg:px-16 border-t-8 border-white">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          
+          <div className="flex flex-col gap-3">
+            <Link to={ROUTES.LANDING} className="flex items-center">
+              <img src={logo} alt="Launchly Logo" className="h-9 w-auto object-contain brightness-200 invert" />
+            </Link>
+            <span className="font-['JetBrains_Mono',monospace] text-xs text-slate-400">
+              © {new Date().getFullYear()} {t('landing.footer.copyright', 'Launchly Inc. All rights reserved.')}
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <Link 
+              to={ROUTES.TERMS} 
+              className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:underline underline-offset-4 transition-all"
+            >
+              {t('landing.footer.terms', 'Terms of Service')}
+            </Link>
+            <Link 
+              to={ROUTES.PRIVACY} 
+              className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:underline underline-offset-4 transition-all"
+            >
+              {t('landing.footer.privacy', 'Privacy Policy')}
+            </Link>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <Link 
+              to={ROUTES.BLOG} 
+              className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:underline underline-offset-4 transition-all"
+            >
+              {t('landing.footer.blog', 'Blog')}
+            </Link>
+            <a 
+              href="mailto:support@launchly.app" 
+              className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:underline underline-offset-4 transition-all"
+            >
+              {t('landing.footer.support', 'Support & Contact')}
+            </a>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <span className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest text-slate-300 flex items-center gap-2">
+              <ShieldCheck size={16} className="text-emerald-400" />
+              <span>{t('landing.footer.gdpr', 'GDPR Compliant')}</span>
+            </span>
+            <span className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest text-slate-300 flex items-center gap-2">
+              <Lock size={16} className="text-indigo-400" />
+              <span>{t('landing.footer.ssl', 'SSL Encrypted')}</span>
+            </span>
+          </div>
+
+        </div>
+      </footer>
+
     </div>
   );
 };
