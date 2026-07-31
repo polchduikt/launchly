@@ -16,6 +16,8 @@ import type { BotUserResponse } from '../../../../types/bot';
 import { UserAvatar } from './UserAvatar';
 import { useTagsQuery } from '../../../../hooks/broadcast/useBroadcastQueries';
 import { useUpdateBotUserMutation, useDeleteBotUserMutation } from '../../../../hooks/crm/useCrmQueries';
+import { createTagApi } from '../../../../api/broadcast';
+import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../api/bot';
 import { TagSearchSelect } from '../../FlowBuilder/components/sidebar/editors/TagSearchSelect';
 import { ChatHistoryModal } from './ChatHistoryModal';
 import { ConfirmActionModal } from './ConfirmActionModal';
@@ -158,10 +160,16 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
     });
   };
 
+
+
   const handleAddTag = (tagName: string) => {
     if (!botUser || !tagName.trim()) return;
     const trimmed = tagName.trim();
     if ((botUser.tags || []).includes(trimmed)) return;
+
+    if (conversation.botId) {
+      createTagApi(conversation.botId, { name: trimmed }).catch(() => {});
+    }
 
     updateBotUserMut.mutate({
       userId: botUser.id,
@@ -188,15 +196,28 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
 
   const handleAddCustomField = () => {
     if (!botUser || !customFieldName.trim()) return;
+    const nameTrimmed = customFieldName.trim();
     const fields = meta.customFields || {};
 
     handleUpdateContactMetadata({
       ...meta,
       customFields: {
         ...fields,
-        [customFieldName.trim()]: customFieldValue,
+        [nameTrimmed]: customFieldValue,
       },
     });
+
+    if (conversation.botId) {
+      getCustomFieldsApi(conversation.botId)
+        .then((existing) => {
+          const list = existing && Array.isArray(existing.fields) ? existing.fields : Array.isArray(existing) ? existing : [];
+          if (!list.some((f: any) => f.name === nameTrimmed)) {
+            const updated = [...list, { name: nameTrimmed, type: 'Text', description: '', folder: null }];
+            saveCustomFieldsApi(conversation.botId, { fields: updated }).catch(() => {});
+          }
+        })
+        .catch(() => {});
+    }
 
     setCustomFieldName('');
     setCustomFieldValue('');

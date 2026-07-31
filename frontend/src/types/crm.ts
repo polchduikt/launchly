@@ -5,6 +5,9 @@ export interface ConversationResponse {
   id: number;
   status: ConversationStatus;
   unread: boolean;
+  favorite?: boolean;
+  tags?: string[];
+  notes?: string | null;
   botUserName: string;
   botUserUsername: string | null;
   botUserTelegramId: number;

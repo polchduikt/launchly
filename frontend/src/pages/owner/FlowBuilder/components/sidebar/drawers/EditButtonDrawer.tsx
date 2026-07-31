@@ -18,6 +18,9 @@ const mapNodeTypeToActionType = (nodeType?: string): string => {
   }
 };
 
+import { useIntegrationsQuery } from '../../../../../../hooks/integration/useIntegrationQueries';
+import type { IntegrationResponse } from '../../../../../../types';
+
 export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   onClose,
   button,
@@ -28,6 +31,10 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   nodeId,
   onUnlinkConnection,
 }) => {
+  const { data: integrations = [] } = useIntegrationsQuery();
+  const isStripeConnected = integrations.some((i: IntegrationResponse) => i.type === 'STRIPE' && i.active);
+  const isPaypalConnected = integrations.some((i: IntegrationResponse) => i.type === 'PAYPAL' && i.active);
+  const isPaymentConnected = isStripeConnected || isPaypalConnected;
   const [label, setLabel] = useState('');
   const [actionType, setActionType] = useState('');
   const [actionTarget, setActionTarget] = useState('');
@@ -105,9 +112,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
     { type: 'AUTOMATION', label: t('editor.edit_button.action.start_automation'), icon: Play, color: 'text-teal-500 bg-teal-50' },
   ];
 
-  const isStripeConnected = localStorage.getItem('launchly_payments_stripe_connected') === 'true';
-  const isPaypalConnected = localStorage.getItem('launchly_payments_paypal_connected') === 'true';
-  const isPaymentConnected = isStripeConnected || isPaypalConnected;
+
 
   return (
     <div className="h-full flex flex-col justify-between bg-white font-sans w-full">

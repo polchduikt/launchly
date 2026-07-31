@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
-import { lsGet, lsSet } from '../../utils/crmChat';
 import {
-  LS_LABELS,
-  LS_FAVS,
-  LS_TAGS,
-  LS_NOTES,
-  LS_UNREAD,
-  LS_LAST_SEEN,
-} from '../../const/chat';
+  getLabelsApi,
+  addLabelApi,
+  deleteLabelApi,
+  updateConversationApi,
+} from '../../api/crm';
 import type { ConversationResponse } from '../../types/crm';
 
 interface UseChatLocalStorageParams {
@@ -19,70 +16,68 @@ export const useChatLocalStorage = ({
   conversations,
   selectedConvId,
 }: UseChatLocalStorageParams) => {
-  const [labels, setLabels] = useState<string[]>(() => lsGet(LS_LABELS, []));
+  const [labels, setLabels] = useState<string[]>([]);
   const [showAddLabel, setShowAddLabel] = useState(false);
   const [newLabelName, setNewLabelName] = useState('');
-  const [favorites, setFavorites] = useState<number[]>(() => lsGet(LS_FAVS, []));
-  const [contactTags, setContactTags] = useState<Record<number, string[]>>(() => lsGet(LS_TAGS, {}));
+  const [favorites, setFavorites] = useState<number[]>([]);
+  const [contactTags, setContactTags] = useState<Record<number, string[]>>({});
   const [showAddTag, setShowAddTag] = useState(false);
   const [newTagName, setNewTagName] = useState('');
-  const [contactNotes, setContactNotes] = useState<Record<number, string>>(() => lsGet(LS_NOTES, {}));
-  const [unreadConvIds, setUnreadConvIds] = useState<number[]>(() => lsGet(LS_UNREAD, []));
-  const [lastSeenAt, setLastSeenAt] = useState<Record<number, string>>(() => lsGet(LS_LAST_SEEN, {}));
+  const [contactNotes, setContactNotes] = useState<Record<number, string>>({});
+  const [unreadConvIds, setUnreadConvIds] = useState<number[]>([]);
 
-  useEffect(() => { lsSet(LS_LABELS, labels); }, [labels]);
-  useEffect(() => { lsSet(LS_FAVS, favorites); }, [favorites]);
-  useEffect(() => { lsSet(LS_TAGS, contactTags); }, [contactTags]);
-  useEffect(() => { lsSet(LS_NOTES, contactNotes); }, [contactNotes]);
-  useEffect(() => { lsSet(LS_UNREAD, unreadConvIds); }, [unreadConvIds]);
-  useEffect(() => { lsSet(LS_LAST_SEEN, lastSeenAt); }, [lastSeenAt]);
-
-  const parseIsoDate = (dateStr: string) => {
-    if (!dateStr) return 0;
-    const hasTimezone = dateStr.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(dateStr);
-    const normalized = hasTimezone ? dateStr : `${dateStr}Z`;
-    return new Date(normalized).getTime();
-  };
-
+  // Fetch labels from API on mount
   useEffect(() => {
-    conversations.forEach(c => {
-      if (c.id !== selectedConvId && c.lastMessageAt) {
-        const seen = lastSeenAt[c.id];
-        if (!seen || parseIsoDate(c.lastMessageAt) > parseIsoDate(seen)) {
-          setUnreadConvIds(prev => prev.includes(c.id) ? prev : [...prev, c.id]);
-        }
-      }
+    getLabelsApi()
+      .then(setLabels)
+      .catch((err) => console.error('Failed to load CRM labels:', err));
+  }, []);
+
+  // Sync favorites, contactTags, contactNotes, unread from conversations prop
+  useEffect(() => {
+    const newFavs: number[] = [];
+    const newTags: Record<number, string[]> = {};
+    const newNotes: Record<number, string> = {};
+    const newUnread: number[] = [];
+
+    conversations.forEach((c) => {
+      if (c.favorite) newFavs.push(c.id);
+      if (c.tags && c.tags.length > 0) newTags[c.id] = c.tags;
+      if (c.notes) newNotes[c.id] = c.notes;
+      if (c.unread) newUnread.push(c.id);
     });
-  }, [conversations, selectedConvId]);
 
-  useEffect(() => {
-    if (selectedConvId) {
-      const conv = conversations.find(c => c.id === selectedConvId);
-      if (conv && conv.lastMessageAt) {
-        const seen = lastSeenAt[selectedConvId];
-        const lastMsgTime = parseIsoDate(conv.lastMessageAt);
-        const seenTime = seen ? parseIsoDate(seen) : 0;
-        if (lastMsgTime > seenTime) {
-          setLastSeenAt(prev => ({ ...prev, [selectedConvId]: conv.lastMessageAt ?? new Date().toISOString() }));
-          setUnreadConvIds(prev => prev.filter(uid => uid !== selectedConvId));
-        }
-      }
-    }
-  }, [conversations, selectedConvId]);
+    setFavorites(newFavs);
+    setContactTags(newTags);
+    setContactNotes(newNotes);
+    setUnreadConvIds(newUnread);
+  }, [conversations]);
 
   const markAsRead = (convId: number) => {
-    setUnreadConvIds(prev => prev.filter(uid => uid !== convId));
-    const conv = conversations.find(c => c.id === convId);
-    const timestamp = conv?.lastMessageAt || new Date().toISOString();
-    setLastSeenAt(prev => ({ ...prev, [convId]: timestamp }));
+    setUnreadConvIds((prev) => prev.filter((uid) => uid !== convId));
+    updateConversationApi(convId, { unread: false }).catch((err) =>
+      console.error('Failed to mark conversation as read:', err)
+    );
   };
 
-  const toggleFavorite = (convId: number) =>
-    setFavorites(prev => prev.includes(convId) ? prev.filter(id => id !== convId) : [...prev, convId]);
+  const toggleFavorite = (convId: number) => {
+    const isFav = favorites.includes(convId);
+    const updated = !isFav;
+    setFavorites((prev) =>
+      updated ? [...prev, convId] : prev.filter((id) => id !== convId)
+    );
+    updateConversationApi(convId, { favorite: updated }).catch((err) =>
+      console.error('Failed to update favorite:', err)
+    );
+  };
 
   const addLabel = () => {
     if (newLabelName.trim() && !labels.includes(newLabelName.trim())) {
-      setLabels([...labels, newLabelName.trim()]);
+      const name = newLabelName.trim();
+      setLabels((prev) => [...prev, name]);
+      addLabelApi(name)
+        .then(setLabels)
+        .catch((err) => console.error('Failed to add label:', err));
     }
     setNewLabelName('');
     setShowAddLabel(false);
@@ -91,19 +86,29 @@ export const useChatLocalStorage = ({
   const addLabelByName = (name: string) => {
     const trimmed = name.trim();
     if (trimmed && !labels.includes(trimmed)) {
-      setLabels(prev => [...prev, trimmed]);
+      setLabels((prev) => [...prev, trimmed]);
+      addLabelApi(trimmed)
+        .then(setLabels)
+        .catch((err) => console.error('Failed to add label:', err));
     }
   };
 
   const deleteLabelByName = (name: string) => {
-    setLabels(prev => prev.filter(l => l !== name));
+    setLabels((prev) => prev.filter((l) => l !== name));
+    deleteLabelApi(name)
+      .then(setLabels)
+      .catch((err) => console.error('Failed to delete label:', err));
   };
 
   const addTag = () => {
     if (!selectedConvId || !newTagName.trim()) return;
     const cur = contactTags[selectedConvId] || [];
     if (!cur.includes(newTagName.trim())) {
-      setContactTags({ ...contactTags, [selectedConvId]: [...cur, newTagName.trim()] });
+      const updatedTags = [...cur, newTagName.trim()];
+      setContactTags({ ...contactTags, [selectedConvId]: updatedTags });
+      updateConversationApi(selectedConvId, { tags: updatedTags }).catch((err) =>
+        console.error('Failed to add tag:', err)
+      );
     }
     setNewTagName('');
     setShowAddTag(false);
@@ -111,15 +116,19 @@ export const useChatLocalStorage = ({
 
   const removeTag = (tag: string) => {
     if (!selectedConvId) return;
-    setContactTags({
-      ...contactTags,
-      [selectedConvId]: (contactTags[selectedConvId] || []).filter(t => t !== tag),
-    });
+    const updatedTags = (contactTags[selectedConvId] || []).filter((t) => t !== tag);
+    setContactTags({ ...contactTags, [selectedConvId]: updatedTags });
+    updateConversationApi(selectedConvId, { tags: updatedTags }).catch((err) =>
+      console.error('Failed to remove tag:', err)
+    );
   };
 
   const saveNote = (note: string) => {
     if (!selectedConvId) return;
     setContactNotes({ ...contactNotes, [selectedConvId]: note });
+    updateConversationApi(selectedConvId, { notes: note }).catch((err) =>
+      console.error('Failed to save note:', err)
+    );
   };
 
   return {

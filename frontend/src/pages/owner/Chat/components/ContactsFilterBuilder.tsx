@@ -3,6 +3,7 @@ import { X, Plus, Search, Tag, User, Phone, Mail, Hash, Clock, Pause, Send, Spar
 import { useTranslation } from '../../../../i18n/config';
 import type { FilterCondition } from '../../../../types/crm';
 import type { TagResponse } from '../../../../types';
+import { getCustomFieldsApi } from '../../../../api/bot';
 
 interface ContactsFilterBuilderProps {
   isOpen: boolean;
@@ -43,8 +44,25 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
     };
   }, [isAddDropdownOpen]);
 
+
+  const [apiCustomFields, setApiCustomFields] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (botId) {
+      getCustomFieldsApi(botId)
+        .then((data) => {
+          if (data && typeof data === 'object') {
+            const list = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
+            const names = list.map((f: any) => typeof f === 'string' ? f : f?.name).filter(Boolean);
+            setApiCustomFields(names);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [botId]);
+
   const allCustomFields = useMemo(() => {
-    const fieldsSet = new Set<string>();
+    const fieldsSet = new Set<string>(apiCustomFields);
 
     if (botId) {
       const storedFields = localStorage.getItem(`launchly_custom_fields_${botId}`);

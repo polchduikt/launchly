@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, MoreVertical, HelpCircle, X, Folder, ChevronRight, Edit2 } from 'lucide-react';
 import { useBotStore } from '../../../../store/useBotStore';
 import { t } from '../../../../i18n/config';
-
 import type { UserField, UserFieldFolder } from '../../../../types/bot';
+import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../api/bot';
 
 export const UserFieldsPanel: React.FC = () => {
   const activeBotId = useBotStore((state) => state.activeBotId);
@@ -30,43 +30,21 @@ export const UserFieldsPanel: React.FC = () => {
 
   useEffect(() => {
     if (activeBotId !== null && activeBotId !== undefined) {
-      const storedFields = localStorage.getItem(`launchly_custom_fields_${activeBotId}`);
-      if (storedFields) {
-        try {
-          setFields(JSON.parse(storedFields));
-        } catch {
-          setFields([]);
-        }
-      } else {
-        const defaults = [
-          { name: 'Kr', type: 'Text', description: 'User credit count', folder: null },
-          { name: 'Рыба', type: 'Text', description: 'Favorite fish type', folder: null }
-        ];
-        setFields(defaults);
-        localStorage.setItem(`launchly_custom_fields_${activeBotId}`, JSON.stringify(defaults));
-      }
-
-      const storedArchived = localStorage.getItem(`launchly_archived_fields_${activeBotId}`);
-      if (storedArchived) {
-        try {
-          setArchivedFields(JSON.parse(storedArchived));
-        } catch {
-          setArchivedFields([]);
-        }
-      } else {
-        setArchivedFields([]);
-      }
-
-      const storedFolders = localStorage.getItem(`launchly_field_folders_${activeBotId}`);
-      if (storedFolders) {
-        try {
-          setFolders(JSON.parse(storedFolders));
-        } catch {
-          setFolders([]);
-        }
-      } else {
-        setFolders([]);
-      }
+      getCustomFieldsApi(activeBotId)
+        .then((data) => {
+          if (data && typeof data === 'object') {
+            if (Array.isArray(data.fields)) setFields(data.fields);
+            else if (Array.isArray(data)) setFields(data);
+            else setFields([]);
+            if (Array.isArray(data.archivedFields)) setArchivedFields(data.archivedFields);
+            if (Array.isArray(data.folders)) setFolders(data.folders);
+          } else {
+            setFields([]);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to fetch custom fields:', err);
+        });
     }
   }, [activeBotId]);
 
@@ -75,9 +53,11 @@ export const UserFieldsPanel: React.FC = () => {
     setArchivedFields(updatedArchived);
     setFolders(updatedFolders);
     if (activeBotId !== null && activeBotId !== undefined) {
-      localStorage.setItem(`launchly_custom_fields_${activeBotId}`, JSON.stringify(updatedFields));
-      localStorage.setItem(`launchly_archived_fields_${activeBotId}`, JSON.stringify(updatedArchived));
-      localStorage.setItem(`launchly_field_folders_${activeBotId}`, JSON.stringify(updatedFolders));
+      saveCustomFieldsApi(activeBotId, {
+        fields: updatedFields,
+        archivedFields: updatedArchived,
+        folders: updatedFolders,
+      }).catch((err) => console.error('Failed to save custom fields:', err));
     }
   };
 
@@ -465,7 +445,7 @@ export const UserFieldsPanel: React.FC = () => {
                 {filteredArchived.length === 0 && (
                   <tr>
                     <td colSpan={5} className="text-center py-10 text-slate-450 italic bg-white">
-                      No Fields
+                      {t('settings.fields.empty_state')}
                     </td>
                   </tr>
                 )}

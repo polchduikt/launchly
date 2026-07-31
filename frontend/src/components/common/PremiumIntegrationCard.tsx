@@ -3,7 +3,7 @@ import { HelpCircle, CheckCircle } from 'lucide-react';
 import { t } from '../../i18n/config';
 import {
   useCreateIntegrationMutation,
-  useDeleteIntegrationMutation
+  useDeleteIntegrationMutation,
 } from '../../hooks/integration/useIntegrationQueries';
 
 import type { IntegrationResponse } from '../../types';
@@ -33,11 +33,6 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
   botId,
   integration,
 }) => {
-  const normalizedName = name.toLowerCase().replace(/\s+/g, '_');
-  const storageKey = hasApiSecret 
-    ? `launchly_key_${normalizedName}`
-    : `launchly_connected_${normalizedName}`;
-
   const [apiKey, setApiKey] = useState('');
   const [isConnected, setIsConnected] = useState(false);
 
@@ -49,21 +44,12 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
       setIsConnected(integration.active);
       if (integration.config && 'apiKey' in integration.config && integration.config.apiKey) {
         setApiKey(integration.config.apiKey);
-        localStorage.setItem(storageKey, integration.config.apiKey);
       }
     } else {
-      const value = localStorage.getItem(storageKey);
-      if (value) {
-        setIsConnected(true);
-        if (hasApiSecret) {
-          setApiKey(value);
-        }
-      } else {
-        setIsConnected(false);
-        setApiKey('');
-      }
+      setIsConnected(false);
+      setApiKey('');
     }
-  }, [integration, storageKey, hasApiSecret]);
+  }, [integration]);
 
   const handleConnect = async () => {
     if (hasApiSecret) {
@@ -74,9 +60,8 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
             name: name,
             type: typeStr,
             botId: botId,
-            config: { apiKey: apiKey.trim() }
+            config: { apiKey: apiKey.trim() },
           });
-          localStorage.setItem(storageKey, apiKey.trim());
           setIsConnected(true);
         } catch (err) {
           console.error(err);
@@ -91,9 +76,8 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
           name: name,
           type: typeStr,
           botId: botId,
-          config: {}
+          config: {},
         });
-        localStorage.setItem(storageKey, 'true');
         setIsConnected(true);
       } catch (err) {
         console.error(err);
@@ -109,7 +93,6 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
         console.error(err);
       }
     }
-    localStorage.removeItem(storageKey);
     setIsConnected(false);
     setApiKey('');
   };
@@ -135,16 +118,18 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
 
         <div className="flex-1 flex flex-col gap-0.5">
           <span className="font-bold text-slate-800 text-sm">{name}</span>
-          
+
           {hasApiSecret ? (
             <div className="mt-2.5 space-y-2.5 w-full">
               {stepText && !isConnected && (
                 <div className="flex flex-col select-none">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider leading-none">{t('settings.integrations.premium.step1')}</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider leading-none">
+                    {t('settings.integrations.premium.step1')}
+                  </span>
                   <span className="text-xs font-bold text-slate-500 mt-0.5">{stepText}</span>
                 </div>
               )}
-              
+
               <div className="space-y-1">
                 <label className="flex items-center gap-1 text-[9px] font-extrabold text-slate-450 uppercase tracking-wider select-none">
                   <span>{t('settings.integrations.premium.api_secret')}</span>
@@ -182,7 +167,9 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
             <div className="mt-2.5 w-full space-y-2">
               {stepText && !isConnected && (
                 <div className="flex flex-col select-none mb-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider leading-none">{t('settings.integrations.premium.step1')}</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider leading-none">
+                    {t('settings.integrations.premium.step1')}
+                  </span>
                   <span className="text-xs font-bold text-slate-500 mt-0.5">{stepText}</span>
                 </div>
               )}

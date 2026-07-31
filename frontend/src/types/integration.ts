@@ -8,7 +8,9 @@ export type IntegrationType =
   | 'GEMINI'
   | 'HOTMART'
   | 'MAILCHIMP'
-  | 'HUBSPOT';
+  | 'HUBSPOT'
+  | 'STRIPE'
+  | 'PAYPAL';
 
 export interface GoogleSheetsConfig {
   spreadsheetId: string;
@@ -32,12 +34,31 @@ export interface ApiKeyConfig {
   apiKey: string;
 }
 
+export interface StripeConfig {
+  connected?: boolean;
+  apiKey?: string;
+  [key: string]: any;
+}
+
+export interface PaypalConfig {
+  paypalClientId?: string;
+  paypalWebhookId?: string;
+  paypalLiveClientId?: string;
+  paypalLiveWebhookId?: string;
+  currency?: string;
+  notifyMessenger?: boolean;
+  notifyEmail?: boolean;
+  sendReceiptEmail?: boolean;
+  orders?: any[];
+  [key: string]: any;
+}
+
 export interface IntegrationResponse {
   id: number;
   name: string;
   type: IntegrationType;
   active: boolean;
-  config: GoogleSheetsConfig | WebhookConfig | ExcelConfig | ApiKeyConfig | Record<string, never> | null;
+  config: Record<string, any> | null;
   botId: number;
   createdAt: string;
 }
@@ -46,5 +67,5 @@ export interface IntegrationCreateRequest {
   name: string;
   type: IntegrationType;
   botId: number;
-  config: GoogleSheetsConfig | WebhookConfig | ExcelConfig | ApiKeyConfig | Record<string, never>;
+  config: Record<string, any>;
 }

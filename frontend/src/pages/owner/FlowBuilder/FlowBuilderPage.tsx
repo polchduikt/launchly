@@ -6,6 +6,7 @@ import type { ConnectionLineComponentProps, Edge, Node, OnNodeDrag } from '@xyfl
 import '@xyflow/react/dist/style.css';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
+import { getCustomFieldsApi } from '../../../api/bot';
 import { NodeEditorPanel } from './components/sidebar/NodeEditorPanel';
 import { FLOW_BLOCKS } from '../../../const/flowBlocks';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
@@ -77,24 +78,20 @@ const FlowBuilderInner: React.FC = () => {
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
   const { data: tags = [] } = useTagsQuery(activeBotId || 0);
-  const customFields = useMemo(() => {
-    if (!activeBotId) return ['last_order_product', 'last_order_price', 'phone', 'email'];
-    const stored = localStorage.getItem(`launchly_custom_fields_${activeBotId}`);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          return parsed
-            .filter((f): f is { name: string } =>
-              typeof f === 'object' && f !== null && 'name' in f && typeof f.name === 'string'
-            )
-            .map((f) => f.name);
-        }
-      } catch (e) {
-        console.error('Failed to parse custom fields', e);
-      }
+  const [customFields, setCustomFields] = useState<string[]>(['last_order_product', 'last_order_price', 'phone', 'email']);
+
+  useEffect(() => {
+    if (activeBotId) {
+      getCustomFieldsApi(activeBotId)
+        .then((data) => {
+          if (data && typeof data === 'object') {
+            const list = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
+            const names = list.map((f: any) => typeof f === 'string' ? f : f?.name).filter(Boolean);
+            if (names.length > 0) setCustomFields(names);
+          }
+        })
+        .catch((err) => console.error('Failed to load custom fields:', err));
     }
-    return ['last_order_product', 'last_order_price', 'phone', 'email'];
   }, [activeBotId]);
 
   const isLocalChangeRef = useRef(false);

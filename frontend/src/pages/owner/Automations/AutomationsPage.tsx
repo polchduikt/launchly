@@ -23,6 +23,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { useBotStore } from '../../../store/useBotStore';
+import { getAutomationFoldersApi, saveAutomationFoldersApi } from '../../../api/bot';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
 import { t, getLanguage } from '../../../i18n/config';
 import {
@@ -101,14 +102,30 @@ export const AutomationsPage: React.FC = () => {
   const startBotMutation = useStartBotMutation();
   const stopBotMutation = useStopBotMutation();
   const updateBotMutation = useUpdateBotMutation();
-  const [folders, setFolders] = useState<Folder[]>(() => {
-    const saved = localStorage.getItem('launchly_folders');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [botFolders, setBotFolders] = useState<Record<number, string | number>>(() => {
-    const saved = localStorage.getItem('launchly_bot_folders');
-    return saved ? JSON.parse(saved) : {};
-  });
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [botFolders, setBotFolders] = useState<Record<number, string | number>>({});
+
+  useEffect(() => {
+    getAutomationFoldersApi()
+      .then((data) => {
+        if (data && typeof data === 'object') {
+          if (Array.isArray(data.folders)) setFolders(data.folders);
+          if (data.botFolders && typeof data.botFolders === 'object') setBotFolders(data.botFolders);
+        }
+      })
+      .catch((err) => console.error('Failed to fetch automation folders:', err));
+  }, []);
+
+  const isInitialMount = React.useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    saveAutomationFoldersApi({ folders, botFolders }).catch((err) =>
+      console.error('Failed to save automation folders:', err)
+    );
+  }, [folders, botFolders]);
   const [selectedFolderId, setSelectedFolderId] = useState<string | number | null>(null);
   const [activeMenuBotId, setActiveMenuBotId] = useState<number | null>(null);
   const [menuCoords, setMenuCoords] = useState<{ top: number; left: number } | null>(null);
@@ -187,13 +204,7 @@ export const AutomationsPage: React.FC = () => {
     return enMap[reason] || t(reason) || reason;
   };
 
-  useEffect(() => {
-    localStorage.setItem('launchly_folders', JSON.stringify(folders));
-  }, [folders]);
 
-  useEffect(() => {
-    localStorage.setItem('launchly_bot_folders', JSON.stringify(botFolders));
-  }, [botFolders]);
 
   useEffect(() => {
     const handleClose = () => {

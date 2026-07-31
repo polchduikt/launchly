@@ -7,10 +7,22 @@ import {
   AlertCircle, 
   Plus
 } from 'lucide-react';
-
+import { useBotStore } from '../../store/useBotStore';
+import {
+  useIntegrationsQuery,
+  useCreateIntegrationMutation,
+  useDeleteIntegrationMutation,
+} from '../../hooks/integration/useIntegrationQueries';
 import type { PaymentOrder } from '../../types/billing';
+import type { IntegrationResponse } from '../../types';
 
 export const PaymentsPanel: React.FC = () => {
+  const activeBotId = useBotStore((state) => state.activeBotId) || 0;
+  const { data: integrations = [] } = useIntegrationsQuery();
+  const createIntegrationMutation = useCreateIntegrationMutation();
+  const deleteIntegrationMutation = useDeleteIntegrationMutation();
+  const stripeIntegration = integrations.find((i: IntegrationResponse) => i.type === 'STRIPE');
+  const paypalIntegration = integrations.find((i: IntegrationResponse) => i.type === 'PAYPAL');
   const [isStripeConnected, setIsStripeConnected] = useState(false);
   const [isStripeConnecting, setIsStripeConnecting] = useState(false);
   const [paypalClientId, setPaypalClientId] = useState('');
@@ -27,34 +39,28 @@ export const PaymentsPanel: React.FC = () => {
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   useEffect(() => {
-    const savedStripe = localStorage.getItem('launchly_payments_stripe_connected');
-    if (savedStripe === 'true') setIsStripeConnected(true);
-
-    const savedPaypal = localStorage.getItem('launchly_payments_paypal_connected');
-    if (savedPaypal === 'true') {
-      setIsPaypalConnected(true);
-      setPaypalClientId(localStorage.getItem('launchly_payments_paypal_client') || '');
-      setPaypalWebhookId(localStorage.getItem('launchly_payments_paypal_wh') || '');
-      setPaypalLiveClientId(localStorage.getItem('launchly_payments_paypal_live_client') || '');
-      setPaypalLiveWebhookId(localStorage.getItem('launchly_payments_paypal_live_wh') || '');
+    if (stripeIntegration) {
+      setIsStripeConnected(stripeIntegration.active);
+    } else {
+      setIsStripeConnected(false);
     }
 
-    const savedCurrency = localStorage.getItem('launchly_payments_currency');
-    if (savedCurrency) setCurrency(savedCurrency);
-
-    setNotifyMessenger(localStorage.getItem('launchly_payments_notify_messenger') === 'true');
-    setNotifyEmail(localStorage.getItem('launchly_payments_notify_email') === 'true');
-    setSendReceiptEmail(localStorage.getItem('launchly_payments_send_receipt') === 'true');
-
-    const savedOrders = localStorage.getItem('launchly_payments_orders');
-    if (savedOrders) {
-      try {
-        setOrders(JSON.parse(savedOrders));
-      } catch (e) {
-        console.error('Failed to parse saved orders', e);
-      }
+    if (paypalIntegration) {
+      setIsPaypalConnected(paypalIntegration.active);
+      const cfg = paypalIntegration.config || {};
+      if (cfg.paypalClientId) setPaypalClientId(cfg.paypalClientId);
+      if (cfg.paypalWebhookId) setPaypalWebhookId(cfg.paypalWebhookId);
+      if (cfg.paypalLiveClientId) setPaypalLiveClientId(cfg.paypalLiveClientId);
+      if (cfg.paypalLiveWebhookId) setPaypalLiveWebhookId(cfg.paypalLiveWebhookId);
+      if (cfg.currency) setCurrency(cfg.currency);
+      if (typeof cfg.notifyMessenger === 'boolean') setNotifyMessenger(cfg.notifyMessenger);
+      if (typeof cfg.notifyEmail === 'boolean') setNotifyEmail(cfg.notifyEmail);
+      if (typeof cfg.sendReceiptEmail === 'boolean') setSendReceiptEmail(cfg.sendReceiptEmail);
+      if (Array.isArray(cfg.orders)) setOrders(cfg.orders);
+    } else {
+      setIsPaypalConnected(false);
     }
-  }, []);
+  }, [stripeIntegration, paypalIntegration]);
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
@@ -63,37 +69,50 @@ export const PaymentsPanel: React.FC = () => {
     }, 4000);
   };
 
-  const handleConnectStripe = () => {
-    if (isStripeConnected) {
-      setIsStripeConnected(false);
-      localStorage.removeItem('launchly_payments_stripe_connected');
-      showNotification('success', t('settings.payments.stripe.disconnected_msg'));
+  const handleConnectStripe = async () => {
+    if (isStripeConnected && stripeIntegration) {
+      try {
+        await deleteIntegrationMutation.mutateAsync(stripeIntegration.id);
+        setIsStripeConnected(false);
+        showNotification('success', t('settings.payments.stripe.disconnected_msg'));
+      } catch (err) {
+        console.error(err);
+      }
       return;
     }
 
     setIsStripeConnecting(true);
-    setTimeout(() => {
-      setIsStripeConnecting(false);
+    try {
+      await createIntegrationMutation.mutateAsync({
+        name: 'Stripe Payment Gateway',
+        type: 'STRIPE' as IntegrationResponse['type'],
+        botId: activeBotId,
+        config: { connected: true },
+      });
       setIsStripeConnected(true);
-      localStorage.setItem('launchly_payments_stripe_connected', 'true');
       showNotification('success', t('settings.payments.stripe.connected_msg'));
-    }, 1500);
+    } catch (err) {
+      console.error(err);
+      showNotification('error', 'Failed to connect Stripe');
+    } finally {
+      setIsStripeConnecting(false);
+    }
   };
 
-  const handleConnectPaypal = (e: React.FormEvent) => {
+  const handleConnectPaypal = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isPaypalConnected) {
-      setIsPaypalConnected(false);
-      localStorage.removeItem('launchly_payments_paypal_connected');
-      localStorage.removeItem('launchly_payments_paypal_client');
-      localStorage.removeItem('launchly_payments_paypal_wh');
-      localStorage.removeItem('launchly_payments_paypal_live_client');
-      localStorage.removeItem('launchly_payments_paypal_live_wh');
-      setPaypalClientId('');
-      setPaypalWebhookId('');
-      setPaypalLiveClientId('');
-      setPaypalLiveWebhookId('');
-      showNotification('success', t('settings.payments.paypal.disconnected_msg'));
+    if (isPaypalConnected && paypalIntegration) {
+      try {
+        await deleteIntegrationMutation.mutateAsync(paypalIntegration.id);
+        setIsPaypalConnected(false);
+        setPaypalClientId('');
+        setPaypalWebhookId('');
+        setPaypalLiveClientId('');
+        setPaypalLiveWebhookId('');
+        showNotification('success', t('settings.payments.paypal.disconnected_msg'));
+      } catch (err) {
+        console.error(err);
+      }
       return;
     }
 
@@ -103,21 +122,48 @@ export const PaymentsPanel: React.FC = () => {
     }
 
     setIsPaypalConnecting(true);
-    setTimeout(() => {
-      setIsPaypalConnecting(false);
+    try {
+      await createIntegrationMutation.mutateAsync({
+        name: 'PayPal Payment Gateway',
+        type: 'PAYPAL' as IntegrationResponse['type'],
+        botId: activeBotId,
+        config: {
+          paypalClientId: paypalClientId.trim(),
+          paypalWebhookId: paypalWebhookId.trim(),
+          paypalLiveClientId: paypalLiveClientId.trim(),
+          paypalLiveWebhookId: paypalLiveWebhookId.trim(),
+          currency,
+          notifyMessenger,
+          notifyEmail,
+          sendReceiptEmail,
+          orders,
+        },
+      });
       setIsPaypalConnected(true);
-      localStorage.setItem('launchly_payments_paypal_connected', 'true');
-      localStorage.setItem('launchly_payments_paypal_client', paypalClientId);
-      localStorage.setItem('launchly_payments_paypal_wh', paypalWebhookId);
-      localStorage.setItem('launchly_payments_paypal_live_client', paypalLiveClientId);
-      localStorage.setItem('launchly_payments_paypal_live_wh', paypalLiveWebhookId);
       showNotification('success', t('settings.payments.paypal.connected_msg'));
-    }, 1500);
+    } catch (err) {
+      console.error(err);
+      showNotification('error', 'Failed to connect PayPal');
+    } finally {
+      setIsPaypalConnecting(false);
+    }
   };
 
-  const handleSaveSettings = (key: string, value: string | boolean | number) => {
-    localStorage.setItem(key, String(value));
+  const handleSaveSettings = async (updates: Record<string, unknown>) => {
     showNotification('success', t('settings.payments.history.saved_msg'));
+    if (paypalIntegration) {
+      const updatedConfig = { ...paypalIntegration.config, ...updates };
+      try {
+        await createIntegrationMutation.mutateAsync({
+          name: 'PayPal Payment Gateway',
+          type: 'PAYPAL' as IntegrationResponse['type'],
+          botId: activeBotId,
+          config: updatedConfig,
+        });
+      } catch (err) {
+        console.error('Failed to sync settings to DB:', err);
+      }
+    }
   };
 
   const handleGenerateTestOrder = () => {
@@ -168,13 +214,13 @@ export const PaymentsPanel: React.FC = () => {
 
     const updated = [newOrder, ...orders];
     setOrders(updated);
-    localStorage.setItem('launchly_payments_orders', JSON.stringify(updated));
+    handleSaveSettings({ orders: updated });
     showNotification('success', t('settings.payments.history.success_sim'));
   };
 
   const handleClearOrders = () => {
     setOrders([]);
-    localStorage.removeItem('launchly_payments_orders');
+    handleSaveSettings({ orders: [] });
     showNotification('success', t('settings.payments.history.success_clear'));
   };
 
@@ -336,8 +382,9 @@ export const PaymentsPanel: React.FC = () => {
             <select
               value={currency}
               onChange={(e) => {
-                setCurrency(e.target.value);
-                handleSaveSettings('launchly_payments_currency', e.target.value);
+                const val = e.target.value;
+                setCurrency(val);
+                handleSaveSettings({ currency: val });
               }}
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-indigo-500 transition-all bg-white"
             >
@@ -361,8 +408,9 @@ export const PaymentsPanel: React.FC = () => {
                 type="checkbox"
                 checked={notifyMessenger}
                 onChange={(e) => {
-                  setNotifyMessenger(e.target.checked);
-                  handleSaveSettings('launchly_payments_notify_messenger', e.target.checked);
+                  const val = e.target.checked;
+                  setNotifyMessenger(val);
+                  handleSaveSettings({ notifyMessenger: val });
                 }}
                 className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
               />
@@ -378,8 +426,9 @@ export const PaymentsPanel: React.FC = () => {
                 type="checkbox"
                 checked={notifyEmail}
                 onChange={(e) => {
-                  setNotifyEmail(e.target.checked);
-                  handleSaveSettings('launchly_payments_notify_email', e.target.checked);
+                  const val = e.target.checked;
+                  setNotifyEmail(val);
+                  handleSaveSettings({ notifyEmail: val });
                 }}
                 className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
               />
@@ -400,8 +449,9 @@ export const PaymentsPanel: React.FC = () => {
                 type="checkbox"
                 checked={sendReceiptEmail}
                 onChange={(e) => {
-                  setSendReceiptEmail(e.target.checked);
-                  handleSaveSettings('launchly_payments_send_receipt', e.target.checked);
+                  const val = e.target.checked;
+                  setSendReceiptEmail(val);
+                  handleSaveSettings({ sendReceiptEmail: val });
                 }}
                 className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
               />

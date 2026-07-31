@@ -79,7 +79,7 @@ export const sendOwnerMessageApi = async (
 
 export const updateConversationApi = async (
   conversationId: number,
-  data: { status?: ConversationStatus; unread?: boolean }
+  data: { status?: ConversationStatus; unread?: boolean; favorite?: boolean; tags?: string[]; notes?: string }
 ): Promise<ConversationResponse> => {
   const response = await apiClient.patch<ConversationResponse>(`/crm/conversations/${conversationId}`, data);
   return response.data;
@@ -93,5 +93,20 @@ export const sendNoteApi = async (
     `/crm/conversations/${conversationId}/notes`,
     { content }
   );
+  return response.data;
+};
+
+export const getLabelsApi = async (): Promise<string[]> => {
+  const response = await apiClient.get<string[]>('/crm/labels');
+  return response.data;
+};
+
+export const addLabelApi = async (name: string): Promise<string[]> => {
+  const response = await apiClient.post<string[]>('/crm/labels', { name });
+  return response.data;
+};
+
+export const deleteLabelApi = async (name: string): Promise<string[]> => {
+  const response = await apiClient.delete<string[]>(`/crm/labels/${encodeURIComponent(name)}`);
   return response.data;
 };

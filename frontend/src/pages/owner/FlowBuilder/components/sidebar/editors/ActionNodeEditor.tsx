@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import type { ActionItem, ActionNodeEditorProps } from '../../../../../../types/bot';
 import { t } from '../../../../../../i18n/config';
@@ -30,6 +30,8 @@ import {
 } from 'lucide-react';
 
 
+import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../../../api/bot';
+
 export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handleChange, editorState }) => {
   const activeBotId = useBotStore((state) => state.activeBotId);
   const { data: tags = [] } = useTagsQuery(activeBotId || 0);
@@ -38,27 +40,18 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
 
   const [userFields, setUserFields] = useState<Array<{ name: string; type: string; description: string }>>([]);
 
-  const [prevBotId, setPrevBotId] = useState<number | null>(null);
-  if (activeBotId !== prevBotId) {
-    setPrevBotId(activeBotId);
-    let loaded = [
-      { name: 'Kr', type: 'Text', description: 'User credit count' },
-      { name: 'Рыба', type: 'Text', description: 'Favorite fish type' }
-    ];
+  useEffect(() => {
     if (activeBotId) {
-      const stored = localStorage.getItem(`launchly_custom_fields_${activeBotId}`);
-      if (stored) {
-        try {
-          loaded = JSON.parse(stored);
-        } catch (e) {
-          console.error('Failed to parse stored user fields', e);
-        }
-      } else {
-        localStorage.setItem(`launchly_custom_fields_${activeBotId}`, JSON.stringify(loaded));
-      }
+      getCustomFieldsApi(activeBotId)
+        .then((data) => {
+          if (data && typeof data === 'object') {
+            if (Array.isArray(data.fields)) setUserFields(data.fields);
+            else if (Array.isArray(data)) setUserFields(data);
+          }
+        })
+        .catch((err) => console.error('Failed to load custom fields:', err));
     }
-    setUserFields(loaded);
-  }
+  }, [activeBotId]);
 
   const customFields = useMemo(() => {
     return userFields.map(f => f.name);
@@ -389,17 +382,13 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
       description: newFieldDesc.trim()
     };
 
-    const stored = localStorage.getItem(`launchly_custom_fields_${activeBotId}`);
-    let fieldsList: Array<{ name: string; type: string; description: string }> = [];
-    if (stored) {
-      try {
-        fieldsList = JSON.parse(stored);
-      } catch (e) {
-        console.error(e);
-      }
+    const updated = [...userFields.filter((f) => f.name !== newField.name), newField];
+    setUserFields(updated);
+    if (activeBotId) {
+      saveCustomFieldsApi(activeBotId, { fields: updated }).catch((err) =>
+        console.error('Failed to save custom field:', err)
+      );
     }
-    const updated = [...fieldsList.filter((f) => f.name !== newField.name), newField];
-    localStorage.setItem(`launchly_custom_fields_${activeBotId}`, JSON.stringify(updated));
 
     setUserFields(updated);
 

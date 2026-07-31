@@ -17,6 +17,8 @@ import { ContactAvatar } from './ContactAvatar';
 import { useUpdateBotUserMutation, useDeleteBotUserMutation } from '../../../../hooks/crm/useCrmQueries';
 import { ROUTES } from '../../../../routes/paths';
 import { t } from '../../../../i18n/config';
+import { createTagApi } from '../../../../api/broadcast';
+import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../api/bot';
 import { TagSearchSelect } from '../../FlowBuilder/components/sidebar/editors/TagSearchSelect';
 
 import type { ConversationResponse, BotUserMetadata } from '../../../../types/crm';
@@ -80,10 +82,16 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
     );
   };
 
+
+
   const handleAddTagInline = (tagName: string) => {
     if (!tagName.trim()) return;
     const trimmed = tagName.trim();
     if ((selectedContact.tags || []).includes(trimmed)) return;
+
+    if (botId) {
+      createTagApi(botId, { name: trimmed }).catch(() => {});
+    }
 
     updateBotUserMut.mutate(
       {
@@ -120,15 +128,28 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
   const handleAddCustomFieldInline = () => {
     if (!customFieldName.trim()) return;
+    const nameTrimmed = customFieldName.trim();
     const fields = meta.customFields || {};
 
     handleUpdateContactMetadata({
       ...meta,
       customFields: {
         ...fields,
-        [customFieldName.trim()]: customFieldValue,
+        [nameTrimmed]: customFieldValue,
       },
     });
+
+    if (botId) {
+      getCustomFieldsApi(botId)
+        .then((existing) => {
+          const list = existing && Array.isArray(existing.fields) ? existing.fields : Array.isArray(existing) ? existing : [];
+          if (!list.some((f: any) => f.name === nameTrimmed)) {
+            const updated = [...list, { name: nameTrimmed, type: 'Text', description: '', folder: null }];
+            saveCustomFieldsApi(botId, { fields: updated }).catch(() => {});
+          }
+        })
+        .catch(() => {});
+    }
 
     setCustomFieldName('');
     setCustomFieldValue('');
