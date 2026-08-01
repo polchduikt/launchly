@@ -53,7 +53,8 @@ export const BlogDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased flex flex-col justify-between relative z-0 selection:bg-[#0A0A0A] selection:text-[#F2EBDD]">
-      <div
+      
+      <div 
         className="fixed inset-0 z-[-1] pointer-events-none opacity-5"
         style={{
           backgroundColor: '#F2EBDD',
@@ -67,7 +68,7 @@ export const BlogDetailPage: React.FC = () => {
       />
 
       <div>
-        <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] fixed top-0 w-full z-50 flex justify-between items-center h-20 px-6 md:px-12 lg:px-16 relative">
+        <header className="bg-[#F2EBDD]/85 backdrop-blur-md border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] sticky top-0 w-full z-50 flex justify-between items-center h-20 px-6 md:px-12 lg:px-16">
           
           <div className="flex items-center gap-4">
             <Link to={ROUTES.LANDING} className="flex items-center">
@@ -167,7 +168,8 @@ export const BlogDetailPage: React.FC = () => {
           </div>
         </header>
 
-        <div className="max-w-4xl mx-auto px-6 pt-28 pb-16 space-y-8">
+        <div className="max-w-4xl mx-auto px-6 pt-14 pb-16 space-y-8">
+          
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate(ROUTES.BLOG)}

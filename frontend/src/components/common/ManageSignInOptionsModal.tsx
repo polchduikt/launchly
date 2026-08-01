@@ -39,7 +39,7 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
     <>
       <div 
         onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 transition-all duration-300 cursor-pointer"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/50 transition-all duration-300 cursor-pointer"
       >
         <div 
           onClick={(e) => e.stopPropagation()}

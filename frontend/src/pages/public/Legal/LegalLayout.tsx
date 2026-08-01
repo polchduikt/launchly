@@ -33,7 +33,6 @@ export const LegalLayout: React.FC<LegalLayoutProps> = ({ children, title, effec
   return (
     <div className="min-h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased flex flex-col justify-between relative z-0 selection:bg-[#0A0A0A] selection:text-[#F2EBDD]">
       
-      {/* Grid Paper Background Pattern */}
       <div 
         className="fixed inset-0 z-[-1] pointer-events-none opacity-5"
         style={{
@@ -48,16 +47,13 @@ export const LegalLayout: React.FC<LegalLayoutProps> = ({ children, title, effec
       />
 
       <div>
-        {/* Top Navigation Bar */}
-        <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] fixed top-0 w-full z-50 flex justify-between items-center h-20 px-6 md:px-12 lg:px-16 relative">
+        <header className="bg-[#F2EBDD]/85 backdrop-blur-md border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] sticky top-0 w-full z-50 flex justify-between items-center h-20 px-6 md:px-12 lg:px-16">
           
-          {/* Left Side: Logo + Language Switcher */}
           <div className="flex items-center gap-4">
             <Link to={ROUTES.LANDING} className="flex items-center">
               <img src={logo} alt="Launchly Logo" className="h-10 sm:h-12 w-auto object-contain cursor-pointer" />
             </Link>
 
-            {/* Language Switcher Widget */}
             <div className="relative ml-2">
               <button
                 onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
@@ -97,7 +93,6 @@ export const LegalLayout: React.FC<LegalLayoutProps> = ({ children, title, effec
             </div>
           </div>
 
-          {/* Center: Centered Nav Items */}
           <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             <Link 
               to={`${ROUTES.LANDING}#features`} 
@@ -125,7 +120,6 @@ export const LegalLayout: React.FC<LegalLayoutProps> = ({ children, title, effec
             </Link>
           </nav>
 
-          {/* Right Side: Auth Buttons */}
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
               <button
@@ -153,11 +147,9 @@ export const LegalLayout: React.FC<LegalLayoutProps> = ({ children, title, effec
           </div>
         </header>
 
-        {/* Main Document Layout */}
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-28 pb-16">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-14 pb-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* Left Sidebar Menu */}
             <aside className="lg:col-span-3 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-4 lg:sticky lg:top-28">
               <div className="font-['JetBrains_Mono',monospace] text-[11px] font-extrabold uppercase tracking-widest text-slate-500 mb-3 px-2 border-b border-[#0A0A0A]/20 pb-2">
                 {t('legal.nav.section_title', 'Legal Documents')}
@@ -182,10 +174,8 @@ export const LegalLayout: React.FC<LegalLayoutProps> = ({ children, title, effec
               </nav>
             </aside>
 
-            {/* Main Document Content Container */}
             <main className="lg:col-span-9 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] p-6 sm:p-10 lg:p-12">
               
-              {/* Effective Date Header Stamp */}
               <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-4 mb-8 font-['JetBrains_Mono',monospace] text-xs font-bold tracking-widest text-[#0A0A0A] uppercase">
                 <span>{t('legal.effective_date', { date: effectiveDate })}</span>
                 <span className="bg-[#0A0A0A] text-[#F2EBDD] px-2.5 py-0.5 text-[10px]">{t('legal.badge', 'LAUNCHLY LEGAL')}</span>
@@ -205,7 +195,6 @@ export const LegalLayout: React.FC<LegalLayoutProps> = ({ children, title, effec
         </div>
       </div>
 
-      {/* Brutalist Footer */}
       <footer className="bg-[#0A0A0A] text-[#F2EBDD] w-full py-12 px-6 lg:px-16 border-t-8 border-white">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           

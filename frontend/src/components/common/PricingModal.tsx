@@ -73,7 +73,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/50 animate-fade-in select-none">
       <div className="bg-slate-50 rounded-[32px] shadow-2xl w-full max-w-7xl overflow-hidden flex flex-col max-h-[94vh] border border-slate-100 animate-scale-up">
         
         <div className="bg-white bg-pattern p-8 flex flex-col items-center relative shrink-0">

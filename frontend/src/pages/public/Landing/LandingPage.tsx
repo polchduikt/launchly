@@ -52,7 +52,7 @@ export const LandingPage: React.FC = () => {
         }}
       />
 
-      <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] fixed top-0 w-full z-50 flex justify-between items-center h-20 px-6 md:px-12 lg:px-16 relative">
+      <header className="bg-[#F2EBDD]/85 backdrop-blur-md border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] sticky top-0 w-full z-50 flex justify-between items-center h-20 px-6 md:px-12 lg:px-16">
         
         <div className="flex items-center gap-4">
           <Link to={ROUTES.LANDING} className="flex items-center">
@@ -152,7 +152,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      <main className="flex-grow pt-20">
+      <main className="flex-grow pt-10 sm:pt-14">
         <section className="py-16 md:py-24 px-6 lg:px-12 max-w-7xl mx-auto relative overflow-hidden flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1 text-center lg:text-left z-10 space-y-6">
             <h1 className="font-['Anybody',sans-serif] text-4xl sm:text-6xl lg:text-7xl font-extrabold text-[#0A0A0A] uppercase leading-[0.95] tracking-tight border-l-8 border-[#0A0A0A] pl-4 sm:pl-6 text-left">

@@ -27,7 +27,8 @@ export const BlogPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased flex flex-col justify-between relative z-0 selection:bg-[#0A0A0A] selection:text-[#F2EBDD]">
-      <div
+      
+      <div 
         className="fixed inset-0 z-[-1] pointer-events-none opacity-5"
         style={{
           backgroundColor: '#F2EBDD',
@@ -41,7 +42,7 @@ export const BlogPage: React.FC = () => {
       />
 
       <div>
-        <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] fixed top-0 w-full z-50 flex justify-between items-center h-20 px-6 md:px-12 lg:px-16 relative">
+        <header className="bg-[#F2EBDD]/85 backdrop-blur-md border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] sticky top-0 w-full z-50 flex justify-between items-center h-20 px-6 md:px-12 lg:px-16">
           
           <div className="flex items-center gap-4">
             <Link to={ROUTES.LANDING} className="flex items-center">
@@ -86,6 +87,7 @@ export const BlogPage: React.FC = () => {
               )}
             </div>
           </div>
+
           <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             <Link 
               to={`${ROUTES.LANDING}#features`} 
@@ -140,7 +142,8 @@ export const BlogPage: React.FC = () => {
           </div>
         </header>
 
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-28 pb-16 space-y-12">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-14 pb-16 space-y-12">
+          
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-4 border-[#0A0A0A] pb-8">
             <div className="space-y-3">
               <span className="font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-widest bg-[#0A0A0A] text-[#F2EBDD] px-3 py-1 inline-block">
@@ -153,6 +156,7 @@ export const BlogPage: React.FC = () => {
                 {t('blog.hero.subtitle', 'Guides, tutorials, product updates, and automation strategies for modern Telegram businesses.')}
               </p>
             </div>
+
             <div className="relative min-w-[280px] sm:min-w-[340px]">
               <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#0A0A0A]" />
               <input
@@ -164,6 +168,7 @@ export const BlogPage: React.FC = () => {
               />
             </div>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
             {filteredArticles.map((article) => (
               <article
@@ -184,7 +189,7 @@ export const BlogPage: React.FC = () => {
                   </div>
 
                   <div className="p-6 space-y-4">
-                    <h2 className="font-['Anybody',sans-serif] text-xl font-extrabold uppercase text-[#0A0A0A] leading-snug group-hover:underline underline-offset-4 line-clamp-2">
+                    <h2 className="font-['Anybody',sans-serif] text-xl font-extrabold uppercase text-[#0A0A0A] leading-snug line-clamp-2">
                       {article.title}
                     </h2>
                     <p className="font-['Geist',sans-serif] text-xs font-medium text-slate-800 line-clamp-3 leading-relaxed">
@@ -192,6 +197,7 @@ export const BlogPage: React.FC = () => {
                     </p>
                   </div>
                 </div>
+
                 <div className="p-6 pt-0 border-t border-[#0A0A0A]/20 mt-4 flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A]">
                   <div className="flex items-center gap-1.5">
                     <Calendar size={13} />

@@ -272,6 +272,7 @@ const DashboardPage: React.FC = () => {
     setSelectedTemplate(null);
     setIsTemplatesModalOpen(false);
   };
+
   const totalContacts = useMemo(() => {
     return bots
       .filter((b) => b.hasTelegramToken)
@@ -367,10 +368,10 @@ const DashboardPage: React.FC = () => {
 
   if (isLoadingRequire || isLoadingBots) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="animate-spin text-indigo-600" size={32} />
-          <span className="text-sm font-semibold text-slate-500">Loading dashboard...</span>
+      <div className="min-h-screen bg-[#F2EBDD] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 font-['JetBrains_Mono',monospace]">
+          <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
+          <span className="text-xs font-bold text-[#0A0A0A] uppercase tracking-wider">Loading dashboard...</span>
         </div>
       </div>
     );
@@ -380,26 +381,28 @@ const DashboardPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6 md:p-10 max-w-[1300px] mx-auto space-y-12">
+      <div className="p-6 md:p-10 max-w-[1300px] mx-auto space-y-12 relative z-10">
         
-        <div className="space-y-1.5">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+        <div className="space-y-2 border-b-4 border-[#0A0A0A] pb-6">
+          <h1 className="font-['Anybody',sans-serif] text-3xl md:text-5xl font-black text-[#0A0A0A] uppercase tracking-tight">
             {t('dashboard.hello_user', { name: displayName })}
           </h1>
-          <div className="flex items-center gap-1.5 mt-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
-            <span className="text-[11px] font-bold text-slate-400">
+          <div className="flex items-center gap-2 font-['JetBrains_Mono',monospace] text-xs font-bold text-[#0A0A0A]">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-[#0A0A0A]"></span>
+            <span>
               {totalContacts} {t('dashboard.contacts_count')}
             </span>
           </div>
         </div>
 
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">{t('dashboard.start_here')}</h2>
+          <div className="flex items-center justify-between border-l-4 border-[#0A0A0A] pl-4">
+            <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black text-[#0A0A0A] uppercase tracking-tight">
+              {t('dashboard.start_here')}
+            </h2>
             <button
               onClick={() => setIsTemplatesModalOpen(true)}
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1 cursor-pointer"
+              className="font-['JetBrains_Mono',monospace] text-xs font-extrabold text-[#0A0A0A] hover:underline underline-offset-4 uppercase tracking-wider cursor-pointer"
             >
               <span>{t('dashboard.explore_templates')}</span>
             </button>
@@ -414,15 +417,15 @@ const DashboardPage: React.FC = () => {
                     setSelectedTemplate(tmpl);
                     setIsOpenedFromList(false);
                   }}
-                  className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all rounded-3xl p-6 flex flex-col justify-between group cursor-pointer min-h-[190px]"
+                  className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all duration-200 rounded-3xl p-6 flex flex-col justify-between group cursor-pointer min-h-[190px]"
                 >
                   <div className="space-y-3">
-                    <h3 className="font-medium text-slate-700 text-sm md:text-base leading-snug group-hover:text-indigo-650 transition-colors">
+                    <h3 className="font-['Geist',sans-serif] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-sm md:text-base leading-snug transition-colors">
                       {getTemplateTitle(tmpl)}
                     </h3>
                   </div>
-                  <div className="mt-5 pt-5 border-t border-slate-100 flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
-                    <Workflow size={11} />
+                  <div className="mt-5 pt-5 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold uppercase tracking-wider text-[#0A0A0A] group-hover:text-[#F2EBDD]">
+                    <Workflow size={12} />
                     <span>{tmpl.type}</span>
                   </div>
                 </div>
@@ -430,12 +433,15 @@ const DashboardPage: React.FC = () => {
             })}
           </div>
         </div>
+
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">{t('dashboard.blog.latest')}</h2>
+          <div className="flex items-center justify-between border-l-4 border-[#0A0A0A] pl-4">
+            <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black text-[#0A0A0A] uppercase tracking-tight">
+              {t('dashboard.blog.latest')}
+            </h2>
             <button 
               onClick={() => navigate('/blog')}
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1 cursor-pointer"
+              className="font-['JetBrains_Mono',monospace] text-xs font-extrabold text-[#0A0A0A] hover:underline underline-offset-4 uppercase tracking-wider cursor-pointer"
             >
               <span>{t('dashboard.blog.view_all')}</span>
             </button>
@@ -447,17 +453,17 @@ const DashboardPage: React.FC = () => {
                 <div
                   key={article.id}
                   onClick={() => navigate(`/blog/${article.id}`)}
-                  className="bg-white border border-slate-100 hover:border-slate-200 hover:shadow-xl transition-all duration-300 rounded-[24px] overflow-hidden flex flex-col group cursor-pointer"
+                  className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:shadow-[8px_8px_0px_#0A0A0A] hover:-translate-y-1 transition-all rounded-[24px] overflow-hidden flex flex-col group cursor-pointer"
                 >
-                  <div className="aspect-[16/10] w-full overflow-hidden bg-slate-50 relative">
+                  <div className="aspect-[16/10] w-full overflow-hidden bg-slate-200 border-b-2 border-[#0A0A0A] relative">
                     <img
                       src={article.coverImage}
                       alt={article.title}
-                      className="w-full h-full object-cover group-hover:scale-[1.025] transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                     />
                   </div>
                   <div className="p-6 flex-1 flex flex-col justify-between">
-                    <h3 className="font-semibold text-slate-800 text-sm md:text-base leading-snug group-hover:text-indigo-650 transition-colors line-clamp-3">
+                    <h3 className="font-['Anybody',sans-serif] font-bold text-[#0A0A0A] text-sm md:text-base leading-snug line-clamp-3 uppercase">
                       {article.title}
                     </h3>
                   </div>
@@ -466,6 +472,7 @@ const DashboardPage: React.FC = () => {
             })}
           </div>
         </div>
+
         {(isTemplatesModalOpen || selectedTemplate !== null) && createPortal(
           <div 
             onClick={(e) => {
@@ -473,58 +480,60 @@ const DashboardPage: React.FC = () => {
                 handleCloseAll();
               }
             }}
-            className="fixed inset-0 bg-slate-950/20 z-[9998] flex items-center justify-center p-4 transition-all duration-200"
+            className="fixed inset-0 bg-[#0A0A0A]/50 z-[9998] flex items-center justify-center p-4 transition-all duration-200"
           >
-            <div className="bg-white rounded-3xl max-w-5xl w-full h-[85vh] border border-slate-100 shadow-2xl flex overflow-hidden relative animate-in fade-in zoom-in-95 duration-200">
+            <div className={`bg-[#F2EBDD] rounded-3xl w-full border-2 border-[#0A0A0A] shadow-2xl flex overflow-hidden relative transition-all duration-300 ${
+              selectedTemplate ? 'max-w-5xl h-[85vh]' : 'max-w-[1240px] h-[88vh]'
+            }`}>
               
               <button
                 onClick={handleCloseAll}
-                className="absolute top-5 right-5 z-[10000] text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
+                className="absolute top-5 right-5 z-[10000] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] p-2 rounded-full transition-colors cursor-pointer"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
 
               {selectedTemplate ? (
                 <div className="flex flex-col md:flex-row w-full h-full min-h-0">
-                  <div className="flex-1 p-8 md:p-12 overflow-y-auto flex flex-col justify-between space-y-8 min-h-0">
+                  <div className="flex-1 p-8 md:p-12 overflow-y-auto custom-scrollbar flex flex-col justify-between space-y-8 min-h-0">
                     <div className="space-y-6">
-                      <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
-                        <BookOpen size={12} className="text-slate-400" />
+                      <div className="flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-xs font-extrabold text-[#0A0A0A] uppercase tracking-widest border-b border-[#0A0A0A]/20 pb-2">
+                        <BookOpen size={14} className="text-[#0A0A0A]" />
                         <span>{t('dashboard.templates.type_label')}</span>
                       </div>
 
-                      <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight">
+                      <h1 className="font-['Anybody',sans-serif] text-2xl md:text-4xl font-black text-[#0A0A0A] uppercase leading-tight">
                         {getTemplateTitle(selectedTemplate)}
                       </h1>
 
-                      <p className="text-xs font-semibold text-slate-500 leading-relaxed">
+                      <p className="font-['Geist',sans-serif] text-xs font-semibold text-slate-800 leading-relaxed">
                         {getTemplateDesc(selectedTemplate)}
                       </p>
 
                       <div className="space-y-4">
                         <div className="space-y-1.5">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{t('dashboard.templates.biz_value_label')}</h4>
-                          <p className="text-xs text-slate-650 leading-relaxed font-medium">
+                          <h4 className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">{t('dashboard.templates.biz_value_label')}</h4>
+                          <p className="font-['Geist',sans-serif] text-xs text-slate-800 leading-relaxed font-medium">
                             {getTemplateBusinessValue(selectedTemplate)}
                           </p>
                         </div>
 
                         <div className="space-y-1.5">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{t('dashboard.templates.how_works_label')}</h4>
-                          <p className="text-xs text-slate-650 leading-relaxed font-medium">
+                          <h4 className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">{t('dashboard.templates.how_works_label')}</h4>
+                          <p className="font-['Geist',sans-serif] text-xs text-slate-800 leading-relaxed font-medium">
                             {getTemplateHowItWorks(selectedTemplate)}
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-6 border-t border-slate-100 flex items-center justify-between gap-4 shrink-0">
+                    <div className="pt-6 border-t-2 border-[#0A0A0A] flex items-center justify-between gap-4 shrink-0 font-['JetBrains_Mono',monospace]">
                       <button
                         onClick={() => {
                           setSelectedTemplate(null);
                           setIsTemplatesModalOpen(true);
                         }}
-                        className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
+                        className="flex items-center gap-1.5 text-xs font-bold text-[#0A0A0A] hover:underline cursor-pointer uppercase"
                       >
                         <ArrowLeft size={14} />
                         <span>{t('dashboard.templates.back_btn')}</span>
@@ -533,7 +542,7 @@ const DashboardPage: React.FC = () => {
                       <button
                         onClick={() => handleSetUpTemplate(selectedTemplate)}
                         disabled={isCreating}
-                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold rounded-xl shadow-md shadow-indigo-100 hover:shadow-indigo-200 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                        className="px-6 py-3 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] text-xs font-extrabold uppercase border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                       >
                         {isCreating && <Loader2 size={13} className="animate-spin" />}
                         <span>{t('dashboard.templates.setup_btn')}</span>
@@ -541,29 +550,21 @@ const DashboardPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="w-full md:w-[360px] bg-slate-50 border-l border-slate-100 flex items-center justify-center p-8 shrink-0 relative">
-                    <div 
-                      className="absolute inset-0 bg-slate-100/50 opacity-60 pointer-events-none" 
-                      style={{ 
-                        backgroundImage: 'radial-gradient(circle, #cbd5e1 1px, transparent 1px)', 
-                        backgroundSize: '16px 16px' 
-                      }} 
-                    />
-                    
+                  <div className="w-full md:w-[360px] bg-slate-900 border-l-2 border-[#0A0A0A] flex items-center justify-center p-8 shrink-0 relative">
                     <PhonePreview template={selectedTemplate} />
                   </div>
                 </div>
               ) : (
                 <div className="flex flex-col w-full h-full min-h-0">
-                  <div className="p-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+                  <div className="p-6 border-b-2 border-[#0A0A0A] flex items-center justify-between shrink-0 font-['JetBrains_Mono',monospace]">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-black text-slate-800">{t('dashboard.templates.modal_title')}</h3>
+                      <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-[#0A0A0A]">{t('dashboard.templates.modal_title')}</h3>
                     </div>
-                    <div className="flex items-center gap-4 pr-8">
+                    <div className="flex items-center gap-4 pr-16 md:pr-20">
                       <button
                         onClick={handleStartFromScratch}
                         disabled={isCreating}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-bold rounded-xl transition-all disabled:opacity-50 cursor-pointer"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] text-xs font-bold uppercase transition-all disabled:opacity-50 cursor-pointer shadow-[3px_3px_0px_#0A0A0A]"
                       >
                         {isCreating ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
                         <span>{t('dashboard.templates.start_from_scratch')}</span>
@@ -572,15 +573,15 @@ const DashboardPage: React.FC = () => {
                   </div>
 
                   <div className="flex flex-1 overflow-hidden min-h-0">
-                    <div className="w-56 border-r border-slate-100 p-6 flex flex-col gap-6 shrink-0 bg-slate-50/50">
+                    <div className="w-56 border-r-2 border-[#0A0A0A] p-6 flex flex-col gap-6 shrink-0 bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#0A0A0A]" size={14} />
                         <input
                           type="text"
                           placeholder={t('dashboard.templates.search_placeholder')}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                          className="w-full pl-9 pr-4 py-2 bg-white border-2 border-[#0A0A0A] text-xs font-bold text-[#0A0A0A] placeholder-[#0A0A0A]/50 focus:outline-none uppercase"
                         />
                       </div>
 
@@ -588,10 +589,10 @@ const DashboardPage: React.FC = () => {
                         <div className="space-y-1.5">
                           <button
                             onClick={() => setActiveCategory('all')}
-                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`w-full text-left px-3 py-2 text-xs font-bold border-2 transition-all cursor-pointer uppercase ${
                               activeCategory === 'all' 
-                                ? 'bg-slate-200 text-slate-800' 
-                                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
+                                ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' 
+                                : 'border-transparent text-[#0A0A0A] hover:bg-white hover:border-[#0A0A0A]'
                             }`}
                           >
                             {t('dashboard.templates.all')}
@@ -599,23 +600,23 @@ const DashboardPage: React.FC = () => {
                         </div>
 
                         <div className="space-y-1.5">
-                          <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3">{t('dashboard.templates.by_goal')}</span>
+                          <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3">{t('dashboard.templates.by_goal')}</span>
                           <button
                             onClick={() => setActiveCategory('engage')}
-                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`w-full text-left px-3 py-2 text-xs font-bold border-2 transition-all cursor-pointer uppercase ${
                               activeCategory === 'engage' 
-                                ? 'bg-slate-200 text-slate-800' 
-                                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
+                                ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' 
+                                : 'border-transparent text-[#0A0A0A] hover:bg-white hover:border-[#0A0A0A]'
                             }`}
                           >
                             {t('dashboard.templates.engage')}
                           </button>
                           <button
                             onClick={() => setActiveCategory('traffic')}
-                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`w-full text-left px-3 py-2 text-xs font-bold border-2 transition-all cursor-pointer uppercase ${
                               activeCategory === 'traffic' 
-                                ? 'bg-slate-200 text-slate-800' 
-                                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
+                                ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' 
+                                : 'border-transparent text-[#0A0A0A] hover:bg-white hover:border-[#0A0A0A]'
                             }`}
                           >
                             {t('dashboard.templates.traffic')}
@@ -623,13 +624,13 @@ const DashboardPage: React.FC = () => {
                         </div>
 
                         <div className="space-y-1.5">
-                          <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3">{t('dashboard.templates.by_trigger')}</span>
+                          <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3">{t('dashboard.templates.by_trigger')}</span>
                           <button
                             onClick={() => setActiveCategory('dm')}
-                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`w-full text-left px-3 py-2 text-xs font-bold border-2 transition-all cursor-pointer uppercase ${
                               activeCategory === 'dm' 
-                                ? 'bg-slate-200 text-slate-800' 
-                                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
+                                ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' 
+                                : 'border-transparent text-[#0A0A0A] hover:bg-white hover:border-[#0A0A0A]'
                             }`}
                           >
                             {t('dashboard.templates.dm')}
@@ -638,16 +639,16 @@ const DashboardPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
                       {filteredTemplates.length === 0 ? (
-                        <div className="text-center py-12 text-slate-400 text-xs font-bold">
+                        <div className="text-center py-12 text-[#0A0A0A] text-xs font-bold font-['JetBrains_Mono',monospace]">
                           {t('dashboard.templates.no_results')}
                         </div>
                       ) : activeCategory === 'all' ? (
                         <>
                           {recommendedTemplates.length > 0 && (
                             <div className="space-y-4">
-                              <h4 className="text-base font-bold text-slate-700 tracking-tight">{t('dashboard.recommended')}</h4>
+                              <h4 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase tracking-tight">{t('dashboard.recommended')}</h4>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {recommendedTemplates.map((tmpl) => (
                                   <div
@@ -656,17 +657,17 @@ const DashboardPage: React.FC = () => {
                                       setSelectedTemplate(tmpl);
                                       setIsOpenedFromList(true);
                                     }}
-                                    className="bg-white border border-slate-150 hover:border-slate-250 hover:shadow-sm transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
+                                    className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
                                   >
                                     <div className="space-y-1.5">
-                                      <h3 className="font-bold text-slate-800 text-[15px] leading-snug group-hover:text-indigo-650 transition-colors">
+                                      <h3 className="font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-[15px] leading-snug transition-colors">
                                         {getTemplateTitle(tmpl)}
                                       </h3>
-                                      <p className="text-xs text-slate-450 leading-normal line-clamp-2">
+                                      <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2">
                                         {getTemplateDesc(tmpl)}
                                       </p>
                                     </div>
-                                    <div className="mt-3 pt-3 border-t border-slate-50 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                                    <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
                                       <Workflow size={13} />
                                       <span>{tmpl.type}</span>
                                     </div>
@@ -678,7 +679,7 @@ const DashboardPage: React.FC = () => {
 
                           {discoverTemplates.length > 0 && (
                             <div className="space-y-4">
-                              <h4 className="text-base font-bold text-slate-700 tracking-tight">{t('dashboard.discover_more_templates')}</h4>
+                              <h4 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase tracking-tight">{t('dashboard.discover_more_templates')}</h4>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {discoverTemplates.map((tmpl) => (
                                   <div
@@ -687,17 +688,17 @@ const DashboardPage: React.FC = () => {
                                       setSelectedTemplate(tmpl);
                                       setIsOpenedFromList(true);
                                     }}
-                                    className="bg-white border border-slate-150 hover:border-slate-250 hover:shadow-sm transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
+                                    className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
                                   >
                                     <div className="space-y-1.5">
-                                      <h3 className="font-bold text-slate-800 text-[15px] leading-snug group-hover:text-indigo-650 transition-colors">
+                                      <h3 className="font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-[15px] leading-snug transition-colors">
                                         {getTemplateTitle(tmpl)}
                                       </h3>
-                                      <p className="text-xs text-slate-450 leading-normal line-clamp-2">
+                                      <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2">
                                         {getTemplateDesc(tmpl)}
                                       </p>
                                     </div>
-                                    <div className="mt-3 pt-3 border-t border-slate-50 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                                    <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
                                       <Workflow size={13} />
                                       <span>{tmpl.type}</span>
                                     </div>
@@ -708,8 +709,8 @@ const DashboardPage: React.FC = () => {
                           )}
                         </>
                       ) : (
-                        <div className="space-y-4 animate-in fade-in duration-200">
-                          <h4 className="text-base font-bold text-slate-700 tracking-tight">{getCategoryTitle()}</h4>
+                        <div className="space-y-4">
+                          <h4 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase tracking-tight">{getCategoryTitle()}</h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {filteredTemplates.map((tmpl) => (
                               <div
@@ -718,17 +719,17 @@ const DashboardPage: React.FC = () => {
                                   setSelectedTemplate(tmpl);
                                   setIsOpenedFromList(true);
                                 }}
-                                className="bg-white border border-slate-150 hover:border-slate-250 hover:shadow-sm transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
+                                className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
                               >
                                 <div className="space-y-1.5">
-                                  <h3 className="font-bold text-slate-800 text-[15px] leading-snug group-hover:text-indigo-650 transition-colors">
+                                  <h3 className="font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-[15px] leading-snug transition-colors">
                                     {getTemplateTitle(tmpl)}
                                   </h3>
-                                  <p className="text-xs text-slate-450 leading-normal line-clamp-2">
+                                  <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2">
                                     {getTemplateDesc(tmpl)}
                                   </p>
                                 </div>
-                                <div className="mt-3 pt-3 border-t border-slate-50 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                                <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
                                   <Workflow size={13} />
                                   <span>{tmpl.type}</span>
                                 </div>
@@ -751,4 +752,3 @@ const DashboardPage: React.FC = () => {
 };
 
 export default DashboardPage;
-
