@@ -78,6 +78,8 @@ public class BroadcastServiceImpl implements BroadcastService {
         validateWriteAccess(botId, userId);
         Bot bot = validateBotOwnership(botId, userId);
 
+        validateScheduledAt(request.scheduledAt());
+
         CampaignStatus initialStatus = request.scheduledAt() != null
                 ? CampaignStatus.SCHEDULED
                 : CampaignStatus.DRAFT;
@@ -135,6 +137,7 @@ public class BroadcastServiceImpl implements BroadcastService {
         campaign.setFilterValue(request.filterValue());
         
         if (request.scheduledAt() != null) {
+            validateScheduledAt(request.scheduledAt());
             campaign.setScheduledAt(request.scheduledAt());
             campaign.setStatus(CampaignStatus.SCHEDULED);
         }
@@ -389,6 +392,12 @@ public class BroadcastServiceImpl implements BroadcastService {
 
         campaignRepository.delete(campaign);
         log.info("Deleted campaignId={} for userId={}", campaignId, userId);
+    }
+
+    private void validateScheduledAt(LocalDateTime scheduledAt) {
+        if (scheduledAt != null && !scheduledAt.isAfter(LocalDateTime.now())) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Scheduled time must be in the future.");
+        }
     }
 
     private CampaignResponse toResponse(BroadcastCampaign campaign) {
