@@ -5,12 +5,12 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   ({ label, icon, error, registration, rightElement, className = '', ...props }, ref) => {
     return (
       <div>
-        <label className="block text-sm font-bold text-on-surface mb-1.5" htmlFor={props.id}>
+        <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5" htmlFor={props.id}>
           {label}
         </label>
         <div className="relative">
           {icon && (
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#0A0A0A]/50">
               {icon}
             </div>
           )}
@@ -31,8 +31,8 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             }}
             className={`block w-full ${icon ? 'pl-10' : 'pl-3'} ${
               rightElement ? 'pr-10' : 'pr-3'
-            } py-2.5 border rounded bg-surface text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm ${
-              error ? 'border-red-300' : 'border-outline-variant/60'
+            } py-2.5 border-2 rounded-xl bg-white text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/15 transition-all text-sm font-bold ${
+              error ? 'border-rose-500' : 'border-[#0A0A0A]'
             } ${className}`}
           />
           {rightElement && (
@@ -42,7 +42,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           )}
         </div>
         {error && (
-          <p className="mt-1.5 text-red-500 text-xs font-medium">{error}</p>
+          <p className="mt-1.5 text-rose-700 text-xs font-bold">{error}</p>
         )}
       </div>
     );

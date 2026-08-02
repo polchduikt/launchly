@@ -141,12 +141,12 @@ export const TeamMembersPanel: React.FC = () => {
         <img
           src={avatarUrl!}
           alt={name}
-          className={`${sizeClass} rounded-full object-cover border border-slate-100 shrink-0`}
+          className={`${sizeClass} rounded-full object-cover border-2 border-[#0A0A0A] shrink-0`}
         />
       );
     }
     return (
-      <div className={`${sizeClass} rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 font-bold flex items-center justify-center text-xs shrink-0 select-none`}>
+      <div className={`${sizeClass} rounded-full bg-[#0A0A0A] text-[#F2EBDD] font-black flex items-center justify-center text-xs shrink-0 select-none border-2 border-[#0A0A0A]`}>
         {getInitials(name)}
       </div>
     );
@@ -159,28 +159,28 @@ export const TeamMembersPanel: React.FC = () => {
     const isOwner = editingMember.role === 'Owner';
 
     return (
-      <div className="space-y-6 text-left">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 select-none">
+      <div className="space-y-6 text-left font-['JetBrains_Mono',monospace]">
+        <div className="flex items-center gap-1.5 text-xs font-black text-slate-600 select-none">
           <button
             onClick={() => setEditingMemberId(null)}
-            className="hover:text-slate-700 transition-colors cursor-pointer"
+            className="hover:text-[#0A0A0A] transition-colors cursor-pointer uppercase"
           >
             {t('settings.members.breadcrumb')}
           </button>
           <span>&gt;</span>
-          <span className="text-slate-700">{getMemberName(editingMember)}</span>
+          <span className="text-[#0A0A0A] uppercase">{getMemberName(editingMember)}</span>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-[20px] shadow-sm divide-y divide-slate-100 overflow-hidden">
+        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-center">
             <div className="lg:col-span-3">
-              <span className="text-xs font-bold text-slate-800">{t('settings.members.name')}</span>
+              <span className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase">{t('settings.members.name')}</span>
             </div>
             <div className="lg:col-span-9 flex items-center gap-3">
               {renderMemberAvatar(editingMember)}
-              <span className="text-xs font-bold text-slate-700">{getMemberName(editingMember)}</span>
+              <span className="text-xs font-bold text-[#0A0A0A]">{getMemberName(editingMember)}</span>
               {editingMember.isPending && (
-                <span className="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-600 rounded-md font-bold text-[10px]">
+                <span className="px-2 py-0.5 bg-amber-200 border-2 border-[#0A0A0A] text-[#0A0A0A] rounded-md font-black text-[10px] uppercase">
                   {t('settings.members.pending_invite')}
                 </span>
               )}
@@ -189,7 +189,7 @@ export const TeamMembersPanel: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-start">
             <div className="lg:col-span-3 pt-1">
-              <span className="text-xs font-bold text-slate-800">{t('settings.members.role_label')}</span>
+              <span className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase">{t('settings.members.role_label')}</span>
             </div>
             <div className="lg:col-span-5">
               <select
@@ -205,7 +205,7 @@ export const TeamMembersPanel: React.FC = () => {
                   }
                 }}
                 disabled={isMe || isOwner || editingMember.isPending}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full px-3 py-2 rounded-xl border-2 border-[#0A0A0A] focus:outline-none text-xs font-bold bg-white text-[#0A0A0A] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <option value="Owner" disabled>Owner</option>
                 <option value="Admin">Admin</option>
@@ -215,7 +215,7 @@ export const TeamMembersPanel: React.FC = () => {
               </select>
             </div>
             <div className="lg:col-span-4">
-              <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+              <p className="text-xs text-slate-700 font-bold leading-relaxed">
                 {getRoleDescription(editingMember.role)}
               </p>
             </div>
@@ -223,10 +223,10 @@ export const TeamMembersPanel: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-start">
             <div className="lg:col-span-3 pt-1">
-              <span className="text-xs font-bold text-slate-800">{t('settings.members.seat_type')}</span>
+              <span className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase">{t('settings.members.seat_type')}</span>
             </div>
             <div className="lg:col-span-5 flex items-center gap-3">
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={editingMember.inboxSeat}
@@ -241,14 +241,13 @@ export const TeamMembersPanel: React.FC = () => {
                       );
                     }
                   }}
-                  className="sr-only peer"
+                  className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
                 />
-                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                <span className="ml-3 text-xs font-semibold text-slate-700 select-none">{t('settings.members.inbox_seat')}</span>
+                <span className="text-xs font-bold text-[#0A0A0A] select-none">{t('settings.members.inbox_seat')}</span>
               </label>
             </div>
             <div className="lg:col-span-4">
-              <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+              <p className="text-xs text-slate-700 font-bold leading-relaxed">
                 {t('settings.members.inbox_seat_desc')}
               </p>
             </div>
@@ -256,10 +255,10 @@ export const TeamMembersPanel: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-start">
             <div className="lg:col-span-3 pt-1">
-              <span className="text-xs font-bold text-slate-800">{t('settings.members.billing')}</span>
+              <span className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase">{t('settings.members.billing')}</span>
             </div>
             <div className="lg:col-span-5 flex items-center gap-3">
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={editingMember.billingPermission}
@@ -274,14 +273,13 @@ export const TeamMembersPanel: React.FC = () => {
                       );
                     }
                   }}
-                  className="sr-only peer"
+                  className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
                 />
-                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                <span className="ml-3 text-xs font-semibold text-slate-700 select-none">{t('settings.members.has_permissions')}</span>
+                <span className="text-xs font-bold text-[#0A0A0A] select-none">{t('settings.members.has_permissions')}</span>
               </label>
             </div>
             <div className="lg:col-span-4">
-              <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+              <p className="text-xs text-slate-700 font-bold leading-relaxed">
                 {t('settings.members.billing_desc')}
               </p>
             </div>
@@ -289,20 +287,20 @@ export const TeamMembersPanel: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-start">
             <div className="lg:col-span-3 pt-1">
-              <span className="text-xs font-bold text-slate-800">{t('settings.members.remove')}</span>
+              <span className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase">{t('settings.members.remove')}</span>
             </div>
             <div className="lg:col-span-5">
               <button
                 type="button"
                 onClick={() => handleRemoveMemberOrInvite(editingMember)}
                 disabled={isOwner || (isMe && editingMember.role === 'Owner')}
-                className="w-full py-2 bg-rose-50 hover:bg-rose-100/70 border border-rose-200 text-rose-600 text-xs font-bold rounded-xl select-none cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:border-slate-200 disabled:text-slate-400"
+                className="w-full py-2 bg-rose-200 hover:bg-rose-300 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl select-none cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {editingMember.isPending ? t('settings.members.btn.cancel_inv') : isMe ? t('settings.members.btn.leave_ws') : t('settings.members.btn.remove_mem')}
               </button>
             </div>
             <div className="lg:col-span-4">
-              <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+              <p className="text-xs text-slate-700 font-bold leading-relaxed">
                 {isMe
                   ? isOwner
                     ? t('settings.members.desc.owner_leave')
@@ -319,24 +317,24 @@ export const TeamMembersPanel: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex border-b border-slate-200">
+    <div className="space-y-6 font-['JetBrains_Mono',monospace]">
+      <div className="flex border-b-2 border-[#0A0A0A]">
         <button
           onClick={() => setActiveSubTab('members')}
-          className={`px-4 py-2 text-xs font-bold cursor-pointer transition-all border-b-2 -mb-[2px] ${
+          className={`px-4 py-2 text-xs font-black uppercase cursor-pointer transition-all border-b-2 -mb-[2px] ${
             activeSubTab === 'members'
-              ? 'border-blue-600 text-slate-800'
-              : 'border-transparent text-slate-400 hover:text-slate-650'
+              ? 'border-[#0A0A0A] bg-[#0A0A0A] text-[#F2EBDD]'
+              : 'border-transparent text-[#0A0A0A] hover:bg-white'
           }`}
         >
           {t('settings.members.breadcrumb')}
         </button>
         <button
           onClick={() => setActiveSubTab('groups')}
-          className={`px-4 py-2 text-xs font-bold cursor-pointer transition-all border-b-2 -mb-[2px] ${
+          className={`px-4 py-2 text-xs font-black uppercase cursor-pointer transition-all border-b-2 -mb-[2px] ${
             activeSubTab === 'groups'
-              ? 'border-blue-600 text-slate-800'
-              : 'border-transparent text-slate-400 hover:text-slate-650'
+              ? 'border-[#0A0A0A] bg-[#0A0A0A] text-[#F2EBDD]'
+              : 'border-transparent text-[#0A0A0A] hover:bg-white'
           }`}
         >
           {t('settings.members.groups')}
@@ -345,9 +343,9 @@ export const TeamMembersPanel: React.FC = () => {
 
       {activeSubTab === 'members' ? (
         <div className="space-y-6 text-left animate-in fade-in duration-150">
-          <div className="bg-white border border-slate-200 rounded-[20px] shadow-sm overflow-hidden">
-            <div className="p-5 flex justify-between items-center border-b border-slate-100">
-              <h3 className="text-sm font-extrabold text-slate-700">
+          <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
+            <div className="p-5 flex justify-between items-center border-b-2 border-[#0A0A0A]">
+              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
                 {t('settings.members.title', { name: botName })}
               </h3>
               <button
@@ -355,90 +353,92 @@ export const TeamMembersPanel: React.FC = () => {
                   setErrorMsg('');
                   setIsInviteOpen(true);
                 }}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Plus size={14} />
                 <span>{t('settings.members.invite_btn')}</span>
               </button>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/10 text-[10px] font-black text-slate-400 uppercase tracking-wider select-none">
-                    <th className="px-6 py-3">{t('settings.members.name')}</th>
-                    <th className="px-6 py-3">{t('settings.members.role_label')}</th>
-                    <th className="px-6 py-3">
-                      <span className="flex items-center gap-1">
-                        <span>{t('settings.members.inbox_seat')}</span>
-                        <HelpCircle size={11} />
-                      </span>
-                    </th>
-                    <th className="px-6 py-3">
-                      <span className="flex items-center gap-1">
-                        <span>{t('settings.members.billing')}</span>
-                        <HelpCircle size={11} />
-                      </span>
-                    </th>
-                    <th className="px-6 py-3 text-right"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700 bg-white">
-                  {members.map((m) => (
-                    <tr key={m.id} className="hover:bg-slate-50/30 transition-colors">
-                      <td className="px-6 py-4 flex items-center gap-3">
-                        {renderMemberAvatar(m)}
-                        <div>
-                          <p className="font-bold text-slate-800">{getMemberName(m)}</p>
-                          {m.userId === currentUser?.id && <p className="text-[10px] text-slate-450 mt-0.5 font-bold">{t('settings.members.table.it_is_me')}</p>}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <span>{m.role}</span>
-                          {m.isPending && (
-                            <span className="px-1.5 py-0.5 bg-amber-50 border border-amber-200 text-amber-600 rounded text-[9px] font-black uppercase">
-                              {t('settings.members.table.pending')}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        {m.inboxSeat && <Check size={16} className="text-slate-400" />}
-                      </td>
-                      <td className="px-6 py-4">
-                        {m.billingPermission && <Check size={16} className="text-slate-400" />}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => setEditingMemberId(m.id)}
-                          className="text-blue-600 hover:text-blue-700 font-bold hover:underline cursor-pointer"
-                        >
-                          {t('settings.members.table.edit')}
-                        </button>
-                      </td>
+            <div className="overflow-x-auto p-4">
+              <div className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b-2 border-[#0A0A0A] bg-[#F2EBDD] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
+                      <th className="px-6 py-3">{t('settings.members.name')}</th>
+                      <th className="px-6 py-3">{t('settings.members.role_label')}</th>
+                      <th className="px-6 py-3">
+                        <span className="flex items-center gap-1">
+                          <span>{t('settings.members.inbox_seat')}</span>
+                          <HelpCircle size={11} />
+                        </span>
+                      </th>
+                      <th className="px-6 py-3">
+                        <span className="flex items-center gap-1">
+                          <span>{t('settings.members.billing')}</span>
+                          <HelpCircle size={11} />
+                        </span>
+                      </th>
+                      <th className="px-6 py-3 text-right"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y-2 divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A] bg-white">
+                    {members.map((m) => (
+                      <tr key={m.id} className="hover:bg-[#F2EBDD]/50 transition-colors">
+                        <td className="px-6 py-4 flex items-center gap-3">
+                          {renderMemberAvatar(m)}
+                          <div>
+                            <p className="font-bold text-[#0A0A0A]">{getMemberName(m)}</p>
+                            {m.userId === currentUser?.id && <p className="text-[10px] text-slate-700 uppercase font-bold">{t('settings.members.table.it_is_me')}</p>}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <span>{m.role}</span>
+                            {m.isPending && (
+                              <span className="px-1.5 py-0.5 bg-amber-200 border-2 border-[#0A0A0A] text-[#0A0A0A] rounded text-[9px] font-black uppercase">
+                                {t('settings.members.table.pending')}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {m.inboxSeat && <Check size={16} className="text-[#0A0A0A]" />}
+                        </td>
+                        <td className="px-6 py-4">
+                          {m.billingPermission && <Check size={16} className="text-[#0A0A0A]" />}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => setEditingMemberId(m.id)}
+                            className="text-[#0A0A0A] hover:underline font-black uppercase cursor-pointer"
+                          >
+                            {t('settings.members.table.edit')}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
       ) : (
         <div className="space-y-6 text-left animate-in fade-in duration-150">
-          <div className="bg-white border border-slate-200 rounded-[20px] shadow-sm p-12 text-center flex flex-col items-center justify-center space-y-4 select-none">
-            <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm">
+          <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-12 text-center flex flex-col items-center justify-center space-y-4 select-none">
+            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#0A0A0A] border-2 border-[#0A0A0A]">
               <Users size={20} />
             </div>
             <div className="space-y-1 max-w-sm mx-auto">
-              <h3 className="font-extrabold text-slate-800 text-sm">{t('settings.members.groups.empty_title')}</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-sm uppercase">{t('settings.members.groups.empty_title')}</h3>
+              <p className="text-xs text-slate-700 font-bold leading-relaxed">
                 {t('settings.members.groups.empty_desc')}
               </p>
             </div>
             <button
               onClick={() => {}}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer flex items-center gap-1.5"
             >
               <Plus size={14} />
               <span>{t('settings.members.groups.add_btn')}</span>
@@ -453,15 +453,15 @@ export const TeamMembersPanel: React.FC = () => {
             setIsInviteOpen(false);
             setInviteEmail('');
           }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
         >
           <form 
             onSubmit={handleSendInvite}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl w-full max-w-md flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-md flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
           >
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
+            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3">
+              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
                 {t('settings.members.invite_btn')}
               </h3>
               <button
@@ -470,21 +470,21 @@ export const TeamMembersPanel: React.FC = () => {
                   setIsInviteOpen(false);
                   setInviteEmail('');
                 }}
-                className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700 transition-all cursor-pointer"
+                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
               >
                 <X size={16} />
               </button>
             </div>
 
             {errorMsg && (
-              <div className="px-4 py-2.5 bg-rose-50 border border-rose-200 text-rose-650 text-xs font-bold rounded-xl">
+              <div className="px-4 py-2.5 bg-rose-200 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold rounded-xl">
                 {errorMsg}
               </div>
             )}
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
                   {t('settings.members.invite.email_label')}
                 </label>
                 <input
@@ -493,12 +493,12 @@ export const TeamMembersPanel: React.FC = () => {
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder={t('settings.members.invite.email_placeholder')}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs font-semibold bg-slate-50/20"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2.5">
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-2.5">
                   {t('settings.members.invite.select_role')}
                 </label>
                 <div className="space-y-2">
@@ -513,57 +513,55 @@ export const TeamMembersPanel: React.FC = () => {
                           setInviteInboxSeat(role !== 'Viewer');
                           setInviteBilling(role === 'Admin');
                         }}
-                        className="w-4 h-4 border-slate-350 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
                       />
-                      <span className="text-xs font-semibold text-slate-700">{role}</span>
+                      <span className="text-xs font-bold text-[#0A0A0A]">{role}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between py-2 border-t border-b border-slate-100">
-                <span className="text-xs font-bold text-slate-750">{t('settings.members.invite.assign_inbox')}</span>
-                <label className="relative inline-flex items-center cursor-pointer">
+              <div className="flex items-center justify-between py-2 border-t-2 border-b-2 border-[#0A0A0A]/15">
+                <span className="text-xs font-bold text-[#0A0A0A]">{t('settings.members.invite.assign_inbox')}</span>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={inviteInboxSeat}
                     onChange={(e) => setInviteInboxSeat(e.target.checked)}
-                    className="sr-only peer"
+                    className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
                   />
-                  <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
 
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <span className="text-xs font-bold text-slate-750">{t('settings.members.invite.grant_billing')}</span>
-                <label className="relative inline-flex items-center cursor-pointer">
+              <div className="flex items-center justify-between pb-2 border-b-2 border-[#0A0A0A]/15">
+                <span className="text-xs font-bold text-[#0A0A0A]">{t('settings.members.invite.grant_billing')}</span>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={inviteBilling}
                     onChange={(e) => setInviteBilling(e.target.checked)}
-                    className="sr-only peer"
+                    className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
                   />
-                  <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
 
-              <div className="bg-slate-50 border border-slate-200/60 p-4 rounded-2xl text-[11px] text-slate-400 font-medium leading-relaxed">
+              <div className="bg-white border-2 border-[#0A0A0A] p-4 rounded-2xl text-xs text-slate-700 font-bold leading-relaxed">
                 {getRoleDescription(inviteRole)}
               </div>
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-100 select-none">
+            <div className="flex justify-end gap-2.5 pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
               <button
                 type="button"
                 onClick={() => setIsInviteOpen(false)}
-                className="px-4 py-2.5 bg-slate-150 hover:bg-slate-200 text-slate-705 text-xs font-extrabold rounded-xl transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {t('settings.members.invite.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={loading || !inviteEmail.trim()}
-                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-55 text-white text-xs font-extrabold rounded-xl transition-all shadow-sm cursor-pointer"
+                className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] disabled:opacity-55 text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {loading ? t('settings.members.invite.sending') : t('settings.members.invite.send_btn')}
               </button>

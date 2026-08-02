@@ -101,25 +101,25 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
 
   if (!conversation) {
     return (
-      <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-3 bg-white">
-        <MessageSquare size={48} strokeWidth={1} className="text-slate-200" />
-        <span className="text-sm font-medium text-slate-400">{t('crm.chat.select_placeholder_title')}</span>
-        <span className="text-xs text-slate-300">{t('crm.chat.select_placeholder_desc')}</span>
+      <div className="h-full flex flex-col items-center justify-center text-[#0A0A0A] gap-3 bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
+        <MessageSquare size={48} strokeWidth={1.5} className="text-[#0A0A0A]" />
+        <span className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A]">{t('crm.chat.select_placeholder_title')}</span>
+        <span className="text-xs text-slate-700 font-bold">{t('crm.chat.select_placeholder_desc')}</span>
       </div>
     );
   }
 
   return (
     <>
-      <div className="h-[56px] min-h-[56px] px-5 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">
+      <div className="h-[56px] min-h-[56px] px-5 border-b-2 border-[#0A0A0A] flex items-center justify-between shrink-0 bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
         <div className="flex items-center gap-3">
           <UserAvatar name={conversation.botUserName} photoUrl={conversation.botUserPhotoUrl} size={34} />
           <div>
-            <h3 className="font-semibold text-sm text-slate-800">{conversation.botUserName}</h3>
+            <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight">{conversation.botUserName}</h3>
             {conversation.botUserUsername && (
               <button
                 onClick={() => window.open(`https://t.me/${conversation.botUserUsername}`, '_blank')}
-                className="text-[10px] text-indigo-500 hover:text-indigo-700 hover:underline cursor-pointer flex items-center gap-0.5"
+                className="text-[10px] text-[#0A0A0A] font-bold hover:underline cursor-pointer flex items-center gap-0.5"
               >
                 @{conversation.botUserUsername} <ExternalLink size={9} />
               </button>
@@ -148,16 +148,18 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 py-4 bg-white" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex-1 overflow-y-auto px-5 py-4 bg-[#F2EBDD] font-['JetBrains_Mono',monospace]" style={{ scrollbarWidth: 'none' }}>
         {isMsgLoading ? (
-          <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-indigo-600" size={24} /></div>
+          <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-[#0A0A0A]" size={24} /></div>
         ) : messages.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-xs text-slate-400 italic">No messages in this conversation.</div>
+          <div className="h-full flex items-center justify-center text-xs text-[#0A0A0A] font-bold italic">No messages in this conversation.</div>
         ) : (
           groupedMessages.map((group, gi) => (
             <div key={gi}>
               <div className="flex items-center justify-center my-4">
-                <span className="text-[11px] text-slate-400 font-semibold">{formatDateSeparator(group.date)}</span>
+                <span className="text-[10px] text-[#0A0A0A] font-black uppercase bg-white border-2 border-[#0A0A0A] px-3 py-1 rounded-full shadow-[2px_2px_0px_0px_#0A0A0A]">
+                  {formatDateSeparator(group.date)}
+                </span>
               </div>
               {group.msgs.map(m => (
                 <MessageBubble

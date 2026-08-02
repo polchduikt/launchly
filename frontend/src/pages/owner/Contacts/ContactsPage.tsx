@@ -2,13 +2,13 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import {
-  useBotUsersQuery,
+  useAllBotUsersQuery,
   useUpdateBotUserMutation,
   useDeleteBotUserMutation,
   useConversationsQuery,
   useCreateBotUserMutation,
 } from '../../../hooks/crm/useCrmQueries';
-import { useTagsQuery } from '../../../hooks/broadcast/useBroadcastQueries';
+import { useAllTagsQuery } from '../../../hooks/broadcast/useBroadcastQueries';
 import {
   Filter,
   Search,
@@ -40,9 +40,9 @@ export const ContactsPage: React.FC = () => {
 
   const botId = activeBotId || (bots[0]?.id || 0);
 
-  const { data: contacts = [], isLoading: isContactsLoading, refetch } = useBotUsersQuery(botId);
+  const { data: contacts = [], isLoading: isContactsLoading, refetch } = useAllBotUsersQuery();
   const { data: conversations = [] } = useConversationsQuery(botId);
-  const { data: tags = [] } = useTagsQuery(botId);
+  const { data: tags = [] } = useAllTagsQuery();
 
   const updateBotUserMut = useUpdateBotUserMutation(botId);
   const deleteBotUserMut = useDeleteBotUserMutation(botId);
@@ -254,78 +254,78 @@ export const ContactsPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-4rem)] flex bg-slate-50 font-sans">
-        <main className="flex-1 flex flex-col min-w-0 bg-slate-50 overflow-hidden">
+      <div className="h-[calc(100vh-4rem)] flex bg-[#F2EBDD] font-['Geist',sans-serif]">
+        <main className="flex-1 flex flex-col min-w-0 bg-[#F2EBDD] overflow-hidden">
           
           <ContactsHeader
             onCreateContact={() => setShowCreateModal(true)}
           />
 
-          <div className="px-6 py-3 bg-white border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 select-none">
+          <div className="px-6 py-3.5 bg-[#F2EBDD] border-b-2 border-[#0A0A0A] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 select-none font-['JetBrains_Mono',monospace]">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowFiltersBuilder(!showFiltersBuilder)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm ${
+                className={`flex items-center gap-2 px-4 py-2 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   showFiltersBuilder
-                    ? 'bg-blue-50 border border-blue-200 text-blue-600'
-                    : 'bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600'
+                    ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                    : 'bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
                 }`}
               >
-                <Filter size={14} className={showFiltersBuilder ? 'text-blue-500' : 'text-slate-400'} />
+                <Filter size={14} />
                 <span>{t('crm.contacts.filter')}</span>
               </button>
               <div className="relative w-full sm:w-64">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#0A0A0A]" />
                 <input
                   type="text"
                   placeholder={t('crm.contacts.search_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 focus:border-indigo-500 rounded-xl text-xs font-semibold text-slate-700 placeholder:text-slate-400 focus:outline-none transition-all"
+                  className="w-full pl-9 pr-4 py-2 bg-white border-2 border-[#0A0A0A] focus:outline-none rounded-xl text-xs font-bold text-[#0A0A0A] placeholder:text-slate-500 transition-all"
                 />
               </div>
             </div>
 
             <div className="flex items-center gap-3 self-end sm:self-auto">
-              <span className="text-xs font-bold text-slate-500">
+              <span className="text-xs font-bold text-[#0A0A0A]">
                 {t('crm.contacts.selected_count', { count: selectedContactIds.size, total: filteredContacts.length })}
               </span>
               <div className="relative" ref={bulkMenuRef}>
                 <button
                   onClick={() => setShowBulkMenu(!showBulkMenu)}
                   disabled={selectedContactIds.size === 0}
-                  className="flex items-center gap-1 px-3 py-2 bg-white hover:bg-slate-50 disabled:opacity-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition-all cursor-pointer shadow-sm"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
                 >
                   <span>{t('crm.contacts.btn.bulk_actions')}</span>
-                  <ChevronDown size={14} className="text-slate-400" />
+                  <ChevronDown size={14} />
                 </button>
 
                 {showBulkMenu && (
-                  <div className="absolute right-0 mt-1.5 w-60 bg-white border border-slate-200 rounded-xl shadow-xl z-30 py-1.5 overflow-hidden text-xs font-bold text-slate-700">
-                    <button onClick={() => setBulkActionType('add-tag')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <Tag size={13} className="text-slate-400" /> {t('crm.contacts.bulk.add_tag')}
+                  <div className="absolute right-0 mt-1.5 w-60 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl z-30 py-1.5 overflow-hidden text-xs font-bold text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
+                    <button onClick={() => setBulkActionType('add-tag')} className="w-full text-left px-4 py-2 hover:bg-white flex items-center gap-2 cursor-pointer">
+                      <Tag size={13} className="text-[#0A0A0A]" /> {t('crm.contacts.bulk.add_tag')}
                     </button>
-                    <button onClick={() => setBulkActionType('remove-tag')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <X size={13} className="text-slate-400" /> {t('crm.contacts.bulk.remove_tag')}
+                    <button onClick={() => setBulkActionType('remove-tag')} className="w-full text-left px-4 py-2 hover:bg-white flex items-center gap-2 cursor-pointer">
+                      <X size={13} className="text-[#0A0A0A]" /> {t('crm.contacts.bulk.remove_tag')}
                     </button>
-                    <button onClick={() => setBulkActionType('pause')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <Pause size={13} className="text-slate-400" /> {t('crm.contacts.bulk.pause')}
+                    <button onClick={() => setBulkActionType('pause')} className="w-full text-left px-4 py-2 hover:bg-white flex items-center gap-2 cursor-pointer">
+                      <Pause size={13} className="text-[#0A0A0A]" /> {t('crm.contacts.bulk.pause')}
                     </button>
-                    <button onClick={() => setBulkActionType('resume')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <Play size={13} className="text-slate-400" /> {t('crm.contacts.bulk.resume')}
+                    <button onClick={() => setBulkActionType('resume')} className="w-full text-left px-4 py-2 hover:bg-white flex items-center gap-2 cursor-pointer">
+                      <Play size={13} className="text-[#0A0A0A]" /> {t('crm.contacts.bulk.resume')}
                     </button>
-                    <button onClick={() => setBulkActionType('set-field')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <Bookmark size={13} className="text-slate-400" /> {t('crm.contacts.bulk.set_field')}
+                    <button onClick={() => setBulkActionType('set-field')} className="w-full text-left px-4 py-2 hover:bg-white flex items-center gap-2 cursor-pointer">
+                      <Bookmark size={13} className="text-[#0A0A0A]" /> {t('crm.contacts.bulk.set_field')}
                     </button>
-                    <button onClick={() => setBulkActionType('clear-field')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
-                      <X size={13} className="text-slate-400" /> {t('crm.contacts.bulk.clear_field')}
+                    <button onClick={() => setBulkActionType('clear-field')} className="w-full text-left px-4 py-2 hover:bg-white flex items-center gap-2 cursor-pointer">
+                      <X size={13} className="text-[#0A0A0A]" /> {t('crm.contacts.bulk.clear_field')}
                     </button>
-                    <div className="border-t border-slate-100 my-1"></div>
-                    <button onClick={() => setBulkActionType('unsub-acc')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer text-amber-600">
-                      <Lock size={13} className="text-amber-500" /> {t('crm.contacts.bulk.unsub_acc')}
+                    <div className="border-t border-[#0A0A0A]/20 my-1"></div>
+                    <button onClick={() => setBulkActionType('unsub-acc')} className="w-full text-left px-4 py-2 hover:bg-white flex items-center gap-2 cursor-pointer text-amber-700">
+                      <Lock size={13} className="text-amber-700" /> {t('crm.contacts.bulk.unsub_acc')}
                     </button>
-                    <button onClick={() => setBulkActionType('delete')} className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer text-rose-600">
-                      <Trash2 size={13} className="text-rose-500" /> {t('crm.contacts.bulk.delete')}
+                    <button onClick={() => setBulkActionType('delete')} className="w-full text-left px-4 py-2 hover:bg-white flex items-center gap-2 cursor-pointer text-rose-700">
+                      <Trash2 size={13} className="text-rose-700" /> {t('crm.contacts.bulk.delete')}
                     </button>
                   </div>
                 )}

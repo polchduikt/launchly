@@ -27,30 +27,29 @@ export const DisplayPanel: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white border border-slate-200 rounded-[20px] shadow-sm divide-y divide-slate-100 overflow-hidden text-left">
+    <div className="space-y-6 font-['JetBrains_Mono',monospace]">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden text-left">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-start">
           <div className="lg:col-span-3">
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
               {t('settings.display.templates_title')}
             </h3>
           </div>
           <div className="lg:col-span-5 flex items-center">
-            <label className="relative inline-flex items-center cursor-pointer select-none">
+            <label className="flex items-center gap-3 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={showTemplatesModal}
                 onChange={(e) => handleToggleTemplates(e.target.checked)}
-                className="sr-only peer animate-none"
+                className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
               />
-              <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-              <span className="ml-3 text-xs font-semibold text-slate-700">
+              <span className="text-xs font-bold text-[#0A0A0A]">
                 {t('settings.display.templates_toggle')}
               </span>
             </label>
           </div>
           <div className="lg:col-span-4">
-            <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+            <p className="text-xs text-slate-700 font-bold leading-relaxed">
               {t('settings.display.templates_desc')}
             </p>
           </div>
@@ -58,26 +57,25 @@ export const DisplayPanel: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-start">
           <div className="lg:col-span-3">
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
               {t('settings.display.contacts_title')}
             </h3>
           </div>
           <div className="lg:col-span-5 flex items-center">
-            <label className="relative inline-flex items-center cursor-pointer select-none">
+            <label className="flex items-center gap-3 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={showOnlySubscribed}
                 onChange={(e) => handleToggleSubscribed(e.target.checked)}
-                className="sr-only peer animate-none"
+                className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
               />
-              <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-              <span className="ml-3 text-xs font-semibold text-slate-700">
+              <span className="text-xs font-bold text-[#0A0A0A]">
                 {t('settings.display.contacts_toggle')}
               </span>
             </label>
           </div>
           <div className="lg:col-span-4">
-            <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+            <p className="text-xs text-slate-700 font-bold leading-relaxed">
               {t('settings.display.contacts_desc')}
             </p>
           </div>

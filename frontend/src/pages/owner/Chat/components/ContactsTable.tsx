@@ -48,11 +48,11 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
 
   if (botId === 0) {
     return (
-      <div className="h-full flex items-center justify-center p-8 text-center bg-white rounded-2xl border border-slate-200 shadow-sm m-6">
-        <div className="max-w-sm space-y-3">
-          <AlertCircle size={40} className="text-slate-300 mx-auto" />
-          <p className="font-bold text-slate-700">{t('crm.contacts.no_bot_title')}</p>
-          <p className="text-xs text-slate-400">{t('crm.contacts.no_bot_desc')}</p>
+      <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl m-6">
+        <div className="max-w-sm space-y-3 font-['JetBrains_Mono',monospace]">
+          <AlertCircle size={40} className="text-[#0A0A0A] mx-auto" />
+          <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-sm uppercase">{t('crm.contacts.no_bot_title')}</p>
+          <p className="text-xs text-slate-700 font-medium">{t('crm.contacts.no_bot_desc')}</p>
         </div>
       </div>
     );
@@ -61,25 +61,25 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
   if (isContactsLoading) {
     return (
       <div className="h-full flex items-center justify-center m-6">
-        <Loader2 className="animate-spin text-indigo-600" size={32} />
+        <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
       </div>
     );
   }
 
   if (filteredContacts.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center text-slate-400 italic bg-white rounded-2xl border border-slate-200 shadow-sm m-6">
+      <div className="h-full flex items-center justify-center text-[#0A0A0A] font-['JetBrains_Mono',monospace] font-bold text-xs bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl m-6">
         {t('crm.contacts.no_contacts_found')}
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-auto p-6">
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+    <div className="flex-1 overflow-auto p-6 font-['JetBrains_Mono',monospace]">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider select-none">
+            <tr className="bg-white border-b-2 border-[#0A0A0A] text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider select-none">
               <th className="py-4 pl-6 pr-2 w-10">
                 <input
                   type="checkbox"
@@ -88,7 +88,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
                     filteredContacts.every((c) => selectedContactIds.has(c.id))
                   }
                   onChange={(e) => onSelectAll(e.target.checked)}
-                  className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  className="accent-[#0A0A0A] cursor-pointer"
                 />
               </th>
               <th className="py-4 px-2 w-16">{t('crm.contacts.table.avatar')}</th>
@@ -97,7 +97,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
               <th className="py-4 px-6">{t('crm.contacts.table.subscribed')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+          <tbody className="divide-y divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A]">
             {filteredContacts.map((c) => {
               const isSelected = selectedContactIds.has(c.id);
               const meta = parseMetadata(c.metadata);
@@ -111,8 +111,8 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
               return (
                 <tr
                   key={c.id}
-                  className={`hover:bg-slate-50/50 transition-all cursor-pointer ${
-                    isSelected ? 'bg-indigo-50/20' : ''
+                  className={`hover:bg-white/70 transition-all cursor-pointer ${
+                    isSelected ? 'bg-white/90' : ''
                   }`}
                   onClick={() => onSelectContactDetail(c)}
                 >
@@ -124,34 +124,34 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
                       type="checkbox"
                       checked={isSelected}
                       onChange={(e) => onSelectContact(c.id, e.target.checked)}
-                      className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      className="accent-[#0A0A0A] cursor-pointer"
                     />
                   </td>
                   <td className="py-4 px-2 w-16">
                     <ContactAvatar photoUrl={c.photoUrl} name={c.firstName} size="md" />
                   </td>
-                  <td className="py-4 px-2 font-bold text-slate-900">
+                  <td className="py-4 px-2 font-black text-[#0A0A0A]">
                     <div className="flex flex-col">
-                      <span>{c.firstName} {c.lastName}</span>
+                      <span className="font-extrabold">{c.firstName} {c.lastName}</span>
                       {c.username && (
-                        <span className="text-[11px] font-normal text-slate-400">@{c.username}</span>
+                        <span className="text-[11px] font-semibold text-slate-700">@{c.username}</span>
                       )}
                     </div>
                   </td>
                   <td className="py-4 px-6">
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border-2 border-[#0A0A0A] ${
                         isUnsubscribed
-                          ? 'bg-rose-50 text-rose-600 border border-rose-100'
+                          ? 'bg-rose-200 text-[#0A0A0A]'
                           : isPaused
-                          ? 'bg-amber-50 text-amber-600 border border-amber-100'
-                          : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                          ? 'bg-amber-200 text-[#0A0A0A]'
+                          : 'bg-emerald-200 text-[#0A0A0A]'
                       }`}
                     >
                       {statusText}
                     </span>
                   </td>
-                  <td className="py-4 px-6 text-slate-400 text-[11px]">
+                  <td className="py-4 px-6 text-slate-700 text-[11px] font-bold">
                     {getRelativeTime(c.createdAt)}
                   </td>
                 </tr>

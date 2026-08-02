@@ -6,9 +6,7 @@ import { NAV_ITEMS } from './config/navItems';
 import { useTranslation } from '../../i18n/config';
 import type { DashboardLayoutProps } from '../../types/shared';
 import { HelpCircle } from 'lucide-react';
-import { useBotStore } from '../../store/useBotStore';
-import { useBotsQuery } from '../../hooks/bot/useBotsQuery';
-import { useBotUsersQuery } from '../../hooks/crm/useCrmQueries';
+import { useAllBotUsersQuery } from '../../hooks/crm/useCrmQueries';
 import { useSubscriptionQuery } from '../../hooks/bot/useBillingQueries';
 import { PricingModal } from '../common/PricingModal';
 import { ManageSignInOptionsModal } from '../common/ManageSignInOptionsModal';
@@ -28,11 +26,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const helpMenuRef = useRef<HTMLDivElement>(null);
 
-  const activeBotId = useBotStore((state) => state.activeBotId);
-  const botsQuery = useBotsQuery(true);
-  const bots = botsQuery.data || [];
-  const targetBotId = activeBotId || (bots[0]?.id || 0);
-  const { data: contacts = [] } = useBotUsersQuery(targetBotId, !!targetBotId);
+  const { data: contacts = [] } = useAllBotUsersQuery();
   const { data: subscription } = useSubscriptionQuery();
 
   useEffect(() => {
@@ -60,19 +54,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   return (
     <div className="flex h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased overflow-hidden selection:bg-[#0A0A0A] selection:text-[#F2EBDD] relative">
       
-      <div
-        className="fixed inset-0 pointer-events-none opacity-5 z-0"
-        style={{
-          backgroundColor: '#F2EBDD',
-          backgroundImage: `
-            linear-gradient(#0A0A0A 1px, transparent 1px),
-            linear-gradient(90deg, #0A0A0A 1px, transparent 1px)
-          `,
-          backgroundSize: '20px 20px',
-          backgroundPosition: '-1px -1px'
-        }}
-      />
-
       <aside className="w-16 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] flex flex-col justify-between h-full z-30 shrink-0 relative select-none">
         <div className="flex flex-col overflow-y-auto flex-1">
           <div className="h-16 flex items-center justify-center border-b-2 border-[#0A0A0A]">
@@ -293,7 +274,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto z-10 relative">
+      <main className="flex-1 overflow-y-auto custom-scrollbar z-10 relative">
         {children}
       </main>
 

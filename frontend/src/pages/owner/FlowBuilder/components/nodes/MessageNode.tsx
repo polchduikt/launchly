@@ -199,7 +199,7 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
         parts.push(
           <span 
             key={match.index} 
-            className="inline-flex items-center bg-blue-600 text-white rounded px-1.5 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline shrink-0"
+            className="inline-flex items-center bg-[#0A0A0A] text-[#F2EBDD] rounded-lg px-2 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline shrink-0 border border-[#0A0A0A] font-mono"
           >
             {match.displayName}
           </span>
@@ -232,14 +232,14 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected 
-          ? 'border-emerald-500 ring-4 ring-emerald-100' 
-          : 'border-slate-200 hover:border-slate-300'
+          ? 'shadow-lg ring-2 ring-[#0A0A0A]' 
+          : 'shadow-md'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
-      <div className="relative flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/50 select-none rounded-t-[22px]">
+      <div className="relative flex items-center gap-2 px-4 py-3 bg-sky-100/80 select-none rounded-t-[22px]">
         <NodeHandle
           type="target"
           position={Position.Left}
@@ -502,7 +502,7 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
         </>
       )}
 
-      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative rounded-b-[22px]">
+      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 select-none relative rounded-b-[22px]">
         <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mr-2">{t('flow_builder.next_step')}</span>
         <NodeHandle
           type="source"

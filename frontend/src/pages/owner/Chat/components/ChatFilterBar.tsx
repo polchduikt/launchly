@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { MessageSquare, ChevronDown } from 'lucide-react';
 import type { ChatFilter, SortOrder } from '../../../../types/chat';
 import { CHAT_FILTER_OPTIONS } from '../../../../const/chat';
@@ -22,6 +23,36 @@ interface ChatFilterBarProps {
   onResetFilters?: () => void;
 }
 
+interface DropdownPortalProps {
+  anchorRef: React.RefObject<HTMLDivElement | null>;
+  isOpen: boolean;
+  minWidth?: number;
+  children: React.ReactNode;
+}
+
+export const DropdownPortal: React.FC<DropdownPortalProps> = ({ anchorRef, isOpen, minWidth, children }) => {
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (isOpen && anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      setCoords({ top: rect.bottom + 4, left: rect.left });
+    }
+  }, [isOpen, anchorRef]);
+
+  if (!isOpen) return null;
+
+  return ReactDOM.createPortal(
+    <div
+      style={{ top: coords.top, left: coords.left, minWidth: minWidth ?? 'auto' }}
+      className="fixed bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_0px_#0A0A0A] z-[9999] py-1 font-['JetBrains_Mono',monospace] overflow-hidden"
+    >
+      {children}
+    </div>,
+    document.body
+  );
+};
+
 export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
   chatFilter,
   onChatFilterChange,
@@ -38,56 +69,67 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
   onShowSortDrop,
   sortRef,
 }) => (
-  <div className="h-12 border-b border-slate-200 flex items-center justify-between px-4 bg-white shrink-0 select-none relative z-20">
-    <div className="flex items-center gap-1.5 py-1">
+  <div className="h-12 border-b-2 border-[#0A0A0A] flex items-center justify-between px-4 bg-[#F2EBDD] shrink-0 select-none font-['JetBrains_Mono',monospace]">
+    <div className="flex items-center gap-2 py-1">
 
-      <div ref={filterRef} className="relative shrink-0">
+      <div ref={filterRef} className="shrink-0">
         <button
           onClick={() => { onShowChatFilterDrop(!showChatFilterDrop); onShowSortDrop(false); }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-indigo-200 bg-indigo-50/50 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50 cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all"
         >
-          <MessageSquare size={12} className="text-indigo-500" />
+          <MessageSquare size={12} className="shrink-0" />
           {chatFilter === 'open' ? t('crm.chat.open_chats') : chatFilter === 'closed' ? t('crm.chat.closed_chats') : t('crm.chat.all_chats')} <ChevronDown size={11} />
         </button>
-        {showChatFilterDrop && (
-          <div className="absolute top-full mt-1 left-0 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1 min-w-[140px]">
-            {CHAT_FILTER_OPTIONS.map(f => (
-              <button
-                key={f.value}
-                onClick={() => { onChatFilterChange(f.value); onShowChatFilterDrop(false); }}
-                className={`w-full text-left px-3 py-1.5 text-xs font-medium cursor-pointer ${chatFilter === f.value ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}
-              >
-                {f.value === 'open' ? t('crm.chat.open_chats') : f.value === 'closed' ? t('crm.chat.closed_chats') : t('crm.chat.all_chats')}
-              </button>
-            ))}
-          </div>
-        )}
+        <DropdownPortal anchorRef={filterRef} isOpen={showChatFilterDrop} minWidth={160}>
+          {CHAT_FILTER_OPTIONS.map(f => (
+            <button
+              key={f.value}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onChatFilterChange(f.value);
+                onShowChatFilterDrop(false);
+              }}
+              className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap ${chatFilter === f.value ? 'text-[#0A0A0A] bg-[#F2EBDD]' : 'text-[#0A0A0A] hover:bg-slate-100'}`}
+            >
+              {f.value === 'open' ? t('crm.chat.open_chats') : f.value === 'closed' ? t('crm.chat.closed_chats') : t('crm.chat.all_chats')}
+            </button>
+          ))}
+        </DropdownPortal>
       </div>
 
       <button
         onClick={() => onShowUnreadOnlyChange(!showUnreadOnly)}
-        className={`px-2.5 py-1.5 rounded-md border text-[11px] font-semibold cursor-pointer transition-all shrink-0 ${
-          showUnreadOnly ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+        className={`px-3 py-1 rounded-xl border-2 border-[#0A0A0A] text-xs font-black uppercase cursor-pointer transition-all shrink-0 ${
+          showUnreadOnly ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'bg-white text-[#0A0A0A] hover:bg-[#F2EBDD]'
         }`}
       >
-        {t('crm.chat.unread')} {unreadCount > 0 && <span className="ml-1 bg-indigo-500 text-white text-[9px] font-bold px-1 rounded-full">{unreadCount}</span>}
+        {t('crm.chat.unread')} {unreadCount > 0 && <span className="ml-1 bg-white text-[#0A0A0A] border border-[#0A0A0A] text-[10px] font-black px-1.5 py-0.5 rounded-md">{unreadCount}</span>}
       </button>
 
-      <div ref={sortRef} className="relative shrink-0">
+      <div ref={sortRef} className="shrink-0">
         <button
           onClick={() => { onShowSortDrop(!showSortDrop); onShowChatFilterDrop(false); }}
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-[11px] font-semibold text-slate-600 hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+          className="flex items-center gap-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all"
         >
           {sortOrder === 'newest' ? t('crm.chat.sort_newest') : t('crm.chat.sort_oldest')} <ChevronDown size={11} />
         </button>
-        {showSortDrop && (
-          <div className="absolute top-full mt-1 left-0 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1 min-w-[110px]">
-            <button onClick={() => { onSortOrderChange('newest'); onShowSortDrop(false); }} className={`w-full text-left px-3 py-1.5 text-xs font-medium cursor-pointer ${sortOrder === 'newest' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}>{t('crm.chat.sort_newest_opt')}</button>
-            <button onClick={() => { onSortOrderChange('oldest'); onShowSortDrop(false); }} className={`w-full text-left px-3 py-1.5 text-xs font-medium cursor-pointer ${sortOrder === 'oldest' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}>{t('crm.chat.sort_oldest_opt')}</button>
-          </div>
-        )}
+        <DropdownPortal anchorRef={sortRef} isOpen={showSortDrop} minWidth={140}>
+          <button
+            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onSortOrderChange('newest'); onShowSortDrop(false); }}
+            className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap ${sortOrder === 'newest' ? 'text-[#0A0A0A] bg-[#F2EBDD]' : 'text-[#0A0A0A] hover:bg-slate-100'}`}
+          >
+            {t('crm.chat.sort_newest_opt')}
+          </button>
+          <button
+            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onSortOrderChange('oldest'); onShowSortDrop(false); }}
+            className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap ${sortOrder === 'oldest' ? 'text-[#0A0A0A] bg-[#F2EBDD]' : 'text-[#0A0A0A] hover:bg-slate-100'}`}
+          >
+            {t('crm.chat.sort_oldest_opt')}
+          </button>
+        </DropdownPortal>
       </div>
 
-      </div>
+    </div>
   </div>
 );

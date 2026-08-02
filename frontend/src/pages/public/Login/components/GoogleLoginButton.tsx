@@ -6,7 +6,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onClick })
     <button
       type="button"
       onClick={onClick}
-      className="w-full inline-flex justify-center items-center py-2.5 px-4 border border-outline-variant rounded bg-surface text-on-surface text-sm font-semibold hover:bg-surface-container-low transition-colors shadow-sm cursor-pointer"
+      className="w-full inline-flex justify-center items-center py-2.5 px-4 border-2 border-[#0A0A0A] rounded-xl bg-white text-[#0A0A0A] text-sm font-black hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer"
     >
       <svg className="h-5 w-5 mr-3" viewBox="0 0 24 24">
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

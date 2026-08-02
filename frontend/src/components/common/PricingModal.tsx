@@ -73,55 +73,60 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/50 animate-fade-in select-none">
-      <div className="bg-slate-50 rounded-[32px] shadow-2xl w-full max-w-7xl overflow-hidden flex flex-col max-h-[94vh] border border-slate-100 animate-scale-up">
-        
-        <div className="bg-white bg-pattern p-8 flex flex-col items-center relative shrink-0">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#0A0A0A]/40 animate-fade-in select-none cursor-pointer font-['JetBrains_Mono',monospace]"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-7xl overflow-hidden flex flex-col max-h-[94vh] animate-scale-up cursor-default"
+      >
+        <div className="bg-[#F2EBDD] px-6 py-4 flex flex-col items-center relative shrink-0 border-b-2 border-[#0A0A0A]">
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+            className="absolute top-4 right-4 p-1.5 text-[#0A0A0A] hover:bg-white border-2 border-transparent hover:border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
 
-          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight text-center">
+          <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black text-[#0A0A0A] uppercase tracking-tight text-center">
             {t('pricing.header')}
           </h2>
 
-          <div className="flex bg-slate-100 p-1 rounded-full gap-1 mt-6">
+          <div className="flex bg-white p-1 rounded-2xl border-2 border-[#0A0A0A] gap-1 mt-3">
             <button
               onClick={() => setBillingPeriod('monthly')}
-              className={`px-5 py-2 text-xs font-bold rounded-full transition-all cursor-pointer ${
+              className={`px-4 py-1.5 text-xs font-black uppercase rounded-xl transition-all cursor-pointer ${
                 billingPeriod === 'monthly'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-800'
+                  ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A]'
+                  : 'text-[#0A0A0A] hover:bg-[#F2EBDD]'
               }`}
             >
               {t('pricing.period.monthly')}
             </button>
             <button
               onClick={() => setBillingPeriod('annually')}
-              className={`px-5 py-2 text-xs font-bold rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-4 py-1.5 text-xs font-black uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
                 billingPeriod === 'annually'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-800'
+                  ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A]'
+                  : 'text-[#0A0A0A] hover:bg-[#F2EBDD]'
               }`}
             >
               <span>{t('pricing.period.annually')}</span>
-              <span className="bg-emerald-100 text-emerald-700 text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full select-none">
+              <span className="bg-emerald-300 text-[#0A0A0A] text-[9px] font-black uppercase px-1.5 py-0.5 border border-[#0A0A0A] rounded-md select-none">
                 {t('pricing.period.discount')}
               </span>
             </button>
           </div>
         </div>
 
-        <div className="p-8 overflow-y-auto flex-1 min-h-0 bg-slate-50/50">
+        <div className="p-5 md:p-6 overflow-y-auto flex-1 min-h-0 bg-[#F2EBDD]">
           {isPlansLoading ? (
-            <div className="h-64 flex items-center justify-center">
-              <Loader2 className="animate-spin text-indigo-600" size={36} />
+            <div className="h-48 flex items-center justify-center">
+              <Loader2 className="animate-spin text-[#0A0A0A]" size={36} />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
               {sortedPlans.map((plan) => {
                 const isCurrent = plan.id === currentPlanId;
                 const isPro = plan.name.toUpperCase() === 'PRO';
@@ -137,14 +142,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                 return (
                   <div
                     key={plan.id}
-                    className={`relative flex flex-col bg-white border rounded-[28px] p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+                    className={`relative flex flex-col bg-white border-2 border-[#0A0A0A] rounded-2xl p-5 transition-all duration-300 shadow-[4px_4px_0px_0px_#0A0A0A] hover:shadow-[6px_6px_0px_0px_#0A0A0A] hover:-translate-y-0.5 ${
                       isPro
-                        ? 'border-indigo-600 ring-2 ring-indigo-600/10 shadow-lg shadow-indigo-50/50'
-                        : 'border-slate-200'
+                        ? 'ring-2 ring-[#0A0A0A]'
+                        : ''
                     }`}
                   >
                     {isPro && (
-                      <span className="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-md flex items-center gap-1 select-none whitespace-nowrap">
+                      <span className="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-[#0A0A0A] text-[#F2EBDD] text-[9px] font-black uppercase tracking-wider px-3 py-0.5 rounded-lg border-2 border-[#0A0A0A] flex items-center gap-1 select-none whitespace-nowrap">
                         <Sparkles size={10} /> {t('pricing.most_popular')}
                       </span>
                     )}
@@ -152,43 +157,43 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                     <div className="flex-1 flex flex-col">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-extrabold text-2xl text-slate-900 tracking-tight capitalize">
+                          <h4 className="font-['Anybody',sans-serif] font-black text-xl text-[#0A0A0A] uppercase tracking-tight">
                             {plan.displayName}
                           </h4>
                           {showAiBadge && (
-                            <span className="bg-indigo-50 text-indigo-700 text-[9px] font-black uppercase px-2 py-0.5 rounded-full border border-indigo-100">
+                            <span className="bg-indigo-100 border-2 border-[#0A0A0A] text-[#0A0A0A] text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md">
                               +AI
                             </span>
                           )}
                         </div>
                         
-                        <p className="text-slate-400 text-xs mt-2 leading-relaxed min-h-[36px]">
+                        <p className="text-slate-700 text-[11px] font-bold mt-1.5 leading-snug min-h-[28px]">
                           {getPlanTagline(plan.name)}
                         </p>
 
-                        <div className="flex items-baseline gap-1 mt-4">
-                          <span className="text-4xl font-extrabold text-slate-900 tracking-tight">
+                        <div className="flex items-baseline gap-1 mt-2.5">
+                          <span className="text-3xl font-black text-[#0A0A0A] tracking-tight">
                             ${displayPrice}
                           </span>
-                          <span className="text-xs text-slate-400 font-bold">/mo</span>
+                          <span className="text-xs text-slate-700 font-bold">/mo</span>
                         </div>
 
-                        <div className="mt-5">
-                          <div className="text-xl font-bold text-slate-800">
+                        <div className="mt-3">
+                          <div className="text-lg font-black text-[#0A0A0A]">
                             {plan.maxBotUsers.toLocaleString()}
                           </div>
-                          <div className="text-[11px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
+                          <div className="text-[10px] text-slate-700 font-bold flex items-center gap-1 mt-0.5">
                             <span>{t('pricing.active_contacts')}</span>
-                            <HelpCircle size={12} className="text-slate-300" />
+                            <HelpCircle size={11} className="text-[#0A0A0A]" />
                           </div>
                         </div>
                       </div>
 
-                      <div className="mt-6">
+                      <div className="mt-4">
                         {isCurrent ? (
                           <button
                             disabled
-                            className="w-full py-3.5 bg-slate-50 border border-slate-100 text-slate-400 text-xs font-bold rounded-2xl select-none cursor-not-allowed text-center transition-all shadow-sm"
+                            className="w-full py-2.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] text-slate-600 text-xs font-black uppercase rounded-xl select-none cursor-not-allowed text-center transition-all"
                           >
                             {t('pricing.current_plan')}
                           </button>
@@ -196,10 +201,10 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                           <button
                             onClick={() => handleUpgrade(plan.id, plan.name)}
                             disabled={upgradingPlanId !== null}
-                            className={`w-full py-3.5 text-xs font-bold rounded-2xl transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2 ${
+                            className={`w-full py-2.5 text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer flex items-center justify-center gap-2 ${
                               isPro
-                                ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/10'
-                                : 'bg-white hover:bg-slate-50 border border-slate-200 text-slate-700'
+                                ? 'bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD]'
+                                : 'bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A]'
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                           >
                             {isUpgrading ? (
@@ -218,12 +223,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                         )}
                       </div>
 
-                      <div className="mt-6 flex-1">
-                        <ul className="space-y-3">
+                      <div className="mt-4 flex-1">
+                        <ul className="space-y-1.5">
                           {getPlanFeaturesList(plan.name).map((feat, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-xs">
-                              <span className="text-slate-400 shrink-0 select-none font-bold">•</span>
-                              <span className="text-slate-600 font-medium">{feat}</span>
+                            <li key={idx} className="flex items-start gap-1.5 text-[11px]">
+                              <span className="text-[#0A0A0A] shrink-0 select-none font-bold">•</span>
+                              <span className="text-slate-800 font-bold leading-tight">{feat}</span>
                             </li>
                           ))}
                         </ul>
@@ -234,12 +239,6 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
               })}
             </div>
           )}
-
-          <div className="flex justify-center mt-8">
-            <span className="text-slate-400 text-xs hover:text-indigo-600 hover:underline cursor-pointer transition-colors font-medium">
-              {t('pricing.deep_dive')}
-            </span>
-          </div>
         </div>
       </div>
     </div>

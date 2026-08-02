@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HelpCircle } from 'lucide-react';
 import { useAuthStore } from '../../../../store/useAuthStore';
 import { updateNotificationsApi, unlinkTelegramApi } from '../../../../api/auth';
@@ -28,6 +28,12 @@ export const NotificationsPanel: React.FC = () => {
   const [emailInput, setEmailInput] = useState(user?.notificationEmail || user?.email || '');
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [telegramAvatarError, setTelegramAvatarError] = useState(false);
+  const telegramAvatarUrl = user?.telegramPhotoUrl || user?.avatar;
+
+  useEffect(() => {
+    setTelegramAvatarError(false);
+  }, [telegramAvatarUrl]);
 
   const handleToggleDesktopMsgAssigned = (val: boolean) => {
     setDesktopMsgAssigned(val);
@@ -139,18 +145,18 @@ export const NotificationsPanel: React.FC = () => {
   const isTelegramSubscribed = !!user?.telegramUserId;
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="space-y-6 pb-10 font-['JetBrains_Mono',monospace]">
       {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-250 text-emerald-800 p-4 rounded-2xl text-xs font-bold shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="bg-emerald-200 border-2 border-[#0A0A0A] text-[#0A0A0A] p-4 rounded-2xl text-xs font-bold animate-in fade-in duration-200">
           {successMsg}
         </div>
       )}
-      <div className="bg-white border border-slate-200 rounded-[20px] shadow-sm divide-y divide-slate-100 overflow-hidden text-left">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden text-left">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
           <div className="lg:col-span-3">
-            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase flex items-center gap-1.5">
               <span>{t('settings.notifications.notify_assignees')}</span>
-              <span className="text-[9px] font-black bg-blue-600 text-white px-1.5 py-0.5 rounded uppercase tracking-wider">
+              <span className="text-[9px] font-black bg-[#0A0A0A] text-[#F2EBDD] px-1.5 py-0.5 rounded uppercase tracking-wider">
                 PRO
               </span>
             </h3>
@@ -161,37 +167,37 @@ export const NotificationsPanel: React.FC = () => {
                 type="checkbox"
                 checked={notifyEmail}
                 onChange={(e) => handleToggleEmail(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
               />
-              <span className="text-xs font-semibold text-slate-700">{t('settings.notifications.email')}</span>
+              <span className="text-xs font-bold text-[#0A0A0A]">{t('settings.notifications.email')}</span>
             </label>
             <label className="flex items-center gap-3 select-none cursor-pointer">
               <input
                 type="checkbox"
                 checked={notifyTelegram}
                 onChange={(e) => handleToggleTelegram(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
               />
               <div className="flex items-center gap-1">
-                <span className="text-xs font-semibold text-slate-700">{t('settings.notifications.telegram')}</span>
+                <span className="text-xs font-bold text-[#0A0A0A]">{t('settings.notifications.telegram')}</span>
                 <span title={t('settings.notifications.telegram_help')}>
-                  <HelpCircle size={13} className="text-slate-400 cursor-help" />
+                  <HelpCircle size={13} className="text-[#0A0A0A] cursor-help" />
                 </span>
               </div>
             </label>
           </div>
           <div className="lg:col-span-4">
-            <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+            <p className="text-xs text-slate-700 font-bold leading-relaxed">
               {t('settings.notifications.notify_assignees_desc')}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-[20px] shadow-sm overflow-hidden text-left">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden text-left">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
           <div className="lg:col-span-3">
-            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase flex items-center gap-1.5">
               <span>{t('settings.notifications.stats_report')}</span>
             </h3>
           </div>
@@ -201,9 +207,9 @@ export const NotificationsPanel: React.FC = () => {
                 type="checkbox"
                 checked={statsNotificationsEnabled}
                 onChange={(e) => saveSettings({ statsNotificationsEnabled: e.target.checked })}
-                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
               />
-              <span className="text-xs font-semibold text-slate-700">{t('settings.notifications.enable_stats')}</span>
+              <span className="text-xs font-bold text-[#0A0A0A]">{t('settings.notifications.enable_stats')}</span>
             </label>
 
             {statsNotificationsEnabled && (
@@ -303,16 +309,16 @@ export const NotificationsPanel: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-[20px] shadow-sm divide-y divide-slate-100 overflow-hidden text-left">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden text-left">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
           <div className="lg:col-span-3">
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
               {t('settings.notifications.desktop_title')}
             </h3>
           </div>
           <div className="lg:col-span-5 space-y-4">
             <div>
-              <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2.5">
+              <p className="text-[11px] font-black text-slate-700 uppercase tracking-wider mb-2.5">
                 {t('settings.notifications.notify_me_when')}
               </p>
               <div className="space-y-3">
@@ -321,9 +327,9 @@ export const NotificationsPanel: React.FC = () => {
                     type="checkbox"
                     checked={desktopMsgAssigned}
                     onChange={(e) => handleToggleDesktopMsgAssigned(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    className="w-4 h-4 mt-0.5 accent-[#0A0A0A] cursor-pointer"
                   />
-                  <span className="text-xs font-semibold text-slate-700 leading-normal">
+                  <span className="text-xs font-bold text-[#0A0A0A] leading-normal">
                     {t('settings.notifications.desktop_msg_assigned')}
                   </span>
                 </label>
@@ -332,9 +338,9 @@ export const NotificationsPanel: React.FC = () => {
                     type="checkbox"
                     checked={desktopNewUnassigned}
                     onChange={(e) => handleToggleDesktopNewUnassigned(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    className="w-4 h-4 mt-0.5 accent-[#0A0A0A] cursor-pointer"
                   />
-                  <span className="text-xs font-semibold text-slate-700 leading-normal">
+                  <span className="text-xs font-bold text-[#0A0A0A] leading-normal">
                     {t('settings.notifications.desktop_new_unassigned')}
                   </span>
                 </label>
@@ -343,9 +349,9 @@ export const NotificationsPanel: React.FC = () => {
                     type="checkbox"
                     checked={desktopAssignedToMe}
                     onChange={(e) => handleToggleDesktopAssignedToMe(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    className="w-4 h-4 mt-0.5 accent-[#0A0A0A] cursor-pointer"
                   />
-                  <span className="text-xs font-semibold text-slate-700 leading-normal">
+                  <span className="text-xs font-bold text-[#0A0A0A] leading-normal">
                     {t('settings.notifications.desktop_assigned_to_me')}
                   </span>
                 </label>
@@ -353,23 +359,23 @@ export const NotificationsPanel: React.FC = () => {
             </div>
           </div>
           <div className="lg:col-span-4">
-            <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+            <p className="text-xs text-slate-700 font-bold leading-relaxed">
               {t('settings.notifications.desktop_desc')}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-[20px] shadow-sm divide-y divide-slate-100 overflow-hidden text-left">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden text-left">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
           <div className="lg:col-span-3">
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
               {t('settings.notifications.channel_title')}
             </h3>
           </div>
           <div className="lg:col-span-5 space-y-4">
             <div>
-              <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2.5">
+              <p className="text-[11px] font-black text-slate-700 uppercase tracking-wider mb-2.5">
                 {t('settings.notifications.notify_me_when')}
               </p>
               <label className="flex items-start gap-3 select-none cursor-pointer">
@@ -377,26 +383,26 @@ export const NotificationsPanel: React.FC = () => {
                   type="checkbox"
                   checked={channelAssignedToMe}
                   onChange={(e) => handleToggleChannelAssignedToMe(e.target.checked)}
-                  className="w-4 h-4 mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  className="w-4 h-4 mt-0.5 accent-[#0A0A0A] cursor-pointer"
                 />
-                <span className="text-xs font-semibold text-slate-700 leading-normal">
+                <span className="text-xs font-bold text-[#0A0A0A] leading-normal">
                   {t('settings.notifications.desktop_assigned_to_me')}
                 </span>
               </label>
             </div>
           </div>
           <div className="lg:col-span-4">
-            <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+            <p className="text-xs text-slate-700 font-bold leading-relaxed">
               {t('settings.notifications.channel_desc')}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-[20px] shadow-sm divide-y divide-slate-100 overflow-hidden text-left">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden text-left">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-center">
           <div className="lg:col-span-3">
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
               {t('settings.notifications.my_telegram')}
             </h3>
           </div>
@@ -404,21 +410,26 @@ export const NotificationsPanel: React.FC = () => {
             {isTelegramSubscribed ? (
               <div className="flex items-center justify-between w-full max-w-md">
                 <div className="flex items-center gap-3">
-                  {isValidAvatarUrl(user?.telegramPhotoUrl) ? (
-                    <img src={user!.telegramPhotoUrl!} alt={user?.telegramName || 'Telegram User'} className="w-10 h-10 rounded-full object-cover border border-slate-100 shrink-0" />
+                  {!telegramAvatarError && isValidAvatarUrl(telegramAvatarUrl) ? (
+                    <img
+                      src={telegramAvatarUrl!}
+                      alt={user?.telegramName || user?.name || 'Telegram User'}
+                      onError={() => setTelegramAvatarError(true)}
+                      className="w-10 h-10 rounded-full object-cover border-2 border-[#0A0A0A] shrink-0 bg-white"
+                    />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center font-bold text-sm shrink-0 select-none">
-                      {getInitials(user?.telegramName, 'T')}
+                    <div className="w-10 h-10 rounded-full bg-[#0A0A0A] text-[#F2EBDD] flex items-center justify-center font-bold text-sm shrink-0 select-none border-2 border-[#0A0A0A]">
+                      {getInitials(user?.telegramName || user?.name, 'T')}
                     </div>
                   )}
                   <div className="flex flex-col text-left">
-                    <span className="font-bold text-xs text-slate-800 leading-none mb-1">{user?.telegramName || 'Telegram User'}</span>
-                    <span className="text-[10px] text-slate-400">@{user?.telegramUsername || 'unknown'}</span>
+                    <span className="font-bold text-xs text-[#0A0A0A] leading-none mb-1">{user?.telegramName || 'Telegram User'}</span>
+                    <span className="text-[10px] font-bold text-slate-700">@{user?.telegramUsername || 'unknown'}</span>
                   </div>
                 </div>
                 <button
                   onClick={handleUnsubscribeTelegram}
-                  className="px-5 py-2 border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs font-bold rounded-xl transition-all cursor-pointer animate-in fade-in duration-200"
+                  className="px-5 py-2 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
                 >
                   {t('settings.notifications.unsubscribe')}
                 </button>
@@ -426,14 +437,14 @@ export const NotificationsPanel: React.FC = () => {
             ) : (
               <button
                 onClick={() => setIsTelegramModalOpen(true)}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition-all cursor-pointer shadow-sm select-none w-64 animate-in fade-in duration-200"
+                className="px-5 py-2.5 rounded-xl text-xs font-black uppercase bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] transition-all cursor-pointer select-none w-64"
               >
                 {t('settings.notifications.subscribe_telegram')}
               </button>
             )}
           </div>
           <div className="lg:col-span-4">
-            <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+            <p className="text-xs text-slate-700 font-bold leading-relaxed">
               {t('settings.notifications.my_telegram_desc')}
             </p>
           </div>
@@ -441,7 +452,7 @@ export const NotificationsPanel: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-center">
           <div className="lg:col-span-3">
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
               {t('settings.notifications.my_email')}
             </h3>
           </div>
@@ -453,18 +464,18 @@ export const NotificationsPanel: React.FC = () => {
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
                 placeholder={t('settings.notifications.enter_email')}
-                className="flex-1 px-4 py-2 border border-slate-200 focus:outline-none focus:border-indigo-500 rounded-xl text-xs font-semibold bg-slate-50/20"
+                className="flex-1 px-4 py-2 border-2 border-[#0A0A0A] focus:outline-none rounded-xl text-xs font-bold bg-white text-[#0A0A0A]"
               />
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer shrink-0"
+                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer shrink-0"
               >
                 {t('settings.notifications.update')}
               </button>
             </form>
           </div>
           <div className="lg:col-span-4">
-            <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+            <p className="text-xs text-slate-700 font-bold leading-relaxed">
               {t('settings.notifications.my_email_desc')}
             </p>
           </div>

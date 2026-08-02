@@ -84,15 +84,15 @@ const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ i
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl shadow-md transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected
-          ? 'border-indigo-500 ring-4 ring-indigo-500/10'
-          : 'border-slate-200 hover:border-slate-355'
+          ? 'shadow-lg ring-2 ring-[#0A0A0A]'
+          : 'shadow-md'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 
-      <div className="relative flex items-center gap-2 bg-[#e6fc9c]/75 border-b border-[#cde080]/60 rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-lime-200 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
@@ -147,7 +147,7 @@ const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ i
         )}
       </div>
 
-      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative rounded-b-[22px]">
+      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 select-none relative rounded-b-[22px]">
         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">{t('node.start_automation.next_step')}</span>
         <NodeHandle
           type="source"

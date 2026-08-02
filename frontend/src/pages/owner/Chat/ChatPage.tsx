@@ -186,7 +186,7 @@ export const ChatPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col bg-white font-sans overflow-hidden w-full max-w-full">
+      <div className="h-full flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace] overflow-hidden w-full max-w-full">
         <style>{`
           .scrollbar-none::-webkit-scrollbar { display: none; }
           .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
@@ -311,8 +311,6 @@ export const ChatPage: React.FC = () => {
                 const noteEl = document.querySelector(`[data-message-id="${noteId}"]`);
                 if (noteEl) {
                   noteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  noteEl.classList.add('highlight-message');
-                  setTimeout(() => noteEl.classList.remove('highlight-message'), 2000);
                 }
               }}
               isOpen={infoPanelOpen}

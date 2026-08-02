@@ -1,4 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { useBotsQuery } from '../bot/useBotsQuery';
 import {
   getOrdersApi,
   updateOrderApi,
@@ -19,7 +21,7 @@ import {
   deleteBotUserApi,
 } from '../../api/bot';
 import type { OrderStatus, LeadStatus, ConversationStatus } from '../../types/crm';
-import type { BotUserUpdateRequest, BotUserCreateRequest } from '../../types/bot';
+import type { BotUserUpdateRequest, BotUserCreateRequest, BotUserResponse } from '../../types/bot';
 
 export const useOrdersQuery = (botId: number, enabled: boolean = true) => {
   return useQuery({
@@ -122,6 +124,35 @@ export const useBotUsersQuery = (botId: number, enabled: boolean = true) => {
     queryFn: () => getBotUsersApi(botId),
     enabled: enabled && botId > 0,
   });
+};
+
+export const useAllBotUsersQuery = () => {
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
+  const queries = useQueries({
+    queries: bots.map((bot) => ({
+      queryKey: ['botUsers', bot.id],
+      queryFn: () => getBotUsersApi(bot.id),
+      enabled: bots.length > 0,
+    })),
+  });
+
+  const contacts = useMemo(() => {
+    const list = queries.flatMap((q) => q.data || []);
+    const uniqueMap = new Map<string | number, BotUserResponse>();
+    list.forEach((u) => {
+      if (u) {
+        const key = u.telegramId ? String(u.telegramId) : u.id;
+        if (!uniqueMap.has(key)) {
+          uniqueMap.set(key, u);
+        }
+      }
+    });
+    return Array.from(uniqueMap.values());
+  }, [queries]);
+
+  const isLoading = isBotsLoading || queries.some((q) => q.isLoading);
+
+  return { data: contacts, isLoading, refetch: () => queries.forEach((q) => q.refetch()) };
 };
 
 export const useUpdateBotUserMutation = (botId: number) => {

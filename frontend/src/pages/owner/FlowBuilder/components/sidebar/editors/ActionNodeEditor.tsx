@@ -685,25 +685,25 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
             setIsActionPickerOpen(false);
             setSearchQuery('');
           }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/20 p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white border border-slate-200 rounded-lg shadow-2xl w-full max-w-[780px] h-[580px] flex overflow-hidden animate-in zoom-in-95 duration-200 relative"
+            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-2xl w-full max-w-[800px] h-[600px] flex overflow-hidden animate-in zoom-in-95 duration-200 relative font-['JetBrains_Mono',monospace] text-[#0A0A0A]"
           >
             <button
               onClick={() => {
                 setIsActionPickerOpen(false);
                 setSearchQuery('');
               }}
-              className="absolute right-4 top-4 p-1.5 hover:bg-slate-100 rounded-md text-slate-400 hover:text-slate-700 transition-all cursor-pointer z-50"
+              className="absolute right-4 top-4 p-2 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-[#0A0A0A] transition-all cursor-pointer z-50"
             >
               <X size={16} />
             </button>
 
-                        
-            <div className="w-[190px] border-r border-slate-100 bg-white p-5 flex flex-col gap-1 select-none shrink-0">
-              <h2 className="text-sm font-extrabold text-slate-800 tracking-tight mb-4 mt-6 leading-snug">
+            {/* Left Sidebar Categories */}
+            <div className="w-[210px] border-r-2 border-[#0A0A0A] bg-[#F2EBDD] p-5 flex flex-col gap-1.5 select-none shrink-0">
+              <h2 className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-3 mt-4 leading-snug font-['Anybody',sans-serif]">
                 {t('editor.action.perform_actions')}
               </h2>
               {[
@@ -719,10 +719,10 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                     setSelectedCategory(cat.id);
                     setSearchQuery('');
                   }}
-                  className={`w-full text-left px-3 py-2 rounded-sm text-xs font-semibold transition-all cursor-pointer ${
+                  className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-2 ${
                     selectedCategory === cat.id && !searchQuery
-                      ? 'bg-slate-100 text-slate-900'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
+                      : 'border-transparent text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
                   }`}
                 >
                   <span>{cat.name}</span>
@@ -730,18 +730,17 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
               ))}
             </div>
 
-                        
-            <div className="flex-1 p-7 overflow-y-auto custom-scrollbar flex flex-col gap-5">
-              <div className="flex flex-col gap-3">
-                
+            {/* Main Content Area */}
+            <div className="flex-1 p-6 overflow-y-auto custom-scrollbar flex flex-col gap-5">
+              <div className="flex flex-col gap-3 mr-12">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]/40" size={16} />
                   <input
                     type="text"
                     placeholder={t('editor.action.search_placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:border-indigo-400 text-xs font-semibold bg-white"
+                    className="w-full pl-9 pr-4 py-2 rounded-xl border-2 border-[#0A0A0A] focus:outline-none text-xs font-bold bg-white text-[#0A0A0A] placeholder:text-[#0A0A0A]/40"
                   />
                 </div>
               </div>
@@ -749,8 +748,8 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
               {searchQuery ? (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t('editor.action.search_results_title')}</h3>
-                    <p className="text-[11px] text-slate-500 font-medium mt-0.5">{t('editor.action.search_results_desc', { count: filteredActions.length })}</p>
+                    <h3 className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">{t('editor.action.search_results_title')}</h3>
+                    <p className="text-[10px] text-[#0A0A0A]/70 font-bold mt-0.5">{t('editor.action.search_results_desc', { count: filteredActions.length })}</p>
                   </div>
                   <div className="grid grid-cols-1 gap-3">
                     {filteredActions.map((act) => (
@@ -761,51 +760,33 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                           setIsActionPickerOpen(false);
                           setSearchQuery('');
                         }}
-                        className="w-full text-left p-4 border border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 rounded-md transition-all cursor-pointer flex gap-3.5 items-center group bg-white"
+                        className="w-full text-left p-4 border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-2xl transition-all cursor-pointer flex gap-3.5 items-center group bg-white text-[#0A0A0A]"
                       >
-                        <div className="w-8 h-8 rounded-md bg-emerald-50 flex items-center justify-center shrink-0 border border-emerald-100 transition-colors">
+                        <div className="w-9 h-9 rounded-xl bg-amber-100 border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 text-[#0A0A0A]">
                           {act.icon}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-extrabold text-slate-800 transition-colors">{act.title}</h4>
+                            <h4 className="text-xs font-black group-hover:text-[#F2EBDD] transition-colors font-['Anybody',sans-serif]">{act.title}</h4>
                             {act.pro && (
-                              <span className="text-[8px] font-extrabold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                              <span className="text-[8px] font-black bg-amber-300 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
                                 PRO
                               </span>
                             )}
-                            <span className="text-[9px] font-extrabold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded ml-auto capitalize">
-                              {act.category === 'sheets'
-                                ? t('editor.action.google_sheets_title')
-                                : act.category === 'live_chat'
-                                ? t('editor.action.live_chat_title')
-                                : act.category === 'recently_used'
-                                ? t('editor.action.categories.recently_used')
-                                : act.category}
-                            </span>
                           </div>
-                          <p className="text-xs text-slate-400 font-semibold mt-0.5">{act.desc}</p>
+                          <p className="text-[10px] text-[#0A0A0A]/70 group-hover:text-[#F2EBDD]/80 font-bold mt-0.5">{act.desc}</p>
                         </div>
                       </button>
                     ))}
-                    {filteredActions.length === 0 && (
-                      <div className="text-center py-12">
-                        <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mx-auto text-slate-400 mb-3 border border-slate-100">
-                          <Search size={20} />
-                        </div>
-                        <p className="text-xs font-bold text-slate-700">{t('editor.action.no_actions_title')}</p>
-                        <p className="text-[11px] text-slate-400 font-semibold mt-0.5">{t('editor.action.no_actions_desc')}</p>
-                      </div>
-                    )}
                   </div>
                 </div>
               ) : (
                 <>
                   {selectedCategory === 'recently_used' && (
-                    <div className="space-y-4">
+                    <div className="space-y-3.5">
                       <div>
-                        <h3 className="text-sm font-extrabold text-slate-800">{t('editor.action.categories.recently_used')}</h3>
-                        <p className="text-xs text-slate-400 font-medium mt-0.5">{t('editor.action.recently_used_desc')}</p>
+                        <h3 className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">{t('editor.action.categories.recently_used')}</h3>
+                        <p className="text-[10px] text-[#0A0A0A]/70 font-bold mt-0.5">{t('editor.action.recently_used_desc')}</p>
                       </div>
                       <div className="grid grid-cols-1 gap-3 animate-in fade-in duration-150">
                         {allActions.filter(a => a.type === 'ADD_TAG' || a.type === 'GS_INSERT_ROW').map((act) => (
@@ -815,9 +796,9 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                               handleAddAction(act.type);
                               setIsActionPickerOpen(false);
                             }}
-                            className="w-full text-left p-4 border border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 rounded-md transition-all cursor-pointer flex gap-3.5 items-center group bg-white"
+                            className="w-full text-left p-4 border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-2xl transition-all cursor-pointer flex gap-3.5 items-center group bg-white text-[#0A0A0A]"
                           >
-                            <div className="w-8 h-8 rounded-md bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 transition-colors">
+                            <div className="w-9 h-9 rounded-xl bg-amber-100 border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 text-[#0A0A0A]">
                               {act.icon}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -851,7 +832,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                               handleAddAction(act.type);
                               setIsActionPickerOpen(false);
                             }}
-                            className="w-full text-left p-4 border border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 rounded-md transition-all cursor-pointer flex gap-3.5 items-center group bg-white"
+                            className="w-full text-left p-4 border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-2xl transition-all cursor-pointer flex gap-3.5 items-center group bg-white text-[#0A0A0A]"
                           >
                             <div className="w-8 h-8 rounded-md bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 transition-colors">
                               {act.icon}
@@ -880,7 +861,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                               handleAddAction(act.type);
                               setIsActionPickerOpen(false);
                             }}
-                            className="w-full text-left p-4 border border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 rounded-md transition-all cursor-pointer flex gap-3.5 items-center group bg-white"
+                            className="w-full text-left p-4 border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-2xl transition-all cursor-pointer flex gap-3.5 items-center group bg-white text-[#0A0A0A]"
                           >
                             <div className="w-8 h-8 rounded-md bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 transition-colors">
                               {act.icon}
@@ -909,7 +890,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                               handleAddAction(act.type);
                               setIsActionPickerOpen(false);
                             }}
-                            className="w-full text-left p-4 border border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 rounded-md transition-all cursor-pointer flex gap-3.5 items-center group bg-white"
+                            className="w-full text-left p-4 border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-2xl transition-all cursor-pointer flex gap-3.5 items-center group bg-white text-[#0A0A0A]"
                           >
                             <div className="w-8 h-8 rounded-md bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 transition-colors">
                               {act.icon}
@@ -942,7 +923,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = ({ data, handle
                               handleAddAction(act.type);
                               setIsActionPickerOpen(false);
                             }}
-                            className="w-full text-left p-4 border border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 rounded-md transition-all cursor-pointer flex gap-3.5 items-center group bg-white"
+                            className="w-full text-left p-4 border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-2xl transition-all cursor-pointer flex gap-3.5 items-center group bg-white text-[#0A0A0A]"
                           >
                             <div className="w-8 h-8 rounded-md bg-emerald-50 flex items-center justify-center shrink-0 border border-emerald-100 transition-colors">
                               {act.icon}

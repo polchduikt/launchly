@@ -181,7 +181,7 @@ const FlowBuilderInner: React.FC = () => {
     } else {
       updateLocalAction(null, null);
     }
-  }, [selectedNodeId, currentUser, updateLocalAction]);
+  }, [selectedNodeId, currentUser?.name, updateLocalAction]);
   const nodesWithCollaborators = useMemo(() => {
     const collaboratorMap = new Map(collaborators.map(c => [c.editingNodeId, c]));
     let hasChanges = false;
@@ -248,21 +248,24 @@ const FlowBuilderInner: React.FC = () => {
 
   const { setOnGenerate, setHasExistingNodes } = useAiStore();
 
+  const handleOnGenerate = useCallback((newNodes: unknown[], newEdges: unknown[]) => {
+    takeSnapshot();
+    setNodes(newNodes as Node[]);
+    setEdges(newEdges as Edge[]);
+    setSelectedNodeId(null);
+  }, [takeSnapshot, setNodes, setEdges, setSelectedNodeId]);
+
   useEffect(() => {
-    setOnGenerate((newNodes, newEdges) => {
-      takeSnapshot();
-      setNodes(newNodes as Node[]);
-      setEdges(newEdges as Edge[]);
-      setSelectedNodeId(null);
-    });
+    setOnGenerate(handleOnGenerate);
     return () => {
       setOnGenerate(null);
     };
-  }, [setOnGenerate, setNodes, setEdges, setSelectedNodeId, takeSnapshot]);
+  }, [setOnGenerate, handleOnGenerate]);
 
+  const hasNodes = nodes.length > 1 || (nodes.length === 1 && nodes[0]?.type !== 'START');
   useEffect(() => {
-    setHasExistingNodes(nodes.length > 1 || (nodes.length === 1 && nodes[0].type !== 'START'));
-  }, [nodes, setHasExistingNodes]);
+    setHasExistingNodes(hasNodes);
+  }, [hasNodes, setHasExistingNodes]);
 
   const undoRef = useRef(undo);
   const redoRef = useRef(redo);
@@ -341,40 +344,39 @@ const FlowBuilderInner: React.FC = () => {
             markerHeight="7"
             orient="auto-start-reverse"
           >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1" />
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0A0A0A" />
           </marker>
         </defs>
       </svg>
-      <div className="h-full w-full flex flex-col bg-slate-50 font-sans overflow-hidden">
-        <header className="h-16 border-b border-slate-200 bg-white px-6 flex justify-between items-center z-10 shrink-0 select-none">
+      <div className="h-full w-full flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace] overflow-hidden">
+        <header className="h-16 border-b-2 border-[#0A0A0A] bg-[#F2EBDD] px-6 flex justify-between items-center z-10 shrink-0 select-none">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate(ROUTES.AUTOMATIONS)}
-              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 border border-slate-200 rounded-xl transition-all cursor-pointer"
+              className="p-2 text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-sm"
             >
                <ArrowLeft size={16} />
             </button>
-            <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold">
+            <div className="flex items-center gap-2 text-[#0A0A0A]/60 text-xs font-bold font-['JetBrains_Mono',monospace]">
               <span>{t('flow_builder.automations')}</span>
               <span>&gt;</span>
-              <span className="text-slate-800 font-bold text-sm">{t('flow_builder.telegram_flow_schema')}</span>
+              <span className="text-[#0A0A0A] font-black text-sm font-['Anybody',sans-serif] uppercase tracking-wider">{t('flow_builder.telegram_flow_schema')}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             {saveError && (
-              <span className="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1.5 border border-rose-100 rounded-lg animate-pulse mr-1">
+              <span className="text-xs font-black text-rose-800 bg-rose-200 px-3 py-1.5 border-2 border-[#0A0A0A] rounded-xl animate-pulse mr-1">
                 {saveError}
               </span>
             )}
 
             {activeAction && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-50 border border-indigo-150 rounded-2xl text-[10px] text-indigo-700 font-extrabold shadow-3xs animate-in slide-in-from-right-2 duration-300 max-w-[240px] truncate select-none">
-                <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping" />
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-200 border-2 border-[#0A0A0A] rounded-xl text-[10px] text-[#0A0A0A] font-extrabold shadow-sm animate-in slide-in-from-right-2 duration-300 max-w-[240px] truncate select-none">
+                <span className="w-2 h-2 bg-[#0A0A0A] rounded-full animate-ping" />
                 <span className="truncate">{activeAction}</span>
               </div>
             )}
-
 
             {collaborators.length > 0 && (
               <div className="flex items-center -space-x-1.5 select-none relative group">
@@ -382,7 +384,7 @@ const FlowBuilderInner: React.FC = () => {
                   src={currentUser?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80"}
                   alt={currentUser?.name || "Me"}
                   title={`${currentUser?.name || "Me"} (You)`}
-                  className="w-6 h-6 rounded-full border-2 border-white object-cover shadow-sm ring-1 ring-slate-100"
+                  className="w-7 h-7 rounded-full border-2 border-[#0A0A0A] object-cover shadow-sm"
                 />
                 {collaborators.map((c) => (
                   <div key={c.userId} className="relative">
@@ -390,47 +392,46 @@ const FlowBuilderInner: React.FC = () => {
                       src={c.avatar || "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&h=80"}
                       alt={c.name}
                       title={`${c.name} (Online)`}
-                      className={`w-6 h-6 rounded-full border-2 border-white object-cover shadow-sm ring-1 ring-slate-100 transition-all ${
-                        c.action ? 'ring-2 ring-indigo-500 ring-offset-1 scale-105' : ''
+                      className={`w-7 h-7 rounded-full border-2 border-[#0A0A0A] object-cover shadow-sm transition-all ${
+                        c.action ? 'ring-2 ring-[#0A0A0A] scale-105' : ''
                       }`}
                     />
                     {c.action && (
-                      <span className="absolute bottom-0 right-0 w-2 h-2 bg-indigo-500 rounded-full border border-white animate-ping" />
+                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0A0A0A] animate-ping" />
                     )}
                   </div>
                 ))}
               </div>
             )}
 
-
-            <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-3.5 py-1.5 rounded-2xl font-sans">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 min-w-[85px] justify-start select-none">
+            <div className="flex items-center gap-3 bg-[#F2EBDD] border-2 border-[#0A0A0A] px-3.5 py-1.5 rounded-xl shadow-sm font-['JetBrains_Mono',monospace]">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#0A0A0A] min-w-[85px] justify-start select-none">
                 {isDirty || saveMutation.isPending ? (
                   <>
-                    <Loader2 className="animate-spin text-indigo-500 shrink-0" size={14} />
-                    <span className="text-slate-400">{t('flow_builder.saving')}</span>
+                    <Loader2 className="animate-spin text-[#0A0A0A] shrink-0" size={14} />
+                    <span className="text-[#0A0A0A]/70">{t('flow_builder.saving')}</span>
                   </>
                 ) : saveMutation.isError ? (
                   <>
-                    <span className="text-rose-500 shrink-0 font-bold">✕</span>
-                    <span className="text-rose-500">{t('flow_builder.failed')}</span>
+                    <span className="text-rose-600 shrink-0 font-black">✕</span>
+                    <span className="text-rose-600 font-bold">{t('flow_builder.failed')}</span>
                   </>
                 ) : (
                   <>
-                    <span className="text-emerald-500 shrink-0 font-bold">✓</span>
-                    <span className="text-slate-500">{t('flow_builder.saved')}</span>
+                    <span className="text-emerald-700 shrink-0 font-black">✓</span>
+                    <span className="text-[#0A0A0A] font-bold">{t('flow_builder.saved')}</span>
                   </>
                 )}
               </div>
 
-              <div className="w-[1px] h-4 bg-slate-200" />
+              <div className="w-[2px] h-4 bg-[#0A0A0A]/30" />
 
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={undo}
                   disabled={isViewer || !canUndo}
                   title="Undo (Ctrl+Z)"
-                  className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:hover:text-slate-400 hover:bg-slate-200/50 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
+                  className="p-1 text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-30 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center border border-[#0A0A0A]/20"
                 >
                   <Undo2 size={15} />
                 </button>
@@ -438,21 +439,21 @@ const FlowBuilderInner: React.FC = () => {
                   onClick={redo}
                   disabled={isViewer || !canRedo}
                   title="Redo (Ctrl+Y)"
-                  className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:hover:text-slate-400 hover:bg-slate-200/50 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
+                  className="p-1 text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-30 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center border border-[#0A0A0A]/20"
                 >
                   <Redo2 size={15} />
                 </button>
               </div>
             </div>
 
-            <div className="w-[1px] h-6 bg-slate-200 hidden sm:block" />
+            <div className="w-[2px] h-6 bg-[#0A0A0A]/30 hidden sm:block" />
 
             <button
               onClick={() => setIsPreviewOpen((v) => !v)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all border cursor-pointer shadow-3xs ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer shadow-sm ${
                 isPreviewOpen
-                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
-                  : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
+                  ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                  : 'bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A]'
               }`}
               title="Preview flow"
             >
@@ -466,7 +467,7 @@ const FlowBuilderInner: React.FC = () => {
                   useAiStore.getState().setIsOpen(true);
                   useAiStore.getState().setActiveTab('generator');
                 }}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 text-xs font-bold rounded-xl transition-all border border-indigo-100 cursor-pointer shadow-3xs"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer shadow-sm"
                 title="Generate flow with AI"
               >
                 <Sparkles size={14} className="animate-pulse" />
@@ -478,16 +479,16 @@ const FlowBuilderInner: React.FC = () => {
               <button
                 onClick={handleSaveFlow}
                 disabled={saveMutation.isPending}
-                className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-all shadow shadow-indigo-100 cursor-pointer"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 active:translate-x-[1px] active:translate-y-[1px] disabled:opacity-70 disabled:cursor-not-allowed text-[#F2EBDD] text-xs font-black rounded-xl transition-all border-2 border-[#0A0A0A] shadow-sm cursor-pointer uppercase tracking-wider font-['Anybody',sans-serif]"
               >
                 {saveMutation.isPending ? (
                   <>
-                    <Loader2 className="animate-spin" size={14} />
+                    <Loader2 className="animate-spin text-[#F2EBDD]" size={14} />
                     <span>{t('flow_builder.saving')}</span>
                   </>
                 ) : (
                   <>
-                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isBotLive ? 'bg-emerald-400' : 'bg-slate-400'}`} />
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 border border-[#0A0A0A] ${isBotLive ? 'bg-emerald-400' : 'bg-slate-400'}`} />
                     <span>{t('flow_builder.set_live')}</span>
                   </>
                 )}
@@ -495,7 +496,6 @@ const FlowBuilderInner: React.FC = () => {
             )}
           </div>
         </header>
-
 
         <div className="flex-1 flex overflow-hidden relative">
           <div className="flex-1 relative h-full">
@@ -518,8 +518,8 @@ const FlowBuilderInner: React.FC = () => {
               isValidConnection={isValidConnection}
               defaultEdgeOptions={FLOW_EDGE_DEFAULTS}
               connectionLineStyle={{
-                strokeWidth: 2.2,
-                stroke: '#7b8794',
+                strokeWidth: 2.5,
+                stroke: '#0A0A0A',
               }}
               connectionLineComponent={CustomConnectionLine}
               connectionLineType={edgeType === 'default' ? ConnectionLineType.Bezier : ConnectionLineType.SmoothStep}
@@ -530,7 +530,7 @@ const FlowBuilderInner: React.FC = () => {
               fitView
               fitViewOptions={{ maxZoom: 1, padding: 0.2 }}
               proOptions={{ hideAttribution: true }}
-              className="bg-slate-50"
+              className="bg-[#F2EBDD]"
               zoomOnDoubleClick={false}
               multiSelectionKeyCode="Control"
               selectionKeyCode="Control"
@@ -546,7 +546,7 @@ const FlowBuilderInner: React.FC = () => {
                   transform: 'translateY(-50%)',
                   margin: 0,
                 }}
-                className="border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col bg-white custom-controls-panel"
+                className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-md flex flex-col bg-[#F2EBDD] custom-controls-panel"
               >
                 <button
                   onClick={() => setEdgeType((t) => (t === 'default' ? 'smoothstep' : 'default'))}
@@ -555,9 +555,9 @@ const FlowBuilderInner: React.FC = () => {
                   style={{ order: -3 }}
                 >
                   {edgeType === 'default' ? (
-                    <Route size={18} className="text-slate-700" />
+                    <Route size={18} className="text-[#0A0A0A]" />
                   ) : (
-                    <GitCommit size={18} className="text-slate-700" />
+                    <GitCommit size={18} className="text-[#0A0A0A]" />
                   )}
                 </button>
                 <button
@@ -566,7 +566,7 @@ const FlowBuilderInner: React.FC = () => {
                   className="react-flow__controls-button"
                   style={{ order: -2 }}
                 >
-                  <GitFork size={18} className="rotate-90 text-slate-700" />
+                  <GitFork size={18} className="rotate-90 text-[#0A0A0A]" />
                 </button>
                 <button
                   onClick={() => handleAutoLayout('TB')}
@@ -574,13 +574,13 @@ const FlowBuilderInner: React.FC = () => {
                   className="react-flow__controls-button"
                   style={{ order: -1 }}
                 >
-                  <GitFork size={18} className="text-slate-700" />
+                  <GitFork size={18} className="text-[#0A0A0A]" />
                 </button>
               </Controls>
-              <Background color="#cbd5e1" gap={16} size={1} />
+              <Background color="#0A0A0A" gap={20} size={1.2} />
             </ReactFlow>
 
-            <aside className={`absolute left-0 top-0 h-full w-80 border-r border-slate-200 bg-white z-20 flex flex-col justify-between overflow-visible shadow-2xl transition-all duration-300 ease-in-out ${
+            <aside className={`absolute left-0 top-0 h-full w-80 border-r-2 border-[#0A0A0A] bg-[#F2EBDD] z-20 flex flex-col justify-between overflow-visible shadow-xl transition-all duration-300 ease-in-out ${
               selectedNodeId ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'
             }`}>
               {selectedNode && (
@@ -592,7 +592,7 @@ const FlowBuilderInner: React.FC = () => {
                 />
               )}
 
-              <div className={`absolute left-0 top-0 h-full w-80 border-r border-slate-200 bg-white -z-10 flex flex-col justify-between overflow-hidden shadow-xl transition-all duration-300 ease-in-out ${
+              <div className={`absolute left-0 top-0 h-full w-80 border-r-2 border-[#0A0A0A] bg-[#F2EBDD] -z-10 flex flex-col justify-between overflow-hidden shadow-xl transition-all duration-300 ease-in-out ${
                 (editorState.isBtnDialogOpen || editorState.isNextStepDrawerOpen || editorState.isDataCollectionDrawerOpen) ? 'translate-x-full opacity-100' : 'translate-x-0 opacity-0 pointer-events-none'
               }`}>
                 {selectedNode && editorState.isNextStepDrawerOpen ? (
@@ -670,7 +670,7 @@ const FlowBuilderInner: React.FC = () => {
               <div className="absolute top-4 right-4 z-10 select-none">
                 <button
                   onClick={() => setIsAddDropdownOpen(!isAddDropdownOpen)}
-                  className="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white flex items-center justify-center shadow-lg transition-all border border-indigo-500 cursor-pointer"
+                  className="w-12 h-12 rounded-full bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 active:scale-95 text-[#F2EBDD] flex items-center justify-center shadow-md transition-all border-2 border-[#0A0A0A] cursor-pointer"
                 >
                   <Plus size={24} className={`transition-transform duration-200 ${isAddDropdownOpen ? 'rotate-45' : ''}`} />
                 </button>
@@ -680,8 +680,8 @@ const FlowBuilderInner: React.FC = () => {
                       className="fixed inset-0 z-10"
                       onClick={() => setIsAddDropdownOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2.5 w-52 bg-white/95 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">
+                    <div className="absolute right-0 mt-2.5 w-56 bg-[#F2EBDD] border-2 border-[#0A0A0A] p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150 font-['JetBrains_Mono',monospace]">
+                      <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-1 font-['Anybody',sans-serif]">
                         {t('flow_builder.add_standalone_node')}
                       </span>
                       {FLOW_BLOCKS.map((item) => (
@@ -691,9 +691,9 @@ const FlowBuilderInner: React.FC = () => {
                             handleAddNode(item.type);
                             setIsAddDropdownOpen(false);
                           }}
-                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-slate-50 border border-transparent hover:border-slate-200 rounded-xl text-left text-xs font-semibold text-slate-700 transition-all cursor-pointer group"
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A]/10 hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group"
                         >
-                          <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${item.color}`}>
+                          <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${item.color}`}>
                             <Plus size={12} className="group-hover:scale-110 transition-transform" />
                           </span>
                           <span>{item.label}</span>
@@ -711,30 +711,30 @@ const FlowBuilderInner: React.FC = () => {
                 onClick={() => setContextMenu(null)}
               >
                 <div
-                  className="absolute bg-white border border-slate-200 p-2 rounded-2xl shadow-xl w-56 flex flex-col gap-0.5 select-none pointer-events-auto animate-in fade-in zoom-in-95 duration-150 z-50"
+                  className="absolute bg-[#F2EBDD] border-2 border-[#0A0A0A] p-2.5 rounded-2xl shadow-xl w-60 flex flex-col gap-1 select-none pointer-events-auto animate-in fade-in zoom-in-95 duration-150 z-50 font-['JetBrains_Mono',monospace]"
                   style={{
-                    left: Math.min(contextMenu.x, window.innerWidth - 240),
-                    top: Math.min(contextMenu.y, window.innerHeight - 360),
+                    left: Math.min(contextMenu.x, window.innerWidth - 250),
+                    top: Math.min(contextMenu.y, window.innerHeight - 380),
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 px-3 pt-1 select-none">
+                  <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-3 pt-1 select-none font-['Anybody',sans-serif]">
                     {t('flow_builder.connect_to')}
                   </span>
                   {filteredContextMenuOptions.map((opt, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleCreateAndConnectNode(opt.type)}
-                      className="w-full flex items-center justify-between px-3 py-1.5 hover:bg-slate-50 border border-transparent hover:border-slate-100 rounded-xl text-left text-xs font-bold text-slate-700 transition-all cursor-pointer group select-none"
+                      className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-transparent hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group select-none"
                     >
-                      <span className="text-slate-800 font-semibold">{opt.label}</span>
+                      <span className="font-bold">{opt.label}</span>
                       {opt.isPro && (
-                        <span className="text-[8px] font-extrabold bg-blue-500 text-white px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">
+                        <span className="text-[8px] font-black bg-amber-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
                           PRO
                         </span>
                       )}
                       {opt.isAi && (
-                        <span className="text-[8px] font-extrabold bg-slate-900 text-white px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">
+                        <span className="text-[8px] font-black bg-purple-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
                           AI
                         </span>
                       )}
@@ -743,15 +743,13 @@ const FlowBuilderInner: React.FC = () => {
                   
                   <button
                     onClick={() => setContextMenu(null)}
-                    className="w-full text-center py-2 text-xs font-bold text-slate-400 hover:text-slate-700 transition-all border-t border-slate-100 mt-2.5 cursor-pointer pt-2 select-none"
+                    className="w-full text-center py-2 text-xs font-black text-[#0A0A0A]/60 hover:text-[#0A0A0A] hover:bg-[#0A0A0A]/10 rounded-xl transition-all border-t-2 border-[#0A0A0A]/20 mt-1 cursor-pointer select-none uppercase tracking-wider"
                   >
                     {t('flow_builder.cancel')}
                   </button>
                 </div>
               </div>
             )}
-
-
           </div>
         </div>
       </div>

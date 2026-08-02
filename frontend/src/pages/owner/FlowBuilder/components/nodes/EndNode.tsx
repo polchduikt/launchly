@@ -36,14 +36,14 @@ const EndNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected 
   return (
     <div
       {...bindHover}
-      className={`w-64 bg-white/75 backdrop-blur-[2px] border-2 rounded-2xl shadow-sm transition-all relative overflow-visible isolate ${
+      className={`w-64 bg-white border-2 border-[#0A0A0A] rounded-2xl transition-all relative overflow-visible isolate ${
         selected 
-          ? 'border-slate-400 ring-2 ring-slate-100' 
-          : 'border-slate-200'
+          ? 'shadow-lg ring-2 ring-[#0A0A0A]' 
+          : 'shadow-md'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
-      <div className="relative flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/50 select-none rounded-t-[22px]">
+      <div className="relative flex items-center gap-2 px-4 py-3 bg-slate-200 select-none rounded-t-[22px]">
         <NodeHandle
           type="target"
           position={Position.Left}

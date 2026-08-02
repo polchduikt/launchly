@@ -12,12 +12,12 @@ export interface TagSearchSelectProps {
   assignedTags?: string[];
 }
 
-export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({ 
-  tagName, 
-  tags, 
-  onChange, 
+export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({
+  tagName,
+  tags,
+  onChange,
   onCreateTag,
-  assignedTags = []
+  assignedTags = [],
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -37,10 +37,10 @@ export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({
     };
   }, [isOpen]);
 
-  const filteredTags = tags.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
+  const filteredTags = tags.filter(tag => tag.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="relative w-full" ref={dropdownRef}>
+    <div className="relative w-full font-['JetBrains_Mono',monospace]" ref={dropdownRef}>
       <input
         type="text"
         placeholder={t('crm.tags.placeholder_select_or_search')}
@@ -51,17 +51,17 @@ export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({
         }}
         onFocus={() => setIsOpen(true)}
         onClick={() => setIsOpen(true)}
-        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-400 text-xs font-bold bg-white"
+        className="w-full px-3 py-2 rounded-xl border-2 border-[#0A0A0A] focus:outline-none text-xs font-bold bg-white text-[#0A0A0A] placeholder:text-slate-500"
       />
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-1 max-h-48 overflow-y-auto custom-scrollbar flex flex-col gap-0.5">
+        <div className="absolute left-0 right-0 mt-1 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_0px_#0A0A0A] z-50 p-1.5 max-h-48 overflow-y-auto custom-scrollbar flex flex-col gap-1">
           <button
             type="button"
             onClick={() => {
               onCreateTag();
               setIsOpen(false);
             }}
-            className="w-full text-left px-2.5 py-1.5 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 rounded-lg text-xs font-extrabold flex items-center gap-1 transition-all cursor-pointer"
+            className="w-full text-left px-3 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <Plus size={12} />
             <span>{t('crm.tags.create_new_tag')}</span>
@@ -81,15 +81,15 @@ export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({
                     setSearch('');
                   }
                 }}
-                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-between ${
+                className={`w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-between ${
                   isAssigned
-                    ? 'bg-slate-50 text-slate-400 cursor-not-allowed'
-                    : 'hover:bg-slate-50 text-slate-700 cursor-pointer'
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                    : 'hover:bg-[#F2EBDD] text-[#0A0A0A] cursor-pointer'
                 }`}
               >
                 <span>{tag.name}</span>
                 {isAssigned && (
-                  <span className="text-[9px] bg-slate-200/60 text-slate-500 px-1.5 py-0.5 rounded font-extrabold">
+                  <span className="text-[9px] bg-white text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded font-black uppercase">
                     {t('crm.tags.added_label')}
                   </span>
                 )}
@@ -103,7 +103,7 @@ export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({
                 onCreateTag();
                 setIsOpen(false);
               }}
-              className="w-full text-left px-2.5 py-1.5 text-slate-400 italic text-xs font-semibold cursor-pointer"
+              className="w-full text-left px-3 py-1.5 text-slate-500 italic text-xs font-bold cursor-pointer"
             >
               {t('crm.tags.no_match_create', { search })}
             </button>

@@ -23,6 +23,7 @@ import { getAutoLayoutedElements } from '../../../utils/flowLayout';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { NODE_TYPES } from '../../../const/nodeTypes';
+import { getCustomFieldsApi } from '../../../api/bot';
 import { FLOW_EDGE_DEFAULTS, EDGE_TYPES } from '../../../const/flowEdges';
 import { BROADCAST_BLOCKS, BROADCAST_CONTEXT_MENU_OPTIONS } from '../../../const/broadcastBlocks';
 import { ROUTES } from '../../../routes/paths';
@@ -42,7 +43,7 @@ import {
   Clock,
   GitFork,
   Route,
-  Spline,
+  GitCommit,
   Undo2,
   Redo2,
   Sparkles,
@@ -85,8 +86,8 @@ const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
     <g>
       <path
         fill="none"
-        stroke="#7b8794"
-        strokeWidth={2.2}
+        stroke="#0A0A0A"
+        strokeWidth={2.5}
         d={edgePath}
         style={{
           ...connectionLineStyle,
@@ -121,8 +122,13 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedu
 
   if (!isOpen) return null;
 
+  const minDateTime = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+  const isDateTimeInFuture = dateTime ? new Date(dateTime).getTime() > Date.now() : false;
+
   const handleScheduleSubmit = async () => {
-    if (!dateTime || isSubmitting) return;
+    if (!dateTime || !isDateTimeInFuture || isSubmitting) return;
     setIsSubmitting(true);
     try {
       const formattedIso = dateTime.length === 16 ? `${dateTime}:00` : dateTime;
@@ -138,38 +144,39 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedu
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 select-none"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white border border-slate-200 rounded-3xl shadow-xl w-96 p-6 animate-in fade-in zoom-in-95 duration-150"
+        className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-xl w-96 p-6 animate-in fade-in zoom-in-95 duration-150 font-['JetBrains_Mono',monospace]"
       >
-        <h3 className="font-extrabold text-sm text-slate-800 uppercase tracking-wider mb-2">
+        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-wider mb-2">
           {t('broadcast.schedule.title')}
         </h3>
-        <p className="text-xs text-slate-400 font-semibold mb-4 leading-relaxed">
+        <p className="text-xs text-[#0A0A0A]/65 font-bold mb-4 leading-relaxed">
           {t('broadcast.schedule.description')}
         </p>
 
         <input
           type="datetime-local"
           value={dateTime}
+          min={minDateTime}
           onChange={(e) => setDateTime(e.target.value)}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-250 rounded-2xl text-xs font-semibold focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all text-slate-800 mb-6 cursor-pointer"
+          className="w-full px-4 py-3 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/20 transition-all text-[#0A0A0A] mb-6 cursor-pointer"
         />
 
         <div className="flex gap-3">
           <button
             onClick={onClose}
             disabled={isSubmitting}
-            className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-500 font-bold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50"
+            className="flex-1 py-2.5 border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50"
           >
             {t('broadcast.schedule.cancel')}
           </button>
           <button
             onClick={handleScheduleSubmit}
-            disabled={!dateTime || isSubmitting}
-            className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+            disabled={!dateTime || !isDateTimeInFuture || isSubmitting}
+            className="flex-1 py-2.5 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 text-[#F2EBDD] font-black text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 border-2 border-[#0A0A0A]"
           >
             {isSubmitting && <Loader2 size={12} className="animate-spin" />}
             <span>{t('broadcast.schedule.submit')}</span>
@@ -355,21 +362,26 @@ const BroadcastBuilderInner: React.FC = () => {
     });
   }, [displayNodes, collaborators]);
 
-  const customFields = React.useMemo(() => {
-    if (!activeBotId) return ['last_order_product', 'last_order_price', 'phone', 'email'];
-    const stored = localStorage.getItem(`launchly_custom_fields_${activeBotId}`);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          return parsed.map((f: any) => f.name);
-        }
-      } catch (e) {
-        console.error('Failed to parse custom fields', e);
-      }
+  const [apiCustomFields, setApiCustomFields] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    if (activeBotId) {
+      getCustomFieldsApi(activeBotId)
+        .then((data) => {
+          if (data && typeof data === 'object') {
+            const list = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
+            const names = list.map((f: any) => typeof f === 'string' ? f : f?.name).filter(Boolean);
+            setApiCustomFields(names);
+          }
+        })
+        .catch(() => {});
     }
-    return ['last_order_product', 'last_order_price', 'phone', 'email'];
   }, [activeBotId]);
+
+  const customFields = React.useMemo(() => {
+    if (apiCustomFields.length > 0) return apiCustomFields;
+    return ['last_order_product', 'last_order_price', 'phone', 'email'];
+  }, [apiCustomFields]);
 
   const filteredContextMenuOptions = React.useMemo(() => {
     if (!contextMenu) return BROADCAST_CONTEXT_MENU_OPTIONS;
@@ -472,12 +484,12 @@ const BroadcastBuilderInner: React.FC = () => {
 
   if (!activeBotId) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-8 text-center space-y-4">
-        <AlertTriangle className="text-amber-500" size={48} />
-        <h1 className="text-lg font-bold text-slate-800 font-sans">{t('broadcast.builder.no_active_bot')}</h1>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#F2EBDD] p-8 text-center space-y-4 font-['JetBrains_Mono',monospace]">
+        <AlertTriangle className="text-[#0A0A0A]" size={48} />
+        <h1 className="text-lg font-black text-[#0A0A0A] font-['Anybody',sans-serif] uppercase">{t('broadcast.builder.no_active_bot')}</h1>
         <button
           onClick={() => window.location.assign(ROUTES.HOME)}
-          className="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all cursor-pointer"
+          className="px-5 py-2 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-sm font-black hover:bg-[#F2EBDD] hover:text-[#0A0A0A] transition-all cursor-pointer"
         >
           {t('broadcast.builder.select_bot')}
         </button>
@@ -487,25 +499,25 @@ const BroadcastBuilderInner: React.FC = () => {
 
   if (isCampaignsLoading || !campaign) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="animate-spin text-indigo-600" size={32} />
+      <div className="min-h-screen bg-[#F2EBDD] flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
       </div>
     );
   }
 
   return (
     <DashboardLayout>
-      <div className="h-screen w-full flex flex-col bg-slate-50 font-sans overflow-hidden relative">
-        <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between z-10 select-none">
+      <div className="h-screen w-full flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace] overflow-hidden relative">
+        <header className="h-16 border-b-2 border-[#0A0A0A] bg-[#F2EBDD] px-6 flex items-center justify-between z-10 shrink-0 select-none">
         <div className="flex items-center gap-4">
           <button
             onClick={() => window.location.assign(ROUTES.BROADCASTS)}
-            className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all cursor-pointer"
+            className="w-9 h-9 rounded-xl border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] hover:text-[#F2EBDD] hover:bg-[#0A0A0A] transition-all cursor-pointer shadow-sm"
           >
             <ArrowLeft size={16} />
           </button>
 
-          <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold">
+          <div className="flex items-center gap-1.5 text-[#0A0A0A]/60 text-xs font-bold">
             <span>{t('broadcast.builder.breadcrumbs.broadcasts')}</span>
             <span>&gt;</span>
             <span>{t('broadcast.builder.breadcrumbs.drafts')}</span>
@@ -524,21 +536,21 @@ const BroadcastBuilderInner: React.FC = () => {
                     if (e.key === 'Enter') setIsEditingName(false);
                   }}
                   autoFocus
-                  className="px-2 py-1 border border-indigo-400 rounded-lg text-sm font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-800"
+                  className="px-2 py-1 border-2 border-[#0A0A0A] rounded-lg text-sm font-black focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/20 text-[#0A0A0A] bg-white"
                 />
                 <button
                   onClick={() => setIsEditingName(false)}
-                  className="p-1 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all cursor-pointer"
+                  className="p-1 rounded-lg bg-[#0A0A0A] text-[#F2EBDD] hover:bg-[#0A0A0A]/90 transition-all cursor-pointer border border-[#0A0A0A]"
                 >
                   <Check size={14} />
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2 group">
-                <span className="font-bold text-sm text-slate-800">{campaignName}</span>
+                <span className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-wider">{campaignName}</span>
                 <button
                   onClick={() => setIsEditingName(true)}
-                  className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-650 transition-all p-1"
+                  className="opacity-0 group-hover:opacity-100 text-[#0A0A0A]/60 hover:text-[#0A0A0A] transition-all p-1"
                 >
                   <Edit2 size={12} />
                 </button>
@@ -549,8 +561,8 @@ const BroadcastBuilderInner: React.FC = () => {
 
         <div className="flex items-center gap-4">
           {activeAction && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-50 border border-indigo-150 rounded-2xl text-[10px] text-indigo-700 font-extrabold shadow-3xs animate-in slide-in-from-right-2 duration-300 max-w-[240px] truncate select-none">
-              <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping" />
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-200 border-2 border-[#0A0A0A] rounded-xl text-[10px] text-[#0A0A0A] font-extrabold shadow-sm animate-in slide-in-from-right-2 duration-300 max-w-[240px] truncate select-none">
+              <span className="w-2 h-2 bg-[#0A0A0A] rounded-full animate-ping" />
               <span className="truncate">{activeAction}</span>
             </div>
           )}
@@ -562,7 +574,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 src={currentUser?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80"}
                 alt={currentUser?.name || "Me"}
                 title={`${currentUser?.name || "Me"} (You)`}
-                className="w-6 h-6 rounded-full border-2 border-white object-cover shadow-sm ring-1 ring-slate-100"
+                className="w-7 h-7 rounded-full border-2 border-[#0A0A0A] object-cover shadow-sm"
               />
               {collaborators.map((c) => (
                 <div key={c.userId} className="relative">
@@ -570,12 +582,12 @@ const BroadcastBuilderInner: React.FC = () => {
                     src={c.avatar || "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&h=80"}
                     alt={c.name}
                     title={`${c.name} (Online)`}
-                    className={`w-6 h-6 rounded-full border-2 border-white object-cover shadow-sm ring-1 ring-slate-100 transition-all ${
-                      c.action ? 'ring-2 ring-indigo-500 ring-offset-1 scale-105' : ''
+                    className={`w-7 h-7 rounded-full border-2 border-[#0A0A0A] object-cover shadow-sm transition-all ${
+                      c.action ? 'ring-2 ring-[#0A0A0A] scale-105' : ''
                     }`}
                   />
                   {c.action && (
-                    <span className="absolute bottom-0 right-0 w-2 h-2 bg-indigo-500 rounded-full border border-white animate-ping" />
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0A0A0A] animate-ping" />
                   )}
                 </div>
               ))}
@@ -583,12 +595,12 @@ const BroadcastBuilderInner: React.FC = () => {
           )}
 
 
-          <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-3.5 py-1.5 rounded-2xl font-sans">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 min-w-[85px] justify-start select-none">
+          <div className="flex items-center gap-3 bg-[#F2EBDD] border-2 border-[#0A0A0A] px-3.5 py-1.5 rounded-xl shadow-sm">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#0A0A0A] min-w-[85px] justify-start select-none">
               {isDirty || updateCampaignMut.isPending ? (
                 <>
-                  <Loader2 className="animate-spin text-indigo-500 shrink-0" size={14} />
-                  <span className="text-slate-400">{t('broadcast.builder.saving')}</span>
+                  <Loader2 className="animate-spin text-[#0A0A0A] shrink-0" size={14} />
+                  <span className="text-[#0A0A0A]/70">{t('broadcast.builder.saving')}</span>
                 </>
               ) : updateCampaignMut.isError ? (
                 <div
@@ -605,19 +617,19 @@ const BroadcastBuilderInner: React.FC = () => {
               ) : (
                 <>
                   <span className="text-emerald-500 shrink-0 font-bold">✓</span>
-                  <span className="text-slate-500">{t('broadcast.builder.saved')}</span>
+                  <span className="text-[#0A0A0A]">{t('broadcast.builder.saved')}</span>
                 </>
               )}
             </div>
 
-            <div className="w-[1px] h-4 bg-slate-200" />
+            <div className="w-[2px] h-4 bg-[#0A0A0A]/30" />
 
             <div className="flex items-center gap-1.5">
               <button
                 onClick={undo}
                 disabled={isViewer || !canUndo}
                 title="Undo (Ctrl+Z)"
-                className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:hover:text-slate-400 hover:bg-slate-200/50 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
+                className="p-1 text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-30 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center border border-[#0A0A0A]/20"
               >
                 <Undo2 size={15} />
               </button>
@@ -625,21 +637,21 @@ const BroadcastBuilderInner: React.FC = () => {
                 onClick={redo}
                 disabled={isViewer || !canRedo}
                 title="Redo (Ctrl+Y)"
-                className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:hover:text-slate-400 hover:bg-slate-200/50 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
+                className="p-1 text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-30 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center border border-[#0A0A0A]/20"
               >
                 <Redo2 size={15} />
               </button>
             </div>
           </div>
 
-          <div className="w-[1px] h-6 bg-slate-200 hidden sm:block" />
+          <div className="w-[2px] h-6 bg-[#0A0A0A]/30 hidden sm:block" />
 
           <button
             onClick={() => setIsPreviewOpen((v) => !v)}
-            className={`flex items-center gap-1 px-4 py-2 border text-xs font-bold rounded-xl transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer shadow-sm ${
               isPreviewOpen
-                ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
-                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                : 'bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A]'
             }`}
           >
             <Eye size={14} />
@@ -652,7 +664,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 useAiStore.getState().setIsOpen(true);
                 useAiStore.getState().setActiveTab('generator');
               }}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 text-xs font-bold rounded-xl transition-all border border-indigo-100 cursor-pointer shadow-3xs"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer shadow-sm"
               title="Generate flow with AI"
             >
               <Sparkles size={14} className="animate-pulse" />
@@ -665,7 +677,7 @@ const BroadcastBuilderInner: React.FC = () => {
               <button
                 onClick={() => setIsSendConfirmOpen(true)}
                 disabled={sendCampaignMut.isPending || updateCampaignMut.isPending}
-                className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-750 rounded-xl transition-all shadow-sm cursor-pointer shadow-indigo-100"
+                className="flex items-center gap-1.5 px-5 py-2 text-xs font-black text-[#F2EBDD] bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 rounded-xl transition-all shadow-sm cursor-pointer border-2 border-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]"
               >
                 {sendCampaignMut.isPending ? (
                   <Loader2 size={12} className="animate-spin" />
@@ -679,7 +691,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 onClick={() => setIsScheduleModalOpen(true)}
                 disabled={sendCampaignMut.isPending || updateCampaignMut.isPending}
                 title={t('broadcast.builder.schedule_tooltip')}
-                className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-800 rounded-xl transition-all cursor-pointer flex items-center justify-center animate-pulse animate-duration-1000"
+                className="p-2 border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] text-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl transition-all cursor-pointer flex items-center justify-center animate-pulse animate-duration-1000"
               >
                 <Clock size={14} />
               </button>
@@ -701,7 +713,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 markerHeight="7"
                 orient="auto-start-reverse"
               >
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#7b8794" />
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#0A0A0A" />
               </marker>
               <marker
                 id="arrow-indigo"
@@ -712,7 +724,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 markerHeight="7"
                 orient="auto-start-reverse"
               >
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1" />
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#0A0A0A" />
               </marker>
             </defs>
           </svg>
@@ -720,7 +732,7 @@ const BroadcastBuilderInner: React.FC = () => {
             <div className="absolute top-4 right-4 z-10 select-none">
               <button
                 onClick={() => setIsAddDropdownOpen(!isAddDropdownOpen)}
-                className="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white flex items-center justify-center shadow-lg transition-all border border-indigo-500 cursor-pointer"
+                className="w-12 h-12 rounded-full bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 active:scale-95 text-[#F2EBDD] flex items-center justify-center shadow-md transition-all border-2 border-[#0A0A0A] cursor-pointer"
               >
                 <Plus size={24} className={`transition-transform duration-200 ${isAddDropdownOpen ? 'rotate-45' : ''}`} />
               </button>
@@ -730,8 +742,8 @@ const BroadcastBuilderInner: React.FC = () => {
                     className="fixed inset-0 z-10"
                     onClick={() => setIsAddDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 mt-2.5 w-52 bg-white/95 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">
+                  <div className="absolute right-0 mt-2.5 w-56 bg-[#F2EBDD] border-2 border-[#0A0A0A] p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
+                    <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-1 font-['Anybody',sans-serif]">
                       {t('broadcast.builder.add_standalone_node')}
                     </span>
                     {BROADCAST_BLOCKS.map((item) => (
@@ -741,9 +753,9 @@ const BroadcastBuilderInner: React.FC = () => {
                           handleAddNode(item.type);
                           setIsAddDropdownOpen(false);
                         }}
-                        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-slate-50 border border-transparent hover:border-slate-200 rounded-xl text-left text-xs font-semibold text-slate-700 transition-all cursor-pointer group"
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A]/10 hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group"
                       >
-                        <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${item.color}`}>
+                        <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${item.color}`}>
                           <Plus size={12} className="group-hover:scale-110 transition-transform" />
                         </span>
                         <span>{item.label}</span>
@@ -776,8 +788,8 @@ const BroadcastBuilderInner: React.FC = () => {
             connectionLineComponent={CustomConnectionLine}
             connectionLineType={edgeType === 'default' ? ConnectionLineType.Bezier : ConnectionLineType.SmoothStep}
             connectionLineStyle={{
-              strokeWidth: 2.2,
-              stroke: '#7b8794',
+              strokeWidth: 2.5,
+              stroke: '#0A0A0A',
             }}
             nodesDraggable={!isViewer}
             nodesConnectable={!isViewer}
@@ -785,11 +797,11 @@ const BroadcastBuilderInner: React.FC = () => {
             deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
             fitView
             fitViewOptions={{ padding: 0.6 }}
-            className="bg-slate-50"
+            className="bg-[#F2EBDD]"
             zoomOnDoubleClick={false}
             proOptions={{ hideAttribution: true }}
           >
-            <Background color="#cbd5e1" gap={16} size={1} />
+            <Background color="#0A0A0A" gap={20} size={1.2} />
             <Controls
               position="bottom-right"
               style={{
@@ -800,7 +812,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 transform: 'translateY(-50%)',
                 margin: 0,
               }}
-              className="border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col bg-white custom-controls-panel"
+              className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-md flex flex-col bg-[#F2EBDD] custom-controls-panel"
             >
               <button
                 onClick={() => setEdgeType((t) => (t === 'default' ? 'smoothstep' : 'default'))}
@@ -809,8 +821,8 @@ const BroadcastBuilderInner: React.FC = () => {
                 style={{ order: -3 }}
               >
                 {edgeType === 'default'
-                  ? <Spline size={18} className="text-slate-700 mx-auto" />
-                  : <Route size={18} className="text-slate-700 mx-auto" />
+                  ? <Route size={18} className="text-[#0A0A0A]" />
+                  : <GitCommit size={18} className="text-[#0A0A0A]" />
                 }
               </button>
               <button
@@ -819,7 +831,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 className="react-flow__controls-button flex items-center justify-center"
                 style={{ order: -2 }}
               >
-                <GitFork size={18} className="rotate-90 text-slate-700 mx-auto" />
+                <GitFork size={18} className="rotate-90 text-[#0A0A0A]" />
               </button>
               <button
                 onClick={() => handleAutoLayout('TB')}
@@ -827,7 +839,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 className="react-flow__controls-button flex items-center justify-center"
                 style={{ order: -1 }}
               >
-                <GitFork size={18} className="text-slate-700 mx-auto" />
+                <GitFork size={18} className="text-[#0A0A0A]" />
               </button>
             </Controls>
           </ReactFlow>
@@ -838,25 +850,25 @@ const BroadcastBuilderInner: React.FC = () => {
               onClick={() => setContextMenu(null)}
             >
               <div
-                className="absolute bg-white border border-slate-200 p-2 rounded-2xl shadow-xl w-56 flex flex-col gap-0.5 select-none pointer-events-auto animate-in fade-in zoom-in-95 duration-150 z-50"
+                className="absolute bg-[#F2EBDD] border-2 border-[#0A0A0A] p-2.5 rounded-2xl shadow-xl w-60 flex flex-col gap-1 select-none pointer-events-auto animate-in fade-in zoom-in-95 duration-150 z-50"
                 style={{
-                  left: Math.min(contextMenu.x, window.innerWidth - 240),
-                  top: Math.min(contextMenu.y, window.innerHeight - 360),
+                  left: Math.min(contextMenu.x, window.innerWidth - 250),
+                  top: Math.min(contextMenu.y, window.innerHeight - 380),
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 px-3 pt-1 select-none">
-                  Connect to:
+                <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-3 pt-1 select-none font-['Anybody',sans-serif]">
+                  {t('flow_builder.connect_to')}
                 </span>
                 {filteredContextMenuOptions.map((opt, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleCreateAndConnectNode(opt.type)}
-                    className="w-full flex items-center justify-between px-3 py-1.5 hover:bg-slate-50 border border-transparent hover:border-slate-100 rounded-xl text-left text-xs font-bold text-slate-700 transition-all cursor-pointer group select-none"
+                    className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-transparent hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group select-none"
                   >
-                    <span className="text-slate-850 font-bold">{opt.label}</span>
+                    <span className="font-bold">{opt.label}</span>
                     {opt.isPro && (
-                      <span className="text-[8px] font-extrabold bg-blue-500 text-white px-1.5 py-0.5 rounded uppercase tracking-wider scale-90">
+                      <span className="text-[8px] font-black bg-amber-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
                         PRO
                       </span>
                     )}
@@ -865,28 +877,28 @@ const BroadcastBuilderInner: React.FC = () => {
               </div>
             </div>
           )}
-          <aside className={`absolute left-0 top-0 h-full w-80 border-r border-slate-200 bg-white z-20 flex flex-col justify-between overflow-visible shadow-2xl transition-all duration-300 ease-in-out ${
+          <aside className={`absolute left-0 top-0 h-full w-80 border-r-2 border-[#0A0A0A] bg-[#F2EBDD] z-20 flex flex-col justify-between overflow-visible shadow-xl transition-all duration-300 ease-in-out ${
             selectedNodeId ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'
           }`}>
             {activeNode && (
               activeNode.type === 'START_BROADCAST' ? (
-                <div className="p-6 space-y-6 font-sans">
-                  <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                    <span className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100 shadow-sm">
-                      <Send size={18} className="fill-indigo-100" />
+                <div className="p-6 space-y-6">
+                  <div className="flex items-center gap-3 border-b-2 border-[#0A0A0A] pb-4">
+                    <span className="w-10 h-10 rounded-xl bg-white text-[#0A0A0A] flex items-center justify-center shrink-0 border-2 border-[#0A0A0A] shadow-sm">
+                      <Send size={18} />
                     </span>
                     <div>
-                      <span className="text-[9px] font-bold text-slate-450 uppercase tracking-widest leading-none mb-1 block">
+                      <span className="text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-widest leading-none mb-1 block">
                         {t('broadcast.builder.node.editing')}
                       </span>
-                      <h2 className="font-extrabold text-sm text-slate-850 uppercase tracking-wider block">
+                      <h2 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-wider block">
                         {t('broadcast.builder.node.trigger_settings')}
                       </h2>
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 border border-slate-200/50 rounded-2xl p-4.5">
-                    <p className="text-xs text-slate-550 leading-relaxed font-semibold">
+                  <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-4">
+                    <p className="text-xs text-[#0A0A0A]/70 leading-relaxed font-bold">
                       {t('broadcast.builder.node.trigger_description')}
                     </p>
                   </div>
@@ -901,7 +913,7 @@ const BroadcastBuilderInner: React.FC = () => {
               )
             )}
 
-            <div className={`absolute left-0 top-0 h-full w-80 border-r border-slate-200 bg-white -z-10 flex flex-col justify-between overflow-hidden shadow-xl transition-all duration-300 ease-in-out ${
+            <div className={`absolute left-0 top-0 h-full w-80 border-r-2 border-[#0A0A0A] bg-[#F2EBDD] -z-10 flex flex-col justify-between overflow-hidden shadow-xl transition-all duration-300 ease-in-out ${
               (editorState.isBtnDialogOpen || editorState.isNextStepDrawerOpen || editorState.isDataCollectionDrawerOpen) ? 'translate-x-full opacity-100' : 'translate-x-0 opacity-0 pointer-events-none'
             }`}>
               {activeNode && editorState.isNextStepDrawerOpen ? (

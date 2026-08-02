@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Plus, 
   Trash2, 
@@ -285,7 +286,6 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
   const [linkStep, setLinkStep] = useState<'select' | 'form'>('select');
   const [linkUrl, setLinkUrl] = useState('');
   const [linkText, setLinkText] = useState('');
-  const [linkHasActions, setLinkHasActions] = useState(false);
 
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -373,14 +373,31 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
     }
   };
 
-  const handleOpenLinkPopover = (blockId: string) => {
+  const [popoverCoords, setPopoverCoords] = useState<{ top: number; left: number } | null>(null);
+  const [emojiCoords, setEmojiCoords] = useState<{ top: number; left: number } | null>(null);
+
+  const handleOpenLinkPopover = (blockId: string, e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setPopoverCoords({
+      top: rect.bottom + window.scrollY + 6,
+      left: Math.max(10, Math.min(window.innerWidth - 340, rect.left + window.scrollX - 140)),
+    });
     editingLinkElementRef.current = null;
     setActiveLinkBlockId(blockId);
     setActiveEmojiBlockId(null);
     setLinkUrl('');
     setLinkText('');
-    setLinkHasActions(false);
     setLinkStep('select');
+  };
+
+  const handleOpenEmojiPicker = (blockId: string, e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setEmojiCoords({
+      top: rect.bottom + window.scrollY + 6,
+      left: Math.max(10, Math.min(window.innerWidth - 380, rect.right + window.scrollX - 350)),
+    });
+    setActiveEmojiBlockId(blockId);
+    setActiveLinkBlockId(null);
   };
 
   const textToHtml = (text: string) => {
@@ -533,23 +550,21 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
             <div 
               key={block.id} 
               id={`block-container-${block.id || ''}`}
-              className={`border border-dashed border-slate-200 rounded-3xl bg-white shadow-sm flex flex-col group/block transition-all hover:border-slate-350 hover:shadow-md relative ${
-                activeBlockId === block.id ? 'z-40' : 'overflow-hidden'
-              }`}
+              className="border-2 border-[#0A0A0A] rounded-3xl bg-white shadow-sm flex flex-col group/block transition-all relative overflow-hidden font-['JetBrains_Mono',monospace]"
             >
-              <div className="bg-slate-50/70 border-b border-slate-100 px-4 py-2 flex items-center justify-between">
+              <div className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-4 py-2.5 flex items-center justify-between rounded-t-[22px]">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-500 shrink-0">
+                  <span className="text-[#0A0A0A] shrink-0">
                     {block.type === 'text' && <AlignLeft size={13} />}
-                    {block.type === 'image' && <ImageIcon size={13} className="text-indigo-500" />}
-                    {block.type === 'delay' && <Clock size={13} className="text-cyan-500" />}
-                    {block.type === 'data_collection' && <Database size={13} className="text-blue-500" />}
-                    {block.type === 'file' && <Paperclip size={13} className="text-slate-500" />}
-                    {block.type === 'audio' && <Volume2 size={13} className="text-violet-500" />}
-                    {block.type === 'video' && <Video size={13} className="text-rose-500" />}
-                    {block.type === 'telegram_menu' && <Grid size={13} className="text-slate-400" />}
+                    {block.type === 'image' && <ImageIcon size={13} className="text-[#0A0A0A]" />}
+                    {block.type === 'delay' && <Clock size={13} className="text-[#0A0A0A]" />}
+                    {block.type === 'data_collection' && <Database size={13} className="text-[#0A0A0A]" />}
+                    {block.type === 'file' && <Paperclip size={13} className="text-[#0A0A0A]" />}
+                    {block.type === 'audio' && <Volume2 size={13} className="text-[#0A0A0A]" />}
+                    {block.type === 'video' && <Video size={13} className="text-[#0A0A0A]" />}
+                    {block.type === 'telegram_menu' && <Grid size={13} className="text-[#0A0A0A]" />}
                   </span>
-                  <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">
+                  <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">
                     {block.type === 'text' && t('flow_builder.text_block')}
                     {block.type === 'image' && t('flow_builder.image_block')}
                     {block.type === 'delay' && t('flow_builder.delay_block')}
@@ -558,12 +573,12 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                     {block.type === 'audio' && t('flow_builder.audio_block')}
                     {block.type === 'video' && t('flow_builder.video_block')}
                     {block.type === 'telegram_menu' && (
-                      <span className="inline-flex items-center gap-1 normal-case font-bold text-slate-700">
+                      <span className="inline-flex items-center gap-1 normal-case font-black text-[#0A0A0A]">
                         <span>{t('flow_builder.telegram_menu_block')}</span>
                         <span title="Group buttons into rows. Buttons in the same row appear side-by-side in Telegram. Drag and drop to reorder.">
                           <HelpCircle 
                             size={12} 
-                            className="text-blue-500 cursor-pointer hover:text-blue-600 transition-colors ml-0.5"
+                            className="text-[#0A0A0A]/60 cursor-pointer hover:text-[#0A0A0A] transition-colors ml-0.5"
                           />
                         </span>
                       </span>
@@ -571,12 +586,12 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1 opacity-60 group-hover/block:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1 opacity-70 group-hover/block:opacity-100 transition-opacity">
                   <button
                     type="button"
                     disabled={idx === 0}
                     onClick={() => moveBlockUp(idx)}
-                    className="p-1 hover:bg-slate-100 rounded transition-colors text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent"
+                    className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded transition-colors text-[#0A0A0A] disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
                   >
                     <ArrowUp size={12} className="stroke-[2.5]" />
                   </button>
@@ -584,21 +599,21 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                     type="button"
                     disabled={idx === blocks.length - 1}
                     onClick={() => moveBlockDown(idx)}
-                    className="p-1 hover:bg-slate-100 rounded transition-colors text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent"
+                    className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded transition-colors text-[#0A0A0A] disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
                   >
                     <ArrowDown size={12} className="stroke-[2.5]" />
                   </button>
                   <button
                     type="button"
                     onClick={() => duplicateBlock(block)}
-                    className="p-1 hover:bg-slate-100 rounded transition-colors text-slate-400 hover:text-slate-700"
+                    className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded transition-colors text-[#0A0A0A] cursor-pointer"
                   >
                     <Copy size={12} className="stroke-[2.5]" />
                   </button>
                   <button
                     type="button"
                     onClick={() => deleteBlock(block.id || '')}
-                    className="p-1 hover:bg-rose-50 rounded transition-colors text-slate-400 hover:text-rose-600"
+                    className="p-1 hover:bg-rose-600 hover:text-white rounded transition-colors text-[#0A0A0A] cursor-pointer"
                   >
                     <Trash2 size={12} className="stroke-[2.5]" />
                   </button>
@@ -608,7 +623,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
               {block.type === 'text' && (
                 <div className="flex flex-col">
                   <div 
-                    className="bg-slate-50/20 p-4 pb-2 relative flex flex-col min-h-[110px]"
+                    className="bg-white p-4 pb-2 relative flex flex-col min-h-[110px]"
                     onFocus={() => setActiveBlockId(block.id || '')}
                   >
                     <div
@@ -622,29 +637,26 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       }}
                       onClick={(e) => handleContentEditableClick(e, block.id || '')}
                       data-placeholder={t('editor.message.text_placeholder')}
-                      className="w-full text-xs font-semibold text-slate-800 focus:outline-none bg-transparent min-h-[80px] cursor-text break-words outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 empty:before:pointer-events-none"
+                      className="w-full text-xs font-bold text-[#0A0A0A] focus:outline-none bg-transparent min-h-[80px] cursor-text break-words outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-[#0A0A0A]/40 empty:before:pointer-events-none font-['JetBrains_Mono',monospace]"
                     />
                     
                     {activeBlockId === block.id && (
-                      <div className="absolute bottom-2.5 right-3 bg-slate-900 text-slate-200 px-2.5 py-1.5 rounded-xl flex items-center gap-2 shadow-md z-50">
+                      <div className="absolute bottom-2.5 right-3 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] px-3 py-1.5 rounded-full flex items-center gap-2.5 shadow-md z-30 font-['JetBrains_Mono',monospace]">
                         <button
                           type="button"
                           onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => handleOpenLinkPopover(block.id || '')}
-                          className="hover:text-white transition-colors cursor-pointer"
+                          onClick={(e) => handleOpenLinkPopover(block.id || '', e)}
+                          className="hover:text-amber-300 transition-colors cursor-pointer"
                         >
-                          <LinkIcon size={12} className="stroke-[2.5]" />
+                          <LinkIcon size={13} className="stroke-[2.5]" />
                         </button>
                         <button
                           type="button"
                           onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => {
-                            setActiveEmojiBlockId(block.id || '');
-                            setActiveLinkBlockId(null);
-                          }}
-                          className="hover:text-white transition-colors cursor-pointer"
+                          onClick={(e) => handleOpenEmojiPicker(block.id || '', e)}
+                          className="hover:text-amber-300 transition-colors cursor-pointer"
                         >
-                          <Smile size={12} className="stroke-[2.5]" />
+                          <Smile size={13} className="stroke-[2.5]" />
                         </button>
                         <FieldVariableSelector
                           onSelect={(val) => {
@@ -657,7 +669,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                                               : val === 'contact_id' ? 'Contact Id'
                                               : val === 'subscribed' ? 'Subscribed'
                                               : val;
-                            const html = `<span class="inline-flex items-center bg-blue-600 text-white rounded px-1.5 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline" contenteditable="false" data-type="variable" data-val="${val}">${displayName}</span>`;
+                            const html = `<span class="inline-flex items-center bg-[#0A0A0A] text-[#F2EBDD] rounded-lg px-2 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline border border-[#0A0A0A]" contenteditable="false" data-type="variable" data-val="${val}">${displayName}</span>`;
                             insertHtmlAtCursor(html, block.id || '');
                             setActiveLinkBlockId(null);
                             setActiveEmojiBlockId(null);
@@ -674,179 +686,17 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                                 setActiveLinkBlockId(null);
                                 setActiveEmojiBlockId(null);
                               }}
-                              className="hover:text-white transition-colors cursor-pointer flex items-center"
+                              className="hover:text-amber-300 transition-colors cursor-pointer flex items-center"
                               title="Variables"
                             >
                               <Parentheses size={12} className="stroke-[2.5]" />
                             </button>
                           }
                         />
-                        <div className="w-[1px] h-3.5 bg-slate-700/60 my-0.5" />
-                        <span className="text-[10px] font-extrabold tracking-wider text-slate-300">
+                        <div className="w-[1px] h-3.5 bg-white/30 my-0.5" />
+                        <span className="text-[10px] font-extrabold tracking-wider text-[#F2EBDD]/80 font-mono">
                           {2000 - (block.text || '').length}
                         </span>
-                      </div>
-                    )}
-
-                    {activeLinkBlockId === block.id && (
-                      <div className="absolute top-full mt-2 left-3 z-50 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 w-72 text-slate-800 space-y-3 text-left before:content-[''] before:absolute before:bottom-full before:left-10 before:border-[6px] before:border-transparent before:border-b-white">
-                        <div className="flex justify-between items-center pb-1">
-                          <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
-                            {t('editor.message.link_clicked')}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setActiveLinkBlockId(null)}
-                            className="text-slate-400 hover:text-slate-655 cursor-pointer"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-
-                        {linkStep === 'select' ? (
-                          <div className="space-y-2">
-                            <button
-                              type="button"
-                              onClick={() => setLinkStep('form')}
-                              className="flex items-center gap-2.5 w-full p-3 border border-indigo-100 hover:bg-indigo-50/20 rounded-xl text-xs font-bold text-indigo-700 transition-colors text-left cursor-pointer"
-                            >
-                              <LinkIcon size={14} />
-                              <span>{t('editor.edit_button.action.open_website')}</span>
-                            </button>
-                            <button
-                              type="button"
-                              disabled
-                              className="flex items-center gap-2.5 w-full p-3 border border-slate-100 bg-slate-50/50 text-slate-400 rounded-xl text-xs font-bold text-left cursor-not-allowed opacity-60"
-                            >
-                              <MessageSquare size={14} />
-                              <span>{t('editor.message.open_messenger')}</span>
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between bg-indigo-50/40 border border-indigo-100/60 rounded-xl px-3 py-2 text-xs text-indigo-750 font-bold">
-                              <div className="flex items-center gap-2">
-                                <LinkIcon size={12} />
-                                <span>{t('editor.edit_button.action.open_website')}</span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => setLinkStep('select')}
-                                className="text-indigo-400 hover:text-indigo-650 cursor-pointer"
-                              >
-                                <X size={12} />
-                              </button>
-                            </div>
-
-                            <div className="space-y-1">
-                              <label className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">
-                                Website URL
-                              </label>
-                              <input
-                                type="text"
-                                value={linkUrl}
-                                onChange={(e) => setLinkUrl(e.target.value)}
-                                placeholder="https://yourwebsite.com"
-                                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-400 bg-white text-slate-800"
-                              />
-                            </div>
-
-                            <div className="space-y-1">
-                              <label className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">
-                                Link text
-                              </label>
-                              <input
-                                type="text"
-                                value={linkText}
-                                onChange={(e) => setLinkText(e.target.value)}
-                                placeholder="Enter link text"
-                                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-400 bg-white text-slate-800"
-                              />
-                            </div>
-
-                            <div className="flex items-start justify-between py-1">
-                              <div className="space-y-0.5">
-                                <span className="text-[11px] font-bold text-slate-700 block">
-                                  Additional actions
-                                </span>
-                                <span className="text-[9px] text-slate-400 block leading-tight max-w-[180px]">
-                                  E.g. you can add a tag on a button click.
-                                </span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => setLinkHasActions(!linkHasActions)}
-                                className={`w-8 h-4 rounded-full transition-all relative cursor-pointer ${
-                                  linkHasActions ? 'bg-indigo-650' : 'bg-slate-200'
-                                }`}
-                              >
-                                <span
-                                  className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.25 transition-all shadow-3xs ${
-                                    linkHasActions ? 'right-0.25' : 'left-0.25'
-                                  }`}
-                                />
-                              </button>
-                            </div>
-
-                            <div className="flex gap-2 pt-1">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (editingLinkElementRef.current) {
-                                    const parent = editingLinkElementRef.current.parentNode;
-                                    if (parent) {
-                                      const textNode = document.createTextNode(editingLinkElementRef.current.innerText);
-                                      parent.replaceChild(textNode, editingLinkElementRef.current);
-                                    }
-                                    editingLinkElementRef.current = null;
-                                    handleContentEditableInput(block.id || '');
-                                  }
-                                  setActiveLinkBlockId(null);
-                                }}
-                                className="flex-1 px-3 py-2 border border-slate-200 hover:bg-slate-50 text-slate-550 rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
-                              >
-                                Delete
-                              </button>
-                              <button
-                                type="button"
-                                disabled={!linkUrl.trim()}
-                                onClick={() => {
-                                  if (editingLinkElementRef.current) {
-                                    editingLinkElementRef.current.setAttribute('data-url', linkUrl.trim());
-                                    editingLinkElementRef.current.innerText = linkText.trim() || linkUrl.trim();
-                                    editingLinkElementRef.current = null;
-                                    handleContentEditableInput(block.id || '');
-                                  } else {
-                                    const html = `<span class="text-blue-600 font-bold hover:underline cursor-pointer" contenteditable="false" data-type="link" data-url="${linkUrl.trim()}">${linkText.trim() || linkUrl.trim()}</span>`;
-                                    insertHtmlAtCursor(html, block.id || '');
-                                  }
-                                  setActiveLinkBlockId(null);
-                                }}
-                                className="flex-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-100 disabled:text-slate-400 text-white rounded-xl text-xs font-bold transition-all cursor-pointer text-center disabled:cursor-not-allowed"
-                              >
-                                Done
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {activeEmojiBlockId === block.id && (
-                      <div 
-                        onMouseDown={(e) => e.preventDefault()}
-                        className="absolute top-full mt-2 right-3 z-50 shadow-xl rounded-2xl overflow-hidden border border-slate-200 bg-white origin-top-right scale-[0.82] before:content-[''] before:absolute before:bottom-full before:right-6 before:border-[6px] before:border-transparent before:border-b-white"
-                      >
-                        <Picker
-                          data={emojiData}
-                          onEmojiSelect={(emoji: { native?: string }) => {
-                            insertHtmlAtCursor(emoji.native ?? '', block.id);
-                            setActiveEmojiBlockId(null);
-                          }}
-                          theme="light"
-                          previewPosition="none"
-                          skinTonePosition="none"
-                          perLine={8}
-                        />
                       </div>
                     )}
                   </div>
@@ -1649,6 +1499,200 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
           {t('ai.builder.choose_next_step')}
         </button>
       </div>
+
+      {activeLinkBlockId && popoverCoords && createPortal(
+        <>
+          <div
+            className="fixed inset-0 z-[99998]"
+            onClick={() => {
+              setActiveLinkBlockId(null);
+              setPopoverCoords(null);
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: `${popoverCoords.top}px`,
+              left: `${popoverCoords.left}px`,
+              zIndex: 99999,
+            }}
+            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-2xl p-4 w-80 text-[#0A0A0A] space-y-3 text-left font-['JetBrains_Mono',monospace] animate-in zoom-in-95 duration-150"
+          >
+            <div className="flex justify-between items-center pb-1.5 border-b-2 border-[#0A0A0A]/20">
+              <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">
+                {t('editor.message.link_clicked')}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveLinkBlockId(null);
+                  setPopoverCoords(null);
+                }}
+                className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-[#0A0A0A] cursor-pointer transition-colors"
+              >
+                <X size={12} />
+              </button>
+            </div>
+
+            {linkStep === 'select' ? (
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onClick={(e) => { e.stopPropagation(); setLinkStep('form'); }}
+                  className="flex items-center gap-2.5 w-full p-3 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-xs font-bold text-[#0A0A0A] transition-colors text-left cursor-pointer group"
+                >
+                  <LinkIcon size={14} className="shrink-0" />
+                  <span>{t('editor.edit_button.action.open_website')}</span>
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className="flex items-center gap-2.5 w-full p-3 border-2 border-[#0A0A0A]/30 bg-[#F2EBDD]/50 text-[#0A0A0A]/40 rounded-2xl text-xs font-bold text-left cursor-not-allowed"
+                >
+                  <MessageSquare size={14} className="shrink-0" />
+                  <span>{t('editor.message.open_messenger')}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between bg-white border-2 border-[#0A0A0A] rounded-2xl px-3 py-2 text-xs text-[#0A0A0A] font-bold">
+                  <div className="flex items-center gap-2">
+                    <LinkIcon size={12} />
+                    <span>{t('editor.edit_button.action.open_website')}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    onClick={(e) => { e.stopPropagation(); setLinkStep('select'); }}
+                    className="p-0.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded text-[#0A0A0A] cursor-pointer"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider block font-['Anybody',sans-serif]">
+                    Website URL
+                  </label>
+                  <input
+                    type="text"
+                    value={linkUrl}
+                    onChange={(e) => setLinkUrl(e.target.value)}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    placeholder="https://yourwebsite.com"
+                    className="w-full border-2 border-[#0A0A0A] rounded-xl px-3 py-2 text-xs font-bold focus:outline-none bg-white text-[#0A0A0A] placeholder:text-[#0A0A0A]/40"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider block font-['Anybody',sans-serif]">
+                    Link text
+                  </label>
+                  <input
+                    type="text"
+                    value={linkText}
+                    onChange={(e) => setLinkText(e.target.value)}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    placeholder="Click here"
+                    className="w-full border-2 border-[#0A0A0A] rounded-xl px-3 py-2 text-xs font-bold focus:outline-none bg-white text-[#0A0A0A] placeholder:text-[#0A0A0A]/40"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-1 font-['JetBrains_Mono',monospace]">
+                  {editingLinkElementRef.current && (
+                    <button
+                      type="button"
+                      onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (editingLinkElementRef.current) {
+                          const parent = editingLinkElementRef.current.parentNode;
+                          if (parent) {
+                            const textNode = document.createTextNode(editingLinkElementRef.current.innerText);
+                            parent.replaceChild(textNode, editingLinkElementRef.current);
+                          }
+                          editingLinkElementRef.current = null;
+                          handleContentEditableInput(activeLinkBlockId || '');
+                        }
+                        setActiveLinkBlockId(null);
+                        setPopoverCoords(null);
+                      }}
+                      className="flex-1 py-2 bg-white hover:bg-rose-50 border-2 border-rose-600 text-rose-600 rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+                    >
+                      Delete
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    disabled={!linkUrl.trim()}
+                    onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (editingLinkElementRef.current) {
+                        editingLinkElementRef.current.setAttribute('data-url', linkUrl.trim());
+                        editingLinkElementRef.current.innerText = linkText.trim() || linkUrl.trim();
+                        editingLinkElementRef.current = null;
+                        handleContentEditableInput(activeLinkBlockId || '');
+                      } else {
+                        const html = `<span class="text-blue-600 font-bold hover:underline cursor-pointer" contenteditable="false" data-type="link" data-url="${linkUrl.trim()}">${linkText.trim() || linkUrl.trim()}</span>`;
+                        insertHtmlAtCursor(html, activeLinkBlockId || '');
+                      }
+                      setActiveLinkBlockId(null);
+                      setPopoverCoords(null);
+                    }}
+                    className="flex-1 py-2.5 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 disabled:bg-[#0A0A0A]/20 text-[#F2EBDD] text-xs font-black rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer disabled:cursor-not-allowed uppercase tracking-wider font-['Anybody',sans-serif]"
+                  >
+                    Save link
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </>,
+        document.body
+      )}
+
+      {activeEmojiBlockId && emojiCoords && createPortal(
+        <>
+          <div
+            className="fixed inset-0 z-[99998]"
+            onClick={() => {
+              setActiveEmojiBlockId(null);
+              setEmojiCoords(null);
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: `${emojiCoords.top}px`,
+              left: `${emojiCoords.left}px`,
+              zIndex: 99999,
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            className="shadow-2xl rounded-3xl overflow-hidden border-2 border-[#0A0A0A] bg-white animate-in zoom-in-95 duration-150 font-['JetBrains_Mono',monospace]"
+          >
+            <Picker
+              data={emojiData}
+              onEmojiSelect={(emoji: { native?: string }) => {
+                insertHtmlAtCursor(emoji.native ?? '', activeEmojiBlockId);
+                setActiveEmojiBlockId(null);
+                setEmojiCoords(null);
+              }}
+              theme="light"
+              previewPosition="none"
+              skinTonePosition="none"
+              perLine={8}
+            />
+          </div>
+        </>,
+        document.body
+      )}
     </div>
   );
 };

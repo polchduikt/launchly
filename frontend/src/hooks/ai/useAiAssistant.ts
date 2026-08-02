@@ -33,15 +33,14 @@ export const useAiAssistant = () => {
     }
   }, [isOpen, messages, chatMutation.isPending, activeTab, scrollToBottom]);
 
+  const schemaMutationReset = schemaMutation.reset;
   useEffect(() => {
     if (!isOpen) {
       setDescription('');
       setConfirmOverwrite(false);
-      if (schemaMutation.status !== 'idle') {
-        schemaMutation.reset();
-      }
+      schemaMutationReset();
     }
-  }, [isOpen, schemaMutation]);
+  }, [isOpen, schemaMutationReset]);
 
   const prevOnGenerateRef = useRef(onGenerate);
   useEffect(() => {

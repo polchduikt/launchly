@@ -233,25 +233,25 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
 
   return (
     <div
-      className={`absolute left-0 right-0 z-20 bg-white border-t border-slate-200 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] transition-all duration-300 ease-in-out select-none flex flex-col ${
+      className={`absolute left-0 right-0 z-20 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] transition-all duration-300 ease-in-out select-none flex flex-col font-['JetBrains_Mono',monospace] ${
         isAudienceOpen ? 'top-0 bottom-0' : 'h-14 bottom-0'
       }`}
     >
       {!isAudienceOpen ? (
         <div
           onClick={() => setIsAudienceOpen(true)}
-          className="px-6 h-14 flex items-center justify-between border-b border-slate-100 hover:bg-slate-50/50 cursor-pointer shrink-0"
+          className="px-6 h-14 flex items-center justify-between border-b-2 border-[#0A0A0A] hover:bg-white cursor-pointer shrink-0"
         >
           <div className="flex items-center gap-2">
-            <span className="font-extrabold text-sm text-slate-800">
+            <span className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase">
               {t('audience.panel.target_audience')}
             </span>
-            <button className="text-slate-400 mt-0.5">
+            <button className="text-[#0A0A0A] mt-0.5">
               <ChevronUp size={15} />
             </button>
           </div>
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-550 bg-slate-50 border border-slate-200/60 px-3.5 py-1.5 rounded-xl">
-            <User size={13} className="text-slate-400" />
+          <div className="flex items-center gap-2 text-xs font-bold text-[#0A0A0A] bg-white border-2 border-[#0A0A0A] px-3.5 py-1.5 rounded-xl">
+            <User size={13} className="text-[#0A0A0A]" />
             <span>{t('audience.panel.subscribers_receive', { count: getAudienceCount() })}</span>
           </div>
         </div>
@@ -259,22 +259,22 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
         <div className="flex-1 flex flex-col overflow-hidden">
           <div
             onClick={() => setIsAudienceOpen(false)}
-            className="px-6 h-14 flex items-center justify-between border-b border-slate-100 hover:bg-slate-50/40 cursor-pointer shrink-0"
+            className="px-6 h-14 flex items-center justify-between border-b-2 border-[#0A0A0A] hover:bg-white cursor-pointer shrink-0"
           >
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-sm text-slate-800">{t('audience.panel.target_audience')}</span>
-              <ChevronDown size={15} className="text-slate-400 mt-0.5" />
+              <span className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase">{t('audience.panel.target_audience')}</span>
+              <ChevronDown size={15} className="text-[#0A0A0A] mt-0.5" />
             </div>
 
-            <div className="flex-1 px-8 text-[11px] font-bold text-slate-700 uppercase tracking-wider text-center pointer-events-none">
+            <div className="flex-1 px-8 text-xs font-black text-[#0A0A0A] uppercase tracking-wider text-center pointer-events-none">
               {t('audience.panel.send_matching')}{' '}
-              <span className="underline decoration-indigo-500 underline-offset-2 text-indigo-750">
+              <span className="underline underline-offset-2 text-[#0A0A0A]">
                 {t('audience.panel.matching_conditions')}
               </span>
             </div>
 
             <div
-              className="flex items-center gap-1.5 text-indigo-655 font-extrabold bg-indigo-50/70 border border-indigo-100 px-3 py-1 rounded-xl shadow-xs text-xs shrink-0"
+              className="flex items-center gap-1.5 text-[#0A0A0A] font-black bg-white border-2 border-[#0A0A0A] px-3 py-1 rounded-xl text-xs shrink-0"
               onClick={(e) => e.stopPropagation()}
             >
               <UserCheck size={13} strokeWidth={2.5} />
@@ -283,8 +283,8 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
           </div>
 
           <div className="flex-1 flex overflow-hidden">
-            <div className="w-64 border-r border-slate-100 px-6 py-5 shrink-0">
-              <p className="text-xs font-semibold text-slate-400 leading-relaxed">
+            <div className="w-64 border-r-2 border-[#0A0A0A] px-6 py-5 shrink-0">
+              <p className="text-xs font-bold text-slate-700 leading-relaxed">
                 {t('audience.panel.targeting_desc')}
               </p>
             </div>
@@ -304,13 +304,13 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                     return (
                       <div
                         key={cond.id}
-                        className="bg-white border border-slate-200 shadow-xs px-3 py-2 rounded-2xl flex items-center gap-2 relative animate-in zoom-in-95 duration-100 hover:border-slate-350 transition-colors shrink-0"
+                        className="bg-white border-2 border-[#0A0A0A] px-3 py-2 rounded-xl flex items-center gap-2 relative animate-in zoom-in-95 duration-100 transition-colors shrink-0"
                       >
-                        <span className="text-[11px] font-bold text-slate-500 shrink-0">
+                        <span className="text-[11px] font-black text-[#0A0A0A] uppercase shrink-0">
                           {displayField}
                         </span>
 
-                        <div className="flex items-center gap-1 text-xs select-none">
+                        <div className="flex items-center gap-1 text-xs select-none font-bold">
                           <button
                             type="button"
                             onClick={() => {
@@ -318,7 +318,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                               setValSearch(displayVal === 'Select...' ? '' : displayVal);
                               setActiveDropdownId(activeDropdownId === cond.id ? null : cond.id);
                             }}
-                            className="text-[#D9534F] hover:text-[#C9302C] font-semibold cursor-pointer border-b border-dashed border-[#D9534F]/40 pb-0.5"
+                            className="text-rose-600 font-black cursor-pointer border-b-2 border-dashed border-rose-600 pb-0.5"
                           >
                             {displayOperator}
                           </button>
@@ -330,7 +330,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                               setValSearch(displayVal === 'Select...' ? '' : displayVal);
                               setActiveDropdownId(activeDropdownId === cond.id ? null : cond.id);
                             }}
-                            className="text-slate-700 hover:text-indigo-655 font-bold cursor-pointer border-b border-dashed border-slate-300 pb-0.5"
+                            className="text-[#0A0A0A] font-black cursor-pointer border-b-2 border-dashed border-[#0A0A0A] pb-0.5"
                           >
                             {displayValue}
                           </button>
@@ -339,7 +339,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                         <button
                           type="button"
                           onClick={() => handleRemoveCondition(cond.id)}
-                          className="text-slate-350 hover:text-rose-500 hover:bg-rose-50 p-1 rounded-lg transition-all cursor-pointer shrink-0"
+                          className="text-[#0A0A0A] hover:bg-rose-600 hover:text-white p-1 rounded-lg transition-all cursor-pointer shrink-0"
                         >
                           <X size={13} />
                         </button>
@@ -350,8 +350,8 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                               className="fixed inset-0 z-30 bg-transparent cursor-default"
                               onClick={() => setActiveDropdownId(null)}
                             />
-                            <div className="absolute top-full left-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl flex z-40 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-                              <div className="w-[85px] bg-slate-50/50 border-r border-slate-100 p-1.5 flex flex-col gap-1 shrink-0">
+                            <div className="absolute top-full left-0 mt-1.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_0px_#0A0A0A] flex z-40 overflow-hidden animate-in fade-in duration-150">
+                              <div className="w-[95px] bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-1.5 flex flex-col gap-1 shrink-0">
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -361,10 +361,10 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                     setConditions(updated);
                                     setIsDirty(true);
                                   }}
-                                  className={`w-full text-left px-2.5 py-1.5 text-xs font-bold transition-all rounded-lg cursor-pointer ${
+                                  className={`w-full text-left px-2.5 py-1.5 text-xs font-black uppercase transition-all rounded-lg cursor-pointer ${
                                     cond.operator === 'is'
-                                      ? 'text-indigo-600 bg-indigo-50/65'
-                                      : 'text-slate-655 hover:bg-slate-100'
+                                      ? 'text-[#F2EBDD] bg-[#0A0A0A]'
+                                      : 'text-[#0A0A0A] hover:bg-white'
                                   }`}
                                 >
                                   {t('audience.panel.operator.is')}
@@ -379,10 +379,10 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                     setIsDirty(true);
                                     setActiveDropdownId(null);
                                   }}
-                                  className={`w-full text-left px-2.5 py-1.5 text-xs font-bold transition-all rounded-lg cursor-pointer ${
+                                  className={`w-full text-left px-2.5 py-1.5 text-xs font-black uppercase transition-all rounded-lg cursor-pointer ${
                                     cond.operator === 'is_not'
-                                      ? 'text-indigo-600 bg-indigo-50/65'
-                                      : 'text-slate-655 hover:bg-slate-100'
+                                      ? 'text-[#F2EBDD] bg-[#0A0A0A]'
+                                      : 'text-[#0A0A0A] hover:bg-white'
                                   }`}
                                 >
                                   {t('audience.panel.operator.is_not')}
@@ -391,7 +391,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
 
                               {cond.field === 'lead' && (cond.value?.startsWith('System:') || cond.value?.startsWith('Field:')) ? (
                                 <div className="w-[200px] p-3 flex flex-col gap-2 shrink-0 bg-white">
-                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                  <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">
                                     {t('audience.panel.enter_value')}
                                   </span>
                                   <input
@@ -413,7 +413,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                         setActiveDropdownId(null);
                                       }
                                     }}
-                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-indigo-400 transition-all text-slate-800"
+                                    className="w-full px-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none text-[#0A0A0A]"
                                     autoFocus
                                   />
                                   <button
@@ -430,7 +430,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                       setIsDirty(true);
                                       setActiveDropdownId(null);
                                     }}
-                                    className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs transition-all cursor-pointer text-center"
+                                    className="w-full py-1.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] font-black uppercase rounded-lg text-xs transition-all cursor-pointer text-center border-2 border-[#0A0A0A]"
                                   >
                                     {t('editor.condition.apply')}
                                   </button>
@@ -438,13 +438,13 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                               ) : (
                                 <div className="w-[200px] p-2 flex flex-col gap-1.5 shrink-0 bg-white">
                                   <div className="relative">
-                                    <Search size={11} className="text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                                    <Search size={11} className="text-[#0A0A0A] absolute left-2.5 top-1/2 -translate-y-1/2" />
                                     <input
                                       type="text"
                                       placeholder={t('audience.panel.search_ellipsis')}
                                       value={valSearch}
                                       onChange={(e) => setValSearch(e.target.value)}
-                                      className="w-full pl-7 pr-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[11px] font-semibold focus:outline-none focus:bg-white focus:border-indigo-400 transition-all text-slate-800"
+                                      className="w-full pl-7 pr-3 py-1 bg-white border-2 border-[#0A0A0A] rounded-lg text-[11px] font-bold focus:outline-none text-[#0A0A0A]"
                                       autoFocus
                                     />
                                   </div>
@@ -461,20 +461,20 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                           setIsDirty(true);
                                           setActiveDropdownId(null);
                                         }}
-                                        className={`w-full flex items-center justify-between px-2 py-1.5 hover:bg-slate-50 border border-transparent rounded-lg text-left text-xs font-bold transition-all cursor-pointer group ${
+                                        className={`w-full flex items-center justify-between px-2 py-1.5 hover:bg-[#F2EBDD] border border-transparent rounded-lg text-left text-xs font-bold transition-all cursor-pointer group ${
                                           cond.value === valObj.name
-                                            ? 'text-indigo-750 bg-indigo-50/30 border-slate-150'
-                                            : 'text-slate-700 hover:text-indigo-650'
+                                            ? 'text-[#0A0A0A] bg-[#F2EBDD] border-[#0A0A0A]'
+                                            : 'text-[#0A0A0A]'
                                         }`}
                                       >
                                         <span className="truncate">{valObj.name}</span>
-                                        <span className="text-[10px] text-slate-400 font-extrabold group-hover:text-indigo-500 transition-colors shrink-0">
+                                        <span className="text-[10px] text-slate-700 font-black shrink-0">
                                           {valObj.count}
                                         </span>
                                       </button>
                                     ))}
                                     {filteredFieldValues.length === 0 && (
-                                      <span className="text-[10px] text-slate-400 font-semibold text-center py-4">
+                                      <span className="text-[10px] text-slate-700 font-bold italic text-center py-4">
                                         {t('audience.panel.no_matches')}
                                       </span>
                                     )}
@@ -492,7 +492,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                   <button
                     type="button"
                     onClick={() => setIsConditionDropdownOpen(!isConditionDropdownOpen)}
-                    className="flex items-center justify-center gap-1.5 px-4 py-2 border border-slate-200 hover:border-indigo-400 text-xs font-bold text-slate-500 hover:text-indigo-600 bg-white hover:bg-slate-50/20 rounded-xl transition-all cursor-pointer shadow-xs border-dashed whitespace-nowrap"
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 border-2 border-dashed border-[#0A0A0A] hover:bg-white text-xs font-black text-[#0A0A0A] uppercase rounded-xl transition-all cursor-pointer whitespace-nowrap"
                   >
                     <span>{t('audience.panel.add_condition')}</span>
                   </button>
@@ -503,28 +503,28 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                         className="fixed inset-0 z-30 bg-transparent cursor-default"
                         onClick={() => setIsConditionDropdownOpen(false)}
                       />
-                      <div className="absolute top-full left-0 mt-1.5 w-[460px] bg-white border border-slate-200 rounded-2xl shadow-xl flex flex-col overflow-hidden z-45 animate-in fade-in slide-in-from-top-2 duration-150">
-                        <div className="p-3 border-b border-slate-100 flex items-center gap-2 relative">
-                          <Search size={13} className="text-slate-400 absolute left-6 top-1/2 -translate-y-1/2" />
+                      <div className="absolute top-full left-0 mt-1.5 w-[460px] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_0px_#0A0A0A] flex flex-col overflow-hidden z-45 animate-in fade-in duration-150">
+                        <div className="p-3 border-b-2 border-[#0A0A0A] flex items-center gap-2 relative bg-white">
+                          <Search size={13} className="text-[#0A0A0A] absolute left-6 top-1/2 -translate-y-1/2" />
                           <input
                             type="text"
                             placeholder={t('audience.panel.search_filters')}
                             value={dropdownSearch}
                             onChange={(e) => setDropdownSearch(e.target.value)}
-                            className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-indigo-400 transition-all text-slate-800"
+                            className="w-full pl-9 pr-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none text-[#0A0A0A]"
                             autoFocus
                           />
                         </div>
 
-                        <div className="flex h-56 bg-white">
-                          <div className="w-44 bg-slate-50/50 border-r border-slate-100 p-2 space-y-1 shrink-0">
+                        <div className="flex h-56 bg-[#F2EBDD]">
+                          <div className="w-44 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-2 space-y-1 shrink-0">
                             <button
                               type="button"
                               onClick={() => setSelectedCategory('general')}
-                              className={`w-full px-3 py-2 text-left text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+                              className={`w-full px-3 py-2 text-left text-xs font-black uppercase rounded-lg transition-all cursor-pointer border-2 ${
                                 selectedCategory === 'general'
-                                  ? 'bg-white text-indigo-700 shadow-sm border border-slate-100'
-                                  : 'text-slate-655 hover:bg-slate-100'
+                                  ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
+                                  : 'text-[#0A0A0A] border-transparent hover:bg-white'
                               }`}
                             >
                               {t('audience.panel.general_filters')}
@@ -532,10 +532,10 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                             <button
                               type="button"
                               onClick={() => setSelectedCategory('system')}
-                              className={`w-full px-3 py-2 text-left text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+                              className={`w-full px-3 py-2 text-left text-xs font-black uppercase rounded-lg transition-all cursor-pointer border-2 ${
                                 selectedCategory === 'system'
-                                  ? 'bg-white text-indigo-700 shadow-sm border border-slate-100'
-                                  : 'text-slate-655 hover:bg-slate-100'
+                                  ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
+                                  : 'text-[#0A0A0A] border-transparent hover:bg-white'
                               }`}
                             >
                               {t('audience.panel.system_fields')}
@@ -543,10 +543,10 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                             <button
                               type="button"
                               onClick={() => setSelectedCategory('custom')}
-                              className={`w-full px-3 py-2 text-left text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+                              className={`w-full px-3 py-2 text-left text-xs font-black uppercase rounded-lg transition-all cursor-pointer border-2 ${
                                 selectedCategory === 'custom'
-                                  ? 'bg-white text-indigo-700 shadow-sm border border-slate-100'
-                                  : 'text-slate-655 hover:bg-slate-100'
+                                  ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
+                                  : 'text-[#0A0A0A] border-transparent hover:bg-white'
                               }`}
                             >
                               {t('audience.panel.custom_fields')}
@@ -562,12 +562,12 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                     key={idx}
                                     type="button"
                                     onClick={() => handleAddConditionItem(item)}
-                                    className="w-full px-3 py-2 hover:bg-slate-50 hover:text-indigo-655 rounded-lg text-left text-xs font-bold text-slate-700 flex items-center gap-2.5 transition-colors cursor-pointer group"
+                                    className="w-full px-3 py-2 hover:bg-[#F2EBDD] rounded-lg text-left text-xs font-bold text-[#0A0A0A] flex items-center gap-2.5 transition-colors cursor-pointer group"
                                   >
-                                    <IconComponent size={14} className="text-slate-400 shrink-0" />
+                                    <IconComponent size={14} className="text-[#0A0A0A] shrink-0" />
                                     <span className="truncate flex-1">{item.label}</span>
                                     {(item as any).count !== undefined && (
-                                      <span className="text-[10px] text-slate-400 font-extrabold group-hover:text-indigo-500 transition-colors shrink-0">
+                                      <span className="text-[10px] text-slate-700 font-black shrink-0">
                                         {(item as any).count}
                                       </span>
                                     )}
@@ -575,7 +575,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                 );
                               })
                             ) : (
-                              <div className="text-[10px] text-slate-400 italic text-center py-12">
+                              <div className="text-[10px] text-slate-700 font-bold italic text-center py-12">
                                 {t('audience.panel.no_matching_items')}
                               </div>
                             )}

@@ -6,14 +6,12 @@ import {
   useCancelSubscriptionMutation,
   useResumeSubscriptionMutation,
 } from '../../hooks/bot/useBillingQueries';
-import { useBotStore } from '../../store/useBotStore';
-import { useBotUsersQuery } from '../../hooks/crm/useCrmQueries';
+import { useAllBotUsersQuery } from '../../hooks/crm/useCrmQueries';
 import { PricingModal } from './PricingModal';
 
 export const SubscriptionsPanel: React.FC = () => {
-  const activeBotId = useBotStore((state) => state.activeBotId);
-  const { data: botUsers = [] } = useBotUsersQuery(activeBotId || 0, !!activeBotId);
-  const activeContactsCount = botUsers.length || 2;
+  const { data: contacts = [] } = useAllBotUsersQuery();
+  const activeContactsCount = contacts.length;
 
   const {
     data: subscription,
@@ -66,14 +64,14 @@ export const SubscriptionsPanel: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white border border-slate-200 rounded-[24px] p-6 md:p-8 shadow-sm">
-        <div className="flex items-start justify-between pb-6 border-b border-slate-100">
-          <div className="space-y-1.5">
-            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+    <div className="space-y-6 font-['JetBrains_Mono',monospace]">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 md:p-8">
+        <div className="flex items-start justify-between pb-6 border-b-2 border-[#0A0A0A]">
+          <div className="space-y-1.5 text-left">
+            <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider">
               {t('settings.billing.your_plan')}
             </span>
-            <h2 className="text-3xl font-black text-slate-800 capitalize tracking-tight leading-none">
+            <h2 className="font-['Anybody',sans-serif] text-3xl font-black text-[#0A0A0A] uppercase tracking-tight leading-none">
               {plan.displayName}
             </h2>
           </div>
@@ -82,7 +80,7 @@ export const SubscriptionsPanel: React.FC = () => {
             {!isFree && (
               <button
                 onClick={() => setIsPricingModalOpen(true)}
-                className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                className="px-4 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
               >
                 {t('settings.billing.change_plan')}
               </button>
@@ -91,7 +89,7 @@ export const SubscriptionsPanel: React.FC = () => {
             {isFree ? (
               <button
                 onClick={() => setIsPricingModalOpen(true)}
-                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm shadow-emerald-100"
+                className="px-5 py-2.5 bg-emerald-200 hover:bg-emerald-300 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
               >
                 {t('settings.billing.activate_trial')}
               </button>
@@ -99,7 +97,7 @@ export const SubscriptionsPanel: React.FC = () => {
               <button
                 onClick={handleResume}
                 disabled={resumeMutation.isPending}
-                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-indigo-700 disabled:opacity-50 text-[#F2EBDD] border-2 border-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
               >
                 {resumeMutation.isPending && <Loader2 size={12} className="animate-spin" />}
                 {t('settings.billing.restore')}
@@ -108,9 +106,9 @@ export const SubscriptionsPanel: React.FC = () => {
               <button
                 onClick={handleCancel}
                 disabled={cancelMutation.isPending}
-                className="px-5 py-2.5 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-rose-200 hover:bg-rose-300 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
               >
-                {cancelMutation.isPending && <Loader2 size={12} className="animate-spin text-rose-600" />}
+                {cancelMutation.isPending && <Loader2 size={12} className="animate-spin text-[#0A0A0A]" />}
                 {t('settings.billing.cancel')}
               </button>
             )}
@@ -118,9 +116,9 @@ export const SubscriptionsPanel: React.FC = () => {
         </div>
 
         <div className="pt-6 space-y-6">
-          <div className="space-y-1">
-            <h3 className="text-sm font-bold text-slate-800">{t('settings.billing.contacts')}</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
+          <div className="space-y-1 text-left">
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">{t('settings.billing.contacts')}</h3>
+            <p className="text-xs text-slate-700 font-bold leading-relaxed">
               {t('settings.billing.desc')}
             </p>
           </div>
@@ -131,39 +129,39 @@ export const SubscriptionsPanel: React.FC = () => {
                 className="absolute flex flex-col items-center -translate-x-1/2 transition-all duration-500"
                 style={{ left: `${pct}%` }}
               >
-                <span className="text-sm font-extrabold text-slate-800 leading-none">
+                <span className="text-sm font-black text-[#0A0A0A] leading-none">
                   {activeContactsCount}
                 </span>
-                <span className="text-[10px] font-bold text-slate-500 mt-1 whitespace-nowrap">
+                <span className="text-[10px] font-bold text-[#0A0A0A] mt-1 whitespace-nowrap">
                   {t('settings.billing.active_contacts')}
                 </span>
-                <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-[#1d59c9] mt-1.5" />
+                <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-[#0A0A0A] mt-1.5" />
               </div>
             </div>
 
-            <div className="w-full h-5 bg-slate-100 rounded-full relative overflow-hidden">
+            <div className="w-full h-5 bg-white border-2 border-[#0A0A0A] rounded-full relative overflow-hidden">
               <div
-                className="absolute left-0 top-0 bottom-0 bg-[#1d59c9] rounded-full transition-all duration-500"
+                className="absolute left-0 top-0 bottom-0 bg-[#0A0A0A] rounded-full transition-all duration-500"
                 style={{ width: `${pct}%` }}
               />
             </div>
 
-            <div className="flex items-center justify-between text-[11px] font-extrabold text-slate-400 px-0.5">
+            <div className="flex items-center justify-between text-[11px] font-black text-[#0A0A0A] px-0.5">
               <span>0</span>
               <span>{maxContactsLimit}</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6 pt-6 border-t border-slate-100 text-left">
+          <div className="grid grid-cols-2 gap-6 pt-6 border-t-2 border-[#0A0A0A]/15 text-left">
             <div className="space-y-1">
-              <span className="text-xs font-bold text-slate-400">{t('settings.billing.price')}</span>
-              <p className="text-sm font-extrabold text-slate-700">
+              <span className="text-xs font-black text-slate-700 uppercase">{t('settings.billing.price')}</span>
+              <p className="text-sm font-black text-[#0A0A0A]">
                 {isFree ? '$0' : `$${plan.price}`}
               </p>
             </div>
-            <div className="space-y-1 border-l border-slate-100 pl-6">
-              <span className="text-xs font-bold text-slate-400">{t('settings.billing.contacts')}</span>
-              <p className="text-sm font-extrabold text-slate-700">
+            <div className="space-y-1 border-l-2 border-[#0A0A0A]/15 pl-6">
+              <span className="text-xs font-black text-slate-700 uppercase">{t('settings.billing.contacts')}</span>
+              <p className="text-sm font-black text-[#0A0A0A]">
                 {activeContactsCount}/{maxContactsLimit}
               </p>
             </div>

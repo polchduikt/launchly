@@ -267,5 +267,6 @@
   "settings.telegram.revoke_title": "Відкликати токен бота",
   "settings.telegram.status_label": "Статус Telegram",
   "settings.telegram.subheader": "Керуйте автоматичними відповідями, вітаннями та активними токенами для ваших ботів Telegram.",
-  "settings.updated": "Налаштування успішно оновлено."
+  "settings.updated": "Налаштування успішно оновлено.",
+  "settings.integrations.google.connect": "Підключити"
 }

@@ -8,6 +8,7 @@ import { useAuthStore } from '../../../store/useAuthStore';
 import { useTranslation } from '../../../i18n/config';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
+import { useAllBotUsersQuery } from '../../../hooks/crm/useCrmQueries';
 import { createBotApi, saveFlowSchemaApi } from '../../../api/bot';
 import { TEMPLATES_DATA } from '../../../const/templatesData';
 import type { FlowTemplate } from '../../../const/templatesData';
@@ -236,12 +237,13 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
   );
 };
 
-const DashboardPage: React.FC = () => {
+export const DashboardPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isLoading: isLoadingRequire, hasBots } = useRequireBots();
-  const { data: bots = [], isLoading: isLoadingBots } = useBotsQuery();
+  const { isLoading: isLoadingBots } = useBotsQuery();
+  const { data: allContacts = [] } = useAllBotUsersQuery();
   const { data: blogArticles = BLOG_ARTICLES } = useBlogArticlesQuery();
   const user = useAuthStore((state) => state.user);
   const [selectedTemplate, setSelectedTemplate] = useState<FlowTemplate | null>(null);
@@ -274,10 +276,8 @@ const DashboardPage: React.FC = () => {
   };
 
   const totalContacts = useMemo(() => {
-    return bots
-      .filter((b) => b.hasTelegramToken)
-      .reduce((sum, b) => sum + (b.totalUsers || 0), 0);
-  }, [bots]);
+    return allContacts.length;
+  }, [allContacts]);
 
   const handleSetUpTemplate = async (template: FlowTemplate) => {
     setIsCreating(true);

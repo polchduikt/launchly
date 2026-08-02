@@ -48,15 +48,14 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row gap-6 md:items-center justify-between">
+    <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between font-['JetBrains_Mono',monospace]">
       
       <div className="w-full md:w-1/4 shrink-0">
-        <h3 className="font-extrabold text-sm text-slate-800 tracking-tight leading-snug">
+        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">
           {t('settings.integrations.google.title')}
         </h3>
       </div>
 
-      
       <div className="w-full md:w-2/5 flex gap-4 items-center">
         
         <div className="w-16 h-16 flex items-center justify-center shrink-0 text-[#0F9D58]">
@@ -65,13 +64,13 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
 
         <div className="flex-1 flex flex-wrap md:flex-nowrap items-center gap-4 md:gap-12">
           <div className="flex flex-col gap-0.5">
-            <span className="font-bold text-slate-800 text-sm">Google Sheets</span>
+            <span className="font-black text-[#0A0A0A] text-sm uppercase">Google Sheets</span>
             {isConnected && (
               <div className="mt-1 space-y-0.5">
-                <span className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">
+                <span className="block text-[9px] font-black text-slate-700 uppercase tracking-wider">
                   {t('settings.integrations.google.account_name')}
                 </span>
-                <span className="block text-xs font-bold text-slate-700">
+                <span className="block text-xs font-bold text-[#0A0A0A]">
                   {connectedEmail}
                 </span>
               </div>
@@ -84,7 +83,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
                 <button
                   type="button"
                   onClick={handleConnectGoogle}
-                  className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 text-emerald-700 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm select-none shrink-0"
+                  className="px-4 py-2 bg-emerald-200 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none shrink-0"
                 >
                   {t('settings.integrations.google.reconnect')}
                 </button>
@@ -93,7 +92,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
                 type="button"
                 onClick={handleDelete}
                 disabled={deleteMut.isPending}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm select-none shrink-0"
+                className="px-4 py-2 bg-rose-200 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none shrink-0"
               >
                 {deleteMut.isPending ? t('settings.integrations.google.disconnecting') : t('settings.integrations.google.disconnect')}
               </button>
@@ -102,16 +101,15 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
             <button
               type="button"
               onClick={handleConnectGoogle}
-              className="px-4 py-2 border border-slate-250 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm select-none shrink-0"
+              className="px-4 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none shrink-0"
             >
-              {t('settings.integrations.google.title')}
+              {t('settings.integrations.google.connect', 'Connect')}
             </button>
           )}
         </div>
       </div>
 
-      
-      <div className="w-full md:w-1/3 text-xs text-slate-400 leading-relaxed font-medium">
+      <div className="w-full md:w-1/3 text-xs text-slate-700 leading-relaxed font-bold">
         {t('settings.integrations.google.desc')}{' '}
         <a href="https://google.com" target="_blank" rel="noopener noreferrer" className="text-indigo-650 font-bold hover:underline cursor-pointer">
           {t('settings.integrations.google.learn_more')}

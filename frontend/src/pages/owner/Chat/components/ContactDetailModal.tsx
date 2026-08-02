@@ -4,12 +4,14 @@ import {
   Play,
   Pause,
   CheckCircle2,
+  XCircle,
   Send,
   ExternalLink,
   MessageSquare,
   Trash2,
   X,
   Check,
+  Plus,
 } from 'lucide-react';
 import type { BotUserResponse, BotUserUpdateRequest } from '../../../../types/bot';
 import type { TagResponse } from '../../../../types';
@@ -68,61 +70,26 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
   const handleUpdateContactMetadata = (updatedMeta: BotUserMetadata) => {
     updateBotUserMut.mutate(
-      {
-        userId: selectedContact.id,
-        data: {
-          metadata: JSON.stringify(updatedMeta),
-        },
-      },
-      {
-        onSuccess: (updated) => {
-          onContactUpdated(updated);
-        },
-      }
+      { userId: selectedContact.id, data: { metadata: JSON.stringify(updatedMeta) } },
+      { onSuccess: (updated) => { onContactUpdated(updated); } }
     );
   };
-
-
 
   const handleAddTagInline = (tagName: string) => {
     if (!tagName.trim()) return;
     const trimmed = tagName.trim();
     if ((selectedContact.tags || []).includes(trimmed)) return;
-
-    if (botId) {
-      createTagApi(botId, { name: trimmed }).catch(() => {});
-    }
-
+    if (botId) createTagApi(botId, { name: trimmed }).catch(() => {});
     updateBotUserMut.mutate(
-      {
-        userId: selectedContact.id,
-        data: {
-          tags: [...(selectedContact.tags || []), trimmed],
-        },
-      },
-      {
-        onSuccess: (updated) => {
-          onContactUpdated(updated);
-          setNewTagVal('');
-          setShowAddTagInline(false);
-        },
-      }
+      { userId: selectedContact.id, data: { tags: [...(selectedContact.tags || []), trimmed] } },
+      { onSuccess: (updated) => { onContactUpdated(updated); setNewTagVal(''); setShowAddTagInline(false); } }
     );
   };
 
   const handleRemoveTagInline = (tagName: string) => {
     updateBotUserMut.mutate(
-      {
-        userId: selectedContact.id,
-        data: {
-          tags: (selectedContact.tags || []).filter((t) => t !== tagName),
-        },
-      },
-      {
-        onSuccess: (updated) => {
-          onContactUpdated(updated);
-        },
-      }
+      { userId: selectedContact.id, data: { tags: (selectedContact.tags || []).filter((t) => t !== tagName) } },
+      { onSuccess: (updated) => { onContactUpdated(updated); } }
     );
   };
 
@@ -130,157 +97,125 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
     if (!customFieldName.trim()) return;
     const nameTrimmed = customFieldName.trim();
     const fields = meta.customFields || {};
-
-    handleUpdateContactMetadata({
-      ...meta,
-      customFields: {
-        ...fields,
-        [nameTrimmed]: customFieldValue,
-      },
-    });
-
+    handleUpdateContactMetadata({ ...meta, customFields: { ...fields, [nameTrimmed]: customFieldValue } });
     if (botId) {
-      getCustomFieldsApi(botId)
-        .then((existing) => {
-          const list = existing && Array.isArray(existing.fields) ? existing.fields : Array.isArray(existing) ? existing : [];
-          if (!list.some((f: any) => f.name === nameTrimmed)) {
-            const updated = [...list, { name: nameTrimmed, type: 'Text', description: '', folder: null }];
-            saveCustomFieldsApi(botId, { fields: updated }).catch(() => {});
-          }
-        })
-        .catch(() => {});
+      getCustomFieldsApi(botId).then((existing) => {
+        const list = existing && Array.isArray(existing.fields) ? existing.fields : Array.isArray(existing) ? existing : [];
+        if (!list.some((f: any) => f.name === nameTrimmed)) {
+          saveCustomFieldsApi(botId, { fields: [...list, { name: nameTrimmed, type: 'Text', description: '', folder: null }] }).catch(() => {});
+        }
+      }).catch(() => {});
     }
-
-    setCustomFieldName('');
-    setCustomFieldValue('');
-    setShowAddCustomFieldInline(false);
+    setCustomFieldName(''); setCustomFieldValue(''); setShowAddCustomFieldInline(false);
   };
 
   const handleRemoveCustomFieldInline = (fieldKey: string) => {
     const fields = { ...(meta.customFields || {}) };
     delete (fields as Record<string, any>)[fieldKey];
-
-    handleUpdateContactMetadata({
-      ...meta,
-      customFields: { ...fields },
-    });
+    handleUpdateContactMetadata({ ...meta, customFields: { ...fields } });
   };
 
   const handleUpdateName = (field: 'first' | 'last', val: string) => {
     const data: BotUserUpdateRequest = {};
-    if (field === 'first') {
-      if (selectedContact.firstName === val) return;
-      data.firstName = val;
-    } else {
-      if ((selectedContact.lastName || '') === val) return;
-      data.lastName = val;
-    }
-
-    updateBotUserMut.mutate(
-      {
-        userId: selectedContact.id,
-        data,
-      },
-      {
-        onSuccess: (updated) => {
-          onContactUpdated(updated);
-        },
-      }
-    );
+    if (field === 'first') { if (selectedContact.firstName === val) return; data.firstName = val; }
+    else { if ((selectedContact.lastName || '') === val) return; data.lastName = val; }
+    updateBotUserMut.mutate({ userId: selectedContact.id, data }, { onSuccess: (updated) => { onContactUpdated(updated); } });
   };
 
   const handleStartChat = () => {
     const conv = conversations.find((c) => c.botUserTelegramId === selectedContact.telegramId);
-    if (conv) {
-      navigate(`${ROUTES.CHAT}?conversationId=${conv.id}`);
-    } else {
-      navigate(ROUTES.CHAT);
-    }
+    navigate(conv ? `${ROUTES.CHAT}?conversationId=${conv.id}` : ROUTES.CHAT);
   };
 
   return (
-    <div 
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
-      }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 select-none animate-fade-in cursor-pointer"
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/50 select-none animate-fade-in cursor-pointer font-['JetBrains_Mono',monospace]"
     >
-      <div 
+      <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] border border-slate-100 animate-scale-up cursor-default"
+        className="bg-[#F2EBDD] rounded-3xl border-2 border-[#0A0A0A] w-full max-w-4xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] cursor-default"
       >
-        
-        <div className="w-full md:w-[320px] border-r border-slate-100 p-6 flex flex-col items-center space-y-5 bg-slate-50/50 shrink-0">
-          <ContactAvatar photoUrl={selectedContact.photoUrl} name={selectedContact.firstName} size="lg" />
+        {/* ── LEFT PANEL ── */}
+        <div className="w-full md:w-[280px] border-r-2 border-[#0A0A0A] flex flex-col bg-[#F2EBDD] shrink-0">
+          {/* Avatar area */}
+          <div className="p-6 flex flex-col items-center gap-4 border-b-2 border-[#0A0A0A]">
+            <ContactAvatar photoUrl={selectedContact.photoUrl} name={selectedContact.firstName} size="lg" />
+            <div className="text-center">
+              <h2 className="font-['Anybody',sans-serif] text-lg font-black text-[#0A0A0A] uppercase leading-tight">
+                {selectedContact.firstName} {selectedContact.lastName || ''}
+              </h2>
+              {selectedContact.username && (
+                <a
+                  href={`https://t.me/${selectedContact.username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-[#0A0A0A]/60 hover:text-[#0A0A0A] transition-all mt-0.5"
+                >
+                  <Send size={11} className="rotate-45" />
+                  @{selectedContact.username}
+                  <ExternalLink size={10} />
+                </a>
+              )}
+            </div>
+          </div>
 
-          <button
-            onClick={() => handleUpdateContactMetadata({ ...meta, paused: !isPaused })}
-            className="w-full py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-          >
-            {isPaused ? (
-              <>
-                <Play size={14} className="text-emerald-500" />
-                <span>{t('crm.contact.resume_automations')}</span>
-              </>
-            ) : (
-              <>
-                <Pause size={14} className="text-slate-500" />
-                <span>{t('crm.contact.pause_automations')}</span>
-              </>
-            )}
-          </button>
-
-          <div className="w-full border-t border-slate-100 pt-4 space-y-3.5 text-xs font-bold text-slate-600">
+          {/* Info rows */}
+          <div className="px-5 py-4 flex flex-col gap-3 border-b-2 border-[#0A0A0A]">
+            {/* Subscription */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CheckCircle2 size={15} className={isUnsubscribed ? 'text-rose-500' : 'text-emerald-500'} />
-                <span>{isUnsubscribed ? t('crm.contact.unsubscribed') : t('crm.contact.subscribed')}</span>
+                {isUnsubscribed
+                  ? <XCircle size={14} className="text-rose-600 shrink-0" />
+                  : <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />}
+                <span className="text-xs font-black uppercase text-[#0A0A0A]">
+                  {isUnsubscribed ? t('crm.contact.unsubscribed') : t('crm.contact.subscribed')}
+                </span>
               </div>
               <button
                 onClick={() => handleUpdateContactMetadata({ ...meta, unsubscribed: !isUnsubscribed })}
-                className="text-indigo-600 hover:text-indigo-700 underline text-[11px] cursor-pointer"
+                className="text-[10px] font-black uppercase px-2 py-0.5 border-2 border-[#0A0A0A] rounded-lg bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer"
               >
                 {isUnsubscribed ? t('crm.contact.subscribe') : t('crm.contact.unsubscribe')}
               </button>
             </div>
 
-            <div className="flex items-center gap-2 text-slate-500">
-              <span className="font-mono bg-slate-100 text-[10px] text-slate-500 px-1.5 py-0.5 rounded">ID</span>
-              <span>{selectedContact.telegramId}</span>
+            {/* Telegram ID */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black bg-[#0A0A0A] text-[#F2EBDD] px-1.5 py-0.5 rounded font-mono">ID</span>
+              <span className="text-xs font-bold text-[#0A0A0A]">{selectedContact.telegramId}</span>
             </div>
-
-            {selectedContact.username && (
-              <a
-                href={`https://t.me/${selectedContact.username}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer"
-              >
-                <Send size={14} className="text-indigo-500 rotate-45" />
-                <span>@{selectedContact.username}</span>
-                <ExternalLink size={11} />
-              </a>
-            )}
           </div>
 
-          <div className="w-full pt-4">
+          {/* Action buttons */}
+          <div className="p-4 flex flex-col gap-2 mt-auto">
+            <button
+              onClick={() => handleUpdateContactMetadata({ ...meta, paused: !isPaused })}
+              className={`w-full py-2.5 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                isPaused ? 'bg-emerald-400 text-[#0A0A0A] hover:bg-emerald-500' : 'bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+              }`}
+            >
+              {isPaused ? <><Play size={13} /><span>{t('crm.contact.resume_automations')}</span></>
+                : <><Pause size={13} /><span>{t('crm.contact.pause_automations')}</span></>}
+            </button>
+
             <button
               onClick={handleStartChat}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/10 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <MessageSquare size={14} />
+              <MessageSquare size={13} />
               <span>{t('crm.contact.start_chat')}</span>
             </button>
           </div>
         </div>
 
-        <div className="flex-1 p-6 overflow-y-auto space-y-6 flex flex-col min-w-0">
-          <div className="flex justify-between items-start shrink-0">
-            <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-              {selectedContact.firstName} {selectedContact.lastName || ''}
-            </h2>
+        {/* ── RIGHT PANEL ── */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {/* Header */}
+          <div className="px-6 py-4 border-b-2 border-[#0A0A0A] flex items-center justify-between shrink-0">
+            <span className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-tight">
+              {t('crm.contact.details') || 'ДЕТАЛІ'}
+            </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
@@ -289,191 +224,197 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
                     onContactDeleted();
                   }
                 }}
-                className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-rose-600 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all cursor-pointer"
                 title={t('crm.contact.delete_tooltip')}
               >
-                <Trash2 size={16} />
+                <Trash2 size={14} />
               </button>
               <button
                 onClick={onClose}
-                className="p-2 text-slate-400 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer"
               >
-                <X size={18} />
+                <X size={15} />
               </button>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between items-center select-none">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{t('crm.contact.tags_title')}</span>
-              <button
-                onClick={() => setShowAddTagInline(!showAddTagInline)}
-                className="text-indigo-600 hover:text-indigo-700 text-xs font-bold cursor-pointer"
-              >
-                {t('crm.contact.add_tag')}
-              </button>
-            </div>
-            
-            {showAddTagInline && (
-              <div className="flex gap-2 max-w-sm animation-slide-in w-full">
-                {newTagVal === 'NEW_TAG' ? (
-                  <>
-                    <input
-                      type="text"
-                      placeholder={t('crm.contact.custom_tag_placeholder')}
-                      value={customTagName}
-                      onChange={(e) => setCustomTagName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleAddTagInline(customTagName);
-                          setCustomTagName('');
-                        }
-                      }}
-                      className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none"
-                    />
-                    <button
-                      onClick={() => {
-                        handleAddTagInline(customTagName);
-                        setCustomTagName('');
-                      }}
-                      className="px-3.5 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 cursor-pointer"
-                    >
-                      {t('crm.contact.add')}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setNewTagVal('');
-                        setCustomTagName('');
-                      }}
-                      className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded-xl text-xs font-semibold hover:bg-slate-200 cursor-pointer flex items-center justify-center"
-                    >
-                      ✕
-                    </button>
-                  </>
-                ) : (
-                  <div className="w-full">
-                    <TagSearchSelect
-                      tagName=""
-                      tags={tags}
-                      assignedTags={selectedContact.tags || []}
-                      onChange={(selectedTag: any) => {
-                        if (selectedTag) {
-                          handleAddTagInline(selectedTag.name);
-                        }
-                      }}
-                      onCreateTag={() => {
-                        setNewTagVal('NEW_TAG');
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="flex flex-wrap gap-1.5">
-              {!(selectedContact.tags) || selectedContact.tags.length === 0 ? (
-                <span className="text-xs text-slate-400 italic">{t('crm.contact.no_tags')}</span>
-              ) : (
-                (selectedContact.tags || []).map((t) => (
-                  <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-full select-none">
-                    <span>{t}</span>
-                    <button
-                      onClick={() => handleRemoveTagInline(t)}
-                      className="text-slate-400 hover:text-slate-600 cursor-pointer"
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block border-b border-slate-100 pb-1">{t('crm.contact.system_fields')}</span>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-extrabold text-slate-400 uppercase">{t('crm.contact.first_name')}</label>
-                <input
-                  type="text"
-                  defaultValue={selectedContact.firstName}
-                  onBlur={(e) => handleUpdateName('first', e.target.value)}
-                  className="w-full px-3 py-2 bg-blue-50/30 focus:bg-white border border-blue-100 focus:border-indigo-500 rounded-xl text-xs font-bold text-slate-800 focus:outline-none transition-all shadow-sm shadow-blue-50/20"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-extrabold text-slate-400 uppercase">{t('crm.contact.last_name')}</label>
-                <input
-                  type="text"
-                  defaultValue={selectedContact.lastName || ''}
-                  onBlur={(e) => handleUpdateName('last', e.target.value)}
-                  placeholder={t('crm.contact.not_set')}
-                  className="w-full px-3 py-2 bg-blue-50/30 focus:bg-white border border-blue-100 focus:border-indigo-500 rounded-xl text-xs font-bold text-slate-800 placeholder:text-slate-400 placeholder:italic focus:outline-none transition-all shadow-sm shadow-blue-50/20"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex justify-between items-center select-none border-b border-slate-100 pb-1">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{t('crm.contact.custom_fields')}</span>
-              <button
-                onClick={() => setShowAddCustomFieldInline(!showAddCustomFieldInline)}
-                className="text-indigo-600 hover:text-indigo-700 text-xs font-bold cursor-pointer"
-              >
-                {t('crm.contact.add_custom_field')}
-              </button>
-            </div>
-
-            {showAddCustomFieldInline && (
-              <div className="flex gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-200 animation-slide-in">
-                <input
-                  type="text"
-                  placeholder={t('crm.contact.field_key_placeholder')}
-                  value={customFieldName}
-                  onChange={(e) => setCustomFieldName(e.target.value)}
-                  className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder={t('crm.contact.value_placeholder')}
-                  value={customFieldValue}
-                  onChange={(e) => setCustomFieldValue(e.target.value)}
-                  className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none"
-                />
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+            {/* Tags */}
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-wider">
+                  {t('crm.contact.tags_title')}
+                </h3>
                 <button
-                  onClick={handleAddCustomFieldInline}
-                  className="p-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer"
+                  onClick={() => setShowAddTagInline(!showAddTagInline)}
+                  className="flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-1 border-2 border-[#0A0A0A] rounded-lg bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer"
                 >
-                  <Check size={14} />
+                  <Plus size={10} />
+                  {t('crm.contact.add_tag')}
                 </button>
               </div>
-            )}
 
-            <div className="space-y-2">
-              {!(meta.customFields) || Object.keys(meta.customFields).length === 0 ? (
-                <span className="text-xs text-slate-400 italic">{t('crm.contact.no_custom_fields')}</span>
-              ) : (
-                Object.entries(meta.customFields).map(([k, v]) => (
-                  <div key={k} className="flex items-center justify-between py-2 px-3 bg-blue-50/20 border border-blue-50 rounded-xl shadow-sm shadow-blue-50/10">
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{k}</span>
-                      <span className="text-xs font-bold text-slate-800 truncate">{v}</span>
+              {showAddTagInline && (
+                <div className="flex gap-2 max-w-sm w-full">
+                  {newTagVal === 'NEW_TAG' ? (
+                    <>
+                      <input
+                        type="text"
+                        placeholder={t('crm.contact.custom_tag_placeholder')}
+                        value={customTagName}
+                        onChange={(e) => setCustomTagName(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { handleAddTagInline(customTagName); setCustomTagName(''); } }}
+                        className="flex-1 px-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none"
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => { handleAddTagInline(customTagName); setCustomTagName(''); }}
+                        className="px-3 py-1.5 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase cursor-pointer"
+                      >
+                        {t('crm.contact.add')}
+                      </button>
+                      <button
+                        onClick={() => { setNewTagVal(''); setCustomTagName(''); }}
+                        className="px-3 py-1.5 bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-xl text-xs font-black cursor-pointer"
+                      >
+                        <X size={12} />
+                      </button>
+                    </>
+                  ) : (
+                    <div className="w-full">
+                      <TagSearchSelect
+                        tagName=""
+                        tags={tags}
+                        assignedTags={selectedContact.tags || []}
+                        onChange={(selectedTag: any) => { if (selectedTag) handleAddTagInline(selectedTag.name); }}
+                        onCreateTag={() => setNewTagVal('NEW_TAG')}
+                      />
                     </div>
-                    <button
-                      onClick={() => handleRemoveCustomFieldInline(k)}
-                      className="p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))
+                  )}
+                </div>
               )}
-            </div>
+
+              <div className="flex flex-wrap gap-1.5">
+                {!(selectedContact.tags) || selectedContact.tags.length === 0 ? (
+                  <span className="text-xs text-[#0A0A0A]/40 italic font-bold">{t('crm.contact.no_tags')}</span>
+                ) : (
+                  (selectedContact.tags || []).map((tag) => (
+                    <span key={tag} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl select-none">
+                      <span>{tag}</span>
+                      <button
+                        onClick={() => handleRemoveTagInline(tag)}
+                        className="text-[#0A0A0A]/50 hover:text-rose-600 cursor-pointer transition-all"
+                      >
+                        <X size={11} />
+                      </button>
+                    </span>
+                  ))
+                )}
+              </div>
+            </section>
+
+            {/* Divider */}
+            <div className="border-t-2 border-[#0A0A0A]/10" />
+
+            {/* System fields */}
+            <section className="space-y-3">
+              <h3 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-wider">
+                {t('crm.contact.system_fields')}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-[#0A0A0A]/50 uppercase tracking-wider block">
+                    {t('crm.contact.first_name')}
+                  </label>
+                  <input
+                    type="text"
+                    defaultValue={selectedContact.firstName}
+                    onBlur={(e) => handleUpdateName('first', e.target.value)}
+                    className="w-full px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none transition-all"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-[#0A0A0A]/50 uppercase tracking-wider block">
+                    {t('crm.contact.last_name')}
+                  </label>
+                  <input
+                    type="text"
+                    defaultValue={selectedContact.lastName || ''}
+                    onBlur={(e) => handleUpdateName('last', e.target.value)}
+                    placeholder={t('crm.contact.not_set')}
+                    className="w-full px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder:text-[#0A0A0A]/30 focus:outline-none transition-all"
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* Divider */}
+            <div className="border-t-2 border-[#0A0A0A]/10" />
+
+            {/* Custom fields */}
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-wider">
+                  {t('crm.contact.custom_fields')}
+                </h3>
+                <button
+                  onClick={() => setShowAddCustomFieldInline(!showAddCustomFieldInline)}
+                  className="flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-1 border-2 border-[#0A0A0A] rounded-lg bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer"
+                >
+                  <Plus size={10} />
+                  {t('crm.contact.add_custom_field')}
+                </button>
+              </div>
+
+              {showAddCustomFieldInline && (
+                <div className="flex gap-2 items-center bg-white border-2 border-[#0A0A0A] p-3 rounded-2xl">
+                  <input
+                    type="text"
+                    placeholder={t('crm.contact.field_key_placeholder')}
+                    value={customFieldName}
+                    onChange={(e) => setCustomFieldName(e.target.value)}
+                    className="flex-1 px-3 py-1.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none"
+                    autoFocus
+                  />
+                  <input
+                    type="text"
+                    placeholder={t('crm.contact.value_placeholder')}
+                    value={customFieldValue}
+                    onChange={(e) => setCustomFieldValue(e.target.value)}
+                    className="flex-1 px-3 py-1.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none"
+                  />
+                  <button
+                    onClick={handleAddCustomFieldInline}
+                    className="w-8 h-8 flex items-center justify-center bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl cursor-pointer hover:bg-[#2A2A2A] transition-all shrink-0"
+                  >
+                    <Check size={13} />
+                  </button>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                {!(meta.customFields) || Object.keys(meta.customFields).length === 0 ? (
+                  <span className="text-xs text-[#0A0A0A]/40 italic font-bold">{t('crm.contact.no_custom_fields')}</span>
+                ) : (
+                  Object.entries(meta.customFields).map(([k, v]) => (
+                    <div key={k} className="flex items-center justify-between py-2 px-3 bg-white border-2 border-[#0A0A0A] rounded-xl">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[10px] font-black text-[#0A0A0A]/50 uppercase tracking-wider">{k}</span>
+                        <span className="text-xs font-bold text-[#0A0A0A] truncate">{v}</span>
+                      </div>
+                      <button
+                        onClick={() => handleRemoveCustomFieldInline(k)}
+                        className="w-7 h-7 flex items-center justify-center text-[#0A0A0A]/40 hover:text-rose-600 hover:bg-rose-50 border-2 border-transparent hover:border-rose-200 rounded-lg transition-all cursor-pointer shrink-0"
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
           </div>
-
         </div>
-
       </div>
     </div>
   );

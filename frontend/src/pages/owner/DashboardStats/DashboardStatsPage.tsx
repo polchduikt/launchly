@@ -57,8 +57,8 @@ interface SemiDonutChartProps {
 }
 
 const SemiDonutChart: React.FC<SemiDonutChartProps> = ({ data, total }) => {
-  const size = 90;
-  const strokeWidth = 11;
+  const size = 85;
+  const strokeWidth = 10.5;
   const r = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * r;
   const cx = size / 2;
@@ -77,7 +77,7 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({ data, total }) => {
           cy={cy}
           r={r}
           fill="none"
-          stroke="#f1f5f9"
+          stroke="#e2e8f0"
           strokeWidth={strokeWidth}
         />
         {data.map((item, idx) => {
@@ -104,16 +104,15 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({ data, total }) => {
           );
         })}
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none">
-        <span className="text-[8px] font-extrabold text-slate-400 uppercase tracking-widest block">Total</span>
-        <span className="text-sm font-black text-slate-800 tracking-tight block mt-0.5">
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none font-['JetBrains_Mono',monospace]">
+        <span className="text-[8px] font-extrabold text-[#0A0A0A]/60 uppercase tracking-widest block">Total</span>
+        <span className="text-sm font-black text-[#0A0A0A] tracking-tight block mt-0.5">
           {total.toLocaleString()}
         </span>
       </div>
     </div>
   );
 };
-
 
 export const DashboardStatsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -146,18 +145,6 @@ export const DashboardStatsPage: React.FC = () => {
       setSelectedBotId(connectedBots[0].id);
     }
   }, [connectedBots, selectedBotId]);
-
-  React.useEffect(() => {
-    const scrollContainer = document.querySelector('main > div.overflow-y-auto');
-    if (scrollContainer) {
-      scrollContainer.classList.add('lg:overflow-y-hidden');
-    }
-    return () => {
-      if (scrollContainer) {
-        scrollContainer.classList.remove('lg:overflow-y-hidden');
-      }
-    };
-  }, []);
 
   const tagStats = React.useMemo(() => {
     if (stats?.topTags && stats.topTags.length > 0) {
@@ -210,6 +197,15 @@ export const DashboardStatsPage: React.FC = () => {
     return data;
   }, [stats]);
 
+  const last6DaysActiveBots = React.useMemo(() => {
+    if (!stats || !stats.dailyStats || stats.dailyStats.length === 0) return [0, 0, 0, 0, 1, 2];
+    const data = stats.dailyStats.slice(-6).map((d) => (d.activeUsers > 0 || d.clicks > 0 ? (stats?.activeAutomations || 1) : 0));
+    while (data.length < 6) {
+      data.unshift(0);
+    }
+    return data;
+  }, [stats]);
+
   const chartData = React.useMemo(() => {
     const totalSub = stats?.totalSubscribers ?? 100;
     const colors = ['#6366f1', '#a855f7', '#3b82f6', '#10b981', '#f59e0b'];
@@ -227,11 +223,14 @@ export const DashboardStatsPage: React.FC = () => {
   const handlePeriodChange = (val: number) => {
     setDays(val);
   };
+
   const handleBotChange = (id: number) => {
     setSelectedBotId(id);
     setIsBotSelectorOpen(false);
   };
+
   const currentBot = bots.find((b) => b.id === selectedBotId);
+
   const renderActivityChart = () => {
     if (!stats) return null;
 
@@ -259,8 +258,8 @@ export const DashboardStatsPage: React.FC = () => {
     }
 
     const width = 1000;
-    const height = 180;
-    const padding = 30;
+    const height = 170;
+    const padding = 28;
 
     const maxVal = Math.max(
       ...data.map((d) => Math.max(d.activeUsers, d.clicks, 5))
@@ -349,12 +348,6 @@ export const DashboardStatsPage: React.FC = () => {
               <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
               <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
             </linearGradient>
-            <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
-              <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#6366f1" floodOpacity="0.2" />
-            </filter>
-            <filter id="shadow-green" x="-5%" y="-5%" width="110%" height="110%">
-              <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#10b981" floodOpacity="0.2" />
-            </filter>
           </defs>
 
           {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
@@ -367,17 +360,18 @@ export const DashboardStatsPage: React.FC = () => {
                   y1={y}
                   x2={width - padding}
                   y2={y}
-                  stroke="#e2e8f0"
+                  stroke="#0A0A0A"
                   strokeWidth="1"
                   strokeDasharray="4 4"
                 />
                 <text
                   x={padding - 10}
                   y={y + 4}
-                  fill="#94a3b8"
+                  fill="#0A0A0A"
                   fontSize="9.5"
                   fontWeight="bold"
                   textAnchor="end"
+                  className="font-mono"
                 >
                   {valLabel}
                 </text>
@@ -394,7 +388,6 @@ export const DashboardStatsPage: React.FC = () => {
             stroke="#6366f1"
             strokeWidth="3.2"
             strokeLinecap="round"
-            filter="url(#shadow)"
           />
           <path
             d={clicksPath}
@@ -402,7 +395,6 @@ export const DashboardStatsPage: React.FC = () => {
             stroke="#10b981"
             strokeWidth="3.2"
             strokeLinecap="round"
-            filter="url(#shadow-green)"
           />
 
           {hoveredIdx !== null && (
@@ -411,7 +403,7 @@ export const DashboardStatsPage: React.FC = () => {
               y1={padding}
               x2={getX(hoveredIdx)}
               y2={height - padding}
-              stroke="#cbd5e1"
+              stroke="#0A0A0A"
               strokeWidth="1.5"
               strokeDasharray="3 3"
             />
@@ -450,7 +442,7 @@ export const DashboardStatsPage: React.FC = () => {
           })}
 
           {data.map((d, idx) => {
-            if (data.length > 12 && idx % 2 !== 0) return null;
+            if (idx % Math.ceil(data.length / 7) !== 0 && idx !== data.length - 1) return null;
             const x = getX(idx);
             const dateParts = d.date.split('-');
             const labelStr = dateParts.length >= 3 ? `${dateParts[2]}.${dateParts[1]}` : d.date;
@@ -459,11 +451,12 @@ export const DashboardStatsPage: React.FC = () => {
               <text
                 key={idx}
                 x={x}
-                y={height - 12}
-                fill="#94a3b8"
+                y={height - 10}
+                fill="#0A0A0A"
                 fontSize="9.5"
                 fontWeight="bold"
                 textAnchor="middle"
+                className="font-mono"
               >
                 {labelStr}
               </text>
@@ -473,7 +466,7 @@ export const DashboardStatsPage: React.FC = () => {
 
         {hoveredIdx !== null && data[hoveredIdx] && (
           <div 
-            className="absolute bg-slate-900/95 text-white px-3 py-2 rounded-xl shadow-xl pointer-events-none text-left z-30 flex flex-col gap-1 min-w-[160px] border border-slate-800 animate-fade-in"
+            className="absolute bg-[#0A0A0A] text-[#F2EBDD] px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] pointer-events-none text-left z-30 flex flex-col gap-1 min-w-[160px] font-['JetBrains_Mono',monospace]"
             style={(() => {
               const xPercent = (getX(hoveredIdx) / width) * 100;
               if (xPercent < 20) {
@@ -507,18 +500,18 @@ export const DashboardStatsPage: React.FC = () => {
               })()}
             </div>
             <div className="flex items-center justify-between gap-4 text-xs mt-1 select-none">
-              <span className="flex items-center gap-1.5 font-semibold text-slate-350">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              <span className="flex items-center gap-1.5 font-semibold text-slate-300">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
                 {t('dashboard.stats.active_users_legend')}
               </span>
-              <span className="font-extrabold text-slate-50">{data[hoveredIdx].activeUsers}</span>
+              <span className="font-extrabold text-white">{data[hoveredIdx].activeUsers}</span>
             </div>
             <div className="flex items-center justify-between gap-4 text-xs select-none">
-              <span className="flex items-center gap-1.5 font-semibold text-slate-350">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="flex items-center gap-1.5 font-semibold text-slate-300">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 {t('dashboard.stats.button_clicks_legend')}
               </span>
-              <span className="font-extrabold text-slate-50">{data[hoveredIdx].clicks}</span>
+              <span className="font-extrabold text-white">{data[hoveredIdx].clicks}</span>
             </div>
           </div>
         )}
@@ -543,13 +536,13 @@ export const DashboardStatsPage: React.FC = () => {
     const maxVal = Math.max(...(stats.activityHeatmap?.map((h) => h.count) || []), 1);
 
     return (
-      <div className="w-full overflow-x-auto select-none pb-2">
+      <div className="w-full overflow-x-auto select-none pb-1 font-['JetBrains_Mono',monospace]">
         <div className="min-w-[580px]">
-          <div className="flex items-center mb-2 pl-8">
+          <div className="flex items-center mb-1.5 pl-8">
             {Array.from({ length: 24 }).map((_, hour) => (
               <div 
                 key={hour} 
-                className="flex-1 text-center text-[9px] font-black text-slate-450"
+                className="flex-1 text-center text-[9px] font-black text-[#0A0A0A]/60"
               >
                 {String(hour).padStart(2, '0')}
               </div>
@@ -562,7 +555,7 @@ export const DashboardStatsPage: React.FC = () => {
 
               return (
                 <div key={dayIdx} className="flex items-center gap-1">
-                  <div className="w-7 text-[10px] font-extrabold text-slate-500 text-left pr-2 shrink-0">
+                  <div className="w-7 text-[10px] font-extrabold text-[#0A0A0A] text-left pr-2 shrink-0 uppercase">
                     {dayName}
                   </div>
 
@@ -572,14 +565,14 @@ export const DashboardStatsPage: React.FC = () => {
                         (h) => h.dayOfWeek === dayIdx && h.hour === hour
                       );
                       const count = entry ? entry.count : 0;
-                      const opacity = count > 0 ? 0.15 + (count / maxVal) * 0.85 : 0;
-                      const backgroundColor = count > 0 ? `rgba(99, 102, 241, ${opacity})` : '#f1f5f9';
+                      const opacity = count > 0 ? 0.2 + (count / maxVal) * 0.8 : 0;
+                      const backgroundColor = count > 0 ? `rgba(99, 102, 241, ${opacity})` : '#e2e8f0';
 
                       return (
                         <div
                           key={hour}
-                          className="flex-1 rounded-[2px] transition-all duration-300 hover:scale-110 hover:shadow-2xs cursor-pointer"
-                          style={{ backgroundColor, height: '11px', minHeight: '11px' }}
+                          className="flex-1 rounded-[2px] border border-[#0A0A0A]/20 transition-all duration-200 hover:scale-110 cursor-pointer"
+                          style={{ backgroundColor, height: '10px', minHeight: '10px' }}
                           title={`${dayName}, ${String(hour).padStart(2, '0')}:00 — ${count} ${t('dashboard.stats.actions_count_label')}`}
                         />
                       );
@@ -590,12 +583,12 @@ export const DashboardStatsPage: React.FC = () => {
             })}
           </div>
 
-          <div className="flex items-center justify-end gap-1.5 mt-4 text-[9px] font-bold text-slate-400 pr-1">
+          <div className="flex items-center justify-end gap-1.5 mt-2 text-[9px] font-bold text-[#0A0A0A] pr-1">
             <span>{t('dashboard.stats.heatmap.less')}</span>
-            <div className="w-2.5 h-2.5 bg-slate-100 rounded-sm" />
-            <div className="w-2.5 h-2.5 bg-indigo-100/50 rounded-sm" />
-            <div className="w-2.5 h-2.5 bg-indigo-300/80 rounded-sm" />
-            <div className="w-2.5 h-2.5 bg-indigo-500 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-slate-200 border border-[#0A0A0A]/30 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-indigo-200 border border-[#0A0A0A]/30 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-indigo-400 border border-[#0A0A0A]/30 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-indigo-600 border border-[#0A0A0A]/30 rounded-sm" />
             <span>{t('dashboard.stats.heatmap.more')}</span>
           </div>
         </div>
@@ -608,15 +601,18 @@ export const DashboardStatsPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col bg-slate-50 font-sans min-h-full pb-0">
-        <header className="bg-white border-b border-slate-200 px-6 py-4 flex flex-row justify-between items-center gap-4 shrink-0 shadow-xs z-20">
+      <div className="flex flex-col bg-[#F2EBDD] font-['Geist',sans-serif] min-h-full pb-6">
+        
+        {/* Top Header */}
+        <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-6 py-4 flex flex-row justify-between items-center gap-4 shrink-0 z-20">
           <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2 select-none">
-              <TrendingUp size={20} className="text-indigo-600" />
+            <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight flex items-center gap-2.5 select-none">
+              <TrendingUp size={22} className="text-[#0A0A0A]" />
               <span>{t('dashboard.stats.title')}</span>
             </h1>
-            <p className="text-xs text-slate-400">{t('dashboard.stats.subtitle')}</p>
+            <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-700 mt-1 uppercase">{t('dashboard.stats.subtitle')}</p>
           </div>
+
           {connectedBots.length > 0 && (
             <div className="relative" ref={botSelectorRef}>
               <button
@@ -625,27 +621,27 @@ export const DashboardStatsPage: React.FC = () => {
                     setIsBotSelectorOpen(!isBotSelectorOpen);
                   }
                 }}
-                className={`flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-800 text-xs font-bold transition-all shadow-3xs select-none min-w-[180px] justify-between ${
-                  isMultipleBots ? 'hover:border-slate-350 cursor-pointer' : 'cursor-default'
+                className={`flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold transition-all select-none min-w-[180px] justify-between ${
+                  isMultipleBots ? 'hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer' : 'cursor-default'
                 }`}
               >
                 <div className="flex items-center gap-2 truncate">
-                  <MessageSquare size={14} className="text-indigo-500 shrink-0" />
+                  <MessageSquare size={14} className="shrink-0" />
                   <span className="truncate">
                     {selectedBotId === 0 ? t('dashboard.stats.all_automation') : (currentBot ? currentBot.name : t('dashboard.stats.select_bot'))}
                   </span>
                 </div>
-                {isMultipleBots && <ChevronDown size={14} className="text-slate-400 shrink-0" />}
+                {isMultipleBots && <ChevronDown size={14} className="shrink-0" />}
               </button>
 
               {isBotSelectorOpen && isMultipleBots && (
-                <div className="absolute right-0 mt-1.5 w-60 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-35 max-h-60 overflow-y-auto">
+                <div className="absolute right-0 mt-2 w-60 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 z-35 max-h-60 overflow-y-auto font-['JetBrains_Mono',monospace]">
                   <button
                     onClick={() => handleBotChange(0)}
                     className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors cursor-pointer block truncate ${
                       selectedBotId === 0
-                        ? 'bg-indigo-50 text-indigo-700'
-                        : 'text-slate-655 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                        : 'text-[#0A0A0A] hover:bg-white'
                     }`}
                   >
                     {t('dashboard.stats.all_automation')}
@@ -657,8 +653,8 @@ export const DashboardStatsPage: React.FC = () => {
                       onClick={() => handleBotChange(bot.id)}
                       className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors cursor-pointer block truncate ${
                         bot.id === selectedBotId
-                          ? 'bg-indigo-50 text-indigo-700'
-                          : 'text-slate-655 hover:bg-slate-50 hover:text-slate-900'
+                          ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                          : 'text-[#0A0A0A] hover:bg-white'
                       }`}
                     >
                       {bot.name}
@@ -672,42 +668,44 @@ export const DashboardStatsPage: React.FC = () => {
 
         <div className="p-6 space-y-6">
           {hasNoBots ? (
-            <div className="h-full flex items-center justify-center p-8 text-center bg-white border border-slate-200 rounded-3xl shadow-sm">
-              <div className="max-w-md space-y-3.5">
-                <AlertCircle size={44} className="text-slate-350 mx-auto animate-pulse" />
-                <p className="font-extrabold text-slate-700 text-base">{t('dashboard.stats.no_bot_title')}</p>
-                <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
+            <div className="h-full flex items-center justify-center p-12 text-center bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl">
+              <div className="max-w-md space-y-4">
+                <AlertCircle size={48} className="text-[#0A0A0A]" mx-auto animate-pulse />
+                <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-lg uppercase">{t('dashboard.stats.no_bot_title')}</p>
+                <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A] font-medium max-w-xs mx-auto leading-relaxed">
                   {t('dashboard.stats.no_bot_desc')}
                 </p>
               </div>
             </div>
           ) : isLoading ? (
-            <div className="h-96 flex flex-col items-center justify-center gap-3">
-              <Loader2 className="animate-spin text-indigo-600" size={32} />
-              <span className="text-xs font-bold text-slate-400">{t('dashboard.stats.loading')}</span>
+            <div className="h-96 flex flex-col items-center justify-center gap-3 font-['JetBrains_Mono',monospace]">
+              <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
+              <span className="text-xs font-bold text-[#0A0A0A] uppercase tracking-wider">{t('dashboard.stats.loading')}</span>
             </div>
           ) : error ? (
-            <div className="p-6 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-700 text-xs font-semibold">
+            <div className="p-6 bg-rose-100 border-2 border-[#0A0A0A] rounded-2xl flex items-center gap-3 text-rose-900 text-xs font-bold font-['JetBrains_Mono',monospace]">
               <AlertCircle size={18} className="shrink-0" />
               <span>{t('dashboard.stats.error')}: {error.message}</span>
             </div>
           ) : (
-            <div className="space-y-6 w-full pb-6">
+            <div className="space-y-6 w-full">
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {/* 4 Top Stat Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-                <div className="bg-white border border-slate-200 hover:border-slate-350 hover:shadow-sm transition-all rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between shadow-3xs group select-none min-h-[150px]">
+                {/* Stat 1: Total Subscribers */}
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
                   <div className="flex justify-between items-start">
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{t('dashboard.stats.total_subscribers')}</span>
-                    <button className="text-slate-400 hover:text-slate-650 transition-colors cursor-pointer">
+                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A]/70 uppercase tracking-widest block">{t('dashboard.stats.total_subscribers')}</span>
+                    <button className="text-[#0A0A0A] hover:opacity-70 transition-opacity cursor-pointer">
                       <MoreVertical size={14} />
                     </button>
                   </div>
                   <div className="my-2 select-text">
-                    <span className="text-2xl font-black text-slate-900 tracking-tight block">
+                    <span className="font-['Anybody',sans-serif] text-3xl font-black text-[#0A0A0A] tracking-tight block">
                       {stats?.totalSubscribers ?? 0}
                     </span>
-                    <span className={`text-[10px] font-bold flex items-center gap-1 mt-0.5 ${(stats?.subscribersGrowth ?? 0) >= 0 ? 'text-indigo-600' : 'text-rose-500'}`}>
+                    <span className={`font-['JetBrains_Mono',monospace] text-[10px] font-extrabold flex items-center gap-1 mt-0.5 ${(stats?.subscribersGrowth ?? 0) >= 0 ? 'text-indigo-700' : 'text-rose-600'}`}>
                       {(stats?.subscribersGrowth ?? 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                       <span>
                         {(stats?.subscribersGrowth ?? 0) >= 0 ? '+' : ''}
@@ -715,24 +713,25 @@ export const DashboardStatsPage: React.FC = () => {
                       </span>
                     </span>
                   </div>
-                  <div className="mt-1 flex justify-between items-end border-t border-slate-50 pt-2.5">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase">{t('dashboard.stats.lifetime_total')}</span>
+                  <div className="mt-1 flex justify-between items-end border-t border-[#0A0A0A]/20 pt-2.5">
+                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold text-[#0A0A0A]/70 uppercase">{t('dashboard.stats.lifetime_total')}</span>
                     <MiniBarChart data={last6DaysSubscribers} color="#818cf8" />
                   </div>
                 </div>
 
-                <div className="bg-white border border-slate-200 hover:border-slate-350 hover:shadow-sm transition-all rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between shadow-3xs group select-none min-h-[150px]">
+                {/* Stat 2: Active Users */}
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
                   <div className="flex justify-between items-start">
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{t('dashboard.stats.active_users')}</span>
-                    <button className="text-slate-400 hover:text-slate-650 transition-colors cursor-pointer">
+                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A]/70 uppercase tracking-widest block">{t('dashboard.stats.active_users')}</span>
+                    <button className="text-[#0A0A0A] hover:opacity-70 transition-opacity cursor-pointer">
                       <MoreVertical size={14} />
                     </button>
                   </div>
                   <div className="my-2 select-text">
-                    <span className="text-2xl font-black text-slate-900 tracking-tight block">
+                    <span className="font-['Anybody',sans-serif] text-3xl font-black text-[#0A0A0A] tracking-tight block">
                       {stats?.activeUsers24h ?? 0}
                     </span>
-                    <span className={`text-[10px] font-bold flex items-center gap-1 mt-0.5 ${(stats?.activeUsersGrowth ?? 0) >= 0 ? 'text-violet-600' : 'text-rose-500'}`}>
+                    <span className={`font-['JetBrains_Mono',monospace] text-[10px] font-extrabold flex items-center gap-1 mt-0.5 ${(stats?.activeUsersGrowth ?? 0) >= 0 ? 'text-violet-700' : 'text-rose-600'}`}>
                       {(stats?.activeUsersGrowth ?? 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                       <span>
                         {(stats?.activeUsersGrowth ?? 0) >= 0 ? '+' : ''}
@@ -740,24 +739,25 @@ export const DashboardStatsPage: React.FC = () => {
                       </span>
                     </span>
                   </div>
-                  <div className="mt-1 flex justify-between items-end border-t border-slate-50 pt-2.5">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase">{t('dashboard.stats.unique_visitors')}</span>
+                  <div className="mt-1 flex justify-between items-end border-t border-[#0A0A0A]/20 pt-2.5">
+                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold text-[#0A0A0A]/70 uppercase">{t('dashboard.stats.unique_visitors')}</span>
                     <MiniBarChart data={last6DaysActiveUsers} color="#c084fc" />
                   </div>
                 </div>
 
-                <div className="bg-white border border-slate-200 hover:border-slate-350 hover:shadow-sm transition-all rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between shadow-3xs group select-none min-h-[150px]">
+                {/* Stat 3: Total Clicks */}
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
                   <div className="flex justify-between items-start">
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{t('dashboard.stats.total_clicks')}</span>
-                    <button className="text-slate-400 hover:text-slate-650 transition-colors cursor-pointer">
+                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A]/70 uppercase tracking-widest block">{t('dashboard.stats.total_clicks')}</span>
+                    <button className="text-[#0A0A0A] hover:opacity-70 transition-opacity cursor-pointer">
                       <MoreVertical size={14} />
                     </button>
                   </div>
                   <div className="my-2 select-text">
-                    <span className="text-2xl font-black text-slate-900 tracking-tight block">
+                    <span className="font-['Anybody',sans-serif] text-3xl font-black text-[#0A0A0A] tracking-tight block">
                       {stats?.clicksCount30d ?? 0}
                     </span>
-                    <span className={`text-[10px] font-bold flex items-center gap-1 mt-0.5 ${(stats?.clicksGrowth ?? 0) >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                    <span className={`font-['JetBrains_Mono',monospace] text-[10px] font-extrabold flex items-center gap-1 mt-0.5 ${(stats?.clicksGrowth ?? 0) >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
                       {(stats?.clicksGrowth ?? 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                       <span>
                         {(stats?.clicksGrowth ?? 0) >= 0 ? '+' : ''}
@@ -765,24 +765,25 @@ export const DashboardStatsPage: React.FC = () => {
                       </span>
                     </span>
                   </div>
-                  <div className="mt-1 flex justify-between items-end border-t border-slate-50 pt-2.5">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase">{t('dashboard.stats.interaction_counts')}</span>
+                  <div className="mt-1 flex justify-between items-end border-t border-[#0A0A0A]/20 pt-2.5">
+                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold text-[#0A0A0A]/70 uppercase">{t('dashboard.stats.interaction_counts')}</span>
                     <MiniBarChart data={last6DaysClicks} color="#34d399" />
                   </div>
                 </div>
 
-                <div className="bg-white border border-slate-200 hover:border-slate-350 hover:shadow-sm transition-all rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between shadow-3xs group select-none min-h-[150px]">
+                {/* Stat 4: Active Automations */}
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
                   <div className="flex justify-between items-start">
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{t('dashboard.stats.active_automations')}</span>
-                    <button className="text-slate-400 hover:text-slate-650 transition-colors cursor-pointer">
+                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A]/70 uppercase tracking-widest block">{t('dashboard.stats.active_automations')}</span>
+                    <button className="text-[#0A0A0A] hover:opacity-70 transition-opacity cursor-pointer">
                       <MoreVertical size={14} />
                     </button>
                   </div>
                   <div className="my-2 select-text">
-                    <span className="text-2xl font-black text-slate-900 tracking-tight block">
+                    <span className="font-['Anybody',sans-serif] text-3xl font-black text-[#0A0A0A] tracking-tight block">
                       {stats?.activeAutomations ?? 0}
                     </span>
-                    <span className={`text-[10px] font-bold flex items-center gap-1 mt-0.5 ${(stats?.automationsGrowth ?? 0) >= 0 ? 'text-amber-600' : 'text-rose-500'}`}>
+                    <span className={`font-['JetBrains_Mono',monospace] text-[10px] font-extrabold flex items-center gap-1 mt-0.5 ${(stats?.automationsGrowth ?? 0) >= 0 ? 'text-amber-700' : 'text-rose-600'}`}>
                       {(stats?.automationsGrowth ?? 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                       <span>
                         {(stats?.automationsGrowth ?? 0) >= 0 ? '+' : ''}
@@ -790,37 +791,35 @@ export const DashboardStatsPage: React.FC = () => {
                       </span>
                     </span>
                   </div>
-                  <div className="mt-1 flex justify-between items-end border-t border-slate-50 pt-2.5">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase">{t('dashboard.stats.active_bots_count')}</span>
-                    <div className="flex gap-1">
-                      <div className="w-3 h-6 bg-slate-100 rounded-xs" />
-                      <div className="w-3 h-6 bg-slate-100 rounded-xs" />
-                      <div className="w-3 h-6 bg-amber-400 rounded-xs animate-pulse" />
-                      <div className="w-3 h-6 bg-amber-400 rounded-xs" />
-                    </div>
+                  <div className="mt-1 flex justify-between items-end border-t border-[#0A0A0A]/20 pt-2.5">
+                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold text-[#0A0A0A]/70 uppercase">{t('dashboard.stats.active_bots_count')}</span>
+                    <MiniBarChart data={last6DaysActiveBots} color="#fbbf24" />
                   </div>
                 </div>
 
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-                <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-3xs flex flex-col justify-between lg:h-[310px] overflow-hidden">
-                  <div className="flex flex-row justify-between items-center mb-6 select-none">
+              {/* Middle Row: Interaction History Chart & Top Buttons */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                {/* Line Chart */}
+                <div className="lg:col-span-2 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between lg:h-[310px] overflow-hidden">
+                  <div className="flex flex-row justify-between items-center mb-4 select-none font-['JetBrains_Mono',monospace]">
                     <div className="space-y-1">
-                      <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">{t('dashboard.stats.interaction_history')}</h2>
-                      <div className="flex items-center gap-3 text-[10px] font-bold mt-1">
+                      <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest">{t('dashboard.stats.interaction_history')}</h2>
+                      <div className="flex items-center gap-4 text-[10px] font-bold mt-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-indigo-400" />
-                          <span className="text-slate-500">{t('dashboard.stats.active_users_legend')}</span>
+                          <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 border border-[#0A0A0A]" />
+                          <span className="text-[#0A0A0A]">{t('dashboard.stats.active_users_legend')}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                          <span className="text-slate-500">{t('dashboard.stats.button_clicks_legend')}</span>
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-[#0A0A0A]" />
+                          <span className="text-[#0A0A0A]">{t('dashboard.stats.button_clicks_legend')}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-3xs shrink-0">
+                    <div className="flex items-center gap-1 bg-white p-1 rounded-xl border-2 border-[#0A0A0A] shrink-0">
                       {[
                         { label: t('dashboard.stats.days_7'), val: 7 },
                         { label: t('dashboard.stats.days_14'), val: 14 },
@@ -829,10 +828,10 @@ export const DashboardStatsPage: React.FC = () => {
                         <button
                           key={p.val}
                           onClick={() => handlePeriodChange(p.val)}
-                          className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer ${
+                          className={`px-3 py-1 text-[10px] font-extrabold uppercase transition-all cursor-pointer ${
                             days === p.val
-                              ? 'bg-white text-slate-800 shadow-2xs'
-                              : 'text-slate-550 hover:text-slate-800'
+                              ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                              : 'text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
                           }`}
                         >
                           {p.label}
@@ -843,16 +842,16 @@ export const DashboardStatsPage: React.FC = () => {
                   {renderActivityChart()}
                 </div>
 
-
-                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-3xs flex flex-col lg:h-[310px]">
+                {/* Top Buttons Progress List */}
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col lg:h-[310px]">
                   <div className="mb-4">
-                    <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">{t('dashboard.stats.top_clicked_buttons')}</h2>
-                    <p className="text-[10px] text-slate-400 mt-1">{t('dashboard.stats.top_clicked_buttons_desc')}</p>
+                    <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest">{t('dashboard.stats.top_clicked_buttons')}</h2>
+                    <p className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-700 mt-1 uppercase">{t('dashboard.stats.top_clicked_buttons_desc')}</p>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 select-none custom-scrollbar">
+                  <div className="flex-1 overflow-y-auto space-y-4 pr-1 select-none custom-scrollbar">
                     {!stats || !stats.topButtons || stats.topButtons.length === 0 ? (
-                      <div className="h-full flex items-center justify-center text-center p-6 text-slate-400 text-xs font-semibold">
+                      <div className="h-full flex items-center justify-center text-center p-6 text-[#0A0A0A] text-xs font-bold font-['JetBrains_Mono',monospace]">
                         {t('dashboard.stats.no_buttons')}
                       </div>
                     ) : (
@@ -864,18 +863,18 @@ export const DashboardStatsPage: React.FC = () => {
                           const pct = Math.round((btn.clicks / total) * 100);
 
                           return (
-                            <div key={idx} className="space-y-1.5">
-                              <div className="flex justify-between items-center text-xs font-bold text-slate-700">
-                                <span className="truncate max-w-[170px]">{btn.buttonName || t('dashboard.stats.option_button')}</span>
-                                <span className="text-[10.5px] text-slate-455 font-extrabold flex gap-1.5 items-center">
+                            <div key={idx} className="space-y-1.5 font-['JetBrains_Mono',monospace]">
+                              <div className="flex justify-between items-center text-xs font-bold text-[#0A0A0A]">
+                                <span className="truncate max-w-[170px] uppercase">{btn.buttonName || t('dashboard.stats.option_button')}</span>
+                                <span className="text-[10.5px] text-[#0A0A0A] font-extrabold flex gap-1.5 items-center">
                                   <span>{t('dashboard.stats.clicks_count', { count: btn.clicks })}</span>
-                                  <span className="text-slate-300">•</span>
-                                  <span className="text-indigo-600 font-black">{pct}%</span>
+                                  <span>•</span>
+                                  <span className="text-indigo-700 font-black">{pct}%</span>
                                 </span>
                               </div>
-                              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                              <div className="w-full h-2 bg-white border border-[#0A0A0A] overflow-hidden">
                                 <div 
-                                  className="h-full bg-indigo-500 rounded-full transition-all duration-500 ease-out" 
+                                  className="h-full bg-indigo-600 transition-all duration-500 ease-out" 
                                   style={{ width: `${pct}%` }} 
                                 />
                               </div>
@@ -889,67 +888,70 @@ export const DashboardStatsPage: React.FC = () => {
 
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5">
+              {/* Bottom Row: AI Insights, Tags Breakdown, Activity Heatmap */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
                 
-                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-3xs flex flex-col justify-between lg:col-span-3">
+                {/* AI Insights */}
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between lg:col-span-3 lg:h-[275px]">
                   <div>
-                    <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">{t('dashboard.stats.ai_insights_title')}</h2>
-                    <p className="text-[10px] text-slate-400 mb-4 mt-1">{t('dashboard.stats.ai_insights_desc')}</p>
+                    <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest block mb-1">{t('dashboard.stats.ai_insights_title')}</h2>
+                    <p className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-700 mb-3 mt-0.5 uppercase">{t('dashboard.stats.ai_insights_desc')}</p>
                     
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3 bg-slate-50/50 border border-slate-100 rounded-xl flex flex-col justify-center min-h-[64px]">
-                        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1">{t('dashboard.stats.ai_messages')}</span>
-                        <span className="text-base font-black text-slate-800 flex items-center gap-1.5">
-                          <Sparkles size={13} className="text-indigo-400 animate-pulse" />
+                    <div className="grid grid-cols-2 gap-2.5 font-['JetBrains_Mono',monospace]">
+                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
+                        <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_messages')}</span>
+                        <span className="text-base font-black text-[#0A0A0A] flex items-center gap-1.5">
+                          <Sparkles size={13} className="text-indigo-600 animate-pulse" />
                           {aiStats.messagesProcessed}
                         </span>
                       </div>
                       
-                      <div className="p-3 bg-slate-50/50 border border-slate-100 rounded-xl flex flex-col justify-center min-h-[64px]">
-                        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1">{t('dashboard.stats.ai_resolution_rate')}</span>
-                        <span className="text-base font-black text-slate-800">{aiStats.resolutionRate}%</span>
+                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
+                        <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_resolution_rate')}</span>
+                        <span className="text-base font-black text-[#0A0A0A]">{aiStats.resolutionRate}%</span>
                       </div>
                       
-                      <div className="p-3 bg-slate-50/50 border border-slate-100 rounded-xl flex flex-col justify-center min-h-[64px]">
-                        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1">{t('dashboard.stats.ai_time_saved')}</span>
-                        <span className="text-base font-black text-emerald-600 flex items-center gap-1.5">
-                          <Clock size={13} className="text-emerald-500" />
+                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
+                        <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_time_saved')}</span>
+                        <span className="text-base font-black text-emerald-700 flex items-center gap-1.5">
+                          <Clock size={13} className="text-emerald-600" />
                           {aiStats.timeSavedHours}h
                         </span>
                       </div>
                       
-                      <div className="p-3 bg-slate-50/50 border border-slate-100 rounded-xl flex flex-col justify-center min-h-[64px]">
-                        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1">{t('dashboard.stats.ai_response_time')}</span>
-                        <span className="text-base font-black text-slate-800">{aiStats.responseTimeSeconds}s</span>
+                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
+                        <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_response_time')}</span>
+                        <span className="text-base font-black text-[#0A0A0A]">{aiStats.responseTimeSeconds}s</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-3xs flex flex-col justify-between lg:col-span-3">
+                {/* Tags Breakdown */}
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between lg:col-span-3 lg:h-[275px]">
                   <div>
-                    <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1 select-none">{t('dashboard.stats.tags_breakdown_title')}</h2>
-                    <p className="text-[10px] text-slate-400 mb-4 mt-1">{t('dashboard.stats.tags_breakdown_desc')}</p>
+                    <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest block mb-1 select-none">{t('dashboard.stats.tags_breakdown_title')}</h2>
+                    <p className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-700 mb-3 mt-0.5 uppercase">{t('dashboard.stats.tags_breakdown_desc')}</p>
                     
                     {tagStats.length === 0 ? (
-                      <div className="py-8 text-center text-xs font-bold text-slate-400 flex flex-col items-center gap-1.5 select-none">
-                        <HelpCircle size={22} className="text-slate-300" />
+                      <div className="py-6 text-center text-xs font-bold text-[#0A0A0A] font-['JetBrains_Mono',monospace] flex flex-col items-center gap-2 select-none">
+                        <HelpCircle size={22} className="text-[#0A0A0A]" />
                         <span>{t('dashboard.stats.no_tags_found')}</span>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center gap-4 justify-center">
+                      <div className="flex flex-col items-center gap-3 justify-center">
                         <div className="shrink-0">
                           <SemiDonutChart data={chartData} total={stats?.totalSubscribers ?? 0} />
                         </div>
-                        <div className="w-full space-y-2.5 max-h-[110px] overflow-y-auto pr-1 custom-scrollbar">
+                        <div className="w-full space-y-2 max-h-[90px] overflow-y-auto pr-1 custom-scrollbar font-['JetBrains_Mono',monospace]">
                           {chartData.map((tag) => (
                             <div key={tag.name} className="flex justify-between items-center text-xs font-semibold select-none">
                               <div className="flex items-center gap-2 min-w-0">
-                                <div className="w-1.5 h-3 rounded-full shrink-0" style={{ backgroundColor: tag.color }} />
-                                <span className="text-slate-700 font-bold truncate text-[11px]">{tag.name}</span>
+                                <div className="w-2 h-3 border border-[#0A0A0A] shrink-0" style={{ backgroundColor: tag.color }} />
+                                <span className="text-[#0A0A0A] font-bold truncate text-[11px] uppercase">{tag.name}</span>
                               </div>
-                              <div className="flex items-center gap-3 text-slate-400 font-extrabold text-[10.5px] shrink-0">
-                                <span className="text-slate-800">{tag.count.toLocaleString()}</span>
+                              <div className="flex items-center gap-3 text-[#0A0A0A] font-extrabold text-[10.5px] shrink-0">
+                                <span>{tag.count.toLocaleString()}</span>
                                 <span>{tag.pct}%</span>
                               </div>
                             </div>
@@ -960,11 +962,12 @@ export const DashboardStatsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-3xs flex flex-col justify-between h-full lg:col-span-6">
+                {/* Activity Heatmap */}
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between h-full lg:col-span-6 lg:h-[275px]">
                   <div>
-                    <div className="mb-4">
-                      <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">{t('dashboard.stats.activity_heatmap_title')}</h2>
-                      <p className="text-[10px] text-slate-400 mt-1">{t('dashboard.stats.activity_heatmap_desc')}</p>
+                    <div className="mb-3">
+                      <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest block mb-1">{t('dashboard.stats.activity_heatmap_title')}</h2>
+                      <p className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-700 mt-0.5 uppercase">{t('dashboard.stats.activity_heatmap_desc')}</p>
                     </div>
                     {renderActivityHeatmap()}
                   </div>
@@ -980,3 +983,5 @@ export const DashboardStatsPage: React.FC = () => {
     </DashboardLayout>
   );
 };
+
+export default DashboardStatsPage;

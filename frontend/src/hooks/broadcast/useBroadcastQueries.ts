@@ -1,4 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { useBotsQuery } from '../bot/useBotsQuery';
 import {
   getCampaignsApi,
   createCampaignApi,
@@ -10,7 +12,7 @@ import {
   deleteCampaignApi,
   cancelScheduleApi,
 } from '../../api/broadcast';
-import type { CreateCampaignRequest, CreateTagRequest } from '../../types';
+import type { CreateCampaignRequest, CreateTagRequest, TagResponse } from '../../types';
 
 export const useCampaignsQuery = (botId: number, enabled: boolean = true) => {
   return useQuery({
@@ -34,6 +36,35 @@ export const useTagsQuery = (botId: number, enabled: boolean = true) => {
     queryFn: () => getTagsApi(botId),
     enabled: enabled && botId > 0,
   });
+};
+
+export const useAllTagsQuery = () => {
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
+  const queries = useQueries({
+    queries: bots.map((bot) => ({
+      queryKey: ['tags', bot.id],
+      queryFn: () => getTagsApi(bot.id),
+      enabled: bots.length > 0,
+    })),
+  });
+
+  const tags = useMemo(() => {
+    const list = queries.flatMap((q) => q.data || []);
+    const uniqueMap = new Map<string, TagResponse>();
+    list.forEach((t) => {
+      if (t && t.name) {
+        const key = t.name.trim().toLowerCase();
+        if (!uniqueMap.has(key)) {
+          uniqueMap.set(key, t);
+        }
+      }
+    });
+    return Array.from(uniqueMap.values());
+  }, [queries]);
+
+  const isLoading = isBotsLoading || queries.some((q) => q.isLoading);
+
+  return { data: tags, isLoading, refetch: () => queries.forEach((q) => q.refetch()) };
 };
 
 export const useCreateCampaignMutation = (botId: number) => {

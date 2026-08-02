@@ -48,5 +48,6 @@
   "time.mins": "{mins} хв",
   "time.now": "зараз",
   "time.today": "Сьогодні",
-  "time.yesterday": "Вчора"
+  "time.yesterday": "Вчора",
+  "common.sign_out": "Вийти"
 }

@@ -492,7 +492,6 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
           filterValue,
           nodes: JSON.stringify(nodes),
           edges: JSON.stringify(edges),
-          scheduledAt: campaign?.scheduledAt,
         },
       }, {
         onError: (err) => {
@@ -507,7 +506,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [nodes, edges, campaignName, messageText, conditions, campaignId, isCampaignsLoading, campaign?.scheduledAt, campaign?.status]);
+  }, [nodes, edges, campaignName, messageText, conditions, campaignId, isCampaignsLoading, campaign?.status]);
 
   useEffect(() => {
     const handleHover = (e: Event) => {
@@ -1117,7 +1116,6 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
           filterValue,
           nodes: JSON.stringify(nodes),
           edges: JSON.stringify(edges),
-          scheduledAt: undefined,
         },
       });
       setIsDirty(false);

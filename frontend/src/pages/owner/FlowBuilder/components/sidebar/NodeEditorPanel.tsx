@@ -89,18 +89,18 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
 
 
   return (
-    <div className="h-full overflow-y-auto p-5 pb-24 font-sans flex flex-col custom-scrollbar">
+    <div className="h-full overflow-y-auto p-5 pb-24 font-['JetBrains_Mono',monospace] flex flex-col custom-scrollbar bg-[#F2EBDD] text-[#0A0A0A]">
       <div className="flex-1 flex flex-col gap-5">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 shrink-0">
+        <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3.5 shrink-0">
           <div className="flex items-center gap-2">
-            <span className="w-8 h-8 rounded-lg bg-slate-50 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200">
+            <span className="w-8 h-8 rounded-lg bg-[#F2EBDD] text-[#0A0A0A] flex items-center justify-center shrink-0 border-2 border-[#0A0A0A] shadow-sm">
               {renderIcon()}
             </span>
             <div>
-              <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block leading-none">
+              <span className="text-[10px] text-[#0A0A0A]/60 font-black uppercase tracking-wider block leading-none font-['Anybody',sans-serif]">
                 {t('flow_builder.editing_node')}
               </span>
-              <span className="text-xs font-bold text-slate-800 block mt-0.5">
+              <span className="text-xs font-black text-[#0A0A0A] block mt-0.5 font-['Anybody',sans-serif]">
                 {renderTitle()}
               </span>
             </div>

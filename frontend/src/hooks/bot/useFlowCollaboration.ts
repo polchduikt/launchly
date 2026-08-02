@@ -42,7 +42,7 @@ export const useFlowCollaboration = (
   const lastCollabSnapshotRef = useRef<string>('');
   const recomputeCollaborators = useCallback(() => {
     const activeList = Object.values(activeCollaboratorsRef.current).filter(
-      (c) => Date.now() - c.lastActive < STALE_THRESHOLD_MS
+      (c) => c.userId !== currentUser?.id && Date.now() - c.lastActive < STALE_THRESHOLD_MS
     );
     const snapshot = activeList
       .map((c) => `${c.userId}:${c.action || ''}:${c.editingNodeId || ''}`)
@@ -56,7 +56,7 @@ export const useFlowCollaboration = (
         .find((c) => c.action);
       setActiveAction(editingCollab ? editingCollab.action : null);
     }
-  }, []);
+  }, [currentUser?.id]);
   const applyPendingMoves = useCallback(() => {
     rafScheduledRef.current = false;
     const updates = pendingMovesRef.current;

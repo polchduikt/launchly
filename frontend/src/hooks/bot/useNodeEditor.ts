@@ -89,10 +89,7 @@ export const useNodeEditor = (
   const [isDataCollectionDrawerOpen, setIsDataCollectionDrawerOpen] = useState(false);
   const [editingDataCollectionBlock, setEditingDataCollectionBlock] = useState<FlowBlock | null>(null);
 
-  const [prevNodeId, setPrevNodeId] = useState<string | null>(null);
-  const currentNodeId = node?.id || null;
-  if (currentNodeId !== prevNodeId) {
-    setPrevNodeId(currentNodeId);
+  useEffect(() => {
     setIsBtnDialogOpen(false);
     setEditingButton(null);
     setEditingButtonBlockId(null);
@@ -100,7 +97,7 @@ export const useNodeEditor = (
     setNextStepSourceHandle(null);
     setIsDataCollectionDrawerOpen(false);
     setEditingDataCollectionBlock(null);
-  }
+  }, [node?.id]);
 
   useEffect(() => {
     const handleEditButtonFromNode = (e: Event) => {

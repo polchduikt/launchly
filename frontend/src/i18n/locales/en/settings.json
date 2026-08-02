@@ -76,6 +76,7 @@
   "settings.integrations.gemini.placeholder": "Enter Gemini API Secret",
   "settings.integrations.gemini.title": "Connect Gemini Account",
   "settings.integrations.google.account_name": "Google Sheets Account Name",
+  "settings.integrations.google.connect": "Connect",
   "settings.integrations.google.desc": "The integration provides you with an ability to save customers data from Launchly bot to Google Sheets.",
   "settings.integrations.google.disconnect": "Disconnect",
   "settings.integrations.google.disconnecting": "Disconnecting...",

@@ -81,7 +81,7 @@ export const useFlowAutoSave = (
     }, getDebounceDelay());
 
     return () => clearTimeout(timer);
-  }, [nodes, edges, saveMutation, isLoadingSchema, isLocalChangeRef, getDebounceDelay]);
+  }, [nodes, edges, saveMutation.mutate, isLoadingSchema, isLocalChangeRef, getDebounceDelay]);
 
   return {
     isDirty,

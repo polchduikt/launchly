@@ -23,20 +23,20 @@ const StartBroadcastNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ da
   const isConnected = data?._tempSourceHandle !== 'then' && sourceConns.some((c) => c.sourceHandle === 'then');
 
   return (
-    <div className={`w-64 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl p-4 shadow-md select-none transition-all border-indigo-200 relative overflow-visible isolate ${
+    <div className={`w-64 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl p-4 shadow-md select-none transition-all border-[#0A0A0A] relative overflow-visible isolate ${
       isConnecting ? 'opacity-40 grayscale pointer-events-none' : ''
     }`}>
       <div className="flex items-center gap-2 mb-3">
-        <span className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-          <Send size={14} className="fill-indigo-100" />
+        <span className="w-7 h-7 rounded-lg bg-white text-[#0A0A0A] border border-[#0A0A0A] flex items-center justify-center shrink-0">
+          <Send size={14} />
         </span>
-        <span className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">{t('broadcast.builder.node.when')}</span>
+        <span className="font-extrabold text-xs text-[#0A0A0A] uppercase tracking-wider">{t('broadcast.builder.node.when')}</span>
       </div>
-      <div className="bg-slate-50 border border-slate-200/80 rounded-2xl py-2.5 px-3 text-xs font-bold text-slate-700 text-center">
+      <div className="bg-white border border-[#0A0A0A]/25 rounded-2xl py-2.5 px-3 text-xs font-bold text-[#0A0A0A]/70 text-center">
         {t('broadcast.builder.node.you_send_broadcast')}
       </div>
-      <div className="flex justify-end items-center mt-3 pt-2 border-t border-slate-100 relative">
-        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mr-2">{t('node.start.then')}</span>
+      <div className="flex justify-end items-center mt-3 pt-2 border-t border-[#0A0A0A]/15 relative">
+        <span className="text-[9px] font-extrabold text-[#0A0A0A]/45 uppercase tracking-wider mr-2">{t('node.start.then')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}
