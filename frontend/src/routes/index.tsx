@@ -4,7 +4,6 @@ import { ROUTES } from './paths';
 import { useAuthStore } from '../store/useAuthStore';
 import { getCurrentUserApi } from '../api/auth';
 import { AuthLayout } from '../components/layout';
-import { Loader2 } from 'lucide-react';
 
 import LandingPage from '../pages/public/Landing/LandingPage';
 import BlogPage from '../pages/public/Blog/BlogPage';
@@ -32,6 +31,7 @@ const CheckoutSuccessPage = lazy(() => import('../pages/owner/CheckoutSuccess/Ch
 const CheckoutCancelPage = lazy(() => import('../pages/owner/CheckoutCancel/CheckoutCancelPage'));
 const AcceptableUsePolicyPage = lazy(() => import('../pages/public/Legal/AcceptableUsePolicyPage'));
 const AiTermsPage = lazy(() => import('../pages/public/Legal/AiTermsPage'));
+const PaymentTermsPage = lazy(() => import('../pages/public/Legal/PaymentTermsPage'));
 const BlockedPage = lazy(() => import('../pages/public/Blocked/BlockedPage'));
 
 const AdminStatsPage = lazy(() => import('../pages/admin/AdminStats/AdminStatsPage'));
@@ -40,12 +40,6 @@ const AdminUsersPage = lazy(() => import('../pages/admin/AdminUsers/AdminUsersPa
 const AdminAutomationsPage = lazy(() => import('../pages/admin/AdminAutomations/AdminAutomationsPage'));
 const AdminBroadcastsPage = lazy(() => import('../pages/admin/AdminBroadcasts/AdminBroadcastsPage'));
 const AdminLogsPage = lazy(() => import('../pages/admin/AdminLogs/AdminLogsPage'));
-
-const LoadingSpinner = () => (
-  <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-    <Loader2 className="animate-spin text-indigo-600" size={32} />
-  </div>
-);
 
 const PublicOnlyRoute = () => {
   const accessToken = useAuthStore((state) => state.accessToken);
@@ -132,6 +126,7 @@ export const AppRouter: React.FC = () => {
           <Route path={ROUTES.FAQ} element={<FaqPage />} />
           <Route path={ROUTES.ACCEPTABLE_USE} element={<AcceptableUsePolicyPage />} />
           <Route path={ROUTES.AI_TERMS} element={<AiTermsPage />} />
+          <Route path={ROUTES.PAYMENT_TERMS} element={<PaymentTermsPage />} />
           <Route path={ROUTES.BLOCKED} element={<BlockedPage />} />
 
           <Route element={<PublicOnlyRoute />}>

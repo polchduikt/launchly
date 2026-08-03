@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, Loader2, User as UserIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useRegisterForm } from '../../../hooks/auth/useRegisterForm';

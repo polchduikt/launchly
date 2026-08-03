@@ -25,6 +25,7 @@ export const ROUTES = {
   FAQ: '/faq',
   ACCEPTABLE_USE: '/acceptable-use',
   AI_TERMS: '/ai-terms',
+  PAYMENT_TERMS: '/payment-terms',
   BLOCKED: '/blocked',
   ADMIN_HOME: '/admin',
   ADMIN_STATS: '/admin/stats',

@@ -69,12 +69,12 @@ function loadInitialTranslations(lang: 'en' | 'uk'): Record<string, string> {
 }
 
 const savedLang = typeof localStorage !== 'undefined' ? localStorage.getItem('launchly_language') : null;
-currentLanguage = (savedLang === 'uk' || savedLang === 'en') ? savedLang : 'en';
+currentLanguage = (savedLang === 'uk' || savedLang === 'en') ? savedLang : 'uk';
 translations = loadInitialTranslations(currentLanguage);
 
 export async function initTranslations() {
   const saved = localStorage.getItem('launchly_language');
-  const lang = (saved === 'uk' || saved === 'en') ? saved : 'en';
+  const lang = (saved === 'uk' || saved === 'en') ? saved : 'uk';
   currentLanguage = lang;
   translations = loadInitialTranslations(lang);
   notifyListeners();

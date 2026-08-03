@@ -4,7 +4,6 @@ import logo from '../../assets/images/logo.png';
 import { ROUTES } from '../../routes/paths';
 import { useTranslation } from '../../i18n/config';
 import { useAuthStore } from '../../store/useAuthStore';
-import { ChevronDown } from 'lucide-react';
 
 export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -28,7 +27,7 @@ export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               className="flex items-center gap-1 font-['JetBrains_Mono',monospace] text-sm font-bold text-[#0A0A0A] border-b-2 border-[#0A0A0A] pb-0.5 transition-all cursor-pointer select-none"
             >
               <span>{currentLanguage === 'uk' ? 'Uk' : 'En'}</span>
-              <ChevronDown size={12} strokeWidth={3} />
+              <span className="text-[10px] tracking-tighter">▼</span>
             </button>
 
             {isLangDropdownOpen && (
@@ -60,20 +59,6 @@ export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           </div>
         </div>
 
-        <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-          <a href="/#features" className="text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors duration-200 px-2.5 py-1">
-            {t('landing.nav.product', 'PRODUCT')}
-          </a>
-          <a href="/#features" className="text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors duration-200 px-2.5 py-1">
-            {t('landing.nav.features', 'FEATURES')}
-          </a>
-          <a href="/#pricing" className="text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors duration-200 px-2.5 py-1">
-            {t('landing.nav.pricing', 'PRICING')}
-          </a>
-          <Link to={ROUTES.BLOG} className="text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors duration-200 px-2.5 py-1">
-            {t('landing.nav.blog', 'BLOG')}
-          </Link>
-        </nav>
 
         <div className="flex items-center gap-4">
           {isAuthenticated ? (

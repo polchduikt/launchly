@@ -28,6 +28,7 @@ export const LegalLayout: React.FC<LegalLayoutProps> = ({ children, title, effec
     { label: t('legal.nav.privacy', 'Privacy Policy'), path: ROUTES.PRIVACY },
     { label: t('legal.nav.acceptable_use', 'Acceptable Use Policy'), path: ROUTES.ACCEPTABLE_USE },
     { label: t('legal.nav.ai_terms', 'AI Supplementary Terms'), path: ROUTES.AI_TERMS },
+    { label: t('legal.nav.payment_terms', 'Payment & Merchant Terms'), path: ROUTES.PAYMENT_TERMS },
   ];
 
   return (

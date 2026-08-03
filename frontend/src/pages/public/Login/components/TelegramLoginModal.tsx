@@ -3,6 +3,7 @@ import { X, Loader2, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../../store/useAuthStore';
 import { createTelegramSessionApi, checkTelegramSessionStatusApi } from '../../../../api/auth';
+import { useTranslation } from '../../../../i18n/config';
 
 interface TelegramLoginModalProps {
   isOpen: boolean;
@@ -11,10 +12,16 @@ interface TelegramLoginModalProps {
   isSubscription?: boolean;
 }
 
-export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({ isOpen, onClose, onSuccess, isSubscription = false }) => {
+export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  isSubscription = false,
+}) => {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-  
+  const { t } = useTranslation();
+
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [botUsername, setBotUsername] = useState<string | null>(null);
@@ -36,7 +43,10 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({ isOpen, 
         typeof err === 'object' && err !== null && 'response' in err
           ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
           : undefined;
-      setError(message || 'Failed to initialize Telegram session');
+      setError(
+        message ||
+          t('auth.telegram_modal.expired', 'The authorization session has expired. Please try again.')
+      );
     } finally {
       setLoading(false);
     }
@@ -74,7 +84,7 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({ isOpen, 
             }
             setStatus('SUCCESS');
             login(res.accessToken, res.refreshToken, res.user);
-            
+
             if (onSuccess) {
               onSuccess();
             } else {
@@ -87,7 +97,12 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({ isOpen, 
               pollingRef.current = null;
             }
             setStatus('EXPIRED');
-            setError('The authorization session has expired. Please try again.');
+            setError(
+              t(
+                'auth.telegram_modal.expired',
+                'The authorization session has expired. Please try again.'
+              )
+            );
           }
         } catch (err) {
           console.error('Polling error', err);
@@ -106,19 +121,20 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({ isOpen, 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 transition-all duration-300">
-      <div className="relative w-full max-w-md p-6 bg-white rounded-3xl shadow-xl border border-slate-100 transform transition-all animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] p-6 sm:p-8 transform transition-all animate-in zoom-in-95 duration-200">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"
+          className="absolute top-4 right-4 p-2 bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer rounded-lg"
+          aria-label="Close"
         >
-          <X size={18} />
+          <X size={18} strokeWidth={2.5} />
         </button>
 
-        <div className="flex flex-col items-center text-center mt-2">
-          <div className="w-16 h-16 flex items-center justify-center bg-blue-50 text-blue-500 rounded-3xl mb-4">
+        <div className="flex flex-col items-center text-center">
+          <div className="w-16 h-16 bg-[#229ED9] border-3 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-2xl flex items-center justify-center mb-4">
             <svg
-              className="w-8 h-8 fill-current"
+              className="w-9 h-9 fill-white"
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
@@ -126,64 +142,72 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({ isOpen, 
             </svg>
           </div>
 
-          <h2 className="text-xl font-bold text-slate-800">Telegram Authorization</h2>
-          <p className="text-sm text-slate-400 mt-2 px-4 leading-relaxed">
-            Follow the steps below to securely authorize your account.
+          <h2 className="font-['Anybody',sans-serif] font-black text-2xl uppercase tracking-tight text-[#0A0A0A]">
+            {t('auth.telegram_modal.title', 'Telegram Authorization')}
+          </h2>
+          <p className="text-xs sm:text-sm text-[#0A0A0A]/75 font-bold mt-1.5 px-2">
+            {t('auth.telegram_modal.subtitle', 'Follow the steps below to securely authorize your account.')}
           </p>
 
           <div className="w-full mt-6 space-y-4">
             {loading && (
-              <div className="py-6 flex flex-col items-center justify-center space-y-3">
-                <Loader2 className="animate-spin text-blue-500" size={24} />
-                <span className="text-xs font-semibold text-slate-500">Creating authorization session...</span>
+              <div className="py-8 flex flex-col items-center justify-center space-y-3 bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl p-4">
+                <Loader2 className="animate-spin text-[#0A0A0A]" size={28} />
+                <span className="font-['JetBrains_Mono',monospace] text-xs font-extrabold uppercase text-[#0A0A0A]">
+                  {t('auth.telegram_modal.creating', 'Creating authorization session...')}
+                </span>
               </div>
             )}
 
             {error && (
-              <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-xs font-semibold leading-relaxed">
-                {error}
+              <div className="p-4 bg-rose-200 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl text-[#0A0A0A] text-xs font-bold text-left leading-relaxed">
+                <p>{error}</p>
                 <button
                   onClick={startSession}
-                  className="mt-3 w-full py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl transition-all font-bold cursor-pointer"
+                  className="mt-3 w-full py-2.5 bg-[#0A0A0A] text-[#F2EBDD] hover:bg-white hover:text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-lg font-['JetBrains_Mono',monospace] font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
-                  Try Again
+                  {t('auth.telegram_modal.try_again', 'Try Again')}
                 </button>
               </div>
             )}
 
             {!loading && !error && token && botUsername && (
-              <div className="space-y-4">
-                <div className="bg-slate-50 rounded-2xl p-4 text-left border border-slate-100">
-                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Instructions:</h4>
-                  <ol className="list-decimal list-inside text-xs text-slate-600 space-y-2 leading-relaxed">
-                    <li>Click the link below to open our official Telegram Assistant Bot.</li>
-                    <li>In the Telegram application, click the <strong className="text-slate-800">"Start"</strong> button at the bottom of the chat.</li>
-                    <li>Your account will authorize automatically within a few seconds!</li>
+              <div className="space-y-5">
+                <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl p-4 text-left">
+                  <h4 className="font-['JetBrains_Mono',monospace] text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-2.5 pb-1.5 border-b border-[#0A0A0A]/20">
+                    {t('auth.telegram_modal.instructions_title', 'LOGIN INSTRUCTIONS:')}
+                  </h4>
+                  <ol className="list-decimal list-inside text-xs text-[#0A0A0A] font-semibold space-y-2 leading-relaxed">
+                    <li>{t('auth.telegram_modal.step1', 'Click the button below to open our official Telegram Assistant Bot.')}</li>
+                    <li>
+                      {t('auth.telegram_modal.step2', 'In Telegram, click the "Start" (/start) button at the bottom of the chat.')}
+                    </li>
+                    <li>{t('auth.telegram_modal.step3', 'Your account will authorize automatically within a few seconds!')}</li>
                   </ol>
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3">
                   <a
                     href={`tg://resolve?domain=${botUsername}&start=${token}`}
-                    className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-bold text-sm transition-all shadow-md shadow-blue-100 flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3.5 px-4 bg-[#0A0A0A] text-[#F2EBDD] hover:bg-[#229ED9] hover:text-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none rounded-xl font-['JetBrains_Mono',monospace] font-black text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2.5 cursor-pointer"
                   >
-                    <span>Open Telegram App</span>
-                    <ExternalLink size={14} />
+                    <span>{t('auth.telegram_modal.btn_open', 'Open Telegram App')}</span>
+                    <ExternalLink size={16} strokeWidth={2.5} />
                   </a>
 
                   <a
                     href={`https://t.me/${botUsername}?start=${token}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-blue-500 hover:text-blue-600 hover:underline transition-all block mt-1"
+                    className="font-['JetBrains_Mono',monospace] text-xs font-bold text-[#0A0A0A]/70 hover:text-[#0A0A0A] hover:underline underline-offset-4 transition-all block mt-0.5"
                   >
-                    Trouble opening? Open in browser (t.me)
+                    {t('auth.telegram_modal.web_link', 'Trouble opening? Open in browser (t.me)')}
                   </a>
                 </div>
 
-                <div className="py-2 flex items-center justify-center gap-2 text-xs font-bold text-slate-400 select-none animate-pulse">
-                  <Loader2 className="animate-spin text-slate-400" size={14} />
-                  <span>Waiting for you to click Start in Telegram...</span>
+                <div className="py-2 px-3 bg-amber-300 border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] rounded-lg inline-flex items-center justify-center gap-2 font-['JetBrains_Mono',monospace] text-xs font-black text-[#0A0A0A] uppercase tracking-wider animate-pulse">
+                  <Loader2 className="animate-spin text-[#0A0A0A]" size={14} strokeWidth={2.5} />
+                  <span>{t('auth.telegram_modal.waiting', 'Waiting for you to click Start in Telegram...')}</span>
                 </div>
               </div>
             )}
@@ -193,3 +217,5 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({ isOpen, 
     </div>
   );
 };
+
+export default TelegramLoginModal;

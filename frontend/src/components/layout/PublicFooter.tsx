@@ -33,6 +33,12 @@ export const PublicFooter: React.FC = () => {
           >
             {t('landing.footer.privacy', 'Privacy Policy')}
           </Link>
+          <Link 
+            to={ROUTES.PAYMENT_TERMS} 
+            className="text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:underline underline-offset-4 transition-all"
+          >
+            {t('landing.footer.payment_terms', 'Payment Terms')}
+          </Link>
         </div>
 
         <div className="flex flex-col gap-2.5">
