@@ -6,10 +6,16 @@ import { getCurrentUserApi } from '../api/auth';
 import { AuthLayout } from '../components/layout';
 import { Loader2 } from 'lucide-react';
 
+import LandingPage from '../pages/public/Landing/LandingPage';
+import BlogPage from '../pages/public/Blog/BlogPage';
+import BlogDetailPage from '../pages/public/BlogDetail/BlogDetailPage';
+import TermsOfServicePage from '../pages/public/Terms/TermsOfServicePage';
+import PrivacyPolicyPage from '../pages/public/Privacy/PrivacyPolicyPage';
+import { FaqPage } from '../pages/public/Faq/FaqPage';
+
 const LoginPage = lazy(() => import('../pages/public/Login/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/public/Register/RegisterPage'));
 const OAuth2Callback = lazy(() => import('../pages/public/OAuth2Callback/OAuth2Callback'));
-const LandingPage = lazy(() => import('../pages/public/Landing/LandingPage').then(m => ({ default: m.LandingPage })));
 const DashboardPage = lazy(() => import('../pages/owner/Dashboard/DashboardPage'));
 const DashboardStatsPage = lazy(() => import('../pages/owner/DashboardStats/DashboardStatsPage').then(m => ({ default: m.DashboardStatsPage })));
 const BotsConnectPage = lazy(() => import('../pages/owner/BotsConnect/BotsConnectPage').then(m => ({ default: m.BotsConnectPage })));
@@ -24,10 +30,6 @@ const BroadcastsPage = lazy(() => import('../pages/owner/Broadcasts/BroadcastsPa
 const BroadcastBuilderPage = lazy(() => import('../pages/owner/BroadcastBuilder/BroadcastBuilderPage').then(m => ({ default: m.BroadcastBuilderPage })));
 const CheckoutSuccessPage = lazy(() => import('../pages/owner/CheckoutSuccess/CheckoutSuccessPage'));
 const CheckoutCancelPage = lazy(() => import('../pages/owner/CheckoutCancel/CheckoutCancelPage'));
-const BlogPage = lazy(() => import('../pages/public/Blog/BlogPage'));
-const BlogDetailPage = lazy(() => import('../pages/public/BlogDetail/BlogDetailPage'));
-const TermsOfServicePage = lazy(() => import('../pages/public/Terms/TermsOfServicePage'));
-const PrivacyPolicyPage = lazy(() => import('../pages/public/Privacy/PrivacyPolicyPage'));
 const AcceptableUsePolicyPage = lazy(() => import('../pages/public/Legal/AcceptableUsePolicyPage'));
 const AiTermsPage = lazy(() => import('../pages/public/Legal/AiTermsPage'));
 const BlockedPage = lazy(() => import('../pages/public/Blocked/BlockedPage'));
@@ -63,7 +65,7 @@ const PrivateRoute = () => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
-  const [isSyncing, setIsSyncing] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(!user);
 
   useEffect(() => {
     let isMounted = true;
@@ -87,8 +89,8 @@ const PrivateRoute = () => {
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
-  if (isSyncing) {
-    return <LoadingSpinner />;
+  if (isSyncing && !user) {
+    return null;
   }
 
   const role = user?.role;
@@ -120,13 +122,14 @@ const AdminRoute = () => {
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
-      <Suspense fallback={<LoadingSpinner />}>
+      <Suspense fallback={null}>
         <Routes>
           <Route path={ROUTES.LANDING} element={<LandingPage />} />
           <Route path={ROUTES.BLOG} element={<BlogPage />} />
           <Route path={ROUTES.BLOG_DETAIL} element={<BlogDetailPage />} />
           <Route path={ROUTES.TERMS} element={<TermsOfServicePage />} />
           <Route path={ROUTES.PRIVACY} element={<PrivacyPolicyPage />} />
+          <Route path={ROUTES.FAQ} element={<FaqPage />} />
           <Route path={ROUTES.ACCEPTABLE_USE} element={<AcceptableUsePolicyPage />} />
           <Route path={ROUTES.AI_TERMS} element={<AiTermsPage />} />
           <Route path={ROUTES.BLOCKED} element={<BlockedPage />} />

@@ -3,8 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../routes/paths';
 import { useTranslation } from '../../../i18n/config';
+import { PublicFooter } from '../../../components/layout/PublicFooter';
 import logo from '../../../assets/images/logo.png';
-import { ShieldCheck, Lock } from 'lucide-react';
 
 interface LegalLayoutProps {
   children: React.ReactNode;
@@ -195,62 +195,7 @@ export const LegalLayout: React.FC<LegalLayoutProps> = ({ children, title, effec
         </div>
       </div>
 
-      <footer className="bg-[#0A0A0A] text-[#F2EBDD] w-full py-12 px-6 lg:px-16 border-t-8 border-white">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          
-          <div className="flex flex-col gap-3">
-            <Link to={ROUTES.LANDING} className="flex items-center">
-              <img src={logo} alt="Launchly Logo" className="h-9 w-auto object-contain brightness-200 invert" />
-            </Link>
-            <span className="font-['JetBrains_Mono',monospace] text-xs text-slate-400">
-              © {new Date().getFullYear()} {t('landing.footer.copyright', 'Launchly Inc. All rights reserved.')}
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <Link 
-              to={ROUTES.TERMS} 
-              className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:underline underline-offset-4 transition-all"
-            >
-              {t('landing.footer.terms', 'Terms of Service')}
-            </Link>
-            <Link 
-              to={ROUTES.PRIVACY} 
-              className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:underline underline-offset-4 transition-all"
-            >
-              {t('landing.footer.privacy', 'Privacy Policy')}
-            </Link>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <Link 
-              to={ROUTES.BLOG} 
-              className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:underline underline-offset-4 transition-all"
-            >
-              {t('landing.footer.blog', 'Blog')}
-            </Link>
-            <a 
-              href="mailto:support@launchly.app" 
-              className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:underline underline-offset-4 transition-all"
-            >
-              {t('landing.footer.support', 'Support & Contact')}
-            </a>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <span className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest text-slate-300 flex items-center gap-2">
-              <ShieldCheck size={16} className="text-emerald-400" />
-              <span>{t('landing.footer.gdpr', 'GDPR Compliant')}</span>
-            </span>
-            <span className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest text-slate-300 flex items-center gap-2">
-              <Lock size={16} className="text-indigo-400" />
-              <span>{t('landing.footer.ssl', 'SSL Encrypted')}</span>
-            </span>
-          </div>
-
-        </div>
-      </footer>
-
+      <PublicFooter />
     </div>
   );
 };

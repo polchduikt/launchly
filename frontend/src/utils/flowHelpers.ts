@@ -24,6 +24,60 @@ export const getFlowKey = (nodes: Node[], edges: Edge[]) => {
   return JSON.stringify({ nodes: cleanNodes, edges: cleanEdges });
 };
 
+export const getFlowLogicKey = (nodes: Node[], edges: Edge[]): string => {
+  if (!nodes || nodes.length === 0) return '';
+
+  const startNodes = nodes.filter(n => n.type === 'START' || n.type === 'START_BROADCAST');
+  if (startNodes.length === 0) return '';
+
+  const reachableNodeIds = new Set<string>();
+  const queue: string[] = startNodes.map(n => n.id);
+  startNodes.forEach(n => reachableNodeIds.add(n.id));
+
+  const adj = new Map<string, string[]>();
+  edges.forEach(e => {
+    if (!adj.has(e.source)) {
+      adj.set(e.source, []);
+    }
+    adj.get(e.source)!.push(e.target);
+  });
+
+  while (queue.length > 0) {
+    const currentId = queue.shift()!;
+    const neighbors = adj.get(currentId) || [];
+    for (const nextId of neighbors) {
+      if (!reachableNodeIds.has(nextId)) {
+        reachableNodeIds.add(nextId);
+        queue.push(nextId);
+      }
+    }
+  }
+
+  const reachableNodes = nodes.filter(n => reachableNodeIds.has(n.id));
+  const reachableEdges = edges.filter(e => reachableNodeIds.has(e.source) && reachableNodeIds.has(e.target));
+
+  const cleanNodes = reachableNodes.map(({ id, type, data }) => {
+    const cleanData = { ...data };
+    delete (cleanData as any)._collaborator;
+    delete (cleanData as any)._tempSourceHandle;
+    delete (cleanData as any)._selected;
+    return {
+      id,
+      type,
+      data: cleanData,
+    };
+  }).sort((a, b) => a.id.localeCompare(b.id));
+
+  const cleanEdges = reachableEdges.map(({ source, target, sourceHandle, targetHandle }) => ({
+    source,
+    target,
+    sourceHandle: sourceHandle || null,
+    targetHandle: targetHandle || null,
+  })).sort((a, b) => `${a.source}:${a.sourceHandle}:${a.target}`.localeCompare(`${b.source}:${b.sourceHandle}:${b.target}`));
+
+  return JSON.stringify({ nodes: cleanNodes, edges: cleanEdges });
+};
+
 export const getNodesAfterRemovingEdges = (currentNodes: Node[], removedEdges: Edge[]): Node[] => {
   let nextNodes = [...currentNodes];
   removedEdges.forEach((edge) => {

@@ -222,7 +222,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   Privacy Policy
                 </Link>
                 <Link
-                  to={ROUTES.BLOG}
+                  to={ROUTES.FAQ}
                   className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-white transition-all text-[#0A0A0A]"
                 >
                   FAQ &amp; Guides

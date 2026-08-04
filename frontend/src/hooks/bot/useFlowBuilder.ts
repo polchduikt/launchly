@@ -9,7 +9,7 @@ import { createDefaultNodeData } from '../../const/flowBlocks';
 import { getAutoLayoutedElements } from '../../utils/flowLayout';
 import { ROUTES } from '../../routes/paths';
 import type { ButtonData } from '../../types/bot';
-import { getFlowKey, getNodesAfterRemovingEdges } from '../../utils/flowHelpers';
+import { getFlowKey, getFlowLogicKey, getNodesAfterRemovingEdges } from '../../utils/flowHelpers';
 import { useFlowHistory } from './useFlowHistory';
 import { useFlowAutoSave } from './useFlowAutoSave';
 import { getBlocks } from './useNodeEditor';
@@ -79,6 +79,29 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
     setIsDirty,
     lastSavedKeyRef,
   } = useFlowAutoSave(activeBotId, nodes, edges, isLoadingSchema, saveMutation, isLocalChangeRef);
+
+  const [publishedKey, setPublishedKey] = useState<string>('');
+  const isInitialPublishedKeySetRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    isInitialPublishedKeySetRef.current = false;
+    setPublishedKey('');
+  }, [activeBotId]);
+
+  useEffect(() => {
+    if (!isLoadingSchema && nodes.length > 0) {
+      if (!isInitialPublishedKeySetRef.current) {
+        isInitialPublishedKeySetRef.current = true;
+        setPublishedKey(getFlowLogicKey(nodes, edges));
+      }
+    }
+  }, [isLoadingSchema, nodes, edges]);
+
+  const currentFlowLogicKey = useMemo(() => getFlowLogicKey(nodes, edges), [nodes, edges]);
+  const hasUnpublishedChanges = useMemo(() => {
+    if (!isInitialPublishedKeySetRef.current || !publishedKey) return false;
+    return currentFlowLogicKey !== publishedKey;
+  }, [currentFlowLogicKey, publishedKey]);
 
   const [edgeType, setEdgeType] = useState<'default' | 'smoothstep'>(
     () => (localStorage.getItem('launchly_flow_edge_type') as 'default' | 'smoothstep') || 'default');
@@ -710,7 +733,9 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
       nodes,
       edges,
     });
-    lastSavedKeyRef.current = getFlowKey(nodes, edges);
+    const key = getFlowKey(nodes, edges);
+    lastSavedKeyRef.current = key;
+    setPublishedKey(getFlowLogicKey(nodes, edges));
     setIsDirty(false);
   };
 
@@ -1067,6 +1092,7 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
     canRedo: future.length > 0,
     takeSnapshot,
     isDirty,
+    hasUnpublishedChanges,
     copySelectedNodes,
     pasteCopiedNodes,
     isValidConnection,

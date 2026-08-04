@@ -23,6 +23,31 @@ body {
   padding: 0;
 }
 
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F2EBDD;
+  border-left: 2px solid #0A0A0A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0A0A0A;
+  border: 2px solid #F2EBDD;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #262626;
+}
+
+html, body {
+  scrollbar-width: thin;
+  scrollbar-color: #0A0A0A #F2EBDD;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -69,7 +94,6 @@ body {
 
 
 .highlight-message {
-  /* scroll target - no visual highlight */
 }
 
 

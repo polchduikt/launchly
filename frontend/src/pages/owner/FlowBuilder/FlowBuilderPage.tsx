@@ -6,6 +6,7 @@ import type { ConnectionLineComponentProps, Edge, Node, OnNodeDrag } from '@xyfl
 import '@xyflow/react/dist/style.css';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
+import { useStartBotMutation } from '../../../hooks/bot/useBotMutations';
 import { getCustomFieldsApi } from '../../../api/bot';
 import { NodeEditorPanel } from './components/sidebar/NodeEditorPanel';
 import { FLOW_BLOCKS } from '../../../const/flowBlocks';
@@ -137,6 +138,7 @@ const FlowBuilderInner: React.FC = () => {
     canRedo,
     takeSnapshot,
     isDirty,
+    hasUnpublishedChanges,
     copySelectedNodes,
     pasteCopiedNodes,
     isValidConnection,
@@ -280,9 +282,36 @@ const FlowBuilderInner: React.FC = () => {
   });
 
   const { data: bots = [] } = useBotsQuery();
+  const startBotMutation = useStartBotMutation();
   const activeBot = bots.find((b) => b.id === activeBotId);
   const isBotLive = activeBot?.active ?? false;
   const isViewer = activeBot?.role === 'Viewer';
+
+  const buttonConfig = useMemo(() => {
+    if (!isBotLive) {
+      return {
+        label: t('flow_builder.btn_launch'),
+        dotClass: 'bg-slate-400',
+      };
+    }
+    if (hasUnpublishedChanges) {
+      return {
+        label: t('flow_builder.btn_update'),
+        dotClass: 'bg-amber-400 animate-pulse',
+      };
+    }
+    return {
+      label: t('flow_builder.btn_running'),
+      dotClass: 'bg-emerald-400',
+    };
+  }, [isBotLive, hasUnpublishedChanges]);
+
+  const handleLaunchOrUpdate = () => {
+    handleSaveFlow();
+    if (!isBotLive && activeBotId) {
+      startBotMutation.mutate(activeBotId);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -477,19 +506,19 @@ const FlowBuilderInner: React.FC = () => {
 
             {!isViewer && (
               <button
-                onClick={handleSaveFlow}
-                disabled={saveMutation.isPending}
-                className="flex items-center gap-1.5 px-4 py-2 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 active:translate-x-[1px] active:translate-y-[1px] disabled:opacity-70 disabled:cursor-not-allowed text-[#F2EBDD] text-xs font-black rounded-xl transition-all border-2 border-[#0A0A0A] shadow-sm cursor-pointer uppercase tracking-wider font-['Anybody',sans-serif]"
+                onClick={handleLaunchOrUpdate}
+                disabled={saveMutation.isPending || startBotMutation.isPending}
+                className="flex items-center gap-2 px-4 py-2 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 active:translate-x-[1px] active:translate-y-[1px] disabled:opacity-70 disabled:cursor-not-allowed text-[#F2EBDD] text-xs font-black rounded-xl transition-all border-2 border-[#0A0A0A] shadow-sm cursor-pointer uppercase tracking-wider font-['Anybody',sans-serif]"
               >
-                {saveMutation.isPending ? (
+                {saveMutation.isPending || startBotMutation.isPending ? (
                   <>
                     <Loader2 className="animate-spin text-[#F2EBDD]" size={14} />
                     <span>{t('flow_builder.saving')}</span>
                   </>
                 ) : (
                   <>
-                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 border border-[#0A0A0A] ${isBotLive ? 'bg-emerald-400' : 'bg-slate-400'}`} />
-                    <span>{t('flow_builder.set_live')}</span>
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 border border-[#0A0A0A] ${buttonConfig.dotClass}`} />
+                    <span>{buttonConfig.label}</span>
                   </>
                 )}
               </button>

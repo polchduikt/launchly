@@ -22,6 +22,7 @@ export const ROUTES = {
   BLOG_DETAIL: '/blog/:id',
   TERMS: '/terms',
   PRIVACY: '/privacy',
+  FAQ: '/faq',
   ACCEPTABLE_USE: '/acceptable-use',
   AI_TERMS: '/ai-terms',
   BLOCKED: '/blocked',
