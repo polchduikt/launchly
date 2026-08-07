@@ -2,11 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Zap, Send, Sparkles, Check, Paperclip, Mic } from 'lucide-react';
 import { useTranslation } from '../../../../i18n/config';
 
-// Ease-in-out matching cubic-bezier(0.45, 0, 0.55, 1)
 const easeInOut = (t: number) =>
   t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
-// Animate a line path with a polygon arrowhead traveling in perfect sync
 const animateLine = (
   pathEl: SVGPathElement,
   arrowEl: SVGPolygonElement,
@@ -26,10 +24,7 @@ const animateLine = (
     const p = easeInOut(t);
     const len = total * p;
 
-    // Update line
     pathEl.style.strokeDashoffset = String(total - len);
-
-    // Update arrowhead position + rotation
     if (len > 1) {
       const ahead = pathEl.getPointAtLength(len);
       const behind = pathEl.getPointAtLength(Math.max(0, len - 2));
@@ -47,25 +42,18 @@ const animateLine = (
 
 export const HeroInteractiveDemo: React.FC = () => {
   const { t } = useTranslation();
-
   const [activeView, setActiveView] = useState<'builder' | 'telegram'>('builder');
   const [step, setStep] = useState<number>(0);
-
   const canvasRef = useRef<HTMLDivElement>(null);
   const handle1Ref = useRef<HTMLSpanElement>(null);
   const handle2TargetRef = useRef<HTMLSpanElement>(null);
   const handle2BtnRef = useRef<HTMLSpanElement>(null);
   const handle3TargetRef = useRef<HTMLSpanElement>(null);
-
-  // SVG element refs for JS animation
   const svgLine1Ref = useRef<SVGPathElement>(null);
   const svgArrow1Ref = useRef<SVGPolygonElement>(null);
   const svgLine2Ref = useRef<SVGPathElement>(null);
   const svgArrow2Ref = useRef<SVGPolygonElement>(null);
-
   const [pts, setPts] = useState({ h1x: 0, h1y: 0, h2tx: 0, h2ty: 0, h2bx: 0, h2by: 0, h3tx: 0, h3ty: 0 });
-
-  // Measure handle positions
   useEffect(() => {
     const measure = () => {
       if (!canvasRef.current) return;
@@ -84,8 +72,6 @@ export const HeroInteractiveDemo: React.FC = () => {
     const raf = requestAnimationFrame(measure);
     return () => cancelAnimationFrame(raf);
   });
-
-  // Step timer
   useEffect(() => {
     const timer = setInterval(() => {
       setStep((prev) => {
@@ -97,8 +83,6 @@ export const HeroInteractiveDemo: React.FC = () => {
     }, 1300);
     return () => clearInterval(timer);
   }, []);
-
-  // Trigger line 1 animation when step hits 2 and pts are ready
   useEffect(() => {
     if (step === 2 && svgLine1Ref.current && svgArrow1Ref.current) {
       const tId = setTimeout(() => {
@@ -108,8 +92,6 @@ export const HeroInteractiveDemo: React.FC = () => {
       return () => clearTimeout(tId);
     }
   }, [step]);
-
-  // Trigger line 2 animation when step hits 4
   useEffect(() => {
     if (step === 4 && svgLine2Ref.current && svgArrow2Ref.current) {
       const tId = setTimeout(() => {
@@ -152,8 +134,6 @@ export const HeroInteractiveDemo: React.FC = () => {
           animation: viewFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
       `}</style>
-
-      {/* Title Bar */}
       <div className="bg-[#0A0A0A] text-[#F2EBDD] px-4 py-2.5 flex items-center gap-2 border-b-2 border-[#0A0A0A]">
         <span className="w-3 h-3 rounded-full bg-rose-500 border border-black/20" />
         <span className="w-3 h-3 rounded-full bg-amber-500 border border-black/20" />
@@ -164,14 +144,10 @@ export const HeroInteractiveDemo: React.FC = () => {
       </div>
 
       <div className="relative h-[410px] sm:h-[435px] overflow-hidden">
-
-        {/* ── BUILDER VIEW ─────────────────────────────────── */}
         {activeView === 'builder' && (
           <div className="absolute inset-0 flex flex-col bg-[#F2EBDD] view-fade-in">
             <div className="absolute inset-0 opacity-[0.15] pointer-events-none"
               style={{ backgroundImage: 'radial-gradient(#0A0A0A 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
-
-            {/* Toolbar */}
             <div className="relative z-20 w-full bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-4 py-2 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black uppercase text-[#0A0A0A]/50 font-['Anybody',sans-serif]">{t('landing.demo.flow_label')}</span>
@@ -183,14 +159,8 @@ export const HeroInteractiveDemo: React.FC = () => {
                 <span>{step >= 5 ? t('landing.demo.live_status') : t('landing.demo.update_status')}</span>
               </button>
             </div>
-
-            {/* Canvas */}
-            <div ref={canvasRef} className="relative flex-1 p-3 overflow-hidden">
-
-              {/* SVG — lines drawn by JS */}
+            <div ref={canvasRef} className="relative flex-1 p-3 overflow-x-auto overflow-y-hidden min-w-0">
               <svg className="absolute inset-0 w-full h-full pointer-events-none z-30">
-
-                {/* LINE 1 */}
                 {step >= 2 && pts.h1x > 0 && (
                   <>
                     <path
@@ -211,8 +181,6 @@ export const HeroInteractiveDemo: React.FC = () => {
                     />
                   </>
                 )}
-
-                {/* LINE 2 */}
                 {step >= 4 && pts.h2bx > 0 && (
                   <>
                     <path
@@ -233,8 +201,6 @@ export const HeroInteractiveDemo: React.FC = () => {
                     />
                   </>
                 )}
-
-                {/* Source handle circles */}
                 {pts.h1x > 0 && (
                   <circle cx={pts.h1x} cy={pts.h1y} r="4.5"
                     fill={step >= 2 ? '#7b8794' : 'white'} stroke="#7b8794" strokeWidth="1.5"
@@ -246,8 +212,6 @@ export const HeroInteractiveDemo: React.FC = () => {
                     style={{ transition: 'fill 0.6s ease' }} />
                 )}
               </svg>
-
-              {/* NODE 1 */}
               <div className={`absolute left-3 top-3 w-40 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-md z-10 transition-all duration-700 ease-out ${step >= 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100/70 rounded-t-[14px] border-b border-[#0A0A0A]/10">
                   <Zap size={12} className="text-emerald-700 fill-current shrink-0" />
@@ -267,8 +231,6 @@ export const HeroInteractiveDemo: React.FC = () => {
                   <span ref={handle1Ref} className="absolute -right-[5px] top-1/2 -translate-y-1/2 w-[9px] h-[9px] rounded-full opacity-0" />
                 </div>
               </div>
-
-              {/* NODE 2 */}
               {step >= 1 && (
                 <div className="absolute left-[228px] top-3 w-44 sm:w-48 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-md z-10"
                   style={{ animation: 'tgMsgIn 0.8s cubic-bezier(0.16,1,0.3,1) both' }}>
@@ -295,8 +257,6 @@ export const HeroInteractiveDemo: React.FC = () => {
                   </div>
                 </div>
               )}
-
-              {/* NODE 3 */}
               {step >= 3 && (
                 <div className="absolute left-[228px] top-[235px] w-44 sm:w-48 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-md z-10"
                   style={{ animation: 'tgMsgIn 0.8s cubic-bezier(0.16,1,0.3,1) both' }}>
@@ -320,11 +280,8 @@ export const HeroInteractiveDemo: React.FC = () => {
             </div>
           </div>
         )}
-
-        {/* ── TELEGRAM VIEW ──────────────────────────────────── */}
         {activeView === 'telegram' && (
           <div className="absolute inset-0 flex flex-col view-fade-in" style={{ background: '#17212B' }}>
-            {/* Header */}
             <div className="flex items-center gap-3 px-3 py-2.5 shrink-0" style={{ background: '#232E3C', borderBottom: '1px solid #0d1721' }}>
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="relative shrink-0">
@@ -346,8 +303,6 @@ export const HeroInteractiveDemo: React.FC = () => {
                 </svg>
               </div>
             </div>
-
-            {/* Messages */}
             <div className="flex-1 flex flex-col justify-end px-3 py-3 space-y-2 overflow-hidden" style={{ background: '#17212B' }}>
               {step >= 7 && (
                 <div className="flex justify-end tg-msg-in">
@@ -400,8 +355,6 @@ export const HeroInteractiveDemo: React.FC = () => {
                 </div>
               )}
             </div>
-
-            {/* Input */}
             <div className="px-3 py-2 shrink-0 flex items-center gap-2" style={{ background: '#17212B', borderTop: '1px solid #0d1721' }}>
               <Paperclip size={20} color="#8898AA" className="shrink-0" />
               <div className="flex-1 rounded-2xl px-3 py-1.5 text-[12px]" style={{ background: '#232E3C', color: '#8898AA' }}>{t('landing.demo.input_placeholder')}</div>

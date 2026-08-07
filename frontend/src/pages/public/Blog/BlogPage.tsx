@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { BLOG_ARTICLES, type BlogArticle } from '../../../const/blogData';
 import { useBlogArticlesQuery } from '../../../hooks/dashboard/useBlogQueries';
 import { ArrowRight, Calendar, ChevronLeft, ChevronRight, Zap, Workflow, Bot } from 'lucide-react';
@@ -7,7 +7,7 @@ import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../routes/paths';
 import { useTranslation } from '../../../i18n/config';
 import { PublicFooter } from '../../../components/layout/PublicFooter';
-import logo from '../../../assets/images/logo.png';
+import { PublicHeader } from '../../../components/layout/PublicHeader';
 
 type CardOrientation = 'vertical' | 'horizontal';
 type CardVariant = 'default' | 'landscape' | 'compact' | 'overlay';
@@ -160,26 +160,26 @@ const BlogCard: React.FC<{
           alt={article.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute top-3 left-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest px-2.5 py-1 border border-white">
+        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 sm:px-2.5 sm:py-1 border border-white">
           {article.category}
         </div>
       </div>
 
       <div
-        className={`p-4 sm:p-5 flex flex-col gap-2.5 ${
+        className={`p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2.5 ${
           isVertical ? 'flex-1 min-h-0' : 'flex-1 md:justify-between'
         }`}
       >
         <h2
           className={`font-['Anybody',sans-serif] font-extrabold uppercase text-[#0A0A0A] leading-snug ${
-            isVertical ? 'text-lg sm:text-xl line-clamp-3' : 'text-lg sm:text-xl lg:text-2xl line-clamp-3'
+            isVertical ? 'text-xs sm:text-xl line-clamp-2 sm:line-clamp-3' : 'text-sm sm:text-xl lg:text-2xl line-clamp-2 sm:line-clamp-3'
           }`}
         >
           {article.title}
         </h2>
         <p
-          className={`font-['Geist',sans-serif] text-xs font-medium text-slate-800 leading-relaxed ${
-            fixedHeight ? 'line-clamp-2' : isVertical ? 'line-clamp-3' : 'line-clamp-3'
+          className={`font-['Geist',sans-serif] text-[10px] sm:text-xs font-medium text-slate-800 leading-relaxed ${
+            fixedHeight ? 'line-clamp-2' : isVertical ? 'line-clamp-2 sm:line-clamp-3' : 'line-clamp-2 sm:line-clamp-3'
           } ${fixedHeight ? '' : 'flex-1'}`}
         >
           {article.summary}
@@ -202,34 +202,11 @@ const BlogCard: React.FC<{
 export const BlogPage: React.FC = () => {
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore((state) => !!state.accessToken);
-  const { t, currentLanguage, changeLanguage } = useTranslation();
-  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState<boolean>(false);
+  const { t } = useTranslation();
   const [sliderIndex, setSliderIndex] = useState(0);
   const [showMore, setShowMore] = useState(false);
-  const [isDarkHeader, setIsDarkHeader] = useState(false);
 
   const { data: blogArticles = BLOG_ARTICLES } = useBlogArticlesQuery();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const headerCheckY = 40;
-      const darkElements = document.querySelectorAll('[data-header-theme="dark"]');
-      let overDark = false;
-
-      darkElements.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.top <= headerCheckY && rect.bottom >= headerCheckY) {
-          overDark = true;
-        }
-      });
-
-      setIsDarkHeader(overDark);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const middleArticle = blogArticles[1];
   const rightArticle = blogArticles[2];
@@ -303,147 +280,13 @@ export const BlogPage: React.FC = () => {
       />
 
       <div>
-        <header
-          className={`sticky top-0 w-full z-50 flex justify-between items-center h-20 px-6 md:px-12 lg:px-16 backdrop-blur-md transition-all duration-300 ${
-            isDarkHeader
-              ? 'bg-[#0A0A0A]/90 border-b-2 border-[#F2EBDD] shadow-[0_4px_0px_#F2EBDD] text-[#F2EBDD]'
-              : 'bg-[#F2EBDD]/85 border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] text-[#0A0A0A]'
-          }`}
-        >
-          <div className="flex items-center gap-4">
-            <Link to={ROUTES.LANDING} className="flex items-center">
-              <img
-                src={logo}
-                alt="Launchly Logo"
-                className={`h-10 sm:h-12 w-auto object-contain cursor-pointer transition-all duration-300 ${
-                  isDarkHeader ? 'brightness-0 invert' : ''
-                }`}
-              />
-            </Link>
-
-            <div className="relative ml-2">
-              <button
-                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-                onBlur={() => setTimeout(() => setIsLangDropdownOpen(false), 200)}
-                className={`flex items-center gap-1 font-['JetBrains_Mono',monospace] text-sm font-bold border-b-2 pb-0.5 transition-all cursor-pointer select-none ${
-                  isDarkHeader ? 'text-[#F2EBDD] border-[#F2EBDD]' : 'text-[#0A0A0A] border-[#0A0A0A]'
-                }`}
-              >
-                <span>{currentLanguage === 'uk' ? 'Uk' : 'En'}</span>
-                <span className="text-[10px] tracking-tighter">▼</span>
-              </button>
-
-              {isLangDropdownOpen && (
-                <div
-                  className={`absolute top-full left-0 mt-2 border-2 py-1 min-w-[75px] z-50 ${
-                    isDarkHeader
-                      ? 'bg-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD]'
-                      : 'bg-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A]'
-                  }`}
-                >
-                  <button
-                    onClick={() => {
-                      changeLanguage('en');
-                      setIsLangDropdownOpen(false);
-                    }}
-                    className={`w-full px-3 py-1 text-left font-['JetBrains_Mono',monospace] text-xs font-bold transition-colors cursor-pointer ${
-                      isDarkHeader
-                        ? 'hover:bg-[#F2EBDD] hover:text-[#0A0A0A] ' +
-                          (currentLanguage === 'en' ? 'bg-[#F2EBDD]/20 font-black' : 'text-[#F2EBDD]')
-                        : 'hover:bg-[#0A0A0A] hover:text-[#F2EBDD] ' +
-                          (currentLanguage === 'en' ? 'bg-[#0A0A0A]/10 font-black' : 'text-[#0A0A0A]')
-                    }`}
-                  >
-                    En
-                  </button>
-                  <button
-                    onClick={() => {
-                      changeLanguage('uk');
-                      setIsLangDropdownOpen(false);
-                    }}
-                    className={`w-full px-3 py-1 text-left font-['JetBrains_Mono',monospace] text-xs font-bold transition-colors cursor-pointer ${
-                      isDarkHeader
-                        ? 'hover:bg-[#F2EBDD] hover:text-[#0A0A0A] ' +
-                          (currentLanguage === 'uk' ? 'bg-[#F2EBDD]/20 font-black' : 'text-[#F2EBDD]')
-                        : 'hover:bg-[#0A0A0A] hover:text-[#F2EBDD] ' +
-                          (currentLanguage === 'uk' ? 'bg-[#0A0A0A]/10 font-black' : 'text-[#0A0A0A]')
-                    }`}
-                  >
-                    Uk
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <nav className="hidden lg:flex items-center gap-3 xl:gap-4 absolute left-1/2 -translate-x-1/2">
-            {[
-              { href: '#features', key: 'landing.nav.features', fallback: 'FEATURES' },
-              { href: '#ai-automation', key: 'landing.nav.ai', fallback: 'AI' },
-              { href: '#how-it-works', key: 'landing.nav.how_it_works', fallback: 'HOW IT WORKS' },
-              { href: '#use-cases', key: 'landing.nav.use_cases', fallback: 'SOLUTIONS' },
-              { href: '#comparison', key: 'landing.nav.comparison', fallback: 'WHY US' },
-              { href: '#testimonials', key: 'landing.nav.testimonials', fallback: 'REVIEWS' },
-              { href: '#trust', key: 'landing.nav.trust', fallback: 'SECURITY' },
-              { href: '#pricing', key: 'landing.nav.pricing', fallback: 'PRICING' },
-              { href: '#faq', key: 'landing.nav.faq', fallback: 'FAQ' },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                to={`${ROUTES.LANDING}${item.href}`}
-                className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider transition-colors duration-200 px-2 py-1 ${
-                  isDarkHeader
-                    ? 'text-[#F2EBDD] hover:bg-[#F2EBDD] hover:text-[#0A0A0A]'
-                    : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
-                }`}
-              >
-                {t(item.key, item.fallback)}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-4">
-            {isAuthenticated ? (
-              <button
-                onClick={() => navigate(ROUTES.HOME)}
-                className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-2.5 border-2 transition-all cursor-pointer ${
-                  isDarkHeader
-                    ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
-                    : 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
-                }`}
-              >
-                {t('landing.nav.dashboard', 'DASHBOARD')}
-              </button>
-            ) : (
-              <>
-                <button
-                  onClick={() => navigate(ROUTES.LOGIN)}
-                  className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:underline underline-offset-4 cursor-pointer ${
-                    isDarkHeader ? 'text-[#F2EBDD]' : 'text-[#0A0A0A]'
-                  }`}
-                >
-                  {t('landing.nav.login', 'LOGIN')}
-                </button>
-                <button
-                  onClick={() => navigate(ROUTES.REGISTER)}
-                  className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-2.5 border-2 transition-all cursor-pointer ${
-                    isDarkHeader
-                      ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
-                      : 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
-                  }`}
-                >
-                  {t('landing.nav.signup', 'SIGN UP')}
-                </button>
-              </>
-            )}
-          </div>
-        </header>
+        <PublicHeader />
 
         <div className="w-full max-w-[1680px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 pt-14 pb-16 space-y-12">
           {blogArticles.length > 0 ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-[0.85fr_1.3fr_0.85fr] gap-5 lg:gap-7 xl:gap-8 items-center pb-2 pr-1.5">
-                <div className="h-[520px] lg:h-[580px] xl:h-[620px]">
+                <div className="h-auto md:h-[520px] lg:h-[580px] xl:h-[620px]">
                   {activeSliderArticle && (
                     <div key={activeSliderArticle.id} className="animate-fade-in h-full">
                       <BlogCard
@@ -490,7 +333,7 @@ export const BlogPage: React.FC = () => {
                   )}
                 </div>
 
-                <div className="h-[520px] lg:h-[580px] xl:h-[620px]">
+                <div className="h-auto md:h-[520px] lg:h-[580px] xl:h-[620px]">
                   {rightArticle && (
                     <BlogCard
                       article={rightArticle}
@@ -504,7 +347,7 @@ export const BlogPage: React.FC = () => {
               </div>
 
               {secondRowArticles.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-7 xl:gap-8 items-start pb-2 pr-1.5">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 items-start pb-2 pr-1.5">
                   {secondRowArticles[0] && (
                     <div className="md:pt-8">
                       <BlogCard
@@ -556,7 +399,7 @@ export const BlogPage: React.FC = () => {
             className="w-full bg-[#0A0A0A] text-[#F2EBDD] border-y-4 border-[#0A0A0A] select-none"
             data-header-theme="dark"
           >
-            <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-40 md:py-56 lg:py-72 min-h-[70vh] md:min-h-[80vh] grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center">
+            <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-16 sm:py-28 md:py-48 lg:py-64 min-h-0 lg:min-h-[70vh] grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center">
               <div className="space-y-6">
                 <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-[0.25em] bg-[#F2EBDD] text-[#0A0A0A] px-3 py-1 inline-block">
                   {t('blog.promo.badge', 'LAUNCHLY PLATFORM')}

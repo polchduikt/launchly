@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../routes/paths';
 import { LAUNCHLY_PLANS } from '../../../const/plans';
-import logo from '../../../assets/images/logo.png';
 import { useTranslation } from '../../../i18n/config';
 import { HeroInteractiveDemo } from './components/HeroInteractiveDemo';
 import { CountUpNumber } from './components/CountUpNumber';
 import { StickySolutionsSection } from './components/StickySolutionsSection';
 import { PublicFooter } from '../../../components/layout/PublicFooter';
+import { PublicHeader } from '../../../components/layout/PublicHeader';
 import { useScrollReveal } from '../../../hooks/useScrollReveal';
 import {
   Workflow,
@@ -37,10 +37,8 @@ export const LandingPage: React.FC = () => {
   const location = useLocation();
   const isAuthenticated = useAuthStore((state) => !!state.accessToken);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
-  const { t, currentLanguage, changeLanguage } = useTranslation();
-  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState<boolean>(false);
+  const { t } = useTranslation();
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
-  const [isDarkHeader, setIsDarkHeader] = useState<boolean>(false);
 
   React.useEffect(() => {
     const id = window.location.hash.replace('#', '');
@@ -54,27 +52,6 @@ export const LandingPage: React.FC = () => {
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
   }, [location.hash]);
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      const headerCheckY = 40;
-      const darkElements = document.querySelectorAll('[data-header-theme="dark"]');
-      let overDark = false;
-
-      darkElements.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.top <= headerCheckY && rect.bottom >= headerCheckY) {
-          overDark = true;
-        }
-      });
-
-      setIsDarkHeader(overDark);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useScrollReveal(billingCycle);
 
@@ -116,165 +93,28 @@ export const LandingPage: React.FC = () => {
         }}
       />
 
-      <header
-        className={`sticky top-0 w-full z-50 flex justify-between items-center h-20 px-6 md:px-12 lg:px-16 backdrop-blur-md transition-all duration-300 ${
-          isDarkHeader
-            ? 'bg-[#0A0A0A]/90 border-b-2 border-[#F2EBDD] shadow-[0_4px_0px_#F2EBDD] text-[#F2EBDD]'
-            : 'bg-[#F2EBDD]/85 border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] text-[#0A0A0A]'
-        }`}
-      >
-        
-        <div className="flex items-center gap-4">
-          <Link to={ROUTES.LANDING} className="flex items-center">
-            <img
-              src={logo}
-              alt="Launchly Logo"
-              className={`h-10 sm:h-12 w-auto object-contain cursor-pointer transition-all duration-300 ${
-                isDarkHeader ? 'brightness-0 invert' : ''
-              }`}
-            />
-          </Link>
-
-          <div className="relative ml-2">
-            <button
-              onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-              onBlur={() => setTimeout(() => setIsLangDropdownOpen(false), 200)}
-              className={`flex items-center gap-1 font-['JetBrains_Mono',monospace] text-sm font-bold border-b-2 pb-0.5 transition-all cursor-pointer select-none ${
-                isDarkHeader ? 'text-[#F2EBDD] border-[#F2EBDD]' : 'text-[#0A0A0A] border-[#0A0A0A]'
-              }`}
-            >
-              <span>{currentLanguage === 'uk' ? 'Uk' : 'En'}</span>
-              <span className="text-[10px] tracking-tighter">▼</span>
-            </button>
-
-            {isLangDropdownOpen && (
-              <div
-                className={`absolute top-full left-0 mt-2 border-2 py-1 min-w-[75px] z-50 ${
-                  isDarkHeader
-                    ? 'bg-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD]'
-                    : 'bg-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A]'
-                }`}
-              >
-                <button
-                  onClick={() => {
-                    changeLanguage('en');
-                    setIsLangDropdownOpen(false);
-                  }}
-                  className={`w-full px-3 py-1 text-left font-['JetBrains_Mono',monospace] text-xs font-bold transition-colors cursor-pointer ${
-                    isDarkHeader
-                      ? 'hover:bg-[#F2EBDD] hover:text-[#0A0A0A] ' + (currentLanguage === 'en' ? 'bg-[#F2EBDD]/20 font-black' : 'text-[#F2EBDD]')
-                      : 'hover:bg-[#0A0A0A] hover:text-[#F2EBDD] ' + (currentLanguage === 'en' ? 'bg-[#0A0A0A]/10 font-black' : 'text-[#0A0A0A]')
-                  }`}
-                >
-                  En
-                </button>
-                <button
-                  onClick={() => {
-                    changeLanguage('uk');
-                    setIsLangDropdownOpen(false);
-                  }}
-                  className={`w-full px-3 py-1 text-left font-['JetBrains_Mono',monospace] text-xs font-bold transition-colors cursor-pointer ${
-                    isDarkHeader
-                      ? 'hover:bg-[#F2EBDD] hover:text-[#0A0A0A] ' + (currentLanguage === 'uk' ? 'bg-[#F2EBDD]/20 font-black' : 'text-[#F2EBDD]')
-                      : 'hover:bg-[#0A0A0A] hover:text-[#F2EBDD] ' + (currentLanguage === 'uk' ? 'bg-[#0A0A0A]/10 font-black' : 'text-[#0A0A0A]')
-                  }`}
-                >
-                  Uk
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <nav className="hidden lg:flex items-center gap-3 xl:gap-4 absolute left-1/2 -translate-x-1/2">
-          {[
-            { href: '#features', key: 'landing.nav.features', fallback: 'FEATURES' },
-            { href: '#ai-automation', key: 'landing.nav.ai', fallback: 'AI' },
-            { href: '#how-it-works', key: 'landing.nav.how_it_works', fallback: 'HOW IT WORKS' },
-            { href: '#use-cases', key: 'landing.nav.use_cases', fallback: 'SOLUTIONS' },
-            { href: '#comparison', key: 'landing.nav.comparison', fallback: 'WHY US' },
-            { href: '#testimonials', key: 'landing.nav.testimonials', fallback: 'REVIEWS' },
-            { href: '#trust', key: 'landing.nav.trust', fallback: 'SECURITY' },
-            { href: '#pricing', key: 'landing.nav.pricing', fallback: 'PRICING' },
-            { href: '#faq', key: 'landing.nav.faq', fallback: 'FAQ' },
-          ].map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider transition-colors duration-200 px-2 py-1 ${
-                isDarkHeader
-                  ? 'text-[#F2EBDD] hover:bg-[#F2EBDD] hover:text-[#0A0A0A]'
-                  : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
-              }`}
-            >
-              {t(item.key, item.fallback)}
-            </a>
-          ))}
-          <Link
-            to={ROUTES.BLOG}
-            className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider transition-colors duration-200 px-2 py-1 ${
-              isDarkHeader
-                ? 'text-[#F2EBDD] hover:bg-[#F2EBDD] hover:text-[#0A0A0A]'
-                : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
-            }`}
-          >
-            {t('landing.nav.blog', 'BLOG')}
-          </Link>
-        </nav>
-
-        <div className="flex items-center gap-4">
-          {isAuthenticated ? (
-            <button
-              onClick={() => navigate(ROUTES.HOME)}
-              className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-2.5 border-2 transition-all cursor-pointer ${
-                isDarkHeader
-                  ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
-                  : 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
-              }`}
-            >
-              {t('landing.nav.dashboard', 'DASHBOARD')}
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={() => navigate(ROUTES.LOGIN)}
-                className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:underline underline-offset-4 cursor-pointer ${
-                  isDarkHeader ? 'text-[#F2EBDD]' : 'text-[#0A0A0A]'
-                }`}
-              >
-                {t('landing.nav.login', 'LOGIN')}
-              </button>
-              <button
-                onClick={() => navigate(ROUTES.REGISTER)}
-                className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-2.5 border-2 transition-all cursor-pointer ${
-                  isDarkHeader
-                    ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
-                    : 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
-                }`}
-              >
-                {t('landing.nav.signup', 'SIGN UP')}
-              </button>
-            </>
-          )}
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="flex-grow pt-10 sm:pt-14">
-        <section className="py-16 md:py-24 px-6 lg:px-12 max-w-7xl mx-auto relative overflow-hidden flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-          <div className="flex-1 text-center lg:text-left z-10 space-y-6 reveal-slide-left">
-            <h1 className="font-['Anybody',sans-serif] text-4xl sm:text-6xl lg:text-7xl font-extrabold text-[#0A0A0A] uppercase leading-[0.95] tracking-tight border-l-8 border-[#0A0A0A] pl-4 sm:pl-6 text-left">
+        <section className="py-10 md:py-24 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto relative overflow-hidden flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
+          <div className="flex-1 w-full text-center lg:text-left z-10 space-y-6 reveal-slide-left">
+            <h1 className="font-['Anybody',sans-serif] text-3xl sm:text-6xl lg:text-7xl font-extrabold text-[#0A0A0A] uppercase leading-[0.95] tracking-tight border-l-6 sm:border-l-8 border-[#0A0A0A] pl-3 sm:pl-6 text-left">
               {t('landing.hero.title_1', 'Automate')}<br />
               {t('landing.hero.title_2', 'Everything.')}<br />
               {t('landing.hero.title_3', 'Code Nothing.')}
             </h1>
-            <p className="text-base sm:text-lg text-[#0A0A0A] font-medium max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+            <p className="text-sm sm:text-lg text-[#0A0A0A] font-medium max-w-2xl mx-auto lg:mx-0 leading-relaxed text-left">
               {t('landing.hero.subtitle', 'The All-in-One No-Code platform for chatbots, sales automation, and smart messaging in Telegram.')}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
+            <div className="block lg:hidden w-full max-w-lg mx-auto relative reveal-brutal-pop reveal-delay-150 my-4">
+              <HeroInteractiveDemo />
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start pt-2">
               <button
                 onClick={handleCta}
-                className="bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-8 py-4 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-6 py-3.5 sm:px-8 sm:py-4 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <span>
                   {isAuthenticated 
@@ -285,13 +125,15 @@ export const LandingPage: React.FC = () => {
               </button>
               <a
                 href="#features"
-                className="bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-8 py-4 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex items-center justify-center gap-2"
+                className="bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-6 py-3.5 sm:px-8 sm:py-4 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex items-center justify-center gap-2"
               >
                 <BookOpen size={16} />
                 <span>{t('landing.hero.cta_features', 'Explore Features')}</span>
               </a>
             </div>
-          </div>          <div className="flex-1 w-full relative reveal-brutal-pop reveal-delay-150">
+          </div>
+
+          <div className="hidden lg:block flex-1 w-full relative reveal-brutal-pop reveal-delay-150">
             <HeroInteractiveDemo />
           </div>
         </section>
@@ -355,51 +197,51 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-8 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all duration-200 group cursor-pointer reveal-slide-left reveal-delay-50">
-              <div className="w-16 h-16 border-2 border-[#0A0A0A] group-hover:border-[#F2EBDD] flex items-center justify-center mb-6 bg-white group-hover:bg-[#0A0A0A]">
-                <Workflow size={32} className="text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors" />
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-3 sm:gap-8">
+            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-4 sm:p-8 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all duration-200 group cursor-pointer reveal-slide-left reveal-delay-50">
+              <div className="w-10 h-10 sm:w-16 sm:h-16 border-2 border-[#0A0A0A] group-hover:border-[#F2EBDD] flex items-center justify-center mb-3 sm:mb-6 bg-white group-hover:bg-[#0A0A0A]">
+                <Workflow className="w-5 h-5 sm:w-8 sm:h-8 text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors" />
               </div>
-              <h3 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] group-hover:text-[#F2EBDD] mb-3 uppercase leading-tight">
+              <h3 className="font-['Anybody',sans-serif] text-sm sm:text-2xl font-black text-[#0A0A0A] group-hover:text-[#F2EBDD] mb-1.5 sm:mb-3 uppercase leading-tight">
                 {t('landing.features.card_1_title', 'Visual Flow Builder')}
               </h3>
-              <p className="text-sm font-medium leading-relaxed">
+              <p className="text-xs sm:text-sm font-medium leading-relaxed">
                 {t('landing.features.card_1_desc', 'Design complex conversational flows with our intuitive drag-and-drop canvas. No coding required.')}
               </p>
             </div>
 
-            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-8 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all duration-200 group cursor-pointer reveal-slide-right reveal-delay-100">
-              <div className="w-16 h-16 border-2 border-[#0A0A0A] group-hover:border-[#F2EBDD] flex items-center justify-center mb-6 bg-white group-hover:bg-[#0A0A0A]">
-                <Bot size={32} className="text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors" />
+            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-4 sm:p-8 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all duration-200 group cursor-pointer reveal-slide-right reveal-delay-100">
+              <div className="w-10 h-10 sm:w-16 sm:h-16 border-2 border-[#0A0A0A] group-hover:border-[#F2EBDD] flex items-center justify-center mb-3 sm:mb-6 bg-white group-hover:bg-[#0A0A0A]">
+                <Bot className="w-5 h-5 sm:w-8 sm:h-8 text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors" />
               </div>
-              <h3 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] group-hover:text-[#F2EBDD] mb-3 uppercase leading-tight">
+              <h3 className="font-['Anybody',sans-serif] text-sm sm:text-2xl font-black text-[#0A0A0A] group-hover:text-[#F2EBDD] mb-1.5 sm:mb-3 uppercase leading-tight">
                 {t('landing.features.card_2_title', 'AI Assistants')}
               </h3>
-              <p className="text-sm font-medium leading-relaxed">
+              <p className="text-xs sm:text-sm font-medium leading-relaxed">
                 {t('landing.features.card_2_desc', 'Seamlessly integrate with ChatGPT, Claude, and Gemini to provide intelligent, context-aware responses to your users.')}
               </p>
             </div>
 
-            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-8 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all duration-200 group cursor-pointer reveal-slide-left reveal-delay-150">
-              <div className="w-16 h-16 border-2 border-[#0A0A0A] group-hover:border-[#F2EBDD] flex items-center justify-center mb-6 bg-white group-hover:bg-[#0A0A0A]">
-                <Users size={32} className="text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors" />
+            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-4 sm:p-8 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all duration-200 group cursor-pointer reveal-slide-left reveal-delay-150">
+              <div className="w-10 h-10 sm:w-16 sm:h-16 border-2 border-[#0A0A0A] group-hover:border-[#F2EBDD] flex items-center justify-center mb-3 sm:mb-6 bg-white group-hover:bg-[#0A0A0A]">
+                <Users className="w-5 h-5 sm:w-8 sm:h-8 text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors" />
               </div>
-              <h3 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] group-hover:text-[#F2EBDD] mb-3 uppercase leading-tight">
+              <h3 className="font-['Anybody',sans-serif] text-sm sm:text-2xl font-black text-[#0A0A0A] group-hover:text-[#F2EBDD] mb-1.5 sm:mb-3 uppercase leading-tight">
                 {t('landing.features.card_3_title', 'CRM & Audience')}
               </h3>
-              <p className="text-sm font-medium leading-relaxed">
+              <p className="text-xs sm:text-sm font-medium leading-relaxed">
                 {t('landing.features.card_3_desc', 'Manage your users effectively with tags, custom fields, and detailed analytics built right into the platform.')}
               </p>
             </div>
 
-            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-8 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all duration-200 group cursor-pointer reveal-slide-right reveal-delay-200">
-              <div className="w-16 h-16 border-2 border-[#0A0A0A] group-hover:border-[#F2EBDD] flex items-center justify-center mb-6 bg-white group-hover:bg-[#0A0A0A]">
-                <CreditCard size={32} className="text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors" />
+            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-4 sm:p-8 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all duration-200 group cursor-pointer reveal-slide-right reveal-delay-200">
+              <div className="w-10 h-10 sm:w-16 sm:h-16 border-2 border-[#0A0A0A] group-hover:border-[#F2EBDD] flex items-center justify-center mb-3 sm:mb-6 bg-white group-hover:bg-[#0A0A0A]">
+                <CreditCard className="w-5 h-5 sm:w-8 sm:h-8 text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors" />
               </div>
-              <h3 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] group-hover:text-[#F2EBDD] mb-3 uppercase leading-tight">
+              <h3 className="font-['Anybody',sans-serif] text-sm sm:text-2xl font-black text-[#0A0A0A] group-hover:text-[#F2EBDD] mb-1.5 sm:mb-3 uppercase leading-tight">
                 {t('landing.features.card_4_title', 'Chat Payments')}
               </h3>
-              <p className="text-sm font-medium leading-relaxed">
+              <p className="text-xs sm:text-sm font-medium leading-relaxed">
                 {t('landing.features.card_4_desc', 'Accept payments directly within the chat interface using robust integrations with Stripe and PayPal.')}
               </p>
             </div>
@@ -424,36 +266,38 @@ export const LandingPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                 {[
                   {
-                    icon: <MessageSquare size={22} />,
+                    icon: <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />,
                     title: t('landing.ai.card_chat_title', 'AI in chat'),
                     desc: t('landing.ai.card_chat_desc', 'Replies to customers with context from your business.')
                   },
                   {
-                    icon: <GitBranch size={22} />,
+                    icon: <GitBranch className="w-4 h-4 sm:w-5 sm:h-5" />,
                     title: t('landing.ai.card_nodes_title', 'Node generator'),
                     desc: t('landing.ai.card_nodes_desc', 'Turns a plain request into a ready automation flow.')
                   },
                   {
-                    icon: <Plug size={22} />,
+                    icon: <Plug className="w-4 h-4 sm:w-5 sm:h-5" />,
                     title: t('landing.ai.card_custom_title', 'Your own AI'),
                     desc: t('landing.ai.card_custom_desc', 'Connect OpenAI-compatible providers and keep control.')
                   }
                 ].map((item, index) => (
                   <div
                     key={item.title}
-                    className="bg-white border-2 border-[#0A0A0A] shadow-[5px_5px_0px_#0A0A0A] p-5 hover:-translate-y-1 transition-all reveal-brutal-pop"
+                    className={`bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] p-3.5 sm:p-5 hover:-translate-y-1 transition-all reveal-brutal-pop ${
+                      index === 2 ? 'col-span-2 sm:col-span-1' : ''
+                    }`}
                     style={{ animationDelay: `${index * 90}ms` }}
                   >
-                    <div className="w-11 h-11 bg-amber-300 border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] flex items-center justify-center mb-4 text-[#0A0A0A]">
+                    <div className="w-8 h-8 sm:w-11 sm:h-11 bg-amber-300 border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] sm:shadow-[3px_3px_0px_#0A0A0A] flex items-center justify-center mb-2.5 sm:mb-4 text-[#0A0A0A]">
                       {item.icon}
                     </div>
-                    <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase leading-tight mb-2 text-[#0A0A0A]">
+                    <h3 className="font-['Anybody',sans-serif] text-xs sm:text-lg font-black uppercase leading-tight mb-1 sm:mb-2 text-[#0A0A0A]">
                       {item.title}
                     </h3>
-                    <p className="text-xs sm:text-sm font-bold text-[#0A0A0A]/70 leading-relaxed">
+                    <p className="text-[10px] sm:text-sm font-bold text-[#0A0A0A]/70 leading-relaxed">
                       {item.desc}
                     </p>
                   </div>
@@ -569,40 +413,40 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="relative z-10 flex flex-col items-start text-left bg-[#F2EBDD] text-[#0A0A0A] border-4 border-[#0A0A0A] shadow-[8px_8px_0px_rgba(255,255,255,0.2)] p-8 space-y-4 rounded-xl hover:-translate-y-1 transition-all reveal-slide-left reveal-delay-100">
-                <div className="w-16 h-16 bg-amber-400 text-[#0A0A0A] flex items-center justify-center font-['Anybody',sans-serif] text-2xl font-black border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-lg">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-8">
+              <div className="relative z-10 flex flex-col items-start text-left bg-[#F2EBDD] text-[#0A0A0A] border-2 sm:border-4 border-[#0A0A0A] shadow-[4px_4px_0px_rgba(255,255,255,0.2)] sm:shadow-[8px_8px_0px_rgba(255,255,255,0.2)] p-4 sm:p-8 space-y-2 sm:space-y-4 rounded-xl hover:-translate-y-1 transition-all reveal-slide-left reveal-delay-100">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-amber-400 text-[#0A0A0A] flex items-center justify-center font-['Anybody',sans-serif] text-sm sm:text-2xl font-black border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] sm:shadow-[4px_4px_0px_#0A0A0A] rounded-lg">
                   01
                 </div>
-                <h3 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase leading-tight">
+                <h3 className="font-['Anybody',sans-serif] text-sm sm:text-2xl font-black text-[#0A0A0A] uppercase leading-tight">
                   {t('landing.how.step1_title', 'Connect Your Bot')}
                 </h3>
-                <p className="text-sm sm:text-base font-bold text-[#0A0A0A]/80 leading-relaxed">
+                <p className="text-xs sm:text-base font-bold text-[#0A0A0A]/80 leading-relaxed">
                   {t('landing.how.step1_desc', 'Link your Telegram channels in seconds with zero coding required.')}
                 </p>
               </div>
 
-              <div className="relative z-10 flex flex-col items-start text-left bg-[#F2EBDD] text-[#0A0A0A] border-4 border-[#0A0A0A] shadow-[8px_8px_0px_rgba(255,255,255,0.2)] p-8 space-y-4 rounded-xl hover:-translate-y-1 transition-all reveal-scale-rotate reveal-delay-200">
-                <div className="w-16 h-16 bg-amber-400 text-[#0A0A0A] flex items-center justify-center font-['Anybody',sans-serif] text-2xl font-black border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-lg">
+              <div className="relative z-10 flex flex-col items-start text-left bg-[#F2EBDD] text-[#0A0A0A] border-2 sm:border-4 border-[#0A0A0A] shadow-[4px_4px_0px_rgba(255,255,255,0.2)] sm:shadow-[8px_8px_0px_rgba(255,255,255,0.2)] p-4 sm:p-8 space-y-2 sm:space-y-4 rounded-xl hover:-translate-y-1 transition-all reveal-scale-rotate reveal-delay-200">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-amber-400 text-[#0A0A0A] flex items-center justify-center font-['Anybody',sans-serif] text-sm sm:text-2xl font-black border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] sm:shadow-[4px_4px_0px_#0A0A0A] rounded-lg">
                   02
                 </div>
-                <h3 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase leading-tight">
+                <h3 className="font-['Anybody',sans-serif] text-sm sm:text-2xl font-black text-[#0A0A0A] uppercase leading-tight">
                   {t('landing.how.step2_title', 'Build Your Flow')}
                 </h3>
-                <p className="text-sm sm:text-base font-bold text-[#0A0A0A]/80 leading-relaxed">
+                <p className="text-xs sm:text-base font-bold text-[#0A0A0A]/80 leading-relaxed">
                   {t('landing.how.step2_desc', 'Use the visual drag-and-drop canvas to map out the perfect automated user journey.')}
                 </p>
               </div>
 
-              <div className="relative z-10 flex flex-col items-start text-left bg-[#F2EBDD] text-[#0A0A0A] border-4 border-[#0A0A0A] shadow-[8px_8px_0px_rgba(255,255,255,0.2)] p-8 space-y-4 rounded-xl hover:-translate-y-1 transition-all reveal-slide-right reveal-delay-300">
-                <div className="w-16 h-16 bg-amber-400 text-[#0A0A0A] flex items-center justify-center font-['Anybody',sans-serif] text-2xl font-black border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-lg">
+              <div className="relative z-10 col-span-2 md:col-span-1 flex flex-col items-start text-left bg-[#F2EBDD] text-[#0A0A0A] border-2 sm:border-4 border-[#0A0A0A] shadow-[4px_4px_0px_rgba(255,255,255,0.2)] sm:shadow-[8px_8px_0px_rgba(255,255,255,0.2)] p-4 sm:p-8 space-y-2 sm:space-y-4 rounded-xl hover:-translate-y-1 transition-all reveal-slide-right reveal-delay-300">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-amber-400 text-[#0A0A0A] flex items-center justify-center font-['Anybody',sans-serif] text-sm sm:text-2xl font-black border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] sm:shadow-[4px_4px_0px_#0A0A0A] rounded-lg">
                   03
                 </div>
-                <h3 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase leading-tight">
-                  {t('landing.how.step3_title', 'Start Receiving Payments')}
+                <h3 className="font-['Anybody',sans-serif] text-sm sm:text-2xl font-black text-[#0A0A0A] uppercase leading-tight">
+                  {t('landing.how.step3_title', 'Go Live & Scale')}
                 </h3>
-                <p className="text-sm sm:text-base font-bold text-[#0A0A0A]/80 leading-relaxed">
-                  {t('landing.how.step3_desc', 'Launch your bot and watch subscriber engagement and automated revenue roll in.')}
+                <p className="text-xs sm:text-base font-bold text-[#0A0A0A]/80 leading-relaxed">
+                  {t('landing.how.step3_desc', 'Publish with one click and let your bot handle customer queries and sales 24/7.')}
                 </p>
               </div>
             </div>
@@ -628,7 +472,7 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="overflow-x-auto border-2 border-[#F2EBDD] shadow-[8px_8px_0px_#F2EBDD] bg-[#F2EBDD] text-[#0A0A0A] reveal-flip-up reveal-delay-150">
+            <div className="hidden md:block overflow-x-auto border-2 border-[#F2EBDD] shadow-[8px_8px_0px_#F2EBDD] bg-[#F2EBDD] text-[#0A0A0A] reveal-flip-up reveal-delay-150">
               <div className="min-w-[860px]">
                 <div className="grid grid-cols-[1.15fr_1fr_1fr_1fr] border-b-2 border-[#0A0A0A]">
                   <div className="p-4 bg-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-widest">
@@ -707,6 +551,58 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
+            <div className="block md:hidden space-y-3.5 reveal-flip-up reveal-delay-150">
+              {[
+                {
+                  metric: t('landing.comparison.r1_metric', 'Launch speed'),
+                  launchly: t('landing.comparison.r1_launchly', 'Hours to first working funnel'),
+                  manual: t('landing.comparison.r1_manual', 'Fast start, slow to scale'),
+                },
+                {
+                  metric: t('landing.comparison.r2_metric', 'Engineering dependency'),
+                  launchly: t('landing.comparison.r2_launchly', 'No-code builder for business teams'),
+                  manual: t('landing.comparison.r2_manual', 'Owner or operator does everything manually'),
+                },
+                {
+                  metric: t('landing.comparison.r3_metric', 'CRM, tags, and audience data'),
+                  launchly: t('landing.comparison.r3_launchly', 'Built in from day one'),
+                  manual: t('landing.comparison.r3_manual', 'Scattered across chats and spreadsheets'),
+                },
+                {
+                  metric: t('landing.comparison.r4_metric', 'Payments and follow-ups'),
+                  launchly: t('landing.comparison.r4_launchly', 'Payments, triggers, and post-purchase flows'),
+                  manual: t('landing.comparison.r4_manual', 'Manual checks and missed follow-ups'),
+                },
+                {
+                  metric: t('landing.comparison.r5_metric', 'AI automation'),
+                  launchly: t('landing.comparison.r5_launchly', 'AI nodes ready for support and sales flows'),
+                  manual: t('landing.comparison.r5_manual', 'No reliable AI workflow layer'),
+                },
+                {
+                  metric: t('landing.comparison.r6_metric', 'Maintenance cost'),
+                  launchly: t('landing.comparison.r6_launchly', 'Platform updates included'),
+                  manual: t('landing.comparison.r6_manual', 'Hidden cost in daily team time'),
+                },
+              ].map((row) => (
+                <div key={row.metric} className="bg-[#F2EBDD] text-[#0A0A0A] border-2 border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD] p-3.5 space-y-2.5">
+                  <div className="font-['JetBrains_Mono',monospace] text-[11px] font-black uppercase border-b border-[#0A0A0A]/20 pb-1.5 text-slate-800">
+                    {row.metric}
+                  </div>
+                  <div className="bg-emerald-300 border-2 border-[#0A0A0A] p-2.5 shadow-[2px_2px_0px_#0A0A0A] flex items-start gap-2">
+                    <Check size={15} className="mt-0.5 shrink-0 text-[#0A0A0A] stroke-[3]" />
+                    <div>
+                      <span className="font-['JetBrains_Mono',monospace] text-[9px] font-black uppercase block tracking-wider text-[#0A0A0A]/70">LAUNCHLY</span>
+                      <span className="text-xs font-black text-[#0A0A0A] leading-tight block">{row.launchly}</span>
+                    </div>
+                  </div>
+                  <div className="bg-white border border-[#0A0A0A]/30 p-2 text-xs font-bold text-slate-600 leading-snug">
+                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold uppercase block tracking-wider text-slate-400">OTHERS</span>
+                    {row.manual}
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
               <p className="text-sm sm:text-base font-bold text-[#F2EBDD]/80 max-w-2xl">
                 {t(
@@ -741,176 +637,176 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-8">
               
-              <div className="bg-white border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-6 sm:p-7 flex flex-col justify-between space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-brutal-pop reveal-delay-50">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-1">
+              <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-3.5 sm:p-7 flex flex-col justify-between space-y-3 sm:space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-brutal-pop reveal-delay-50">
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-center gap-0.5 sm:gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} className="fill-amber-400 text-amber-500" />
+                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-500" />
                     ))}
                   </div>
-                  <p className="font-['Geist',sans-serif] text-sm sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
+                  <p className="font-['Geist',sans-serif] text-xs sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
                     {t('landing.testimonials.t1_text')}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3.5 pt-4 border-t border-[#0A0A0A]/10">
+                <div className="flex items-center gap-2 sm:gap-3.5 pt-2.5 sm:pt-4 border-t border-[#0A0A0A]/10">
                   <img
                     src="https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?auto=format&fit=crop&w=256&q=80"
                     alt={t('landing.testimonials.t1_name')}
-                    className="w-11 h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
+                    className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
                   />
-                  <div>
-                    <h4 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="font-['Anybody',sans-serif] text-xs sm:text-base font-black text-[#0A0A0A] uppercase leading-tight truncate">
                       {t('landing.testimonials.t1_name')}
                     </h4>
-                    <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-600">
+                    <p className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold text-slate-600 truncate">
                       {t('landing.testimonials.t1_role')}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-6 sm:p-7 flex flex-col justify-between space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-scale-rotate reveal-delay-100">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-1">
+              <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-3.5 sm:p-7 flex flex-col justify-between space-y-3 sm:space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-scale-rotate reveal-delay-100">
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-center gap-0.5 sm:gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} className="fill-amber-400 text-amber-500" />
+                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-500" />
                     ))}
                   </div>
-                  <p className="font-['Geist',sans-serif] text-sm sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
+                  <p className="font-['Geist',sans-serif] text-xs sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
                     {t('landing.testimonials.t2_text')}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3.5 pt-4 border-t border-[#0A0A0A]/10">
+                <div className="flex items-center gap-2 sm:gap-3.5 pt-2.5 sm:pt-4 border-t border-[#0A0A0A]/10">
                   <img
                     src="https://images.unsplash.com/photo-1598550874175-4d0ef436c909?auto=format&fit=crop&w=256&q=80"
                     alt={t('landing.testimonials.t2_name')}
-                    className="w-11 h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
+                    className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
                   />
-                  <div>
-                    <h4 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="font-['Anybody',sans-serif] text-xs sm:text-base font-black text-[#0A0A0A] uppercase leading-tight truncate">
                       {t('landing.testimonials.t2_name')}
                     </h4>
-                    <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-600">
+                    <p className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold text-slate-600 truncate">
                       {t('landing.testimonials.t2_role')}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-6 sm:p-7 flex flex-col justify-between space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-brutal-pop reveal-delay-150">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-1">
+              <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-3.5 sm:p-7 flex flex-col justify-between space-y-3 sm:space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-brutal-pop reveal-delay-150">
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-center gap-0.5 sm:gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} className="fill-amber-400 text-amber-500" />
+                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-500" />
                     ))}
                   </div>
-                  <p className="font-['Geist',sans-serif] text-sm sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
+                  <p className="font-['Geist',sans-serif] text-xs sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
                     {t('landing.testimonials.t3_text')}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3.5 pt-4 border-t border-[#0A0A0A]/10">
+                <div className="flex items-center gap-2 sm:gap-3.5 pt-2.5 sm:pt-4 border-t border-[#0A0A0A]/10">
                   <img
                     src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=256&q=80"
                     alt={t('landing.testimonials.t3_name')}
-                    className="w-11 h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
+                    className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
                   />
-                  <div>
-                    <h4 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="font-['Anybody',sans-serif] text-xs sm:text-base font-black text-[#0A0A0A] uppercase leading-tight truncate">
                       {t('landing.testimonials.t3_name')}
                     </h4>
-                    <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-600">
+                    <p className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold text-slate-600 truncate">
                       {t('landing.testimonials.t3_role')}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-6 sm:p-7 flex flex-col justify-between space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-scale-rotate reveal-delay-200">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-1">
+              <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-3.5 sm:p-7 flex flex-col justify-between space-y-3 sm:space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-scale-rotate reveal-delay-200">
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-center gap-0.5 sm:gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} className="fill-amber-400 text-amber-500" />
+                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-500" />
                     ))}
                   </div>
-                  <p className="font-['Geist',sans-serif] text-sm sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
+                  <p className="font-['Geist',sans-serif] text-xs sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
                     {t('landing.testimonials.t4_text')}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3.5 pt-4 border-t border-[#0A0A0A]/10">
+                <div className="flex items-center gap-2 sm:gap-3.5 pt-2.5 sm:pt-4 border-t border-[#0A0A0A]/10">
                   <img
                     src="https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?auto=format&fit=crop&w=256&q=80"
                     alt={t('landing.testimonials.t4_name')}
-                    className="w-11 h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
+                    className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
                   />
-                  <div>
-                    <h4 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="font-['Anybody',sans-serif] text-xs sm:text-base font-black text-[#0A0A0A] uppercase leading-tight truncate">
                       {t('landing.testimonials.t4_name')}
                     </h4>
-                    <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-600">
+                    <p className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold text-slate-600 truncate">
                       {t('landing.testimonials.t4_role')}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-6 sm:p-7 flex flex-col justify-between space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-brutal-pop reveal-delay-250">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-1">
+              <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-3.5 sm:p-7 flex flex-col justify-between space-y-3 sm:space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-brutal-pop reveal-delay-250">
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-center gap-0.5 sm:gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} className="fill-amber-400 text-amber-500" />
+                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-500" />
                     ))}
                   </div>
-                  <p className="font-['Geist',sans-serif] text-sm sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
+                  <p className="font-['Geist',sans-serif] text-xs sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
                     {t('landing.testimonials.t5_text')}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3.5 pt-4 border-t border-[#0A0A0A]/10">
+                <div className="flex items-center gap-2 sm:gap-3.5 pt-2.5 sm:pt-4 border-t border-[#0A0A0A]/10">
                   <img
                     src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=256&q=80"
                     alt={t('landing.testimonials.t5_name')}
-                    className="w-11 h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
+                    className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
                   />
-                  <div>
-                    <h4 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="font-['Anybody',sans-serif] text-xs sm:text-base font-black text-[#0A0A0A] uppercase leading-tight truncate">
                       {t('landing.testimonials.t5_name')}
                     </h4>
-                    <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-600">
+                    <p className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold text-slate-600 truncate">
                       {t('landing.testimonials.t5_role')}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-6 sm:p-7 flex flex-col justify-between space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-scale-rotate reveal-delay-300">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-1">
+              <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-3.5 sm:p-7 flex flex-col justify-between space-y-3 sm:space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-scale-rotate reveal-delay-300">
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-center gap-0.5 sm:gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} className="fill-amber-400 text-amber-500" />
+                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-500" />
                     ))}
                   </div>
-                  <p className="font-['Geist',sans-serif] text-sm sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
+                  <p className="font-['Geist',sans-serif] text-xs sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
                     {t('landing.testimonials.t6_text')}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3.5 pt-4 border-t border-[#0A0A0A]/10">
+                <div className="flex items-center gap-2 sm:gap-3.5 pt-2.5 sm:pt-4 border-t border-[#0A0A0A]/10">
                   <img
                     src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=256&q=80"
                     alt={t('landing.testimonials.t6_name')}
-                    className="w-11 h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
+                    className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
                   />
-                  <div>
-                    <h4 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="font-['Anybody',sans-serif] text-xs sm:text-base font-black text-[#0A0A0A] uppercase leading-tight truncate">
                       {t('landing.testimonials.t6_name')}
                     </h4>
-                    <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-600">
+                    <p className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold text-slate-600 truncate">
                       {t('landing.testimonials.t6_role')}
                     </p>
                   </div>
@@ -937,21 +833,21 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {[
-                { icon: <Server size={28} className="text-emerald-400" />, title: t('landing.trust.uptime_title', '99.9% Uptime SLA'), desc: t('landing.trust.uptime_desc', 'Боти працюють цілодобово навіть під час пікових рекламних кампаній'), border: 'border-emerald-500/50 hover:border-emerald-400' },
-                { icon: <Lock size={28} className="text-amber-400" />, title: t('landing.trust.encryption_title', 'Шифрування AES-256'), desc: t('landing.trust.encryption_desc', 'Токени Telegram та ключі Stripe зберігаються у зашифрованому vault'), border: 'border-amber-500/50 hover:border-amber-400' },
-                { icon: <Server size={28} className="text-indigo-400" />, title: t('landing.trust.backup_title', 'Авто-резервування'), desc: t('landing.trust.backup_desc', 'Кожен стан воронки та налаштування бота резервуються щохвилини'), border: 'border-indigo-500/50 hover:border-indigo-400' },
-                { icon: <Shield size={28} className="text-rose-400" />, title: t('landing.trust.gdpr_title', 'GDPR Compliant'), desc: t('landing.trust.gdpr_desc', 'Дані користувачів обробляються відповідно до вимог законодавства ЄС'), border: 'border-rose-500/50 hover:border-rose-400' },
+                { icon: <Server className="w-5 h-5 sm:w-7 sm:h-7 text-emerald-400" />, title: t('landing.trust.uptime_title', '99.9% Uptime SLA'), desc: t('landing.trust.uptime_desc', 'Боти працюють цілодобово навіть під час пікових рекламних кампаній'), border: 'border-emerald-500/50 hover:border-emerald-400' },
+                { icon: <Lock className="w-5 h-5 sm:w-7 sm:h-7 text-amber-400" />, title: t('landing.trust.encryption_title', 'Шифрування AES-256'), desc: t('landing.trust.encryption_desc', 'Токени Telegram та ключі Stripe зберігаються у зашифрованому vault'), border: 'border-amber-500/50 hover:border-amber-400' },
+                { icon: <Server className="w-5 h-5 sm:w-7 sm:h-7 text-indigo-400" />, title: t('landing.trust.backup_title', 'Авто-резервування'), desc: t('landing.trust.backup_desc', 'Кожен стан воронки та налаштування бота резервуються щохвилини'), border: 'border-indigo-500/50 hover:border-indigo-400' },
+                { icon: <Shield className="w-5 h-5 sm:w-7 sm:h-7 text-rose-400" />, title: t('landing.trust.gdpr_title', 'GDPR Compliant'), desc: t('landing.trust.gdpr_desc', 'Дані користувачів обробляються відповідно до вимог законодавства ЄС'), border: 'border-rose-500/50 hover:border-rose-400' },
               ].map((item, i) => (
-                <div key={i} className={`bg-white/5 border-2 ${item.border} p-6 space-y-4 hover:-translate-y-1 transition-all reveal-brutal-pop`} style={{ animationDelay: `${i * 80}ms` }}>
-                  <div className="w-12 h-12 bg-white/10 border border-white/20 flex items-center justify-center">
+                <div key={i} className={`bg-white/5 border-2 ${item.border} p-3.5 sm:p-6 space-y-2 sm:space-y-4 hover:-translate-y-1 transition-all reveal-brutal-pop`} style={{ animationDelay: `${i * 80}ms` }}>
+                  <div className="w-9 h-9 sm:w-12 sm:h-12 bg-white/10 border border-white/20 flex items-center justify-center mb-1.5 sm:mb-3">
                     {item.icon}
                   </div>
-                  <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-white leading-tight">
+                  <h3 className="font-['Anybody',sans-serif] text-xs sm:text-lg font-black uppercase text-white leading-tight">
                     {item.title}
                   </h3>
-                  <p className="font-['Geist',sans-serif] text-sm text-[#F2EBDD]/60 font-medium leading-relaxed">
+                  <p className="font-['Geist',sans-serif] text-[10px] sm:text-sm text-[#F2EBDD]/60 font-medium leading-relaxed">
                     {item.desc}
                   </p>
                 </div>
@@ -990,7 +886,7 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6 items-stretch">
             {LAUNCHLY_PLANS.map((plan, idx) => {
               const price = billingCycle === 'annual' ? plan.priceAnnual : plan.priceMonthly;
               const isPro = plan.id === 'pro';
@@ -1007,63 +903,63 @@ export const LandingPage: React.FC = () => {
               return (
                 <div
                   key={plan.id}
-                  className={`border-2 border-[#0A0A0A] p-6 flex flex-col justify-between relative transition-all reveal-brutal-pop ${delays[idx % 4]} ${
+                  className={`border-2 border-[#0A0A0A] p-2.5 sm:p-6 flex flex-col justify-between relative transition-all reveal-brutal-pop ${delays[idx % 4]} ${
                     isPro
-                      ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[6px_6px_0px_#0A0A0A] ring-2 ring-indigo-500 lg:-translate-y-2'
-                      : 'bg-[#F2EBDD] text-[#0A0A0A] shadow-[5px_5px_0px_#0A0A0A]'
+                      ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] ring-2 ring-indigo-500 lg:-translate-y-2'
+                      : 'bg-[#F2EBDD] text-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[5px_5px_0px_#0A0A0A]'
                   }`}
                 >
                   {plan.popular && (
-                    <div className="absolute top-0 right-0 bg-indigo-600 text-white px-3 py-1 font-['JetBrains_Mono',monospace] text-[10px] uppercase tracking-widest font-black border-l-2 border-b-2 border-[#0A0A0A]">
-                      {t('landing.pricing.popular', 'MOST POPULAR')}
+                    <div className="absolute top-0 right-0 bg-indigo-600 text-white px-1.5 py-0.5 sm:px-3 sm:py-1 font-['JetBrains_Mono',monospace] text-[8px] sm:text-[10px] uppercase tracking-wider font-black border-l-2 border-b-2 border-[#0A0A0A]">
+                      {t('landing.pricing.popular', 'POPULAR')}
                     </div>
                   )}
 
-                  <div className="space-y-5">
+                  <div className="space-y-2.5 sm:space-y-5">
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className={`font-['Anybody',sans-serif] text-2xl font-black uppercase ${isPro ? 'text-[#F2EBDD]' : 'text-[#0A0A0A]'}`}>
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <h3 className={`font-['Anybody',sans-serif] text-sm sm:text-2xl font-black uppercase ${isPro ? 'text-[#F2EBDD]' : 'text-[#0A0A0A]'}`}>
                           {planName}
                         </h3>
                         {plan.badge && (
-                          <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded text-[10px] font-bold">
+                          <span className="px-1 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded text-[8px] sm:text-[10px] font-bold">
                             {plan.badge}
                           </span>
                         )}
                       </div>
-                      <p className={`text-xs font-medium mt-1 min-h-[2.25rem] leading-snug ${isPro ? 'text-slate-300' : 'text-slate-600'}`}>
+                      <p className={`text-[10px] sm:text-xs font-medium mt-0.5 sm:mt-1 min-h-0 sm:min-h-[2.25rem] leading-snug line-clamp-1 ${isPro ? 'text-slate-300' : 'text-slate-600'}`}>
                         {planSubtitle}
                       </p>
                     </div>
 
-                    <div className="py-2 border-t border-b border-current/20 space-y-1">
-                      <div className="flex items-baseline gap-1">
-                        <span className="font-['Anybody',sans-serif] text-3xl sm:text-4xl font-black">${price}</span>
-                        <span className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-widest opacity-80">{t('landing.pricing.mo', '/mo')}</span>
+                    <div className="py-1.5 sm:py-2 border-t border-b border-current/20 space-y-0.5 sm:space-y-1">
+                      <div className="flex items-baseline gap-0.5">
+                        <span className="font-['Anybody',sans-serif] text-xl sm:text-4xl font-black">${price}</span>
+                        <span className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-80">{t('landing.pricing.mo', '/mo')}</span>
                       </div>
-                      <div className="pt-1">
-                        <span className="font-['Anybody',sans-serif] text-lg font-extrabold">{plan.contactsLimit}</span>
-                        <span className="text-[11px] font-bold block opacity-70 leading-none mt-0.5">{t('landing.pricing.contacts_label', 'Active Contacts / mo')}</span>
+                      <div className="pt-0.5">
+                        <span className="font-['Anybody',sans-serif] text-xs sm:text-lg font-extrabold">{plan.contactsLimit}</span>
+                        <span className="text-[9px] sm:text-[11px] font-bold block opacity-70 leading-none mt-0.5">{t('landing.pricing.contacts_label', 'Active Contacts / mo')}</span>
                       </div>
                     </div>
 
-                    <ul className="space-y-2">
+                    <ul className="space-y-1 sm:space-y-2">
                       {planFeatures.map((feat) => (
-                        <li key={feat} className="flex items-start gap-2 text-xs font-medium leading-tight">
-                          <Check size={14} className={`shrink-0 mt-0.5 ${isPro ? 'text-indigo-400' : 'text-[#0A0A0A]'}`} />
-                          <span>{feat}</span>
+                        <li key={feat} className="flex items-start gap-1 sm:gap-2 text-[9.5px] sm:text-xs font-medium leading-tight">
+                          <Check className={`w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 mt-0.5 ${isPro ? 'text-indigo-400' : 'text-[#0A0A0A]'}`} />
+                          <span className="line-clamp-2">{feat}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="pt-5">
+                  <div className="pt-2 sm:pt-5">
                     <button
                       onClick={handleCta}
-                      className={`w-full font-['JetBrains_Mono',monospace] text-xs font-extrabold uppercase tracking-wider py-3 border-2 transition-all cursor-pointer ${
+                      className={`w-full font-['JetBrains_Mono',monospace] text-[9.5px] sm:text-xs font-extrabold uppercase tracking-tight sm:tracking-wider py-2 sm:py-3 px-1 sm:px-4 border-2 transition-all cursor-pointer truncate ${
                         isPro
-                          ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD] shadow-[3px_3px_0px_rgba(242,235,221,0.4)] hover:bg-white hover:border-white hover:shadow-none hover:translate-x-1 hover:translate-y-1'
-                          : 'bg-white text-[#0A0A0A] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] hover:shadow-none hover:translate-x-1 hover:translate-y-1'
+                          ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD] shadow-[2px_2px_0px_rgba(242,235,221,0.4)] sm:shadow-[3px_3px_0px_rgba(242,235,221,0.4)] hover:bg-white hover:border-white hover:shadow-none hover:translate-x-1 hover:translate-y-1'
+                          : 'bg-white text-[#0A0A0A] border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] sm:shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] hover:shadow-none hover:translate-x-1 hover:translate-y-1'
                       }`}
                     >
                       {planCta}

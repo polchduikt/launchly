@@ -33,7 +33,10 @@ export const AuthPageLayout: React.FC<AuthPageLayoutProps> = ({
         </div>
       </div>
 
-      <div className="w-full md:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-center items-center bg-[#F2EBDD]">
+      <div className="w-full md:w-1/2 p-6 sm:p-12 lg:p-16 flex flex-col justify-center items-center bg-[#F2EBDD]">
+        <div className="block md:hidden mb-6 text-center">
+          <img src={logo} alt="Launchly Logo" className="h-9 w-auto object-contain mx-auto mb-2" />
+        </div>
         <div className="w-full max-w-[400px]">
           {rightContent}
         </div>

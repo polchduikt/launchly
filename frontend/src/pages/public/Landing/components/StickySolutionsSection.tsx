@@ -313,10 +313,9 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
     <section
       id="use-cases"
       ref={containerRef}
-      className="relative bg-[#F2EBDD] border-y-4 border-[#0A0A0A] z-10"
-      style={{ height: '240vh' }}
+      className="relative bg-[#F2EBDD] border-y-4 border-[#0A0A0A] z-10 py-6 lg:py-0 h-auto lg:h-[240vh]"
     >
-      <div className="sticky top-8 md:top-14 py-6 md:py-8 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto flex flex-col justify-center min-h-[calc(100vh-3.5rem)]">
+      <div className="relative lg:sticky top-0 lg:top-14 py-4 lg:py-8 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto flex flex-col justify-center min-h-0 lg:min-h-[calc(100vh-3.5rem)]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
           <div className="lg:col-span-8 flex flex-col justify-between space-y-4 sm:space-y-5">
             <div className="text-left border-l-8 border-[#0A0A0A] pl-5">
@@ -328,7 +327,7 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
               </p>
             </div>
 
-            <div className="w-full bg-[#0A0A0A]/10 h-2.5 rounded-full overflow-hidden border border-[#0A0A0A]/20">
+            <div className="hidden lg:block w-full bg-[#0A0A0A]/10 h-2.5 rounded-full overflow-hidden border border-[#0A0A0A]/20">
               <div
                 className="bg-[#0A0A0A] h-full w-full origin-left transition-transform duration-100 ease-out will-change-transform"
                 style={{ transform: `scaleX(${scrollProgress})` }}
@@ -413,8 +412,8 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
             </div>
           </div>
 
-          <div className="lg:col-span-4 flex justify-center items-stretch">
-            <div className="w-full max-w-[340px] bg-[#0A0A0A] p-2.5 rounded-[40px] border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] flex flex-col justify-between">
+          <div className="hidden lg:flex lg:col-span-4 justify-center items-stretch">
+            <div className="w-full max-w-[340px] h-full min-h-[500px] bg-[#0A0A0A] p-2 sm:p-2.5 rounded-[36px] sm:rounded-[40px] border-4 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] sm:shadow-[10px_10px_0px_#0A0A0A] flex flex-col justify-between">
               <div className="w-24 h-4 bg-[#0A0A0A] rounded-full mx-auto mb-1.5 flex items-center justify-center gap-1.5 shrink-0 z-20">
                 <div className="w-2.5 h-2.5 rounded-full bg-[#1C1C1E]" />
                 <div className="w-1.5 h-1.5 rounded-full bg-[#0D1F2D]" />
@@ -441,7 +440,7 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
                   </div>
                 </div>
 
-                <div className="flex-1 p-3 overflow-y-auto space-y-2.5 bg-[#0E1621]">
+                <div className="flex-1 p-3 overflow-y-auto scrollbar-none space-y-2.5 bg-[#0E1621]" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                   {currentMessages.map((msg) => (
                     <div
                       key={msg.id}

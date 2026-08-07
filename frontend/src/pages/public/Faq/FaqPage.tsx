@@ -135,7 +135,7 @@ export const FaqPage: React.FC = () => {
 
         <section className="py-8 px-6 lg:px-16 max-w-5xl mx-auto pb-24">
 
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+          <div className="flex overflow-x-auto sm:flex-wrap items-center justify-start sm:justify-center gap-2 mb-10 pb-2 sm:pb-0 scrollbar-none max-w-full">
             {categories.map(cat => {
               const Icon = cat.icon;
               const isActive = selectedCategory === cat.id;
@@ -143,7 +143,7 @@ export const FaqPage: React.FC = () => {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex items-center gap-2 px-4 py-2 border-2 border-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-4 py-2 border-2 border-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                     isActive
                       ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[3px_3px_0px_#0A0A0A]'
                       : 'bg-white text-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#F2EBDD]'
