@@ -26,4 +26,6 @@ public interface AuthService {
     void unlinkTelegram(String currentEmail);
 
     boolean handleTelegramAuth(String token, Long telegramUserId, String telegramUsername, String telegramName, String telegramPhotoUrl);
+
+    void deleteUserAccount(Long userId);
 }

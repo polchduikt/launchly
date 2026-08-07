@@ -13,6 +13,8 @@ import com.launchly.auth.repository.UserRepository;
 import com.launchly.auth.service.AuthService;
 import com.launchly.auth.service.TokenService;
 import com.launchly.billing.service.BillingService;
+import com.launchly.bot.entity.Bot;
+import com.launchly.bot.entity.BotMember;
 import com.launchly.common.exception.AppException;
 import com.launchly.auth.entity.AuthSessionStatus;
 import com.launchly.auth.entity.TelegramAuthSession;
@@ -26,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -39,6 +42,9 @@ public class AuthServiceImpl implements AuthService {
     private final BillingService billingService;
     private final TelegramAuthSessionRepository telegramAuthSessionRepository;
     private final com.launchly.admin.service.UserAuditService userAuditService;
+    private final com.launchly.bot.repository.BotRepository botRepository;
+    private final com.launchly.bot.repository.BotMemberRepository botMemberRepository;
+    private final com.launchly.billing.repository.SubscriptionRepository subscriptionRepository;
 
     @Value("${telegram.system-bot-username:}")
     private String systemBotUsername;
@@ -257,5 +263,26 @@ public class AuthServiceImpl implements AuthService {
         session.setStatus(AuthSessionStatus.SUCCESS);
         telegramAuthSessionRepository.save(session);
         return session.isSubscription();
+    }
+
+    @Override
+    @Transactional
+    public void deleteUserAccount(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+
+        List<Bot> ownedBots = botRepository.findAllByUserId(userId);
+        for (Bot b : ownedBots) {
+            botRepository.delete(b);
+        }
+
+        List<BotMember> memberships = botMemberRepository.findByUserId(userId);
+        for (BotMember bm : memberships) {
+            botMemberRepository.delete(bm);
+        }
+
+        subscriptionRepository.findByUserId(userId).ifPresent(subscriptionRepository::delete);
+
+        userRepository.delete(user);
     }
 }

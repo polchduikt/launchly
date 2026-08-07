@@ -22,4 +22,8 @@ public interface TeamService {
     void acceptInvitation(Long invitationId, Long currentUserId);
 
     void declineInvitation(Long invitationId, Long currentUserId);
+
+    void transferOwnership(Long botId, Long newOwnerUserId, Long currentUserId);
+
+    void leaveBot(Long botId, Long currentUserId);
 }

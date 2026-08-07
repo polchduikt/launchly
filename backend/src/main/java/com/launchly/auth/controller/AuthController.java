@@ -45,4 +45,11 @@ public class AuthController {
     public ResponseEntity<UserResponse> me(Authentication authentication) {
         return ResponseEntity.ok(authService.getCurrentUser(authentication.getName()));
     }
+
+    @DeleteMapping("/delete-account")
+    public ResponseEntity<Void> deleteAccount(Authentication authentication) {
+        UserResponse currentUser = authService.getCurrentUser(authentication.getName());
+        authService.deleteUserAccount(currentUser.id());
+        return ResponseEntity.noContent().build();
+    }
 }

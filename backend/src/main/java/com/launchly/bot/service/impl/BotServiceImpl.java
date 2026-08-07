@@ -132,9 +132,9 @@ public class BotServiceImpl implements BotService {
         List<Bot> memberBots = new ArrayList<>();
 
         for (BotMember bm : memberships) {
-            User owner = bm.getBot().getUser();
-            List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
-            memberBots.addAll(ownerBots);
+            if (bm.getBot() != null) {
+                memberBots.add(bm.getBot());
+            }
         }
 
         List<Bot> allBots = new ArrayList<>(ownedBots);

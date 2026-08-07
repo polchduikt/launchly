@@ -12,6 +12,11 @@ import com.launchly.bot.repository.BotInvitationRepository;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.service.TeamService;
+import com.launchly.billing.entity.Plan;
+import com.launchly.billing.entity.Subscription;
+import com.launchly.billing.entity.SubscriptionStatus;
+import com.launchly.billing.repository.PlanRepository;
+import com.launchly.billing.repository.SubscriptionRepository;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,6 +33,8 @@ public class TeamServiceImpl implements TeamService {
     private final UserRepository userRepository;
     private final BotMemberRepository botMemberRepository;
     private final BotInvitationRepository botInvitationRepository;
+    private final SubscriptionRepository subscriptionRepository;
+    private final PlanRepository planRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -265,13 +272,16 @@ public class TeamServiceImpl implements TeamService {
                         invite.getId(),
                         invite.getBot().getUser().getId(),
                         invite.getBot().getUser().getEmail(),
-                        invite.getBot().getName(),
-                        invite.getBot().getAvatar(),
+                        invite.getBot().getUser().getName() != null && !invite.getBot().getUser().getName().isBlank()
+                                ? invite.getBot().getUser().getName()
+                                : invite.getBot().getUser().getEmail(),
+                        invite.getBot().getUser().getAvatar(),
                         invite.getRole(),
                         invite.isInboxSeat(),
                         invite.isBillingPermission(),
                         true,
-                        invite.getCreatedAt()
+                        invite.getCreatedAt(),
+                        invite.getBot().getId()
                 ))
                 .collect(Collectors.toList());
     }
@@ -315,5 +325,99 @@ public class TeamServiceImpl implements TeamService {
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Invitation not found"));
 
         botInvitationRepository.delete(invite);
+    }
+
+    @Override
+    @Transactional
+    public void transferOwnership(Long botId, Long newOwnerUserId, Long currentUserId) {
+        Bot bot = botRepository.findById(botId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+
+        if (!bot.getUser().getId().equals(currentUserId)) {
+            throw new AppException(HttpStatus.FORBIDDEN, "Only the current workspace owner can transfer ownership");
+        }
+        if (currentUserId.equals(newOwnerUserId)) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "You are already the owner of this workspace");
+        }
+
+        User oldOwner = bot.getUser();
+        User newOwner = userRepository.findById(newOwnerUserId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "New owner user not found"));
+
+        List<Bot> allOldOwnerBots = botRepository.findAllByUserId(oldOwner.getId());
+        if (allOldOwnerBots.isEmpty()) {
+            allOldOwnerBots = List.of(bot);
+        }
+
+        for (Bot b : allOldOwnerBots) {
+            b.setUser(newOwner);
+            botRepository.save(b);
+
+            botMemberRepository.findByBotIdAndUserId(b.getId(), newOwnerUserId)
+                    .ifPresent(botMemberRepository::delete);
+            botMemberRepository.findByBotIdAndUserId(b.getId(), oldOwner.getId())
+                    .ifPresent(botMemberRepository::delete);
+        }
+        Optional<Subscription> oldSubOpt = subscriptionRepository.findByUserId(oldOwner.getId());
+        if (oldSubOpt.isPresent()) {
+            Subscription oldSub = oldSubOpt.get();
+            Plan oldPlan = oldSub.getPlan();
+
+            Optional<Subscription> newOwnerSubOpt = subscriptionRepository.findByUserId(newOwner.getId());
+            if (newOwnerSubOpt.isPresent()) {
+                Subscription newSub = newOwnerSubOpt.get();
+                newSub.setPlan(oldPlan);
+                newSub.setStatus(oldSub.getStatus());
+                newSub.setStripeSubscriptionId(oldSub.getStripeSubscriptionId());
+                newSub.setCancelAtPeriodEnd(oldSub.isCancelAtPeriodEnd());
+                newSub.setCurrentPeriodStart(oldSub.getCurrentPeriodStart());
+                newSub.setCurrentPeriodEnd(oldSub.getCurrentPeriodEnd());
+                subscriptionRepository.save(newSub);
+            } else {
+                Subscription newSub = Subscription.builder()
+                        .user(newOwner)
+                        .plan(oldPlan)
+                        .status(oldSub.getStatus())
+                        .stripeSubscriptionId(oldSub.getStripeSubscriptionId())
+                        .cancelAtPeriodEnd(oldSub.isCancelAtPeriodEnd())
+                        .currentPeriodStart(oldSub.getCurrentPeriodStart())
+                        .currentPeriodEnd(oldSub.getCurrentPeriodEnd())
+                        .build();
+                subscriptionRepository.save(newSub);
+            }
+
+            planRepository.findByName("FREE").ifPresent(freePlan -> {
+                Optional<Subscription> oldOwnerRefresh = subscriptionRepository.findByUserId(oldOwner.getId());
+                if (oldOwnerRefresh.isPresent()) {
+                    Subscription oldOwnerSub = oldOwnerRefresh.get();
+                    oldOwnerSub.setPlan(freePlan);
+                    oldOwnerSub.setStatus(SubscriptionStatus.ACTIVE);
+                    oldOwnerSub.setStripeSubscriptionId(null);
+                    oldOwnerSub.setCancelAtPeriodEnd(false);
+                    subscriptionRepository.save(oldOwnerSub);
+                }
+            });
+        }
+    }
+
+    @Override
+    @Transactional
+    public void leaveBot(Long botId, Long currentUserId) {
+        Bot bot = botRepository.findById(botId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+
+        if (bot.getUser().getId().equals(currentUserId)) {
+            List<BotMember> members = botMemberRepository.findByBotOwnerId(currentUserId);
+            if (members.isEmpty()) {
+                throw new AppException(HttpStatus.BAD_REQUEST, "You are the sole member of this workspace. Add a team member first or delete the workspace.");
+            }
+            BotMember nextOwnerMember = members.get(0);
+            transferOwnership(botId, nextOwnerMember.getUser().getId(), currentUserId);
+        } else {
+            List<BotMember> members = botMemberRepository.findByBotOwnerIdAndUserId(bot.getUser().getId(), currentUserId);
+            for (BotMember member : members) {
+                botMemberRepository.delete(member);
+            }
+        }
     }
 }

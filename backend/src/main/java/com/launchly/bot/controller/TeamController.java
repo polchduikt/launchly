@@ -82,4 +82,21 @@ public class TeamController {
         teamService.declineInvitation(id, userDetails.getId());
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/bots/{botId}/transfer-ownership")
+    public ResponseEntity<Void> transferOwnership(
+            @PathVariable Long botId,
+            @Valid @RequestBody com.launchly.bot.dto.request.TransferOwnershipRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        teamService.transferOwnership(botId, request.getNewOwnerUserId(), userDetails.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/bots/{botId}/leave")
+    public ResponseEntity<Void> leaveBot(
+            @PathVariable Long botId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        teamService.leaveBot(botId, userDetails.getId());
+        return ResponseEntity.ok().build();
+    }
 }
