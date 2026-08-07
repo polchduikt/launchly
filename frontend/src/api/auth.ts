@@ -20,6 +20,10 @@ export const getCurrentUserApi = async (): Promise<UserResponse> => {
   return response.data;
 };
 
+export const deleteAccountApi = async (): Promise<void> => {
+  await apiClient.delete('/auth/delete-account');
+};
+
 export interface TelegramSessionResponse {
   token: string;
   botUsername: string;

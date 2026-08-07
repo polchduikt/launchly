@@ -8,9 +8,10 @@ import type { DashboardLayoutProps } from '../../types/shared';
 import { HelpCircle } from 'lucide-react';
 import { useAllBotUsersQuery } from '../../hooks/crm/useCrmQueries';
 import { useSubscriptionQuery } from '../../hooks/bot/useBillingQueries';
+import { PendingInvitationsBanner } from '../common/PendingInvitationsBanner';
 import { PricingModal } from '../common/PricingModal';
 import { ManageSignInOptionsModal } from '../common/ManageSignInOptionsModal';
-import { isValidAvatarUrl, getInitials } from '../../utils/avatar';
+import { SafeAvatar } from '../common/SafeAvatar';
 import { ROUTES } from '../../routes/paths';
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
@@ -102,28 +103,26 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           <div ref={profileMenuRef} className="relative">
             <div
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="w-9 h-9 rounded-full bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] flex items-center justify-center font-bold text-sm overflow-hidden select-none shrink-0 cursor-pointer hover:opacity-90 transition-all"
+              className="cursor-pointer hover:opacity-90 transition-all shrink-0"
             >
-              {isValidAvatarUrl(user.avatar) ? (
-                <img src={user.avatar!} alt={user.name} className="w-full h-full object-cover" />
-              ) : (
-                getInitials(user.name)
-              )}
+              <SafeAvatar
+                src={user?.avatar}
+                name={user?.name}
+                className="w-9 h-9 rounded-full object-cover border-2 border-[#0A0A0A]"
+                fallbackClassName="w-9 h-9 rounded-full bg-white text-[#0A0A0A] font-bold text-sm flex items-center justify-center border-2 border-[#0A0A0A] shrink-0"
+              />
             </div>
 
             {showProfileMenu && (
               <div className="absolute left-14 bottom-[-10px] w-72 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] z-50 p-4 space-y-4 font-['JetBrains_Mono',monospace] text-left">
                 
                 <div className="flex items-center gap-3.5 pb-3 border-b-2 border-[#0A0A0A]">
-                  <div className="w-12 h-12 rounded-full bg-white border-2 border-[#0A0A0A] overflow-hidden shrink-0">
-                    {isValidAvatarUrl(user.avatar) ? (
-                      <img src={user.avatar!} alt={user.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center font-bold text-base text-[#0A0A0A] bg-white">
-                        {getInitials(user.name)}
-                      </div>
-                    )}
-                  </div>
+                  <SafeAvatar
+                    src={user?.avatar}
+                    name={user?.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-[#0A0A0A] shrink-0"
+                    fallbackClassName="w-12 h-12 rounded-full bg-white text-[#0A0A0A] font-bold text-base flex items-center justify-center border-2 border-[#0A0A0A] shrink-0"
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-black text-[#0A0A0A] truncate leading-snug">{user.name}</p>
                     <p className="text-[10px] text-slate-600 font-bold truncate max-w-[150px]">{user.email || 'Account email'}</p>
@@ -274,9 +273,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto custom-scrollbar z-10 relative">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden relative">
+        <PendingInvitationsBanner />
+        <main className="flex-1 overflow-y-auto custom-scrollbar z-10 relative">
+          {children}
+        </main>
+      </div>
 
       <PricingModal isOpen={showPricing} onClose={() => setShowPricing(false)} />
       <ManageSignInOptionsModal isOpen={showSignInOptions} onClose={() => setShowSignInOptions(false)} />

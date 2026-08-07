@@ -106,5 +106,14 @@
   "settings.payments.stripe.desc": "You can accept payments via Messenger and Instagram. You need to connect an existing Stripe account or create a new one to access Buy Button in your Automations. Buy Button can be used with Card, Gallery, List or Media Template elements.",
   "settings.payments.stripe.disconnected_msg": "Stripe account disconnected successfully.",
   "settings.payments.stripe.mode": "Live Mode • USD",
-  "settings.payments.stripe.title": "Stripe Account"
+  "settings.payments.stripe.title": "Stripe Account",
+  "checkout.success.title": "Subscription Activated!",
+  "checkout.success.desc": "Thank you for your purchase. Your payment went through successfully, and your new plan limits are now active.",
+  "checkout.success.transaction_id": "STRIPE TRANSACTION ID",
+  "checkout.success.activating": "Synchronizing subscription...",
+  "checkout.success.btn_settings": "Return to Settings",
+  "checkout.cancel.title": "Checkout Cancelled",
+  "checkout.cancel.desc": "The transaction was cancelled or could not be processed. No charges were made to your account.",
+  "checkout.cancel.btn_retry": "Try Again in Settings",
+  "checkout.cancel.btn_dashboard": "Go to Dashboard"
 }

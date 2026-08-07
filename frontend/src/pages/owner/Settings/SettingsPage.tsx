@@ -16,6 +16,8 @@ import { UserFieldsPanel } from '../FlowBuilder/components/UserFieldsPanel';
 import { TagsSettingsPanel } from '../FlowBuilder/components/TagsSettingsPanel';
 import { TelegramLoginModal } from '../../public/Login/components/TelegramLoginModal';
 import { PricingModal } from '../../../components/common/PricingModal';
+import { LeaveAccountModal } from './components/LeaveAccountModal';
+import { DeleteAccountModal } from './components/DeleteAccountModal';
 import { t } from '../../../i18n/config';
 import { Loader2, AlertCircle, CheckCircle2, X } from 'lucide-react';
 
@@ -33,6 +35,8 @@ export const SettingsPage: React.FC = () => {
   const [timeZone, setTimeZone] = useState('UTC+07:00');
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const logoutMutation = useLogoutMutation();
 
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
@@ -137,12 +141,12 @@ export const SettingsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
+              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                 <div className="w-full md:w-1/3">
                   <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.clone_account')}</h3>
                 </div>
-                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
-                  <button className="px-4 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer">
+                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
+                  <button className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer">
                     {t('settings.general.clone_btn')}
                   </button>
                   <p className="text-xs text-slate-700 font-bold leading-relaxed md:max-w-xs">
@@ -151,12 +155,12 @@ export const SettingsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
+              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                 <div className="w-full md:w-1/3">
                   <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.use_template')}</h3>
                 </div>
-                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
-                  <button className="px-4 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer">
+                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
+                  <button className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer">
                     {t('settings.general.template_btn')}
                   </button>
                   <p className="text-xs text-slate-700 font-bold leading-relaxed md:max-w-xs">
@@ -165,12 +169,15 @@ export const SettingsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
+              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                 <div className="w-full md:w-1/3">
                   <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.leave_account')}</h3>
                 </div>
-                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
-                  <button className="px-5 py-2.5 bg-slate-200 text-slate-500 text-xs font-bold rounded-xl border-2 border-[#0A0A0A]/30 select-none cursor-not-allowed">
+                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
+                  <button
+                    onClick={() => setIsLeaveModalOpen(true)}
+                    className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+                  >
                     {t('settings.general.leave_btn')}
                   </button>
                   <p className="text-xs text-slate-700 font-bold leading-relaxed md:max-w-xs">
@@ -179,15 +186,15 @@ export const SettingsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
+              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                 <div className="w-full md:w-1/3">
                   <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.sign_out')}</h3>
                 </div>
-                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
+                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
                   <button
                     onClick={handleLogout}
                     disabled={logoutMutation.isPending}
-                    className="px-5 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer gap-2 disabled:opacity-75 disabled:cursor-not-allowed"
                   >
                     {logoutMutation.isPending ? (
                       <>
@@ -204,12 +211,15 @@ export const SettingsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
+              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                 <div className="w-full md:w-1/3">
                   <h3 className="font-bold text-sm text-rose-700 uppercase">{t('settings.general.delete_account')}</h3>
                 </div>
-                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
-                  <button className="px-5 py-2 bg-rose-200 hover:bg-rose-300 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer">
+                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
+                  <button
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-rose-200 hover:bg-rose-300 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer"
+                  >
                     {t('settings.general.delete_btn')}
                   </button>
                   <p className="text-xs text-slate-700 font-bold leading-relaxed md:max-w-xs">
@@ -253,6 +263,18 @@ export const SettingsPage: React.FC = () => {
       </div>
       <TelegramLoginModal isOpen={isTelegramOpen} onClose={() => setIsTelegramOpen(false)} onSuccess={() => {}} />
       <PricingModal isOpen={showPricing} onClose={() => setShowPricing(false)} />
+      <LeaveAccountModal
+        isOpen={isLeaveModalOpen}
+        onClose={() => setIsLeaveModalOpen(false)}
+        onNavigateToTeam={() => {
+          setActiveTab('members');
+          navigate('/settings?tab=members', { replace: true });
+        }}
+      />
+      <DeleteAccountModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+      />
     </DashboardLayout>
   );
 };

@@ -39,6 +39,7 @@ export const ContactAvatar: React.FC<ContactAvatarProps> = ({ photoUrl, name, si
     <img
       src={photoUrl!}
       alt={name}
+      referrerPolicy="no-referrer"
       onError={() => setError(true)}
       className={`${sizeClasses} object-cover shadow-sm border border-slate-200 shrink-0 select-none`}
     />

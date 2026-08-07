@@ -21,7 +21,7 @@ const BotsConnectPage = lazy(() => import('../pages/owner/BotsConnect/BotsConnec
 const AutomationsPage = lazy(() => import('../pages/owner/Automations/AutomationsPage').then(m => ({ default: m.AutomationsPage })));
 const SettingsPage = lazy(() => import('../pages/owner/Settings/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const FlowBuilderPage = lazy(() => import('../pages/owner/FlowBuilder/FlowBuilderPage').then(m => ({ default: m.FlowBuilderPage })));
-const ChatPage = lazy(() => import('../pages/owner/Chat/ChatPage').then(m => ({ default: m.ChatPage })));
+import { ChatPage } from '../pages/owner/Chat/ChatPage';
 const ContactsPage = lazy(() => import('../pages/owner/Contacts/ContactsPage').then(m => ({ default: m.ContactsPage })));
 const AiPage = lazy(() => import('../pages/owner/Ai/AiPage'));
 const OrdersPage = lazy(() => import('../pages/owner/Orders/OrdersPage').then(m => ({ default: m.OrdersPage })));

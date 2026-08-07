@@ -25,3 +25,8 @@ export const resumeSubscriptionApi = async (): Promise<SubscriptionResponse> => 
   const response = await apiClient.post<SubscriptionResponse>('/billing/subscription/resume');
   return response.data;
 };
+
+export const confirmSessionApi = async (sessionId: string): Promise<SubscriptionResponse> => {
+  const response = await apiClient.post<SubscriptionResponse>('/billing/subscription/confirm-session', { sessionId });
+  return response.data;
+};

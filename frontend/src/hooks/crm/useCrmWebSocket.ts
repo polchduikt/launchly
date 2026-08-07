@@ -13,9 +13,14 @@ export const useCrmWebSocket = (botId: number) => {
     const socket = new SockJS('/ws');
     const client = new Client({
       webSocketFactory: () => socket,
-      reconnectDelay: 5000,
-      heartbeatIncoming: 4000,
-      heartbeatOutgoing: 4000,
+      reconnectDelay: 10000,
+      connectionTimeout: 3000,
+      heartbeatIncoming: 10000,
+      heartbeatOutgoing: 10000,
+      onWebSocketError: () => {
+      },
+      onStompError: () => {
+      },
     });
 
     client.onConnect = () => {
@@ -38,10 +43,6 @@ export const useCrmWebSocket = (botId: number) => {
       client.subscribe(`/topic/crm/${botId}/orders`, () => {
         queryClient.invalidateQueries({ queryKey: ['orders', botId] });
       });
-    };
-
-    client.onStompError = (frame) => {
-      console.error('STOMP Error: ' + frame.headers['message']);
     };
 
     client.activate();

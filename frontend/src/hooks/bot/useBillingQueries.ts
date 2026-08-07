@@ -5,6 +5,7 @@ import {
   checkoutApi,
   cancelSubscriptionApi,
   resumeSubscriptionApi,
+  confirmSessionApi,
 } from '../../api/billing';
 
 export const usePlansQuery = () => {
@@ -41,6 +42,16 @@ export const useResumeSubscriptionMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: resumeSubscriptionApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['billing-subscription'] });
+    },
+  });
+};
+
+export const useConfirmSessionMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (sessionId: string) => confirmSessionApi(sessionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['billing-subscription'] });
     },

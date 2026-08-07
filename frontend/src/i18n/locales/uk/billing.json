@@ -106,5 +106,14 @@
   "settings.payments.stripe.desc": "Ви можете приймати платежі через Messenger та Instagram. Вам потрібно підключити існуючий акаунт Stripe або створити новий, щоб отримати доступ до кнопки «Купити» у ваших автоматизаціях. Кнопку «Купити» можна використовувати з елементами «Картка», «Галерея», «Список» або «Медіашаблон».",
   "settings.payments.stripe.disconnected_msg": "Акаунт Stripe успішно відключено.",
   "settings.payments.stripe.mode": "Режим Live • USD",
-  "settings.payments.stripe.title": "Акаунт Stripe"
+  "settings.payments.stripe.title": "Акаунт Stripe",
+  "checkout.success.title": "Підписку Успішно Активовано!",
+  "checkout.success.desc": "Дякуємо за покупку. Ваш платіж пройшов успішно, а нові ліміти та розширений функціонал тарифу вже активовані.",
+  "checkout.success.transaction_id": "ID ТРАНЗАКЦІЇ STRIPE",
+  "checkout.success.activating": "Синхронізація підписки...",
+  "checkout.success.btn_settings": "Повернутися до налаштувань",
+  "checkout.cancel.title": "Оплату скасовано",
+  "checkout.cancel.desc": "Транзакцію було скасовано або не вдалося обробити. Списання коштів з вашого рахунку не відбулося.",
+  "checkout.cancel.btn_retry": "Спробувати знову в налаштуваннях",
+  "checkout.cancel.btn_dashboard": "Перейти на головну панель"
 }

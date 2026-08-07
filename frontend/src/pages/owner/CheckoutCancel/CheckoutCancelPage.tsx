@@ -1,39 +1,47 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { X, ArrowRight, Home } from 'lucide-react';
 import { ROUTES } from '../../../routes/paths';
+import { t } from '../../../i18n/config';
 
 const CheckoutCancelPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-rose-50 flex items-center justify-center p-6 font-sans">
-      <div className="max-w-md w-full bg-white border border-slate-100 rounded-3xl shadow-xl shadow-rose-100/40 p-8 text-center space-y-6">
-        <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto shadow-sm shadow-rose-100 animate-pulse">
+    <div className="min-h-screen bg-[#F2EBDD] flex items-center justify-center p-6 font-['JetBrains_Mono',monospace]">
+      <div className="max-w-lg w-full bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[12px_12px_0px_#0A0A0A] rounded-3xl p-8 text-center space-y-6 text-[#0A0A0A]">
+        
+        <div className="w-16 h-16 bg-rose-300 text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-2xl flex items-center justify-center mx-auto shadow-[3px_3px_0px_#0A0A0A]">
           <X size={32} strokeWidth={3} />
         </div>
 
-        <div className="space-y-2">
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Checkout Cancelled
+        <div className="space-y-3">
+          <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight">
+            {t('checkout.cancel.title', 'Оплату скасовано')}
           </h1>
-          <p className="text-sm text-slate-500 leading-relaxed">
-            The transaction was cancelled or could not be processed. No charges were made to your account.
+          <p className="text-xs text-slate-700 font-bold leading-relaxed">
+            {t(
+              'checkout.cancel.desc',
+              'Транзакцію було скасовано або не вдалося обробити. Списання коштів з вашого рахунку не відбулося.'
+            )}
           </p>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 pt-2">
           <button
             onClick={() => navigate(ROUTES.SETTINGS)}
-            className="w-full py-3 px-6 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-2xl transition-all shadow-lg shadow-slate-950/10 active:scale-[0.98] cursor-pointer"
+            className="w-full py-3.5 px-6 bg-amber-400 hover:bg-amber-500 text-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
           >
-            Try Again in Settings
+            <span>{t('checkout.cancel.btn_retry', 'Спробувати знову в налаштуваннях')}</span>
+            <ArrowRight size={16} />
           </button>
+          
           <button
             onClick={() => navigate(ROUTES.HOME)}
-            className="w-full py-3 px-6 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-sm font-bold rounded-2xl transition-all active:scale-[0.98] cursor-pointer"
+            className="w-full py-3.5 px-6 bg-white hover:bg-slate-100 text-[#0A0A0A] border-2 border-[#0A0A0A] text-xs font-extrabold uppercase rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
           >
-            Go to Dashboard
+            <Home size={15} />
+            <span>{t('checkout.cancel.btn_dashboard', 'Перейти на головну панель')}</span>
           </button>
         </div>
       </div>

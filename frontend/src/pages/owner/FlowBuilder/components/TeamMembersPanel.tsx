@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { X, HelpCircle, Check, Users, Plus } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, HelpCircle, Check, Users, Plus, ChevronDown } from 'lucide-react';
 import { useBotStore } from '../../../../store/useBotStore';
-import { useBotsQuery } from '../../../../hooks/bot/useBotsQuery';
 import { useAuthStore } from '../../../../store/useAuthStore';
 import { t } from '../../../../i18n/config';
 import {
@@ -12,7 +11,68 @@ import {
   removeMemberApi
 } from '../../../../api/teamApi';
 import type { TeamMemberResponse } from '../../../../api/teamApi';
-import { isValidAvatarUrl, getInitials } from '../../../../utils/avatar';
+import { SafeAvatar } from '../../../../components/common/SafeAvatar';
+
+const CustomRoleDropdown: React.FC<{
+  currentRole: string;
+  disabled?: boolean;
+  onSelectRole: (role: string) => void;
+}> = ({ currentRole, disabled = false, onSelectRole }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const roles = ['Admin', 'Editor', 'Inbox Agent', 'Viewer'];
+
+  return (
+    <div ref={dropdownRef} className="relative w-full">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-3.5 py-2 bg-white text-[#0A0A0A] text-xs font-bold rounded-xl border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] flex items-center justify-between transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        <span>{currentRole}</span>
+        <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && !disabled && (
+        <div className="absolute top-full left-0 mt-1.5 w-full bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-2xl z-50 py-1.5 overflow-hidden animate-in fade-in duration-150">
+          {roles.map((role) => {
+            const isSelected = role === currentRole;
+            return (
+              <button
+                key={role}
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  onSelectRole(role);
+                }}
+                className={`w-full text-left px-4 py-2 text-xs font-extrabold transition-all cursor-pointer flex items-center justify-between ${
+                  isSelected
+                    ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                    : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+                }`}
+              >
+                <span>{role}</span>
+                {isSelected && <Check size={12} />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const getRoleDescription = (role: string) => {
   switch (role) {
@@ -27,8 +87,6 @@ const getRoleDescription = (role: string) => {
 
 export const TeamMembersPanel: React.FC = () => {
   const activeBotId = useBotStore((state) => state.activeBotId);
-  const { data: bots = [] } = useBotsQuery(!!activeBotId);
-  const botName = bots.find((b) => b.id === activeBotId)?.name || 'Launchly Official';
   const currentUser = useAuthStore((s) => s.user);
 
   const [activeSubTab, setActiveSubTab] = useState<'members' | 'groups'>('members');
@@ -136,19 +194,13 @@ export const TeamMembersPanel: React.FC = () => {
   const renderMemberAvatar = (m: TeamMemberResponse, sizeClass = 'w-8 h-8') => {
     const avatarUrl = m.userId === currentUser?.id && currentUser?.avatar ? currentUser.avatar : m.avatar;
     const name = getMemberName(m);
-    if (isValidAvatarUrl(avatarUrl)) {
-      return (
-        <img
-          src={avatarUrl!}
-          alt={name}
-          className={`${sizeClass} rounded-full object-cover border-2 border-[#0A0A0A] shrink-0`}
-        />
-      );
-    }
     return (
-      <div className={`${sizeClass} rounded-full bg-[#0A0A0A] text-[#F2EBDD] font-black flex items-center justify-center text-xs shrink-0 select-none border-2 border-[#0A0A0A]`}>
-        {getInitials(name)}
-      </div>
+      <SafeAvatar
+        src={avatarUrl}
+        name={name}
+        className={`${sizeClass} rounded-full object-cover border-2 border-[#0A0A0A] shrink-0`}
+        fallbackClassName={`${sizeClass} rounded-full bg-[#0A0A0A] text-[#F2EBDD] font-black flex items-center justify-center text-xs shrink-0 select-none border-2 border-[#0A0A0A]`}
+      />
     );
   };
 
@@ -192,27 +244,19 @@ export const TeamMembersPanel: React.FC = () => {
               <span className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase">{t('settings.members.role_label')}</span>
             </div>
             <div className="lg:col-span-5">
-              <select
-                value={editingMember.role}
-                onChange={(e) => {
-                  if (editingMember.userId) {
-                    handleUpdatePermissions(
-                      editingMember.userId,
-                      e.target.value,
-                      editingMember.inboxSeat,
-                      editingMember.billingPermission
-                    );
-                  }
-                }}
+              <CustomRoleDropdown
+                currentRole={editingMember.role}
                 disabled={isMe || isOwner || editingMember.isPending}
-                className="w-full px-3 py-2 rounded-xl border-2 border-[#0A0A0A] focus:outline-none text-xs font-bold bg-white text-[#0A0A0A] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                <option value="Owner" disabled>Owner</option>
-                <option value="Admin">Admin</option>
-                <option value="Editor">Editor</option>
-                <option value="Inbox Agent">Inbox Agent</option>
-                <option value="Viewer">Viewer</option>
-              </select>
+                onSelectRole={(newRole) => {
+                  const targetUserId = editingMember.userId || editingMember.id;
+                  handleUpdatePermissions(
+                    targetUserId,
+                    newRole,
+                    editingMember.inboxSeat,
+                    editingMember.billingPermission
+                  );
+                }}
+              />
             </div>
             <div className="lg:col-span-4">
               <p className="text-xs text-slate-700 font-bold leading-relaxed">
@@ -346,7 +390,7 @@ export const TeamMembersPanel: React.FC = () => {
           <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
             <div className="p-5 flex justify-between items-center border-b-2 border-[#0A0A0A]">
               <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
-                {t('settings.members.title', { name: botName })}
+                {t('settings.members.title', 'Члени команди')}
               </h3>
               <button
                 onClick={() => {

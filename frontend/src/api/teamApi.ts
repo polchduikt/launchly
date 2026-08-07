@@ -11,6 +11,7 @@ export interface TeamMemberResponse {
   billingPermission: boolean;
   isPending: boolean;
   createdAt: string;
+  botId?: number;
 }
 
 export interface InviteMemberRequest {
@@ -60,4 +61,12 @@ export const acceptInvitationApi = async (invitationId: number): Promise<void> =
 
 export const declineInvitationApi = async (invitationId: number): Promise<void> => {
   await apiClient.post(`/bots/invitations/${invitationId}/decline`);
+};
+
+export const transferOwnershipApi = async (botId: number, newOwnerUserId: number): Promise<void> => {
+  await apiClient.post(`/bots/${botId}/transfer-ownership`, { newOwnerUserId });
+};
+
+export const leaveBotApi = async (botId: number): Promise<void> => {
+  await apiClient.post(`/bots/${botId}/leave`);
 };

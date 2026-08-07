@@ -26,6 +26,7 @@ export const OwnerAvatar: React.FC<OwnerAvatarProps> = ({ size = 28 }) => {
         <img
           src={user!.avatar!}
           alt={user?.name || 'Me'}
+          referrerPolicy="no-referrer"
           onError={() => setImgError(true)}
           className="w-full h-full object-cover"
         />

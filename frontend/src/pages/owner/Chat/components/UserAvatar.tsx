@@ -31,6 +31,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({ name, photoUrl, size = 3
         <img
           src={photoUrl!}
           alt={name}
+          referrerPolicy="no-referrer"
           onError={() => setHasError(true)}
           className="w-full h-full object-cover"
         />
