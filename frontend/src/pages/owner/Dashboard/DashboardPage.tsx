@@ -367,14 +367,7 @@ export const DashboardPage: React.FC = () => {
   }, [filteredTemplates]);
 
   if (isLoadingRequire || isLoadingBots) {
-    return (
-      <div className="min-h-screen bg-[#F2EBDD] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3 font-['JetBrains_Mono',monospace]">
-          <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
-          <span className="text-xs font-bold text-[#0A0A0A] uppercase tracking-wider">Loading dashboard...</span>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen bg-[#F2EBDD]" />;
   }
 
   if (!hasBots) return null;

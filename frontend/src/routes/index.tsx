@@ -84,7 +84,7 @@ const PrivateRoute = () => {
   }
 
   if (isSyncing && !user) {
-    return null;
+    return <div className="min-h-screen bg-[#F2EBDD]" />;
   }
 
   const role = user?.role;
@@ -113,9 +113,22 @@ const AdminRoute = () => {
   return <Outlet />;
 };
 
+const ScrollToTop = () => {
+  const { pathname, hash } = useLocation();
+
+  useEffect(() => {
+    if (!hash) {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, hash]);
+
+  return null;
+};
+
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Suspense fallback={null}>
         <Routes>
           <Route path={ROUTES.LANDING} element={<LandingPage />} />

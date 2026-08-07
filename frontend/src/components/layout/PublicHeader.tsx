@@ -1,63 +1,182 @@
-import React from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import logo from '../../assets/images/logo.png';
 import { ROUTES } from '../../routes/paths';
+import { useTranslation } from '../../i18n/config';
 
 export const PublicHeader: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const isAuthenticated = useAuthStore((state) => !!state.accessToken);
+  const { t, currentLanguage, changeLanguage } = useTranslation();
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [isDarkHeader, setIsDarkHeader] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const headerCheckY = 40;
+      const darkElements = document.querySelectorAll('[data-header-theme="dark"]');
+      let overDark = false;
+
+      darkElements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= headerCheckY && rect.bottom >= headerCheckY) {
+          overDark = true;
+        }
+      });
+
+      setIsDarkHeader(overDark);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 bg-white/85 backdrop-blur-md border-b border-slate-200/80 z-50 transition-all shadow-xs">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to={ROUTES.LANDING} className="flex items-center gap-2 select-none group">
-          <img src={logo} alt="Launchly Logo" className="h-9 w-auto object-contain transition-transform group-hover:scale-105" />
+    <header
+      className={`sticky top-0 w-full z-50 flex justify-between items-center h-20 px-6 md:px-12 lg:px-16 backdrop-blur-md transition-all duration-300 ${
+        isDarkHeader
+          ? 'bg-[#0A0A0A]/90 border-b-2 border-[#F2EBDD] shadow-[0_4px_0px_#F2EBDD] text-[#F2EBDD]'
+          : 'bg-[#F2EBDD]/85 border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] text-[#0A0A0A]'
+      }`}
+    >
+      <div className="flex items-center gap-4">
+        <Link to={ROUTES.LANDING} className="flex items-center">
+          <img
+            src={logo}
+            alt="Launchly Logo"
+            className={`h-10 sm:h-12 w-auto object-contain cursor-pointer transition-all duration-300 ${
+              isDarkHeader ? 'brightness-0 invert' : ''
+            }`}
+          />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8 text-xs font-bold text-slate-600">
-          <Link 
-            to={ROUTES.LANDING} 
-            className={`transition-colors hover:text-indigo-600 ${location.pathname === ROUTES.LANDING ? 'text-indigo-600 font-extrabold' : ''}`}
+        <div className="relative ml-2">
+          <button
+            onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+            onBlur={() => setTimeout(() => setIsLangDropdownOpen(false), 200)}
+            className={`flex items-center gap-1 font-['JetBrains_Mono',monospace] text-sm font-bold border-b-2 pb-0.5 transition-all cursor-pointer select-none ${
+              isDarkHeader ? 'text-[#F2EBDD] border-[#F2EBDD]' : 'text-[#0A0A0A] border-[#0A0A0A]'
+            }`}
           >
-            Home
-          </Link>
-          <a href="/#features" className="hover:text-indigo-600 transition-colors">Features</a>
-          <a href="/#pricing" className="hover:text-indigo-600 transition-colors">Pricing</a>
-          <Link 
-            to={ROUTES.BLOG} 
-            className={`transition-colors hover:text-indigo-600 ${location.pathname.startsWith('/blog') ? 'text-indigo-600 font-extrabold' : ''}`}
-          >
-            Blog
-          </Link>
-        </nav>
+            <span>{currentLanguage === 'uk' ? 'Uk' : 'En'}</span>
+            <span className="text-[10px] tracking-tighter">▼</span>
+          </button>
 
-        <div className="flex items-center gap-3">
-          {isAuthenticated ? (
-            <button
-              onClick={() => navigate(ROUTES.DASHBOARD)}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-indigo-600/10 cursor-pointer"
+          {isLangDropdownOpen && (
+            <div
+              className={`absolute top-full left-0 mt-2 border-2 py-1 min-w-[75px] z-50 ${
+                isDarkHeader
+                  ? 'bg-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD]'
+                  : 'bg-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A]'
+              }`}
             >
-              Go to Dashboard
-            </button>
-          ) : (
-            <>
               <button
-                onClick={() => navigate(ROUTES.LOGIN)}
-                className="px-3.5 py-1.5 text-slate-600 hover:text-slate-900 text-xs font-bold transition-all cursor-pointer"
+                onClick={() => {
+                  changeLanguage('en');
+                  setIsLangDropdownOpen(false);
+                }}
+                className={`w-full px-3 py-1 text-left font-['JetBrains_Mono',monospace] text-xs font-bold transition-colors cursor-pointer ${
+                  isDarkHeader
+                    ? 'hover:bg-[#F2EBDD] hover:text-[#0A0A0A] ' +
+                      (currentLanguage === 'en' ? 'bg-[#F2EBDD]/20 font-black' : 'text-[#F2EBDD]')
+                    : 'hover:bg-[#0A0A0A] hover:text-[#F2EBDD] ' +
+                      (currentLanguage === 'en' ? 'bg-[#0A0A0A]/10 font-black' : 'text-[#0A0A0A]')
+                }`}
               >
-                Sign In
+                En
               </button>
               <button
-                onClick={() => navigate(ROUTES.REGISTER)}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-indigo-600/10 cursor-pointer"
+                onClick={() => {
+                  changeLanguage('uk');
+                  setIsLangDropdownOpen(false);
+                }}
+                className={`w-full px-3 py-1 text-left font-['JetBrains_Mono',monospace] text-xs font-bold transition-colors cursor-pointer ${
+                  isDarkHeader
+                    ? 'hover:bg-[#F2EBDD] hover:text-[#0A0A0A] ' +
+                      (currentLanguage === 'uk' ? 'bg-[#F2EBDD]/20 font-black' : 'text-[#F2EBDD]')
+                    : 'hover:bg-[#0A0A0A] hover:text-[#F2EBDD] ' +
+                      (currentLanguage === 'uk' ? 'bg-[#0A0A0A]/10 font-black' : 'text-[#0A0A0A]')
+                }`}
               >
-                Get Started
+                Uk
               </button>
-            </>
+            </div>
           )}
         </div>
+      </div>
+
+      <nav className="hidden lg:flex items-center gap-3 xl:gap-4 absolute left-1/2 -translate-x-1/2">
+        {[
+          { href: '#features', key: 'landing.nav.features', fallback: 'FEATURES' },
+          { href: '#ai-automation', key: 'landing.nav.ai', fallback: 'AI' },
+          { href: '#how-it-works', key: 'landing.nav.how_it_works', fallback: 'HOW IT WORKS' },
+          { href: '#use-cases', key: 'landing.nav.use_cases', fallback: 'SOLUTIONS' },
+          { href: '#comparison', key: 'landing.nav.comparison', fallback: 'WHY US' },
+          { href: '#testimonials', key: 'landing.nav.testimonials', fallback: 'REVIEWS' },
+          { href: '#trust', key: 'landing.nav.trust', fallback: 'SECURITY' },
+          { href: '#pricing', key: 'landing.nav.pricing', fallback: 'PRICING' },
+          { href: '#faq', key: 'landing.nav.faq', fallback: 'FAQ' },
+        ].map((item) => (
+          <Link
+            key={item.href}
+            to={`${ROUTES.LANDING}${item.href}`}
+            className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider transition-colors duration-200 px-2 py-1 ${
+              isDarkHeader
+                ? 'text-[#F2EBDD] hover:bg-[#F2EBDD] hover:text-[#0A0A0A]'
+                : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+            }`}
+          >
+            {t(item.key, item.fallback)}
+          </Link>
+        ))}
+        <Link
+          to={ROUTES.BLOG}
+          className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider transition-colors duration-200 px-2 py-1 ${
+            isDarkHeader
+              ? 'text-[#F2EBDD] hover:bg-[#F2EBDD] hover:text-[#0A0A0A]'
+              : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+          }`}
+        >
+          {t('landing.nav.blog', 'BLOG')}
+        </Link>
+      </nav>
+
+      <div className="flex items-center gap-4">
+        {isAuthenticated ? (
+          <button
+            onClick={() => navigate(ROUTES.HOME)}
+            className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-2.5 border-2 transition-all cursor-pointer ${
+              isDarkHeader
+                ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
+                : 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
+            }`}
+          >
+            {t('landing.nav.dashboard', 'DASHBOARD')}
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={() => navigate(ROUTES.LOGIN)}
+              className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:underline underline-offset-4 cursor-pointer ${
+                isDarkHeader ? 'text-[#F2EBDD]' : 'text-[#0A0A0A]'
+              }`}
+            >
+              {t('landing.nav.login', 'LOGIN')}
+            </button>
+            <button
+              onClick={() => navigate(ROUTES.REGISTER)}
+              className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-2.5 border-2 transition-all cursor-pointer ${
+                isDarkHeader
+                  ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
+                  : 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
+              }`}
+            >
+              {t('landing.nav.signup', 'SIGN UP')}
+            </button>
+          </>
+        )}
       </div>
     </header>
   );

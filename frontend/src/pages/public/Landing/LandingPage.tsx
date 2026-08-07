@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../routes/paths';
 import { LAUNCHLY_PLANS } from '../../../const/plans';
 import logo from '../../../assets/images/logo.png';
 import { useTranslation } from '../../../i18n/config';
 import { HeroInteractiveDemo } from './components/HeroInteractiveDemo';
+import { CountUpNumber } from './components/CountUpNumber';
+import { StickySolutionsSection } from './components/StickySolutionsSection';
 import { PublicFooter } from '../../../components/layout/PublicFooter';
 import { useScrollReveal } from '../../../hooks/useScrollReveal';
 import {
@@ -17,10 +19,6 @@ import {
   ArrowRight,
   Zap,
   Check,
-  ShoppingBag,
-  GraduationCap,
-  Calendar,
-  Target,
   Star,
   Shield,
   Server,
@@ -36,13 +34,26 @@ import {
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const isAuthenticated = useAuthStore((state) => !!state.accessToken);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
-  const [useCaseTab, setUseCaseTab] = useState<'ecommerce' | 'courses' | 'services' | 'agencies'>('ecommerce');
   const { t, currentLanguage, changeLanguage } = useTranslation();
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState<boolean>(false);
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
   const [isDarkHeader, setIsDarkHeader] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    const id = window.location.hash.replace('#', '');
+    if (!id) {
+      window.scrollTo(0, 0);
+      return;
+    }
+    const el = document.getElementById(id);
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.pageYOffset - 80;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }, [location.hash]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -321,7 +332,7 @@ export const LandingPage: React.FC = () => {
                 <div key={i} className="text-center px-4 lg:px-8 reveal-blur-in" style={{ animationDelay: `${i * 80}ms` }}>
                   <div className="flex justify-center mb-2">{stat.icon}</div>
                   <div className="font-['Anybody',sans-serif] text-4xl sm:text-5xl font-black text-[#0A0A0A] leading-none mb-1">
-                    {stat.value}
+                    <CountUpNumber value={stat.value} />
                   </div>
                   <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-[#0A0A0A]/60 uppercase tracking-wider">
                     {stat.label}
@@ -548,7 +559,7 @@ export const LandingPage: React.FC = () => {
             <div className="text-left border-l-8 border-[#F2EBDD] pl-6 reveal-blur-in">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-400 text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg mb-3 border border-white shadow-[2px_2px_0px_rgba(255,255,255,0.2)]">
                 <Zap size={14} className="fill-[#0A0A0A]" />
-                <span>3 SIMPLE STEPS</span>
+                <span>{t('landing.how.badge', '3 SIMPLE STEPS')}</span>
               </div>
               <h2 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-3 uppercase leading-none">
                 {t('landing.how.title', 'How It Works')}
@@ -598,126 +609,7 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        <section id="use-cases" className="py-20 md:py-28 bg-[#F2EBDD] border-y-4 border-[#0A0A0A] px-6 lg:px-12 relative z-10">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-left mb-12 border-l-8 border-[#0A0A0A] pl-6 reveal-blur-in">
-              <h2 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl font-black text-[#0A0A0A] mb-2 uppercase leading-none">
-                {t('landing.use_cases.title', 'Solutions for Every Industry')}
-              </h2>
-              <p className="text-base sm:text-lg text-[#0A0A0A] font-bold">
-                {t('landing.use_cases.subtitle', 'Automate communications and sales tailored to your specific business needs')}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 reveal-scale reveal-delay-100">
-              <button
-                onClick={() => setUseCaseTab('ecommerce')}
-                className={`p-4 border-3 border-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  useCaseTab === 'ecommerce'
-                    ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[6px_6px_0px_#0A0A0A] -translate-y-0.5'
-                    : 'bg-white text-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A]/5'
-                }`}
-              >
-                <ShoppingBag size={18} />
-                <span className="truncate">{t('landing.use_cases.ecommerce_title', 'E-Commerce & Stores')}</span>
-              </button>
-
-              <button
-                onClick={() => setUseCaseTab('courses')}
-                className={`p-4 border-3 border-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  useCaseTab === 'courses'
-                    ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[6px_6px_0px_#0A0A0A] -translate-y-0.5'
-                    : 'bg-white text-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A]/5'
-                }`}
-              >
-                <GraduationCap size={18} />
-                <span className="truncate">{t('landing.use_cases.courses_title', 'Info-Business & Courses')}</span>
-              </button>
-
-              <button
-                onClick={() => setUseCaseTab('services')}
-                className={`p-4 border-3 border-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  useCaseTab === 'services'
-                    ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[6px_6px_0px_#0A0A0A] -translate-y-0.5'
-                    : 'bg-white text-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A]/5'
-                }`}
-              >
-                <Calendar size={18} />
-                <span className="truncate">{t('landing.use_cases.services_title', 'Services & Bookings')}</span>
-              </button>
-
-              <button
-                onClick={() => setUseCaseTab('agencies')}
-                className={`p-4 border-3 border-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  useCaseTab === 'agencies'
-                    ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[6px_6px_0px_#0A0A0A] -translate-y-0.5'
-                    : 'bg-white text-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A]/5'
-                }`}
-              >
-                <Target size={18} />
-                <span className="truncate">{t('landing.use_cases.agencies_title', 'Marketers & Agencies')}</span>
-              </button>
-            </div>
-            <div className="bg-white border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] p-8 sm:p-12 flex flex-col md:flex-row gap-8 items-start justify-between transition-all rounded-2xl reveal-brutal-pop reveal-delay-150">
-              <div className="space-y-5 max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg shadow-[2px_2px_0px_#0A0A0A]">
-                  {useCaseTab === 'ecommerce' && <ShoppingBag size={14} className="text-emerald-400" />}
-                  {useCaseTab === 'courses' && <GraduationCap size={14} className="text-amber-400" />}
-                  {useCaseTab === 'services' && <Calendar size={14} className="text-sky-400" />}
-                  {useCaseTab === 'agencies' && <Target size={14} className="text-purple-400" />}
-                  <span>{t(`landing.use_cases.${useCaseTab}_title`)}</span>
-                </div>
-
-                <h3 className="font-['Anybody',sans-serif] text-3xl sm:text-4xl font-black text-[#0A0A0A] uppercase leading-tight">
-                  {t(`landing.use_cases.${useCaseTab}_title`)}
-                </h3>
-
-                <p className="text-base sm:text-lg text-[#0A0A0A]/85 font-semibold leading-relaxed">
-                  {t(`landing.use_cases.${useCaseTab}_desc`)}
-                </p>
-
-                <div className="space-y-3.5 pt-2">
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-emerald-400 border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 mt-0.5 shadow-[2px_2px_0px_#0A0A0A]">
-                      <Check size={14} className="text-[#0A0A0A] stroke-[3]" />
-                    </div>
-                    <span className="text-sm sm:text-base font-bold text-[#0A0A0A]">
-                      {t(`landing.use_cases.${useCaseTab}_f1`)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-emerald-400 border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 mt-0.5 shadow-[2px_2px_0px_#0A0A0A]">
-                      <Check size={14} className="text-[#0A0A0A] stroke-[3]" />
-                    </div>
-                    <span className="text-sm sm:text-base font-bold text-[#0A0A0A]">
-                      {t(`landing.use_cases.${useCaseTab}_f2`)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-emerald-400 border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 mt-0.5 shadow-[2px_2px_0px_#0A0A0A]">
-                      <Check size={14} className="text-[#0A0A0A] stroke-[3]" />
-                    </div>
-                    <span className="text-sm sm:text-base font-bold text-[#0A0A0A]">
-                      {t(`landing.use_cases.${useCaseTab}_f3`)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="w-full md:w-auto shrink-0 pt-6 md:pt-0 self-end">
-                <button
-                  onClick={handleCta}
-                  className="w-full sm:w-auto bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-8 py-4 border-2 border-[#0A0A0A] shadow-[5px_5px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <span>{t('landing.hero.cta_start', 'Start Building Free')}</span>
-                  <ArrowRight size={16} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+        <StickySolutionsSection onCtaClick={handleCta} />
 
         <section id="comparison" className="py-20 md:py-28 bg-[#0A0A0A] text-[#F2EBDD] px-6 lg:px-12 border-y-4 border-[#0A0A0A] relative z-10" data-header-theme="dark">
           <div className="max-w-7xl mx-auto">
@@ -845,7 +737,7 @@ export const LandingPage: React.FC = () => {
                 {t('landing.testimonials.title', 'Що кажуть наші клієнти')}
               </h2>
               <p className="text-base sm:text-lg text-[#0A0A0A] font-bold max-w-2xl">
-                {t('landing.testimonials.subtitle', 'Понад 5,000+ бізнесів та агентств автоматизують продажі та підтримку за допомогою Launchly.')}
+                {t('landing.testimonials.subtitle', 'Понад 500+ бізнесів та агентств автоматизують продажі та підтримку за допомогою Launchly.')}
               </p>
             </div>
 
@@ -1068,7 +960,8 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="py-20 md:py-28 px-6 lg:px-12 max-w-7xl mx-auto" id="pricing">
+        <section className="py-20 md:py-28 bg-[#F2EBDD]" id="pricing">
+          <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-12 space-y-4 reveal-blur-in">
             <h2 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl font-black text-[#0A0A0A] uppercase leading-none">
               {t('landing.pricing.title', 'SIMPLE, TRANSPARENT PRICING')}
@@ -1179,9 +1072,11 @@ export const LandingPage: React.FC = () => {
 
                 </div>
               );
-            })}
+              })}
           </div>
-        </section>
+        </div>
+      </section>
+      <div className="w-full bg-[#0A0A0A] h-1"></div>
 
         <section id="faq" className="py-20 md:py-28 px-6 lg:px-12 relative z-10">
           <div className="max-w-4xl mx-auto space-y-10">
@@ -1228,6 +1123,16 @@ export const LandingPage: React.FC = () => {
                   </div>
                 );
               })}
+
+              <button
+                type="button"
+                onClick={() => navigate(ROUTES.FAQ)}
+                className="w-full bg-[#0A0A0A] text-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer flex items-center justify-center p-5 sm:p-6"
+              >
+                <span className="font-['Anybody',sans-serif] text-base sm:text-lg font-black uppercase text-[#F2EBDD]">
+                  {t('landing.faq.more', 'БІЛЬШЕ')}
+                </span>
+              </button>
             </div>
           </div>
         </section>

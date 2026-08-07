@@ -5,8 +5,7 @@ export const botSchema = z.object({
   botName: z
     .string()
     .trim()
-    .min(1, t('automations.create.error_name'))
-    .max(100, t('automations.create.error_name_long')),
+    .optional(),
   botDesc: z
     .string()
     .trim()

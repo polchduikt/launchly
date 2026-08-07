@@ -18,9 +18,11 @@
   background-size: 24px 24px;
 }
 
-body {
+html, body, #root {
   margin: 0;
   padding: 0;
+  background-color: #F2EBDD;
+  min-height: 100vh;
 }
 
 ::-webkit-scrollbar {
@@ -182,10 +184,8 @@ html, body {
   animation: fadeIn 0.15s ease-out both;
 }
 
-
 .highlight-message {
 }
-
 
 @keyframes marquee {
   0% { transform: translateX(0%); }
@@ -301,6 +301,17 @@ html, body {
   0%, 52% { opacity: 0; transform: translateY(14px) scale(0.96); }
   60%, 90% { opacity: 1; transform: translateY(0) scale(1); }
   96%, 100% { opacity: 0; transform: translateY(-6px) scale(0.98); }
+}
+
+@keyframes countUp {
+  0% { content: 0; }
+  100% { content: attr(data-end); }
+}
+
+.number-animation {
+  display: inline-block;
+  position: relative;
+  animation: countUp 2s ease-in-out forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
