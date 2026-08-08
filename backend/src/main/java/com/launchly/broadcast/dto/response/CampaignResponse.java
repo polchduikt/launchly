@@ -22,6 +22,7 @@ public record CampaignResponse(
         String nodes,
         String edges,
         Boolean targetAllBots,
+        String templateName,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {}

@@ -12,5 +12,7 @@ public record BotDetailResponse(
         boolean active,
         String telegramToken,
         FlowSchemaResponse flowSchema,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        boolean isTemplate,
+        String templateName
 ) {}

@@ -29,13 +29,15 @@ import org.hibernate.type.SqlTypes;
 @AllArgsConstructor
 public class Bot extends BaseEntity {
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false, length = 500)
     private String name;
 
     private String username;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(columnDefinition = "TEXT")
     private String avatar;
 
     @Column(name = "avatar_public_id")
@@ -65,6 +67,13 @@ public class Bot extends BaseEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "custom_fields_data", columnDefinition = "jsonb")
     private String customFieldsData;
+
+    @Column(name = "template_name", length = 500)
+    private String templateName;
+
+    @Column(name = "is_template", nullable = false)
+    @Builder.Default
+    private boolean template = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

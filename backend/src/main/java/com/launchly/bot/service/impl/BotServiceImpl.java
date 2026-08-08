@@ -23,6 +23,7 @@ import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
+import com.launchly.bot.repository.InstalledTemplateRepository;
 import com.launchly.bot.service.BotService;
 import com.launchly.bot.telegram.TelegramBotManager;
 import com.launchly.billing.service.PlanLimitService;
@@ -73,6 +74,7 @@ public class BotServiceImpl implements BotService {
     private final BotUserTagRepository botUserTagRepository;
     private final TagRepository tagRepository;
     private final BotMemberRepository botMemberRepository;
+    private final InstalledTemplateRepository installedTemplateRepository;
     private final UserAuditService userAuditService;
 
     @Override
@@ -168,7 +170,9 @@ public class BotServiceImpl implements BotService {
                 bot.isActive(),
                 maskedToken,
                 schemaResponse,
-                bot.getCreatedAt()
+                bot.getCreatedAt(),
+                bot.isTemplate(),
+                bot.getTemplateName()
         );
     }
 
@@ -199,6 +203,7 @@ public class BotServiceImpl implements BotService {
 
             if (isNewReal) {
                 releaseTokenFromOtherBots(rawToken, userId, bot.getId());
+                bot.setTemplate(false);
             }
 
             bot.setTelegramToken(encryptionUtil.encrypt(rawToken));
@@ -241,6 +246,7 @@ public class BotServiceImpl implements BotService {
             telegramBotManager.unregisterBot(bot.getId());
         }
 
+        installedTemplateRepository.deleteAllByBotId(bot.getId());
         botRepository.delete(bot);
     }
 
@@ -746,7 +752,9 @@ public class BotServiceImpl implements BotService {
                 response.updatedAt(),
                 totalUsers,
                 hasToken,
-                role
+                role,
+                bot.isTemplate(),
+                bot.getTemplateName()
         );
     }
 

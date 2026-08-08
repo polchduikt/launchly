@@ -75,5 +75,23 @@ databaseChangeLog:
       file: db/changelog/changes/V037__add_action_type_to_user_audit_logs.sql
   - include:
       file: db/changelog/changes/V038__deduplicate_user_audit_logs.sql
+  - include:
+      file: db/changelog/changes/V039__create_account_templates_table.sql
+  - include:
+      file: db/changelog/changes/V040__add_avatar_url_to_account_templates.sql
+  - include:
+      file: db/changelog/changes/V041__add_selected_broadcast_ids_to_account_templates.sql
+  - include:
+      file: db/changelog/changes/V042__make_installed_templates_bot_id_nullable.sql
+  - include:
+      file: db/changelog/changes/V043__alter_installed_templates_bot_id_nullable.sql
+  - include:
+      file: db/changelog/changes/V044__alter_bots_columns_to_text.sql
+  - include:
+      file: db/changelog/changes/V045__rework_template_and_bot_schema.sql
+  - include:
+      file: db/changelog/changes/V046__fix_installed_templates_bot_fk_cascade.sql
+  - include:
+      file: db/changelog/changes/V047__add_template_name_to_broadcast_campaigns.sql
 
 

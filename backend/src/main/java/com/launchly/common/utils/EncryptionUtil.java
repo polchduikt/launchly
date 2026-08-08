@@ -2,6 +2,7 @@ package com.launchly.common.utils;
 
 import com.launchly.common.exception.AppException;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+@Slf4j
 @Component
 public class EncryptionUtil {
 
@@ -42,6 +44,9 @@ public class EncryptionUtil {
     }
 
     public String encrypt(String plaintext) {
+        if (plaintext == null || plaintext.isBlank()) {
+            return "";
+        }
         try {
             byte[] iv = new byte[GCM_IV_LENGTH];
             new SecureRandom().nextBytes(iv);
@@ -62,8 +67,14 @@ public class EncryptionUtil {
     }
 
     public String decrypt(String ciphertext) {
+        if (ciphertext == null || ciphertext.isBlank()) {
+            return "";
+        }
         try {
             byte[] decoded = Base64.getDecoder().decode(ciphertext);
+            if (decoded.length < GCM_IV_LENGTH) {
+                return ciphertext;
+            }
 
             ByteBuffer buffer = ByteBuffer.wrap(decoded);
             byte[] iv = new byte[GCM_IV_LENGTH];
@@ -76,7 +87,8 @@ public class EncryptionUtil {
 
             return new String(cipher.doFinal(encrypted));
         } catch (Exception e) {
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to decrypt data");
+            log.debug("Ciphertext could not be decrypted with AES/GCM, returning raw string: {}", e.getMessage());
+            return ciphertext;
         }
     }
 }

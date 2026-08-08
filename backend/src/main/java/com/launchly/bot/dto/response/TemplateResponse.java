@@ -1,0 +1,32 @@
+package com.launchly.bot.dto.response;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public record TemplateResponse(
+        Long id,
+        String shareCode,
+        String shareUrl,
+        String name,
+        String description,
+        String avatarUrl,
+        boolean isProtected,
+        String guideUrl,
+        String videoUrl,
+        Long creatorId,
+        String creatorName,
+        String sourceBotName,
+        String sourceBotDescription,
+        int flowCount,
+        int broadcastCount,
+        int tagCount,
+        int fieldCount,
+        List<String> selectedFlowIds,
+        List<Long> selectedBroadcastIds,
+        List<Long> selectedTagIds,
+        List<Long> selectedFieldIds,
+        String broadcastsDataJson,
+        String tagsDataJson,
+        String customFieldsDataJson,
+        LocalDateTime createdAt
+) {}

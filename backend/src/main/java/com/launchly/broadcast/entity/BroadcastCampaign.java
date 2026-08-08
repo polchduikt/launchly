@@ -81,6 +81,9 @@ public class BroadcastCampaign extends BaseEntity {
     @Builder.Default
     private Boolean targetAllBots = false;
 
+    @Column(name = "template_name", length = 500)
+    private String templateName;
+
     @Column(name = "is_blocked", nullable = false, columnDefinition = "boolean default false")
     @Builder.Default
     private boolean blocked = false;

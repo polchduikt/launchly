@@ -1,5 +1,6 @@
 package com.launchly.broadcast.service.impl;
 
+import com.launchly.auth.entity.User;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotRepository;
@@ -231,7 +232,7 @@ public class BroadcastServiceImpl implements BroadcastService {
             List<Bot> userBots = new ArrayList<>(botRepository.findAllByUserId(ownerId));
             List<BotMember> memberships = botMemberRepository.findByUserId(ownerId);
             for (BotMember bm : memberships) {
-                com.launchly.auth.entity.User owner = bm.getBot().getUser();
+                User owner = bm.getBot().getUser();
                 List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
                 for (Bot b : ownerBots) {
                     if (userBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
@@ -419,6 +420,7 @@ public class BroadcastServiceImpl implements BroadcastService {
                 campaign.getNodes(),
                 campaign.getEdges(),
                 campaign.getTargetAllBots(),
+                campaign.getTemplateName(),
                 campaign.getCreatedAt(),
                 campaign.getUpdatedAt()
         );
