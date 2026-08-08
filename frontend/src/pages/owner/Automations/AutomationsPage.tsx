@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
@@ -74,10 +74,10 @@ export const AutomationsPage: React.FC = () => {
   const handleBulkDelete = () => {
     if (selectedBotIds.size === 0) return;
     setConfirmDialog({
-      title: 'Видалити автоматизації',
-      message: `Ви впевнені, що хочете видалити ${selectedBotIds.size} обрану(их) автоматизацію(ій)?`,
+      title: t('automations.bulk_delete_title', 'Видалити автоматизації'),
+      message: t('automations.bulk_delete_desc', 'Ви впевнені, що хочете видалити {{count}} обрану(их) автоматизацію(ій)?', { count: selectedBotIds.size }),
       variant: 'danger',
-      confirmLabel: 'Видалити',
+      confirmLabel: t('common.delete', 'Видалити'),
       onConfirm: () => {
         const ids = Array.from(selectedBotIds);
         ids.forEach((id) => {
@@ -282,10 +282,10 @@ export const AutomationsPage: React.FC = () => {
 
   const handleDeleteBot = (id: number) => {
     setConfirmDialog({
-      title: 'Видалити автоматизацію',
-      message: 'Ви впевнені, що хочете видалити цю автоматизацію? Цю дію неможливо скасувати.',
+      title: t('automations.delete_modal_title', 'Видалити автоматизацію'),
+      message: t('automations.delete_modal_desc', 'Ви впевнені, що хочете видалити цю автоматизацію? Цю дію неможливо скасувати.'),
       variant: 'danger',
-      confirmLabel: 'Видалити',
+      confirmLabel: t('common.delete', 'Видалити'),
       onConfirm: () => {
         deleteBotMutation.mutate(id, {
           onSuccess: () => {
@@ -437,7 +437,11 @@ export const AutomationsPage: React.FC = () => {
     );
   };
 
-  const filteredBots = bots.filter((bot) => {
+  const allAutomations = useMemo(() => {
+    return bots;
+  }, [bots]);
+
+  const filteredBots = allAutomations.filter((bot) => {
     const matchesSearch = bot.name.toLowerCase().includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
     if (selectedFolderId !== null) {
@@ -679,12 +683,20 @@ export const AutomationsPage: React.FC = () => {
                                   <span className="font-bold text-xs text-[#0A0A0A] uppercase hover:underline truncate max-w-xs md:max-w-md">
                                     {bot.name}
                                   </span>
-                                  {bot.blocked && (
+                                  {bot.blocked ? (
                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-rose-600 text-white border border-[#0A0A0A] uppercase shrink-0">
                                       <Lock size={10} />
                                       {t('status.blocked') || t('admin.status_blocked') || 'Blocked'}
                                     </span>
-                                  )}
+                                  ) : bot.templateName ? (
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
+                                      [{t('template.badge', 'ШАБЛОН')} {bot.templateName}]
+                                    </span>
+                                  ) : bot.isTemplate ? (
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
+                                      [{t('template.badge', 'ШАБЛОН')}]
+                                    </span>
+                                  ) : null}
                                 </div>
                                 {bot.blocked ? (
                                   <span className="text-[11px] text-slate-700 font-bold truncate max-w-xs md:max-w-md mt-0.5">
@@ -752,12 +764,20 @@ export const AutomationsPage: React.FC = () => {
                             <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] group-hover:underline text-sm uppercase truncate">
                               {bot.name}
                             </h3>
-                            {bot.blocked && (
+                            {bot.blocked ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-rose-600 text-white border border-[#0A0A0A] uppercase shrink-0">
                                 <Lock size={10} />
                                 {t('status.blocked') || t('admin.status_blocked') || 'Blocked'}
                               </span>
-                            )}
+                            ) : bot.templateName ? (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
+                                [{t('template.badge', 'ШАБЛОН')} {bot.templateName}]
+                              </span>
+                            ) : bot.isTemplate ? (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
+                                [{t('template.badge', 'ШАБЛОН')}]
+                              </span>
+                            ) : null}
                           </div>
                           {bot.role !== 'Viewer' && (
                             <div className="relative inline-block text-left shrink-0" onClick={(e) => e.stopPropagation()}>

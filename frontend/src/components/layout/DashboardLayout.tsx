@@ -5,7 +5,7 @@ import logoL from '../../assets/images/logo-l.png';
 import { NAV_ITEMS } from './config/navItems';
 import { useTranslation } from '../../i18n/config';
 import type { DashboardLayoutProps } from '../../types/shared';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, Layers, ChevronDown } from 'lucide-react';
 import { useAllBotUsersQuery } from '../../hooks/crm/useCrmQueries';
 import { useSubscriptionQuery } from '../../hooks/bot/useBillingQueries';
 import { PendingInvitationsBanner } from '../common/PendingInvitationsBanner';
@@ -24,6 +24,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSignInOptions, setShowSignInOptions] = useState(false);
   const [showHelpMenu, setShowHelpMenu] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const helpMenuRef = useRef<HTMLDivElement>(null);
 
@@ -116,7 +117,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             {showProfileMenu && (
               <div className="absolute left-14 bottom-[-10px] w-72 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] z-50 p-4 space-y-4 font-['JetBrains_Mono',monospace] text-left">
                 
-                <div className="flex items-center gap-3.5 pb-3 border-b-2 border-[#0A0A0A]">
+                <div className="flex items-center gap-3.5 pb-1">
                   <SafeAvatar
                     src={user?.avatar}
                     name={user?.name}
@@ -129,7 +130,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   </div>
                 </div>
 
-                <div className="space-y-2 pb-3 border-b-2 border-[#0A0A0A]">
+                <div className="space-y-3 pt-2">
                   {(user.role === 'ROLE_ADMIN' || user.role === 'ROLE_MANAGER') && (
                     <button
                       onClick={() => navigate(ROUTES.ADMIN_HOME)}
@@ -139,7 +140,28 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                       <span>Admin Panel</span>
                     </button>
                   )}
-                  <div className="flex items-center justify-between px-1">
+                  <div className="pt-3 border-t-2 border-[#0A0A0A] flex items-center justify-between px-1">
+                    <span 
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        navigate('/templates');
+                      }}
+                      className="text-xs font-bold text-[#0A0A0A] hover:underline cursor-pointer uppercase tracking-wider"
+                    >
+                      {t('common.my_templates', 'My Templates')}
+                    </span>
+                    <div 
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        navigate('/templates');
+                      }}
+                      className="w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-white flex items-center justify-center text-[#0A0A0A] shrink-0 shadow-[1px_1px_0px_#0A0A0A] cursor-pointer transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                    >
+                      <Layers size={12} />
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t-2 border-[#0A0A0A] flex items-center justify-between px-1">
                     <span 
                       onClick={() => setShowSignInOptions(true)}
                       className="text-xs font-bold text-[#0A0A0A] hover:underline cursor-pointer uppercase tracking-wider"
@@ -170,18 +192,46 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                       </button>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between pb-3 border-b-2 border-[#0A0A0A] px-1">
-                  <span className="text-xs font-bold text-[#0A0A0A] uppercase">{t('common.language', 'Language')}</span>
-                  <select
-                    value={language}
-                    onChange={(e) => changeLanguage(e.target.value as 'en' | 'uk')}
-                    className="text-xs font-extrabold text-[#0A0A0A] border-2 border-[#0A0A0A] px-2 py-1 bg-white outline-none cursor-pointer uppercase"
-                  >
-                    <option value="en">EN</option>
-                    <option value="uk">UK</option>
-                  </select>
+                  <div className="pt-3 border-t-2 border-[#0A0A0A] flex items-center justify-between px-1">
+                    <span className="text-xs font-bold text-[#0A0A0A] uppercase">{t('common.language', 'Language')}</span>
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowLangMenu(!showLangMenu)}
+                        className="text-xs font-black uppercase text-[#0A0A0A] border-2 border-[#0A0A0A] px-2.5 py-1 bg-white shadow-[1px_1px_0px_#0A0A0A] cursor-pointer flex items-center gap-1.5 hover:bg-amber-100 transition-colors"
+                      >
+                        <span>{language.toUpperCase()}</span>
+                        <ChevronDown size={12} className={`transition-transform ${showLangMenu ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {showLangMenu && (
+                        <div className="absolute right-0 top-full mt-1.5 w-20 bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] z-50 overflow-hidden divide-y-2 divide-[#0A0A0A]">
+                          <button
+                            onClick={() => {
+                              changeLanguage('en');
+                              setShowLangMenu(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs font-black uppercase transition-colors cursor-pointer ${
+                              language === 'en' ? 'bg-amber-300 text-[#0A0A0A]' : 'bg-white hover:bg-amber-100 text-[#0A0A0A]'
+                            }`}
+                          >
+                            EN
+                          </button>
+                          <button
+                            onClick={() => {
+                              changeLanguage('uk');
+                              setShowLangMenu(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs font-black uppercase transition-colors cursor-pointer ${
+                              language === 'uk' ? 'bg-amber-300 text-[#0A0A0A]' : 'bg-white hover:bg-amber-100 text-[#0A0A0A]'
+                            }`}
+                          >
+                            UK
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="pt-1">

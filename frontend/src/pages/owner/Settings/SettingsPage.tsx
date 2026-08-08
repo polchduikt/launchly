@@ -18,6 +18,7 @@ import { TelegramLoginModal } from '../../public/Login/components/TelegramLoginM
 import { PricingModal } from '../../../components/common/PricingModal';
 import { LeaveAccountModal } from './components/LeaveAccountModal';
 import { DeleteAccountModal } from './components/DeleteAccountModal';
+import { CreateTemplateModal } from './components/CreateTemplateModal';
 import { t } from '../../../i18n/config';
 import { Loader2, AlertCircle, CheckCircle2, X } from 'lucide-react';
 
@@ -37,6 +38,7 @@ export const SettingsPage: React.FC = () => {
   const [showPricing, setShowPricing] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const logoutMutation = useLogoutMutation();
 
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
@@ -143,24 +145,13 @@ export const SettingsPage: React.FC = () => {
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                 <div className="w-full md:w-1/3">
-                  <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.clone_account')}</h3>
-                </div>
-                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
-                  <button className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer">
-                    {t('settings.general.clone_btn')}
-                  </button>
-                  <p className="text-xs text-slate-700 font-bold leading-relaxed md:max-w-xs">
-                    {t('settings.general.clone_desc')}
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-                <div className="w-full md:w-1/3">
                   <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.use_template')}</h3>
                 </div>
                 <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
-                  <button className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer">
+                  <button
+                    onClick={() => navigate('/templates/create')}
+                    className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+                  >
                     {t('settings.general.template_btn')}
                   </button>
                   <p className="text-xs text-slate-700 font-bold leading-relaxed md:max-w-xs">
@@ -274,6 +265,11 @@ export const SettingsPage: React.FC = () => {
       <DeleteAccountModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
+      />
+      <CreateTemplateModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        botId={botId}
       />
     </DashboardLayout>
   );

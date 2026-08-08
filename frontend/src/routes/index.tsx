@@ -33,6 +33,10 @@ const AcceptableUsePolicyPage = lazy(() => import('../pages/public/Legal/Accepta
 const AiTermsPage = lazy(() => import('../pages/public/Legal/AiTermsPage'));
 const PaymentTermsPage = lazy(() => import('../pages/public/Legal/PaymentTermsPage'));
 const BlockedPage = lazy(() => import('../pages/public/Blocked/BlockedPage'));
+import { CreateTemplateWizardPage } from '../pages/owner/Templates/CreateTemplateWizardPage';
+import { InstallTemplateWizardPage } from '../pages/public/InstallTemplate/InstallTemplateWizardPage';
+import { MyTemplatesPage } from '../pages/owner/Templates/MyTemplatesPage';
+import { TemplateDetailPage } from '../pages/owner/Templates/TemplateDetailPage';
 
 const AdminStatsPage = lazy(() => import('../pages/admin/AdminStats/AdminStatsPage'));
 const AdminChatsPage = lazy(() => import('../pages/admin/AdminChats/AdminChatsPage'));
@@ -44,8 +48,14 @@ const AdminLogsPage = lazy(() => import('../pages/admin/AdminLogs/AdminLogsPage'
 const PublicOnlyRoute = () => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const user = useAuthStore((state) => state.user);
+  const location = useLocation();
 
   if (accessToken) {
+    const searchParams = new URLSearchParams(location.search);
+    const redirectUrl = searchParams.get('redirect');
+    if (redirectUrl) {
+      return <Navigate to={redirectUrl} replace />;
+    }
     const role = user?.role;
     const isAdminOrManager = role === 'ROLE_ADMIN' || role === 'ROLE_MANAGER';
     return <Navigate to={isAdminOrManager ? ROUTES.ADMIN_HOME : ROUTES.DASHBOARD} replace />;
@@ -141,6 +151,7 @@ export const AppRouter: React.FC = () => {
           <Route path={ROUTES.AI_TERMS} element={<AiTermsPage />} />
           <Route path={ROUTES.PAYMENT_TERMS} element={<PaymentTermsPage />} />
           <Route path={ROUTES.BLOCKED} element={<BlockedPage />} />
+          <Route path="/templates/install/:shareCode" element={<InstallTemplateWizardPage />} />
 
           <Route element={<PublicOnlyRoute />}>
             <Route path={ROUTES.LOGIN} element={<AuthLayout><LoginPage /></AuthLayout>} />
@@ -156,6 +167,10 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
             <Route path={ROUTES.INTEGRATIONS} element={<SettingsPage />} />
             <Route path={ROUTES.FLOW_BUILDER} element={<FlowBuilderPage />} />
+            <Route path="/templates/create" element={<CreateTemplateWizardPage />} />
+            <Route path="/templates/edit/:shareCode" element={<CreateTemplateWizardPage />} />
+            <Route path="/templates" element={<MyTemplatesPage />} />
+            <Route path="/templates/detail/:shareCode" element={<TemplateDetailPage />} />
             <Route path={ROUTES.CHAT} element={<ChatPage />} />
             <Route path={ROUTES.CONTACTS} element={<ContactsPage />} />
             <Route path={ROUTES.AI} element={<AiPage />} />

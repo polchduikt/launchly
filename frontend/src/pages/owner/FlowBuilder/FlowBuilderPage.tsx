@@ -6,7 +6,7 @@ import type { ConnectionLineComponentProps, Edge, Node, OnNodeDrag } from '@xyfl
 import '@xyflow/react/dist/style.css';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
-import { useStartBotMutation } from '../../../hooks/bot/useBotMutations';
+import { useStartBotMutation, useUpdateBotMutation } from '../../../hooks/bot/useBotMutations';
 import { getCustomFieldsApi } from '../../../api/bot';
 import { NodeEditorPanel } from './components/sidebar/NodeEditorPanel';
 import { FLOW_BLOCKS } from '../../../const/flowBlocks';
@@ -16,7 +16,7 @@ import { FLOW_EDGE_DEFAULTS, EDGE_TYPES } from '../../../const/flowEdges';
 import { CONTEXT_MENU_OPTIONS } from '../../../const/contextMenuOptions';
 import { useFlowBuilder } from '../../../hooks/bot/useFlowBuilder';
 import { ROUTES } from '../../../routes/paths';
-import { ArrowLeft, Loader2, Plus, GitFork, Route, GitCommit, Undo2, Redo2, Sparkles, Eye } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, GitFork, Route, GitCommit, Undo2, Redo2, Sparkles, Eye, X } from 'lucide-react';
 import { useState } from 'react';
 import { FlowPreviewPanel } from '../../../components/common/FlowPreviewPanel';
 import { useAiStore } from '../../../store/useAiStore';
@@ -78,6 +78,13 @@ const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
 const FlowBuilderInner: React.FC = () => {
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
+  const { data: bots = [] } = useBotsQuery();
+  const currentBot = bots.find((b) => b.id === activeBotId);
+  const updateBotMutation = useUpdateBotMutation();
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const [telegramTokenInput, setTelegramTokenInput] = useState('');
+  const [tokenError, setTokenError] = useState<string | null>(null);
+
   const { data: tags = [] } = useTagsQuery(activeBotId || 0);
   const [customFields, setCustomFields] = useState<string[]>(['last_order_product', 'last_order_price', 'phone', 'email']);
 
@@ -209,9 +216,6 @@ const FlowBuilderInner: React.FC = () => {
     return hasChanges ? result : displayNodes;
   }, [displayNodes, collaborators]);
 
-  const { data: userBotsList = [] } = useBotsQuery();
-  const currentBot = useMemo(() => userBotsList.find((b) => b.id === activeBotId), [userBotsList, activeBotId]);
-
   useEffect(() => {
     if (currentBot && currentBot.blocked) {
       alert(`Автоматизацію заблоковано адміністрацією. Причина: ${currentBot.blockReason || 'Порушення правил платформи'}`);
@@ -281,9 +285,8 @@ const FlowBuilderInner: React.FC = () => {
     pasteRef.current = pasteCopiedNodes;
   });
 
-  const { data: bots = [] } = useBotsQuery();
   const startBotMutation = useStartBotMutation();
-  const activeBot = bots.find((b) => b.id === activeBotId);
+  const activeBot = currentBot;
   const isBotLive = activeBot?.active ?? false;
   const isViewer = activeBot?.role === 'Viewer';
 
@@ -389,7 +392,9 @@ const FlowBuilderInner: React.FC = () => {
             <div className="flex items-center gap-2 text-[#0A0A0A]/60 text-xs font-bold font-['JetBrains_Mono',monospace]">
               <span>{t('flow_builder.automations')}</span>
               <span>&gt;</span>
-              <span className="text-[#0A0A0A] font-black text-sm font-['Anybody',sans-serif] uppercase tracking-wider">{t('flow_builder.telegram_flow_schema')}</span>
+              <span className="text-[#0A0A0A] font-black text-sm font-['Anybody',sans-serif] uppercase tracking-wider">
+                {currentBot?.name || t('flow_builder.telegram_flow_schema')}
+              </span>
             </div>
           </div>
 
@@ -783,6 +788,82 @@ const FlowBuilderInner: React.FC = () => {
         </div>
       </div>
       <AiAssistantDrawer />
+      {isConnectModalOpen && currentBot && (
+        <div
+          onClick={() => setIsConnectModalOpen(false)}
+          className="fixed inset-0 bg-[#0A0A0A]/40 z-50 flex items-center justify-center p-4 cursor-pointer font-['JetBrains_Mono',monospace]"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#F2EBDD] rounded-3xl max-w-md w-full border-2 border-[#0A0A0A] shadow-[8px_8px_0px_0px_#0A0A0A] animate-in fade-in duration-200 cursor-default overflow-hidden"
+          >
+            <div className="p-6 pb-4 border-b-2 border-[#0A0A0A] flex items-center justify-between bg-white">
+              <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A]">
+                Підключення Telegram бота
+              </h3>
+              <button
+                onClick={() => setIsConnectModalOpen(false)}
+                className="p-1 text-[#0A0A0A] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4 bg-white">
+              <p className="text-xs font-bold text-slate-700 leading-relaxed">
+                Введіть токен вашого Telegram бота з <span className="font-black text-indigo-700">@BotFather</span>, щоб активувати автоматизацію <strong>{currentBot.name}</strong>.
+              </p>
+              {tokenError && (
+                <div className="p-2.5 bg-rose-100 border border-rose-600 text-rose-900 text-xs font-bold rounded-lg">
+                  {tokenError}
+                </div>
+              )}
+              <div>
+                <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
+                  Telegram Bot Token:
+                </label>
+                <input
+                  type="text"
+                  value={telegramTokenInput}
+                  onChange={(e) => {
+                    setTelegramTokenInput(e.target.value);
+                    setTokenError(null);
+                  }}
+                  placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ"
+                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
+                />
+              </div>
+            </div>
+            <div className="p-4 border-t-2 border-[#0A0A0A] bg-[#F2EBDD] flex justify-end gap-3">
+              <button
+                onClick={() => setIsConnectModalOpen(false)}
+                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-white rounded-xl border border-transparent hover:border-[#0A0A0A] transition-all cursor-pointer"
+              >
+                Скасувати
+              </button>
+              <button
+                disabled={!telegramTokenInput.trim() || updateBotMutation.isPending}
+                onClick={async () => {
+                  try {
+                    await updateBotMutation.mutateAsync({
+                      id: currentBot.id,
+                      data: {
+                        name: currentBot.name,
+                        telegramToken: telegramTokenInput.trim(),
+                      },
+                    });
+                    setIsConnectModalOpen(false);
+                  } catch (err: any) {
+                    setTokenError(err?.response?.data?.message || 'Не вдалося підключити бота. Перевірте токен.');
+                  }
+                }}
+                className="px-6 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] transition-all cursor-pointer disabled:opacity-50"
+              >
+                {updateBotMutation.isPending ? 'Підключення...' : 'Підключити та активувати'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <FlowPreviewPanel
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}

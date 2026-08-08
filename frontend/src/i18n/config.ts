@@ -114,20 +114,30 @@ export async function changeLanguage(lang: 'en' | 'uk') {
   }
 }
 
-export function t(key: string, replacementsOrDefault?: Record<string, string | number> | string): string {
+export function t(
+  key: string,
+  fallbackOrReplacements?: Record<string, string | number> | string,
+  replacements?: Record<string, string | number>
+): string {
   let val = translations[key];
   if (val === undefined) {
     val = fallbacks[currentLanguage]?.[key];
   }
   if (val === undefined) {
-    if (typeof replacementsOrDefault === 'string') {
-      return replacementsOrDefault;
+    if (typeof fallbackOrReplacements === 'string') {
+      val = fallbackOrReplacements;
+    } else {
+      return key;
     }
-    return key;
   }
-  if (replacementsOrDefault && typeof replacementsOrDefault === 'object') {
-    Object.entries(replacementsOrDefault).forEach(([k, v]) => {
-      val = val.replace(`{${k}}`, String(v));
+
+  const params =
+    replacements ||
+    (typeof fallbackOrReplacements === 'object' ? fallbackOrReplacements : undefined);
+
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      val = val.replace(new RegExp(`\\{${k}\\}|\\{\\{${k}\\}\\}`, 'g'), String(v));
     });
   }
   return val;

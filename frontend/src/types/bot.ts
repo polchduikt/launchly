@@ -30,11 +30,15 @@ export interface BotResponse {
   };
   hasTelegramToken: boolean;
   role?: string | null;
+  isTemplate?: boolean;
+  templateName?: string | null;
 }
 
 export interface BotDetailResponse extends BotResponse {
   telegramToken: string;
   flowSchema: FlowSchemaResponse | null;
+  isTemplate?: boolean;
+  templateName?: string | null;
 }
 
 export interface BotCreateRequest {

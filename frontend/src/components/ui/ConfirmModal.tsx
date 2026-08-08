@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
+import { useTranslation } from '../../i18n/config';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -16,12 +17,13 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   isOpen,
   title,
   message,
-  confirmLabel = 'Підтвердити',
-  cancelLabel = 'Скасувати',
+  confirmLabel,
+  cancelLabel,
   variant = 'danger',
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   const confirmBtnClass =
@@ -56,13 +58,13 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             onClick={onCancel}
             className="px-4 py-2 text-xs font-bold text-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
           >
-            {cancelLabel}
+            {cancelLabel || t('common.cancel', 'Скасувати')}
           </button>
           <button
             onClick={onConfirm}
             className={`px-4 py-2 text-xs font-black uppercase rounded-xl transition-all cursor-pointer ${confirmBtnClass}`}
           >
-            {confirmLabel}
+            {confirmLabel || t('common.confirm', 'Підтвердити')}
           </button>
         </div>
       </div>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLoginMutation } from './useLoginMutation';
 import { ROUTES } from '../../routes/paths';
 import { loginSchema } from '../../schemas/auth.schema';
@@ -12,6 +12,7 @@ export type LoginFields = LoginSchemaType;
 
 export const useLoginForm = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { mutateAsync: loginMutate, isPending } = useLoginMutation();
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -27,6 +28,11 @@ export const useLoginForm = () => {
     setApiError(null);
     try {
       const res = await loginMutate(data);
+      const redirectUrl = searchParams.get('redirect');
+      if (redirectUrl) {
+        navigate(redirectUrl, { replace: true });
+        return;
+      }
       const role = res?.user?.role;
       const isAdminOrManager = role === 'ROLE_ADMIN' || role === 'ROLE_MANAGER';
 
