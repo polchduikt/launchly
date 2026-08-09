@@ -37,9 +37,9 @@ export const GeneralPanel: React.FC = () => {
 
       <div className="py-4 flex flex-col gap-3">
         <h3 className="text-sm font-semibold text-slate-900">Використовувати як шаблон</h3>
-        <p className="text-xs text-slate-500">Створити знімок цього акаунту та поділитися ним за посиланням</p>
+        <p className="text-xs text-slate-500">Створити шаблон та поділитися ним за посиланням</p>
         <button className="w-fit px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-all">
-          Створити шаблон акаунту
+          Створити шаблон
         </button>
       </div>
 

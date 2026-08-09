@@ -5,11 +5,12 @@ import { getTemplateByShareCodeApi, installTemplateApi, type TemplateResponse } 
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
 import { useBotStore } from '../../../store/useBotStore';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 
 export const InstallTemplatePage: React.FC = () => {
   const { shareCode } = useParams<{ shareCode: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const isAuthenticated = useAuthStore((state) => !!state.accessToken);
   const activeBotId = useBotStore((state) => state.activeBotId);
   const { data: bots = [] } = useBotsQuery(isAuthenticated);
@@ -68,10 +69,10 @@ export const InstallTemplatePage: React.FC = () => {
           </div>
           <div>
             <h1 className="font-['Anybody',sans-serif] text-xl font-black uppercase tracking-tight">
-              {t('template.install.title', 'Встановити шаблон акаунту')}
+              {t('template.install.title', 'Встановити шаблон')}
             </h1>
             <p className="text-xs font-bold text-slate-600">
-              Launchly Account Template System
+              Launchly Template System
             </p>
           </div>
         </div>
@@ -99,10 +100,10 @@ export const InstallTemplatePage: React.FC = () => {
               Усі воронки та елементи шаблону збережено у ваш бот.
             </p>
             <button
-              onClick={() => navigate('/automations')}
+              onClick={() => navigate('/templates?tab=installed')}
               className="w-full py-3 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
             >
-              <span>{t('template.install.go_automations', 'Перейти у воронки')}</span>
+              <span>{t('template.tab_installed_templates', 'Завантажені темплейти')}</span>
               <ArrowRight size={16} />
             </button>
           </div>

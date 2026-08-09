@@ -101,5 +101,6 @@
   "dashboard.templates.start_from_scratch": "Почати з нуля",
   "dashboard.templates.traffic": "Залучення трафіку",
   "dashboard.templates.type_label": "Шаблон Telegram",
+  "dashboard.templates.flow_template": "Шаблон Автоматизації",
   "dashboard.welcome": "Ласкаво просимо до вашої панелі керування!"
 }

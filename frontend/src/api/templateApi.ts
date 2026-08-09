@@ -47,6 +47,14 @@ export interface TemplateResponse {
   broadcastCount: number;
   tagCount: number;
   fieldCount: number;
+  nodeCount?: number;
+  edgeCount?: number;
+  broadcastNodeCount?: number;
+  broadcastEdgeCount?: number;
+  totalNodeCount?: number;
+  totalEdgeCount?: number;
+  viewsCount?: number;
+  installsCount?: number;
   selectedFlowIds?: string[];
   selectedBroadcastIds?: number[];
   selectedTagIds?: number[];
@@ -74,7 +82,7 @@ export const getInstalledTemplatesApi = async (): Promise<TemplateResponse[]> =>
 };
 
 export const getTemplateByShareCodeApi = async (shareCode: string): Promise<TemplateResponse> => {
-  const response = await apiClient.get<TemplateResponse>(`/templates/${shareCode}`);
+  const response = await apiClient.get<TemplateResponse>(`/templates/share/${shareCode}`);
   return response.data;
 };
 
@@ -98,3 +106,8 @@ export const deleteTemplateApi = async (shareCode: string): Promise<void> => {
 export const deleteInstalledTemplateApi = async (shareCode: string): Promise<void> => {
   await apiClient.delete(`/templates/installed/${shareCode}`);
 };
+
+export const trackTemplateViewApi = async (shareCode: string): Promise<void> => {
+  await apiClient.post(`/templates/share/${shareCode}/view`);
+};
+

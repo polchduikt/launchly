@@ -419,7 +419,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
                   <div className="mt-5 pt-5 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold uppercase tracking-wider text-[#0A0A0A] group-hover:text-[#F2EBDD]">
                     <Workflow size={12} />
-                    <span>{tmpl.type}</span>
+                    <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                   </div>
                 </div>
               );
@@ -492,7 +492,7 @@ export const DashboardPage: React.FC = () => {
                     <div className="space-y-6">
                       <div className="flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-xs font-extrabold text-[#0A0A0A] uppercase tracking-widest border-b border-[#0A0A0A]/20 pb-2">
                         <BookOpen size={14} className="text-[#0A0A0A]" />
-                        <span>{t('dashboard.templates.type_label')}</span>
+                        <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                       </div>
 
                       <h1 className="font-['Anybody',sans-serif] text-2xl md:text-4xl font-black text-[#0A0A0A] uppercase leading-tight">
@@ -662,7 +662,7 @@ export const DashboardPage: React.FC = () => {
                                     </div>
                                     <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
                                       <Workflow size={13} />
-                                      <span>{tmpl.type}</span>
+                                      <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                                     </div>
                                   </div>
                                 ))}
@@ -693,7 +693,7 @@ export const DashboardPage: React.FC = () => {
                                     </div>
                                     <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
                                       <Workflow size={13} />
-                                      <span>{tmpl.type}</span>
+                                      <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                                     </div>
                                   </div>
                                 ))}
@@ -724,7 +724,7 @@ export const DashboardPage: React.FC = () => {
                                 </div>
                                 <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
                                   <Workflow size={13} />
-                                  <span>{tmpl.type}</span>
+                                  <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                                 </div>
                               </div>
                             ))}

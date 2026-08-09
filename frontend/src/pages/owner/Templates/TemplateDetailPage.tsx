@@ -15,6 +15,8 @@ import {
   Tag as TagIcon,
   BookOpen,
   PlayCircle,
+  Eye,
+  Download,
 } from 'lucide-react';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import {
@@ -25,11 +27,12 @@ import {
 } from '../../../api/templateApi';
 import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 
 export const TemplateDetailPage: React.FC = () => {
   const { shareCode } = useParams<{ shareCode: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const currentUser = useAuthStore((s) => s.user);
 
   const [template, setTemplate] = useState<TemplateResponse | null>(null);
@@ -107,20 +110,41 @@ export const TemplateDetailPage: React.FC = () => {
   }
   const automationName = template.sourceBotName || template.name;
 
-  const broadcastNames: string[] = [];
+  interface BroadcastItem {
+    name: string;
+    nodeCount?: number;
+    edgeCount?: number;
+  }
+  const broadcastItems: BroadcastItem[] = [];
   if (template.broadcastsDataJson) {
     try {
       const parsed = JSON.parse(template.broadcastsDataJson);
       if (Array.isArray(parsed)) {
         parsed.forEach((c: any) => {
-          if (c && c.name) broadcastNames.push(c.name);
+          if (c && c.name) {
+            let nCnt = 0;
+            let eCnt = 0;
+            if (c.nodes) {
+              if (Array.isArray(c.nodes)) nCnt = c.nodes.length;
+              else if (typeof c.nodes === 'string') {
+                try { nCnt = JSON.parse(c.nodes).length; } catch {}
+              }
+            }
+            if (c.edges) {
+              if (Array.isArray(c.edges)) eCnt = c.edges.length;
+              else if (typeof c.edges === 'string') {
+                try { eCnt = JSON.parse(c.edges).length; } catch {}
+              }
+            }
+            broadcastItems.push({ name: c.name, nodeCount: nCnt, edgeCount: eCnt });
+          }
         });
       }
     } catch {}
   }
-  if (broadcastNames.length === 0 && template.broadcastCount > 0) {
+  if (broadcastItems.length === 0 && template.broadcastCount > 0) {
     for (let i = 1; i <= template.broadcastCount; i++) {
-      broadcastNames.push(`Розсилка #${i}`);
+      broadcastItems.push({ name: `${t('template.create.fallback_broadcast', 'Розсилка')} #${i}` });
     }
   }
 
@@ -163,7 +187,7 @@ export const TemplateDetailPage: React.FC = () => {
               className="px-3 py-1.5 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border border-[#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1 shrink-0"
             >
               <ChevronLeft size={15} />
-              <span>{t('template.tab_my_templates', 'Мої темплейти')}</span>
+              <span>{t('common.back', 'Назад')}</span>
             </button>
 
             <div className="flex items-center gap-2 text-xs font-black uppercase">
@@ -267,21 +291,28 @@ export const TemplateDetailPage: React.FC = () => {
                   >
                     <span className="font-black text-xs uppercase text-[#0A0A0A] flex items-center gap-2">
                       <Workflow size={15} className="text-[#0A0A0A]" />
-                      <span>{`${t('common.nav.automation', 'Автоматизація')}: 1`}</span>
+                      <span>{`${t('common.nav.automation', 'Автоматизація')}: ${template.flowCount || 1}`}</span>
                     </span>
                     <ChevronDown size={16} className={`transition-transform duration-200 text-[#0A0A0A] ${collapsedAutomations ? '-rotate-90' : ''}`} />
                   </button>
 
                   {!collapsedAutomations && (
-                    <div className="p-4 bg-white text-xs font-bold text-slate-800">
-                      <div className="py-2 px-3 bg-slate-50 border border-[#0A0A0A] rounded-lg flex items-center gap-2.5">
-                        <Check size={15} className="text-emerald-600 shrink-0 stroke-[3]" />
-                        <span className="text-[#0A0A0A] font-extrabold uppercase">{automationName}</span>
+                    <div className="p-4 bg-white text-xs font-bold text-slate-800 space-y-2">
+                      <div className="py-2 px-3 bg-slate-50 border border-[#0A0A0A] rounded-lg flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <Check size={15} className="text-emerald-600 shrink-0 stroke-[3]" />
+                          <span className="text-[#0A0A0A] font-extrabold uppercase">{automationName}</span>
+                        </div>
+                        {(template.nodeCount !== undefined && template.nodeCount > 0) && (
+                          <span className="text-[10px] text-slate-500 font-bold">
+                            {`${template.nodeCount} ${t('template.count_nodes', 'нодів')}, ${template.edgeCount ?? 0} ${t('template.count_edges', 'зв\'язків')}`}
+                          </span>
+                        )}
                       </div>
                     </div>
                   )}
                 </div>
-                {broadcastNames.length > 0 && (
+                {broadcastItems.length > 0 && (
                   <div className="border-2 border-[#0A0A0A] bg-white shadow-[3px_3px_0px_0px_#0A0A0A] overflow-hidden rounded-xl">
                     <button
                       onClick={() => setCollapsedBroadcasts(!collapsedBroadcasts)}
@@ -289,17 +320,24 @@ export const TemplateDetailPage: React.FC = () => {
                     >
                       <span className="font-black text-xs uppercase text-[#0A0A0A] flex items-center gap-2">
                         <Radio size={15} className="text-[#0A0A0A]" />
-                        <span>{`${t('common.nav.broadcasts', 'Розсилки')}: ${broadcastNames.length}`}</span>
+                        <span>{`${t('common.nav.broadcasts', 'Розсилки')}: ${broadcastItems.length}`}</span>
                       </span>
                       <ChevronDown size={16} className={`transition-transform duration-200 text-[#0A0A0A] ${collapsedBroadcasts ? '-rotate-90' : ''}`} />
                     </button>
 
                     {!collapsedBroadcasts && (
                       <div className="p-4 bg-white text-xs font-bold text-slate-800 space-y-2">
-                        {broadcastNames.map((name, i) => (
-                          <div key={i} className="py-2 px-3 bg-slate-50 border border-[#0A0A0A] rounded-lg flex items-center gap-2.5">
-                            <Check size={15} className="text-emerald-600 shrink-0 stroke-[3]" />
-                            <span className="text-[#0A0A0A] font-extrabold uppercase">{name}</span>
+                        {broadcastItems.map((item, i) => (
+                          <div key={i} className="py-2 px-3 bg-slate-50 border border-[#0A0A0A] rounded-lg flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                              <Check size={15} className="text-emerald-600 shrink-0 stroke-[3]" />
+                              <span className="text-[#0A0A0A] font-extrabold uppercase">{item.name}</span>
+                            </div>
+                            {item.nodeCount !== undefined && item.nodeCount > 0 && (
+                              <span className="text-[10px] text-slate-500 font-bold">
+                                {`${item.nodeCount} ${t('template.count_nodes', 'нодів')}, ${item.edgeCount ?? 0} ${t('template.count_edges', 'зв\'язків')}`}
+                              </span>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -360,6 +398,92 @@ export const TemplateDetailPage: React.FC = () => {
               </div>
             </div>
             <div className="space-y-6">
+              <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[4px_4px_0px_0px_#0A0A0A] space-y-4 rounded-xl">
+                <h3 className="font-black text-xs uppercase text-[#0A0A0A] border-b-2 border-[#0A0A0A] pb-3 flex items-center gap-2">
+                  <Eye size={15} className="text-indigo-600" />
+                  <span>{t('template.stats.views', 'Статистика шаблону')}</span>
+                </h3>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-slate-50 border-2 border-[#0A0A0A] rounded-lg text-center space-y-1">
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-slate-600 font-bold uppercase">
+                      <Eye size={13} className="text-slate-500" />
+                      <span>{t('template.stats.views', 'Перегляди')}</span>
+                    </div>
+                    <div className="text-xl font-black font-['Anybody',sans-serif] text-[#0A0A0A]">
+                      {template.viewsCount ?? 0}
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-emerald-50 border-2 border-[#0A0A0A] rounded-lg text-center space-y-1">
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-700 font-bold uppercase">
+                      <Download size={13} className="text-emerald-600" />
+                      <span>{t('template.stats.installs', 'Встановлення')}</span>
+                    </div>
+                    <div className="text-xl font-black font-['Anybody',sans-serif] text-emerald-900">
+                      {template.installsCount ?? 0}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-200 space-y-2.5 text-xs font-bold text-slate-700">
+                  <div className="p-2.5 bg-indigo-50/70 border border-indigo-200 rounded-lg space-y-1">
+                    <div className="flex items-center justify-between text-indigo-950 font-black">
+                      <span className="flex items-center gap-1.5">
+                        <Workflow size={13} className="text-indigo-600" />
+                        <span>{t('common.nav.automation', 'Автоматизація')}</span>
+                      </span>
+                      <span>{`${template.flowCount || 1} ${t('template.count_flows', 'воронка')}`}</span>
+                    </div>
+                    <div className="text-[11px] text-indigo-800 flex items-center justify-between pt-0.5">
+                      <span className="font-semibold text-slate-500">{t('template.stats.structure', 'Структура:')}</span>
+                      <span className="font-bold">
+                        {`${template.nodeCount ?? 0} ${t('template.count_nodes', 'нодів')} • ${template.edgeCount ?? 0} ${t('template.count_edges', 'зв\'язків')}`}
+                      </span>
+                    </div>
+                  </div>
+
+                  {template.broadcastCount > 0 && (
+                    <div className="p-2.5 bg-amber-50/70 border border-amber-200 rounded-lg space-y-1">
+                      <div className="flex items-center justify-between text-amber-950 font-black">
+                        <span className="flex items-center gap-1.5">
+                          <Radio size={13} className="text-amber-600" />
+                          <span>{t('common.nav.broadcasts', 'Розсилки')}</span>
+                        </span>
+                        <span>{`${template.broadcastCount} ${t('template.count_broadcasts', 'розсилок')}`}</span>
+                      </div>
+                      <div className="text-[11px] text-amber-800 flex items-center justify-between pt-0.5">
+                        <span className="font-semibold text-slate-500">{t('template.stats.structure', 'Структура:')}</span>
+                        <span className="font-bold">
+                          {`${template.broadcastNodeCount ?? 0} ${t('template.count_nodes', 'нодів')} • ${template.broadcastEdgeCount ?? 0} ${t('template.count_edges', 'зв\'язків')}`}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {template.fieldCount > 0 && (
+                    <div className="flex items-center justify-between px-1 text-slate-600">
+                      <span className="flex items-center gap-1.5">
+                        <Sliders size={13} />
+                        <span>{t('template.custom_fields', 'Користувацькі поля')}</span>
+                      </span>
+                      <span className="font-black text-[#0A0A0A]">{template.fieldCount}</span>
+                    </div>
+                  )}
+
+                  {template.tagCount > 0 && (
+                    <div className="flex items-center justify-between px-1 text-slate-600">
+                      <span className="flex items-center gap-1.5">
+                        <TagIcon size={13} />
+                        <span>{t('template.tags', 'Теги')}</span>
+                      </span>
+                      <span className="font-black text-[#0A0A0A]">{template.tagCount}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* About Card */}
               <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[4px_4px_0px_0px_#0A0A0A] space-y-4 rounded-xl">
                 <h3 className="font-black text-xs uppercase text-[#0A0A0A] border-b-2 border-[#0A0A0A] pb-3">
                   {t('template.about_title', 'Про шаблон')}

@@ -59,7 +59,19 @@ apiClient.interceptors.response.use(
       const refreshToken = useAuthStore.getState().refreshToken;
       if (!refreshToken) {
         useAuthStore.getState().logout();
-        window.location.href = '/login';
+        const pathname = window.location.pathname;
+        const isPublicPage =
+          pathname.startsWith('/templates/install') ||
+          pathname.startsWith('/templates/detail') ||
+          pathname.startsWith('/blog') ||
+          pathname.startsWith('/login') ||
+          pathname.startsWith('/register') ||
+          pathname === '/';
+
+        if (!isPublicPage) {
+          const currentUrl = pathname + window.location.search;
+          window.location.href = `/login?redirect=${encodeURIComponent(currentUrl)}`;
+        }
         return Promise.reject(error);
       }
 

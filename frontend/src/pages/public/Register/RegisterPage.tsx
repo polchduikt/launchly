@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, Loader2, User as UserIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useRegisterForm } from '../../../hooks/auth/useRegisterForm';
 import { AuthPageLayout } from '../Login/components/AuthPageLayout';
 import { FormInput } from '../Login/components/FormInput';
@@ -12,10 +12,22 @@ import { t } from '../../../i18n/config';
 const RegisterPage: React.FC = () => {
   const { form, onSubmit, isPending, apiError } = useRegisterForm();
   const { register, formState: { errors } } = form;
+  const [searchParams] = useSearchParams();
+  const redirectParam = searchParams.get('redirect');
   const [showPassword, setShowPassword] = useState(false);
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
 
+  React.useEffect(() => {
+    if (redirectParam) {
+      localStorage.setItem('auth_redirect_url', redirectParam);
+    }
+  }, [redirectParam]);
+
   const handleGoogleLogin = () => {
+    const redirectUrl = redirectParam || localStorage.getItem('auth_redirect_url');
+    if (redirectUrl) {
+      localStorage.setItem('auth_redirect_url', redirectUrl);
+    }
     window.location.href = GOOGLE_OAUTH_URL;
   };
 
@@ -114,7 +126,10 @@ const RegisterPage: React.FC = () => {
 
       <p className="mt-8 text-center text-sm text-[#0A0A0A]/70 font-bold">
         {t('auth.register.has_account', 'Already have an account?')}{' '}
-        <Link to="/login" className="text-[#0A0A0A] hover:underline font-black transition-colors">
+        <Link
+          to={redirectParam ? `/login?redirect=${encodeURIComponent(redirectParam)}` : '/login'}
+          className="text-[#0A0A0A] hover:underline font-black transition-colors"
+        >
           {t('auth.login.link', 'Sign In')}
         </Link>
       </p>

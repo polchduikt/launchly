@@ -28,8 +28,9 @@ export const useLoginForm = () => {
     setApiError(null);
     try {
       const res = await loginMutate(data);
-      const redirectUrl = searchParams.get('redirect');
+      const redirectUrl = searchParams.get('redirect') || localStorage.getItem('auth_redirect_url');
       if (redirectUrl) {
+        localStorage.removeItem('auth_redirect_url');
         navigate(redirectUrl, { replace: true });
         return;
       }

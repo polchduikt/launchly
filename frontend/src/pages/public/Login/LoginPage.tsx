@@ -16,10 +16,21 @@ const LoginPage: React.FC = () => {
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
 
   const [searchParams] = useSearchParams();
+  const redirectParam = searchParams.get('redirect');
   const isBlockedError = searchParams.get('error') === 'blocked';
   const displayError = apiError || (isBlockedError ? t('auth.account_blocked_error') : null);
 
+  React.useEffect(() => {
+    if (redirectParam) {
+      localStorage.setItem('auth_redirect_url', redirectParam);
+    }
+  }, [redirectParam]);
+
   const handleGoogleLogin = () => {
+    const redirectUrl = redirectParam || localStorage.getItem('auth_redirect_url');
+    if (redirectUrl) {
+      localStorage.setItem('auth_redirect_url', redirectUrl);
+    }
     window.location.href = GOOGLE_OAUTH_URL;
   };
 
@@ -108,7 +119,10 @@ const LoginPage: React.FC = () => {
 
       <p className="mt-8 text-center text-sm text-[#0A0A0A]/70 font-bold">
         {t('auth.login.no_account', "Don't have an account?")}{' '}
-        <Link to="/register" className="text-[#0A0A0A] hover:underline font-black transition-colors">
+        <Link
+          to={redirectParam ? `/register?redirect=${encodeURIComponent(redirectParam)}` : '/register'}
+          className="text-[#0A0A0A] hover:underline font-black transition-colors"
+        >
           {t('auth.register.link', 'Create Account')}
         </Link>
       </p>

@@ -88,7 +88,13 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({
             if (onSuccess) {
               onSuccess();
             } else {
-              navigate('/dashboard');
+              const redirectUrl = localStorage.getItem('auth_redirect_url');
+              if (redirectUrl) {
+                localStorage.removeItem('auth_redirect_url');
+                navigate(redirectUrl, { replace: true });
+              } else {
+                navigate('/dashboard');
+              }
             }
             onClose();
           } else if (res.status === 'EXPIRED') {

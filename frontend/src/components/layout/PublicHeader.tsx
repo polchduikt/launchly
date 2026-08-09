@@ -6,7 +6,15 @@ import logo from '../../assets/images/logo.png';
 import { ROUTES } from '../../routes/paths';
 import { useTranslation } from '../../i18n/config';
 
-export const PublicHeader: React.FC = () => {
+export interface PublicHeaderProps {
+  simple?: boolean;
+  redirectUrl?: string;
+}
+
+export const PublicHeader: React.FC<PublicHeaderProps> = ({
+  simple = false,
+  redirectUrl,
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isBlogPage = location.pathname.startsWith(ROUTES.BLOG);
@@ -122,33 +130,36 @@ export const PublicHeader: React.FC = () => {
         </div>
       </div>
 
-      <nav className="hidden lg:flex items-center gap-3 xl:gap-4 absolute left-1/2 -translate-x-1/2">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            to={`${ROUTES.LANDING}${item.href}`}
-            className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider transition-colors duration-200 px-2 py-1 ${
-              isDarkHeader
-                ? 'text-[#F2EBDD] hover:bg-[#F2EBDD] hover:text-[#0A0A0A]'
-                : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
-            }`}
-          >
-            {t(item.key, item.fallback)}
-          </Link>
-        ))}
-        {!isBlogPage && (
-          <Link
-            to={ROUTES.BLOG}
-            className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider transition-colors duration-200 px-2 py-1 ${
-              isDarkHeader
-                ? 'text-[#F2EBDD] hover:bg-[#F2EBDD] hover:text-[#0A0A0A]'
-                : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
-            }`}
-          >
-            {t('landing.nav.blog', 'BLOG')}
-          </Link>
-        )}
-      </nav>
+      {!simple && (
+        <nav className="hidden lg:flex items-center gap-3 xl:gap-4 absolute left-1/2 -translate-x-1/2">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              to={`${ROUTES.LANDING}${item.href}`}
+              className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider transition-colors duration-200 px-2 py-1 ${
+                isDarkHeader
+                  ? 'text-[#F2EBDD] hover:bg-[#F2EBDD] hover:text-[#0A0A0A]'
+                  : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+              }`}
+            >
+              {t(item.key, item.fallback)}
+            </Link>
+          ))}
+          {!isBlogPage && (
+            <Link
+              to={ROUTES.BLOG}
+              className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider transition-colors duration-200 px-2 py-1 ${
+                isDarkHeader
+                  ? 'text-[#F2EBDD] hover:bg-[#F2EBDD] hover:text-[#0A0A0A]'
+                  : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+              }`}
+            >
+              {t('landing.nav.blog', 'BLOG')}
+            </Link>
+          )}
+        </nav>
+      )}
+
       <div className="hidden lg:flex items-center gap-4">
         {isAuthenticated ? (
           <button
@@ -164,7 +175,7 @@ export const PublicHeader: React.FC = () => {
         ) : (
           <>
             <button
-              onClick={() => navigate(ROUTES.LOGIN)}
+              onClick={() => navigate(redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : ROUTES.LOGIN)}
               className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:underline underline-offset-4 cursor-pointer ${
                 isDarkHeader ? 'text-[#F2EBDD]' : 'text-[#0A0A0A]'
               }`}
@@ -172,7 +183,7 @@ export const PublicHeader: React.FC = () => {
               {t('landing.nav.login', 'LOGIN')}
             </button>
             <button
-              onClick={() => navigate(ROUTES.REGISTER)}
+              onClick={() => navigate(redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : ROUTES.REGISTER)}
               className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-2.5 border-2 transition-all cursor-pointer ${
                 isDarkHeader
                   ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
@@ -208,27 +219,29 @@ export const PublicHeader: React.FC = () => {
               : 'bg-[#F2EBDD] border-[#0A0A0A] text-[#0A0A0A]'
           }`}
         >
-          <div className="flex flex-col space-y-3 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider border-b pb-4 border-current/20">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                to={`${ROUTES.LANDING}${item.href}`}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="py-1.5 hover:underline underline-offset-4 transition-all"
-              >
-                {t(item.key, item.fallback)}
-              </Link>
-            ))}
-            {!isBlogPage && (
-              <Link
-                to={ROUTES.BLOG}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="py-1.5 hover:underline underline-offset-4 transition-all"
-              >
-                {t('landing.nav.blog', 'BLOG')}
-              </Link>
-            )}
-          </div>
+          {!simple && (
+            <div className="flex flex-col space-y-3 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider border-b pb-4 border-current/20">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  to={`${ROUTES.LANDING}${item.href}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="py-1.5 hover:underline underline-offset-4 transition-all"
+                >
+                  {t(item.key, item.fallback)}
+                </Link>
+              ))}
+              {!isBlogPage && (
+                <Link
+                  to={ROUTES.BLOG}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="py-1.5 hover:underline underline-offset-4 transition-all"
+                >
+                  {t('landing.nav.blog', 'BLOG')}
+                </Link>
+              )}
+            </div>
+          )}
 
           <div className="pt-2 flex flex-col space-y-3">
             {isAuthenticated ? (
@@ -248,7 +261,7 @@ export const PublicHeader: React.FC = () => {
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
-                    navigate(ROUTES.LOGIN);
+                    navigate(redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : ROUTES.LOGIN);
                   }}
                   className={`py-3 border-2 font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider text-center cursor-pointer ${
                     isDarkHeader ? 'border-[#F2EBDD] text-[#F2EBDD]' : 'border-[#0A0A0A] text-[#0A0A0A]'
@@ -259,7 +272,7 @@ export const PublicHeader: React.FC = () => {
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
-                    navigate(ROUTES.REGISTER);
+                    navigate(redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : ROUTES.REGISTER);
                   }}
                   className={`py-3 border-2 font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_currentColor] text-center cursor-pointer ${
                     isDarkHeader ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD]' : 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'

@@ -18,6 +18,7 @@ import {
   Sliders,
 } from 'lucide-react';
 import { useBotStore } from '../../../store/useBotStore';
+import { useAuthStore } from '../../../store/useAuthStore';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
 import { getCampaignsApi, getTagsApi } from '../../../api/broadcast';
 import { getCustomFieldsApi } from '../../../api/bot';
@@ -43,6 +44,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
   const editShareCode = routeParams.shareCode || searchParams.get('edit');
   const isEditMode = Boolean(editShareCode);
   const { t } = useTranslation();
+  const currentUser = useAuthStore((s) => s.user);
   const activeBotId = useBotStore((s) => s.activeBotId);
   const { data: bots = [], isLoading: isLoadingBots } = useBotsQuery();
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -99,14 +101,31 @@ export const CreateTemplateWizardPage: React.FC = () => {
         setTags(mergedTags);
 
         const mergedFields: any[] = [];
+        const seenFieldNames = new Set<string>();
         allFields.forEach((fRes) => {
+          if (!fRes) return;
+          let list: any[] = [];
           if (Array.isArray(fRes)) {
-            mergedFields.push(...fRes);
-          } else if (fRes && typeof fRes === 'object') {
-            Object.keys(fRes).forEach((k) => {
-              mergedFields.push({ name: k, label: fRes[k] });
-            });
+            list = fRes;
+          } else if (typeof fRes === 'object') {
+            if (Array.isArray(fRes.fields)) {
+              list = [...fRes.fields];
+            } else {
+              Object.keys(fRes).forEach((k) => {
+                if (k !== 'folders' && k !== 'archivedFields') {
+                  list.push({ name: k, label: typeof fRes[k] === 'string' ? fRes[k] : k });
+                }
+              });
+            }
           }
+
+          list.forEach((f: any) => {
+            const name = (typeof f === 'string' ? f : f?.name || f?.label || '').trim();
+            if (name && !seenFieldNames.has(name.toLowerCase())) {
+              seenFieldNames.add(name.toLowerCase());
+              mergedFields.push(typeof f === 'string' ? { name, type: 'Text' } : f);
+            }
+          });
         });
         setCustomFields(mergedFields);
 
@@ -117,6 +136,11 @@ export const CreateTemplateWizardPage: React.FC = () => {
         });
         if (editShareCode) {
           getTemplateByShareCodeApi(editShareCode).then((existingTpl) => {
+            if (currentUser && existingTpl.creatorId && existingTpl.creatorId !== currentUser.id) {
+              alert(t('template.error.not_owner', 'Ви не можете редагувати чужий шаблон. Лише власник може вносити зміни.'));
+              navigate('/templates');
+              return;
+            }
             setTemplateName(existingTpl.name);
             setAboutText(existingTpl.description || '');
             setGuideUrl(existingTpl.guideUrl || '');
@@ -146,7 +170,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
         }
       })
       .finally(() => setLoadingRealData(false));
-  }, [bots, editShareCode]);
+  }, [bots, editShareCode, currentUser, navigate, t]);
 
   const automationItems: SelectionItem[] = bots.map((b) => ({
     id: `automation_${b.id}`,
@@ -156,13 +180,13 @@ export const CreateTemplateWizardPage: React.FC = () => {
 
   const broadcastItems: SelectionItem[] = campaigns.map((c) => ({
     id: `broadcast_${c.id}`,
-    name: c.name || `Розсилка #${c.id}`,
+    name: c.name || `${t('template.create.fallback_broadcast', 'Розсилка')} #${c.id}`,
     category: 'broadcasts',
   }));
 
   const fieldItems: SelectionItem[] = customFields.map((f, idx) => ({
-    id: `field_${f.id || idx}`,
-    name: f.name || f.label || `Поле #${idx + 1}`,
+    id: `field_${idx}`,
+    name: f.name || f.label || `${t('template.create.fallback_field', 'Поле')} #${idx + 1}`,
     category: 'fields',
   }));
 
@@ -211,13 +235,16 @@ export const CreateTemplateWizardPage: React.FC = () => {
       const selectedFlows = selectedIds.filter((id) => id.startsWith('automation_'));
       const selectedBroadcasts = selectedIds
         .filter((id) => id.startsWith('broadcast_'))
-        .map((id) => parseInt(id.replace('broadcast_', '')) || 0);
+        .map((id) => parseInt(id.replace('broadcast_', ''), 10))
+        .filter((n) => !isNaN(n));
       const selectedFields = selectedIds
         .filter((id) => id.startsWith('field_'))
-        .map((id) => parseInt(id.replace('field_', '')) || 0);
+        .map((id) => parseInt(id.replace('field_', ''), 10))
+        .filter((n) => !isNaN(n));
       const selectedTags = selectedIds
         .filter((id) => id.startsWith('tag_'))
-        .map((id) => parseInt(id.replace('tag_', '')) || 0);
+        .map((id) => parseInt(id.replace('tag_', ''), 10))
+        .filter((n) => !isNaN(n));
 
       let targetSourceBotId = activeBotId;
       if (selectedFlows.length > 0) {
@@ -357,7 +384,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                 onClick={() => navigate('/templates')}
                 className="px-4 py-2 bg-white hover:bg-slate-100 text-[#0A0A0A] border border-[#0A0A0A] text-xs font-black uppercase cursor-pointer"
               >
-                {t('common.close', 'Завершити')}
+                {t('template.create.finish_btn', 'Завершити')}
               </button>
             )}
           </div>
@@ -556,7 +583,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                         <Shield size={16} className="text-indigo-600" />
                         <div>
                           <span className="text-xs font-black uppercase text-[#0A0A0A]">
-                            {t('template.create.protect_label', 'Захистити шаблон (Protect template)')}
+                            {t('template.create.protect_label', 'Захистити шаблон')}
                           </span>
                           <p className="text-[10px] font-bold text-slate-500">
                             {t('template.create.protect_desc', 'Забороняє отримувачам повторно експортувати вміст шаблону')}
@@ -614,7 +641,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                   {t('template.create.success_heading', 'Чудова робота!')}
                 </h2>
                 <p className="text-xs font-black uppercase text-slate-600">
-                  {isEditMode ? t('template.create.updated_success', 'Шаблон акаунту успішно оновлено') : t('template.create.success_sub', 'Шаблон акаунту успішно створено')}
+                  {isEditMode ? t('template.create.updated_success', 'Шаблон успішно оновлено') : t('template.create.success_sub', 'Шаблон успішно створено')}
                 </p>
 
                 <div className="pt-4 max-w-xl mx-auto space-y-2">
@@ -675,7 +702,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                       type="text"
                       value={guideUrl}
                       onChange={(e) => setGuideUrl(e.target.value)}
-                      placeholder="e.g. mysite.com/my-template-guide"
+                      placeholder={t('template.create.guide_url_placeholder', 'e.g. mysite.com/my-template-guide')}
                       className="w-full px-3 py-2 border-2 border-[#0A0A0A] bg-[#F2EBDD]/40 text-xs font-bold focus:outline-none focus:bg-white"
                     />
                   </div>
@@ -688,7 +715,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                       type="text"
                       value={videoUrl}
                       onChange={(e) => setVideoUrl(e.target.value)}
-                      placeholder="e.g. https://www.youtube.com/watch?v=XXXXXX"
+                      placeholder={t('template.create.video_url_placeholder', 'e.g. https://www.youtube.com/watch?v=XXXXXX')}
                       className="w-full px-3 py-2 border-2 border-[#0A0A0A] bg-[#F2EBDD]/40 text-xs font-bold focus:outline-none focus:bg-white"
                     />
                   </div>

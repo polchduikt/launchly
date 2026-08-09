@@ -25,6 +25,13 @@ const OAuth2Callback: React.FC = () => {
         const user = await getCurrentUserApi();
         login(accessToken, refreshToken, user);
 
+        const redirectUrl = searchParams.get('redirect') || localStorage.getItem('auth_redirect_url');
+        if (redirectUrl) {
+          localStorage.removeItem('auth_redirect_url');
+          navigate(redirectUrl, { replace: true });
+          return;
+        }
+
         const isAdminOrManager = user.role === 'ROLE_ADMIN' || user.role === 'ROLE_MANAGER';
         if (isAdminOrManager) {
           navigate(ROUTES.ADMIN_HOME, { replace: true });

@@ -51,7 +51,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
             </div>
             <div>
               <h2 className="font-extrabold text-base uppercase tracking-tight">
-                {t('settings.template.title', 'Шаблон акаунту')}
+                {t('settings.template.title', 'Шаблон')}
               </h2>
               <p className="text-[11px] font-bold text-slate-600">
                 {t('settings.template.subtitle', 'Створіть посилання, щоб поділитися воронками')}

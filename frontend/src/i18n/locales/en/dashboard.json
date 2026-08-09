@@ -101,5 +101,6 @@
   "dashboard.templates.start_from_scratch": "Start From Scratch",
   "dashboard.templates.traffic": "Drive traffic",
   "dashboard.templates.type_label": "Telegram Template",
+  "dashboard.templates.flow_template": "Automation Template",
   "dashboard.welcome": "Welcome to your dashboard!"
 }

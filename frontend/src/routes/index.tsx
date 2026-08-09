@@ -52,8 +52,9 @@ const PublicOnlyRoute = () => {
 
   if (accessToken) {
     const searchParams = new URLSearchParams(location.search);
-    const redirectUrl = searchParams.get('redirect');
+    const redirectUrl = searchParams.get('redirect') || localStorage.getItem('auth_redirect_url');
     if (redirectUrl) {
+      localStorage.removeItem('auth_redirect_url');
       return <Navigate to={redirectUrl} replace />;
     }
     const role = user?.role;
@@ -152,11 +153,11 @@ export const AppRouter: React.FC = () => {
           <Route path={ROUTES.PAYMENT_TERMS} element={<PaymentTermsPage />} />
           <Route path={ROUTES.BLOCKED} element={<BlockedPage />} />
           <Route path="/templates/install/:shareCode" element={<InstallTemplateWizardPage />} />
+          <Route path={ROUTES.OAUTH_CALLBACK} element={<OAuth2Callback />} />
 
           <Route element={<PublicOnlyRoute />}>
             <Route path={ROUTES.LOGIN} element={<AuthLayout><LoginPage /></AuthLayout>} />
             <Route path={ROUTES.REGISTER} element={<AuthLayout><RegisterPage /></AuthLayout>} />
-            <Route path={ROUTES.OAUTH_CALLBACK} element={<OAuth2Callback />} />
           </Route>
 
           <Route element={<PrivateRoute />}>

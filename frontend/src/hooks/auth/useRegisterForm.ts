@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useRegisterMutation } from './useRegisterMutation';
 import { registerSchema } from '../../schemas/auth.schema';
 import type { RegisterSchemaType } from '../../schemas/auth.schema';
@@ -11,6 +11,7 @@ export type RegisterFields = RegisterSchemaType;
 
 export const useRegisterForm = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { mutateAsync: registerMutate, isPending } = useRegisterMutation();
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -32,6 +33,12 @@ export const useRegisterForm = () => {
         email: data.email,
         password: data.password,
       });
+      const redirectUrl = searchParams.get('redirect') || localStorage.getItem('auth_redirect_url');
+      if (redirectUrl) {
+        localStorage.removeItem('auth_redirect_url');
+        navigate(redirectUrl, { replace: true });
+        return;
+      }
       navigate('/home', { replace: true });
     } catch (error: unknown) {
       const msg = axios.isAxiosError(error)
