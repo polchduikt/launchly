@@ -43,4 +43,6 @@ public interface InstalledTemplateRepository extends JpaRepository<InstalledTemp
     @Modifying
     @Query("DELETE FROM InstalledTemplate it WHERE it.bot.id = :botId")
     void deleteAllByBotId(@Param("botId") Long botId);
+
+    long countByTemplateId(Long templateId);
 }

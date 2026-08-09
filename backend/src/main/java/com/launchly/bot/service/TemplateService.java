@@ -14,4 +14,5 @@ public interface TemplateService {
     List<TemplateResponse> getInstalledTemplates(Long userId);
     void deleteTemplate(String shareCode, Long userId);
     void deleteInstalledTemplate(String shareCode, Long userId);
+    void trackTemplateView(String shareCode, Long viewerUserId);
 }

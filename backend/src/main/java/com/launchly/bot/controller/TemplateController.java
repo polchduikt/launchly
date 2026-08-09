@@ -43,9 +43,19 @@ public class TemplateController {
         return ResponseEntity.ok(templateService.getInstalledTemplates(userDetails.getId()));
     }
 
-    @GetMapping("/{shareCode}")
+    @GetMapping("/share/{shareCode}")
     public ResponseEntity<TemplateResponse> getTemplateByShareCode(@PathVariable String shareCode) {
         return ResponseEntity.ok(templateService.getTemplateByShareCode(shareCode));
+    }
+
+    @PostMapping("/share/{shareCode}/view")
+    public ResponseEntity<Void> trackView(
+            @PathVariable String shareCode,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails != null ? userDetails.getId() : null;
+        templateService.trackTemplateView(shareCode, userId);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{shareCode}")
@@ -75,7 +85,7 @@ public class TemplateController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping({"/install/{shareCode}", "/{shareCode}/install"})
+    @PostMapping("/install/{shareCode}")
     public ResponseEntity<Void> installTemplate(
             @PathVariable String shareCode,
             @RequestParam(required = false) Long botId,

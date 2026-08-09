@@ -102,6 +102,43 @@ public class TemplateServiceImpl implements TemplateService {
         String broadcastIdsJson = writeJson(broadcastIds);
         String tagIdsJson = writeJson(tagIds);
         String fieldIdsJson = writeJson(fieldIds);
+
+        int resolvedFieldCount = 0;
+        if (bot != null && bot.getCustomFieldsData() != null && !bot.getCustomFieldsData().trim().isEmpty() && !bot.getCustomFieldsData().trim().equals("{}")) {
+            try {
+                Map<String, Object> botFieldsMap = objectMapper.readValue(bot.getCustomFieldsData(), new TypeReference<Map<String, Object>>() {});
+                List<Map<String, Object>> botFieldsList = botFieldsMap.containsKey("fields") && botFieldsMap.get("fields") instanceof List<?>
+                        ? (List<Map<String, Object>>) botFieldsMap.get("fields")
+                        : new ArrayList<>();
+
+                if (fieldIds.isEmpty()) {
+                    Map<String, Object> emptyMap = new HashMap<>();
+                    emptyMap.put("fields", Collections.emptyList());
+                    emptyMap.put("folders", Collections.emptyList());
+                    emptyMap.put("archivedFields", Collections.emptyList());
+                    customFieldsData = objectMapper.writeValueAsString(emptyMap);
+                    resolvedFieldCount = 0;
+                } else {
+                    List<Map<String, Object>> selectedFieldsList = new ArrayList<>();
+                    for (int i = 0; i < botFieldsList.size(); i++) {
+                        if (fieldIds.contains((long) i)) {
+                            selectedFieldsList.add(botFieldsList.get(i));
+                        }
+                    }
+                    if (selectedFieldsList.isEmpty() && !botFieldsList.isEmpty()) {
+                        selectedFieldsList.addAll(botFieldsList);
+                    }
+                    Map<String, Object> filteredMap = new HashMap<>(botFieldsMap);
+                    filteredMap.put("fields", selectedFieldsList);
+                    customFieldsData = objectMapper.writeValueAsString(filteredMap);
+                    resolvedFieldCount = selectedFieldsList.size();
+                }
+            } catch (Exception e) {
+                customFieldsData = bot.getCustomFieldsData();
+                resolvedFieldCount = fieldIds.size();
+            }
+        }
+
         List<Map<String, Object>> broadcastsList = new ArrayList<>();
         if (!broadcastIds.isEmpty()) {
             List<BroadcastCampaign> camps = broadcastCampaignRepository.findAllById(broadcastIds);
@@ -157,7 +194,7 @@ public class TemplateServiceImpl implements TemplateService {
                 .flowCount(flowIds.isEmpty() ? 1 : flowIds.size())
                 .broadcastCount(broadcastsList.size())
                 .tagCount(tagNames.size())
-                .fieldCount(fieldIds.size())
+                .fieldCount(resolvedFieldCount)
                 .build();
 
         template = accountTemplateRepository.save(template);
@@ -172,6 +209,18 @@ public class TemplateServiceImpl implements TemplateService {
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Template not found"));
 
         return toTemplateResponse(template);
+    }
+
+    @Override
+    @Transactional
+    public void trackTemplateView(String shareCode, Long viewerUserId) {
+        AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode).orElse(null);
+        if (template == null) return;
+        if (viewerUserId != null && template.getCreator() != null && template.getCreator().getId().equals(viewerUserId)) {
+            return;
+        }
+        template.setViewsCount(template.getViewsCount() + 1);
+        accountTemplateRepository.save(template);
     }
 
     @Override
@@ -332,6 +381,52 @@ public class TemplateServiceImpl implements TemplateService {
             }
         }
 
+        if (template.getCustomFieldsDataJson() != null && !template.getCustomFieldsDataJson().trim().isEmpty() && !template.getCustomFieldsDataJson().trim().equals("{}")) {
+            try {
+                String existingBotFieldsJson = targetBot.getCustomFieldsData();
+                Map<String, Object> targetData = (existingBotFieldsJson != null && !existingBotFieldsJson.trim().isEmpty() && !existingBotFieldsJson.trim().equals("{}"))
+                        ? objectMapper.readValue(existingBotFieldsJson, new TypeReference<Map<String, Object>>() {})
+                        : new HashMap<>();
+
+                Map<String, Object> templateData = objectMapper.readValue(template.getCustomFieldsDataJson(), new TypeReference<Map<String, Object>>() {});
+
+                List<Map<String, Object>> targetFieldsList = targetData.containsKey("fields") && targetData.get("fields") instanceof List<?>
+                        ? new ArrayList<>((List<Map<String, Object>>) targetData.get("fields"))
+                        : new ArrayList<>();
+
+                List<Map<String, Object>> tplFieldsList = templateData.containsKey("fields") && templateData.get("fields") instanceof List<?>
+                        ? (List<Map<String, Object>>) templateData.get("fields")
+                        : new ArrayList<>();
+
+                Set<String> existingNames = new HashSet<>();
+                for (Map<String, Object> f : targetFieldsList) {
+                    if (f.get("name") != null) {
+                        existingNames.add(f.get("name").toString().trim().toLowerCase());
+                    }
+                }
+
+                for (Map<String, Object> tf : tplFieldsList) {
+                    if (tf.get("name") != null && !existingNames.contains(tf.get("name").toString().trim().toLowerCase())) {
+                        targetFieldsList.add(tf);
+                        existingNames.add(tf.get("name").toString().trim().toLowerCase());
+                    }
+                }
+
+                targetData.put("fields", targetFieldsList);
+                if (!targetData.containsKey("folders")) {
+                    targetData.put("folders", templateData.getOrDefault("folders", Collections.emptyList()));
+                }
+                if (!targetData.containsKey("archivedFields")) {
+                    targetData.put("archivedFields", Collections.emptyList());
+                }
+
+                targetBot.setCustomFieldsData(objectMapper.writeValueAsString(targetData));
+                botRepository.save(targetBot);
+            } catch (Exception e) {
+                log.error("Error merging custom fields: {}", e.getMessage());
+            }
+        }
+
         boolean alreadyInstalled = installedTemplateRepository.existsByUserIdAndTemplateId(userId, template.getId());
         if (!alreadyInstalled) {
             InstalledTemplate installed = InstalledTemplate.builder()
@@ -341,6 +436,8 @@ public class TemplateServiceImpl implements TemplateService {
                     .build();
             installedTemplateRepository.save(installed);
         }
+        template.setInstallsCount(template.getInstallsCount() + 1);
+        accountTemplateRepository.save(template);
     }
 
     @Override
@@ -382,19 +479,72 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     private TemplateResponse toTemplateResponse(AccountTemplate t) {
+        String resolvedShareUrl = frontendUrl + "/templates/install/" + t.getShareCode();
+        Long creatorId = t.getCreator() != null ? t.getCreator().getId() : null;
+        String creatorName = t.getCreator() != null ? t.getCreator().getName() : "Користувач";
+
+        String sourceBotName = t.getSourceBotName();
+        String sourceBotDesc = t.getSourceBotDescription();
         List<String> flowIds = readStringList(t.getSelectedFlowIdsJson());
         List<Long> broadcastIds = readLongList(t.getSelectedBroadcastIdsJson());
         List<Long> tagIds = readLongList(t.getSelectedTagIdsJson());
         List<Long> fieldIds = readLongList(t.getSelectedFieldIdsJson());
 
-        String resolvedShareUrl = frontendUrl.replaceAll("/+$", "") + "/templates/install/" + t.getShareCode();
-        String creatorName = (t.getCreator() != null && t.getCreator().getName() != null)
-                ? t.getCreator().getName()
-                : (t.getCreator() != null ? t.getCreator().getEmail() : "Launchly User");
-        String sourceBotName = t.getSourceBotName() != null ? t.getSourceBotName() : (t.getSourceBot() != null ? t.getSourceBot().getName() : "Launchly Bot");
-        String sourceBotDesc = t.getSourceBotDescription() != null ? t.getSourceBotDescription() : "";
+        int automationNodeCount = 0;
+        int automationEdgeCount = 0;
+        if (t.getSchemaJson() != null && !t.getSchemaJson().trim().isEmpty()) {
+            try {
+                Map<String, Object> schema = objectMapper.readValue(t.getSchemaJson(), new TypeReference<Map<String, Object>>() {});
+                automationNodeCount = countJsonElements(schema.get("nodes"));
+                automationEdgeCount = countJsonElements(schema.get("edges"));
+            } catch (Exception ignored) {}
+        }
+        if (automationNodeCount == 0 && (t.getFlowCount() > 0 || (flowIds != null && !flowIds.isEmpty()))) {
+            automationNodeCount = 1;
+        }
 
-        Long creatorId = t.getCreator() != null ? t.getCreator().getId() : null;
+        int broadcastNodeCount = 0;
+        int broadcastEdgeCount = 0;
+        if (t.getBroadcastsDataJson() != null && !t.getBroadcastsDataJson().trim().isEmpty()) {
+            try {
+                List<Map<String, Object>> camps = objectMapper.readValue(t.getBroadcastsDataJson(), new TypeReference<List<Map<String, Object>>>() {});
+                for (Map<String, Object> c : camps) {
+                    broadcastNodeCount += countJsonElements(c.get("nodes"));
+                    broadcastEdgeCount += countJsonElements(c.get("edges"));
+                }
+            } catch (Exception ignored) {}
+        }
+
+        int totalNodeCount = automationNodeCount + broadcastNodeCount;
+        int totalEdgeCount = automationEdgeCount + broadcastEdgeCount;
+
+        int fieldCount = t.getFieldCount();
+        if (fieldCount == 0 && t.getCustomFieldsDataJson() != null && !t.getCustomFieldsDataJson().trim().isEmpty() && !t.getCustomFieldsDataJson().trim().equals("{}")) {
+            try {
+                Object parsed = objectMapper.readValue(t.getCustomFieldsDataJson(), Object.class);
+                if (parsed instanceof Map<?, ?> m) {
+                    if (m.containsKey("fields") && m.get("fields") instanceof List<?> fl) {
+                        fieldCount = fl.size();
+                    } else {
+                        fieldCount = m.size();
+                    }
+                } else if (parsed instanceof List<?> l) {
+                    fieldCount = l.size();
+                }
+            } catch (Exception ignored) {}
+        }
+
+        int tagCount = t.getTagCount();
+        if (tagCount == 0 && t.getTagsDataJson() != null && !t.getTagsDataJson().trim().isEmpty()) {
+            try {
+                List<?> list = objectMapper.readValue(t.getTagsDataJson(), List.class);
+                tagCount = list.size();
+            } catch (Exception ignored) {}
+        }
+
+        int viewsCount = t.getViewsCount();
+        int dbInstalls = (int) installedTemplateRepository.countByTemplateId(t.getId());
+        int installsCount = Math.max(t.getInstallsCount(), dbInstalls);
 
         return new TemplateResponse(
                 t.getId(),
@@ -410,10 +560,18 @@ public class TemplateServiceImpl implements TemplateService {
                 creatorName,
                 sourceBotName,
                 sourceBotDesc,
-                t.getFlowCount(),
+                t.getFlowCount() > 0 ? t.getFlowCount() : (flowIds.isEmpty() ? 1 : flowIds.size()),
                 t.getBroadcastCount(),
-                t.getTagCount(),
-                t.getFieldCount(),
+                tagCount,
+                fieldCount,
+                automationNodeCount,
+                automationEdgeCount,
+                broadcastNodeCount,
+                broadcastEdgeCount,
+                totalNodeCount,
+                totalEdgeCount,
+                viewsCount,
+                installsCount,
                 flowIds,
                 broadcastIds,
                 tagIds,
@@ -423,6 +581,24 @@ public class TemplateServiceImpl implements TemplateService {
                 t.getCustomFieldsDataJson(),
                 t.getCreatedAt()
         );
+    }
+
+    private int countJsonElements(Object jsonElement) {
+        if (jsonElement == null) return 0;
+        if (jsonElement instanceof List<?> list) {
+            return list.size();
+        }
+        if (jsonElement instanceof String str) {
+            String trimmed = str.trim();
+            if (trimmed.isEmpty() || trimmed.equals("[]") || trimmed.equals("{}")) return 0;
+            try {
+                List<?> list = objectMapper.readValue(trimmed, List.class);
+                return list != null ? list.size() : 0;
+            } catch (Exception e) {
+                return 0;
+            }
+        }
+        return 0;
     }
 
     private String writeJson(Object obj) {

@@ -92,6 +92,14 @@ public class AccountTemplate extends BaseEntity {
     @Column(name = "field_count")
     private int fieldCount;
 
+    @Column(name = "views_count", columnDefinition = "integer default 0")
+    @Builder.Default
+    private int viewsCount = 0;
+
+    @Column(name = "installs_count", columnDefinition = "integer default 0")
+    @Builder.Default
+    private int installsCount = 0;
+
     @Lob
     @Column(name = "avatar_url", columnDefinition = "TEXT")
     private String avatarUrl;
