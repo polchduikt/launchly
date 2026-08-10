@@ -32,6 +32,7 @@ import type { BotUserMetadata, FilterCondition } from '../../../types/crm';
 
 import { useTranslation } from '../../../i18n/config';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
+import { DISPLAY_KEY_CONTACTS_HIDE_UNSUB } from '../FlowBuilder/components/DisplayPanel';
 
 export const ContactsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -54,6 +55,18 @@ export const ContactsPage: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showFiltersBuilder, setShowFiltersBuilder] = useState(false);
   const [conditions, setConditions] = useState<FilterCondition[]>([]);
+
+  const [hideUnsub, setHideUnsub] = useState(
+    () => localStorage.getItem(DISPLAY_KEY_CONTACTS_HIDE_UNSUB) === 'true'
+  );
+
+  useEffect(() => {
+    const handler = () => {
+      setHideUnsub(localStorage.getItem(DISPLAY_KEY_CONTACTS_HIDE_UNSUB) === 'true');
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, []);
   
   const [showBulkMenu, setShowBulkMenu] = useState(false);
   const [bulkActionType, setBulkActionType] = useState<string | null>(null);
@@ -96,6 +109,13 @@ export const ContactsPage: React.FC = () => {
 
   const filteredContacts = useMemo(() => {
     return contacts.filter((c) => {
+      // Hide unsubscribed if toggle is on
+      if (hideUnsub) {
+        try {
+          const meta = c.metadata ? JSON.parse(c.metadata) : {};
+          if (meta.unsubscribed) return false;
+        } catch {}
+      }
       const fullname = `${c.firstName || ''} ${c.lastName || ''}`.toLowerCase();
       const username = (c.username || '').toLowerCase();
       const q = searchQuery.toLowerCase().trim();
@@ -177,7 +197,7 @@ export const ContactsPage: React.FC = () => {
         return true;
       });
     });
-  }, [contacts, searchQuery, conditions]);
+  }, [contacts, searchQuery, conditions, hideUnsub]);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {

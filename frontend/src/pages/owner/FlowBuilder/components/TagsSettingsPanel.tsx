@@ -210,7 +210,7 @@ export const TagsSettingsPanel: React.FC = () => {
             className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all flex items-center gap-1.5 cursor-pointer select-none"
           >
             <Plus size={14} />
-            <span>{t('settings.tags.new_tag_btn')}</span>
+            <span>{t('settings.tags.new_tag_btn', 'Новий тег')}</span>
           </button>
         </div>
 
@@ -247,13 +247,13 @@ export const TagsSettingsPanel: React.FC = () => {
                         }}
                         className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase"
                       >
-                        {t('settings.tags.action_rename')}
+                        {t('settings.tags.action_rename', 'Перейменувати')}
                       </button>
                       <button
                         onClick={() => handleDeleteFolder(folder.id)}
                         className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/15 uppercase"
                       >
-                        {t('settings.tags.action_delete')}
+                        {t('settings.tags.action_delete', 'Видалити')}
                       </button>
                     </div>
                   )}
@@ -265,7 +265,7 @@ export const TagsSettingsPanel: React.FC = () => {
                 className="px-4 py-2.5 border-2 border-dashed border-[#0A0A0A] text-[#0A0A0A] hover:bg-white text-xs font-black uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer select-none"
               >
                 <Plus size={14} />
-                <span>{t('settings.tags.new_folder_btn')}</span>
+                <span>{t('settings.tags.new_folder_btn', 'Нова папка')}</span>
               </button>
             </div>
           )}

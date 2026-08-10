@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, HelpCircle, Check, Users, Plus, ChevronDown } from 'lucide-react';
+import { X, HelpCircle, Check, Plus, ChevronDown } from 'lucide-react';
 import { useBotStore } from '../../../../store/useBotStore';
 import { useAuthStore } from '../../../../store/useAuthStore';
 import { t } from '../../../../i18n/config';
@@ -89,7 +89,6 @@ export const TeamMembersPanel: React.FC = () => {
   const activeBotId = useBotStore((state) => state.activeBotId);
   const currentUser = useAuthStore((s) => s.user);
 
-  const [activeSubTab, setActiveSubTab] = useState<'members' | 'groups'>('members');
   const [members, setMembers] = useState<TeamMemberResponse[]>([]);
   const [editingMemberId, setEditingMemberId] = useState<number | null>(null);
 
@@ -362,134 +361,95 @@ export const TeamMembersPanel: React.FC = () => {
 
   return (
     <div className="space-y-6 font-['JetBrains_Mono',monospace]">
-      <div className="flex border-b-2 border-[#0A0A0A]">
-        <button
-          onClick={() => setActiveSubTab('members')}
-          className={`px-4 py-2 text-xs font-black uppercase cursor-pointer transition-all border-b-2 -mb-[2px] ${
-            activeSubTab === 'members'
-              ? 'border-[#0A0A0A] bg-[#0A0A0A] text-[#F2EBDD]'
-              : 'border-transparent text-[#0A0A0A] hover:bg-white'
-          }`}
-        >
-          {t('settings.members.breadcrumb')}
-        </button>
-        <button
-          onClick={() => setActiveSubTab('groups')}
-          className={`px-4 py-2 text-xs font-black uppercase cursor-pointer transition-all border-b-2 -mb-[2px] ${
-            activeSubTab === 'groups'
-              ? 'border-[#0A0A0A] bg-[#0A0A0A] text-[#F2EBDD]'
-              : 'border-transparent text-[#0A0A0A] hover:bg-white'
-          }`}
-        >
-          {t('settings.members.groups')}
-        </button>
-      </div>
+      <div className="space-y-6 text-left animate-in fade-in duration-150">
+        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
+          <div className="p-5 flex justify-between items-center border-b-2 border-[#0A0A0A]">
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
+              {t('settings.members.title', 'Члени команди')}
+            </h3>
+            <button
+              onClick={() => {
+                setErrorMsg('');
+                setIsInviteOpen(true);
+              }}
+              className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus size={14} />
+              <span>{t('settings.members.btn.invite', 'Запросити учасника')}</span>
+            </button>
+          </div>
 
-      {activeSubTab === 'members' ? (
-        <div className="space-y-6 text-left animate-in fade-in duration-150">
-          <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
-            <div className="p-5 flex justify-between items-center border-b-2 border-[#0A0A0A]">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
-                {t('settings.members.title', 'Члени команди')}
-              </h3>
-              <button
-                onClick={() => {
-                  setErrorMsg('');
-                  setIsInviteOpen(true);
-                }}
-                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all flex items-center gap-1.5 cursor-pointer"
-              >
-                <Plus size={14} />
-                <span>{t('settings.members.invite_btn')}</span>
-              </button>
-            </div>
-
-            <div className="overflow-x-auto p-4">
-              <div className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b-2 border-[#0A0A0A] bg-[#F2EBDD] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
-                      <th className="px-6 py-3">{t('settings.members.name')}</th>
-                      <th className="px-6 py-3">{t('settings.members.role_label')}</th>
-                      <th className="px-6 py-3">
-                        <span className="flex items-center gap-1">
-                          <span>{t('settings.members.inbox_seat')}</span>
-                          <HelpCircle size={11} />
-                        </span>
-                      </th>
-                      <th className="px-6 py-3">
-                        <span className="flex items-center gap-1">
-                          <span>{t('settings.members.billing')}</span>
-                          <HelpCircle size={11} />
-                        </span>
-                      </th>
-                      <th className="px-6 py-3 text-right"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y-2 divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A] bg-white">
-                    {members.map((m) => (
-                      <tr key={m.id} className="hover:bg-[#F2EBDD]/50 transition-colors">
-                        <td className="px-6 py-4 flex items-center gap-3">
-                          {renderMemberAvatar(m)}
-                          <div>
-                            <p className="font-bold text-[#0A0A0A]">{getMemberName(m)}</p>
-                            {m.userId === currentUser?.id && <p className="text-[10px] text-slate-700 uppercase font-bold">{t('settings.members.table.it_is_me')}</p>}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
+          <div className="p-6">
+            <div className="bg-white border-2 border-[#0A0A0A] rounded-xl overflow-hidden text-xs">
+              <table className="w-full text-left">
+                <thead className="bg-slate-100 border-b-2 border-[#0A0A0A] font-extrabold uppercase text-[#0A0A0A]">
+                  <tr>
+                    <th className="px-6 py-3.5">{t('settings.members.table.name', "Ім'я")}</th>
+                    <th className="px-6 py-3.5">{t('settings.members.table.role', 'Роль')}</th>
+                    <th className="px-6 py-3.5 flex items-center gap-1">
+                      {t('settings.members.table.inbox', 'Доступ до Inbox')}
+                      <HelpCircle size={12} className="text-slate-400 cursor-help" />
+                    </th>
+                    <th className="px-6 py-3.5">
+                      <div className="flex items-center gap-1">
+                        {t('settings.members.table.billing', 'Оплата')}
+                        <HelpCircle size={12} className="text-slate-400 cursor-help" />
+                      </div>
+                    </th>
+                    <th className="px-6 py-3.5 text-right"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y border-[#0A0A0A]/10 font-bold">
+                  {members.map((m) => (
+                    <tr key={m.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 flex items-center gap-3">
+                        {renderMemberAvatar(m)}
+                        <div>
                           <div className="flex items-center gap-2">
-                            <span>{m.role}</span>
+                            <span className="font-extrabold text-[#0A0A0A]">{getMemberName(m)}</span>
+                            {m.userId === currentUser?.id && (
+                              <span className="bg-[#0A0A0A] text-[#F2EBDD] text-[9px] px-1.5 py-0.5 rounded uppercase font-black">
+                                {t('settings.members.badge.me', 'Це я')}
+                              </span>
+                            )}
                             {m.isPending && (
-                              <span className="px-1.5 py-0.5 bg-amber-200 border-2 border-[#0A0A0A] text-[#0A0A0A] rounded text-[9px] font-black uppercase">
-                                {t('settings.members.table.pending')}
+                              <span className="bg-amber-200 text-[#0A0A0A] text-[9px] px-1.5 py-0.5 rounded uppercase font-black border border-[#0A0A0A]">
+                                {t('settings.members.badge.pending', 'Очікує')}
                               </span>
                             )}
                           </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          {m.inboxSeat && <Check size={16} className="text-[#0A0A0A]" />}
-                        </td>
-                        <td className="px-6 py-4">
-                          {m.billingPermission && <Check size={16} className="text-[#0A0A0A]" />}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={() => setEditingMemberId(m.id)}
-                            className="text-[#0A0A0A] hover:underline font-black uppercase cursor-pointer"
-                          >
-                            {t('settings.members.table.edit')}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          {m.email && <div className="text-[10px] text-slate-500 font-bold">{m.email}</div>}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-700">
+                        {m.role === 'Owner'
+                          ? t('settings.members.role.owner', 'Owner')
+                          : m.role === 'Admin'
+                          ? t('settings.members.role.admin', 'Admin')
+                          : t('settings.members.role.viewer', 'Viewer')}
+                      </td>
+                      <td className="px-6 py-4">
+                        {m.inboxSeat && <Check size={16} className="text-[#0A0A0A]" />}
+                      </td>
+                      <td className="px-6 py-4">
+                        {m.billingPermission && <Check size={16} className="text-[#0A0A0A]" />}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => setEditingMemberId(m.id)}
+                          className="text-[#0A0A0A] hover:underline font-black uppercase cursor-pointer"
+                        >
+                          {t('settings.members.table.edit', 'Редагувати')}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-      ) : (
-        <div className="space-y-6 text-left animate-in fade-in duration-150">
-          <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-12 text-center flex flex-col items-center justify-center space-y-4 select-none">
-            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#0A0A0A] border-2 border-[#0A0A0A]">
-              <Users size={20} />
-            </div>
-            <div className="space-y-1 max-w-sm mx-auto">
-              <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-sm uppercase">{t('settings.members.groups.empty_title')}</h3>
-              <p className="text-xs text-slate-700 font-bold leading-relaxed">
-                {t('settings.members.groups.empty_desc')}
-              </p>
-            </div>
-            <button
-              onClick={() => {}}
-              className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer flex items-center gap-1.5"
-            >
-              <Plus size={14} />
-              <span>{t('settings.members.groups.add_btn')}</span>
-            </button>
-          </div>
-        </div>
-      )}
+      </div>
 
       {isInviteOpen && (
         <div 

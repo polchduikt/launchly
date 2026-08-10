@@ -132,7 +132,7 @@ export const ChatToolbar: React.FC<ChatToolbarProps> = ({
           <Tag size={15} />
         </button>
         {openMenu === 'labels' && (
-          <div className="absolute right-0 top-[calc(100%+6px)] z-40 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_0px_#0A0A0A] w-56 py-1">
+          <div className="absolute right-0 top-[calc(100%+6px)] z-40 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_0px_#0A0A0A] w-72 py-1">
             <div className="px-3 py-1.5 text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider border-b-2 border-[#0A0A0A] font-['Anybody',sans-serif]">
               {t('crm.toolbar.labels')}
             </div>
@@ -180,12 +180,12 @@ export const ChatToolbar: React.FC<ChatToolbarProps> = ({
                 onChange={e => setNewLabelInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleAddLabel()}
                 placeholder={t('common.label_name_placeholder')}
-                className="flex-1 text-xs border-2 border-[#0A0A0A] rounded-lg px-2 py-1 focus:outline-none bg-white text-[#0A0A0A] font-bold"
+                className="flex-1 min-w-0 text-xs border-2 border-[#0A0A0A] rounded-lg px-2.5 py-1 focus:outline-none bg-white text-[#0A0A0A] font-bold"
                 autoFocus
               />
               <button
                 onClick={handleAddLabel}
-                className="p-1.5 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-lg cursor-pointer hover:bg-[#2A2A2A]"
+                className="p-1.5 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-lg cursor-pointer hover:bg-[#2A2A2A] shrink-0"
               >
                 <Plus size={14} />
               </button>

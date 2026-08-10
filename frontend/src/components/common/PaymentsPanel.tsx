@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { t } from '../../i18n/config';
 import { 
   CheckCircle2, 
   HelpCircle, 
   CreditCard, 
   AlertCircle, 
-  Plus
+  Plus,
+  ChevronDown
 } from 'lucide-react';
+
 import { useBotStore } from '../../store/useBotStore';
 import {
   useIntegrationsQuery,
@@ -33,6 +35,18 @@ export const PaymentsPanel: React.FC = () => {
   const [isPaypalConnected, setIsPaypalConnected] = useState(false);
   const [isPaypalConnecting, setIsPaypalConnecting] = useState(false);
   const [currency, setCurrency] = useState('USD');
+  const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+  const currencyDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(e.target as Node)) {
+        setIsCurrencyOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   const [notifyMessenger, setNotifyMessenger] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState(false);
   const [sendReceiptEmail, setSendReceiptEmail] = useState(false);
@@ -384,21 +398,48 @@ export const PaymentsPanel: React.FC = () => {
           <div className="w-full md:w-1/4">
             <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">{t('settings.payments.currency.title')}</h3>
           </div>
-          <div className="w-full md:w-5/12">
-            <select
-              value={currency}
-              onChange={(e) => {
-                const val = e.target.value;
-                setCurrency(val);
-                handleSaveSettings({ currency: val });
-              }}
-              className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none cursor-pointer"
+          <div className="w-full md:w-5/12 relative" ref={currencyDropdownRef}>
+            <button
+              type="button"
+              onClick={() => setIsCurrencyOpen(!isCurrencyOpen)}
+              className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] flex items-center justify-between cursor-pointer focus:outline-none select-none"
             >
-              <option value="USD">{t('settings.payments.currency.usd')}</option>
-              <option value="EUR">{t('settings.payments.currency.eur')}</option>
-              <option value="UAH">{t('settings.payments.currency.uah')}</option>
-              <option value="GBP">{t('settings.payments.currency.gbp')}</option>
-            </select>
+              <span>
+                {currency === 'USD' ? t('settings.payments.currency.usd', 'Долар США') :
+                 currency === 'EUR' ? t('settings.payments.currency.eur', 'Євро') :
+                 currency === 'UAH' ? t('settings.payments.currency.uah', 'Українська гривня') :
+                 currency === 'GBP' ? t('settings.payments.currency.gbp', 'Британський фунт') : currency}
+              </span>
+              <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform ${isCurrencyOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isCurrencyOpen && (
+              <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl overflow-hidden py-1 text-left animate-in fade-in duration-100">
+                {[
+                  { code: 'USD', key: 'settings.payments.currency.usd', fallback: 'Долар США' },
+                  { code: 'EUR', key: 'settings.payments.currency.eur', fallback: 'Євро' },
+                  { code: 'UAH', key: 'settings.payments.currency.uah', fallback: 'Українська гривня' },
+                  { code: 'GBP', key: 'settings.payments.currency.gbp', fallback: 'Британський фунт' },
+                ].map((item) => (
+                  <button
+                    key={item.code}
+                    type="button"
+                    onClick={() => {
+                      setCurrency(item.code);
+                      setIsCurrencyOpen(false);
+                      handleSaveSettings({ currency: item.code });
+                    }}
+                    className={`w-full px-4 py-2 text-xs font-bold text-left cursor-pointer transition-colors ${
+                      currency === item.code
+                        ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                        : 'text-[#0A0A0A] hover:bg-white'
+                    }`}
+                  >
+                    {t(item.key, item.fallback)}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="w-full md:w-1/3 text-xs text-slate-700 font-bold leading-relaxed text-balance">
             {t('settings.payments.currency.desc')}

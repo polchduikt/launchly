@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { SETTINGS_SECTIONS } from '../../../const/settingsSections';
 import { useLogoutMutation } from '../../../hooks/auth/useLogoutMutation';
@@ -20,7 +21,10 @@ import { LeaveAccountModal } from './components/LeaveAccountModal';
 import { DeleteAccountModal } from './components/DeleteAccountModal';
 import { CreateTemplateModal } from './components/CreateTemplateModal';
 import { t } from '../../../i18n/config';
-import { Loader2, AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2, X, Check } from 'lucide-react';
+import { TimezoneSelect } from '../../../components/ui/TimezoneSelect/TimezoneSelect';
+import { updateTimezoneApi } from '../../../api/auth';
+import { useAuthStore } from '../../../store/useAuthStore';
 
 export const SettingsPage: React.FC = () => {
   const location = useLocation();
@@ -33,7 +37,29 @@ export const SettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(
     tabParam || (location.pathname === '/integrations' ? 'integrations' : 'general')
   );
-  const [timeZone, setTimeZone] = useState('UTC+07:00');
+  const user = useAuthStore((s) => s.user);
+  const setUser = useAuthStore((s) => s.setUser);
+  const [timeZone, setTimeZone] = useState(user?.timezone || 'Europe/Kyiv');
+  const [timezoneSaved, setTimezoneSaved] = useState(false);
+
+  const timezoneMutation = useMutation({
+    mutationFn: updateTimezoneApi,
+    onSuccess: (updatedUser) => {
+      setUser(updatedUser);
+      setTimezoneSaved(true);
+      setTimeout(() => setTimezoneSaved(false), 2000);
+    },
+  });
+
+  // Sync with user when it loads
+  useEffect(() => {
+    if (user?.timezone) setTimeZone(user.timezone);
+  }, [user?.timezone]);
+
+  const handleTimezoneChange = (tz: string) => {
+    setTimeZone(tz);
+    timezoneMutation.mutate(tz);
+  };
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
@@ -121,27 +147,36 @@ export const SettingsPage: React.FC = () => {
           {activeTab === 'general' ? (
             <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden font-['JetBrains_Mono',monospace]">
 
-              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
+              <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between">
                 <div className="w-full md:w-1/3">
                   <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.account_timezone')}</h3>
                 </div>
-                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-start">
-                  <select
-                    value={timeZone}
-                    onChange={(e) => setTimeZone(e.target.value)}
-                    className="w-full md:max-w-md px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold text-[#0A0A0A] focus:outline-none transition-all bg-white"
-                  >
-                    <option value="UTC+07:00">(UTC+07:00) - Barnaul Time</option>
-                    <option value="UTC+03:00">(UTC+03:00) - Kyiv, Moscow Time</option>
-                    <option value="UTC+00:00">(UTC+00:00) - London, GMT</option>
-                    <option value="UTC-05:00">(UTC-05:00) - New York, EST</option>
-                  </select>
-                  <div className="text-xs text-slate-700 leading-relaxed md:max-w-xs font-bold">
-                    {t('settings.general.timezone_desc')}{' '}
-                    <button className="text-indigo-700 font-extrabold hover:underline">{t('settings.general.learn_more')}</button>
+                <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
+                  <div className="w-full md:max-w-[300px]">
+                    <TimezoneSelect
+                      value={timeZone}
+                      onChange={handleTimezoneChange}
+                      disabled={timezoneMutation.isPending}
+                    />
                   </div>
+                  <div className="flex items-center gap-2">
+                    {timezoneMutation.isPending && (
+                      <span className="flex items-center gap-1.5 text-xs font-bold text-[#0A0A0A]/50">
+                        <Loader2 size={11} className="animate-spin" /> Збереження...
+                      </span>
+                    )}
+                    {timezoneSaved && !timezoneMutation.isPending && (
+                      <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
+                        <Check size={11} /> Збережено
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-700 font-bold leading-relaxed flex-1">
+                    {t('settings.general.timezone_desc')}
+                  </p>
                 </div>
               </div>
+
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                 <div className="w-full md:w-1/3">

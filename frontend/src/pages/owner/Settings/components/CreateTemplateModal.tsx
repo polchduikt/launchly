@@ -42,7 +42,14 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in font-['JetBrains_Mono',monospace]">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !loading) {
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/40 animate-fade-in font-['JetBrains_Mono',monospace]"
+    >
       <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] rounded-3xl max-w-lg w-full overflow-hidden text-[#0A0A0A] relative">
         <div className="p-6 border-b-2 border-[#0A0A0A] flex items-center justify-between bg-amber-100">
           <div className="flex items-center gap-3">

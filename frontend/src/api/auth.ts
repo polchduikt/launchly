@@ -67,3 +67,7 @@ export const updateNotificationsApi = async (data: UpdateNotificationsRequest): 
   return response.data;
 };
 
+export const updateTimezoneApi = async (timezone: string): Promise<UserResponse> => {
+  const response = await apiClient.put<UserResponse>('/notifications/timezone', { timezone });
+  return response.data;
+};

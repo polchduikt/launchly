@@ -24,6 +24,7 @@ export interface User {
   statsDaysRange: number;
   statsNotifyEmail: boolean;
   statsNotifyTelegram: boolean;
+  timezone: string;
 }
 
 export interface LoginRequest {

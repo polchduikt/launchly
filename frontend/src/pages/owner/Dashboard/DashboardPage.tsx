@@ -14,6 +14,7 @@ import { TEMPLATES_DATA } from '../../../const/templatesData';
 import type { FlowTemplate } from '../../../const/templatesData';
 import { BLOG_ARTICLES } from '../../../const/blogData';
 import { useBlogArticlesQuery } from '../../../hooks/dashboard/useBlogQueries';
+import { DISPLAY_KEY_HOME_TEMPLATES, DISPLAY_KEY_HOME_BLOG } from '../FlowBuilder/components/DisplayPanel';
 import { 
   Workflow, 
   X, 
@@ -254,6 +255,23 @@ export const DashboardPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<'all' | 'engage' | 'traffic' | 'dm'>('all');
   const displayName = user?.name || user?.email?.split('@')[0] || 'User';
 
+  const [showHomeTemplates, setShowHomeTemplates] = useState(
+    () => localStorage.getItem(DISPLAY_KEY_HOME_TEMPLATES) !== 'false'
+  );
+  const [showHomeBlog, setShowHomeBlog] = useState(
+    () => localStorage.getItem(DISPLAY_KEY_HOME_BLOG) !== 'false'
+  );
+
+  // React to storage changes (e.g. from settings page)
+  useEffect(() => {
+    const handler = () => {
+      setShowHomeTemplates(localStorage.getItem(DISPLAY_KEY_HOME_TEMPLATES) !== 'false');
+      setShowHomeBlog(localStorage.getItem(DISPLAY_KEY_HOME_BLOG) !== 'false');
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, []);
+
   const getTemplateTitle = (tmpl: FlowTemplate) => {
     return t(`dashboard.template.${tmpl.id}.title`);
   };
@@ -388,6 +406,7 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
 
+        {showHomeTemplates && (
         <div className="space-y-6">
           <div className="flex items-center justify-between border-l-4 border-[#0A0A0A] pl-4">
             <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black text-[#0A0A0A] uppercase tracking-tight">
@@ -426,7 +445,9 @@ export const DashboardPage: React.FC = () => {
             })}
           </div>
         </div>
+        )}
 
+        {showHomeBlog && (
         <div className="space-y-6">
           <div className="flex items-center justify-between border-l-4 border-[#0A0A0A] pl-4">
             <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black text-[#0A0A0A] uppercase tracking-tight">
@@ -465,6 +486,7 @@ export const DashboardPage: React.FC = () => {
             })}
           </div>
         </div>
+        )}
 
         {(isTemplatesModalOpen || selectedTemplate !== null) && createPortal(
           <div 

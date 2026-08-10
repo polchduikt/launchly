@@ -10,6 +10,7 @@ import {
   MoreVertical,
   Users,
   Check,
+  ChevronDown,
 } from 'lucide-react';
 import type { ConversationResponse, MessageResponse } from '../../../../types/crm';
 import type { BotUserResponse } from '../../../../types/bot';
@@ -108,6 +109,35 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
   const [showAddCustomField, setShowAddCustomField] = useState(false);
   const [customFieldName, setCustomFieldName] = useState('');
   const [customFieldValue, setCustomFieldValue] = useState('');
+  const [availableFields, setAvailableFields] = useState<string[]>([]);
+  const [isFieldDropdownOpen, setIsFieldDropdownOpen] = useState(false);
+  const fieldDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (fieldDropdownRef.current && !fieldDropdownRef.current.contains(e.target as Node)) {
+        setIsFieldDropdownOpen(false);
+      }
+    };
+    if (isFieldDropdownOpen) {
+      document.addEventListener('mousedown', handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [isFieldDropdownOpen]);
+
+  useEffect(() => {
+    if (conversation.botId) {
+      getCustomFieldsApi(conversation.botId)
+        .then((res) => {
+          const list = res && Array.isArray(res.fields) ? res.fields : Array.isArray(res) ? res : [];
+          const names = list.map((f: any) => f.name).filter(Boolean);
+          setAvailableFields(names);
+        })
+        .catch(() => {});
+    }
+  }, [conversation.botId]);
 
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showPauseMenu, setShowPauseMenu] = useState(false);
@@ -436,27 +466,65 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
               </button>
             </div>
             {showAddCustomField && (
-              <div className="flex gap-1.5 items-center bg-white p-2 rounded-xl border-2 border-[#0A0A0A]">
-                <input
-                  type="text"
-                  placeholder={t('crm.panel.fields.placeholder_key')}
-                  value={customFieldName}
-                  onChange={(e) => setCustomFieldName(e.target.value)}
-                  className="flex-1 min-w-0 px-2 py-1 bg-white border-2 border-[#0A0A0A] rounded-lg text-xs font-bold focus:outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder={t('crm.panel.fields.placeholder_val')}
-                  value={customFieldValue}
-                  onChange={(e) => setCustomFieldValue(e.target.value)}
-                  className="flex-1 min-w-0 px-2 py-1 bg-white border-2 border-[#0A0A0A] rounded-lg text-xs font-bold focus:outline-none"
-                />
-                <button
-                  onClick={handleAddCustomField}
-                  className="p-1.5 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-lg cursor-pointer"
-                >
-                  <Check size={12} />
-                </button>
+              <div className="flex flex-col gap-2 bg-white p-2.5 rounded-xl border-2 border-[#0A0A0A] text-left">
+                {availableFields.length > 0 && (
+                  <div className="relative w-full" ref={fieldDropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => setIsFieldDropdownOpen(!isFieldDropdownOpen)}
+                      className="w-full px-2.5 py-1.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-lg text-xs font-bold text-[#0A0A0A] flex items-center justify-between cursor-pointer focus:outline-none select-none"
+                    >
+                      <span className="truncate">{customFieldName || '-- Оберіть поле --'}</span>
+                      <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform ${isFieldDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isFieldDropdownOpen && (
+                      <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl overflow-hidden py-1 text-left max-h-40 overflow-y-auto animate-in fade-in duration-100">
+                        {availableFields.map((fname) => (
+                          <button
+                            key={fname}
+                            type="button"
+                            onClick={() => {
+                              setCustomFieldName(fname);
+                              setIsFieldDropdownOpen(false);
+                            }}
+                            className={`w-full px-3 py-1.5 text-xs font-bold text-left cursor-pointer transition-colors ${
+                              customFieldName === fname
+                                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                                : 'text-[#0A0A0A] hover:bg-white'
+                            }`}
+                          >
+                            {fname}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div className="flex gap-1.5 items-center">
+                  <input
+                    type="text"
+                    placeholder={t('crm.panel.fields.placeholder_key', 'Ключ')}
+                    value={customFieldName}
+                    onChange={(e) => setCustomFieldName(e.target.value)}
+                    className="flex-1 min-w-0 px-2 py-1 bg-white border-2 border-[#0A0A0A] rounded-lg text-xs font-bold text-[#0A0A0A] focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder={t('crm.panel.fields.placeholder_val', 'Значення')}
+                    value={customFieldValue}
+                    onChange={(e) => setCustomFieldValue(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddCustomField()}
+                    className="flex-1 min-w-0 px-2 py-1 bg-white border-2 border-[#0A0A0A] rounded-lg text-xs font-bold text-[#0A0A0A] focus:outline-none"
+                  />
+                  <button
+                    onClick={handleAddCustomField}
+                    disabled={!customFieldName.trim()}
+                    className="p-1.5 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-lg cursor-pointer hover:bg-[#2A2A2A] disabled:opacity-40 shrink-0"
+                  >
+                    <Check size={12} />
+                  </button>
+                </div>
               </div>
             )}
             <div className="space-y-1.5 max-h-[180px] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>

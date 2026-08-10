@@ -35,6 +35,11 @@ import {
 } from '../../../hooks/bot/useBotMutations';
 
 import type { Folder, BotResponse } from '../../../types/bot';
+import {
+  DISPLAY_KEY_AUTO_RUNS,
+  DISPLAY_KEY_AUTO_CTR,
+  DISPLAY_KEY_AUTO_BADGE,
+} from '../FlowBuilder/components/DisplayPanel';
 
 export const AutomationsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -43,6 +48,26 @@ export const AutomationsPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [selectedBotIds, setSelectedBotIds] = useState<Set<number>>(new Set());
   const { data: bots = [], isLoading } = useBotsQuery();
+
+  const [showRuns, setShowRuns] = useState(
+    () => localStorage.getItem(DISPLAY_KEY_AUTO_RUNS) !== 'false'
+  );
+  const [showCtr, setShowCtr] = useState(
+    () => localStorage.getItem(DISPLAY_KEY_AUTO_CTR) !== 'false'
+  );
+  const [showBadge, setShowBadge] = useState(
+    () => localStorage.getItem(DISPLAY_KEY_AUTO_BADGE) !== 'false'
+  );
+
+  useEffect(() => {
+    const handler = () => {
+      setShowRuns(localStorage.getItem(DISPLAY_KEY_AUTO_RUNS) !== 'false');
+      setShowCtr(localStorage.getItem(DISPLAY_KEY_AUTO_CTR) !== 'false');
+      setShowBadge(localStorage.getItem(DISPLAY_KEY_AUTO_BADGE) !== 'false');
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, []);
 
   const handleToggleSelectBot = (botId: number) => {
     setSelectedBotIds((prev) => {
@@ -633,8 +658,8 @@ export const AutomationsPage: React.FC = () => {
                           />
                         </th>
                         <th className="py-3 px-2">{t('automations.table.name')}</th>
-                        <th className="py-3 px-2 w-28 text-center">{t('automations.table.runs')}</th>
-                        <th className="py-3 px-2 w-28 text-center">{t('automations.table.ctr')}</th>
+                        {showRuns && <th className="py-3 px-2 w-28 text-center">{t('automations.table.runs')}</th>}
+                        {showCtr && <th className="py-3 px-2 w-28 text-center">{t('automations.table.ctr')}</th>}
                         <th className="py-3 px-2 w-40">{t('automations.table.modified')}</th>
                         <th className="py-3 px-4 w-12"></th>
                       </tr>
@@ -688,11 +713,11 @@ export const AutomationsPage: React.FC = () => {
                                       <Lock size={10} />
                                       {t('status.blocked') || t('admin.status_blocked') || 'Blocked'}
                                     </span>
-                                  ) : bot.templateName ? (
+                                  ) : showBadge && bot.templateName ? (
                                     <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
                                       [{t('template.badge', 'ШАБЛОН')} {bot.templateName}]
                                     </span>
-                                  ) : bot.isTemplate ? (
+                                  ) : showBadge && bot.isTemplate ? (
                                     <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
                                       [{t('template.badge', 'ШАБЛОН')}]
                                     </span>
@@ -710,10 +735,12 @@ export const AutomationsPage: React.FC = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">{bot.totalUsers}</td>
-                          <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">
-                            {bot.totalUsers === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
-                          </td>
+                          {showRuns && <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">{bot.totalUsers}</td>}
+                          {showCtr && (
+                            <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">
+                              {bot.totalUsers === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
+                            </td>
+                          )}
                           <td className="py-4 px-2 w-40 text-xs font-bold text-slate-700">{formatModifiedDate(bot.updatedAt || bot.createdAt)}</td>
                           <td className="py-4 px-4 w-12 text-right" onClick={(e) => e.stopPropagation()}>
                             {bot.role !== 'Viewer' && (
@@ -769,11 +796,11 @@ export const AutomationsPage: React.FC = () => {
                                 <Lock size={10} />
                                 {t('status.blocked') || t('admin.status_blocked') || 'Blocked'}
                               </span>
-                            ) : bot.templateName ? (
+                            ) : showBadge && bot.templateName ? (
                               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
                                 [{t('template.badge', 'ШАБЛОН')} {bot.templateName}]
                               </span>
-                            ) : bot.isTemplate ? (
+                            ) : showBadge && bot.isTemplate ? (
                               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
                                 [{t('template.badge', 'ШАБЛОН')}]
                               </span>
@@ -799,14 +826,18 @@ export const AutomationsPage: React.FC = () => {
 
                       <div className="flex items-center justify-between border-t-2 border-[#0A0A0A] pt-3 mt-4 text-[11px] text-[#0A0A0A] font-bold">
                         <div className="flex items-center gap-3">
-                          <span>
-                            {t('automations.table.runs')}: <span className="font-black">{bot.totalUsers}</span>
-                          </span>
-                          <span>
-                            {t('automations.table.ctr')}: <span className="font-black">
-                              {bot.totalUsers === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
+                          {showRuns && (
+                            <span>
+                              {t('automations.table.runs')}: <span className="font-black">{bot.totalUsers}</span>
                             </span>
-                          </span>
+                          )}
+                          {showCtr && (
+                            <span>
+                              {t('automations.table.ctr')}: <span className="font-black">
+                                {bot.totalUsers === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
+                              </span>
+                            </span>
+                          )}
                         </div>
                         <span className="text-slate-700">{formatModifiedDate(bot.updatedAt || bot.createdAt)}</span>
                       </div>
