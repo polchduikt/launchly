@@ -29,8 +29,6 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({ value, onChange,
       (t) => t.label.toLowerCase().includes(q) || t.value.toLowerCase().includes(q)
     );
   }, [timezones, search]);
-
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -41,12 +39,9 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({ value, onChange,
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
-
-  // Focus search on open
   useEffect(() => {
     if (open) {
       setTimeout(() => searchRef.current?.focus(), 50);
-      // scroll to selected
       const idx = filtered.findIndex((t) => t.value === value);
       if (idx >= 0 && listRef.current) {
         const item = listRef.current.children[idx] as HTMLElement;
@@ -63,7 +58,6 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({ value, onChange,
 
   return (
     <div ref={containerRef} className="relative w-full md:max-w-md">
-      {/* Trigger button */}
       <button
         type="button"
         disabled={disabled}
@@ -86,10 +80,8 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({ value, onChange,
         />
       </button>
 
-      {/* Dropdown */}
       {open && (
         <div className="absolute z-50 mt-1 w-full bg-white border-2 border-[#0A0A0A] rounded-xl shadow-xl overflow-hidden">
-          {/* Search */}
           <div className="p-2 border-b-2 border-[#0A0A0A]/10 flex items-center gap-2 px-3">
             <Search size={12} className="text-[#0A0A0A]/50 shrink-0" />
             <input
@@ -101,8 +93,6 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({ value, onChange,
               className="flex-1 text-xs font-bold text-[#0A0A0A] bg-transparent outline-none placeholder:text-[#0A0A0A]/30 py-1"
             />
           </div>
-
-          {/* List */}
           <ul
             ref={listRef}
             className="max-h-60 overflow-y-auto overscroll-contain divide-y divide-[#0A0A0A]/5"

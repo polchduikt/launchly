@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import enAdmin       from './locales/en/admin.json';
 import enAi          from './locales/en/ai.json';
 import enAuth        from './locales/en/auth.json';
@@ -143,18 +143,25 @@ export function t(
   return val;
 }
 
-export function subscribeLanguageChange(listener: () => void) {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
 
-export function useTranslation() {
-  const [, setTick] = useState(0);
+
+export const LanguageContext = createContext<{
+  currentLanguage: 'en' | 'uk';
+  changeLanguage: (lang: 'en' | 'uk') => Promise<void>;
+  t: typeof t;
+}>({
+  currentLanguage,
+  changeLanguage,
+  t,
+});
+
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [lang, setLang] = useState<'en' | 'uk'>(currentLanguage);
 
   useEffect(() => {
-    const handler = () => setTick(tick => tick + 1);
+    const handler = () => {
+      setLang(currentLanguage);
+    };
     listeners.add(handler);
     window.addEventListener('launchly_language_changed', handler);
     return () => {
@@ -163,5 +170,40 @@ export function useTranslation() {
     };
   }, []);
 
-  return { t, currentLanguage, changeLanguage, getLanguage };
+  return React.createElement(
+    LanguageContext.Provider,
+    { value: { currentLanguage: lang, changeLanguage, t } },
+    children
+  );
+};
+
+export function subscribeLanguageChange(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+export function useTranslation() {
+  const ctx = useContext(LanguageContext);
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const handler = () => setTick((tick) => tick + 1);
+    listeners.add(handler);
+    window.addEventListener('launchly_language_changed', handler);
+    return () => {
+      listeners.delete(handler);
+      window.removeEventListener('launchly_language_changed', handler);
+    };
+  }, []);
+
+  const activeLang = ctx?.currentLanguage || currentLanguage;
+
+  return {
+    t,
+    currentLanguage: activeLang,
+    changeLanguage,
+    getLanguage,
+  };
 }

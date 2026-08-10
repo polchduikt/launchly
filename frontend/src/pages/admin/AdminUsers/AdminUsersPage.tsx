@@ -346,14 +346,14 @@ export const AdminUsersPage: React.FC = () => {
   };
 
   return (
-    <AdminLayout noPadding>
-      <div className="flex h-full w-full overflow-hidden">
+    <AdminLayout noPadding={true}>
+      <div className="flex h-full w-full overflow-hidden font-['JetBrains_Mono',monospace]">
         
-        <aside className="w-56 lg:w-60 bg-white border-r border-slate-200 h-full p-4 space-y-5 overflow-y-auto shrink-0 flex flex-col justify-between z-10">
+        <aside className="w-56 lg:w-60 bg-[#F2EBDD] border-r-4 border-[#0A0A0A] h-full p-4 space-y-5 overflow-y-auto shrink-0 flex flex-col justify-between z-10 text-[#0A0A0A]">
           <div className="space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-                <Filter size={14} className="text-indigo-600" />
+            <div className="flex items-center justify-between pb-3 border-b-2 border-[#0A0A0A]">
+              <h3 className="font-['Anybody',sans-serif] font-black text-[11px] uppercase tracking-wider text-[#0A0A0A] flex items-center gap-1.5">
+                <Filter size={14} className="text-[#0A0A0A]" />
                 <span>{t('admin.filters_title')}</span>
               </h3>
               {(roleFilter || planFilter || sortFilter !== 'desc') && (
@@ -364,7 +364,7 @@ export const AdminUsersPage: React.FC = () => {
                     setSortFilter('desc');
                     setPage(0);
                   }}
-                  className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                  className="text-[10px] font-black uppercase text-[#0A0A0A] hover:underline transition cursor-pointer"
                 >
                   {t('admin.reset_filters')}
                 </button>
@@ -372,19 +372,19 @@ export const AdminUsersPage: React.FC = () => {
             </div>
 
             <div className="space-y-1" ref={roleDropdownRef}>
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.user_role_label')}</label>
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.user_role_label')}</label>
               <div className="relative w-full">
                 <button
                   type="button"
                   onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
+                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <span>{getRoleLabel(roleFilter)}</span>
-                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className={`text-current transition-transform duration-200 ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isRoleDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace] overflow-hidden">
                     {roleOptions.map((opt) => (
                       <button
                         key={opt.value}
@@ -394,10 +394,10 @@ export const AdminUsersPage: React.FC = () => {
                           setPage(0);
                           setIsRoleDropdownOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-1.5 text-xs font-semibold flex items-center justify-between transition-colors ${
+                        className={`w-full text-left px-3 py-1.5 text-xs font-bold uppercase flex items-center justify-between transition-colors cursor-pointer ${
                           roleFilter === opt.value
-                            ? 'bg-indigo-50 text-indigo-600 font-bold'
-                            : 'text-slate-700 hover:bg-slate-50'
+                            ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                            : 'text-[#0A0A0A] hover:bg-white'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -409,19 +409,19 @@ export const AdminUsersPage: React.FC = () => {
             </div>
 
             <div className="space-y-1" ref={planDropdownRef}>
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.plan_filter_label') !== 'admin.plan_filter_label' ? t('admin.plan_filter_label') : 'Тарифний план'}</label>
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.plan_filter_label') !== 'admin.plan_filter_label' ? t('admin.plan_filter_label') : 'Тарифний план'}</label>
               <div className="relative w-full">
                 <button
                   type="button"
                   onClick={() => setIsPlanDropdownOpen(!isPlanDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
+                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <span>{getPlanLabel(planFilter)}</span>
-                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isPlanDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className={`text-current transition-transform duration-200 ${isPlanDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isPlanDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace] overflow-hidden">
                     {planOptions.map((opt) => (
                       <button
                         key={opt.value}
@@ -431,10 +431,10 @@ export const AdminUsersPage: React.FC = () => {
                           setPage(0);
                           setIsPlanDropdownOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-1.5 text-xs font-semibold flex items-center justify-between transition-colors ${
+                        className={`w-full text-left px-3 py-1.5 text-xs font-bold uppercase flex items-center justify-between transition-colors cursor-pointer ${
                           planFilter === opt.value
-                            ? 'bg-indigo-50 text-indigo-600 font-bold'
-                            : 'text-slate-700 hover:bg-slate-50'
+                            ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                            : 'text-[#0A0A0A] hover:bg-white'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -446,19 +446,19 @@ export const AdminUsersPage: React.FC = () => {
             </div>
 
             <div className="space-y-1" ref={sortDropdownRef}>
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('admin.sorting_label')}</label>
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.sorting_label')}</label>
               <div className="relative w-full">
                 <button
                   type="button"
                   onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
+                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <span>{sortFilter === 'asc' ? t('admin.sort_oldest') : t('admin.sort_newest')}</span>
-                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className={`text-current transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isSortDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace] overflow-hidden">
                     {[
                       { value: 'desc', label: t('admin.sort_newest') },
                       { value: 'asc', label: t('admin.sort_oldest') },
@@ -471,8 +471,8 @@ export const AdminUsersPage: React.FC = () => {
                           setPage(0);
                           setIsSortDropdownOpen(false);
                         }}
-                        className={`w-full px-3 py-1.5 text-left text-xs font-semibold flex items-center justify-between hover:bg-slate-50 transition cursor-pointer ${
-                          sortFilter === opt.value ? 'text-indigo-600 bg-indigo-50/50 font-bold' : 'text-slate-700'
+                        className={`w-full px-3 py-1.5 text-left text-xs font-bold uppercase flex items-center justify-between hover:bg-white transition cursor-pointer ${
+                          sortFilter === opt.value ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A]'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -485,12 +485,12 @@ export const AdminUsersPage: React.FC = () => {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-slate-50 space-y-4">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-[#F2EBDD] space-y-4 text-[#0A0A0A]">
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-3 flex-1 max-w-md">
               <div className="relative w-full">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]" size={15} />
                 <input
                   type="text"
                   placeholder={t('admin.search_users_placeholder') !== 'admin.search_users_placeholder' ? t('admin.search_users_placeholder') : 'Search email, name...'}
@@ -499,11 +499,11 @@ export const AdminUsersPage: React.FC = () => {
                     setSearch(e.target.value);
                     setPage(0);
                   }}
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all shadow-2xs"
+                  className="w-full pl-9 pr-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder-slate-400 focus:outline-none shadow-[2px_2px_0px_#0A0A0A]"
                 />
               </div>
               {isAdmin && selectedUserIds.length > 0 && (
-                <span className="px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-extrabold text-xs animate-in fade-in duration-150 shrink-0">
+                <span className="px-3.5 py-1.5 rounded-full bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] font-black text-xs shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
                   {t('admin.selected_count', { count: selectedUserIds.length })}
                 </span>
               )}
@@ -515,36 +515,36 @@ export const AdminUsersPage: React.FC = () => {
                   type="button"
                   disabled={selectedUserIds.length === 0}
                   onClick={() => setIsBulkActionOpen(!isBulkActionOpen)}
-                  className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-xs font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+                  className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
                 >
                   <span>{t('admin.bulk_actions')}</span>
-                  <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isBulkActionOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className={`text-current transition-transform duration-200 ${isBulkActionOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isBulkActionOpen && selectedUserIds.length > 0 && (
-                  <div className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-1.5 animate-in fade-in-50 slide-in-from-top-1 duration-150 font-sans">
+                  <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1.5 overflow-hidden font-['JetBrains_Mono',monospace]">
                     <button
                       type="button"
                       onClick={handleBulkChangeRole}
-                      className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 flex items-center space-x-2.5 transition cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-xs font-bold uppercase text-[#0A0A0A] hover:bg-white flex items-center space-x-2.5 transition cursor-pointer"
                     >
-                      <Shield size={14} className="text-indigo-600" />
+                      <Shield size={14} className="text-[#0A0A0A]" />
                       <span>{t('admin.bulk_change_role')}</span>
                     </button>
                     <button
                       type="button"
                       onClick={handleBulkBlock}
-                      className="w-full text-left px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center space-x-2.5 transition cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-xs font-bold uppercase text-rose-700 hover:bg-white flex items-center space-x-2.5 transition cursor-pointer"
                     >
-                      <UserX size={14} className="text-rose-600" />
+                      <UserX size={14} className="text-rose-700" />
                       <span>{t('admin.bulk_block')}</span>
                     </button>
                     <button
                       type="button"
                       onClick={handleBulkUnblock}
-                      className="w-full text-left px-4 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-50 flex items-center space-x-2.5 transition cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-xs font-bold uppercase text-emerald-700 hover:bg-white flex items-center space-x-2.5 transition cursor-pointer"
                     >
-                      <UserCheck size={14} className="text-emerald-600" />
+                      <UserCheck size={14} className="text-emerald-700" />
                       <span>{t('admin.bulk_unblock')}</span>
                     </button>
                   </div>
@@ -553,16 +553,16 @@ export const AdminUsersPage: React.FC = () => {
             )}
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+          <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl overflow-hidden shadow-[4px_4px_0px_#0A0A0A]">
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="animate-spin text-indigo-600" size={32} />
+                <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
               </div>
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
+                  <table className="w-full text-left text-xs font-['JetBrains_Mono',monospace]">
+                    <thead className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-black uppercase text-[10px]">
                       <tr>
                         {isAdmin && (
                           <th className="py-4 px-4 text-center w-12">
@@ -570,7 +570,7 @@ export const AdminUsersPage: React.FC = () => {
                               type="checkbox"
                               checked={isAllSelected}
                               onChange={handleToggleSelectAll}
-                              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                              className="w-4 h-4 rounded border-2 border-[#0A0A0A] text-[#0A0A0A] accent-[#0A0A0A] cursor-pointer"
                             />
                           </th>
                         )}
@@ -586,18 +586,18 @@ export const AdminUsersPage: React.FC = () => {
                         <th className="py-4 px-4 text-center">{t('admin.status_col')}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-[#0A0A0A]/20">
                       {data?.content?.map((u) => {
                         const isSelected = selectedUserIds.includes(u.id);
                         return (
-                          <tr key={u.id} className={`hover:bg-slate-50/80 transition ${isSelected ? 'bg-indigo-50/40' : ''}`}>
+                          <tr key={u.id} className={`hover:bg-white transition ${isSelected ? 'bg-amber-100/60' : ''}`}>
                             {isAdmin && (
                               <td className="py-3.5 px-4 text-center">
                                 <input
                                   type="checkbox"
                                   checked={isSelected}
                                   onChange={() => handleToggleSelectUser(u.id)}
-                                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                  className="w-4 h-4 rounded border-2 border-[#0A0A0A] text-[#0A0A0A] accent-[#0A0A0A] cursor-pointer"
                                 />
                               </td>
                             )}
@@ -608,17 +608,17 @@ export const AdminUsersPage: React.FC = () => {
                                 title="Переглянути деталі та статистику користувача"
                               >
                                 {u.avatar ? (
-                                  <img src={u.avatar} alt={u.name} referrerPolicy="no-referrer" className="w-9 h-9 rounded-full object-cover border border-slate-200 shadow-xs group-hover:border-indigo-400 transition shrink-0" />
+                                  <img src={u.avatar} alt={u.name} referrerPolicy="no-referrer" className="w-9 h-9 rounded-full object-cover border-2 border-[#0A0A0A] shrink-0" />
                                 ) : (
-                                  <div className="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center font-extrabold text-indigo-700 text-xs shadow-xs group-hover:bg-indigo-600 group-hover:text-white transition shrink-0">
+                                  <div className="w-9 h-9 rounded-full bg-white border-2 border-[#0A0A0A] flex items-center justify-center font-black text-[#0A0A0A] text-xs shrink-0">
                                     {u.name ? u.name[0].toUpperCase() : 'U'}
                                   </div>
                                 )}
                                 <div className="flex flex-col min-w-0">
-                                  <span className="font-bold text-slate-900 text-xs group-hover:text-indigo-600 transition truncate">{u.name}</span>
-                                  <span className="text-slate-500 text-[11px] font-medium truncate">{u.email}</span>
+                                  <span className="font-black text-[#0A0A0A] text-xs underline-offset-2 group-hover:underline truncate">{u.name}</span>
+                                  <span className="text-slate-700 text-[11px] font-bold truncate">{u.email}</span>
                                   {u.telegramUsername && (
-                                    <span className="text-cyan-600 text-[10px] font-mono truncate">@{u.telegramUsername}</span>
+                                    <span className="text-[#0A0A0A] text-[10px] font-mono truncate">@{u.telegramUsername}</span>
                                   )}
                                 </div>
                               </div>
@@ -626,23 +626,23 @@ export const AdminUsersPage: React.FC = () => {
 
                             <td className="py-3.5 px-4">
                               {u.role === 'ROLE_ADMIN' && (
-                                <span className="px-2.5 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 font-extrabold text-[10px]">
+                                <span className="px-2.5 py-1 rounded-lg bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] font-black text-[10px] uppercase">
                                   Super Admin
                                 </span>
                               )}
                               {u.role === 'ROLE_MANAGER' && (
-                                <span className="px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-extrabold text-[10px]">
+                                <span className="px-2.5 py-1 rounded-lg bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] font-black text-[10px] uppercase">
                                   Manager
                                 </span>
                               )}
                               {u.role === 'ROLE_OWNER' && (
-                                <span className="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-extrabold text-[10px]">
+                                <span className="px-2.5 py-1 rounded-lg bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] font-black text-[10px] uppercase">
                                   Owner
                                 </span>
                               )}
                             </td>
 
-                            <td className="py-3.5 px-4 text-slate-500 uppercase font-mono text-[10px] font-bold">
+                            <td className="py-3.5 px-4 text-[#0A0A0A] uppercase font-mono text-[10px] font-black">
                               {(() => {
                                 const main = u.provider || 'LOCAL';
                                 if (main === 'TELEGRAM') return 'TELEGRAM';
@@ -651,53 +651,53 @@ export const AdminUsersPage: React.FC = () => {
                             </td>
 
                             <td className="py-3.5 px-4 text-center">
-                              <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
-                                <Bot size={13} className="text-indigo-600" />
+                              <div className="flex items-center justify-center space-x-1.5 text-[#0A0A0A] font-mono font-black">
+                                <Bot size={13} className="text-[#0A0A0A]" />
                                 <span>{u.botsCount || 0}</span>
                               </div>
                             </td>
 
                             <td className="py-3.5 px-4 text-center">
-                              <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
-                                <Workflow size={13} className="text-purple-600" />
+                              <div className="flex items-center justify-center space-x-1.5 text-[#0A0A0A] font-mono font-black">
+                                <Workflow size={13} className="text-[#0A0A0A]" />
                                 <span>{u.automationsCount || 0}</span>
                               </div>
                             </td>
 
                             <td className="py-3.5 px-4 text-center">
-                              <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
-                                <Send size={13} className="text-blue-600" />
+                              <div className="flex items-center justify-center space-x-1.5 text-[#0A0A0A] font-mono font-black">
+                                <Send size={13} className="text-[#0A0A0A]" />
                                 <span>{u.broadcastsCount || 0}</span>
                               </div>
                             </td>
 
                             <td className="py-3.5 px-4 text-center">
-                              <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
-                                <Users size={13} className="text-emerald-600" />
+                              <div className="flex items-center justify-center space-x-1.5 text-[#0A0A0A] font-mono font-black">
+                                <Users size={13} className="text-[#0A0A0A]" />
                                 <span>{u.contactsCount || 0}</span>
                               </div>
                             </td>
 
                             <td className="py-3.5 px-4 text-center">
-                              <div className="flex items-center justify-center space-x-1.5 text-slate-700 font-mono font-bold">
-                                <MessageSquare size={13} className="text-cyan-600" />
+                              <div className="flex items-center justify-center space-x-1.5 text-[#0A0A0A] font-mono font-black">
+                                <MessageSquare size={13} className="text-[#0A0A0A]" />
                                 <span>{u.messagesCount || 0}</span>
                               </div>
                             </td>
 
                             <td className="py-3.5 px-4 text-center">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold text-[10px]">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-lg bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] font-black text-[10px]">
                                 {u.planName || 'FREE'}
                               </span>
                             </td>
 
                             <td className="py-3.5 px-4 text-center">
                               {u.active ? (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-emerald-200 text-emerald-950 border-2 border-[#0A0A0A]">
                                   {t('admin.active')}
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-red-50 text-red-700 border border-red-200">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-200 text-rose-950 border-2 border-[#0A0A0A]">
                                   {t('admin.blocked')}
                                 </span>
                               )}
@@ -709,30 +709,30 @@ export const AdminUsersPage: React.FC = () => {
                   </table>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-slate-50/70 border-t border-slate-200 text-xs text-slate-500 font-medium">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] text-xs text-[#0A0A0A] font-bold">
                   <div>
-                    {t('admin.showing') !== 'admin.showing' ? t('admin.showing') : 'Показано'} <span className="font-bold text-slate-900">{data?.content?.length || 0}</span> {t('admin.of') !== 'admin.of' ? t('admin.of') : 'з'} <span className="font-bold text-slate-900">{data?.totalElements || 0}</span>
+                    {t('admin.showing') !== 'admin.showing' ? t('admin.showing') : 'Показано'} <span className="font-black text-[#0A0A0A]">{data?.content?.length || 0}</span> {t('admin.of') !== 'admin.of' ? t('admin.of') : 'з'} <span className="font-black text-[#0A0A0A]">{data?.totalElements || 0}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                       disabled={page === 0}
-                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
                     >
                       <ChevronLeft size={14} />
                       <span>{t('admin.prev') !== 'admin.prev' ? t('admin.prev') : 'Назад'}</span>
                     </button>
 
-                    <div className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold font-mono text-slate-800 shadow-2xs">
-                      <span className="text-indigo-600">{page + 1}</span>
-                      <span className="text-slate-400">/</span>
+                    <div className="flex items-center space-x-1 px-2.5 py-1 rounded-xl bg-white border-2 border-[#0A0A0A] text-xs font-black font-mono text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
+                      <span>{page + 1}</span>
+                      <span>/</span>
                       <span>{data?.totalPages || 1}</span>
                     </div>
 
                     <button
                       onClick={() => setPage((prev) => Math.min(prev + 1, (data?.totalPages || 1) - 1))}
                       disabled={!data || page >= data.totalPages - 1}
-                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition shadow-2xs cursor-pointer"
+                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
                     >
                       <span>{t('admin.next') !== 'admin.next' ? t('admin.next') : 'Далі'}</span>
                       <ChevronRight size={14} />
@@ -745,29 +745,29 @@ export const AdminUsersPage: React.FC = () => {
         </main>
 
         {showRoleModal && selectedUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 p-4 animate-in fade-in duration-150">
-            <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 space-y-6 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                  <Shield size={20} className="text-indigo-600" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+            <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] rounded-3xl w-full max-w-md p-6 space-y-6 shadow-[10px_10px_0px_#0A0A0A] text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
+              <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3">
+                <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] flex items-center gap-2">
+                  <Shield size={20} className="text-[#0A0A0A]" />
                   <span>{t('admin.change_role_title')}</span>
                 </h3>
                 <button
                   onClick={() => setShowRoleModal(false)}
-                  className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                  className="text-[#0A0A0A] hover:bg-white p-1.5 rounded-xl border-2 border-transparent hover:border-[#0A0A0A] transition cursor-pointer"
                 >
                   <X size={18} />
                 </button>
               </div>
 
               <div className="space-y-4">
-                <p className="text-xs text-slate-500 font-medium">
-                  User: <strong className="text-slate-900 font-bold">{selectedUser.email}</strong>
+                <p className="text-xs text-[#0A0A0A] font-bold">
+                  User: <strong className="font-black text-[#0A0A0A]">{selectedUser.email}</strong>
                 </p>
 
                 <div className="space-y-2.5">
-                  <label className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition ${
-                    newRole === 'ROLE_OWNER' ? 'bg-indigo-50 border-indigo-500 text-indigo-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600'
+                  <label className={`flex items-center justify-between p-3.5 rounded-2xl border-2 border-[#0A0A0A] cursor-pointer transition ${
+                    newRole === 'ROLE_OWNER' ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black' : 'bg-white text-[#0A0A0A]'
                   }`}>
                     <div className="flex items-center space-x-2.5">
                       <input
@@ -776,14 +776,14 @@ export const AdminUsersPage: React.FC = () => {
                         value="ROLE_OWNER"
                         checked={newRole === 'ROLE_OWNER'}
                         onChange={() => setNewRole('ROLE_OWNER')}
-                        className="accent-indigo-600"
+                        className="accent-[#0A0A0A]"
                       />
-                      <span className="text-xs">{t('admin.owners')}</span>
+                      <span className="text-xs uppercase font-bold">{t('admin.owners')}</span>
                     </div>
                   </label>
 
-                  <label className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition ${
-                    newRole === 'ROLE_MANAGER' ? 'bg-blue-50 border-blue-500 text-blue-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600'
+                  <label className={`flex items-center justify-between p-3.5 rounded-2xl border-2 border-[#0A0A0A] cursor-pointer transition ${
+                    newRole === 'ROLE_MANAGER' ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black' : 'bg-white text-[#0A0A0A]'
                   }`}>
                     <div className="flex items-center space-x-2.5">
                       <input
@@ -792,14 +792,14 @@ export const AdminUsersPage: React.FC = () => {
                         value="ROLE_MANAGER"
                         checked={newRole === 'ROLE_MANAGER'}
                         onChange={() => setNewRole('ROLE_MANAGER')}
-                        className="accent-blue-600"
+                        className="accent-[#0A0A0A]"
                       />
-                      <span className="text-xs">{t('admin.managers')}</span>
+                      <span className="text-xs uppercase font-bold">{t('admin.managers')}</span>
                     </div>
                   </label>
 
-                  <label className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition ${
-                    newRole === 'ROLE_ADMIN' ? 'bg-purple-50 border-purple-500 text-purple-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600'
+                  <label className={`flex items-center justify-between p-3.5 rounded-2xl border-2 border-[#0A0A0A] cursor-pointer transition ${
+                    newRole === 'ROLE_ADMIN' ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black' : 'bg-white text-[#0A0A0A]'
                   }`}>
                     <div className="flex items-center space-x-2.5">
                       <input
@@ -808,25 +808,25 @@ export const AdminUsersPage: React.FC = () => {
                         value="ROLE_ADMIN"
                         checked={newRole === 'ROLE_ADMIN'}
                         onChange={() => setNewRole('ROLE_ADMIN')}
-                        className="accent-purple-600"
+                        className="accent-[#0A0A0A]"
                       />
-                      <span className="text-xs">{t('admin.admins')}</span>
+                      <span className="text-xs uppercase font-bold">{t('admin.admins')}</span>
                     </div>
                   </label>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-[#0A0A0A]">
                 <button
                   onClick={() => setShowRoleModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#0A0A0A] border-2 border-transparent hover:border-[#0A0A0A] bg-white cursor-pointer"
                 >
                   {t('admin.cancel')}
                 </button>
                 <button
                   onClick={handleSaveRole}
                   disabled={roleMutation.isPending}
-                  className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-100 transition flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2 rounded-xl text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] border-2 border-[#0A0A0A] hover:bg-[#2A2A2A] shadow-[2px_2px_0px_#0A0A0A] transition flex items-center gap-1.5 cursor-pointer"
                 >
                   {roleMutation.isPending && <Loader2 size={14} className="animate-spin" />}
                   <span>{t('admin.save_role')}</span>
@@ -837,29 +837,29 @@ export const AdminUsersPage: React.FC = () => {
         )}
 
         {showBlockModal && userToBlock && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 p-4 animate-in fade-in duration-150">
-            <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-6 space-y-6 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+            <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] rounded-3xl w-full max-w-lg p-6 space-y-6 shadow-[10px_10px_0px_#0A0A0A] text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
+              <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3">
+                <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] flex items-center gap-2">
                   <ShieldAlert size={20} className="text-rose-600" />
                   <span>{t('admin.block_user_title')}</span>
                 </h3>
                 <button
                   onClick={() => setShowBlockModal(false)}
-                  className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                  className="text-[#0A0A0A] hover:bg-white p-1.5 rounded-xl border-2 border-transparent hover:border-[#0A0A0A] transition cursor-pointer"
                 >
                   <X size={18} />
                 </button>
               </div>
 
               <div className="space-y-4">
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs text-slate-600 space-y-1">
-                  <div>User: <strong className="text-slate-900 font-bold">{userToBlock.name}</strong></div>
-                  <div className="text-slate-500">{userToBlock.email}</div>
+                <div className="bg-white p-3.5 rounded-2xl border-2 border-[#0A0A0A] text-xs text-[#0A0A0A] space-y-1">
+                  <div>User: <strong className="text-[#0A0A0A] font-black">{userToBlock.name}</strong></div>
+                  <div className="text-slate-700 font-bold">{userToBlock.email}</div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-700 block">{t('admin.select_block_reason')}</label>
+                  <label className="text-xs font-black uppercase text-[#0A0A0A] block">{t('admin.select_block_reason')}</label>
                   {[
                     { code: 'SUSPICIOUS_ACTIVITY', key: 'admin.reason_suspicious' },
                     { code: 'VIOLATION_OF_RULES', key: 'admin.reason_rules' },
@@ -869,10 +869,10 @@ export const AdminUsersPage: React.FC = () => {
                     <label
                       key={r.code}
                       onClick={() => setBlockReasonOption(r.code)}
-                      className={`flex items-center space-x-3 p-3.5 rounded-2xl border cursor-pointer transition ${
+                      className={`flex items-center space-x-3 p-3.5 rounded-2xl border-2 border-[#0A0A0A] cursor-pointer transition ${
                         blockReasonOption === r.code
-                          ? 'bg-rose-50 border-rose-400 text-rose-900 font-bold shadow-xs'
-                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                          ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black shadow-[2px_2px_0px_#0A0A0A]'
+                          : 'bg-white text-[#0A0A0A] hover:bg-amber-50'
                       }`}
                     >
                       <input
@@ -880,38 +880,38 @@ export const AdminUsersPage: React.FC = () => {
                         name="blockReason"
                         checked={blockReasonOption === r.code}
                         onChange={() => setBlockReasonOption(r.code)}
-                        className="accent-rose-600"
+                        className="accent-[#0A0A0A]"
                       />
-                      <span className="text-xs">{t(r.key)}</span>
+                      <span className="text-xs uppercase font-bold">{t(r.key)}</span>
                     </label>
                   ))}
                 </div>
 
                 {blockReasonOption === 'OTHER' && (
                   <div className="space-y-1.5 pt-1">
-                    <label className="text-xs font-bold text-slate-700 block">{t('admin.specify_block_reason')}</label>
+                    <label className="text-xs font-black uppercase text-[#0A0A0A] block">{t('admin.specify_block_reason')}</label>
                     <textarea
                       value={customBlockReason}
                       onChange={(e) => setCustomBlockReason(e.target.value)}
                       placeholder="..."
                       rows={3}
-                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:outline-none focus:border-rose-500 focus:bg-white transition"
+                      className="w-full p-3 bg-white border-2 border-[#0A0A0A] rounded-2xl text-xs font-bold text-[#0A0A0A] focus:outline-none transition shadow-[2px_2px_0px_#0A0A0A]"
                     />
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-[#0A0A0A]">
                 <button
                   onClick={() => setShowBlockModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#0A0A0A] hover:bg-white border-2 border-transparent hover:border-[#0A0A0A] transition cursor-pointer"
                 >
                   {t('admin.cancel')}
                 </button>
                 <button
                   onClick={handleConfirmBlock}
                   disabled={statusMutation.isPending}
-                  className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-100 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl text-xs font-black uppercase text-white bg-rose-700 border-2 border-[#0A0A0A] hover:bg-rose-800 shadow-[2px_2px_0px_#0A0A0A] transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {statusMutation.isPending && <Loader2 size={14} className="animate-spin" />}
                   <span>{t('admin.confirm_block')}</span>
@@ -922,42 +922,42 @@ export const AdminUsersPage: React.FC = () => {
         )}
 
         {showDetailModal && selectedDetailUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-150">
-            <div className="bg-white border border-slate-300 rounded-3xl w-full max-w-6xl h-[780px] max-h-[92vh] p-6 sm:p-7 shadow-2xl flex flex-col justify-between space-y-4 overflow-hidden">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3.5 shrink-0">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+            <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] rounded-3xl w-full max-w-6xl h-[780px] max-h-[92vh] p-6 sm:p-7 shadow-[10px_10px_0px_#0A0A0A] flex flex-col justify-between space-y-4 overflow-hidden text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
+              <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3.5 shrink-0">
                 <div className="flex items-center space-x-3.5">
                   {selectedDetailUser.avatar ? (
                     <img
                       src={selectedDetailUser.avatar}
                       alt={selectedDetailUser.name}
                       referrerPolicy="no-referrer"
-                      className="w-12 h-12 rounded-xl object-cover border border-slate-200"
+                      className="w-12 h-12 rounded-xl object-cover border-2 border-[#0A0A0A]"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-300 flex items-center justify-center font-bold text-slate-700 text-lg">
+                    <div className="w-12 h-12 rounded-xl bg-white border-2 border-[#0A0A0A] flex items-center justify-center font-black text-[#0A0A0A] text-lg">
                       {selectedDetailUser.name ? selectedDetailUser.name[0].toUpperCase() : 'U'}
                     </div>
                   )}
 
                   <div className="space-y-0.5">
                     <div className="flex items-center space-x-2">
-                      <h3 className="text-base font-bold text-slate-900 leading-tight">{selectedDetailUser.name}</h3>
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-bold text-[10px] uppercase">
+                      <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] leading-tight">{selectedDetailUser.name}</h3>
+                      <span className="px-2 py-0.5 rounded-md bg-white border border-[#0A0A0A] text-[#0A0A0A] font-black text-[10px] uppercase">
                         {selectedDetailUser.role}
                       </span>
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase border-2 border-[#0A0A0A] ${
                         selectedDetailUser.active
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                          : 'bg-rose-50 text-rose-700 border-rose-200'
+                          ? 'bg-emerald-200 text-emerald-950'
+                          : 'bg-rose-200 text-rose-950'
                       }`}>
                         {selectedDetailUser.active ? t('admin.active') : t('admin.blocked')}
                       </span>
                     </div>
 
-                    <div className="text-xs text-slate-500 font-mono flex items-center space-x-2">
+                    <div className="text-xs text-slate-700 font-mono flex items-center space-x-2 font-bold">
                       <span>{selectedDetailUser.email}</span>
                       {selectedDetailUser.telegramUsername && (
-                        <span className="text-cyan-700">@{selectedDetailUser.telegramUsername}</span>
+                        <span className="text-[#0A0A0A]">@{selectedDetailUser.telegramUsername}</span>
                       )}
                       <span>ID: #{selectedDetailUser.id}</span>
                     </div>
@@ -971,7 +971,7 @@ export const AdminUsersPage: React.FC = () => {
                         setShowDetailModal(false);
                         handleOpenRoleModal(selectedDetailUser);
                       }}
-                      className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 transition cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black uppercase text-xs border-2 border-[#0A0A0A] transition cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                     >
                       {t('admin.role')}
                     </button>
@@ -983,10 +983,10 @@ export const AdminUsersPage: React.FC = () => {
                         setShowDetailModal(false);
                         handleOpenBlockModal(selectedDetailUser);
                       }}
-                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border ${
+                      className={`px-2.5 py-1.5 rounded-xl text-xs font-black uppercase transition cursor-pointer border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] ${
                         selectedDetailUser.active
-                          ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                          ? 'bg-rose-200 text-rose-950 hover:bg-rose-300'
+                          : 'bg-emerald-200 text-emerald-950 hover:bg-emerald-300'
                       }`}
                     >
                       {selectedDetailUser.active ? t('admin.block') : t('admin.unblock')}
@@ -995,16 +995,16 @@ export const AdminUsersPage: React.FC = () => {
 
                   <button
                     onClick={() => setShowDetailModal(false)}
-                    className="text-slate-400 hover:text-slate-700 p-1.5 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                    className="text-[#0A0A0A] hover:bg-white p-1.5 rounded-xl border-2 border-transparent hover:border-[#0A0A0A] transition cursor-pointer"
                   >
                     <X size={18} />
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200 shrink-0">
+              <div className="flex items-center justify-between gap-2 bg-white p-2.5 rounded-xl border-2 border-[#0A0A0A] shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
                 <div className="flex items-center space-x-1">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase mr-1 flex items-center gap-1">
+                  <span className="text-[11px] font-black text-[#0A0A0A] uppercase mr-1 flex items-center gap-1">
                     <Calendar size={13} />
                     {t('admin.period_label')}
                   </span>
@@ -1020,10 +1020,10 @@ export const AdminUsersPage: React.FC = () => {
                         setDetailPeriod(p.id as any);
                         setActivityPage(0);
                       }}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-black uppercase transition cursor-pointer ${
                         detailPeriod === p.id
-                          ? 'bg-slate-900 text-white'
-                          : 'text-slate-600 hover:bg-slate-200'
+                          ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                          : 'text-[#0A0A0A] hover:bg-[#F2EBDD]'
                       }`}
                     >
                       {p.label}
@@ -1032,7 +1032,7 @@ export const AdminUsersPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-1">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase mr-1 flex items-center gap-1">
+                  <span className="text-[11px] font-black text-[#0A0A0A] uppercase mr-1 flex items-center gap-1">
                     <Filter size={13} />
                     {t('admin.category_label')}
                   </span>
@@ -1048,10 +1048,10 @@ export const AdminUsersPage: React.FC = () => {
                         setActivityCategoryFilter(c.id as any);
                         setActivityPage(0);
                       }}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-black uppercase transition cursor-pointer ${
                         activityCategoryFilter === c.id
-                          ? 'bg-indigo-600 text-white'
-                          : 'text-slate-600 hover:bg-slate-200'
+                          ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                          : 'text-[#0A0A0A] hover:bg-[#F2EBDD]'
                       }`}
                     >
                       {c.label}
@@ -1061,63 +1061,63 @@ export const AdminUsersPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-6 gap-2 shrink-0">
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
-                  <div className="text-[10px] font-bold uppercase text-slate-500">{t('admin.active_bots')}</div>
-                  <div className="text-base font-extrabold text-slate-900 mt-0.5">
+                <div className="bg-white border-2 border-[#0A0A0A] rounded-xl p-2.5 shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="text-[10px] font-black uppercase text-slate-700">{t('admin.active_bots')}</div>
+                  <div className="text-base font-black text-[#0A0A0A] mt-0.5">
                     {isDetailLoading ? '...' : (userDetailData?.botsCount ?? 0)}
                   </div>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
-                  <div className="text-[10px] font-bold uppercase text-slate-500">{t('admin.cat_automations')}</div>
-                  <div className="text-base font-extrabold text-slate-900 mt-0.5">
+                <div className="bg-white border-2 border-[#0A0A0A] rounded-xl p-2.5 shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="text-[10px] font-black uppercase text-slate-700">{t('admin.cat_automations')}</div>
+                  <div className="text-base font-black text-[#0A0A0A] mt-0.5">
                     {isDetailLoading ? '...' : (userDetailData?.automationsCount ?? 0)}
                   </div>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
-                  <div className="text-[10px] font-bold uppercase text-slate-500">{t('admin.cat_broadcasts')}</div>
-                  <div className="text-base font-extrabold text-slate-900 mt-0.5">
+                <div className="bg-white border-2 border-[#0A0A0A] rounded-xl p-2.5 shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="text-[10px] font-black uppercase text-slate-700">{t('admin.cat_broadcasts')}</div>
+                  <div className="text-base font-black text-[#0A0A0A] mt-0.5">
                     {isDetailLoading ? '...' : (userDetailData?.broadcastsCount ?? 0)}
                   </div>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
-                  <div className="text-[10px] font-bold uppercase text-slate-500">{t('admin.subscribers')}</div>
-                  <div className="text-base font-extrabold text-slate-900 mt-0.5">
+                <div className="bg-white border-2 border-[#0A0A0A] rounded-xl p-2.5 shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="text-[10px] font-black uppercase text-slate-700">{t('admin.subscribers')}</div>
+                  <div className="text-base font-black text-[#0A0A0A] mt-0.5">
                     {isDetailLoading ? '...' : (userDetailData?.contactsCount ?? 0)}
                   </div>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
-                  <div className="text-[10px] font-bold uppercase text-slate-500">{t('admin.messages_sent')}</div>
-                  <div className="text-base font-extrabold text-slate-900 mt-0.5">
+                <div className="bg-white border-2 border-[#0A0A0A] rounded-xl p-2.5 shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="text-[10px] font-black uppercase text-slate-700">{t('admin.messages_sent')}</div>
+                  <div className="text-base font-black text-[#0A0A0A] mt-0.5">
                     {isDetailLoading ? '...' : (userDetailData?.messagesCount ?? 0)}
                   </div>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
-                  <div className="text-[10px] font-bold uppercase text-slate-500">{t('admin.subscription_plan')}</div>
-                  <div className="text-xs font-bold text-slate-900 mt-1 truncate">
+                <div className="bg-white border-2 border-[#0A0A0A] rounded-xl p-2.5 shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="text-[10px] font-black uppercase text-slate-700">{t('admin.subscription_plan')}</div>
+                  <div className="text-xs font-black text-[#0A0A0A] mt-1 truncate">
                     {isDetailLoading ? '...' : (userDetailData?.planName || 'FREE')}
                   </div>
                 </div>
               </div>
 
               {!selectedDetailUser.active && selectedDetailUser.blockReason && (
-                <div className="bg-rose-50 border border-rose-200 rounded-xl p-2.5 text-xs text-rose-800 shrink-0">
-                  <span className="font-bold">{t('blocked.reason_title')}</span> {selectedDetailUser.blockReason}
+                <div className="bg-rose-100 border-2 border-[#0A0A0A] rounded-xl p-2.5 text-xs text-rose-950 font-bold shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
+                  <span className="font-black">{t('blocked.reason_title')}</span> {selectedDetailUser.blockReason}
                 </div>
               )}
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 flex-1 min-h-0 overflow-hidden">
                 <div className="lg:col-span-5 flex flex-col space-y-3 min-h-0 h-full overflow-hidden">
                   
-                  <div className="flex-1 flex flex-col min-h-0 border border-slate-200 rounded-2xl bg-slate-50/50 p-3 overflow-hidden">
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-200 text-xs font-bold text-slate-800 shrink-0">
+                  <div className="flex-1 flex flex-col min-h-0 border-2 border-[#0A0A0A] rounded-2xl bg-white p-3 overflow-hidden shadow-[2px_2px_0px_#0A0A0A]">
+                    <div className="flex items-center justify-between pb-2 border-b-2 border-[#0A0A0A] text-xs font-black uppercase text-[#0A0A0A] shrink-0">
                       <span>{t('admin.automations')}</span>
                       {userDetailData?.automations && (
-                        <span className="text-[11px] font-mono text-slate-500 font-normal">
+                        <span className="text-[11px] font-mono text-[#0A0A0A] font-bold">
                           {t('admin.total')}: {userDetailData.automations.length}
                         </span>
                       )}
@@ -1125,12 +1125,12 @@ export const AdminUsersPage: React.FC = () => {
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pt-2 pr-1">
                       {isDetailLoading ? (
-                        <div className="flex items-center justify-center py-6 text-slate-400 text-xs">
+                        <div className="flex items-center justify-center py-6 text-slate-700 text-xs font-bold">
                           <Loader2 size={16} className="animate-spin mr-2" />
                           {t('admin.loading_history')}
                         </div>
                       ) : !userDetailData?.automations?.length ? (
-                        <div className="text-center py-6 text-slate-400 text-xs font-medium">
+                        <div className="text-center py-6 text-slate-700 text-xs font-bold">
                           {t('admin.no_records')}
                         </div>
                       ) : (
@@ -1141,32 +1141,32 @@ export const AdminUsersPage: React.FC = () => {
                               setShowDetailModal(false);
                               navigate(`${ROUTES.ADMIN_AUTOMATIONS}?search=${encodeURIComponent(auto.name)}`);
                             }}
-                            className="bg-white border border-slate-200 rounded-xl p-2.5 hover:border-indigo-400 hover:shadow-xs cursor-pointer transition group flex flex-col justify-between"
+                            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl p-2.5 hover:bg-white cursor-pointer transition group flex flex-col justify-between"
                             title="Перейти до цієї автоматизації"
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex items-center space-x-2 min-w-0">
                                 <span
-                                  className={`w-2 h-2 rounded-full shrink-0 ${
-                                    auto.active ? 'bg-emerald-500 shadow-xs shadow-emerald-500/50' : 'bg-slate-300'
+                                  className={`w-2 h-2 rounded-full border border-[#0A0A0A] shrink-0 ${
+                                    auto.active ? 'bg-emerald-400' : 'bg-slate-300'
                                   }`}
                                 />
-                                <span className="font-bold text-slate-800 text-xs truncate group-hover:text-indigo-600 transition">
+                                <span className="font-black text-[#0A0A0A] text-xs truncate group-hover:underline">
                                   {auto.name}
                                 </span>
                               </div>
-                              <ChevronRight size={14} className="text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition shrink-0 mt-0.5" />
+                              <ChevronRight size={14} className="text-[#0A0A0A] shrink-0 mt-0.5" />
                             </div>
 
-                            <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-100 text-[10px] font-mono">
+                            <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#0A0A0A]/20 text-[10px] font-mono">
                               {auto.botName && auto.botName !== '—' ? (
-                                <span className="flex items-center gap-1 text-slate-700 font-semibold truncate max-w-[120px]">
+                                <span className="flex items-center gap-1 text-[#0A0A0A] font-bold truncate max-w-[120px]">
                                   <span className="truncate">{auto.botName}</span>
                                 </span>
                               ) : (
-                                <span className="text-slate-400 font-bold">—</span>
+                                <span className="text-slate-500 font-bold">—</span>
                               )}
-                              <span className="font-bold text-slate-600">RUNS: {auto.triggerCount}</span>
+                              <span className="font-black text-[#0A0A0A]">RUNS: {auto.triggerCount}</span>
                             </div>
                           </div>
                         ))
@@ -1174,11 +1174,11 @@ export const AdminUsersPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex-1 flex flex-col min-h-0 border border-slate-200 rounded-2xl bg-slate-50/50 p-3 overflow-hidden">
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-200 text-xs font-bold text-slate-800 shrink-0">
+                  <div className="flex-1 flex flex-col min-h-0 border-2 border-[#0A0A0A] rounded-2xl bg-white p-3 overflow-hidden shadow-[2px_2px_0px_#0A0A0A]">
+                    <div className="flex items-center justify-between pb-2 border-b-2 border-[#0A0A0A] text-xs font-black uppercase text-[#0A0A0A] shrink-0">
                       <span>{t('admin.cat_broadcasts')}</span>
                       {userDetailData?.broadcasts && (
-                        <span className="text-[11px] font-mono text-slate-500 font-normal">
+                        <span className="text-[11px] font-mono text-[#0A0A0A] font-bold">
                           {t('admin.total')}: {userDetailData.broadcasts.length}
                         </span>
                       )}
@@ -1186,12 +1186,12 @@ export const AdminUsersPage: React.FC = () => {
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pt-2 pr-1">
                       {isDetailLoading ? (
-                        <div className="flex items-center justify-center py-6 text-slate-400 text-xs">
+                        <div className="flex items-center justify-center py-6 text-slate-700 text-xs font-bold">
                           <Loader2 size={16} className="animate-spin mr-2" />
                           {t('admin.loading_history')}
                         </div>
                       ) : !userDetailData?.broadcasts?.length ? (
-                        <div className="text-center py-6 text-slate-400 text-xs font-medium">
+                        <div className="text-center py-6 text-slate-700 text-xs font-bold">
                           {t('admin.no_records')}
                         </div>
                       ) : (
@@ -1202,23 +1202,23 @@ export const AdminUsersPage: React.FC = () => {
                               setShowDetailModal(false);
                               navigate(`${ROUTES.ADMIN_BROADCASTS}?search=${encodeURIComponent(bc.name)}`);
                             }}
-                            className="bg-white border border-slate-200 rounded-xl p-2.5 hover:border-blue-400 hover:shadow-xs cursor-pointer transition group flex flex-col justify-between"
+                            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl p-2.5 hover:bg-white cursor-pointer transition group flex flex-col justify-between"
                             title="Перейти до цієї розсилки"
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex items-center space-x-2 min-w-0">
-                                <span className="font-bold text-slate-800 text-xs truncate group-hover:text-blue-600 transition">
+                                <span className="font-black text-[#0A0A0A] text-xs truncate group-hover:underline">
                                   {bc.name}
                                 </span>
                               </div>
-                              <ChevronRight size={14} className="text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition shrink-0 mt-0.5" />
+                              <ChevronRight size={14} className="text-[#0A0A0A] shrink-0 mt-0.5" />
                             </div>
 
-                            <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-100 text-[10px] font-mono">
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-bold uppercase">
+                            <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#0A0A0A]/20 text-[10px] font-mono">
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-white border border-[#0A0A0A] text-[#0A0A0A] font-black uppercase">
                                 {bc.status}
                               </span>
-                              <span className="font-bold text-slate-600">DELIVERED: {bc.sentCount}</span>
+                              <span className="font-black text-[#0A0A0A]">DELIVERED: {bc.sentCount}</span>
                             </div>
                           </div>
                         ))
@@ -1228,11 +1228,11 @@ export const AdminUsersPage: React.FC = () => {
 
                 </div>
 
-                <div className="lg:col-span-7 border border-slate-200 rounded-2xl bg-slate-50/50 p-3.5 flex flex-col min-h-0 h-full overflow-hidden">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-200 text-xs font-bold text-slate-800 shrink-0">
+                <div className="lg:col-span-7 border-2 border-[#0A0A0A] rounded-2xl bg-white p-3.5 flex flex-col min-h-0 h-full overflow-hidden shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="flex items-center justify-between pb-2 border-b-2 border-[#0A0A0A] text-xs font-black uppercase text-[#0A0A0A] shrink-0">
                     <span>{t('admin.activity_history')}</span>
                     {userDetailData?.activities && (
-                      <span className="text-[11px] font-mono text-slate-500 font-normal">
+                      <span className="text-[11px] font-mono text-[#0A0A0A] font-bold">
                         {t('admin.total_records')} {userDetailData.activities.totalElements}
                       </span>
                     )}
@@ -1240,31 +1240,31 @@ export const AdminUsersPage: React.FC = () => {
 
                   <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pt-2 pr-1">
                     {isDetailLoading ? (
-                      <div className="flex items-center justify-center py-12 text-slate-400 text-xs">
+                      <div className="flex items-center justify-center py-12 text-slate-700 text-xs font-bold">
                         <Loader2 size={16} className="animate-spin mr-2" />
                         {t('admin.loading_history')}
                       </div>
                     ) : userDetailData?.activities?.content && userDetailData.activities.content.length > 0 ? (
                       <div className="space-y-2">
                         {userDetailData.activities.content.map((act) => (
-                          <div key={act.id} className="bg-white border border-slate-200 rounded-xl p-3 flex items-start justify-between text-xs hover:border-slate-300 transition shadow-2xs">
+                          <div key={act.id} className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl p-3 flex items-start justify-between text-xs transition">
                             <div className="space-y-1 min-w-0 pr-2">
-                              <div className="font-bold text-slate-900 flex items-center space-x-2 truncate">
+                              <div className="font-black text-[#0A0A0A] flex items-center space-x-2 truncate">
                                 <span className="truncate">{translateAuditTitle(act.title)}</span>
-                                <span className="px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-600 font-mono text-[9px] uppercase font-bold shrink-0">
+                                <span className="px-1.5 py-0.2 rounded bg-white border border-[#0A0A0A] text-[#0A0A0A] font-mono text-[9px] uppercase font-black shrink-0">
                                   {act.badge}
                                 </span>
                               </div>
-                              <div className="text-slate-600 text-[11px] leading-relaxed">{translateAuditDescription(act.description)}</div>
+                              <div className="text-slate-800 text-[11px] leading-relaxed font-bold">{translateAuditDescription(act.description)}</div>
                             </div>
-                            <div className="text-[11px] text-slate-400 font-mono shrink-0">
+                            <div className="text-[11px] text-slate-700 font-mono font-bold shrink-0">
                               {formatEuroDateTime(act.timestamp)}
                             </div>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-12 text-slate-400 text-xs font-medium">
+                      <div className="text-center py-12 text-slate-700 text-xs font-bold">
                         {t('admin.no_records')}
                       </div>
                     )}
@@ -1272,25 +1272,25 @@ export const AdminUsersPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-slate-200 shrink-0">
+              <div className="flex items-center justify-between pt-3 border-t-2 border-[#0A0A0A] shrink-0">
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setActivityPage((prev) => Math.max(0, prev - 1))}
                     disabled={activityPage === 0 || isDetailLoading}
-                    className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-bold hover:bg-slate-100 disabled:opacity-40 cursor-pointer flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-lg border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] text-xs font-black uppercase hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-40 cursor-pointer flex items-center gap-1"
                   >
                     <ChevronLeft size={14} />
                     <span>{t('admin.prev_page')}</span>
                   </button>
 
-                  <span className="text-xs text-slate-600 font-mono font-bold px-1">
+                  <span className="text-xs text-[#0A0A0A] font-mono font-black px-1">
                     {t('admin.page_x_of_y', { current: activityPage + 1, total: userDetailData?.activities?.totalPages || 1 })}
                   </span>
 
                   <button
                     onClick={() => setActivityPage((prev) => prev + 1)}
                     disabled={!userDetailData?.activities || activityPage + 1 >= userDetailData.activities.totalPages || isDetailLoading}
-                    className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-bold hover:bg-slate-100 disabled:opacity-40 cursor-pointer flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-lg border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] text-xs font-black uppercase hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-40 cursor-pointer flex items-center gap-1"
                   >
                     <span>{t('admin.next_page')}</span>
                     <ChevronRight size={14} />
@@ -1299,7 +1299,7 @@ export const AdminUsersPage: React.FC = () => {
 
                 <button
                   onClick={() => setShowDetailModal(false)}
-                  className="px-4 py-1.5 rounded-lg text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 cursor-pointer transition"
+                  className="px-4 py-1.5 rounded-lg text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] border-2 border-[#0A0A0A] hover:bg-[#2A2A2A] cursor-pointer transition shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   {t('admin.close')}
                 </button>

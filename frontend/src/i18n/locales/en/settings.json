@@ -123,6 +123,7 @@
   "settings.integrations.mailchimp.desc": "The integration provides you with an ability to save customers contacts from Manychat to MailChimp. Learn more",
   "settings.integrations.mailchimp.title": "Connect MailChimp Account",
   "settings.integrations.premium.api_secret": "API Secret",
+  "settings.integrations.premium.api_key_required": "Please enter API key",
   "settings.integrations.premium.connect": "Connect {name} Account",
   "settings.integrations.premium.connected": "Connected",
   "settings.integrations.premium.disconnect": "Disconnect Account",

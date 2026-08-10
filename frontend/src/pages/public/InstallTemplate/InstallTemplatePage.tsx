@@ -61,8 +61,6 @@ export const InstallTemplatePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F2EBDD] font-['JetBrains_Mono',monospace] flex flex-col items-center justify-center p-4 text-[#0A0A0A]">
       <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] rounded-3xl max-w-xl w-full p-8 space-y-6">
-        
-        {/* Top Header */}
         <div className="flex items-center gap-4 pb-6 border-b-2 border-[#0A0A0A]">
           <div className="w-12 h-12 rounded-2xl bg-amber-400 border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] flex items-center justify-center shrink-0">
             <Sparkles size={24} className="text-[#0A0A0A]" />
@@ -109,7 +107,6 @@ export const InstallTemplatePage: React.FC = () => {
           </div>
         ) : template && (
           <div className="space-y-6">
-            {/* Template Overview Card */}
             <div className="bg-white border-2 border-[#0A0A0A] p-5 rounded-2xl space-y-3 shadow-[3px_3px_0px_#0A0A0A]">
               <div className="flex items-center justify-between border-b border-[#0A0A0A]/15 pb-3">
                 <h3 className="font-black text-sm uppercase text-[#0A0A0A]">{template.name}</h3>
@@ -123,8 +120,6 @@ export const InstallTemplatePage: React.FC = () => {
                 <span>🤖 Джерело: <strong className="text-[#0A0A0A]">{template.sourceBotName}</strong></span>
               </div>
             </div>
-
-            {/* Target Bot Selection (if logged in) */}
             {isAuthenticated ? (
               <div className="space-y-4">
                 {bots.length > 0 ? (

@@ -122,6 +122,7 @@
   "settings.integrations.mailchimp.desc": "Ця інтеграція дає можливість зберігати контакти клієнтів з Manychat у MailChimp. Дізнатися більше",
   "settings.integrations.mailchimp.title": "Підключити акаунт MailChimp",
   "settings.integrations.premium.api_secret": "API Secret",
+  "settings.integrations.premium.api_key_required": "Будь ласка, введіть API-ключ",
   "settings.integrations.premium.connect": "Підключити акаунт {name}",
   "settings.integrations.premium.connected": "Підключено",
   "settings.integrations.premium.disconnect": "Відключити акаунт",

@@ -16,7 +16,7 @@ interface PremiumIntegrationCardProps {
   hasApiSecret?: boolean;
   stepText?: string;
   placeholder?: string;
-  onUpgrade: () => void;
+  onUpgrade?: () => void;
   botId: number;
   integration?: IntegrationResponse;
 }
@@ -29,12 +29,13 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
   hasApiSecret = false,
   stepText,
   placeholder,
-  onUpgrade,
+  onUpgrade: _onUpgrade,
   botId,
   integration,
 }) => {
   const [apiKey, setApiKey] = useState('');
   const [isConnected, setIsConnected] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const createMutation = useCreateIntegrationMutation();
   const deleteMutation = useDeleteIntegrationMutation();
@@ -49,11 +50,13 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
       setIsConnected(false);
       setApiKey('');
     }
+    setHasError(false);
   }, [integration]);
 
   const handleConnect = async () => {
     if (hasApiSecret) {
       if (apiKey.trim()) {
+        setHasError(false);
         try {
           const typeStr = name.toUpperCase().replace(/\s+/g, '_') as IntegrationResponse['type'];
           await createMutation.mutateAsync({
@@ -67,7 +70,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
           console.error(err);
         }
       } else {
-        onUpgrade();
+        setHasError(true);
       }
     } else {
       try {
@@ -95,6 +98,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
     }
     setIsConnected(false);
     setApiKey('');
+    setHasError(false);
   };
 
   return (
@@ -138,11 +142,21 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
                 <input
                   type="password"
                   value={isConnected ? '••••••••••••••••' : apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
+                  onChange={(e) => {
+                    setApiKey(e.target.value);
+                    if (e.target.value.trim()) setHasError(false);
+                  }}
                   disabled={isConnected}
                   placeholder={placeholder || t('settings.integrations.premium.api_secret')}
-                  className="w-full px-3.5 py-2 border-2 border-[#0A0A0A] rounded-xl text-xs focus:outline-none disabled:bg-slate-100 disabled:text-slate-500 font-bold bg-white text-[#0A0A0A]"
+                  className={`w-full px-3.5 py-2 border-2 rounded-xl text-xs focus:outline-none disabled:bg-slate-100 disabled:text-slate-500 font-bold bg-white text-[#0A0A0A] transition-colors ${
+                    hasError ? 'border-rose-600 focus:ring-2 focus:ring-rose-500' : 'border-[#0A0A0A]'
+                  }`}
                 />
+                {hasError && (
+                  <p className="text-[10px] font-black text-rose-600 uppercase tracking-wider mt-1">
+                    {t('settings.integrations.premium.api_key_required')}
+                  </p>
+                )}
               </div>
 
               {isConnected ? (

@@ -747,13 +747,13 @@ export const AdminStatsPage: React.FC = () => {
           <>
             <div className="flex flex-col sm:flex-row gap-3.5 items-center justify-between w-full mb-10">
               <div className="relative w-full sm:w-80">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]" size={16} />
                 <input
                   type="text"
                   placeholder={t('admin.search_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-all shadow-xs"
+                  className="w-full pl-9 pr-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder-slate-400 focus:outline-none shadow-[2px_2px_0px_#0A0A0A]"
                 />
               </div>
 
@@ -762,14 +762,14 @@ export const AdminStatsPage: React.FC = () => {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setIsPeriodOpen(!isPeriodOpen)}
-                    className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-xs min-w-[150px]"
+                    className="flex items-center justify-between gap-2.5 px-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all shadow-[2px_2px_0px_#0A0A0A] min-w-[150px] cursor-pointer"
                   >
                     <span>{getPeriodLabel(period)}</span>
-                    <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isPeriodOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={14} className={`text-current transition-transform duration-200 ${isPeriodOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {isPeriodOpen && (
-                    <div className="absolute right-0 mt-1.5 w-48 bg-white border border-slate-150 rounded-xl shadow-lg z-50 py-1 animate-in fade-in-50 slide-in-from-top-1 duration-150">
+                    <div className="absolute right-0 mt-1.5 w-48 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 overflow-hidden animate-in fade-in-50 duration-150">
                       {periodOptions.map((opt) => (
                         <button
                           key={opt}
@@ -783,7 +783,7 @@ export const AdminStatsPage: React.FC = () => {
                               setPeriod(opt);
                             }
                           }}
-                          className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors ${period === opt ? 'bg-indigo-50 text-indigo-600' : 'text-slate-700 hover:bg-slate-50'}`}
+                          className={`w-full text-left px-4 py-2 text-xs font-bold uppercase transition-colors cursor-pointer ${period === opt ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A] hover:bg-white'}`}
                         >
                           {getPeriodLabel(opt)}
                         </button>
@@ -799,48 +799,48 @@ export const AdminStatsPage: React.FC = () => {
                       setTempEnd(endDate.toISOString().slice(0, 16));
                       setIsPickerOpen(!isPickerOpen);
                     }}
-                    className="flex items-center space-x-2.5 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:scale-98 transition-all shadow-xs cursor-pointer select-none"
+                    className="flex items-center space-x-2.5 px-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all shadow-[2px_2px_0px_#0A0A0A] cursor-pointer select-none"
                   >
-                    <CalendarDays size={15} className="text-slate-400 shrink-0" />
-                    <span className="font-mono text-slate-600">{formatDateRangeDisplay()}</span>
+                    <CalendarDays size={15} className="text-current shrink-0" />
+                    <span className="font-mono">{formatDateRangeDisplay()}</span>
                   </button>
 
                   {isPickerOpen && (
-                    <div className="absolute right-0 mt-1.5 w-72 bg-white border border-slate-150 rounded-2xl shadow-xl z-50 p-4 flex flex-col gap-3.5 animate-in fade-in-50 slide-in-from-top-1 duration-150">
-                      <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">
+                    <div className="absolute right-0 mt-1.5 w-72 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_#0A0A0A] z-50 p-4 flex flex-col gap-3.5 animate-in fade-in-50 duration-150">
+                      <div className="font-['Anybody',sans-serif] text-[11px] font-black text-[#0A0A0A] uppercase tracking-wider select-none">
                         {t('admin.period_custom')}
                       </div>
                       <div className="flex flex-col gap-3 text-left">
-                        <label className="flex flex-col gap-1 text-[11px] font-bold text-slate-500">
+                        <label className="flex flex-col gap-1 text-[11px] font-bold text-[#0A0A0A]">
                           {t('admin.start')}
                           <input
                             type="datetime-local"
                             value={tempStart}
                             onChange={(e) => setTempStart(e.target.value)}
-                            className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:border-indigo-500"
+                            className="px-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-lg text-xs font-bold text-[#0A0A0A] focus:outline-none"
                           />
                         </label>
-                        <label className="flex flex-col gap-1 text-[11px] font-bold text-slate-500">
+                        <label className="flex flex-col gap-1 text-[11px] font-bold text-[#0A0A0A]">
                           {t('admin.end')}
                           <input
                             type="datetime-local"
                             value={tempEnd}
                             onChange={(e) => setTempEnd(e.target.value)}
-                            className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:border-indigo-500"
+                            className="px-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-lg text-xs font-bold text-[#0A0A0A] focus:outline-none"
                           />
                         </label>
                       </div>
 
-                      <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                      <div className="flex items-center justify-end gap-2 border-t-2 border-[#0A0A0A] pt-3">
                         <button
                           onClick={() => setIsPickerOpen(false)}
-                          className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-lg transition-all"
+                          className="px-3 py-1.5 text-xs font-bold text-[#0A0A0A] hover:bg-white border-2 border-transparent hover:border-[#0A0A0A] rounded-lg transition-all cursor-pointer"
                         >
                           {t('admin.cancel')}
                         </button>
                         <button
                           onClick={handleApplyCustomDates}
-                          className="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-all"
+                          className="px-3 py-1.5 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] border-2 border-[#0A0A0A] hover:bg-[#2A2A2A] rounded-lg shadow-[2px_2px_0px_#0A0A0A] transition-all cursor-pointer"
                         >
                           {t('admin.apply')}
                         </button>
@@ -853,138 +853,138 @@ export const AdminStatsPage: React.FC = () => {
             </div>
 
             <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 ${isManager ? 'xl:grid-cols-7' : 'xl:grid-cols-8'} gap-4`}>
-              <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold text-slate-500">{t('admin.site_owners')}</span>
-                  <div className="p-1.5 rounded-xl bg-blue-50 text-blue-600">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] p-4 rounded-3xl shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
+                <div className="flex items-center justify-between text-[#0A0A0A] mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider">{t('admin.site_owners')}</span>
+                  <div className="p-1.5 rounded-xl bg-white border border-[#0A0A0A] text-[#0A0A0A]">
                     <Users size={15} />
                   </div>
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <div className="text-2xl font-black text-slate-900">{stats?.totalOwners ?? stats?.totalUsers ?? 0}</div>
-                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded-lg font-mono shrink-0">
+                  <div className="text-2xl font-black text-[#0A0A0A]">{stats?.totalOwners ?? stats?.totalUsers ?? 0}</div>
+                  <span className="text-[11px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-2 py-0.5 rounded-lg font-mono shrink-0">
                     {stats?.totalOwnersChange}
                   </span>
                 </div>
-                <div className="text-[10px] text-blue-600 font-bold flex items-center mt-2 truncate">
+                <div className="text-[10px] text-[#0A0A0A] font-bold flex items-center mt-2 truncate">
                   <TrendingUp size={11} className="mr-1 shrink-0" />
                   <span className="truncate">{t('admin.registered_site_users')}</span>
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold text-slate-500">{t('admin.active_owners')}</span>
-                  <div className="p-1.5 rounded-xl bg-indigo-50 text-indigo-600">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] p-4 rounded-3xl shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
+                <div className="flex items-center justify-between text-[#0A0A0A] mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider">{t('admin.active_owners')}</span>
+                  <div className="p-1.5 rounded-xl bg-white border border-[#0A0A0A] text-[#0A0A0A]">
                     <Activity size={15} />
                   </div>
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <div className="text-2xl font-black text-slate-900">{stats?.activeOwners ?? stats?.totalUsers ?? 0}</div>
-                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded-lg font-mono shrink-0">
+                  <div className="text-2xl font-black text-[#0A0A0A]">{stats?.activeOwners ?? stats?.totalUsers ?? 0}</div>
+                  <span className="text-[11px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-2 py-0.5 rounded-lg font-mono shrink-0">
                     {stats?.activeOwnersChange}
                   </span>
                 </div>
-                <div className="text-[10px] text-indigo-600 font-bold flex items-center mt-2 truncate">
+                <div className="text-[10px] text-[#0A0A0A] font-bold flex items-center mt-2 truncate">
                   <span className="truncate">{t('admin.active_site_users')}</span>
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold text-slate-500">{t('admin.bot_clients')}</span>
-                  <div className="p-1.5 rounded-xl bg-emerald-50 text-emerald-600">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] p-4 rounded-3xl shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
+                <div className="flex items-center justify-between text-[#0A0A0A] mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider">{t('admin.bot_clients')}</span>
+                  <div className="p-1.5 rounded-xl bg-white border border-[#0A0A0A] text-[#0A0A0A]">
                     <MessageSquare size={15} />
                   </div>
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <div className="text-2xl font-black text-slate-900">{stats?.totalBotUsers ?? 0}</div>
-                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded-lg font-mono shrink-0">
+                  <div className="text-2xl font-black text-[#0A0A0A]">{stats?.totalBotUsers ?? 0}</div>
+                  <span className="text-[11px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-2 py-0.5 rounded-lg font-mono shrink-0">
                     {stats?.totalBotUsersChange}
                   </span>
                 </div>
-                <div className="text-[10px] text-emerald-600 font-bold flex items-center mt-2 truncate">
+                <div className="text-[10px] text-[#0A0A0A] font-bold flex items-center mt-2 truncate">
                   <span className="truncate">{t('admin.end_telegram_users')}</span>
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold text-slate-500">{t('admin.active_bots')}</span>
-                  <div className="p-1.5 rounded-xl bg-purple-50 text-purple-600">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] p-4 rounded-3xl shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
+                <div className="flex items-center justify-between text-[#0A0A0A] mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider">{t('admin.active_bots')}</span>
+                  <div className="p-1.5 rounded-xl bg-white border border-[#0A0A0A] text-[#0A0A0A]">
                     <Bot size={15} />
                   </div>
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <div className="text-2xl font-black text-slate-900">{stats?.activeBots || 0}</div>
-                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded-lg font-mono shrink-0">
+                  <div className="text-2xl font-black text-[#0A0A0A]">{stats?.activeBots || 0}</div>
+                  <span className="text-[11px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-2 py-0.5 rounded-lg font-mono shrink-0">
                     {stats?.activeBotsChange}
                   </span>
                 </div>
-                <div className="text-[10px] text-purple-600 font-bold flex items-center mt-2 truncate">
+                <div className="text-[10px] text-[#0A0A0A] font-bold flex items-center mt-2 truncate">
                   <span className="truncate">{t('admin.connected_telegram')}</span>
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold text-slate-500">{t('admin.total_automations')}</span>
-                  <div className="p-1.5 rounded-xl bg-violet-50 text-violet-600">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] p-4 rounded-3xl shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
+                <div className="flex items-center justify-between text-[#0A0A0A] mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider">{t('admin.total_automations')}</span>
+                  <div className="p-1.5 rounded-xl bg-white border border-[#0A0A0A] text-[#0A0A0A]">
                     <Workflow size={15} />
                   </div>
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <div className="text-2xl font-black text-slate-900">{stats?.totalAutomations || 0}</div>
-                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded-lg font-mono shrink-0">
+                  <div className="text-2xl font-black text-[#0A0A0A]">{stats?.totalAutomations || 0}</div>
+                  <span className="text-[11px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-2 py-0.5 rounded-lg font-mono shrink-0">
                     {stats?.totalAutomationsChange}
                   </span>
                 </div>
-                <div className="text-[10px] text-violet-600 font-bold flex items-center mt-2 truncate">
+                <div className="text-[10px] text-[#0A0A0A] font-bold flex items-center mt-2 truncate">
                   <span className="truncate">{t('admin.flow_schemas')}</span>
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold text-slate-500">{t('admin.messages_sent')}</span>
-                  <div className="p-1.5 rounded-xl bg-pink-50 text-pink-600">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] p-4 rounded-3xl shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
+                <div className="flex items-center justify-between text-[#0A0A0A] mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider">{t('admin.messages_sent')}</span>
+                  <div className="p-1.5 rounded-xl bg-white border border-[#0A0A0A] text-[#0A0A0A]">
                     <Send size={15} />
                   </div>
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <div className="text-2xl font-black text-slate-900">{stats?.totalMessagesSent || 0}</div>
-                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded-lg font-mono shrink-0">
+                  <div className="text-2xl font-black text-[#0A0A0A]">{stats?.totalMessagesSent || 0}</div>
+                  <span className="text-[11px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-2 py-0.5 rounded-lg font-mono shrink-0">
                     {stats?.totalMessagesSentChange}
                   </span>
                 </div>
-                <div className="text-[10px] text-pink-600 font-bold flex items-center mt-2 truncate">
+                <div className="text-[10px] text-[#0A0A0A] font-bold flex items-center mt-2 truncate">
                   <span className="truncate">{t('admin.broadcasts_chats')}</span>
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold text-slate-500">{t('admin.active_managers')}</span>
-                  <div className="p-1.5 rounded-xl bg-amber-50 text-amber-600">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] p-4 rounded-3xl shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
+                <div className="flex items-center justify-between text-[#0A0A0A] mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider">{t('admin.active_managers')}</span>
+                  <div className="p-1.5 rounded-xl bg-white border border-[#0A0A0A] text-[#0A0A0A]">
                     <UserCheck size={15} />
                   </div>
                 </div>
-                <div className="text-2xl font-black text-slate-900">{stats?.activeManagers || 0}</div>
-                <div className="text-[10px] text-slate-500 font-bold flex items-center mt-2 truncate">
+                <div className="text-2xl font-black text-[#0A0A0A]">{stats?.activeManagers || 0}</div>
+                <div className="text-[10px] text-[#0A0A0A] font-bold flex items-center mt-2 truncate">
                   <span className="truncate">{t('admin.support_staff')}</span>
                 </div>
               </div>
 
               {!isManager && (
-                <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-slate-400 mb-2">
-                    <span className="text-[11px] font-bold text-slate-500">{t('admin.system_uptime')}</span>
-                    <div className="p-1.5 rounded-xl bg-cyan-50 text-cyan-600">
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] p-4 rounded-3xl shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
+                  <div className="flex items-center justify-between text-[#0A0A0A] mb-2">
+                    <span className="text-[11px] font-black uppercase tracking-wider">{t('admin.system_uptime')}</span>
+                    <div className="p-1.5 rounded-xl bg-white border border-[#0A0A0A] text-[#0A0A0A]">
                       <Clock size={15} />
                     </div>
                   </div>
-                  <div className="text-2xl font-black text-slate-900">{formatUptime(stats?.systemUptimeSeconds)}</div>
-                  <div className="text-[10px] text-cyan-700 font-bold flex items-center mt-2 truncate">
+                  <div className="text-2xl font-black text-[#0A0A0A]">{formatUptime(stats?.systemUptimeSeconds)}</div>
+                  <div className="text-[10px] text-[#0A0A0A] font-bold flex items-center mt-2 truncate">
                     <span className="truncate">{t('admin.online_status')}</span>
                   </div>
                 </div>
@@ -992,56 +992,56 @@ export const AdminStatsPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
-              <div className="bg-white border border-slate-200 p-5 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-40">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold text-slate-500">MRR</span>
-                  <div className="p-1.5 rounded-xl bg-indigo-50 text-indigo-600">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] p-5 rounded-3xl shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between h-40 text-[#0A0A0A]">
+                <div className="flex items-center justify-between text-[#0A0A0A] mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider">MRR</span>
+                  <div className="p-1.5 rounded-xl bg-white border border-[#0A0A0A] text-[#0A0A0A]">
                     <TrendingUp size={15} />
                   </div>
                 </div>
                 <div>
                   <div className="flex items-baseline justify-between leading-none">
-                    <div className="text-2xl font-black text-slate-900">
+                    <div className="text-2xl font-black text-[#0A0A0A]">
                       ${(stats?.mrr ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
-                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded-lg font-mono shrink-0">
+                    <span className="text-[11px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-2 py-0.5 rounded-lg font-mono shrink-0">
                       {stats?.mrrChange}
                     </span>
                   </div>
-                  <div className="text-[10px] text-slate-500 font-bold mt-2.5">
+                  <div className="text-[10px] text-slate-700 font-bold mt-2.5">
                     {t('admin.mrr_description')}
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 p-5 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-40">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold text-slate-500">LTV</span>
-                  <div className="p-1.5 rounded-xl bg-amber-50 text-amber-600">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] p-5 rounded-3xl shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between h-40 text-[#0A0A0A]">
+                <div className="flex items-center justify-between text-[#0A0A0A] mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider">LTV</span>
+                  <div className="p-1.5 rounded-xl bg-white border border-[#0A0A0A] text-[#0A0A0A]">
                     <DollarSign size={15} />
                   </div>
                 </div>
                 <div>
                   <div className="flex items-baseline justify-between leading-none">
-                    <div className="text-2xl font-black text-slate-900">
+                    <div className="text-2xl font-black text-[#0A0A0A]">
                       ${(stats?.ltv ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
-                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded-lg font-mono shrink-0">
+                    <span className="text-[11px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-2 py-0.5 rounded-lg font-mono shrink-0">
                       {stats?.ltvChange}
                     </span>
                   </div>
-                  <div className="text-[10px] text-slate-500 font-bold mt-2.5">
+                  <div className="text-[10px] text-slate-700 font-bold mt-2.5">
                     {t('admin.ltv_description')}
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 p-5 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-40">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold text-slate-500">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] p-5 rounded-3xl shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between h-40 text-[#0A0A0A]">
+                <div className="flex items-center justify-between text-[#0A0A0A] mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider">
                     {t('admin.plan_distribution')}
                   </span>
-                  <div className="p-1.5 rounded-xl bg-slate-50 text-slate-600">
+                  <div className="p-1.5 rounded-xl bg-white border border-[#0A0A0A] text-[#0A0A0A]">
                     <CreditCard size={15} />
                   </div>
                 </div>
@@ -1050,10 +1050,10 @@ export const AdminStatsPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full">
-              <div className={`${isManager ? 'lg:col-span-4' : 'lg:col-span-3'} bg-white border border-slate-200 rounded-3xl p-6 shadow-sm`}>
+              <div className={`${isManager ? 'lg:col-span-4' : 'lg:col-span-3'} bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[4px_4px_0px_#0A0A0A] text-[#0A0A0A]`}>
                 <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
-                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 shrink-0">
-                    <TrendingUp size={18} className="text-indigo-600" />
+                  <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] flex items-center gap-2 shrink-0">
+                    <TrendingUp size={18} className="text-[#0A0A0A]" />
                     <span>{t('admin.registration_trend')}</span>
                   </h3>
 
@@ -1064,10 +1064,10 @@ export const AdminStatsPage: React.FC = () => {
                         <button
                           key={cfg.key}
                           onClick={() => setVisibleMetrics(prev => ({ ...prev, [cfg.key]: !prev[cfg.key] }))}
-                          className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border transition-all ${isActive ? 'bg-slate-50 border-slate-200 text-slate-700 shadow-2xs' : 'border-transparent text-slate-400 opacity-50 hover:opacity-75'}`}
+                          className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border-2 border-[#0A0A0A] transition-all cursor-pointer ${isActive ? 'bg-white text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]' : 'bg-transparent text-slate-500 opacity-60 hover:opacity-100'}`}
                         >
                           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: cfg.color }}></span>
-                          <span className={isActive ? '' : 'line-through'}>{cfg.label}</span>
+                          <span className={isActive ? 'font-black' : 'line-through'}>{cfg.label}</span>
                         </button>
                       );
                     })}
@@ -1078,58 +1078,58 @@ export const AdminStatsPage: React.FC = () => {
               </div>
 
               {!isManager && (
-                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
                   <div>
-                    <h3 className="text-base font-bold text-slate-900 mb-6 flex items-center gap-2">
-                      <Server size={18} className="text-emerald-600" />
+                    <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] mb-6 flex items-center gap-2">
+                      <Server size={18} className="text-[#0A0A0A]" />
                       <span>{t('admin.server_status')}</span>
                     </h3>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                        <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
-                          <span className={`w-2 h-2 rounded-full ${stats?.serverHealth?.dbHealthy !== false ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
+                        <div className="flex items-center space-x-2 text-xs font-bold text-[#0A0A0A]">
+                          <span className={`w-2.5 h-2.5 rounded-full border border-[#0A0A0A] ${stats?.serverHealth?.dbHealthy !== false ? 'bg-emerald-400' : 'bg-rose-500'}`}></span>
                           <span>PostgreSQL Database</span>
                         </div>
-                        <span className={`text-[11px] font-mono font-bold flex items-center ${stats?.serverHealth?.dbHealthy !== false ? 'text-emerald-600' : 'text-red-600'}`}>
+                        <span className={`text-[11px] font-mono font-black uppercase flex items-center ${stats?.serverHealth?.dbHealthy !== false ? 'text-emerald-700' : 'text-rose-700'}`}>
                           <CheckCircle2 size={13} className="mr-1" /> {stats?.serverHealth?.dbStatus || 'Connected'}
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                        <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
-                          <span className={`w-2 h-2 rounded-full ${stats?.serverHealth?.telegramHealthy !== false ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
+                        <div className="flex items-center space-x-2 text-xs font-bold text-[#0A0A0A]">
+                          <span className={`w-2.5 h-2.5 rounded-full border border-[#0A0A0A] ${stats?.serverHealth?.telegramHealthy !== false ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
                           <span>Telegram Bot Engine</span>
                         </div>
-                        <span className="text-[11px] font-mono font-bold text-emerald-600 flex items-center">
+                        <span className="text-[11px] font-mono font-black uppercase text-emerald-700 flex items-center">
                           <CheckCircle2 size={13} className="mr-1" /> {stats?.serverHealth?.telegramStatus || 'Polling Active'}
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                        <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
+                        <div className="flex items-center space-x-2 text-xs font-bold text-[#0A0A0A]">
+                          <span className="w-2.5 h-2.5 rounded-full border border-[#0A0A0A] bg-emerald-400"></span>
                           <span>AI Provider Pipeline</span>
                         </div>
-                        <span className="text-[11px] font-mono font-bold text-emerald-600 flex items-center">
+                        <span className="text-[11px] font-mono font-black uppercase text-emerald-700 flex items-center">
                           <CheckCircle2 size={13} className="mr-1" /> {stats?.serverHealth?.aiStatus || 'Operational'}
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                        <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
+                        <div className="flex items-center space-x-2 text-xs font-bold text-[#0A0A0A]">
+                          <span className="w-2.5 h-2.5 rounded-full border border-[#0A0A0A] bg-emerald-400"></span>
                           <span>Broadcast Engine</span>
                         </div>
-                        <span className="text-[11px] font-mono font-bold text-emerald-600 flex items-center">
+                        <span className="text-[11px] font-mono font-black uppercase text-emerald-700 flex items-center">
                           <CheckCircle2 size={13} className="mr-1" /> {stats?.serverHealth?.broadcastStatus || 'Ready'}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] font-bold text-slate-400 flex items-center justify-between">
+                  <div className="mt-6 pt-4 border-t-2 border-[#0A0A0A] text-[11px] font-black uppercase text-[#0A0A0A] flex items-center justify-between">
                     <span>EU-Central (Frankfurt)</span>
-                    <span className="font-mono text-indigo-600">v1.4.0-admin</span>
+                    <span className="font-mono text-[#0A0A0A]">v1.4.0-admin</span>
                   </div>
                 </div>
               )}
@@ -1143,56 +1143,52 @@ export const AdminStatsPage: React.FC = () => {
                 background: transparent;
               }
               .custom-scrollbar::-webkit-scrollbar-thumb {
-                background: #cbd5e1;
+                background: #0A0A0A;
                 border-radius: 4px;
-              }
-              .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                background: #94a3b8;
               }
             `}</style>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full mt-6">
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                      <Workflow size={18} className="text-indigo-600" />
+                    <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] flex items-center gap-2">
+                      <Workflow size={18} className="text-[#0A0A0A]" />
                       <span>{t('admin.integrations_title')}</span>
                     </h3>
-                    <div className="flex items-center space-x-2 text-slate-400">
-                      <button className="px-2.5 py-1 bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-all flex items-center gap-1">
+                    <div className="flex items-center space-x-2 text-[#0A0A0A]">
+                      <button className="px-2.5 py-1 bg-white border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[10px] font-black uppercase transition-all flex items-center gap-1 cursor-pointer">
                         <span>{t('admin.explore_more')}</span>
                       </button>
                     </div>
                   </div>
 
                   <div className="overflow-y-auto max-h-[275px] pr-1.5 custom-scrollbar">
-                    <table className="w-full text-xs font-bold text-slate-600">
+                    <table className="w-full text-xs font-bold text-[#0A0A0A]">
                       <thead>
-                        <tr className="border-b border-slate-100 text-slate-400 font-extrabold text-[10px] uppercase tracking-wider text-left sticky top-0 bg-white z-10">
-                          <th className="pb-3 w-1/2 bg-white sticky top-0">{t('admin.name_col')}</th>
-                          <th className="pb-3 text-right bg-white sticky top-0">{t('admin.usage_col')}</th>
-                          <th className="pb-3 text-right bg-white sticky top-0">{t('admin.change_pct_col')}</th>
+                        <tr className="border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-black text-[10px] uppercase tracking-wider text-left sticky top-0 bg-[#F2EBDD] z-10">
+                          <th className="pb-3 w-1/2 bg-[#F2EBDD] sticky top-0">{t('admin.name_col')}</th>
+                          <th className="pb-3 text-right bg-[#F2EBDD] sticky top-0">{t('admin.usage_col')}</th>
+                          <th className="pb-3 text-right bg-[#F2EBDD] sticky top-0">{t('admin.change_pct_col')}</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-50">
+                      <tbody className="divide-y divide-[#0A0A0A]/20">
                         {stats?.integrationsPopularity?.map((item, idx) => {
-                          const isPositive = item.change.startsWith('+');
                           return (
-                            <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                            <tr key={idx} className="hover:bg-white transition-colors">
                               <td className="py-3 flex items-center space-x-2.5">
-                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: idx === 0 ? '#10b981' : idx === 1 ? '#6366f1' : idx === 2 ? '#f59e0b' : idx === 3 ? '#ef4444' : '#64748b' }} />
-                                <span className="text-slate-800 font-semibold">{item.name}</span>
+                                <span className="w-2 h-2 rounded-full border border-[#0A0A0A]" style={{ backgroundColor: idx === 0 ? '#10b981' : idx === 1 ? '#6366f1' : idx === 2 ? '#f59e0b' : idx === 3 ? '#ef4444' : '#64748b' }} />
+                                <span className="text-[#0A0A0A] font-black">{item.name}</span>
                               </td>
-                              <td className="py-3 text-right text-slate-900 font-mono font-bold">
+                              <td className="py-3 text-right text-[#0A0A0A] font-mono font-black">
                                 {item.count.toLocaleString()}
                               </td>
                               <td className="py-3 text-right">
                                 <div className="flex flex-col items-end">
-                                  <span className={isPositive ? 'text-emerald-600 font-mono' : 'text-red-500 font-mono'}>
+                                  <span className="font-mono font-black text-[#0A0A0A]">
                                     {item.change}
                                   </span>
-                                  <span className="text-[9px] text-slate-400">
+                                  <span className="text-[9px] font-bold text-slate-700">
                                     {item.percentage}% {t('admin.of_total')}
                                   </span>
                                 </div>
@@ -1206,32 +1202,31 @@ export const AdminStatsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                      <Users size={18} className="text-sky-600" />
+                    <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] flex items-center gap-2">
+                      <Users size={18} className="text-[#0A0A0A]" />
                       <span>{t('admin.client_geo_title')}</span>
                     </h3>
-                    <div className="flex items-center space-x-2 text-slate-400">
-                      <button className="px-2.5 py-1 bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-all flex items-center gap-1">
+                    <div className="flex items-center space-x-2 text-[#0A0A0A]">
+                      <button className="px-2.5 py-1 bg-white border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[10px] font-black uppercase transition-all flex items-center gap-1 cursor-pointer">
                         <span>{t('admin.explore_more')}</span>
                       </button>
                     </div>
                   </div>
 
                   <div className="overflow-y-auto max-h-[275px] pr-1.5 custom-scrollbar">
-                    <table className="w-full text-xs font-bold text-slate-600">
+                    <table className="w-full text-xs font-bold text-[#0A0A0A]">
                       <thead>
-                        <tr className="border-b border-slate-100 text-slate-400 font-extrabold text-[10px] uppercase tracking-wider text-left sticky top-0 bg-white z-10">
-                          <th className="pb-3 w-1/2 bg-white sticky top-0">{t('admin.country_col')}</th>
-                          <th className="pb-3 text-right bg-white sticky top-0">{t('admin.subscribers_col')}</th>
-                          <th className="pb-3 text-right bg-white sticky top-0">{t('admin.change_pct_col')}</th>
+                        <tr className="border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-black text-[10px] uppercase tracking-wider text-left sticky top-0 bg-[#F2EBDD] z-10">
+                          <th className="pb-3 w-1/2 bg-[#F2EBDD] sticky top-0">{t('admin.country_col')}</th>
+                          <th className="pb-3 text-right bg-[#F2EBDD] sticky top-0">{t('admin.subscribers_col')}</th>
+                          <th className="pb-3 text-right bg-[#F2EBDD] sticky top-0">{t('admin.change_pct_col')}</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-50">
+                      <tbody className="divide-y divide-[#0A0A0A]/20">
                         {stats?.geographyAndLanguages?.map((item, idx) => {
-                          const isPositive = item.change.startsWith('+');
                           const countryNameMap: Record<string, string> = {
                             'Ukraine': t('admin.country_ukraine'),
                             'United States': t('admin.country_usa'),
@@ -1240,22 +1235,22 @@ export const AdminStatsPage: React.FC = () => {
                             'Other': t('admin.country_other'),
                           };
                           return (
-                            <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                            <tr key={idx} className="hover:bg-white transition-colors">
                               <td className="py-3 flex items-center space-x-2.5">
-                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.name === 'Ukraine' ? '#0284c7' : item.name === 'United States' ? '#ef4444' : item.name === 'Poland' ? '#d946ef' : item.name === 'Germany' ? '#10b981' : '#64748b' }} />
-                                <span className="text-slate-800 font-semibold">
+                                <span className="w-2 h-2 rounded-full border border-[#0A0A0A]" style={{ backgroundColor: item.name === 'Ukraine' ? '#0284c7' : item.name === 'United States' ? '#ef4444' : item.name === 'Poland' ? '#d946ef' : item.name === 'Germany' ? '#10b981' : '#64748b' }} />
+                                <span className="text-[#0A0A0A] font-black">
                                   {countryNameMap[item.name] || item.name}
                                 </span>
                               </td>
-                              <td className="py-3 text-right text-slate-900 font-mono font-bold">
+                              <td className="py-3 text-right text-[#0A0A0A] font-mono font-black">
                                 {item.count.toLocaleString()}
                               </td>
                               <td className="py-3 text-right">
                                 <div className="flex flex-col items-end">
-                                  <span className={isPositive ? 'text-emerald-600 font-mono' : 'text-red-500 font-mono'}>
+                                  <span className="font-mono font-black text-[#0A0A0A]">
                                     {item.change}
                                   </span>
-                                  <span className="text-[9px] text-slate-400">
+                                  <span className="text-[9px] font-bold text-slate-700">
                                     {item.percentage}% {t('admin.of_total')}
                                   </span>
                                 </div>
@@ -1272,20 +1267,20 @@ export const AdminStatsPage: React.FC = () => {
 
             {!isManager && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full mt-6">
-                <div className="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+                <div className="lg:col-span-2 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                        <Activity size={18} className="text-indigo-600 animate-pulse" />
+                      <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] flex items-center gap-2">
+                        <Activity size={18} className="text-[#0A0A0A] animate-pulse" />
                         <span>{t('admin.error_latency_title').replace(/\s*\(.*\)/g, '')}</span>
                       </h3>
-                      <div className="flex items-center gap-3.5 text-[10px] font-bold text-slate-500">
+                      <div className="flex items-center gap-3.5 text-[10px] font-bold text-[#0A0A0A]">
                         <div className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#6366f1]" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#6366f1] border border-[#0A0A0A]" />
                           <span>{t('admin.latency') || 'Затримка'} (ms)</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#f43f5e]" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#f43f5e] border border-[#0A0A0A]" />
                           <span>{t('admin.error_rate') || 'Помилки'} (%)</span>
                         </div>
                       </div>
@@ -1294,23 +1289,23 @@ export const AdminStatsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[4px_4px_0px_#0A0A0A] flex flex-col justify-between text-[#0A0A0A]">
                   <div className="flex flex-col h-full justify-between">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                        <MessageSquare size={18} className="text-slate-600" />
+                      <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] flex items-center gap-2">
+                        <MessageSquare size={18} className="text-[#0A0A0A]" />
                         <span>{t('admin.latest_logs_title')}</span>
                       </h3>
                       <button
                         onClick={() => navigate('/admin/logs')}
-                        className="px-2.5 py-1 bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-all"
+                        className="px-2.5 py-1 bg-white border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer"
                       >
                         {t('admin.explore_more')}
                       </button>
                     </div>
-                    <div className="flex-1 bg-slate-50/70 border border-slate-100/60 rounded-2xl p-4 font-mono text-[10.5px] text-slate-700 max-h-[210px] overflow-y-auto custom-scrollbar flex flex-col gap-2">
+                    <div className="flex-1 bg-white border-2 border-[#0A0A0A] rounded-2xl p-4 font-mono text-[10.5px] text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] max-h-[210px] overflow-y-auto custom-scrollbar flex flex-col gap-2">
                       {(!stats?.latestLogs || stats.latestLogs.length === 0) ? (
-                        <div className="flex items-center justify-center h-full text-slate-400 font-bold py-10">
+                        <div className="flex items-center justify-center h-full text-slate-700 font-bold py-10">
                           No system logs found
                         </div>
                       ) : (
@@ -1319,19 +1314,19 @@ export const AdminStatsPage: React.FC = () => {
                           const isWarn = log.level === 'WARN';
                           const timeStr = log.timestamp ? log.timestamp.split('T')[1]?.substring(0, 8) || '' : '';
                           return (
-                            <div key={idx} className="flex items-start gap-2 hover:bg-slate-100/60 p-2 rounded-xl border border-slate-100/30 transition-all shadow-2xs bg-white">
-                              <span className="text-slate-400 shrink-0 select-none font-bold">[{timeStr}]</span>
-                              <span className={`shrink-0 select-none text-[9px] px-1.5 py-0.5 rounded-md font-extrabold border ${
-                                isError ? 'bg-red-50 text-red-700 border-red-200/50' : 
-                                isWarn ? 'bg-amber-50 text-amber-700 border-amber-200/50' : 
-                                'bg-emerald-50 text-emerald-700 border-emerald-200/50'
+                            <div key={idx} className="flex items-start gap-2 hover:bg-[#F2EBDD] p-2 rounded-xl border border-[#0A0A0A] transition-all bg-white">
+                              <span className="text-slate-700 shrink-0 select-none font-bold">[{timeStr}]</span>
+                              <span className={`shrink-0 select-none text-[9px] px-1.5 py-0.5 rounded-md font-black border border-[#0A0A0A] uppercase ${
+                                isError ? 'bg-rose-200 text-rose-950' : 
+                                isWarn ? 'bg-amber-200 text-amber-950' : 
+                                'bg-emerald-200 text-emerald-950'
                               }`}>
                                 {log.level}
                               </span>
-                              <span className="bg-slate-100 text-slate-600 text-[9px] px-1.5 py-0.5 rounded-md font-extrabold border border-slate-200/40 shrink-0 select-none">
+                              <span className="bg-[#F2EBDD] text-[#0A0A0A] text-[9px] px-1.5 py-0.5 rounded-md font-black uppercase border border-[#0A0A0A] shrink-0 select-none">
                                 {log.service}
                               </span>
-                              <span className="text-slate-800 break-all font-semibold">{log.message}</span>
+                              <span className="text-[#0A0A0A] break-all font-bold">{log.message}</span>
                             </div>
                           );
                         })

@@ -32,7 +32,7 @@ export interface CanvasNode {
   type: CanvasNodeType;
   title: string;
   message: string;
-  x: number; // 2D canvas coordinates
+  x: number;
   y: number;
   buttons?: CanvasButton[];
   promoCode?: string;
@@ -94,12 +94,9 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
-  // Connection line coordinates state for SVG
   const [connectionLines, setConnectionLines] = useState<
     Array<{ id: string; fromX: number; fromY: number; toX: number; toY: number; isActive: boolean; isHovered: boolean }>
   >([]);
-
-  // Reset chat simulator when nodes structure changes initially or on reset
   const resetSimulation = () => {
     const startNode = nodes.find((n) => n.id === 'node-start') || nodes[0];
     if (startNode) {
@@ -120,12 +117,10 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
     resetSimulation();
   }, []);
 
-  // Scroll chat bottom
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory]);
 
-  // Recalculate connection lines between nodes for SVG rendering
   useEffect(() => {
     const calculateLines = () => {
       if (!canvasRef.current) return;
@@ -182,8 +177,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
       window.removeEventListener('resize', calculateLines);
     };
   }, [nodes, activeNodeId, hoveredButtonId]);
-
-  // Handle clicking inline button in Telegram preview
   const handleButtonClickInChat = (btn: CanvasButton) => {
     const targetNode = nodes.find((n) => n.id === btn.targetNodeId);
 
@@ -208,8 +201,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
       }, 350);
     }
   };
-
-  // Add new node to canvas
   const handleAddNode = (type: CanvasNodeType) => {
     const newId = 'node-' + Date.now();
     const count = nodes.length + 1;
@@ -241,8 +232,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
     };
 
     setNodes((prev) => [...prev, newNode]);
-
-    // Automatically link to start node if start node has buttons
     setNodes((prev) =>
       prev.map((n) => {
         if (n.id === 'node-start') {
@@ -259,14 +248,11 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
     );
   };
 
-  // Delete node
   const handleDeleteNode = (id: string) => {
     if (id === 'node-start') return;
     setNodes((prev) => prev.filter((n) => n.id !== id));
     if (activeNodeId === id) setActiveNodeId('node-start');
   };
-
-  // Update node properties
   const handleUpdateNodeMessage = (id: string, message: string) => {
     setNodes((prev) => prev.map((n) => (n.id === id ? { ...n, message } : n)));
   };
@@ -332,7 +318,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
     );
   };
 
-  // Custom user message in chat input
   const handleSendCustomInput = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customInput.trim()) return;
@@ -362,7 +347,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
       className="py-20 md:py-28 bg-[#F2EBDD] border-b-4 border-[#0A0A0A] px-4 sm:px-6 lg:px-12 relative z-10"
     >
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
         <div className="text-left mb-10 border-l-8 border-[#0A0A0A] pl-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded mb-3 shadow-[2px_2px_0px_#0A0A0A]">
             <Sparkles size={14} className="text-amber-400" />
@@ -378,8 +362,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
             )}
           </p>
         </div>
-
-        {/* Floating Add Node Palette */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-[#0A0A0A] text-[#F2EBDD] p-3 sm:p-4 rounded-xl border-3 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A]">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-['JetBrains_Mono',monospace] text-xs font-black uppercase text-amber-400 flex items-center gap-1 mr-2">
@@ -429,9 +411,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
           </button>
         </div>
 
-        {/* 2-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column (7 cols): Visual Graph Canvas */}
           <div className="lg:col-span-7">
             <div className="flex items-center justify-between px-2 mb-2 font-['JetBrains_Mono',monospace] text-xs font-black uppercase text-[#0A0A0A]">
               <span className="flex items-center gap-1.5">
@@ -443,13 +423,10 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
               </span>
             </div>
 
-            {/* Dark Graph Canvas Container */}
             <div
               ref={canvasRef}
               className="relative min-h-[560px] sm:min-h-[620px] bg-[#0E1726] border-4 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] rounded-2xl p-4 sm:p-6 overflow-x-auto overflow-y-visible [background-image:radial-gradient(#2d3c52_1.5px,transparent_1.5px)] [background-size:20px_20px]"
-            >
-              {/* SVG Connecting Lines Overlay */}
-              <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+            ><svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
                 <defs>
                   <marker
                     id="arrow-active"
@@ -499,7 +476,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                 })}
               </svg>
 
-              {/* 2D Canvas Node Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-20">
                 {nodes.map((node) => {
                   const isActive = node.id === activeNodeId;
@@ -513,7 +489,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                           : 'shadow-[4px_4px_0px_#0A0A0A] hover:shadow-[6px_6px_0px_#0A0A0A]'
                       }`}
                     >
-                      {/* Left Target Handle Port (Input) */}
                       <div
                         id={`node-port-${node.id}`}
                         className={`absolute -left-3 top-6 w-5 h-5 rounded-full border-2 border-[#0A0A0A] flex items-center justify-center text-[9px] font-mono font-bold shadow ${
@@ -524,7 +499,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                         ●
                       </div>
 
-                      {/* Card Top Bar */}
                       <div className="flex items-center justify-between border-b-2 border-slate-100 pb-2 mb-3">
                         <div className="flex items-center gap-2">
                           <div
@@ -562,8 +536,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                           </button>
                         )}
                       </div>
-
-                      {/* Card Content Body */}
                       <div className="space-y-3">
                         <div>
                           <label className="block text-[10px] font-['JetBrains_Mono',monospace] font-bold text-slate-500 uppercase mb-1">
@@ -576,16 +548,12 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                             className="w-full p-2 bg-slate-50 border border-[#0A0A0A] font-sans text-xs font-medium text-[#0A0A0A] rounded-lg focus:bg-white outline-none resize-none"
                           />
                         </div>
-
-                        {/* Promo Code tag */}
                         {node.promoCode && (
                           <div className="p-1.5 bg-amber-50 border border-amber-300 rounded text-[11px] font-mono font-bold text-amber-900 flex items-center justify-between">
                             <span>Промокод:</span>
                             <code className="bg-amber-200 px-1 rounded">{node.promoCode}</code>
                           </div>
                         )}
-
-                        {/* Buttons & Output Handles */}
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
                             <span className="text-[10px] font-['JetBrains_Mono',monospace] font-bold text-slate-500 uppercase">
@@ -638,8 +606,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                                   >
                                     <Trash2 size={12} />
                                   </button>
-
-                                  {/* Right Output Handle Port */}
                                   <div
                                     id={`btn-port-${btn.id}`}
                                     className="absolute -right-3 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-emerald-500 border border-[#0A0A0A] flex items-center justify-center text-[8px] text-white font-mono shadow"
@@ -662,7 +628,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column (5 cols): Telegram Phone Simulator */}
           <div className="lg:col-span-5 lg:sticky lg:top-24">
             <div className="flex items-center justify-between px-2 mb-2 font-['JetBrains_Mono',monospace] text-xs font-black uppercase text-[#0A0A0A]">
               <span className="flex items-center gap-1">
@@ -675,14 +640,9 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
               </span>
             </div>
 
-            {/* Smartphone Outer Frame */}
             <div className="bg-[#0A0A0A] p-3 sm:p-4 rounded-[36px] shadow-[10px_10px_0px_#0A0A0A] border-4 border-[#0A0A0A] relative overflow-hidden">
-              {/* Notch */}
               <div className="w-32 h-4 bg-[#0A0A0A] mx-auto rounded-b-xl mb-2 relative z-20"></div>
-
-              {/* Telegram App Interface */}
               <div className="bg-[#0e1621] rounded-[24px] overflow-hidden flex flex-col h-[520px] sm:h-[580px] border border-slate-700 relative z-10">
-                {/* Telegram Header */}
                 <div className="bg-[#17212b] px-4 py-3 border-b border-slate-800 flex items-center justify-between shrink-0">
                   <div className="flex items-center gap-3">
                     <div className="relative">
@@ -711,7 +671,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Telegram Chat Wallpaper & Messages Feed */}
                 <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#0e1621] bg-[radial-gradient(#1c2938_1px,transparent_1px)] [background-size:12px_12px]">
                   <div className="text-center my-1">
                     <span className="px-2.5 py-1 bg-[#182533]/80 text-slate-400 text-[10px] font-bold rounded-full border border-slate-700/50">
@@ -726,7 +685,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                         item.sender === 'user' ? 'items-end' : 'items-start'
                       } space-y-1.5 animate-fadeIn`}
                     >
-                      {/* Message Bubble */}
                       <div
                         className={`max-w-[85%] p-3 rounded-2xl text-xs sm:text-sm font-medium shadow-md leading-relaxed whitespace-pre-line ${
                           item.sender === 'user'
@@ -755,8 +713,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                           12:42
                         </div>
                       </div>
-
-                      {/* Bot Inline Buttons */}
                       {item.sender === 'bot' && item.buttons && item.buttons.length > 0 && (
                         <div className="w-[85%] space-y-1.5 pt-1">
                           {item.buttons.map((btn) => (
@@ -779,8 +735,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
 
                   <div ref={chatBottomRef} />
                 </div>
-
-                {/* Telegram Chat Input Footer */}
                 <form
                   onSubmit={handleSendCustomInput}
                   className="bg-[#17212b] p-2.5 border-t border-slate-800 flex items-center gap-2 shrink-0"
@@ -808,8 +762,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                   </button>
                 </form>
               </div>
-
-              {/* Bottom Phone Bar */}
               <div className="w-28 h-1 bg-slate-700 mx-auto rounded-full mt-2"></div>
             </div>
 

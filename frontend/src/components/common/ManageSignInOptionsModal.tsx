@@ -45,7 +45,6 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
           onClick={(e) => e.stopPropagation()}
           className="relative w-full max-w-xl p-6 md:p-8 bg-[#F2EBDD] rounded-3xl border-2 border-[#0A0A0A] shadow-[8px_8px_0px_0px_#0A0A0A] transform transition-all animate-in fade-in zoom-in-95 duration-200 cursor-default"
         >
-          {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b-2 border-[#0A0A0A] mb-6">
             <div>
               <h2 className="font-['Anybody',sans-serif] text-lg font-black text-[#0A0A0A] uppercase tracking-tight">
@@ -63,9 +62,7 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
             </button>
           </div>
 
-          {/* Options */}
           <div className="space-y-4">
-            {/* Google */}
             <div className="flex items-center justify-between p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#F2EBDD] border-2 border-[#0A0A0A] shrink-0">
@@ -102,8 +99,6 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
                 </button>
               )}
             </div>
-
-            {/* Telegram */}
             <div className="flex items-center justify-between p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-sky-100 border-2 border-[#0A0A0A] text-sky-600 shrink-0">

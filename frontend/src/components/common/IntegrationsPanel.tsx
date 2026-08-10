@@ -64,10 +64,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId, onO
 
   return (
     <div className="space-y-8 pb-10">
-      {/* 1. Google Sheets Integration */}
       <GoogleSheetsCard botId={botId} integration={googleIntegration} />
-
-      {/* 2. Hotmart Integration */}
       <PremiumIntegrationCard
         title={t('settings.integrations.hotmart.title')}
         name="Hotmart"
@@ -81,9 +78,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId, onO
         integration={hotmartIntegration}
         onUpgrade={handleUpgradeClick}
       />
-
-      {/* 3. ChatGPT Integration */}
-      <PremiumIntegrationCard
+        <PremiumIntegrationCard
         title={t('settings.integrations.chatgpt.title')}
         name="ChatGPT"
         description={t('settings.integrations.chatgpt.desc')}
@@ -99,9 +94,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId, onO
         integration={chatgptIntegration}
         onUpgrade={handleUpgradeClick}
       />
-
-      {/* 4. Claude Integration */}
-      <PremiumIntegrationCard
+        <PremiumIntegrationCard
         title={t('settings.integrations.claude.title')}
         name="Claude"
         description={t('settings.integrations.claude.desc')}
@@ -112,9 +105,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId, onO
         integration={claudeIntegration}
         onUpgrade={handleUpgradeClick}
       />
-
-      {/* 5. DeepSeek Integration */}
-      <PremiumIntegrationCard
+        <PremiumIntegrationCard
         title={t('settings.integrations.deepseek.title')}
         name="DeepSeek"
         description={t('settings.integrations.deepseek.desc')}
@@ -129,9 +120,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId, onO
         integration={deepseekIntegration}
         onUpgrade={handleUpgradeClick}
       />
-
-      {/* 6. Gemini Integration */}
-      <PremiumIntegrationCard
+        <PremiumIntegrationCard
         title={t('settings.integrations.gemini.title')}
         name="Gemini"
         description={t('settings.integrations.gemini.desc')}
@@ -142,9 +131,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId, onO
         integration={geminiIntegration}
         onUpgrade={handleUpgradeClick}
       />
-
-      {/* 7. MailChimp Integration */}
-      <PremiumIntegrationCard
+        <PremiumIntegrationCard
         title={t('settings.integrations.mailchimp.title')}
         name="MailChimp"
         description={t('settings.integrations.mailchimp.desc')}
@@ -154,9 +141,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId, onO
         integration={mailchimpIntegration}
         onUpgrade={handleUpgradeClick}
       />
-
-      {/* 8. HubSpot CRM Integration */}
-      <PremiumIntegrationCard
+        <PremiumIntegrationCard
         title={t('settings.integrations.hubspot.title')}
         name="HubSpot CRM"
         description={t('settings.integrations.hubspot.desc')}

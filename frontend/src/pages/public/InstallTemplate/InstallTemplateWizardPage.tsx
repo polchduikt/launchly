@@ -80,11 +80,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F2EBDD] font-['JetBrains_Mono',monospace] text-[#0A0A0A] flex flex-col">
-      
-      {/* Landing Navbar in simple mode */}
       <PublicHeader simple redirectUrl={shareCode ? `/templates/install/${shareCode}` : undefined} />
-
-      {/* Template Header Banner */}
       <div className="w-full bg-[#F2EBDD] py-6 px-4 text-center">
         <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest block mb-1">
           {t('template.install.top_header', 'Встановлення шаблону')}
@@ -101,11 +97,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
           </p>
         )}
       </div>
-
-      {/* Main Container */}
       <main className="max-w-4xl w-full mx-auto p-6 space-y-6 flex-1">
-
-        {/* Wizard Progress Steps */}
         <div className="flex items-center justify-center gap-8 bg-white border-2 border-[#0A0A0A] p-4 shadow-[2px_2px_0px_#0A0A0A]">
           <div className="flex items-center gap-2.5">
             <div className={`w-7 h-7 border border-[#0A0A0A] flex items-center justify-center text-xs font-black ${installStep >= 1 ? 'bg-emerald-400 text-[#0A0A0A]' : 'bg-slate-100 text-slate-400'}`}>
@@ -275,8 +267,6 @@ export const InstallTemplateWizardPage: React.FC = () => {
                   </div>
                 )}
               </div>
-
-              {/* Right Card: About & Installation Steps */}
               <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[2px_2px_0px_#0A0A0A] space-y-5">
                 <h3 className="font-black text-xs uppercase text-[#0A0A0A] border-b-2 border-[#0A0A0A] pb-3">
                   {t('template.install.info_title', 'Інформація про встановлення')}
@@ -329,8 +319,6 @@ export const InstallTemplateWizardPage: React.FC = () => {
               </div>
 
             </div>
-
-            {/* Direct Action */}
             {isAuthenticated ? (
               <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[2px_2px_0px_#0A0A0A] text-center space-y-4">
                 {errorMsg && (

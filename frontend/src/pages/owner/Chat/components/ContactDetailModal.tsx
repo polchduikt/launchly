@@ -136,9 +136,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
         onClick={(e) => e.stopPropagation()}
         className="bg-[#F2EBDD] rounded-3xl border-2 border-[#0A0A0A] w-full max-w-4xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] cursor-default"
       >
-        {/* ── LEFT PANEL ── */}
         <div className="w-full md:w-[280px] border-r-2 border-[#0A0A0A] flex flex-col bg-[#F2EBDD] shrink-0">
-          {/* Avatar area */}
           <div className="p-6 flex flex-col items-center gap-4 border-b-2 border-[#0A0A0A]">
             <ContactAvatar photoUrl={selectedContact.photoUrl} name={selectedContact.firstName} size="lg" />
             <div className="text-center">
@@ -160,9 +158,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Info rows */}
           <div className="px-5 py-4 flex flex-col gap-3 border-b-2 border-[#0A0A0A]">
-            {/* Subscription */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {isUnsubscribed
@@ -179,15 +175,11 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
                 {isUnsubscribed ? t('crm.contact.subscribe') : t('crm.contact.unsubscribe')}
               </button>
             </div>
-
-            {/* Telegram ID */}
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black bg-[#0A0A0A] text-[#F2EBDD] px-1.5 py-0.5 rounded font-mono">ID</span>
               <span className="text-xs font-bold text-[#0A0A0A]">{selectedContact.telegramId}</span>
             </div>
           </div>
-
-          {/* Action buttons */}
           <div className="p-4 flex flex-col gap-2 mt-auto">
             <button
               onClick={() => handleUpdateContactMetadata({ ...meta, paused: !isPaused })}
@@ -208,10 +200,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
             </button>
           </div>
         </div>
-
-        {/* ── RIGHT PANEL ── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Header */}
           <div className="px-6 py-4 border-b-2 border-[#0A0A0A] flex items-center justify-between shrink-0">
             <span className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-tight">
               {t('crm.contact.details') || 'ДЕТАЛІ'}
@@ -239,7 +228,6 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
-            {/* Tags */}
             <section className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-wider">
@@ -312,11 +300,8 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
                 )}
               </div>
             </section>
-
-            {/* Divider */}
             <div className="border-t-2 border-[#0A0A0A]/10" />
 
-            {/* System fields */}
             <section className="space-y-3">
               <h3 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-wider">
                 {t('crm.contact.system_fields')}
@@ -348,10 +333,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
               </div>
             </section>
 
-            {/* Divider */}
             <div className="border-t-2 border-[#0A0A0A]/10" />
-
-            {/* Custom fields */}
             <section className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-wider">
