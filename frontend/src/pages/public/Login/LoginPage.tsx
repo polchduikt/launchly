@@ -8,8 +8,16 @@ import { GoogleLoginButton } from './components/GoogleLoginButton';
 import { TelegramLoginModal } from './components/TelegramLoginModal';
 import { GOOGLE_OAUTH_URL } from '../../../const/auth';
 import { t } from '../../../i18n/config';
+import { useSEO } from '../../../hooks/useSEO';
 
 const LoginPage: React.FC = () => {
+  useSEO({
+    title: t('seo.login.title', 'Sign In — Launchly'),
+    description: t('seo.login.description', 'Sign in to your Launchly workspace to manage your Telegram bots, automations, CRM, and broadcasts.'),
+    canonicalPath: '/login',
+    noindex: true,
+  });
+
   const { form, onSubmit, isPending, apiError } = useLoginForm();
   const { register, formState: { errors } } = form;
   const [showPassword, setShowPassword] = useState(false);

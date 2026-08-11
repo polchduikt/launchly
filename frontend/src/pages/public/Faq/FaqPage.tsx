@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from '../../../i18n/config';
+import { useSEO } from '../../../hooks/useSEO';
 import { PublicFooter } from '../../../components/layout/PublicFooter';
 import { PublicHeader } from '../../../components/layout/PublicHeader';
 import { FooterCTA } from '../../../components/layout/FooterCTA';
@@ -28,6 +29,24 @@ import {
 export const FaqPage: React.FC = () => {
   const location = useLocation();
   const { t } = useTranslation();
+
+  useSEO({
+    title: t('seo.faq.title', 'FAQ — Launchly Help Center & Node Documentation'),
+    description: t('seo.faq.description', 'Answers to frequently asked questions about Launchly: automation nodes, flow builder, AI assistants, billing, and security.'),
+    keywords: t('seo.faq.keywords', 'launchly faq, help center, telegram bot help, automation nodes guide'),
+    canonicalPath: '/faq',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        { '@type': 'Question', name: t('faq.g1.q', 'What is Launchly?'), acceptedAnswer: { '@type': 'Answer', text: t('faq.g1.a', 'Launchly is a no-code platform for building Telegram bots and automations.') } },
+        { '@type': 'Question', name: t('faq.g2.q', 'How do I get started?'), acceptedAnswer: { '@type': 'Answer', text: t('faq.g2.a', 'Sign up for free, connect your Telegram bot token, and start building your first flow.') } },
+        { '@type': 'Question', name: t('faq.b1.q', 'What is the Flow Builder?'), acceptedAnswer: { '@type': 'Answer', text: t('faq.b1.a', 'The Flow Builder is a drag-and-drop visual editor for creating automated chat scenarios.') } },
+        { '@type': 'Question', name: t('faq.a1.q', 'What AI models are supported?'), acceptedAnswer: { '@type': 'Answer', text: t('faq.a1.a', 'Launchly supports OpenAI, Gemini, DeepSeek, and Claude AI models.') } },
+        { '@type': 'Question', name: t('faq.m1.q', 'What payment methods are accepted?'), acceptedAnswer: { '@type': 'Answer', text: t('faq.m1.a', 'We accept Stripe and PayPal. All major credit cards are supported.') } },
+      ],
+    },
+  });
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

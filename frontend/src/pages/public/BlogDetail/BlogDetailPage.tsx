@@ -6,6 +6,7 @@ import { ArrowLeft, Share2, Calendar, User, Clock, Loader2, Check } from 'lucide
 import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../routes/paths';
 import { useTranslation } from '../../../i18n/config';
+import { useSEO } from '../../../hooks/useSEO';
 import { PublicFooter } from '../../../components/layout/PublicFooter';
 import logo from '../../../assets/images/logo.png';
 
@@ -18,6 +19,46 @@ export const BlogDetailPage: React.FC = () => {
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
   const { data: article = BLOG_ARTICLES.find((a) => a.id === id), isLoading } = useBlogArticleDetailQuery(id);
+
+  const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') ?? 'https://launchly.app';
+  useSEO({
+    title: article
+      ? `${article.title} — Launchly Blog`
+      : t('seo.blog.title', 'Launchly Blog — Telegram Automation Guides & Tips'),
+    description: article
+      ? article.summary
+      : t('seo.blog.description', 'Tutorials, product updates, and automation strategies.'),
+    keywords: article
+      ? article.tags.join(', ')
+      : t('seo.blog.keywords', 'telegram automation blog, chatbot tutorials, launchly'),
+    canonicalPath: `/blog/${id}`,
+    ogImage: article?.coverImage ?? `${SITE_URL}/og-image.png`,
+    ogType: 'article',
+    jsonLd: article
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          headline: article.title,
+          description: article.summary,
+          image: article.coverImage,
+          author: {
+            '@type': 'Person',
+            name: article.author,
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'Launchly',
+            url: `${SITE_URL}`,
+            logo: { '@type': 'ImageObject', url: `${SITE_URL}/favicon.ico` },
+          },
+          datePublished: article.date,
+          dateModified: article.date,
+          url: `${SITE_URL}/blog/${article.id}`,
+          mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/blog/${article.id}` },
+          keywords: article.tags.join(', '),
+        }
+      : undefined,
+  });
 
   const handleShareArticle = () => {
     navigator.clipboard.writeText(window.location.href);

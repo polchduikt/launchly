@@ -1,0 +1,28 @@
+User-agent: *
+
+Allow: /
+Allow: /blog
+Allow: /faq
+Allow: /terms
+Allow: /privacy
+Allow: /acceptable-use
+Allow: /ai-terms
+Allow: /payment-terms
+Disallow: /dashboard
+Disallow: /home
+Disallow: /chat
+Disallow: /contacts
+Disallow: /automations
+Disallow: /builder
+Disallow: /settings
+Disallow: /integrations
+Disallow: /broadcasts
+Disallow: /orders
+Disallow: /ai
+Disallow: /billing/
+Disallow: /connect-bot
+Disallow: /admin/
+Disallow: /templates/
+Disallow: /api/
+
+Sitemap: https://launchly.app/sitemap.xml

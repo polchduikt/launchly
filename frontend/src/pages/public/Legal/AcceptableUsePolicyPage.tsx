@@ -1,7 +1,24 @@
 import React from 'react';
 import { LegalLayout } from './LegalLayout';
+import { useSEO } from '../../../hooks/useSEO';
+import { useTranslation } from '../../../i18n/config';
 
 export const AcceptableUsePolicyPage: React.FC = () => {
+  const { t } = useTranslation();
+
+  useSEO({
+    title: t('seo.acceptable_use.title', 'Acceptable Use Policy — Launchly'),
+    description: t('seo.acceptable_use.description', 'Launchly Acceptable Use Policy: prohibited content, prohibited actions, and consequences for violations on the platform.'),
+    canonicalPath: '/acceptable-use',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: t('seo.acceptable_use.title', 'Acceptable Use Policy — Launchly'),
+      url: 'https://launchly.app/acceptable-use',
+      publisher: { '@type': 'Organization', name: 'Launchly', url: 'https://launchly.app' },
+    },
+  });
+
   return (
     <LegalLayout title="Acceptable Use Policy" effectiveDate="AUGUST 14, 2026">
       <p className="text-base font-medium text-slate-900 leading-relaxed">

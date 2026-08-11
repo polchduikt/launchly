@@ -1,7 +1,24 @@
 import React from 'react';
 import { LegalLayout } from './LegalLayout';
+import { useSEO } from '../../../hooks/useSEO';
+import { useTranslation } from '../../../i18n/config';
 
 export const AiTermsPage: React.FC = () => {
+  const { t } = useTranslation();
+
+  useSEO({
+    title: t('seo.ai_terms.title', 'AI Supplementary Terms — Launchly'),
+    description: t('seo.ai_terms.description', 'Terms governing the use of AI Assistant nodes, automated AI chat responses, and AI model integrations within the Launchly platform.'),
+    canonicalPath: '/ai-terms',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: t('seo.ai_terms.title', 'AI Supplementary Terms — Launchly'),
+      url: 'https://launchly.app/ai-terms',
+      publisher: { '@type': 'Organization', name: 'Launchly', url: 'https://launchly.app' },
+    },
+  });
+
   return (
     <LegalLayout title="AI Supplementary Terms" effectiveDate="AUGUST 14, 2026">
       <p className="text-base font-medium text-slate-900 leading-relaxed">

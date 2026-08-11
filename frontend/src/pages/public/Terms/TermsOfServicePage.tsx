@@ -1,7 +1,25 @@
 import React from 'react';
 import { LegalLayout } from '../Legal/LegalLayout';
+import { useSEO } from '../../../hooks/useSEO';
+import { useTranslation } from '../../../i18n/config';
 
 export const TermsOfServicePage: React.FC = () => {
+  const { t } = useTranslation();
+
+  useSEO({
+    title: t('seo.terms.title', 'Terms of Service — Launchly'),
+    description: t('seo.terms.description', 'Read the Launchly Terms of Service. Understand your rights, responsibilities, billing, and acceptable use of the platform.'),
+    canonicalPath: '/terms',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: t('seo.terms.title', 'Terms of Service — Launchly'),
+      description: t('seo.terms.description', 'Read the Launchly Terms of Service.'),
+      url: 'https://launchly.app/terms',
+      publisher: { '@type': 'Organization', name: 'Launchly', url: 'https://launchly.app' },
+    },
+  });
+
   return (
     <LegalLayout title="Launchly Terms of Service" effectiveDate="AUGUST 14, 2026">
       

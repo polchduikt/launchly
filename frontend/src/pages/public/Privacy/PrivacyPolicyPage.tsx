@@ -1,7 +1,25 @@
 import React from 'react';
 import { LegalLayout } from '../Legal/LegalLayout';
+import { useSEO } from '../../../hooks/useSEO';
+import { useTranslation } from '../../../i18n/config';
 
 export const PrivacyPolicyPage: React.FC = () => {
+  const { t } = useTranslation();
+
+  useSEO({
+    title: t('seo.privacy.title', 'Privacy Policy — Launchly'),
+    description: t('seo.privacy.description', 'Launchly privacy policy: how we collect, use, and protect your personal data in compliance with GDPR and privacy regulations.'),
+    canonicalPath: '/privacy',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: t('seo.privacy.title', 'Privacy Policy — Launchly'),
+      description: t('seo.privacy.description', 'Launchly privacy policy: how we collect, use, and protect your personal data.'),
+      url: 'https://launchly.app/privacy',
+      publisher: { '@type': 'Organization', name: 'Launchly', url: 'https://launchly.app' },
+    },
+  });
+
   return (
     <LegalLayout title="Launchly Privacy Policy" effectiveDate="AUGUST 14, 2026">
       

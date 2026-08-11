@@ -8,8 +8,16 @@ import { GoogleLoginButton } from '../Login/components/GoogleLoginButton';
 import { TelegramLoginModal } from '../Login/components/TelegramLoginModal';
 import { GOOGLE_OAUTH_URL } from '../../../const/auth';
 import { t } from '../../../i18n/config';
+import { useSEO } from '../../../hooks/useSEO';
 
 const RegisterPage: React.FC = () => {
+  useSEO({
+    title: t('seo.register.title', 'Create Account — Launchly'),
+    description: t('seo.register.description', 'Create your free Launchly account and start building Telegram bots and automation flows today.'),
+    canonicalPath: '/register',
+    noindex: true,
+  });
+
   const { form, onSubmit, isPending, apiError } = useRegisterForm();
   const { register, formState: { errors } } = form;
   const [searchParams] = useSearchParams();

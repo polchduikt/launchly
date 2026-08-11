@@ -1,7 +1,24 @@
 import React from 'react';
 import { LegalLayout } from './LegalLayout';
+import { useSEO } from '../../../hooks/useSEO';
+import { useTranslation } from '../../../i18n/config';
 
 export const PaymentTermsPage: React.FC = () => {
+  const { t } = useTranslation();
+
+  useSEO({
+    title: t('seo.payment_terms.title', 'Payment & Merchant Terms — Launchly'),
+    description: t('seo.payment_terms.description', 'Payment and merchant terms for Launchly: payment processing, Stripe and PayPal integration, subscription billing, and refund policy.'),
+    canonicalPath: '/payment-terms',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: t('seo.payment_terms.title', 'Payment & Merchant Terms — Launchly'),
+      url: 'https://launchly.app/payment-terms',
+      publisher: { '@type': 'Organization', name: 'Launchly', url: 'https://launchly.app' },
+    },
+  });
+
   return (
     <LegalLayout title="Payment & Merchant Terms" effectiveDate="AUGUST 14, 2026">
       <p className="text-base font-medium text-slate-900 leading-relaxed">

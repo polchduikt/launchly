@@ -4,6 +4,7 @@ import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../routes/paths';
 import { LAUNCHLY_PLANS } from '../../../const/plans';
 import { useTranslation } from '../../../i18n/config';
+import { useSEO } from '../../../hooks/useSEO';
 import { HeroInteractiveDemo } from './components/HeroInteractiveDemo';
 import { CountUpNumber } from './components/CountUpNumber';
 import { StickySolutionsSection } from './components/StickySolutionsSection';
@@ -39,6 +40,42 @@ export const LandingPage: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const { t } = useTranslation();
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
+
+  useSEO({
+    title: t('seo.landing.title', 'Launchly — No-Code Telegram Bot Automation & CRM Platform'),
+    description: t('seo.landing.description', 'Build Telegram chatbots, automate sales funnels, and manage leads without writing code.'),
+    keywords: t('seo.landing.keywords', 'telegram bot, no-code automation, chatbot builder, crm, launchly'),
+    canonicalPath: '/',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Launchly',
+        url: 'https://launchly.app',
+        description: t('seo.landing.description', 'Build Telegram chatbots, automate sales funnels, and manage leads without writing code.'),
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: 'https://launchly.app/blog?q={search_term_string}',
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'Launchly',
+        url: 'https://launchly.app',
+        logo: 'https://launchly.app/favicon.ico',
+        sameAs: [],
+        contactPoint: {
+          '@type': 'ContactPoint',
+          email: 'support@launchly.app',
+          contactType: 'customer support',
+        },
+      },
+    ],
+  });
+
+
 
   React.useEffect(() => {
     const id = window.location.hash.replace('#', '');

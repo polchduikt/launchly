@@ -1,0 +1,21 @@
+{
+  "name": "Launchly",
+  "short_name": "Launchly",
+  "description": "No-Code Telegram Bot Automation & CRM Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2EBDD",
+  "theme_color": "#0A0A0A",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"],
+  "lang": "uk",
+  "dir": "ltr"
+}

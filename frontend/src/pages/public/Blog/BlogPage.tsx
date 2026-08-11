@@ -6,6 +6,7 @@ import { ArrowRight, Calendar, ChevronLeft, ChevronRight, Zap, Workflow, Bot } f
 import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../routes/paths';
 import { useTranslation } from '../../../i18n/config';
+import { useSEO } from '../../../hooks/useSEO';
 import { PublicFooter } from '../../../components/layout/PublicFooter';
 import { PublicHeader } from '../../../components/layout/PublicHeader';
 
@@ -203,6 +204,26 @@ export const BlogPage: React.FC = () => {
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore((state) => !!state.accessToken);
   const { t } = useTranslation();
+
+  useSEO({
+    title: t('seo.blog.title', 'Launchly Blog — Telegram Automation Guides & Tips'),
+    description: t('seo.blog.description', 'Tutorials, product updates, automation strategies and guides for Telegram bot builders and no-code business owners.'),
+    keywords: t('seo.blog.keywords', 'telegram automation blog, chatbot tutorials, no-code guides, launchly blog'),
+    canonicalPath: '/blog',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'Blog',
+      name: 'Launchly Blog',
+      description: t('seo.blog.description', 'Tutorials, product updates, automation strategies and guides for Telegram bot builders.'),
+      url: 'https://launchly.app/blog',
+      publisher: {
+        '@type': 'Organization',
+        name: 'Launchly',
+        url: 'https://launchly.app',
+      },
+    },
+  });
+
   const [sliderIndex, setSliderIndex] = useState(0);
   const [showMore, setShowMore] = useState(false);
 
