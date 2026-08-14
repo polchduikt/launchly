@@ -18,5 +18,6 @@ public record UserResponse(
         int statsHour,
         int statsDaysRange,
         boolean statsNotifyEmail,
-        boolean statsNotifyTelegram
+        boolean statsNotifyTelegram,
+        String timezone
 ) {}

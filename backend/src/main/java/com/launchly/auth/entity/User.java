@@ -105,6 +105,10 @@ public class User extends BaseEntity {
     @Builder.Default
     private boolean statsNotifyTelegram = false;
 
+    @Column(name = "timezone")
+    @Builder.Default
+    private String timezone = "Europe/Kyiv";
+
     @JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(name = "automation_folders", columnDefinition = "jsonb")
     private String automationFolders;

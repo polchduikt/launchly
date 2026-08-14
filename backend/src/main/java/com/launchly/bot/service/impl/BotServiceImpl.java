@@ -24,6 +24,7 @@ import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
 import com.launchly.bot.repository.InstalledTemplateRepository;
+import com.launchly.bot.repository.AccountTemplateRepository;
 import com.launchly.bot.service.BotService;
 import com.launchly.bot.telegram.TelegramBotManager;
 import com.launchly.billing.service.PlanLimitService;
@@ -75,6 +76,7 @@ public class BotServiceImpl implements BotService {
     private final TagRepository tagRepository;
     private final BotMemberRepository botMemberRepository;
     private final InstalledTemplateRepository installedTemplateRepository;
+    private final AccountTemplateRepository accountTemplateRepository;
     private final UserAuditService userAuditService;
 
     @Override
@@ -247,6 +249,7 @@ public class BotServiceImpl implements BotService {
         }
 
         installedTemplateRepository.deleteAllByBotId(bot.getId());
+        accountTemplateRepository.detachSourceBot(bot.getId());
         botRepository.delete(bot);
     }
 

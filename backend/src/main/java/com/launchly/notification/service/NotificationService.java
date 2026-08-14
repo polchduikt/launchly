@@ -18,4 +18,6 @@ public interface NotificationService {
     UserResponse updateSettings(String email, UpdateNotificationSettingsRequest request);
 
     UserResponse unlinkTelegram(String email);
+
+    UserResponse updateTimezone(String email, String timezone);
 }

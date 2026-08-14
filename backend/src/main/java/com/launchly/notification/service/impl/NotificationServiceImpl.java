@@ -84,6 +84,16 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional
+    public UserResponse updateTimezone(String email, String timezone) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        user.setTimezone(timezone);
+        userRepository.save(user);
+        return authMapper.toUserResponse(user);
+    }
+
+    @Override
     @Async
     @Transactional(readOnly = true)
     public void sendAssignmentNotification(Long userId, Long botUserId) {
