@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useThemeStore } from '../../store/useThemeStore';
 import logoL from '../../assets/images/logo-l.png';
 import { NAV_ITEMS } from './config/navItems';
 import { useTranslation } from '../../i18n/config';
@@ -19,6 +20,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
   const { currentLanguage: language, changeLanguage, t } = useTranslation();
+  const { theme, setTheme } = useThemeStore();
   const logout = useAuthStore((state) => state.logout);
   const [showPricing, setShowPricing] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -30,6 +32,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
   const { data: contacts = [] } = useAllBotUsersQuery();
   const { data: subscription } = useSubscriptionQuery();
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    return () => {
+      document.documentElement.removeAttribute('data-theme');
+    };
+  }, [theme]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -54,7 +63,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const percentage = Math.min(100, Math.round((contactsCount / maxBotUsers) * 100));
 
   return (
-    <div className="flex h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased overflow-hidden selection:bg-[#0A0A0A] selection:text-[#F2EBDD] relative">
+    <div data-theme={theme} className="dashboard-themed flex h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased overflow-hidden selection:bg-[#0A0A0A] selection:text-[#F2EBDD] relative">
       
       <aside className="w-16 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] flex flex-col justify-between h-full z-30 shrink-0 relative select-none">
         <div className="flex flex-col overflow-y-auto flex-1">
@@ -189,6 +198,39 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                         <svg className="w-3.5 h-3.5 text-[#229ED9]" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.66-.52.36-1 .53-1.42.52-.47-.01-1.37-.27-2.03-.49-.82-.27-1.47-.41-1.42-.87.03-.24.36-.49.99-.74 3.89-1.69 6.48-2.8 7.77-3.32 3.7-1.52 4.47-1.78 4.97-1.79.11 0 .36.03.52.16.14.12.18.28.2.45-.02.07-.02.13-.02.2z" />
                         </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t-2 border-[#0A0A0A] flex items-center justify-between px-1">
+                    <span className="text-xs font-bold text-[#0A0A0A] uppercase">{t('common.theme', 'Theme:')}</span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setTheme('yellow')}
+                        className={`w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-[#F2EBDD] flex items-center justify-center cursor-pointer transition-all shadow-[1px_1px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
+                          theme === 'yellow' ? 'ring-2 ring-[#0A0A0A] ring-offset-1 scale-105' : ''
+                        }`}
+                        title={t('common.theme_yellow', 'Yellow')}
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-[#0A0A0A]" />
+                      </button>
+                      <button
+                        onClick={() => setTheme('light')}
+                        className={`w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-white flex items-center justify-center cursor-pointer transition-all shadow-[1px_1px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
+                          theme === 'light' ? 'ring-2 ring-[#0A0A0A] ring-offset-1 scale-105' : ''
+                        }`}
+                        title={t('common.theme_light', 'Light')}
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full bg-slate-200 border border-[#0A0A0A]" />
+                      </button>
+                      <button
+                        onClick={() => setTheme('dark')}
+                        className={`w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-[#0A0A0A] flex items-center justify-center cursor-pointer transition-all shadow-[1px_1px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
+                          theme === 'dark' ? 'ring-2 ring-amber-400 ring-offset-1 scale-105' : ''
+                        }`}
+                        title={t('common.theme_dark', 'Dark')}
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full bg-zinc-700 border border-zinc-500" />
                       </button>
                     </div>
                   </div>
