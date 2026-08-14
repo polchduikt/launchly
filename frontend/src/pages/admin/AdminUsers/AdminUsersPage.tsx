@@ -175,28 +175,39 @@ export const AdminUsersPage: React.FC = () => {
     return `${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
   };
 
-  const translateAuditTitle = (title: string) => {
-    if (!title) return '';
-    const cleanedTitle = title.replace(': {0}', '').replace(' {0}', '').replace('{0}', '').trim();
+  const translateAuditTitle = (title: string, targetName?: string) => {
+    if (!title) return targetName || '';
+    let name = (targetName || '').trim();
+    if (name === '{0}' || name === '{botName}' || name === 'null' || name === 'undefined') {
+      name = '';
+    }
+
+    if (title.includes(':')) {
+      const extracted = title.split(':')[1]?.trim() || '';
+      if (extracted && extracted !== '{0}' && extracted !== '{botName}' && extracted !== 'null' && extracted !== 'undefined') {
+        name = extracted;
+      }
+    }
+
+    const cleanedTitle = title.replace(/:\s*\{0\}/g, '').replace(/\s*\{0\}/g, '').replace(/\{0\}/g, '').trim();
+
     if (cleanedTitle.startsWith('Реєстрація у Launchly') || cleanedTitle.startsWith('Registered in Launchly')) {
       return t('audit.user_registration.title');
     }
     if (cleanedTitle.startsWith('Авторизація користувача') || cleanedTitle.startsWith('User Authentication')) {
       return t('audit.user_auth.title');
     }
-    if (cleanedTitle.startsWith('Підключення бота:') || cleanedTitle.startsWith('Bot Connected:')) {
-      const rawName = cleanedTitle.split(':')[1]?.trim() || '';
-      const name = (!rawName || rawName === '{0}' || rawName === '{botName}' || rawName === 'null' || rawName === 'undefined') ? '' : rawName;
+    if (cleanedTitle.startsWith('Підключення бота') || cleanedTitle.startsWith('Bot Connected')) {
       return name ? t('audit.bot_connected.title', { botName: name }) : t('audit.bot_created.title');
     }
     if (cleanedTitle.startsWith('Модифікація автоматизації') || cleanedTitle.startsWith('Automation Modified')) {
-      const parts = cleanedTitle.split(':');
-      const rawName = parts[1]?.trim() || '';
-      const name = (!rawName || rawName === '{0}' || rawName === '{botName}' || rawName === 'null' || rawName === 'undefined') ? '' : rawName;
       return name ? t('audit.automation_modified.title', { botName: name }) : (t('audit.automation_modified.title_simple') || 'Модифікація автоматизації');
     }
     if (cleanedTitle.startsWith('Запуск розсилки') || cleanedTitle.startsWith('Broadcast Launched')) {
-      return t('audit.broadcast_launched.title');
+      return name ? `${t('audit.broadcast_launched.title')}: ${name}` : t('audit.broadcast_launched.title');
+    }
+    if (cleanedTitle.startsWith('Скасування розсилки') || cleanedTitle.startsWith('Broadcast Cancelled')) {
+      return name ? `${t('audit.broadcast_cancelled.title')}: ${name}` : t('audit.broadcast_cancelled.title');
     }
     if (cleanedTitle.startsWith('Права доступу та роль') || cleanedTitle.startsWith('Access Rights & Role')) {
       return t('audit.access_role.title');
@@ -1250,7 +1261,7 @@ export const AdminUsersPage: React.FC = () => {
                           <div key={act.id} className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl p-3 flex items-start justify-between text-xs transition">
                             <div className="space-y-1 min-w-0 pr-2">
                               <div className="font-black text-[#0A0A0A] flex items-center space-x-2 truncate">
-                                <span className="truncate">{translateAuditTitle(act.title)}</span>
+                                <span className="truncate">{translateAuditTitle(act.title, act.targetName)}</span>
                                 <span className="px-1.5 py-0.2 rounded bg-white border border-[#0A0A0A] text-[#0A0A0A] font-mono text-[9px] uppercase font-black shrink-0">
                                   {act.badge}
                                 </span>

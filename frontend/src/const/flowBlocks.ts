@@ -38,7 +38,7 @@ export const FLOW_BLOCKS = FLOW_BLOCK_TYPES.map((type) => ({
 export const createDefaultNodeData = (type: string): Record<string, unknown> => {
   switch (type) {
     case 'MESSAGE':
-      return { text: 'Hello! Enter your text here.', buttons: [] };
+      return { text: '', buttons: [] };
     case 'CONDITION':
       return {
         branches: [

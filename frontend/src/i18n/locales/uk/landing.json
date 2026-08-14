@@ -308,6 +308,8 @@
   "connect_bot.step3_subtitle": "Просто дотримуйтесь покрокової інструкції для підключення існуючого Telegram бота.",
   "connect_bot.back": "Назад",
   "connect_bot.choose_another_channel": "Обрати інший канал",
+  "connect_bot.skip_for_now": "Пропустити",
+  "connect_bot.go_to_dashboard": "Перейти на головну",
   "connect_bot.tg_title": "Telegram",
   "connect_bot.tg_desc": "Посильте свій бізнес за допомогою автоматизації у Telegram.",
   "connect_bot.ig_title": "Instagram",

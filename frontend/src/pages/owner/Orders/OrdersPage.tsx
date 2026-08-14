@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
+import { useTranslation } from '../../../i18n/config';
 import {
   useOrdersQuery,
   useUpdateOrderMutation,
@@ -10,11 +12,14 @@ import {
   AlertCircle,
   Download,
   ShoppingCart,
+  Plus
 } from 'lucide-react';
 import type { OrderStatus } from '../../../types/crm';
 import { exportExcelApi } from '../../../api/integration';
 
 export const OrdersPage: React.FC = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
   const botId = activeBotId || 0;
   const { data: orders = [], isLoading: isOrdersLoading } = useOrdersQuery(botId);
@@ -29,13 +34,12 @@ export const OrdersPage: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `orders_bot_${botId}.xlsx`);
+      link.setAttribute('download', `orders_${new Date().toISOString().slice(0, 10)}.xlsx`);
       document.body.appendChild(link);
       link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Failed to export Excel:', err);
+      link.parentNode?.removeChild(link);
+    } catch (e) {
+      console.error(e);
     } finally {
       setIsExportingOrders(false);
     }
@@ -43,22 +47,37 @@ export const OrdersPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-4rem)] flex flex-col bg-slate-50 font-sans">
+      <div className="h-[calc(100vh-4rem)] flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
 
-        <header className="bg-white border-b border-slate-200 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 shadow-sm">
+        <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
           <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Orders</h1>
-            <p className="text-xs text-slate-400">Track and manage your product orders</p>
+            <h1 className="font-['Anybody',sans-serif] text-xl font-black text-[#0A0A0A] uppercase tracking-tight">Orders</h1>
+            <p className="text-xs text-[#0A0A0A]/70 font-bold">Track and manage your product orders</p>
           </div>
         </header>
 
         <div className="flex-1 overflow-hidden">
           {botId === 0 ? (
-            <div className="h-full flex items-center justify-center p-8 text-center">
-              <div className="max-w-sm space-y-3">
-                <AlertCircle size={40} className="text-slate-300 mx-auto" />
-                <p className="font-bold text-slate-700">No active bot found</p>
-                <p className="text-xs text-slate-400">Please connect a bot first to view orders.</p>
+            <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">
+              <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
+                <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
+                  <AlertCircle size={32} />
+                </div>
+                <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">
+                  {t('crm.contacts.no_bot_title', 'No active bot found')}
+                </p>
+                <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">
+                  Please connect a bot first to view orders.
+                </p>
+                <div className="pt-2">
+                  <button
+                    onClick={() => navigate('/connect-bot')}
+                    className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
+                  >
+                    <Plus size={14} />
+                    <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
+                  </button>
+                </div>
               </div>
             </div>
           ) : (

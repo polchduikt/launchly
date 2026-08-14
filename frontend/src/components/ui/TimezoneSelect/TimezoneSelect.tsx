@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDown, Search, Globe } from 'lucide-react';
 import { getAllTimezones } from '../../../utils/timezones';
+import { t } from '../../../i18n/config';
 
 interface TimezoneSelectProps {
   value: string;
@@ -89,7 +90,7 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({ value, onChange,
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Пошук часового поясу..."
+              placeholder={t('settings.timezone.search_placeholder', 'Пошук часового поясу...')}
               className="flex-1 text-xs font-bold text-[#0A0A0A] bg-transparent outline-none placeholder:text-[#0A0A0A]/30 py-1"
             />
           </div>
@@ -99,7 +100,7 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({ value, onChange,
           >
             {filtered.length === 0 ? (
               <li className="px-4 py-3 text-xs text-[#0A0A0A]/40 font-bold text-center">
-                Нічого не знайдено
+                {t('settings.timezone.no_results', 'Нічого не знайдено')}
               </li>
             ) : (
               filtered.map((tz) => (

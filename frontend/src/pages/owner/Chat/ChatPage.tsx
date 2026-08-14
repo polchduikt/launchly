@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
+import { useTranslation } from '../../../i18n/config';
 import {
   useConversationQuery,
   useAllConversationsQuery,
@@ -14,7 +16,7 @@ import { useCrmWebSocket } from '../../../hooks/crm/useCrmWebSocket';
 import { useChatLocalStorage } from '../../../hooks/crm/useChatLocalStorage';
 import { useChatActions } from '../../../hooks/crm/useChatActions';
 import { useChatFilters } from '../../../hooks/crm/useChatFilters';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Plus } from 'lucide-react';
 import { ChatHeader } from './components/ChatHeader';
 import { SettingsModal } from '../../../components/common/SettingsModal';
 import { ChatSidebar } from './components/ChatSidebar';
@@ -31,6 +33,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { updateConversationApi } from '../../../api/crm';
 
 export const ChatPage: React.FC = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const { activeBotId, setActiveBotId } = useBotStore();
   const { data: bots = [] } = useBotsQuery();
 
@@ -173,11 +177,26 @@ export const ChatPage: React.FC = () => {
   if (botId === 0) {
     return (
       <DashboardLayout>
-        <div className="h-full flex items-center justify-center p-8 text-center bg-slate-50">
-          <div className="max-w-sm space-y-3">
-            <AlertCircle size={40} className="text-slate-300 mx-auto" />
-            <p className="font-bold text-slate-700">No active bot found</p>
-            <p className="text-xs text-slate-400">Please connect a bot first to access the chat.</p>
+        <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">
+          <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
+            <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
+              <AlertCircle size={32} />
+            </div>
+            <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">
+              {t('crm.contacts.no_bot_title', 'No active bot found')}
+            </p>
+            <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">
+              {t('crm.contacts.no_bot_desc', 'Please connect a bot first to access the chat.')}
+            </p>
+            <div className="pt-2">
+              <button
+                onClick={() => navigate('/connect-bot')}
+                className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
+              >
+                <Plus size={14} />
+                <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
+              </button>
+            </div>
           </div>
         </div>
       </DashboardLayout>

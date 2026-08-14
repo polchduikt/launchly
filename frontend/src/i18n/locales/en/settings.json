@@ -94,6 +94,8 @@
   "settings.general.template_btn": "Create Template",
   "settings.general.template_desc": "Create a template and share it via link",
   "settings.general.timezone_desc": "All the data in Launchly will be displayed and exported according to this timezone.",
+  "settings.timezone.search_placeholder": "Search timezone...",
+  "settings.timezone.no_results": "Nothing found",
   "settings.general.use_template": "Use as Template",
   "settings.integrations.chatgpt.desc": "ChatGPT integration enables individuals to accomplish a wide range of tasks. The flexibility and intelligence allow handling various types of requests and offering personalized support.",
   "settings.integrations.chatgpt.placeholder": "Enter ChatGPT API Secret",

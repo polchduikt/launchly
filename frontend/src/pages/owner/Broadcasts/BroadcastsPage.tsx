@@ -180,22 +180,27 @@ export const BroadcastsPage: React.FC = () => {
   if (bots.length === 0 && installedTemplates.length === 0) {
     return (
       <DashboardLayout>
-        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4 font-['JetBrains_Mono',monospace]">
-          <div className="p-4 bg-indigo-50 border-2 border-[#0A0A0A] rounded-2xl">
-            <Bell size={32} className="text-[#0A0A0A]" />
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">{t('broadcasts.connect_bot_title')}</h1>
-            <p className="text-sm text-slate-500">
+        <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">
+          <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
+            <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
+              <Bell size={32} />
+            </div>
+            <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">
+              {t('broadcasts.connect_bot_title')}
+            </p>
+            <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">
               {t('broadcasts.connect_bot_desc')}
             </p>
+            <div className="pt-2">
+              <button
+                onClick={() => navigate('/connect-bot')}
+                className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
+              >
+                <Plus size={14} />
+                <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
+              </button>
+            </div>
           </div>
-          <button
-            onClick={() => navigate('/')}
-            className="px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-100 cursor-pointer"
-          >
-            {t('broadcasts.btn.go_home')}
-          </button>
         </div>
       </DashboardLayout>
     );
@@ -339,7 +344,10 @@ export const BroadcastsPage: React.FC = () => {
                           <div className="text-xs text-[#0A0A0A] font-bold mb-1.5 whitespace-nowrap">
                             {camp.status === 'SCHEDULED'
                               ? `${t('status.scheduled') || 'Заплановано'} (${formatScheduledDate(camp.scheduledAt)})`
-                              : `${camp.sentCount || 0} / ${camp.totalCount ?? (campaignBot?.totalUsers ?? 0)} надіслано`}
+                              : t('broadcasts.table.sent', {
+                                  sent: camp.sentCount || 0,
+                                  total: camp.totalCount ?? (campaignBot?.totalUsers ?? 0),
+                                })}
                           </div>
                           <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                             <div

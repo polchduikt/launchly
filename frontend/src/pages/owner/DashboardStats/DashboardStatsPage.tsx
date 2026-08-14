@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { useDashboardStatsQuery } from '../../../hooks/dashboard/useDashboardStatsQuery';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
@@ -13,7 +14,8 @@ import {
   Clock,
   Sparkles,
   HelpCircle,
-  MoreVertical
+  MoreVertical,
+  Plus
 } from 'lucide-react';
 
 interface MiniBarChartProps {
@@ -116,6 +118,7 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({ data, total }) => {
 
 export const DashboardStatsPage: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [selectedBotId, setSelectedBotId] = useState<number>(0);
   const [days, setDays] = useState<number>(7);
   const [isBotSelectorOpen, setIsBotSelectorOpen] = useState(false);
@@ -668,13 +671,24 @@ export const DashboardStatsPage: React.FC = () => {
 
         <div className="p-6 space-y-6">
           {hasNoBots ? (
-            <div className="h-full flex items-center justify-center p-12 text-center bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl">
-              <div className="max-w-md space-y-4">
-                <AlertCircle size={48} className="text-[#0A0A0A]" mx-auto animate-pulse />
-                <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-lg uppercase">{t('dashboard.stats.no_bot_title')}</p>
-                <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A] font-medium max-w-xs mx-auto leading-relaxed">
+            <div className="h-full flex items-center justify-center p-12 text-center bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-[4px_4px_0px_#0A0A0A]">
+              <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace]">
+                <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
+                  <AlertCircle size={32} />
+                </div>
+                <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">{t('dashboard.stats.no_bot_title')}</p>
+                <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">
                   {t('dashboard.stats.no_bot_desc')}
                 </p>
+                <div className="pt-2">
+                  <button
+                    onClick={() => navigate('/connect-bot')}
+                    className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
+                  >
+                    <Plus size={14} />
+                    <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
+                  </button>
+                </div>
               </div>
             </div>
           ) : isLoading ? (

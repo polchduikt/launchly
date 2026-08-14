@@ -94,6 +94,8 @@
   "settings.general.template_btn": "Створити шаблон",
   "settings.general.template_desc": "Створити шаблон та поділитися ним за посиланням",
   "settings.general.timezone_desc": "Усі дані в Launchly будуть відображатися та експортуватися відповідно до цього часового поясу.",
+  "settings.timezone.search_placeholder": "Пошук часового поясу...",
+  "settings.timezone.no_results": "Нічого не знайдено",
   "settings.general.use_template": "Використовувати як шаблон",
   "settings.integrations.chatgpt.desc": "Інтеграція з ChatGPT дозволяє вирішувати широкий спектр завдань. Гнучкість та інтелект дозволяють обробляти різноманітні запити та пропонувати персоналізовану підтримку.",
   "settings.integrations.chatgpt.placeholder": "Введіть API Secret для ChatGPT",

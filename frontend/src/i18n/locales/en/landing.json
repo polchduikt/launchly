@@ -287,6 +287,8 @@
   "connect_bot.step3_subtitle": "Just follow the quick step-by-step instructions to connect an existing Telegram bot.",
   "connect_bot.back": "Back",
   "connect_bot.choose_another_channel": "Choose Another Channel",
+  "connect_bot.skip_for_now": "Skip for now",
+  "connect_bot.go_to_dashboard": "Go to Dashboard",
   "connect_bot.tg_title": "Telegram",
   "connect_bot.tg_desc": "Power up your business with Telegram automation.",
   "connect_bot.ig_title": "Instagram",

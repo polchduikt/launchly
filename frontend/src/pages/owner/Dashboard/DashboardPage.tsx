@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useRequireBots } from '../../../hooks/dashboard/useRequireBots';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { useTranslation } from '../../../i18n/config';
@@ -242,7 +241,6 @@ export const DashboardPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isLoading: isLoadingRequire, hasBots } = useRequireBots();
   const { isLoading: isLoadingBots } = useBotsQuery();
   const { data: allContacts = [] } = useAllBotUsersQuery();
   const { data: blogArticles = BLOG_ARTICLES } = useBlogArticlesQuery();
@@ -384,11 +382,9 @@ export const DashboardPage: React.FC = () => {
     return filteredTemplates.filter(t => t.category !== 'Recommended');
   }, [filteredTemplates]);
 
-  if (isLoadingRequire || isLoadingBots) {
+  if (isLoadingBots) {
     return <div className="min-h-screen bg-[#F2EBDD]" />;
   }
-
-  if (!hasBots) return null;
 
   return (
     <DashboardLayout>

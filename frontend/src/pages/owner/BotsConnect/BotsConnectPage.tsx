@@ -37,27 +37,22 @@ export const BotsConnectPage: React.FC = () => {
     },
   });
 
-  const handleConnect = (data: BotFormValues) => {
+  const handleConnect = async (data: BotFormValues) => {
     setValidationError(null);
 
-    createBotMutation.mutate(
-      {
+    try {
+      await createBotMutation.mutateAsync({
         name: data.botName?.trim() || 'Telegram Bot',
         telegramToken: data.botToken.trim(),
         description: data.botDesc?.trim() || undefined,
-      },
-      {
-        onSuccess: () => {
-          navigate('/home');
-        },
-        onError: (err: unknown) => {
-          const errMsg = axios.isAxiosError(err)
-            ? (err.response?.data?.message ?? 'Failed to connect bot. Please verify your token.')
-            : (err instanceof Error ? err.message : 'Something went wrong');
-          setValidationError(errMsg);
-        },
-      }
-    );
+      });
+      navigate('/home');
+    } catch (err: unknown) {
+      const errMsg = axios.isAxiosError(err)
+        ? (err.response?.data?.message ?? 'Failed to connect bot. Please verify your token.')
+        : (err instanceof Error ? err.message : 'Something went wrong');
+      setValidationError(errMsg);
+    }
   };
 
   const handleBack = () => {
@@ -84,10 +79,11 @@ export const BotsConnectPage: React.FC = () => {
       <div className="w-full md:w-5/12 bg-[#F2EBDD] border-b-4 md:border-b-0 md:border-r-4 border-[#0A0A0A] p-8 md:p-16 flex flex-col justify-between relative overflow-hidden">
         
         <div
-          onClick={() => hasBots && navigate('/home')}
-          className={`flex items-center mb-12 select-none ${hasBots ? 'cursor-pointer' : ''}`}
+          onClick={() => navigate('/home')}
+          className="flex items-center mb-12 select-none cursor-pointer"
+          title="Launchly Home"
         >
-          <img src={logo} alt="Launchly Logo" className="h-10 sm:h-12 w-auto object-contain" />
+          <img src={logo} alt="Launchly Logo" className="h-10 sm:h-12 w-auto object-contain hover:opacity-80 transition-opacity" />
         </div>
 
         <div className="my-auto space-y-6 relative z-10">
@@ -134,13 +130,20 @@ export const BotsConnectPage: React.FC = () => {
           )}
         </div>
 
-        <div className="mt-12 md:mt-0">
+        <div className="mt-12 md:mt-0 flex items-center justify-between gap-4">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:underline underline-offset-4 cursor-pointer text-[#0A0A0A] group"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
             {step === 1 ? t('connect_bot.back', 'Back') : step === 2 ? t('connect_bot.choose_another_channel', 'Choose Another Channel') : t('connect_bot.back', 'Back')}
+          </button>
+
+          <button
+            onClick={() => navigate('/home')}
+            className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:underline underline-offset-4 cursor-pointer text-[#0A0A0A]"
+          >
+            {t('connect_bot.skip_for_now', 'Skip for now')} &rarr;
           </button>
         </div>
       </div>

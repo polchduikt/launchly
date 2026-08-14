@@ -1,7 +1,7 @@
 import React from 'react';
 import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
-import { Zap, Plus } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../../types/bot';
 import { t } from '../../../../../i18n/config';
@@ -50,11 +50,6 @@ const StartNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ selected, d
             </p>
           </div>
         </div>
-
-        <button className="w-full py-2 border-2 border-dashed border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1">
-          <Plus size={13} />
-          <span>{t('node.start.new_trigger')}</span>
-        </button>
       </div>
 
       <div className="flex justify-end items-center px-4 py-2 bg-[#F2EBDD] select-none relative rounded-b-[22px]">

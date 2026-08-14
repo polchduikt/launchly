@@ -387,6 +387,8 @@ export const fetchAdminLogsApi = async (
 
 export interface UserActivity {
   id: number;
+  targetId?: number;
+  targetName?: string;
   title: string;
   description: string;
   category: 'automations' | 'broadcasts' | 'system';

@@ -7,7 +7,7 @@ import {
   stopBotApi,
   updateBotApi,
 } from '../../api/bot';
-import type { BotCreateRequest, BotUpdateRequest } from '../../types/bot';
+import type { BotCreateRequest, BotUpdateRequest, BotResponse } from '../../types/bot';
 
 export const useCreateBotMutation = () => {
   const queryClient = useQueryClient();
@@ -15,6 +15,11 @@ export const useCreateBotMutation = () => {
   return useMutation({
     mutationFn: (data: BotCreateRequest) => createBotApi(data),
     onSuccess: (newBot) => {
+      queryClient.setQueryData<BotResponse[]>(['bots'], (old) => {
+        if (!old) return [newBot];
+        if (old.some((b) => b.id === newBot.id)) return old;
+        return [...old, newBot];
+      });
       queryClient.invalidateQueries({ queryKey: ['bots'] });
       setActiveBotId(newBot.id);
     },

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Loader2, AlertCircle, Plus } from 'lucide-react';
 import type { BotUserResponse } from '../../../../types/bot';
 import { ContactAvatar } from './ContactAvatar';
 import { t } from '../../../../i18n/config';
@@ -23,6 +24,8 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
   onSelectContact,
   onSelectContactDetail,
 }) => {
+  const navigate = useNavigate();
+
   const parseMetadata = (metaStr: string | null) => {
     try {
       return metaStr ? JSON.parse(metaStr) : {};
@@ -48,11 +51,22 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
 
   if (botId === 0) {
     return (
-      <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl m-6">
-        <div className="max-w-sm space-y-3 font-['JetBrains_Mono',monospace]">
-          <AlertCircle size={40} className="text-[#0A0A0A] mx-auto" />
-          <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-sm uppercase">{t('crm.contacts.no_bot_title')}</p>
-          <p className="text-xs text-slate-700 font-medium">{t('crm.contacts.no_bot_desc')}</p>
+      <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD] m-6">
+        <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
+          <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
+            <AlertCircle size={32} />
+          </div>
+          <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">{t('crm.contacts.no_bot_title')}</p>
+          <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">{t('crm.contacts.no_bot_desc')}</p>
+          <div className="pt-2">
+            <button
+              onClick={() => navigate('/connect-bot')}
+              className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
+            >
+              <Plus size={14} />
+              <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
+            </button>
+          </div>
         </div>
       </div>
     );
