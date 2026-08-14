@@ -32,4 +32,19 @@ export const paypalConfigSchema = z.object({
   sendReceiptEmail: z.boolean().optional(),
 });
 
-export type PaypalConfigSchemaType = z.infer<typeof paypalConfigSchema>;
+export const mailchimpSchema = z.object({
+  apiKey: z.string().min(1, t('settings.integrations.mailchimp.error_api_key', 'API Key is required')),
+  listId: z.string().min(1, t('settings.integrations.mailchimp.error_list_id', 'Audience / List ID is required')),
+  serverPrefix: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+});
+
+export type MailchimpSchemaType = z.infer<typeof mailchimpSchema>;
+
+export const hotmartSchema = z.object({
+  hottok: z.string().min(1, t('settings.integrations.hotmart.error_hottok', 'Hottok verification token is required')),
+  syncOrders: z.boolean().optional(),
+  syncLeads: z.boolean().optional(),
+});
+
+export type HotmartSchemaType = z.infer<typeof hotmartSchema>;

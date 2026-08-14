@@ -1,5 +1,6 @@
 User-agent: *
 
+# Allow public pages
 Allow: /
 Allow: /blog
 Allow: /faq
@@ -8,6 +9,8 @@ Allow: /privacy
 Allow: /acceptable-use
 Allow: /ai-terms
 Allow: /payment-terms
+
+# Disallow private / app pages
 Disallow: /dashboard
 Disallow: /home
 Disallow: /chat

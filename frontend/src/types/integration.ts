@@ -34,6 +34,19 @@ export interface ApiKeyConfig {
   apiKey: string;
 }
 
+export interface MailchimpConfig {
+  apiKey: string;
+  listId: string;
+  serverPrefix?: string;
+  tags?: string[];
+}
+
+export interface HotmartConfig {
+  hottok: string;
+  syncOrders?: boolean;
+  syncLeads?: boolean;
+}
+
 export interface StripeConfig {
   connected?: boolean;
   apiKey?: string;

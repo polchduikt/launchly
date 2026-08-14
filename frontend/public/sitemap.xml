@@ -4,7 +4,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://launchly.app</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
       <xhtml:link rel="alternate" hreflang="uk" href="https://launchly.app"/>
@@ -13,7 +13,7 @@
   </url>
   <url>
     <loc>https://launchly.app/blog</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
       <xhtml:link rel="alternate" hreflang="uk" href="https://launchly.app/blog"/>
@@ -22,7 +22,7 @@
   </url>
   <url>
     <loc>https://launchly.app/faq</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
       <xhtml:link rel="alternate" hreflang="uk" href="https://launchly.app/faq"/>
@@ -31,7 +31,7 @@
   </url>
   <url>
     <loc>https://launchly.app/terms</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
       <xhtml:link rel="alternate" hreflang="uk" href="https://launchly.app/terms"/>
@@ -40,7 +40,7 @@
   </url>
   <url>
     <loc>https://launchly.app/privacy</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
       <xhtml:link rel="alternate" hreflang="uk" href="https://launchly.app/privacy"/>
@@ -49,7 +49,7 @@
   </url>
   <url>
     <loc>https://launchly.app/acceptable-use</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
       <xhtml:link rel="alternate" hreflang="uk" href="https://launchly.app/acceptable-use"/>
@@ -58,7 +58,7 @@
   </url>
   <url>
     <loc>https://launchly.app/ai-terms</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
       <xhtml:link rel="alternate" hreflang="uk" href="https://launchly.app/ai-terms"/>
@@ -67,7 +67,7 @@
   </url>
   <url>
     <loc>https://launchly.app/payment-terms</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
       <xhtml:link rel="alternate" hreflang="uk" href="https://launchly.app/payment-terms"/>
