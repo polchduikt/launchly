@@ -9,5 +9,8 @@ public enum IntegrationType {
     DEEPSEEK,
     GEMINI,
     STRIPE,
-    PAYPAL
+    PAYPAL,
+    HOTMART,
+    MAILCHIMP,
+    HUBSPOT
 }

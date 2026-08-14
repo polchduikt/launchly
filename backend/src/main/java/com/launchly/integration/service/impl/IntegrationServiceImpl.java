@@ -140,6 +140,10 @@ public class IntegrationServiceImpl implements IntegrationService {
                 configObj = objectMapper.readValue(configStr, ExcelConfig.class);
             } else if (type == IntegrationType.GEMINI || type == IntegrationType.CHATGPT || type == IntegrationType.CLAUDE || type == IntegrationType.DEEPSEEK) {
                 configObj = objectMapper.readValue(configStr, com.launchly.integration.dto.AiProviderConfig.class);
+            } else if (type == IntegrationType.MAILCHIMP) {
+                configObj = objectMapper.readValue(configStr, com.launchly.integration.dto.request.MailchimpConfig.class);
+            } else if (type == IntegrationType.HOTMART) {
+                configObj = objectMapper.readValue(configStr, com.launchly.integration.dto.request.HotmartConfig.class);
             } else {
                 throw new AppException(HttpStatus.BAD_REQUEST, "Unsupported integration type");
             }

@@ -41,6 +41,7 @@ public class ActionNodeExecutor implements NodeExecutor {
     private final BotUserTagRepository botUserTagRepository;
     private final IntegrationRepository integrationRepository;
     private final GoogleSheetsService googleSheetsService;
+    private final com.launchly.integration.service.MailchimpService mailchimpService;
     private final NotificationService notificationService;
 
     @Override
@@ -330,6 +331,40 @@ public class ActionNodeExecutor implements NodeExecutor {
                                 notificationService.sendAssignmentNotification(botOwner.getId(), botUser.getId());
                             } else {
                                 log.warn("Cannot send assignee notification: bot owner is null");
+                            }
+                            break;
+                        }
+
+                        case "MAILCHIMP_SUBSCRIBE": {
+                            Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.MAILCHIMP).orElse(null);
+                            if (integration != null && integration.isActive()) {
+                                String email = resolveValue((String) action.get("email"), sessionData, botUser);
+                                if (email == null || email.trim().isEmpty()) {
+                                    email = sessionData.getOrDefault("email", "");
+                                }
+                                String firstName = resolveValue((String) action.get("firstName"), sessionData, botUser);
+                                if (firstName == null || firstName.trim().isEmpty()) {
+                                    firstName = botUser.getFirstName() != null ? botUser.getFirstName() : "";
+                                }
+                                String lastName = resolveValue((String) action.get("lastName"), sessionData, botUser);
+                                if (lastName == null || lastName.trim().isEmpty()) {
+                                    lastName = botUser.getLastName() != null ? botUser.getLastName() : "";
+                                }
+                                String phone = resolveValue((String) action.get("phone"), sessionData, botUser);
+                                if (phone == null || phone.trim().isEmpty()) {
+                                    phone = sessionData.getOrDefault("phone", "");
+                                }
+                                Object tagsObj = action.get("tags");
+                                List<String> tags = null;
+                                if (tagsObj instanceof List) {
+                                    tags = ((List<?>) tagsObj).stream().map(String::valueOf).collect(Collectors.toList());
+                                }
+                                if (email != null && !email.trim().isEmpty()) {
+                                    mailchimpService.addOrUpdateSubscriber(integration, email.trim(), firstName.trim(), lastName.trim(), phone.trim(), tags);
+                                    log.info("Triggered Mailchimp subscribe for user {} email {}", telegramUserId, email);
+                                }
+                            } else {
+                                log.warn("Skipping Mailchimp subscribe: no active MAILCHIMP integration for bot {}", botId);
                             }
                             break;
                         }

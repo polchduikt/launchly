@@ -33,6 +33,7 @@ public class IntegrationEventServiceImpl implements IntegrationEventService {
     private final LeadRepository leadRepository;
     private final GoogleSheetsService googleSheetsService;
     private final WebhookService webhookService;
+    private final com.launchly.integration.service.MailchimpService mailchimpService;
     private final ObjectMapper objectMapper;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -55,6 +56,8 @@ public class IntegrationEventServiceImpl implements IntegrationEventService {
                     processGoogleSheetsOrder(integration, fullOrder);
                 } else if (integration.getType() == IntegrationType.WEBHOOK) {
                     processWebhookOrder(integration, fullOrder);
+                } else if (integration.getType() == IntegrationType.MAILCHIMP) {
+                    processMailchimpOrder(integration, fullOrder);
                 }
             } catch (Exception e) {
                 log.error("Error processing order integration {} for bot {}: {}",
@@ -81,10 +84,42 @@ public class IntegrationEventServiceImpl implements IntegrationEventService {
                     processGoogleSheetsLead(integration, fullLead);
                 } else if (integration.getType() == IntegrationType.WEBHOOK) {
                     processWebhookLead(integration, fullLead);
+                } else if (integration.getType() == IntegrationType.MAILCHIMP) {
+                    processMailchimpLead(integration, fullLead);
                 }
             } catch (Exception e) {
                 log.error("Error processing lead integration {} for bot {}: {}",
                         integration.getId(), fullLead.getBot().getId(), e.getMessage(), e);
+            }
+        }
+    }
+
+    private void processMailchimpLead(Integration integration, Lead lead) {
+        if (lead.getEmail() != null && !lead.getEmail().trim().isEmpty()) {
+            String firstName = lead.getName() != null ? lead.getName() : "";
+            String lastName = "";
+            if (firstName.contains(" ")) {
+                String[] parts = firstName.split(" ", 2);
+                firstName = parts[0];
+                lastName = parts[1];
+            }
+            mailchimpService.addOrUpdateSubscriber(integration, lead.getEmail().trim(), firstName, lastName, lead.getPhone(), List.of("Launchly-Lead"));
+        }
+    }
+
+    private void processMailchimpOrder(Integration integration, Order order) {
+        if (order.getBotUser() != null) {
+            String email = null;
+            if (order.getNotes() != null && order.getNotes().contains("@")) {
+                for (String word : order.getNotes().split("\\s+")) {
+                    if (word.contains("@")) {
+                        email = word.replaceAll("[^a-zA-Z0-9@._-]", "");
+                        break;
+                    }
+                }
+            }
+            if (email != null && !email.trim().isEmpty()) {
+                mailchimpService.addOrUpdateSubscriber(integration, email.trim(), order.getBotUser().getFirstName(), order.getBotUser().getLastName(), null, List.of("Launchly-Customer"));
             }
         }
     }
