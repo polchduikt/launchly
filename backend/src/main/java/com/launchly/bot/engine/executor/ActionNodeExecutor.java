@@ -15,6 +15,7 @@ import com.launchly.integration.entity.Integration;
 import com.launchly.integration.entity.IntegrationType;
 import com.launchly.integration.repository.IntegrationRepository;
 import com.launchly.integration.service.GoogleSheetsService;
+import com.launchly.integration.service.MailchimpService;
 import com.launchly.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +42,7 @@ public class ActionNodeExecutor implements NodeExecutor {
     private final BotUserTagRepository botUserTagRepository;
     private final IntegrationRepository integrationRepository;
     private final GoogleSheetsService googleSheetsService;
-    private final com.launchly.integration.service.MailchimpService mailchimpService;
+    private final MailchimpService mailchimpService;
     private final NotificationService notificationService;
 
     @Override

@@ -87,6 +87,8 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         Page<UserActivityDto> activityPage = logPage.map(l -> UserActivityDto.builder()
                 .id(l.getId())
+                .targetId(l.getTargetId())
+                .targetName(l.getTargetName())
                 .title(l.getTitle())
                 .description(l.getDescription())
                 .category(l.getCategory())

@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class UserActivityDto {
     private Long id;
+    private Long targetId;
+    private String targetName;
     private String title;
     private String description;
     private String category;

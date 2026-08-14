@@ -63,6 +63,8 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
 
         Page<UserActivityDto> activityPage = logPage.map(log -> UserActivityDto.builder()
                 .id(log.getId())
+                .targetId(log.getTargetId())
+                .targetName(log.getTargetName())
                 .title(log.getTitle())
                 .description(log.getDescription())
                 .category(log.getCategory())

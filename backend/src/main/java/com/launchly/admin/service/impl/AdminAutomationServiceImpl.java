@@ -103,6 +103,8 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
 
         Page<UserActivityDto> activityPage = logPage.map(l -> UserActivityDto.builder()
                 .id(l.getId())
+                .targetId(l.getTargetId())
+                .targetName(l.getTargetName())
                 .title(l.getTitle())
                 .description(l.getDescription())
                 .category(l.getCategory())
