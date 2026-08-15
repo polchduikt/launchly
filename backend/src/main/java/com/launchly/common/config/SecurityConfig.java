@@ -51,7 +51,7 @@ public class SecurityConfig {
                                 "/api/v1/integrations/google/callback",
                                 "/api/v1/integrations/hotmart/webhook/**",
                                 "/api/v1/blog/**",
-                                "/api/v1/support/**",
+                                "/api/v1/support/appeal",
                                 "/api/i18n/**",
                                 "/ws/**"
                         ).permitAll()

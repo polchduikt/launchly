@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
+import java.text.MessageFormat;
 
 @Component
 @RequiredArgsConstructor
@@ -16,10 +17,14 @@ public class MessageUtils {
     }
 
     public String getMessage(String code, Object... args) {
-        return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
+        String msg = messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
+        if (args != null && args.length > 0 && msg.contains("{0}")) {
+            return MessageFormat.format(msg, args);
+        }
+        return msg;
     }
 
-    public String getMessage(String code, String defaultMessage) {
+    public String getMessageWithDefault(String code, String defaultMessage) {
         return messageSource.getMessage(code, null, defaultMessage, LocaleContextHolder.getLocale());
     }
 }

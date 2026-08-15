@@ -31,6 +31,10 @@ public class SupportTicket extends BaseEntity {
     @Builder.Default
     private Boolean unreadForAdmin = true;
 
+    @Column(name = "unread_for_user", nullable = false)
+    @Builder.Default
+    private Boolean unreadForUser = false;
+
     @Column(name = "is_favorite", nullable = false)
     @Builder.Default
     private Boolean isFavorite = false;

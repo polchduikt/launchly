@@ -16,6 +16,8 @@ public interface SupportTicketRepository extends JpaRepository<SupportTicket, Lo
     @Query("SELECT t FROM SupportTicket t WHERE t.user.id = :userId ORDER BY t.updatedAt DESC")
     Optional<SupportTicket> findFirstByUserId(@Param("userId") Long userId);
 
+    Page<SupportTicket> findByUserId(Long userId, Pageable pageable);
+
     Page<SupportTicket> findByStatus(String status, Pageable pageable);
 
     Page<SupportTicket> findByUnreadForAdminTrue(Pageable pageable);

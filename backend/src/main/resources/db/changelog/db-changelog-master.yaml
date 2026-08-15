@@ -93,5 +93,9 @@ databaseChangeLog:
       file: db/changelog/changes/V046__fix_installed_templates_bot_fk_cascade.sql
   - include:
       file: db/changelog/changes/V047__add_template_name_to_broadcast_campaigns.sql
+  - include:
+      file: db/changelog/changes/V048__add_timezone_to_users.sql
+  - include:
+      file: db/changelog/changes/V049__create_support_tickets_and_unread_for_user.sql
 
 

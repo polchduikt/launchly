@@ -107,6 +107,7 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
 
         ticket.setLastMessage(text);
         ticket.setUnreadForAdmin(false);
+        ticket.setUnreadForUser(true);
         ticket.setUpdatedAt(LocalDateTime.now());
         supportTicketRepository.save(ticket);
 
@@ -278,6 +279,7 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
                 .userPlan(planName)
                 .userRole(u != null && u.getRole() != null ? u.getRole().name() : "ROLE_OWNER")
                 .unread(ticket.getUnreadForAdmin())
+                .unreadForUser(ticket.getUnreadForUser())
                 .isFavorite(ticket.getIsFavorite())
                 .status(ticket.getStatus())
                 .lastMessage(ticket.getLastMessage())

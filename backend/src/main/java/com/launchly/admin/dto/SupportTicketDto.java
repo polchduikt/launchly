@@ -20,6 +20,7 @@ public class SupportTicketDto {
     private String userPlan;
     private String userRole;
     private Boolean unread;
+    private Boolean unreadForUser;
     private Boolean isFavorite;
     private String status;
     private String lastMessage;
