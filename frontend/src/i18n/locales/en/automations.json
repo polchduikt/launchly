@@ -57,5 +57,11 @@
   "automations.create.error_name": "Bot name is required",
   "automations.create.error_name_long": "Bot name is too long",
   "automations.create.error_desc_long": "Description is too long",
-  "automations.create.error_token": "Telegram bot token is required"
+  "automations.create.error_token": "Telegram bot token is required",
+  "automations.bulk_delete_title": "Delete Automations",
+  "automations.bulk_delete_desc": "Are you sure you want to delete {{count}} selected automation(s)?",
+  "automations.delete_modal_title": "Delete Automation",
+  "automations.delete_modal_desc": "Are you sure you want to delete this automation? This action cannot be undone.",
+  "automations.delete_folder_title": "Delete Folder",
+  "automations.delete_folder_desc": "Are you sure? All automations from the folder will be moved to the root list."
 }

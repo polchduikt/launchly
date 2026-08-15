@@ -395,10 +395,10 @@ export const AutomationsPage: React.FC = () => {
 
   const handleDeleteFolder = (folderId: string | number) => {
     setConfirmDialog({
-      title: 'Видалити папку',
-      message: 'Ви впевнені? Всі автоматизації з папки будуть переміщені до кореневого списку.',
+      title: t('automations.delete_folder_title', 'Видалити папку'),
+      message: t('automations.delete_folder_desc', 'Ви впевнені? Всі автоматизації з папки будуть переміщені до кореневого списку.'),
       variant: 'danger',
-      confirmLabel: 'Видалити',
+      confirmLabel: t('common.delete', 'Видалити'),
       onConfirm: () => {
         setFolders(folders.filter((f) => f.id !== folderId));
         const updated = { ...botFolders };

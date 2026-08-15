@@ -57,5 +57,11 @@
   "automations.create.error_name": "Назва бота є обов'язковою",
   "automations.create.error_name_long": "Назва бота занадто довга",
   "automations.create.error_desc_long": "Опис занадто довгий",
-  "automations.create.error_token": "Токен Telegram-бота є обов'язковим"
+  "automations.create.error_token": "Токен Telegram-бота є обов'язковим",
+  "automations.bulk_delete_title": "Видалити автоматизації",
+  "automations.bulk_delete_desc": "Ви впевнені, що хочете видалити {{count}} обрану(их) автоматизацію(ій)?",
+  "automations.delete_modal_title": "Видалити автоматизацію",
+  "automations.delete_modal_desc": "Ви впевнені, що хочете видалити цю автоматизацію? Цю дію неможливо скасувати.",
+  "automations.delete_folder_title": "Видалити папку",
+  "automations.delete_folder_desc": "Ви впевнені? Всі автоматизації з папки будуть переміщені до кореневого списку."
 }

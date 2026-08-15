@@ -15,6 +15,7 @@ export const ROUTES = {
   ORDERS: '/orders',
   BROADCASTS: '/broadcasts',
   BROADCAST_BUILDER: '/broadcasts/:id',
+  SUPPORT: '/support',
   INTEGRATIONS: '/integrations',
   BILLING_SUCCESS: '/billing/success',
   BILLING_CANCEL: '/billing/cancel',

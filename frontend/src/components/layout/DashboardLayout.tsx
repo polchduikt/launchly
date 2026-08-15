@@ -9,6 +9,7 @@ import type { DashboardLayoutProps } from '../../types/shared';
 import { HelpCircle, Layers, ChevronDown } from 'lucide-react';
 import { useAllBotUsersQuery } from '../../hooks/crm/useCrmQueries';
 import { useSubscriptionQuery } from '../../hooks/bot/useBillingQueries';
+import { useUserTicketsQuery } from '../../hooks/support/useSupportQueries';
 import { PendingInvitationsBanner } from '../common/PendingInvitationsBanner';
 import { PricingModal } from '../common/PricingModal';
 import { ManageSignInOptionsModal } from '../common/ManageSignInOptionsModal';
@@ -29,9 +30,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const [showLangMenu, setShowLangMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const helpMenuRef = useRef<HTMLDivElement>(null);
-
   const { data: contacts = [] } = useAllBotUsersQuery();
   const { data: subscription } = useSubscriptionQuery();
+  const { data: userTicketsData } = useUserTicketsQuery();
+  const hasUnreadSupport = userTicketsData?.content?.some((t) => Boolean(t.unreadForUser)) || false;
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -292,31 +294,61 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           <div ref={helpMenuRef} className="relative">
             <button
               onClick={() => setShowHelpMenu(!showHelpMenu)}
-              className="w-8 h-8 rounded-full border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] font-bold text-xs hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors cursor-pointer"
+              className="relative w-8 h-8 rounded-full border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] font-bold text-xs hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors cursor-pointer"
               title="Help & Legal"
             >
               ?
+              {hasUnreadSupport && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-600 border border-white"></span>
+                </span>
+              )}
             </button>
 
             {showHelpMenu && (
-              <div className="absolute left-14 bottom-0 w-60 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] z-50 p-3 space-y-2 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider">
+              <div className="absolute left-14 bottom-0 w-60 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] z-50 p-3 space-y-1.5 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider">
+                <Link
+                  to={ROUTES.SUPPORT}
+                  onClick={() => setShowHelpMenu(false)}
+                  className="flex items-center justify-between px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-white transition-all text-[#0A0A0A]"
+                >
+                  <span>{t('common.contact_support', 'Contact Support')}</span>
+                  {hasUnreadSupport && (
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-600 border border-white"></span>
+                    </span>
+                  )}
+                </Link>
+                <div className="border-t-2 border-[#0A0A0A] my-1" />
                 <Link
                   to={ROUTES.TERMS}
+                  onClick={() => setShowHelpMenu(false)}
                   className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-white transition-all text-[#0A0A0A]"
                 >
-                  Terms of Service
+                  {t('common.terms_of_service', 'Terms of Service')}
                 </Link>
                 <Link
                   to={ROUTES.PRIVACY}
+                  onClick={() => setShowHelpMenu(false)}
                   className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-white transition-all text-[#0A0A0A]"
                 >
-                  Privacy Policy
+                  {t('common.privacy_policy', 'Privacy Policy')}
+                </Link>
+                <Link
+                  to={ROUTES.BLOG}
+                  onClick={() => setShowHelpMenu(false)}
+                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-white transition-all text-[#0A0A0A]"
+                >
+                  {t('common.blog', 'Blog')}
                 </Link>
                 <Link
                   to={ROUTES.FAQ}
+                  onClick={() => setShowHelpMenu(false)}
                   className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-white transition-all text-[#0A0A0A]"
                 >
-                  FAQ &amp; Guides
+                  {t('common.faq_guides', 'FAQ & Guides')}
                 </Link>
               </div>
             )}

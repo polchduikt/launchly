@@ -27,6 +27,7 @@ const AiPage = lazy(() => import('../pages/owner/Ai/AiPage'));
 const OrdersPage = lazy(() => import('../pages/owner/Orders/OrdersPage').then(m => ({ default: m.OrdersPage })));
 const BroadcastsPage = lazy(() => import('../pages/owner/Broadcasts/BroadcastsPage').then(m => ({ default: m.BroadcastsPage })));
 const BroadcastBuilderPage = lazy(() => import('../pages/owner/BroadcastBuilder/BroadcastBuilderPage').then(m => ({ default: m.BroadcastBuilderPage })));
+const SupportPage = lazy(() => import('../pages/owner/Support/SupportPage').then(m => ({ default: m.SupportPage })));
 const CheckoutSuccessPage = lazy(() => import('../pages/owner/CheckoutSuccess/CheckoutSuccessPage'));
 const CheckoutCancelPage = lazy(() => import('../pages/owner/CheckoutCancel/CheckoutCancelPage'));
 const AcceptableUsePolicyPage = lazy(() => import('../pages/public/Legal/AcceptableUsePolicyPage'));
@@ -178,6 +179,7 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.ORDERS} element={<OrdersPage />} />
             <Route path={ROUTES.BROADCASTS} element={<BroadcastsPage />} />
             <Route path={ROUTES.BROADCAST_BUILDER} element={<BroadcastBuilderPage />} />
+            <Route path={ROUTES.SUPPORT} element={<SupportPage />} />
             <Route path={ROUTES.BILLING_SUCCESS} element={<CheckoutSuccessPage />} />
             <Route path={ROUTES.BILLING_CANCEL} element={<CheckoutCancelPage />} />
           </Route>

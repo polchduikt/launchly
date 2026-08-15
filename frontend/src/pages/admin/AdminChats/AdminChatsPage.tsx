@@ -553,7 +553,17 @@ export const AdminChatsPage: React.FC = () => {
             <div className="flex-1 p-6 overflow-y-auto overflow-x-hidden custom-scrollbar space-y-4 min-w-0 select-text">
               {(selectedTicket.messages || []).map(msg => {
                 if ((msg.sender as string) === 'SYSTEM') {
-                  const managerName = msg.text.replace(/^До діалогу приєднався менеджер |^Manager /, '');
+                  let managerName = selectedTicket.assignedManagerName || '';
+                  if (!managerName) {
+                    const cleaned = msg.text
+                      .replace(/^До діалогу приєднався менеджер\s*/i, '')
+                      .replace(/^Manager\s*/i, '')
+                      .replace(/\s*joined the dialog$/i, '')
+                      .replace(/\{0\}/g, '')
+                      .trim();
+                    if (cleaned) managerName = cleaned;
+                  }
+                  if (!managerName) managerName = t('admin.support_team', 'Служба підтримки');
                   return (
                     <div key={msg.id} className="flex justify-center my-2">
                       <div className="px-4 py-1.5 rounded-xl bg-amber-200 border-2 border-[#0A0A0A] text-[#0A0A0A] text-[11px] font-black uppercase shadow-[2px_2px_0px_#0A0A0A] flex items-center gap-1.5">
