@@ -4,10 +4,7 @@ import com.launchly.blog.dto.BlogArticleDto;
 import com.launchly.blog.service.BlogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
@@ -18,8 +15,8 @@ public class BlogController {
     private final BlogService blogService;
 
     @GetMapping
-    public ResponseEntity<List<BlogArticleDto>> getAllArticles() {
-        return ResponseEntity.ok(blogService.getAllArticles());
+    public ResponseEntity<List<BlogArticleDto>> getAllArticles(@RequestParam(required = false) String lang) {
+        return ResponseEntity.ok(blogService.getAllArticles(lang));
     }
 
     @GetMapping("/{id}")

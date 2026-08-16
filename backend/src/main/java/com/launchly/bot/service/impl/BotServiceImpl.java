@@ -286,6 +286,7 @@ public class BotServiceImpl implements BotService {
 
         try {
             bot.setActive(true);
+            bot.setRunsCount(bot.getRunsCount() + 1);
             bot = botRepository.save(bot);
         } catch (Exception e) {
             try {
@@ -295,6 +296,43 @@ public class BotServiceImpl implements BotService {
             throw e;
         }
 
+        return toBotResponseWithStats(bot);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "bots", key = "#userId")
+    public BotResponse publishBot(Long id, Long userId) {
+        Bot bot = findBotByIdAndUser(id, userId);
+        validateWriteAccess(bot, userId);
+
+        bot.setRunsCount(bot.getRunsCount() + 1);
+        bot.setUpdatedAt(LocalDateTime.now());
+
+        if (!bot.isActive()) {
+            boolean hasRealToken = false;
+            try {
+                if (bot.getTelegramToken() != null && !bot.getTelegramToken().isBlank()) {
+                    String decrypted = encryptionUtil.decrypt(bot.getTelegramToken());
+                    if (decrypted != null && !decrypted.isBlank() && 
+                        !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decrypted)) {
+                        hasRealToken = true;
+                    }
+                }
+            } catch (Exception e) {
+            }
+
+            if (hasRealToken) {
+                try {
+                    telegramBotManager.registerBot(bot);
+                    bot.setActive(true);
+                } catch (Exception e) {
+                    log.error("Failed to register bot on publish: {}", e.getMessage(), e);
+                }
+            }
+        }
+
+        bot = botRepository.save(bot);
         return toBotResponseWithStats(bot);
     }
 
@@ -757,7 +795,8 @@ public class BotServiceImpl implements BotService {
                 hasToken,
                 role,
                 bot.isTemplate(),
-                bot.getTemplateName()
+                bot.getTemplateName(),
+                bot.getRunsCount()
         );
     }
 

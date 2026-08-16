@@ -75,6 +75,10 @@ public class Bot extends BaseEntity {
     @Builder.Default
     private boolean template = false;
 
+    @Column(name = "runs_count", nullable = false)
+    @Builder.Default
+    private int runsCount = 1;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

@@ -26,6 +26,8 @@ public interface BotService {
 
     BotResponse startBot(Long id, Long userId);
 
+    BotResponse publishBot(Long id, Long userId);
+
     BotResponse stopBot(Long id, Long userId);
 
     FlowSchemaResponse getFlowSchema(Long botId, Long userId);

@@ -72,6 +72,12 @@ public class BotController {
         return ResponseEntity.ok(botService.startBot(id, userDetails.getId()));
     }
 
+    @PostMapping("/{id}/publish")
+    public ResponseEntity<BotResponse> publishBot(@PathVariable Long id,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(botService.publishBot(id, userDetails.getId()));
+    }
+
     @PostMapping("/{id}/stop")
     public ResponseEntity<BotResponse> stopBot(@PathVariable Long id,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {

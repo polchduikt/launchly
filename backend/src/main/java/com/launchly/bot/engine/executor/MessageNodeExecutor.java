@@ -404,16 +404,18 @@ public class MessageNodeExecutor implements NodeExecutor {
                 }
             }
         } else {
-            String text = data != null ? (String) data.getOrDefault("text", "...") : "...";
+            String text = data != null ? (String) data.get("text") : null;
             String imageUrl = data != null ? (String) data.get("imageUrl") : null;
             List<?> buttonsList = data != null ? (List<?>) data.get("buttons") : null;
 
-            String sanitizedText = SanitizationUtil.sanitizeForTelegram(text);
+            boolean hasText = text != null && !text.trim().isEmpty();
+            boolean hasImage = imageUrl != null && !imageUrl.trim().isEmpty();
             InlineKeyboardMarkup markup = buildMarkup(buttonsList);
             if (markup != null) hasButtons = true;
 
-            try {
-                if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            if (hasImage) {
+                String sanitizedText = hasText ? SanitizationUtil.sanitizeForTelegram(text) : "";
+                try {
                     SendPhoto sendPhoto = SendPhoto.builder()
                             .chatId(chatId)
                             .photo(new InputFile(imageUrl))
@@ -421,16 +423,23 @@ public class MessageNodeExecutor implements NodeExecutor {
                             .replyMarkup(markup)
                             .build();
                     client.execute(sendPhoto);
-                } else {
+                } catch (TelegramApiException e) {
+                    log.error("Failed to send photo for node {}: {}", node.id(), e.getMessage());
+                }
+            } else if (hasText || markup != null) {
+                String sanitizedText = hasText ? SanitizationUtil.sanitizeForTelegram(text) : "...";
+                try {
                     SendMessage message = SendMessage.builder()
                             .chatId(chatId)
                             .text(sanitizedText)
                             .replyMarkup(markup)
                             .build();
                     client.execute(message);
+                } catch (TelegramApiException e) {
+                    log.error("Failed to send legacy flat message for node {}: {}", node.id(), e.getMessage());
                 }
-            } catch (TelegramApiException e) {
-                log.error("Failed to send legacy flat message for node {}: {}", node.id(), e.getMessage());
+            } else {
+                log.debug("Message node {} is empty (no text/image/buttons), skipping sending.", node.id());
             }
         }
 

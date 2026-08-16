@@ -97,5 +97,9 @@ databaseChangeLog:
       file: db/changelog/changes/V048__add_timezone_to_users.sql
   - include:
       file: db/changelog/changes/V049__create_support_tickets_and_unread_for_user.sql
+  - include:
+      file: db/changelog/changes/V050__add_language_to_blog_articles.sql
+  - include:
+      file: db/changelog/changes/V051__add_runs_count_to_bots.sql
 
 

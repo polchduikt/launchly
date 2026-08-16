@@ -44,6 +44,10 @@ public class BlogArticle {
     @Column(columnDefinition = "TEXT")
     private String tags;
 
+    @Column(nullable = false, length = 10)
+    @Builder.Default
+    private String language = "uk";
+
     @Column(name = "content_blocks", nullable = false, columnDefinition = "TEXT")
     private String contentBlocks;
 }

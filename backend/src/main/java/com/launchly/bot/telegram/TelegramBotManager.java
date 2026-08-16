@@ -72,7 +72,7 @@ public class TelegramBotManager {
         }
     }
 
-    public void registerBot(Bot bot) {
+    public synchronized void registerBot(Bot bot) {
         if (activeBots.containsKey(bot.getId())) {
             log.warn("Bot {} is already registered", bot.getId());
             return;
@@ -84,6 +84,22 @@ public class TelegramBotManager {
             if (token == null || token.isBlank() || "0000000000:dummyTokenPlaceholderForNoBotConfig".equals(token)) {
                 log.info("Skipping registration for bot {} (id={}): dummy token placeholder", bot.getName(), bot.getId());
                 return;
+            }
+
+            for (Long activeId : activeBots.keySet()) {
+                if (!activeId.equals(bot.getId()) && activeId > 0) {
+                    try {
+                        botRepository.findById(activeId).ifPresent(other -> {
+                            String otherToken = encryptionUtil.decrypt(other.getTelegramToken());
+                            if (token.equals(otherToken)) {
+                                log.info("Unregistering conflicting active bot id={} sharing token with bot id={}", activeId, bot.getId());
+                                unregisterBot(activeId);
+                            }
+                        });
+                    } catch (Exception e) {
+                        log.warn("Error checking conflicting bot id={}: {}", activeId, e.getMessage());
+                    }
+                }
             }
 
             if (bot.getUsername() == null || bot.getUsername().isBlank()) {
@@ -114,7 +130,7 @@ public class TelegramBotManager {
                 String deleteWebhookUrl = "https://api.telegram.org/bot" + token + "/deleteWebhook?drop_pending_updates=false";
                 org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
                 restTemplate.getForEntity(deleteWebhookUrl, String.class);
-                Thread.sleep(500);
+                Thread.sleep(300);
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
@@ -134,7 +150,7 @@ public class TelegramBotManager {
         }
     }
 
-    private void registerSystemBot() {
+    private synchronized void registerSystemBot() {
         if (activeBots.containsKey(-1L)) {
             return;
         }
@@ -144,7 +160,7 @@ public class TelegramBotManager {
                 String deleteWebhookUrl = "https://api.telegram.org/bot" + systemBotToken + "/deleteWebhook?drop_pending_updates=false";
                 org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
                 restTemplate.getForEntity(deleteWebhookUrl, String.class);
-                Thread.sleep(500);
+                Thread.sleep(300);
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
@@ -164,16 +180,13 @@ public class TelegramBotManager {
         }
     }
 
-    public void unregisterBot(Long botId) {
+    public synchronized void unregisterBot(Long botId) {
         TelegramBotsLongPollingApplication app = activeBots.remove(botId);
         telegramClients.remove(botId);
         if (app != null) {
             try {
                 app.close();
-                Thread.sleep(500);
                 log.info("Unregistered bot {}", botId);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 log.error("Error closing bot {}: {}", botId, e.getMessage());
             }

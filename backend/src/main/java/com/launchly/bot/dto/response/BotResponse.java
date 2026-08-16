@@ -18,5 +18,6 @@ public record BotResponse(
         boolean hasTelegramToken,
         String role,
         boolean isTemplate,
-        String templateName
+        String templateName,
+        int runs
 ) {}

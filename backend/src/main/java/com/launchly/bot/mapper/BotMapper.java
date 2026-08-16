@@ -13,6 +13,7 @@ public interface BotMapper {
     @Mapping(target = "totalUsers", ignore = true)
     @Mapping(target = "hasTelegramToken", ignore = true)
     @Mapping(target = "role", ignore = true)
+    @Mapping(target = "runs", ignore = true)
     BotResponse toBotResponse(Bot bot);
 
     @Mapping(target = "tags", ignore = true)
