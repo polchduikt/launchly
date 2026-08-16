@@ -1093,6 +1093,7 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
     takeSnapshot,
     isDirty,
     hasUnpublishedChanges,
+    setPublishedKey,
     copySelectedNodes,
     pasteCopiedNodes,
     isValidConnection,

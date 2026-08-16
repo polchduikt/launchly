@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { useTranslation } from '../../../i18n/config';
+import { useTranslation, getLanguage } from '../../../i18n/config';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
 import { useAllBotUsersQuery } from '../../../hooks/crm/useCrmQueries';
@@ -22,7 +22,10 @@ import {
   ArrowLeft, 
   Loader2, 
   RotateCcw,
-  BookOpen
+  BookOpen,
+  User,
+  Calendar,
+  Clock
 } from 'lucide-react';
 
 const parseButtons = (text: string) => {
@@ -243,7 +246,12 @@ export const DashboardPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { isLoading: isLoadingBots } = useBotsQuery();
   const { data: allContacts = [] } = useAllBotUsersQuery();
-  const { data: blogArticles = BLOG_ARTICLES } = useBlogArticlesQuery();
+  const currentLang = getLanguage() || 'uk';
+  const { data: rawBlogArticles = BLOG_ARTICLES } = useBlogArticlesQuery(currentLang);
+  const blogArticles = useMemo(
+    () => rawBlogArticles.filter((a) => !a.language || a.language.toLowerCase() === currentLang.toLowerCase()),
+    [rawBlogArticles, currentLang]
+  );
   const user = useAuthStore((state) => state.user);
   const [selectedTemplate, setSelectedTemplate] = useState<FlowTemplate | null>(null);
   const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false);
@@ -472,10 +480,33 @@ export const DashboardPage: React.FC = () => {
                       className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                     />
                   </div>
-                  <div className="p-6 flex-1 flex flex-col justify-between">
-                    <h3 className="font-['Anybody',sans-serif] font-bold text-[#0A0A0A] text-sm md:text-base leading-snug line-clamp-3 uppercase">
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-3 font-['JetBrains_Mono',monospace]">
+                    <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-sm md:text-base leading-snug line-clamp-2 uppercase break-words [overflow-wrap:anywhere]">
                       {article.title}
                     </h3>
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold text-slate-700 pt-2 border-t border-[#0A0A0A]/15">
+                      <div className="flex items-center gap-1.5 truncate max-w-[130px]">
+                        <User size={12} className="shrink-0 text-[#0A0A0A]" />
+                        <span className="truncate">{article.author || 'Launchly Team'}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {article.date && (
+                          <div className="flex items-center gap-1">
+                            <Calendar size={12} className="shrink-0 text-[#0A0A0A]" />
+                            <span>{article.date}</span>
+                          </div>
+                        )}
+                        {article.readTime && (
+                          <>
+                            <span>•</span>
+                            <div className="flex items-center gap-1">
+                              <Clock size={12} className="shrink-0 text-[#0A0A0A]" />
+                              <span>{article.readTime}</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               );

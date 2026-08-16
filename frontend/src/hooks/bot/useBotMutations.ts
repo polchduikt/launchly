@@ -4,6 +4,7 @@ import {
   createBotApi,
   deleteBotApi,
   startBotApi,
+  publishBotApi,
   stopBotApi,
   updateBotApi,
 } from '../../api/bot';
@@ -42,6 +43,17 @@ export const useStartBotMutation = () => {
     mutationFn: (id: number) => startBotApi(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bots'] });
+    },
+  });
+};
+
+export const usePublishBotMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => publishBotApi(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['bots'] });
+      queryClient.setQueryData(['bot', data.id], data);
     },
   });
 };

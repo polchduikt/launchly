@@ -22,6 +22,7 @@ export interface BotResponse {
   createdAt: string;
   updatedAt?: string;
   totalUsers: number;
+  runs?: number;
   stats?: {
     users?: number;
     messages?: number;

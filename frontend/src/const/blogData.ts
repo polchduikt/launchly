@@ -7,6 +7,7 @@ export interface BlogArticle {
   date: string;
   summary: string;
   coverImage: string;
+  language?: string;
   tags: string[];
   contentBlocks: Array<
     | { type: 'paragraph'; text: string }

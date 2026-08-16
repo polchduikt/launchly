@@ -50,6 +50,13 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
       allowed: isManager,
     },
     {
+      id: 'blog',
+      label: t('admin.blog_nav', 'Блог'),
+      path: ROUTES.ADMIN_BLOG,
+      icon: Globe,
+      allowed: true,
+    },
+    {
       id: 'users',
       label: t('admin.users'),
       path: ROUTES.ADMIN_USERS,
@@ -83,6 +90,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
     switch (location.pathname) {
       case ROUTES.ADMIN_CHATS:
         return t('admin.chats_title');
+      case ROUTES.ADMIN_BLOG:
+        return t('admin.blog_title', 'Керування блогом');
       case ROUTES.ADMIN_USERS:
         return t('admin.users_title');
       case ROUTES.ADMIN_AUTOMATIONS:

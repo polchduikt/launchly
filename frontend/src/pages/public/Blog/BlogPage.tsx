@@ -5,7 +5,7 @@ import { useBlogArticlesQuery } from '../../../hooks/dashboard/useBlogQueries';
 import { ArrowRight, Calendar, ChevronLeft, ChevronRight, Zap, Workflow, Bot } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../routes/paths';
-import { useTranslation } from '../../../i18n/config';
+import { useTranslation, getLanguage } from '../../../i18n/config';
 import { useSEO } from '../../../hooks/useSEO';
 import { PublicFooter } from '../../../components/layout/PublicFooter';
 import { PublicHeader } from '../../../components/layout/PublicHeader';
@@ -38,7 +38,7 @@ const BlogCard: React.FC<{
     return (
       <article
         onClick={() => onOpen(article.id)}
-        className={`relative bg-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden aspect-[4/5] ${className}`}
+        className={`relative bg-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden aspect-[4/5] min-w-0 w-full ${className}`}
       >
         <img
           src={article.coverImage}
@@ -46,19 +46,19 @@ const BlogCard: React.FC<{
           className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/55 to-transparent" />
-        <div className="absolute top-3 left-3 bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest px-2.5 py-1">
+        <div className="absolute top-3 left-3 bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest px-2.5 py-1 z-10 max-w-[80%] truncate">
           {article.category}
         </div>
-        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 space-y-3">
-          <h2 className="font-['Anybody',sans-serif] text-xl sm:text-2xl font-extrabold uppercase text-[#F2EBDD] leading-snug line-clamp-3">
+        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 space-y-3 min-w-0">
+          <h2 className="font-['Anybody',sans-serif] text-xl sm:text-2xl font-extrabold uppercase text-[#F2EBDD] leading-snug line-clamp-3 break-words [overflow-wrap:anywhere]">
             {article.title}
           </h2>
-          <div className="flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#F2EBDD]/80">
-            <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#F2EBDD]/80 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
               <Calendar size={13} />
               <span>{article.date}</span>
             </div>
-            <div className="flex items-center gap-1 text-indigo-300 font-extrabold group-hover:translate-x-1 transition-transform">
+            <div className="flex items-center gap-1 text-indigo-300 font-extrabold group-hover:translate-x-1 transition-transform shrink-0">
               <span>{readLabel}</span>
               <ArrowRight size={13} />
             </div>
@@ -72,7 +72,7 @@ const BlogCard: React.FC<{
     return (
       <article
         onClick={() => onOpen(article.id)}
-        className={`bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden flex flex-col ${className}`}
+        className={`bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden flex flex-col min-w-0 w-full h-full ${className}`}
       >
         <div className="aspect-[16/10] w-full border-b-2 border-[#0A0A0A] relative overflow-hidden bg-slate-200 shrink-0">
           <img
@@ -80,20 +80,22 @@ const BlogCard: React.FC<{
             alt={article.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          <div className="absolute top-3 left-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest px-2.5 py-1 border border-white">
+          <div className="absolute top-3 left-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest px-2.5 py-1 border border-white max-w-[80%] truncate">
             {article.category}
           </div>
         </div>
-        <div className="p-4 sm:p-5 flex flex-col flex-1 gap-2">
-          <h2 className="font-['Anybody',sans-serif] text-base sm:text-lg font-extrabold uppercase text-[#0A0A0A] leading-snug line-clamp-2">
-            {article.title}
-          </h2>
-          <p className="font-['Geist',sans-serif] text-xs font-medium text-slate-800 line-clamp-2 leading-relaxed">
-            {article.summary}
-          </p>
-          <div className="pt-2 mt-auto flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A]">
+        <div className="p-4 sm:p-5 flex flex-col flex-1 gap-2 min-w-0 justify-between">
+          <div className="space-y-2 min-w-0">
+            <h2 className="font-['Anybody',sans-serif] text-base sm:text-lg font-extrabold uppercase text-[#0A0A0A] leading-snug line-clamp-2 break-words [overflow-wrap:anywhere]">
+              {article.title}
+            </h2>
+            <p className="font-['Geist',sans-serif] text-xs font-medium text-slate-800 line-clamp-2 leading-relaxed break-words [overflow-wrap:anywhere]">
+              {article.summary}
+            </p>
+          </div>
+          <div className="pt-2 mt-auto flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] shrink-0 border-t border-[#0A0A0A]/20">
             <span>{article.date}</span>
-            <div className="flex items-center gap-1 text-indigo-700 font-extrabold group-hover:translate-x-1 transition-transform">
+            <div className="flex items-center gap-1 text-indigo-700 font-extrabold group-hover:translate-x-1 transition-transform shrink-0">
               <span>{readLabel}</span>
               <ArrowRight size={13} />
             </div>
@@ -107,29 +109,29 @@ const BlogCard: React.FC<{
     return (
       <article
         onClick={() => onOpen(article.id)}
-        className={`bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden flex flex-col ${className}`}
+        className={`bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden flex flex-col min-w-0 w-full h-full ${className}`}
       >
-        <div className="p-4 sm:p-5 border-b-2 border-[#0A0A0A] space-y-2">
-          <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest text-indigo-700">
+        <div className="p-4 sm:p-5 border-b-2 border-[#0A0A0A] space-y-2 min-w-0">
+          <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest text-indigo-700 block truncate">
             {article.category}
           </span>
-          <h2 className="font-['Anybody',sans-serif] text-lg sm:text-xl font-extrabold uppercase text-[#0A0A0A] leading-snug line-clamp-3">
+          <h2 className="font-['Anybody',sans-serif] text-lg sm:text-xl font-extrabold uppercase text-[#0A0A0A] leading-snug line-clamp-3 break-words [overflow-wrap:anywhere]">
             {article.title}
           </h2>
         </div>
-        <div className="aspect-[5/4] w-full relative overflow-hidden bg-slate-200">
+        <div className="aspect-[5/4] w-full relative overflow-hidden bg-slate-200 shrink-0">
           <img
             src={article.coverImage}
             alt={article.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
-        <div className="p-4 flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A]">
-          <div className="flex items-center gap-1.5">
+        <div className="p-4 mt-auto flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <Calendar size={13} />
             <span>{article.date}</span>
           </div>
-          <div className="flex items-center gap-1 text-indigo-700 font-extrabold group-hover:translate-x-1 transition-transform">
+          <div className="flex items-center gap-1 text-indigo-700 font-extrabold group-hover:translate-x-1 transition-transform shrink-0">
             <span>{readLabel}</span>
             <ArrowRight size={13} />
           </div>
@@ -141,7 +143,7 @@ const BlogCard: React.FC<{
   return (
     <article
       onClick={() => onOpen(article.id)}
-      className={`bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden ${
+      className={`bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden min-w-0 w-full ${
         isVertical ? 'flex flex-col' : 'flex flex-col md:flex-row'
       } ${fixedHeight ? 'h-full' : ''} ${className}`}
     >
@@ -149,11 +151,11 @@ const BlogCard: React.FC<{
         className={`relative overflow-hidden bg-slate-200 shrink-0 border-[#0A0A0A] ${
           isVertical
             ? fixedHeight
-              ? 'h-[58%] w-full border-b-2'
-              : 'aspect-[3/4] w-full border-b-2'
+              ? 'aspect-[16/10] sm:aspect-[4/3] md:aspect-auto md:h-[52%] w-full border-b-2'
+              : 'aspect-[16/10] sm:aspect-[4/3] w-full border-b-2'
             : tall
-              ? 'aspect-[4/3] w-full md:aspect-auto md:w-[46%] md:min-h-[280px] lg:min-h-[320px] xl:min-h-[360px] md:self-stretch md:border-b-0 md:border-r-2'
-              : 'aspect-[4/3] w-full md:aspect-auto md:w-[48%] md:min-h-[220px] md:border-b-0 md:border-r-2'
+              ? 'aspect-[16/10] sm:aspect-[4/3] w-full md:aspect-auto md:w-[46%] md:min-h-[280px] lg:min-h-[320px] xl:min-h-[360px] md:self-stretch border-b-2 md:border-b-0 md:border-r-2'
+              : 'aspect-[16/10] sm:aspect-[4/3] w-full md:aspect-auto md:w-[48%] md:min-h-[220px] border-b-2 md:border-b-0 md:border-r-2'
         }`}
       >
         <img
@@ -161,36 +163,38 @@ const BlogCard: React.FC<{
           alt={article.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 sm:px-2.5 sm:py-1 border border-white">
+        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 sm:px-2.5 sm:py-1 border border-white max-w-[85%] truncate">
           {article.category}
         </div>
       </div>
 
       <div
-        className={`p-3 sm:p-5 flex flex-col gap-1.5 sm:gap-2.5 ${
-          isVertical ? 'flex-1 min-h-0' : 'flex-1 md:justify-between'
+        className={`p-4 sm:p-5 flex flex-col gap-2 sm:gap-3 min-w-0 ${
+          isVertical ? 'flex-1 min-h-0 justify-between' : 'flex-1 min-h-0 justify-between'
         }`}
       >
-        <h2
-          className={`font-['Anybody',sans-serif] font-extrabold uppercase text-[#0A0A0A] leading-snug ${
-            isVertical ? 'text-xs sm:text-xl line-clamp-2 sm:line-clamp-3' : 'text-sm sm:text-xl lg:text-2xl line-clamp-2 sm:line-clamp-3'
-          }`}
-        >
-          {article.title}
-        </h2>
-        <p
-          className={`font-['Geist',sans-serif] text-[10px] sm:text-xs font-medium text-slate-800 leading-relaxed ${
-            fixedHeight ? 'line-clamp-2' : isVertical ? 'line-clamp-2 sm:line-clamp-3' : 'line-clamp-2 sm:line-clamp-3'
-          } ${fixedHeight ? '' : 'flex-1'}`}
-        >
-          {article.summary}
-        </p>
-        <div className="pt-3 border-t border-[#0A0A0A]/20 mt-auto flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A]">
-          <div className="flex items-center gap-1.5">
+        <div className="space-y-2 min-w-0">
+          <h2
+            className={`font-['Anybody',sans-serif] font-extrabold uppercase text-[#0A0A0A] leading-snug break-words [overflow-wrap:anywhere] ${
+              isVertical ? 'text-base sm:text-lg lg:text-xl line-clamp-2 sm:line-clamp-3' : 'text-base sm:text-xl lg:text-2xl line-clamp-2 sm:line-clamp-3'
+            }`}
+          >
+            {article.title}
+          </h2>
+          <p
+            className={`font-['Geist',sans-serif] text-xs sm:text-sm font-medium text-slate-800 leading-relaxed break-words [overflow-wrap:anywhere] ${
+              fixedHeight ? 'line-clamp-2 sm:line-clamp-3' : 'line-clamp-2 sm:line-clamp-3'
+            }`}
+          >
+            {article.summary}
+          </p>
+        </div>
+        <div className="pt-3 border-t border-[#0A0A0A]/20 mt-auto flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <Calendar size={13} />
             <span>{article.date}</span>
           </div>
-          <div className="flex items-center gap-1 text-indigo-700 font-extrabold group-hover:translate-x-1 transition-transform">
+          <div className="flex items-center gap-1 text-indigo-700 font-extrabold group-hover:translate-x-1 transition-transform shrink-0">
             <span>{readLabel}</span>
             <ArrowRight size={13} />
           </div>
@@ -227,7 +231,13 @@ export const BlogPage: React.FC = () => {
   const [sliderIndex, setSliderIndex] = useState(0);
   const [showMore, setShowMore] = useState(false);
 
-  const { data: blogArticles = BLOG_ARTICLES } = useBlogArticlesQuery();
+  const lang = getLanguage() || 'uk';
+  const { data: rawArticles = BLOG_ARTICLES } = useBlogArticlesQuery(lang);
+
+  const blogArticles = useMemo(
+    () => rawArticles.filter((a) => !a.language || a.language.toLowerCase() === lang.toLowerCase()),
+    [rawArticles, lang]
+  );
 
   const middleArticle = blogArticles[1];
   const rightArticle = blogArticles[2];
@@ -304,10 +314,52 @@ export const BlogPage: React.FC = () => {
         <PublicHeader />
 
         <div className="w-full max-w-[1680px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 pt-14 pb-16 space-y-12">
-          {blogArticles.length > 0 ? (
+          {blogArticles.length === 0 ? (
+            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-12 text-center space-y-4">
+              <h3 className="font-['Anybody',sans-serif] text-2xl font-black uppercase text-[#0A0A0A]">
+                {t('blog.empty.title', 'No Articles Found')}
+              </h3>
+              <p className="font-['Geist',sans-serif] text-sm text-[#0A0A0A] font-bold">
+                {t('blog.empty.desc', 'Try searching for a different keyword or topic.')}
+              </p>
+            </div>
+          ) : blogArticles.length === 1 ? (
+            <div className="w-full max-w-4xl mx-auto">
+              <BlogCard
+                article={blogArticles[0]}
+                orientation="horizontal"
+                onOpen={openArticle}
+                readLabel={readLabel}
+                tall
+              />
+            </div>
+          ) : blogArticles.length === 2 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-stretch pb-2 pr-1.5">
+              <div className="min-w-0 h-full">
+                <BlogCard
+                  article={blogArticles[0]}
+                  orientation="vertical"
+                  onOpen={openArticle}
+                  readLabel={readLabel}
+                  variant="landscape"
+                  className="h-full"
+                />
+              </div>
+              <div className="min-w-0 h-full">
+                <BlogCard
+                  article={blogArticles[1]}
+                  orientation="vertical"
+                  onOpen={openArticle}
+                  readLabel={readLabel}
+                  variant="landscape"
+                  className="h-full"
+                />
+              </div>
+            </div>
+          ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-[0.85fr_1.3fr_0.85fr] gap-5 lg:gap-7 xl:gap-8 items-center pb-2 pr-1.5">
-                <div className="h-auto md:h-[520px] lg:h-[580px] xl:h-[620px]">
+              <div className="grid grid-cols-1 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.3fr)_minmax(0,0.85fr)] gap-5 lg:gap-7 xl:gap-8 items-center pb-2 pr-1.5">
+                <div className="h-auto md:h-[520px] lg:h-[580px] xl:h-[620px] min-w-0">
                   {activeSliderArticle && (
                     <div key={activeSliderArticle.id} className="animate-fade-in h-full">
                       <BlogCard
@@ -321,7 +373,7 @@ export const BlogPage: React.FC = () => {
                   )}
                 </div>
 
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 min-w-0">
                   {sliderArticles.length > 1 && (
                     <div className="flex items-center gap-2 self-start">
                       <button
@@ -354,7 +406,7 @@ export const BlogPage: React.FC = () => {
                   )}
                 </div>
 
-                <div className="h-auto md:h-[520px] lg:h-[580px] xl:h-[620px]">
+                <div className="h-auto md:h-[520px] lg:h-[580px] xl:h-[620px] min-w-0">
                   {rightArticle && (
                     <BlogCard
                       article={rightArticle}
@@ -368,50 +420,46 @@ export const BlogPage: React.FC = () => {
               </div>
 
               {secondRowArticles.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 items-start pb-2 pr-1.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 items-stretch pb-2 pr-1.5">
                   {secondRowArticles[0] && (
-                    <div className="md:pt-8">
+                    <div className="min-w-0 md:pt-8 h-full">
                       <BlogCard
                         article={secondRowArticles[0]}
                         orientation="vertical"
                         onOpen={openArticle}
                         readLabel={readLabel}
                         variant="landscape"
+                        className="h-full"
                       />
                     </div>
                   )}
                   {secondRowArticles[1] && (
-                    <BlogCard
-                      article={secondRowArticles[1]}
-                      orientation="vertical"
-                      onOpen={openArticle}
-                      readLabel={readLabel}
-                      variant="overlay"
-                    />
+                    <div className="min-w-0 h-full">
+                      <BlogCard
+                        article={secondRowArticles[1]}
+                        orientation="vertical"
+                        onOpen={openArticle}
+                        readLabel={readLabel}
+                        variant="overlay"
+                        className="h-full"
+                      />
+                    </div>
                   )}
                   {secondRowArticles[2] && (
-                    <div className="md:pt-12">
+                    <div className="min-w-0 md:pt-12 h-full">
                       <BlogCard
                         article={secondRowArticles[2]}
                         orientation="vertical"
                         onOpen={openArticle}
                         readLabel={readLabel}
                         variant="compact"
+                        className="h-full"
                       />
                     </div>
                   )}
                 </div>
               )}
             </>
-          ) : (
-            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-12 text-center space-y-4">
-              <h3 className="font-['Anybody',sans-serif] text-2xl font-black uppercase text-[#0A0A0A]">
-                {t('blog.empty.title', 'No Articles Found')}
-              </h3>
-              <p className="font-['Geist',sans-serif] text-sm text-[#0A0A0A] font-bold">
-                {t('blog.empty.desc', 'Try searching for a different keyword or topic.')}
-              </p>
-            </div>
           )}
         </div>
 
@@ -506,16 +554,18 @@ export const BlogPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start animate-fade-in">
-                {remainingArticles.map((article, index) => (
-                  <BlogCard
-                    key={article.id}
-                    article={article}
-                    orientation={index % 3 === 1 ? 'horizontal' : 'vertical'}
-                    onOpen={openArticle}
-                    readLabel={readLabel}
-                    className={index % 3 === 1 ? 'md:mt-10' : ''}
-                  />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch animate-fade-in">
+                {remainingArticles.map((article) => (
+                  <div key={article.id} className="min-w-0 h-full">
+                    <BlogCard
+                      article={article}
+                      orientation="vertical"
+                      onOpen={openArticle}
+                      readLabel={readLabel}
+                      variant="landscape"
+                      className="h-full"
+                    />
+                  </div>
                 ))}
               </div>
             )}

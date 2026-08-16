@@ -735,10 +735,10 @@ export const AutomationsPage: React.FC = () => {
                               </div>
                             </div>
                           </td>
-                          {showRuns && <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">{bot.totalUsers}</td>}
+                          {showRuns && <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">{bot.runs ?? 1}</td>}
                           {showCtr && (
                             <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">
-                              {bot.totalUsers === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
+                              {(bot.runs ?? 0) === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
                             </td>
                           )}
                           <td className="py-4 px-2 w-40 text-xs font-bold text-slate-700">{formatModifiedDate(bot.updatedAt || bot.createdAt)}</td>
@@ -828,13 +828,13 @@ export const AutomationsPage: React.FC = () => {
                         <div className="flex items-center gap-3">
                           {showRuns && (
                             <span>
-                              {t('automations.table.runs')}: <span className="font-black">{bot.totalUsers}</span>
+                              {t('automations.table.runs')}: <span className="font-black">{bot.runs ?? 1}</span>
                             </span>
                           )}
                           {showCtr && (
                             <span>
                               {t('automations.table.ctr')}: <span className="font-black">
-                                {bot.totalUsers === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
+                                {(bot.runs ?? 0) === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
                               </span>
                             </span>
                           )}

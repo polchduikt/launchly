@@ -46,6 +46,11 @@ export const startBotApi = async (id: number): Promise<BotResponse> => {
   return response.data;
 };
 
+export const publishBotApi = async (id: number): Promise<BotResponse> => {
+  const response = await apiClient.post<BotResponse>(`/bots/${id}/publish`);
+  return response.data;
+};
+
 export const stopBotApi = async (id: number): Promise<BotResponse> => {
   const response = await apiClient.post<BotResponse>(`/bots/${id}/stop`);
   return response.data;

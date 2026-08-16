@@ -45,6 +45,7 @@ const AdminUsersPage = lazy(() => import('../pages/admin/AdminUsers/AdminUsersPa
 const AdminAutomationsPage = lazy(() => import('../pages/admin/AdminAutomations/AdminAutomationsPage'));
 const AdminBroadcastsPage = lazy(() => import('../pages/admin/AdminBroadcasts/AdminBroadcastsPage'));
 const AdminLogsPage = lazy(() => import('../pages/admin/AdminLogs/AdminLogsPage'));
+const AdminBlogPage = lazy(() => import('../pages/admin/AdminBlog/AdminBlogPage').then(m => ({ default: m.AdminBlogPage })));
 
 const PublicOnlyRoute = () => {
   const accessToken = useAuthStore((state) => state.accessToken);
@@ -192,6 +193,7 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.ADMIN_AUTOMATIONS} element={<AdminAutomationsPage />} />
             <Route path={ROUTES.ADMIN_BROADCASTS} element={<AdminBroadcastsPage />} />
             <Route path={ROUTES.ADMIN_LOGS} element={<AdminLogsPage />} />
+            <Route path={ROUTES.ADMIN_BLOG} element={<AdminBlogPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />

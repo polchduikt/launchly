@@ -6,7 +6,8 @@ import type { ConnectionLineComponentProps, Edge, Node, OnNodeDrag } from '@xyfl
 import '@xyflow/react/dist/style.css';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
-import { useStartBotMutation, useUpdateBotMutation } from '../../../hooks/bot/useBotMutations';
+import { useStartBotMutation, usePublishBotMutation, useUpdateBotMutation } from '../../../hooks/bot/useBotMutations';
+import { getFlowLogicKey } from '../../../utils/flowHelpers';
 import { getCustomFieldsApi } from '../../../api/bot';
 import { NodeEditorPanel } from './components/sidebar/NodeEditorPanel';
 import { FLOW_BLOCKS } from '../../../const/flowBlocks';
@@ -146,6 +147,7 @@ const FlowBuilderInner: React.FC = () => {
     takeSnapshot,
     isDirty,
     hasUnpublishedChanges,
+    setPublishedKey,
     copySelectedNodes,
     pasteCopiedNodes,
     isValidConnection,
@@ -286,6 +288,7 @@ const FlowBuilderInner: React.FC = () => {
   });
 
   const startBotMutation = useStartBotMutation();
+  const publishBotMutation = usePublishBotMutation();
   const activeBot = currentBot;
   const isBotLive = activeBot?.active ?? false;
   const isViewer = activeBot?.role === 'Viewer';
@@ -311,8 +314,12 @@ const FlowBuilderInner: React.FC = () => {
 
   const handleLaunchOrUpdate = () => {
     handleSaveFlow();
-    if (!isBotLive && activeBotId) {
-      startBotMutation.mutate(activeBotId);
+    if (activeBotId) {
+      publishBotMutation.mutate(activeBotId, {
+        onSuccess: () => {
+          setPublishedKey(getFlowLogicKey(nodes, edges));
+        },
+      });
     }
   };
 

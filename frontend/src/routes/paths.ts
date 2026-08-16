@@ -35,5 +35,6 @@ export const ROUTES = {
   ADMIN_AUTOMATIONS: '/admin/automations',
   ADMIN_BROADCASTS: '/admin/broadcasts',
   ADMIN_LOGS: '/admin/logs',
+  ADMIN_BLOG: '/admin/blog',
 };
 
