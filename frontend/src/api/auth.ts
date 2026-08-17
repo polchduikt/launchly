@@ -20,6 +20,19 @@ export const getCurrentUserApi = async (): Promise<UserResponse> => {
   return response.data;
 };
 
+export interface UpdateProfileRequest {
+  name: string;
+  email: string;
+  avatar?: string | null;
+  currentPassword?: string;
+  newPassword?: string;
+}
+
+export const updateProfileApi = async (data: UpdateProfileRequest): Promise<UserResponse> => {
+  const response = await apiClient.put<UserResponse>('/auth/profile', data);
+  return response.data;
+};
+
 export const deleteAccountApi = async (): Promise<void> => {
   await apiClient.delete('/auth/delete-account');
 };

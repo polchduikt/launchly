@@ -19,6 +19,7 @@ import { TelegramLoginModal } from '../../public/Login/components/TelegramLoginM
 import { PricingModal } from '../../../components/common/PricingModal';
 import { LeaveAccountModal } from './components/LeaveAccountModal';
 import { DeleteAccountModal } from './components/DeleteAccountModal';
+import { ProfilePanel } from './components/ProfilePanel';
 import { CreateTemplateModal } from './components/CreateTemplateModal';
 import { t } from '../../../i18n/config';
 import { Loader2, AlertCircle, CheckCircle2, X, Check } from 'lucide-react';
@@ -51,7 +52,6 @@ export const SettingsPage: React.FC = () => {
     },
   });
 
-  // Sync with user when it loads
   useEffect(() => {
     if (user?.timezone) setTimeZone(user.timezone);
   }, [user?.timezone]);
@@ -144,7 +144,9 @@ export const SettingsPage: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'general' ? (
+          {activeTab === 'profile' ? (
+            <ProfilePanel />
+          ) : activeTab === 'general' ? (
             <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden font-['JetBrains_Mono',monospace]">
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between">

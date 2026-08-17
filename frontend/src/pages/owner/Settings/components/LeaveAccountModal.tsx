@@ -139,7 +139,6 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
     >
       <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] rounded-3xl max-w-lg w-full overflow-hidden text-[#0A0A0A] relative">
         
-        {/* Header */}
         <div className="p-6 border-b-2 border-[#0A0A0A] flex items-center justify-between bg-amber-100/60">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-amber-500 text-[#0A0A0A] border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
@@ -163,7 +162,6 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-6 space-y-5">
           {loading ? (
             <div className="py-8 flex flex-col items-center justify-center gap-3">
@@ -171,7 +169,6 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
               <span className="text-xs font-bold">{t('settings.leave.checking_team', 'Перевірка складу команди...')}</span>
             </div>
           ) : !isOwner ? (
-            /* CASE B: User is NOT the owner (Joined member) */
             <>
               <div className="bg-amber-50 border-2 border-[#0A0A0A] p-5 rounded-2xl space-y-3">
                 <div className="flex items-start gap-3">
@@ -190,7 +187,6 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
                 </div>
               </div>
 
-              {/* Word Confirmation for leaving team */}
               <div className="pt-3 border-t-2 border-[#0A0A0A]/15 space-y-2">
                 <label className="block text-[11px] font-extrabold uppercase text-[#0A0A0A] leading-tight">
                   {t('settings.leave.confirm_leave_label', 'Для підтвердження виходу введіть слово')}{' '}
@@ -208,7 +204,6 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
               </div>
             </>
           ) : hasCandidates ? (
-            /* CASE A1: Owner with team candidates */
             <>
               <div className="bg-white border-2 border-[#0A0A0A] p-4 rounded-2xl space-y-2">
                 <div className="flex items-center gap-2 text-xs font-extrabold uppercase text-[#0A0A0A]">
@@ -229,7 +224,6 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
                 </div>
               )}
 
-              {/* Members Select List */}
               <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                 {candidates.map((m) => {
                   const isSelected = selectedNewOwnerId === m.userId;
@@ -269,7 +263,6 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
                 })}
               </div>
 
-              {/* Strict Word Confirmation */}
               <div className="pt-3 border-t-2 border-[#0A0A0A]/15 space-y-2">
                 <label className="block text-[11px] font-extrabold uppercase text-[#0A0A0A] leading-tight">
                   {t('settings.leave.confirm_label', 'Для підтвердження введіть слово')}{' '}
@@ -287,7 +280,6 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
               </div>
             </>
           ) : (
-            /* CASE A2: Owner sole user */
             <div className="bg-amber-50 border-2 border-[#0A0A0A] p-5 rounded-2xl space-y-3">
               <div className="flex items-start gap-3">
                 <AlertTriangle size={20} className="text-amber-600 shrink-0 mt-0.5" />
@@ -307,7 +299,6 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
           )}
         </div>
 
-        {/* Footer Actions */}
         <div className="p-5 border-t-2 border-[#0A0A0A] bg-white flex items-center justify-end gap-3">
           <button
             onClick={onClose}

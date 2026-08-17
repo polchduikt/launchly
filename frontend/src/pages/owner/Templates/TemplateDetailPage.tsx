@@ -483,7 +483,6 @@ export const TemplateDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* About Card */}
               <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[4px_4px_0px_0px_#0A0A0A] space-y-4 rounded-xl">
                 <h3 className="font-black text-xs uppercase text-[#0A0A0A] border-b-2 border-[#0A0A0A] pb-3">
                   {t('template.about_title', 'Про шаблон')}

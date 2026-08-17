@@ -128,15 +128,22 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             {showProfileMenu && (
               <div className="absolute left-14 bottom-[-10px] w-72 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] z-50 p-4 space-y-4 font-['JetBrains_Mono',monospace] text-left">
                 
-                <div className="flex items-center gap-3.5 pb-1">
+                <div 
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    navigate('/settings?tab=profile');
+                  }}
+                  className="flex items-center gap-3.5 pb-1 cursor-pointer group p-1.5 -m-1.5 rounded-xl transition-all hover:bg-[#0A0A0A]/5 border border-transparent hover:border-[#0A0A0A]/20"
+                  title={t('common.edit_profile', 'Edit profile')}
+                >
                   <SafeAvatar
                     src={user?.avatar}
                     name={user?.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-[#0A0A0A] shrink-0"
-                    fallbackClassName="w-12 h-12 rounded-full bg-white text-[#0A0A0A] font-bold text-base flex items-center justify-center border-2 border-[#0A0A0A] shrink-0"
+                    className="w-12 h-12 rounded-full object-cover border-2 border-[#0A0A0A] shrink-0 group-hover:scale-105 transition-transform"
+                    fallbackClassName="w-12 h-12 rounded-full bg-white text-[#0A0A0A] font-bold text-base flex items-center justify-center border-2 border-[#0A0A0A] shrink-0 group-hover:scale-105 transition-transform"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-black text-[#0A0A0A] truncate leading-snug">{user.name}</p>
+                    <p className="text-sm font-black text-[#0A0A0A] truncate leading-snug group-hover:underline">{user.name}</p>
                     <p className="text-[10px] text-slate-600 font-bold truncate max-w-[150px]">{user.email || 'Account email'}</p>
                   </div>
                 </div>
@@ -151,6 +158,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                       <span>Admin Panel</span>
                     </button>
                   )}
+
                   <div className="pt-3 border-t-2 border-[#0A0A0A] flex items-center justify-between px-1">
                     <span 
                       onClick={() => {

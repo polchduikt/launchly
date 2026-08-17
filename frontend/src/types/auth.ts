@@ -15,6 +15,7 @@ export interface User {
   telegramName: string | null;
   telegramPhotoUrl: string | null;
   provider?: string | null;
+  hasPassword?: boolean;
   notifyEmail: boolean;
   notifyTelegram: boolean;
   notificationEmail: string | null;
