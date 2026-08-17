@@ -46,6 +46,12 @@ public class AuthController {
         return ResponseEntity.ok(authService.getCurrentUser(authentication.getName()));
     }
 
+    @PutMapping("/profile")
+    public ResponseEntity<UserResponse> updateProfile(@Valid @RequestBody com.launchly.auth.dto.request.UpdateProfileRequest request,
+                                                      Authentication authentication) {
+        return ResponseEntity.ok(authService.updateProfile(authentication.getName(), request));
+    }
+
     @DeleteMapping("/delete-account")
     public ResponseEntity<Void> deleteAccount(Authentication authentication) {
         UserResponse currentUser = authService.getCurrentUser(authentication.getName());

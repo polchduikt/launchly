@@ -2,6 +2,7 @@ package com.launchly.auth.service.impl;
 
 import com.launchly.auth.dto.request.LoginRequest;
 import com.launchly.auth.dto.request.RegisterRequest;
+import com.launchly.auth.dto.request.UpdateProfileRequest;
 import com.launchly.auth.dto.response.AuthResponse;
 import com.launchly.auth.dto.response.UserResponse;
 import com.launchly.auth.entity.Provider;
@@ -45,6 +46,7 @@ public class AuthServiceImpl implements AuthService {
     private final com.launchly.bot.repository.BotRepository botRepository;
     private final com.launchly.bot.repository.BotMemberRepository botMemberRepository;
     private final com.launchly.billing.repository.SubscriptionRepository subscriptionRepository;
+    private final com.launchly.common.utils.MessageUtils messageUtils;
 
     @Value("${telegram.system-bot-username:}")
     private String systemBotUsername;
@@ -53,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new AppException(HttpStatus.CONFLICT, "Email already in use");
+            throw new AppException(HttpStatus.CONFLICT, messageUtils.getMessage("auth.error.email_already_in_use"));
         }
         User user = User.builder()
                 .email(request.email())
@@ -80,15 +82,15 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+                .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, messageUtils.getMessage("auth.error.invalid_credentials")));
 
         if (!user.isActive()) {
-            String reason = user.getBlockReason() != null ? user.getBlockReason() : "admin.reason_rules";
+            String reason = user.getBlockReason() != null ? user.getBlockReason() : messageUtils.getMessage("auth.error.account_blocked");
             throw new AppException(HttpStatus.FORBIDDEN, reason);
         }
 
         if (user.getPassword() == null || !passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new AppException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+            throw new AppException(HttpStatus.UNAUTHORIZED, messageUtils.getMessage("auth.error.invalid_credentials"));
         }
 
         userAuditService.logLogin(user, user.getProvider() != null ? user.getProvider().name() : "LOCAL");
@@ -104,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
         RefreshToken refreshToken = tokenService.verifyRefreshToken(refreshTokenStr);
         User user = refreshToken.getUser();
         if (!user.isActive()) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Ваш акаунт заблоковано. Зверніться до адміністратора.");
+            throw new AppException(HttpStatus.FORBIDDEN, messageUtils.getMessage("auth.error.account_blocked"));
         }
         tokenService.deleteRefreshToken(refreshTokenStr);
         String newAccessToken = tokenService.generateAccessToken(user);
@@ -122,10 +124,56 @@ public class AuthServiceImpl implements AuthService {
     @Transactional(readOnly = true)
     public UserResponse getCurrentUser(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, messageUtils.getMessage("auth.error.user_not_found")));
         if (!user.isActive()) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Ваш акаунт заблоковано. Зверніться до адміністратора.");
+            throw new AppException(HttpStatus.FORBIDDEN, messageUtils.getMessage("auth.error.account_blocked"));
         }
+        return authMapper.toUserResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateProfile(String currentEmail, UpdateProfileRequest request) {
+        User user = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, messageUtils.getMessage("auth.error.user_not_found")));
+
+        if (!user.isActive()) {
+            throw new AppException(HttpStatus.FORBIDDEN, messageUtils.getMessage("auth.error.account_blocked"));
+        }
+
+        String newEmail = request.email().trim().toLowerCase();
+        if (!user.getEmail().equalsIgnoreCase(newEmail)) {
+            if (user.getProvider() == Provider.GOOGLE) {
+                throw new AppException(HttpStatus.BAD_REQUEST, messageUtils.getMessage("auth.error.google_email_immutable"));
+            }
+            if (userRepository.existsByEmailAndIdNot(newEmail, user.getId())) {
+                throw new AppException(HttpStatus.CONFLICT, messageUtils.getMessage("auth.error.email_already_in_use"));
+            }
+            user.setEmail(newEmail);
+        }
+
+        user.setName(request.name().trim());
+
+        if (request.avatar() != null) {
+            user.setAvatar(request.avatar().trim().isEmpty() ? null : request.avatar().trim());
+        }
+
+        if (request.newPassword() != null && !request.newPassword().isBlank()) {
+            if (request.newPassword().length() < 6) {
+                throw new AppException(HttpStatus.BAD_REQUEST, messageUtils.getMessage("auth.error.password_min_length"));
+            }
+            if (user.getPassword() != null && !user.getPassword().isBlank()) {
+                if (request.currentPassword() == null || request.currentPassword().isBlank()) {
+                    throw new AppException(HttpStatus.BAD_REQUEST, messageUtils.getMessage("auth.error.current_password_required"));
+                }
+                if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+                    throw new AppException(HttpStatus.BAD_REQUEST, messageUtils.getMessage("auth.error.invalid_current_password"));
+                }
+            }
+            user.setPassword(passwordEncoder.encode(request.newPassword()));
+        }
+
+        user = userRepository.save(user);
         return authMapper.toUserResponse(user);
     }
 
@@ -162,7 +210,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional(readOnly = true)
     public TelegramStatusResponse checkTelegramSessionStatus(String token) {
         TelegramAuthSession session = telegramAuthSessionRepository.findByToken(token)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Auth session not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, messageUtils.getMessage("auth.error.session_not_found")));
 
         if (session.getExpiresAt().isBefore(LocalDateTime.now()) && session.getStatus() == AuthSessionStatus.PENDING) {
             session.setStatus(AuthSessionStatus.EXPIRED);
@@ -186,7 +234,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void unlinkTelegram(String currentEmail) {
         User user = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, messageUtils.getMessage("auth.error.user_not_found")));
         user.setTelegramUserId(null);
         user.setTelegramUsername(null);
         userRepository.save(user);
@@ -196,16 +244,16 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public boolean handleTelegramAuth(String token, Long telegramUserId, String telegramUsername, String telegramName, String telegramPhotoUrl) {
         TelegramAuthSession session = telegramAuthSessionRepository.findByToken(token)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Auth session not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, messageUtils.getMessage("auth.error.session_not_found")));
 
         if (session.getStatus() != AuthSessionStatus.PENDING) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Auth session is not pending");
+            throw new AppException(HttpStatus.BAD_REQUEST, messageUtils.getMessage("auth.error.session_not_pending"));
         }
 
         if (session.getExpiresAt().isBefore(LocalDateTime.now())) {
             session.setStatus(AuthSessionStatus.EXPIRED);
             telegramAuthSessionRepository.save(session);
-            throw new AppException(HttpStatus.BAD_REQUEST, "Auth session expired");
+            throw new AppException(HttpStatus.BAD_REQUEST, messageUtils.getMessage("auth.error.session_expired"));
         }
 
         User user = session.getUser();

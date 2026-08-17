@@ -19,6 +19,8 @@ public interface AuthService {
 
     UserResponse getCurrentUser(String email);
 
+    UserResponse updateProfile(String currentEmail, com.launchly.auth.dto.request.UpdateProfileRequest request);
+
     TelegramSessionResponse createTelegramSession(String currentEmail, boolean isSubscription);
 
     TelegramStatusResponse checkTelegramSessionStatus(String token);

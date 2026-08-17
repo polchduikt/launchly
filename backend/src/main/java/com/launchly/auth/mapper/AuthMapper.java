@@ -9,5 +9,7 @@ import org.mapstruct.Mapping;
 public interface AuthMapper {
 
     @Mapping(target = "role", expression = "java(user.getRole().name())")
+    @Mapping(target = "provider", expression = "java(user.getProvider() != null ? user.getProvider().name() : \"LOCAL\")")
+    @Mapping(target = "hasPassword", expression = "java(user.getPassword() != null && !user.getPassword().isBlank())")
     UserResponse toUserResponse(User user);
 }
