@@ -25,6 +25,7 @@ import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.broadcast.repository.TagRepository;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.EncryptionUtil;
+import com.launchly.common.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -97,10 +98,10 @@ public class TemplateServiceImpl implements TemplateService {
         List<Long> tagIds = request.selectedTagIds() != null ? request.selectedTagIds() : Collections.emptyList();
         List<Long> fieldIds = request.selectedFieldIds() != null ? request.selectedFieldIds() : Collections.emptyList();
 
-        String flowIdsJson = writeJson(flowIds);
-        String broadcastIdsJson = writeJson(broadcastIds);
-        String tagIdsJson = writeJson(tagIds);
-        String fieldIdsJson = writeJson(fieldIds);
+        String flowIdsJson = JsonUtils.toJson(flowIds);
+        String broadcastIdsJson = JsonUtils.toJson(broadcastIds);
+        String tagIdsJson = JsonUtils.toJson(tagIds);
+        String fieldIdsJson = JsonUtils.toJson(fieldIds);
 
         int resolvedFieldCount = 0;
         if (bot != null && bot.getCustomFieldsData() != null && !bot.getCustomFieldsData().trim().isEmpty() && !bot.getCustomFieldsData().trim().equals("{}")) {
@@ -152,7 +153,7 @@ public class TemplateServiceImpl implements TemplateService {
                 broadcastsList.add(campMap);
             }
         }
-        String broadcastsDataJson = writeJson(broadcastsList);
+        String broadcastsDataJson = JsonUtils.toJson(broadcastsList);
 
         List<String> tagNames = new ArrayList<>();
         if (!tagIds.isEmpty()) {
@@ -163,7 +164,7 @@ public class TemplateServiceImpl implements TemplateService {
                 }
             }
         }
-        String tagsDataJson = writeJson(tagNames);
+        String tagsDataJson = JsonUtils.toJson(tagNames);
 
         String shareCode = "tpl_" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
         String name = (request.name() != null && !request.name().trim().isEmpty())
@@ -250,19 +251,19 @@ public class TemplateServiceImpl implements TemplateService {
         }
 
         if (request.selectedFlowIds() != null) {
-            template.setSelectedFlowIdsJson(writeJson(request.selectedFlowIds()));
+            template.setSelectedFlowIdsJson(JsonUtils.toJson(request.selectedFlowIds()));
             template.setFlowCount(request.selectedFlowIds().size());
         }
         if (request.selectedBroadcastIds() != null) {
-            template.setSelectedBroadcastIdsJson(writeJson(request.selectedBroadcastIds()));
+            template.setSelectedBroadcastIdsJson(JsonUtils.toJson(request.selectedBroadcastIds()));
             template.setBroadcastCount(request.selectedBroadcastIds().size());
         }
         if (request.selectedTagIds() != null) {
-            template.setSelectedTagIdsJson(writeJson(request.selectedTagIds()));
+            template.setSelectedTagIdsJson(JsonUtils.toJson(request.selectedTagIds()));
             template.setTagCount(request.selectedTagIds().size());
         }
         if (request.selectedFieldIds() != null) {
-            template.setSelectedFieldIdsJson(writeJson(request.selectedFieldIds()));
+            template.setSelectedFieldIdsJson(JsonUtils.toJson(request.selectedFieldIds()));
             template.setFieldCount(request.selectedFieldIds().size());
         }
 
@@ -483,18 +484,18 @@ public class TemplateServiceImpl implements TemplateService {
 
         String sourceBotName = t.getSourceBotName();
         String sourceBotDesc = t.getSourceBotDescription();
-        List<String> flowIds = readStringList(t.getSelectedFlowIdsJson());
-        List<Long> broadcastIds = readLongList(t.getSelectedBroadcastIdsJson());
-        List<Long> tagIds = readLongList(t.getSelectedTagIdsJson());
-        List<Long> fieldIds = readLongList(t.getSelectedFieldIdsJson());
+        List<String> flowIds = JsonUtils.readStringList(t.getSelectedFlowIdsJson());
+        List<Long> broadcastIds = JsonUtils.readLongList(t.getSelectedBroadcastIdsJson());
+        List<Long> tagIds = JsonUtils.readLongList(t.getSelectedTagIdsJson());
+        List<Long> fieldIds = JsonUtils.readLongList(t.getSelectedFieldIdsJson());
 
         int automationNodeCount = 0;
         int automationEdgeCount = 0;
         if (t.getSchemaJson() != null && !t.getSchemaJson().trim().isEmpty()) {
             try {
                 Map<String, Object> schema = objectMapper.readValue(t.getSchemaJson(), new TypeReference<Map<String, Object>>() {});
-                automationNodeCount = countJsonElements(schema.get("nodes"));
-                automationEdgeCount = countJsonElements(schema.get("edges"));
+                automationNodeCount = JsonUtils.countElements(schema.get("nodes"));
+                automationEdgeCount = JsonUtils.countElements(schema.get("edges"));
             } catch (Exception ignored) {}
         }
         if (automationNodeCount == 0 && (t.getFlowCount() > 0 || (flowIds != null && !flowIds.isEmpty()))) {
@@ -507,8 +508,8 @@ public class TemplateServiceImpl implements TemplateService {
             try {
                 List<Map<String, Object>> camps = objectMapper.readValue(t.getBroadcastsDataJson(), new TypeReference<List<Map<String, Object>>>() {});
                 for (Map<String, Object> c : camps) {
-                    broadcastNodeCount += countJsonElements(c.get("nodes"));
-                    broadcastEdgeCount += countJsonElements(c.get("edges"));
+                    broadcastNodeCount += JsonUtils.countElements(c.get("nodes"));
+                    broadcastEdgeCount += JsonUtils.countElements(c.get("edges"));
                 }
             } catch (Exception ignored) {}
         }
@@ -580,60 +581,5 @@ public class TemplateServiceImpl implements TemplateService {
                 t.getCreatedAt()
         );
     }
-
-    private int countJsonElements(Object jsonElement) {
-        if (jsonElement == null) return 0;
-        if (jsonElement instanceof List<?> list) {
-            return list.size();
-        }
-        if (jsonElement instanceof String str) {
-            String trimmed = str.trim();
-            if (trimmed.isEmpty() || trimmed.equals("[]") || trimmed.equals("{}")) return 0;
-            try {
-                List<?> list = objectMapper.readValue(trimmed, List.class);
-                return list != null ? list.size() : 0;
-            } catch (Exception e) {
-                return 0;
-            }
-        }
-        return 0;
-    }
-
-    private String writeJson(Object obj) {
-        if (obj == null) return "[]";
-        try {
-            return objectMapper.writeValueAsString(obj);
-        } catch (Exception e) {
-            return "[]";
-        }
-    }
-
-    private List<String> readStringList(String json) {
-        if (json == null || json.trim().isEmpty()) return Collections.emptyList();
-        try {
-            return objectMapper.readValue(json, new TypeReference<List<String>>() {});
-        } catch (Exception e) {
-            return Collections.emptyList();
-        }
-    }
-
-    private List<Long> readLongList(String json) {
-        if (json == null || json.trim().isEmpty()) return Collections.emptyList();
-        try {
-            List<Object> raw = objectMapper.readValue(json, new TypeReference<List<Object>>() {});
-            List<Long> result = new ArrayList<>();
-            for (Object item : raw) {
-                if (item instanceof Number n) {
-                    result.add(n.longValue());
-                } else if (item instanceof String s) {
-                    try {
-                        result.add(Long.parseLong(s.trim()));
-                    } catch (NumberFormatException ignored) {}
-                }
-            }
-            return result;
-        } catch (Exception e) {
-            return Collections.emptyList();
-        }
-    }
 }
+

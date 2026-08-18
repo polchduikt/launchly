@@ -13,6 +13,7 @@ import com.launchly.billing.repository.PlanRepository;
 import com.launchly.billing.repository.SubscriptionRepository;
 import com.launchly.billing.service.BillingService;
 import com.launchly.billing.service.PlanLimitService;
+import com.launchly.billing.util.StripeUtils;
 import com.launchly.common.exception.AppException;
 import com.stripe.Stripe;
 import com.stripe.model.Event;
@@ -34,9 +35,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -354,9 +352,9 @@ public class BillingServiceImpl implements BillingService {
         subscription.setPlan(plan);
         subscription.setStripeSubscriptionId(stripeSubId);
         subscription.setStripeCustomerId(session.getCustomer());
-        subscription.setStatus(mapStripeStatus(stripeSub.getStatus()));
-        subscription.setCurrentPeriodStart(mapEpoch(stripeSub.getCurrentPeriodStart()));
-        subscription.setCurrentPeriodEnd(mapEpoch(stripeSub.getCurrentPeriodEnd()));
+        subscription.setStatus(StripeUtils.mapStripeStatus(stripeSub.getStatus()));
+        subscription.setCurrentPeriodStart(StripeUtils.mapEpoch(stripeSub.getCurrentPeriodStart()));
+        subscription.setCurrentPeriodEnd(StripeUtils.mapEpoch(stripeSub.getCurrentPeriodEnd()));
         subscription.setCancelAtPeriodEnd(stripeSub.getCancelAtPeriodEnd());
 
         subscriptionRepository.save(subscription);
@@ -374,8 +372,8 @@ public class BillingServiceImpl implements BillingService {
 
         com.stripe.model.Subscription stripeSub = com.stripe.model.Subscription.retrieve(stripeSubId);
         subscription.setStatus(SubscriptionStatus.ACTIVE);
-        subscription.setCurrentPeriodStart(mapEpoch(stripeSub.getCurrentPeriodStart()));
-        subscription.setCurrentPeriodEnd(mapEpoch(stripeSub.getCurrentPeriodEnd()));
+        subscription.setCurrentPeriodStart(StripeUtils.mapEpoch(stripeSub.getCurrentPeriodStart()));
+        subscription.setCurrentPeriodEnd(StripeUtils.mapEpoch(stripeSub.getCurrentPeriodEnd()));
         subscriptionRepository.save(subscription);
         evictSubscriptionCache(subscription.getUser().getId());
         log.info("Payment succeeded. Renewed subscription for user {}", subscription.getUser().getId());
@@ -424,9 +422,9 @@ public class BillingServiceImpl implements BillingService {
             return;
         }
 
-        subscription.setStatus(mapStripeStatus(stripeSub.getStatus()));
-        subscription.setCurrentPeriodStart(mapEpoch(stripeSub.getCurrentPeriodStart()));
-        subscription.setCurrentPeriodEnd(mapEpoch(stripeSub.getCurrentPeriodEnd()));
+        subscription.setStatus(com.launchly.billing.util.StripeUtils.mapStripeStatus(stripeSub.getStatus()));
+        subscription.setCurrentPeriodStart(com.launchly.billing.util.StripeUtils.mapEpoch(stripeSub.getCurrentPeriodStart()));
+        subscription.setCurrentPeriodEnd(com.launchly.billing.util.StripeUtils.mapEpoch(stripeSub.getCurrentPeriodEnd()));
         subscription.setCancelAtPeriodEnd(stripeSub.getCancelAtPeriodEnd());
 
         subscriptionRepository.save(subscription);
@@ -434,21 +432,6 @@ public class BillingServiceImpl implements BillingService {
         log.info("Subscription updated in Stripe for user {}", subscription.getUser().getId());
     }
 
-    private LocalDateTime mapEpoch(Long epoch) {
-        if (epoch == null) return null;
-        return LocalDateTime.ofInstant(Instant.ofEpochSecond(epoch), ZoneId.systemDefault());
-    }
-
-    private SubscriptionStatus mapStripeStatus(String stripeStatus) {
-        if (stripeStatus == null) return SubscriptionStatus.ACTIVE;
-        return switch (stripeStatus) {
-            case "active" -> SubscriptionStatus.ACTIVE;
-            case "past_due" -> SubscriptionStatus.PAST_DUE;
-            case "trialing" -> SubscriptionStatus.TRIALING;
-            case "canceled", "unpaid" -> SubscriptionStatus.CANCELLED;
-            default -> SubscriptionStatus.ACTIVE;
-        };
-    }
 
     private void evictSubscriptionCache(Long userId) {
         if (userId != null) {

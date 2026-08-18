@@ -10,6 +10,7 @@ import com.launchly.admin.mapper.AdminMapper;
 import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminAutomationService;
 import com.launchly.admin.service.UserAuditService;
+import com.launchly.admin.util.AdminFilterUtils;
 import com.launchly.admin.util.AdminPeriodResolver;
 import com.launchly.admin.util.BotTokenValidator;
 import com.launchly.auth.entity.User;
@@ -53,8 +54,8 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
         List<FlowSchema> schemas = flowSchemaRepository.findAll();
         List<AdminAutomationDto> allDtos = schemas.stream()
                 .map(this::mapToListDto)
-                .filter(dto -> matchesStatus(dto, status))
-                .filter(dto -> matchesSearch(dto, search))
+                .filter(dto -> AdminFilterUtils.matchesStatus(dto, status))
+                .filter(dto -> AdminFilterUtils.matchesAutomationSearch(dto, search))
                 .collect(Collectors.toList());
 
         allDtos.sort((a, b) -> {
@@ -83,19 +84,17 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
         int nodesCount = 0;
         int edgesCount = 0;
         int integrationsCount = 0;
-
         try {
             if (schema.getNodes() != null && !schema.getNodes().isBlank()) {
                 List<?> nodeArray = objectMapper.readValue(schema.getNodes(), List.class);
                 nodesCount = nodeArray.size();
-                integrationsCount = countIntegrations(nodeArray);
+                integrationsCount = AdminFilterUtils.countIntegrations(nodeArray);
             }
             if (schema.getEdges() != null && !schema.getEdges().isBlank()) {
                 List<?> edgeArray = objectMapper.readValue(schema.getEdges(), List.class);
                 edgesCount = edgeArray.size();
             }
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
 
         LocalDateTime cutoff = periodResolver.resolve(period);
         Page<UserAuditLog> logPage = Page.empty();
@@ -103,16 +102,7 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
             logPage = userAuditLogRepository.findAutomationLogs(bot.getId(), cutoff, PageRequest.of(page, size));
         }
 
-        Page<UserActivityDto> activityPage = logPage.map(l -> UserActivityDto.builder()
-                .id(l.getId())
-                .targetId(l.getTargetId())
-                .targetName(l.getTargetName())
-                .title(l.getTitle())
-                .description(l.getDescription())
-                .category(l.getCategory())
-                .badge(l.getBadge())
-                .timestamp(l.getCreatedAt())
-                .build());
+        Page<UserActivityDto> activityPage = logPage.map(adminMapper::toActivityDto);
 
         return AdminAutomationDetailDto.builder()
                 .id(schema.getId())
@@ -183,6 +173,7 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
         }
     }
 
+
     private AdminAutomationDto mapToListDto(FlowSchema f) {
         Bot bot = f.getBot();
         User owner = bot != null ? bot.getUser() : null;
@@ -191,47 +182,5 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
         int runsCount = connected ? Math.max((int) execCount, f.getVersion()) : 0;
 
         return adminMapper.toAutomationDto(f, bot, owner, botTokenValidator.resolveBotName(bot), connected, runsCount);
-    }
-
-    private boolean matchesStatus(AdminAutomationDto dto, String status) {
-        if (status == null || status.isBlank() || "all".equalsIgnoreCase(status)) return true;
-        if ("blocked".equalsIgnoreCase(status)) return dto.isBlocked();
-        if ("active".equalsIgnoreCase(status)) return dto.isActive() && !dto.isBlocked();
-        if ("paused".equalsIgnoreCase(status)) return !dto.isActive() && !dto.isBlocked();
-        return true;
-    }
-
-    private boolean matchesSearch(AdminAutomationDto dto, String search) {
-        if (search == null || search.isBlank()) return true;
-        String q = search.toLowerCase().trim();
-        return (dto.getName() != null && dto.getName().toLowerCase().contains(q)) ||
-               (dto.getOwnerName() != null && dto.getOwnerName().toLowerCase().contains(q)) ||
-               (dto.getOwnerEmail() != null && dto.getOwnerEmail().toLowerCase().contains(q)) ||
-               (dto.getBotName() != null && dto.getBotName().toLowerCase().contains(q)) ||
-               (dto.getTriggerType() != null && dto.getTriggerType().toLowerCase().contains(q));
-    }
-
-    private int countIntegrations(List<?> nodeArray) {
-        int count = 0;
-        for (Object nodeObj : nodeArray) {
-            if (!(nodeObj instanceof Map<?, ?> nodeMap)) continue;
-            String typeStr = nodeMap.get("type") != null ? nodeMap.get("type").toString().toLowerCase() : "";
-            if ("ai".equals(typeStr) || "api_call".equals(typeStr) || "google_sheets".equals(typeStr) || "webhook".equals(typeStr) || "integration".equals(typeStr)) {
-                count++;
-                continue;
-            }
-            if (nodeMap.get("data") instanceof Map<?, ?> dataMap && dataMap.get("actions") instanceof List<?> actionsList) {
-                for (Object act : actionsList) {
-                    if (act instanceof Map<?, ?> actMap && actMap.get("type") != null) {
-                        String actTypeStr = actMap.get("type").toString().toUpperCase();
-                        if (actTypeStr.startsWith("GS_") || actTypeStr.startsWith("WEBHOOK") || actTypeStr.startsWith("INTEGRATION")) {
-                            count++;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        return count;
     }
 }

@@ -1,6 +1,5 @@
 package com.launchly.blog.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.service.UserQueryService;
 import com.launchly.blog.dto.BlogArticleDto;
@@ -9,8 +8,11 @@ import com.launchly.blog.entity.BlogArticle;
 import com.launchly.blog.mapper.BlogMapper;
 import com.launchly.blog.repository.BlogArticleRepository;
 import com.launchly.blog.service.AdminBlogService;
+import com.launchly.blog.util.BlogUtils;
 import com.launchly.common.exception.AppException;
+import com.launchly.common.utils.JsonUtils;
 import com.launchly.common.utils.MessageUtils;
+import com.launchly.common.utils.SlugUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -30,7 +32,6 @@ public class AdminBlogServiceImpl implements AdminBlogService {
     private final UserQueryService userQueryService;
     private final BlogMapper blogMapper;
     private final MessageUtils messageUtils;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     @Transactional(readOnly = true)
@@ -48,7 +49,7 @@ public class AdminBlogServiceImpl implements AdminBlogService {
     @Override
     @Transactional
     public BlogArticleDto createArticle(SaveBlogArticleRequest request, String currentUserEmail) {
-        String slug = generateOrSanitizeSlug(request.getId(), request.getTitle());
+        String slug = SlugUtils.generateOrSanitizeSlug(request.getId(), request.getTitle());
 
         if (blogArticleRepository.existsById(slug)) {
             slug = slug + "-" + (System.currentTimeMillis() % 10000);
@@ -71,11 +72,11 @@ public class AdminBlogServiceImpl implements AdminBlogService {
 
         String readTimeStr = request.getReadTime();
         if (readTimeStr == null || readTimeStr.isBlank()) {
-            readTimeStr = calculateReadTime(request);
+            readTimeStr = BlogUtils.calculateReadTime(request);
         }
 
         String tagsStr = request.getTags() != null ? String.join(",", request.getTags()) : "";
-        String contentBlocksJson = serializeContentBlocks(request.getContentBlocks());
+        String contentBlocksJson = JsonUtils.toJson(request.getContentBlocks());
         String lang = (request.getLanguage() != null && !request.getLanguage().isBlank()) ? request.getLanguage().trim().toLowerCase() : "uk";
 
         BlogArticle article = BlogArticle.builder()
@@ -116,7 +117,7 @@ public class AdminBlogServiceImpl implements AdminBlogService {
         if (request.getReadTime() != null && !request.getReadTime().isBlank()) {
             article.setReadTime(request.getReadTime().trim());
         } else {
-            article.setReadTime(calculateReadTime(request));
+            article.setReadTime(BlogUtils.calculateReadTime(request));
         }
         if (request.getSummary() != null) {
             article.setSummary(request.getSummary().trim());
@@ -131,7 +132,7 @@ public class AdminBlogServiceImpl implements AdminBlogService {
             article.setTags(String.join(",", request.getTags()));
         }
         if (request.getContentBlocks() != null) {
-            article.setContentBlocks(serializeContentBlocks(request.getContentBlocks()));
+            article.setContentBlocks(JsonUtils.toJson(request.getContentBlocks()));
         }
 
         BlogArticle saved = blogArticleRepository.save(article);
@@ -166,88 +167,4 @@ public class AdminBlogServiceImpl implements AdminBlogService {
                         .findFirst()
                         .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, messageUtils.getMessage("common.error.not_found"))));
     }
-
-    private String generateOrSanitizeSlug(String requestedId, String title) {
-        String raw = (requestedId != null && !requestedId.isBlank()) ? requestedId : title;
-        if (raw == null || raw.isBlank()) {
-            return "post-" + System.currentTimeMillis();
-        }
-        String transliterated = transliterate(raw.trim().toLowerCase());
-        String slug = transliterated.replaceAll("[^a-z0-9\\-]+", "-").replaceAll("^-+|-+$", "");
-        return slug.isBlank() ? "post-" + System.currentTimeMillis() : slug;
-    }
-
-    private String transliterate(String text) {
-        StringBuilder sb = new StringBuilder();
-        for (char c : text.toCharArray()) {
-            switch (c) {
-                case 'а' -> sb.append("a");
-                case 'б' -> sb.append("b");
-                case 'в' -> sb.append("v");
-                case 'г' -> sb.append("h");
-                case 'ґ' -> sb.append("g");
-                case 'д' -> sb.append("d");
-                case 'е', 'є' -> sb.append("e");
-                case 'ж' -> sb.append("zh");
-                case 'з' -> sb.append("z");
-                case 'и', 'і', 'ї' -> sb.append("i");
-                case 'й' -> sb.append("y");
-                case 'к' -> sb.append("k");
-                case 'л' -> sb.append("l");
-                case 'м' -> sb.append("m");
-                case 'н' -> sb.append("n");
-                case 'о' -> sb.append("o");
-                case 'п' -> sb.append("p");
-                case 'р' -> sb.append("r");
-                case 'с' -> sb.append("s");
-                case 'т' -> sb.append("t");
-                case 'у' -> sb.append("u");
-                case 'ф' -> sb.append("f");
-                case 'х' -> sb.append("kh");
-                case 'ц' -> sb.append("ts");
-                case 'ч' -> sb.append("ch");
-                case 'ш' -> sb.append("sh");
-                case 'щ' -> sb.append("shch");
-                case 'ю' -> sb.append("yu");
-                case 'я' -> sb.append("ya");
-                case ' ' -> sb.append("-");
-                default -> sb.append(c);
-            }
-        }
-        return sb.toString();
-    }
-
-    private String calculateReadTime(SaveBlogArticleRequest request) {
-        int wordCount = 0;
-        if (request.getSummary() != null) {
-            wordCount += request.getSummary().split("\\s+").length;
-        }
-        if (request.getContentBlocks() != null) {
-            for (BlogArticleDto.ContentBlockDto b : request.getContentBlocks()) {
-                if (b.getText() != null) {
-                    wordCount += b.getText().split("\\s+").length;
-                }
-                if (b.getItems() != null) {
-                    for (String item : b.getItems()) {
-                        if (item != null) wordCount += item.split("\\s+").length;
-                    }
-                }
-            }
-        }
-        int minutes = Math.max(1, (int) Math.ceil((double) wordCount / 180));
-        return minutes + " хв";
-    }
-
-    private String serializeContentBlocks(List<BlogArticleDto.ContentBlockDto> blocks) {
-        if (blocks == null || blocks.isEmpty()) {
-            return "[]";
-        }
-        try {
-            return objectMapper.writeValueAsString(blocks);
-        } catch (Exception e) {
-            log.error("Failed to serialize content blocks", e);
-            return "[]";
-        }
-    }
 }
-

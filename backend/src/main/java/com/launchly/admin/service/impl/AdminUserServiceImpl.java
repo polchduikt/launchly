@@ -11,6 +11,7 @@ import com.launchly.admin.mapper.AdminMapper;
 import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminUserService;
 import com.launchly.admin.service.UserAuditService;
+import com.launchly.admin.util.AdminFilterUtils;
 import com.launchly.admin.util.AdminPeriodResolver;
 import com.launchly.admin.util.BotTokenValidator;
 import com.launchly.auth.entity.Role;
@@ -123,9 +124,14 @@ public class AdminUserServiceImpl implements AdminUserService {
         List<User> allUsers = userQueryService.findAllUsers();
 
         List<AdminUserDto> filtered = allUsers.stream()
-                .filter(u -> matchesRole(u, roleFilter))
-                .filter(u -> matchesSearch(u, search))
-                .filter(u -> matchesPlan(u, planFilter))
+                .filter(u -> AdminFilterUtils.matchesRole(u, roleFilter))
+                .filter(u -> AdminFilterUtils.matchesSearch(u, search))
+                .filter(u -> {
+                    String pName = subscriptionRepository.findByUserId(u.getId())
+                            .map(sub -> sub.getPlan() != null ? sub.getPlan().getName() : "FREE")
+                            .orElse("FREE");
+                    return AdminFilterUtils.matchesPlan(pName, planFilter);
+                })
                 .map(this::mapToUserDto)
                 .collect(Collectors.toList());
 
@@ -196,24 +202,5 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         return adminMapper.toUserDto(u, uBots.size(), aCount, brCount, cCount, 0, pName);
     }
-
-    private boolean matchesRole(User u, Role roleFilter) {
-        return roleFilter == null || u.getRole() == roleFilter;
-    }
-
-    private boolean matchesSearch(User u, String search) {
-        if (search == null || search.isBlank()) return true;
-        String q = search.toLowerCase().trim();
-        return (u.getName() != null && u.getName().toLowerCase().contains(q)) ||
-               (u.getEmail() != null && u.getEmail().toLowerCase().contains(q)) ||
-               (u.getTelegramUsername() != null && u.getTelegramUsername().toLowerCase().contains(q));
-    }
-
-    private boolean matchesPlan(User u, String planFilter) {
-        if (planFilter == null || planFilter.isBlank()) return true;
-        String pName = subscriptionRepository.findByUserId(u.getId())
-                .map(sub -> sub.getPlan() != null ? sub.getPlan().getName() : "FREE")
-                .orElse("FREE");
-        return pName.equalsIgnoreCase(planFilter.trim());
-    }
 }
+

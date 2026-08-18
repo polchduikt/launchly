@@ -5,6 +5,7 @@ import com.launchly.admin.dto.AdminStatsDto;
 import com.launchly.admin.service.AdminLogService;
 import com.launchly.admin.service.AdminStatsService;
 import com.launchly.admin.util.AdminPeriodResolver;
+import com.launchly.admin.util.AdminStatsCalculator;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.service.UserQueryService;
@@ -22,6 +23,8 @@ import com.launchly.billing.entity.SubscriptionStatus;
 import com.launchly.billing.repository.PlanRepository;
 import com.launchly.billing.repository.SubscriptionRepository;
 import com.launchly.common.metric.PerformanceMonitoringFilter;
+import com.launchly.common.utils.DateTimeUtils;
+import com.launchly.common.utils.MathUtils;
 import com.launchly.integration.entity.Integration;
 import com.launchly.integration.entity.IntegrationType;
 import com.launchly.integration.repository.IntegrationRepository;
@@ -77,27 +80,27 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         if (search != null && !search.trim().isEmpty()) {
             String q = search.trim().toLowerCase();
             allUsers = allUsers.stream()
-                    .filter(u -> contains(u.getName(), q) || contains(u.getEmail(), q) || contains(u.getTelegramUsername(), q))
+                    .filter(u -> AdminStatsCalculator.contains(u.getName(), q) || AdminStatsCalculator.contains(u.getEmail(), q) || AdminStatsCalculator.contains(u.getTelegramUsername(), q))
                     .collect(Collectors.toList());
             allBots = allBots.stream()
-                    .filter(b -> contains(b.getName(), q) || contains(b.getUsername(), q))
+                    .filter(b -> AdminStatsCalculator.contains(b.getName(), q) || AdminStatsCalculator.contains(b.getUsername(), q))
                     .collect(Collectors.toList());
             allSchemas = allSchemas.stream()
-                    .filter(s -> s.getBot() != null && contains(s.getBot().getName(), q))
+                    .filter(s -> s.getBot() != null && AdminStatsCalculator.contains(s.getBot().getName(), q))
                     .collect(Collectors.toList());
             allBroadcasts = allBroadcasts.stream()
-                    .filter(bc -> contains(bc.getName(), q))
+                    .filter(bc -> AdminStatsCalculator.contains(bc.getName(), q))
                     .collect(Collectors.toList());
         }
 
         final LocalDateTime finalStart = resolvedStart;
         final LocalDateTime finalEnd = resolvedEnd;
 
-        List<User> rangeUsers = filterByDateRange(allUsers, u -> u.getCreatedAt(), finalStart, finalEnd);
-        List<Bot> rangeBots = filterByDateRange(allBots, b -> b.getCreatedAt(), finalStart, finalEnd);
-        List<BotUser> rangeBotUsers = filterByDateRange(allBotUsers, bu -> bu.getCreatedAt(), finalStart, finalEnd);
-        List<FlowSchema> rangeSchemas = filterByDateRange(allSchemas, s -> s.getCreatedAt(), finalStart, finalEnd);
-        List<BroadcastCampaign> rangeBroadcasts = filterByDateRange(allBroadcasts, bc -> bc.getCreatedAt(), finalStart, finalEnd);
+        List<User> rangeUsers = DateTimeUtils.filterByDateRange(allUsers, u -> u.getCreatedAt(), finalStart, finalEnd);
+        List<Bot> rangeBots = DateTimeUtils.filterByDateRange(allBots, b -> b.getCreatedAt(), finalStart, finalEnd);
+        List<BotUser> rangeBotUsers = DateTimeUtils.filterByDateRange(allBotUsers, bu -> bu.getCreatedAt(), finalStart, finalEnd);
+        List<FlowSchema> rangeSchemas = DateTimeUtils.filterByDateRange(allSchemas, s -> s.getCreatedAt(), finalStart, finalEnd);
+        List<BroadcastCampaign> rangeBroadcasts = DateTimeUtils.filterByDateRange(allBroadcasts, bc -> bc.getCreatedAt(), finalStart, finalEnd);
 
         long totalUsers = rangeUsers.size();
         long totalOwners = rangeUsers.stream()
@@ -129,15 +132,15 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         AdminStatsDto.ServerHealthDto serverHealth = buildServerHealth(activeBots, allBots);
 
         List<Subscription> allSubscriptions = subscriptionRepository.findAll();
-        double mrrVal = calculateMrr(allSubscriptions);
-        double ltvVal = calculateLtv(allSubscriptions);
+        double mrrVal = AdminStatsCalculator.calculateMrr(allSubscriptions);
+        double ltvVal = AdminStatsCalculator.calculateLtv(allSubscriptions);
 
         LocalDateTime previousStart = resolvedStart.minus(Duration.between(resolvedStart, resolvedEnd));
-        List<User> prevUsers = filterByDateRange(allUsers, u -> u.getCreatedAt(), previousStart, finalStart);
-        List<BotUser> prevBotUsers = filterByDateRange(allBotUsers, bu -> bu.getCreatedAt(), previousStart, finalStart);
-        List<Bot> prevBots = filterByDateRange(allBots, b -> b.getCreatedAt(), previousStart, finalStart);
-        List<FlowSchema> prevSchemas = filterByDateRange(allSchemas, s -> s.getCreatedAt(), previousStart, finalStart);
-        List<BroadcastCampaign> prevBroadcasts = filterByDateRange(allBroadcasts, bc -> bc.getCreatedAt(), previousStart, finalStart);
+        List<User> prevUsers = DateTimeUtils.filterByDateRange(allUsers, u -> u.getCreatedAt(), previousStart, finalStart);
+        List<BotUser> prevBotUsers = DateTimeUtils.filterByDateRange(allBotUsers, bu -> bu.getCreatedAt(), previousStart, finalStart);
+        List<Bot> prevBots = DateTimeUtils.filterByDateRange(allBots, b -> b.getCreatedAt(), previousStart, finalStart);
+        List<FlowSchema> prevSchemas = DateTimeUtils.filterByDateRange(allSchemas, s -> s.getCreatedAt(), previousStart, finalStart);
+        List<BroadcastCampaign> prevBroadcasts = DateTimeUtils.filterByDateRange(allBroadcasts, bc -> bc.getCreatedAt(), previousStart, finalStart);
 
         long prevOwners = prevUsers.stream().filter(u -> u.getRole() == Role.ROLE_OWNER || u.getRole() == Role.ROLE_ADMIN).count();
         long prevBotUsersCount = prevBotUsers.size();
@@ -151,7 +154,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
 
         List<AdminLogDto> latestLogs = adminLogService.getSystemLogs(null, null, null, null, null, "desc", 0, 10).getContent();
 
-        List<AdminStatsDto.PerformanceMetricDto> performanceMetrics = buildPerformanceMetrics();
+        List<AdminStatsDto.PerformanceMetricDto> performanceMetrics = AdminStatsCalculator.buildPerformanceMetrics();
 
         org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
         boolean isManagerUser = auth != null && auth.getAuthorities().stream()
@@ -167,17 +170,17 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         return AdminStatsDto.builder()
                 .totalUsers(totalUsers)
                 .totalOwners(totalOwners)
-                .totalOwnersChange(calcChange(totalOwners, prevOwners))
+                .totalOwnersChange(MathUtils.calcChange(totalOwners, prevOwners))
                 .activeOwners(activeOwners)
                 .activeOwnersChange("+0.0%")
                 .totalBotUsers(totalBotUsers)
-                .totalBotUsersChange(calcChange(totalBotUsers, prevBotUsersCount))
+                .totalBotUsersChange(MathUtils.calcChange(totalBotUsers, prevBotUsersCount))
                 .activeBots(activeBots)
-                .activeBotsChange(calcChange(activeBots, prevActiveBots))
+                .activeBotsChange(MathUtils.calcChange(activeBots, prevActiveBots))
                 .totalAutomations(totalAutomations)
-                .totalAutomationsChange(calcChange(totalAutomations, prevAutomations))
+                .totalAutomationsChange(MathUtils.calcChange(totalAutomations, prevAutomations))
                 .totalMessagesSent(totalMessagesSent)
-                .totalMessagesSentChange(calcChange(totalMessagesSent, prevMessages))
+                .totalMessagesSentChange(MathUtils.calcChange(totalMessagesSent, prevMessages))
                 .systemUptimeSeconds(uptimeSeconds)
                 .activeManagers(activeManagers)
                 .userGrowth(growth)
@@ -192,28 +195,6 @@ public class AdminStatsServiceImpl implements AdminStatsService {
                 .latestLogs(latestLogs)
                 .performanceMetrics(performanceMetrics)
                 .build();
-    }
-
-    private String calcChange(long current, long previous) {
-        if (previous == 0 && current == 0) return "+0.0%";
-        if (previous == 0) return "+100.0%";
-        double change = ((double) (current - previous) / previous) * 100.0;
-        change = Math.round(change * 10.0) / 10.0;
-        return (change >= 0 ? "+" : "") + change + "%";
-    }
-
-    private <T> List<T> filterByDateRange(List<T> items, java.util.function.Function<T, LocalDateTime> dateExtractor,
-                                          LocalDateTime start, LocalDateTime end) {
-        return items.stream()
-                .filter(item -> {
-                    LocalDateTime dt = dateExtractor.apply(item);
-                    return dt != null && dt.isAfter(start) && dt.isBefore(end);
-                })
-                .collect(Collectors.toList());
-    }
-
-    private boolean contains(String value, String query) {
-        return value != null && value.toLowerCase().contains(query);
     }
 
     private List<AdminStatsDto.GrowthMetric> buildGrowthMetrics(
@@ -314,34 +295,6 @@ public class AdminStatsServiceImpl implements AdminStatsService {
                 .build();
     }
 
-    private double calculateMrr(List<Subscription> subscriptions) {
-        return subscriptions.stream()
-                .filter(sub -> sub.getStatus() == SubscriptionStatus.ACTIVE)
-                .mapToDouble(sub -> sub.getPlan() != null && sub.getPlan().getPrice() != null ? sub.getPlan().getPrice().doubleValue() : 0.0)
-                .sum();
-    }
-
-    private double calculateLtv(List<Subscription> subscriptions) {
-        List<Subscription> paying = subscriptions.stream()
-                .filter(sub -> sub.getPlan() != null && sub.getPlan().getPrice() != null && sub.getPlan().getPrice().doubleValue() > 0.0)
-                .collect(Collectors.toList());
-
-        if (paying.isEmpty()) return 0.0;
-
-        double totalRevenue = 0.0;
-        for (Subscription sub : paying) {
-            LocalDateTime subStart = sub.getCreatedAt() != null ? sub.getCreatedAt() : LocalDateTime.now();
-            LocalDateTime subEnd = (sub.getStatus() == SubscriptionStatus.CANCELLED && sub.getUpdatedAt() != null)
-                    ? sub.getUpdatedAt()
-                    : LocalDateTime.now();
-
-            long months = Duration.between(subStart, subEnd).toDays() / 30;
-            if (months < 1) months = 1;
-            totalRevenue += sub.getPlan().getPrice().doubleValue() * months;
-        }
-        return totalRevenue / paying.size();
-    }
-
     private List<AdminStatsDto.PlanDistributionDto> buildPlanDistribution(List<User> allUsers, List<Subscription> allSubscriptions) {
         long totalOwnersCount = allUsers.stream()
                 .filter(u -> u.getRole() == Role.ROLE_OWNER || u.getRole() == Role.ROLE_ADMIN)
@@ -365,18 +318,11 @@ public class AdminStatsServiceImpl implements AdminStatsService {
             String displayName = plan.getDisplayName();
             long count = subCountsByPlan.getOrDefault(displayName, 0L);
             if (!displayName.equalsIgnoreCase("Free") && (count > 0 || true)) {
-                String color = resolvePlanColor(displayName);
+                String color = AdminStatsCalculator.resolvePlanColor(displayName);
                 distribution.add(new AdminStatsDto.PlanDistributionDto(displayName, count, color));
             }
         }
         return distribution;
-    }
-
-    private String resolvePlanColor(String displayName) {
-        String lower = displayName.toLowerCase();
-        if (lower.contains("enterprise") || lower.contains("business")) return "#f59e0b";
-        if (lower.contains("starter")) return "#10b981";
-        return "#6366f1";
     }
 
     private List<AdminStatsDto.IntegrationPopularityDto> buildIntegrationsPopularity(LocalDateTime prevStart, LocalDateTime currentStart) {
@@ -396,9 +342,9 @@ public class AdminStatsServiceImpl implements AdminStatsService {
 
         for (IntegrationType type : IntegrationType.values()) {
             long count = currentCounts.getOrDefault(type, 0L);
-            double pct = totalCount > 0 ? Math.round(count * 10000.0 / totalCount) / 100.0 : 0.0;
+            double pct = totalCount > 0 ? MathUtils.round2(count * 100.0 / totalCount) : 0.0;
             long prev = prevCounts.getOrDefault(type, 0L);
-            String change = calcChange(count, prev);
+            String change = MathUtils.calcChange(count, prev);
             String name = INTEGRATION_DISPLAY_NAMES.getOrDefault(type, type.name());
             result.add(new AdminStatsDto.IntegrationPopularityDto(name, count, pct, change));
         }
@@ -412,7 +358,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
 
         Map<String, Long> currentLangCounts = new HashMap<>();
         for (BotUser bu : allBotUsers) {
-            String region = langToRegion(parseLang(bu.getMetadata()));
+            String region = AdminStatsCalculator.langToRegion(AdminStatsCalculator.parseLang(bu.getMetadata()));
             currentLangCounts.merge(region, 1L, Long::sum);
         }
 
@@ -421,7 +367,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
                 .collect(Collectors.toList());
         Map<String, Long> prevLangCounts = new HashMap<>();
         for (BotUser bu : prevBotUsers) {
-            String region = langToRegion(parseLang(bu.getMetadata()));
+            String region = AdminStatsCalculator.langToRegion(AdminStatsCalculator.parseLang(bu.getMetadata()));
             prevLangCounts.merge(region, 1L, Long::sum);
         }
 
@@ -430,61 +376,13 @@ public class AdminStatsServiceImpl implements AdminStatsService {
 
         for (String region : regions) {
             long count = currentLangCounts.getOrDefault(region, 0L);
-            double pct = totalBotUsersCount > 0 ? Math.round(count * 10000.0 / totalBotUsersCount) / 100.0 : 0.0;
+            double pct = totalBotUsersCount > 0 ? MathUtils.round2(count * 100.0 / totalBotUsersCount) : 0.0;
             long prev = prevLangCounts.getOrDefault(region, 0L);
-            result.add(new AdminStatsDto.ClientGeoLangDto(region, count, pct, calcChange(count, prev)));
+            result.add(new AdminStatsDto.ClientGeoLangDto(region, count, pct, MathUtils.calcChange(count, prev)));
         }
 
         result.sort((a, b) -> Long.compare(b.getCount(), a.getCount()));
         return result;
     }
-
-    private String langToRegion(String lang) {
-        return switch (lang) {
-            case "uk" -> "Ukraine";
-            case "en" -> "United States";
-            case "pl" -> "Poland";
-            default -> "Other";
-        };
-    }
-
-    private List<AdminStatsDto.PerformanceMetricDto> buildPerformanceMetrics() {
-        Map<String, PerformanceMonitoringFilter.HourlyMetric> performanceData = PerformanceMonitoringFilter.getHourlyMetrics();
-        List<AdminStatsDto.PerformanceMetricDto> metrics = new ArrayList<>();
-        LocalDateTime now = LocalDateTime.now();
-
-        for (int i = 6; i >= 0; i--) {
-            LocalDateTime t = now.minusHours(i);
-            String timeBucket = t.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00"));
-            String isoTime = t.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:00:00"));
-
-            PerformanceMonitoringFilter.HourlyMetric metric = performanceData.get(timeBucket);
-
-            double errorRate = 0.0;
-            int latency = 0;
-
-            if (metric != null && metric.requestCount.get() > 0) {
-                int totalReqs = metric.requestCount.get();
-                errorRate = Math.round((metric.errorCount.get() * 10000.0) / totalReqs) / 100.0;
-                latency = (int) (metric.totalLatency.get() / totalReqs);
-            }
-
-            metrics.add(new AdminStatsDto.PerformanceMetricDto(isoTime, errorRate, latency));
-        }
-        return metrics;
-    }
-
-    private String parseLang(String metadata) {
-        if (metadata == null || metadata.isEmpty()) return "unknown";
-        String langKey = metadata.contains("\"language_code\"") ? "\"language_code\"" :
-                         metadata.contains("\"languageCode\"") ? "\"languageCode\"" : null;
-        if (langKey == null) return "unknown";
-        int idx = metadata.indexOf(langKey);
-        int valStart = metadata.indexOf(":", idx) + 1;
-        int quoteStart = metadata.indexOf("\"", valStart);
-        if (quoteStart == -1) return "unknown";
-        int quoteEnd = metadata.indexOf("\"", quoteStart + 1);
-        if (quoteEnd == -1) return "unknown";
-        return metadata.substring(quoteStart + 1, quoteEnd).toLowerCase();
-    }
 }
+

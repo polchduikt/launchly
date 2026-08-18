@@ -1,13 +1,12 @@
 package com.launchly.analytics.service.impl;
 
-import com.launchly.bot.engine.model.FlowNode;
-import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import com.launchly.analytics.dto.response.DashboardStatsResponse;
 import com.launchly.analytics.entity.AnalyticsEvent;
 import com.launchly.analytics.entity.AnalyticsEventType;
 import com.launchly.analytics.repository.AnalyticsEventRepository;
 import com.launchly.analytics.service.AnalyticsService;
+import com.launchly.analytics.util.AnalyticsUtils;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotRepository;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.entity.BotMember;
 import com.launchly.auth.entity.User;
@@ -122,10 +120,10 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                     .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().isBefore(lastWeekDate))
                     .count();
 
-            subscribersGrowth = calculateGrowth(totalSubscribersLastWeek, totalSubscribers);
-            activeUsersGrowth = calculateGrowth(activeUsersYesterday, activeUsers24h);
-            clicksGrowth = calculateGrowth(clicksCountLastMonth, clicksCount30d);
-            automationsGrowth = calculateGrowth(activeAutomationsLastWeek, activeAutomations);
+            subscribersGrowth = AnalyticsUtils.calculateGrowth(totalSubscribersLastWeek, totalSubscribers);
+            activeUsersGrowth = AnalyticsUtils.calculateGrowth(activeUsersYesterday, activeUsers24h);
+            clicksGrowth = AnalyticsUtils.calculateGrowth(clicksCountLastMonth, clicksCount30d);
+            automationsGrowth = AnalyticsUtils.calculateGrowth(activeAutomationsLastWeek, activeAutomations);
 
             rawDaily = analyticsEventRepository.getDailyActivityStatsForBots(botIds, startActivityDate);
             rawButtons = analyticsEventRepository.getTopClickedButtonsForBots(botIds, startActivityDate, 10);
@@ -163,10 +161,10 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                     .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().isBefore(lastWeekDate))
                     .count();
 
-            subscribersGrowth = calculateGrowth(totalSubscribersLastWeek, totalSubscribers);
-            activeUsersGrowth = calculateGrowth(activeUsersYesterday, activeUsers24h);
-            clicksGrowth = calculateGrowth(clicksCountLastMonth, clicksCount30d);
-            automationsGrowth = calculateGrowth(activeAutomationsLastWeek, activeAutomations);
+            subscribersGrowth = AnalyticsUtils.calculateGrowth(totalSubscribersLastWeek, totalSubscribers);
+            activeUsersGrowth = AnalyticsUtils.calculateGrowth(activeUsersYesterday, activeUsers24h);
+            clicksGrowth = AnalyticsUtils.calculateGrowth(clicksCountLastMonth, clicksCount30d);
+            automationsGrowth = AnalyticsUtils.calculateGrowth(activeAutomationsLastWeek, activeAutomations);
 
             rawDaily = analyticsEventRepository.getDailyActivityStats(botId, startActivityDate);
             rawButtons = analyticsEventRepository.getTopClickedButtons(botId, startActivityDate, 10);
@@ -185,7 +183,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         for (Object[] row : rawButtons) {
             String btnName = row[0] != null ? row[0].toString() : "Unknown";
             if (btnName.startsWith("btn_")) {
-                btnName = resolveButtonLabel(botIds, btnName);
+                btnName = AnalyticsUtils.resolveButtonLabel(flowSchemaRepository, botIds, btnName);
             }
             long clicks = row[1] != null ? ((Number) row[1]).longValue() : 0L;
             topButtons.add(new DashboardStatsResponse.ButtonStatsEntry(btnName, clicks));
@@ -258,68 +256,5 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 automationsGrowth
         );
     }
-
-    @SuppressWarnings("unchecked")
-    private String resolveButtonLabel(List<Long> botIds, String callbackData) {
-        if (callbackData == null) {
-            return "Unknown Button";
-        }
-        for (Long bId : botIds) {
-            try {
-                com.launchly.bot.entity.FlowSchema schema = flowSchemaRepository.findByBotId(bId).orElse(null);
-                if (schema != null && schema.getNodes() != null) {
-                    List<FlowNode> nodes = objectMapper.readValue(
-                            schema.getNodes(),
-                            new TypeReference<List<FlowNode>>() {}
-                    );
-                    for (FlowNode node : nodes) {
-                        Map<String, Object> data = node.data();
-                        if (data == null) continue;
-
-                        List<?> topLevelButtons = (List<?>) data.get("buttons");
-                        if (topLevelButtons != null) {
-                            for (Object btnObj : topLevelButtons) {
-                                if (btnObj instanceof Map) {
-                                    Map<String, Object> btn = (Map<String, Object>) btnObj;
-                                    if (callbackData.equals(btn.get("value"))) {
-                                        Object label = btn.get("label");
-                                        if (label != null) return label.toString();
-                                    }
-                                }
-                            }
-                        }
-
-                        List<Map<String, Object>> blocks = (List<Map<String, Object>>) data.get("blocks");
-                        if (blocks != null) {
-                            for (Map<String, Object> block : blocks) {
-                                List<?> blockButtons = (List<?>) block.get("buttons");
-                                if (blockButtons != null) {
-                                    for (Object btnObj : blockButtons) {
-                                        if (btnObj instanceof Map) {
-                                            Map<String, Object> btn = (Map<String, Object>) btnObj;
-                                            if (callbackData.equals(btn.get("value"))) {
-                                                Object label = btn.get("label");
-                                                if (label != null) return label.toString();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-            }
-        }
-        return callbackData;
-    }
-
-    private double calculateGrowth(long prev, long curr) {
-        if (prev == 0) {
-            return curr * 100.0;
-        }
-        double diff = (double) curr - prev;
-        double growth = (diff / prev) * 100.0;
-        return Math.round(growth * 10.0) / 10.0;
-    }
 }
+

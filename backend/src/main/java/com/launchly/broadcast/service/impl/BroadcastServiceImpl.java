@@ -14,6 +14,7 @@ import com.launchly.broadcast.mapper.BroadcastMapper;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.broadcast.service.BroadcastFilterService;
 import com.launchly.broadcast.service.BroadcastService;
+import com.launchly.broadcast.util.BroadcastUtils;
 import com.launchly.billing.service.PlanLimitService;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.SanitizationUtil;
@@ -85,7 +86,7 @@ public class BroadcastServiceImpl implements BroadcastService {
                 ? CampaignStatus.SCHEDULED
                 : CampaignStatus.DRAFT;
 
-        String messageText = extractFirstMessageText(request.nodes(), request.edges(), request.message());
+        String messageText = BroadcastUtils.extractFirstMessageText(request.nodes(), request.edges(), request.message());
 
         BroadcastCampaign campaign = BroadcastCampaign.builder()
                 .name(request.name())
@@ -130,7 +131,7 @@ public class BroadcastServiceImpl implements BroadcastService {
             campaign.setBot(newBot);
         }
 
-        String messageText = extractFirstMessageText(request.nodes(), request.edges(), request.message());
+        String messageText = BroadcastUtils.extractFirstMessageText(request.nodes(), request.edges(), request.message());
 
         campaign.setName(request.name());
         campaign.setMessage(messageText);
@@ -153,54 +154,6 @@ public class BroadcastServiceImpl implements BroadcastService {
         return toResponse(campaign);
     }
 
-    private String extractFirstMessageText(String nodesJson, String edgesJson, String defaultMessage) {
-        if (nodesJson == null || nodesJson.trim().isEmpty() || "[]".equals(nodesJson)) {
-            return defaultMessage != null ? defaultMessage : "";
-        }
-        try {
-            JsonNode nodesNode = objectMapper.readTree(nodesJson);
-            JsonNode edgesNode = edgesJson != null && !edgesJson.trim().isEmpty() ? objectMapper.readTree(edgesJson) : objectMapper.createArrayNode();
-            
-            String startNodeId = null;
-            for (JsonNode n : nodesNode) {
-                if ("START_BROADCAST".equals(n.get("type").asText())) {
-                    startNodeId = n.get("id").asText();
-                    break;
-                }
-            }
-            
-            if (startNodeId == null) {
-                return defaultMessage != null ? defaultMessage : "";
-            }
-            
-            String firstConnectedNodeId = null;
-            for (JsonNode e : edgesNode) {
-                if (startNodeId.equals(e.get("source").asText())) {
-                    firstConnectedNodeId = e.get("target").asText();
-                    break;
-                }
-            }
-            
-            if (firstConnectedNodeId == null) {
-                return defaultMessage != null ? defaultMessage : "";
-            }
-            
-            for (JsonNode n : nodesNode) {
-                if (firstConnectedNodeId.equals(n.get("id").asText())) {
-                    if ("MESSAGE".equals(n.get("type").asText())) {
-                        JsonNode data = n.get("data");
-                        if (data != null && data.has("text")) {
-                            return data.get("text").asText();
-                        }
-                    }
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            log.error("Failed to parse campaign flow to extract message: {}", e.getMessage());
-        }
-        return defaultMessage != null ? defaultMessage : "";
-    }
 
     @Override
     @Transactional(readOnly = true)
