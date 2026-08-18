@@ -27,4 +27,13 @@ public class MessageUtils {
     public String getMessageWithDefault(String code, String defaultMessage) {
         return messageSource.getMessage(code, null, defaultMessage, LocaleContextHolder.getLocale());
     }
+
+    public String getMessageWithDefault(String code, String defaultMessage, Object... args) {
+        String msg = messageSource.getMessage(code, args, defaultMessage, LocaleContextHolder.getLocale());
+        if (args != null && args.length > 0 && msg != null && msg.contains("{0}")) {
+            return MessageFormat.format(msg, args);
+        }
+        return msg;
+    }
 }
+
