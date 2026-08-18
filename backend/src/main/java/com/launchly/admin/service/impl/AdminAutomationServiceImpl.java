@@ -161,10 +161,8 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
         Bot bot = schema.getBot();
         if (bot != null) {
             String reason = request != null ? request.getReason() : null;
-            bot.setBlocked(true);
-            bot.setActive(false);
-            bot.setBlockReason(reason != null && !reason.isBlank() ? reason : messageUtils.getMessage("admin.reason_rules"));
-            bot.setBlockedAt(LocalDateTime.now());
+            String fullReason = (reason != null && !reason.isBlank()) ? reason : messageUtils.getMessage("admin.reason_rules");
+            bot.block(fullReason);
             botRepository.save(bot);
             userAuditService.logAutomationBlocked(bot.getUser(), bot.getId(), bot.getName(), bot.getBlockReason());
         }
@@ -177,9 +175,7 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Automation flow not found"));
         Bot bot = schema.getBot();
         if (bot != null) {
-            bot.setBlocked(false);
-            bot.setBlockReason(null);
-            bot.setBlockedAt(null);
+            bot.unblock();
             botRepository.save(bot);
             userAuditService.logAutomationUnblocked(bot.getUser(), bot.getId(), bot.getName());
         }

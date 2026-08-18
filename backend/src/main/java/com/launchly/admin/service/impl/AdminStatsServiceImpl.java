@@ -7,7 +7,7 @@ import com.launchly.admin.service.AdminStatsService;
 import com.launchly.admin.util.AdminPeriodResolver;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.entity.FlowSchema;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminStatsServiceImpl implements AdminStatsService {
 
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
     private final BotRepository botRepository;
     private final BotUserRepository botUserRepository;
     private final FlowSchemaRepository flowSchemaRepository;
@@ -68,7 +68,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         LocalDateTime resolvedEnd = endDate != null ? endDate : LocalDateTime.now();
         LocalDateTime resolvedStart = periodResolver.resolve(period, startDate);
 
-        List<User> allUsers = userRepository.findAll();
+        List<User> allUsers = userQueryService.findAllUsers();
         List<Bot> allBots = botRepository.findAll();
         List<BotUser> allBotUsers = botUserRepository.findAll();
         List<FlowSchema> allSchemas = flowSchemaRepository.findAll();
@@ -296,7 +296,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         boolean dbHealthy = true;
         String dbStatus = "Connected";
         try {
-            userRepository.count();
+            userQueryService.countTotalUsers();
         } catch (Exception e) {
             dbHealthy = false;
             dbStatus = "Error";

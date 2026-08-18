@@ -3,7 +3,7 @@ package com.launchly.bot.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.bot.dto.request.CreateTemplateRequest;
 import com.launchly.bot.dto.request.UpdateTemplateRequest;
 import com.launchly.bot.dto.response.TemplateResponse;
@@ -43,7 +43,7 @@ public class TemplateServiceImpl implements TemplateService {
     private final BotRepository botRepository;
     private final BotMemberRepository botMemberRepository;
     private final FlowSchemaRepository flowSchemaRepository;
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
     private final BroadcastCampaignRepository broadcastCampaignRepository;
     private final TagRepository tagRepository;
     private final EncryptionUtil encryptionUtil;
@@ -55,8 +55,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @Transactional
     public TemplateResponse createTemplate(CreateTemplateRequest request, Long userId) {
-        User creator = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User creator = userQueryService.getUserOrThrow(userId);
 
         Bot bot = null;
         String sourceBotName = "Автоматизація";
@@ -277,8 +276,7 @@ public class TemplateServiceImpl implements TemplateService {
     public void installTemplate(String shareCode, Long targetBotId, Long userId) {
         AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Template not found"));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserOrThrow(userId);
 
         Bot targetBot = null;
         if (targetBotId != null) {

@@ -58,4 +58,32 @@ public class Subscription extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_id", nullable = false)
     private Plan plan;
+
+    public void activate(Plan plan, String stripeCustomerId, String stripeSubscriptionId, LocalDateTime start, LocalDateTime end) {
+        this.plan = plan;
+        this.stripeCustomerId = stripeCustomerId;
+        this.stripeSubscriptionId = stripeSubscriptionId;
+        this.currentPeriodStart = start;
+        this.currentPeriodEnd = end;
+        this.status = SubscriptionStatus.ACTIVE;
+        this.cancelAtPeriodEnd = false;
+    }
+
+    public void markCancelAtPeriodEnd() {
+        this.cancelAtPeriodEnd = true;
+    }
+
+    public void cancelImmediately() {
+        this.status = SubscriptionStatus.CANCELLED;
+        this.cancelAtPeriodEnd = false;
+    }
+
+    public boolean isActive() {
+        return this.status == SubscriptionStatus.ACTIVE && !isExpired();
+    }
+
+    public boolean isExpired() {
+        return this.currentPeriodEnd != null && this.currentPeriodEnd.isBefore(LocalDateTime.now());
+    }
 }
+

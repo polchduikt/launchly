@@ -20,6 +20,8 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     Optional<User> findByTelegramUserId(Long telegramUserId);
 
+    long countByActiveTrue();
+
     @Query("SELECT u FROM User u WHERE u.statsNotificationsEnabled = true AND " +
            "(UPPER(u.statsDayOfWeek) = 'DAILY' OR UPPER(u.statsDayOfWeek) = :dayOfWeek) AND " +
            "u.statsHour = :hour")

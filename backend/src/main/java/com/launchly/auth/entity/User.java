@@ -112,4 +112,63 @@ public class User extends BaseEntity {
     @JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(name = "automation_folders", columnDefinition = "jsonb")
     private String automationFolders;
+
+    public void block(String reason) {
+        this.active = false;
+        this.blockReason = reason != null && !reason.isBlank() ? reason.trim() : "Account blocked by administrator";
+        this.blockedAt = LocalDateTime.now();
+    }
+
+    public void unblock() {
+        this.active = true;
+        this.blockReason = null;
+        this.blockedAt = null;
+    }
+
+    public void changeRole(Role newRole) {
+        if (newRole == null) {
+            throw new IllegalArgumentException("Role cannot be null");
+        }
+        this.role = newRole;
+    }
+
+    public void updateProfile(String name, String avatar) {
+        if (name != null && !name.isBlank()) {
+            this.name = name.trim();
+        }
+        if (avatar != null) {
+            this.avatar = avatar.isBlank() ? null : avatar.trim();
+        }
+    }
+
+    public void changePassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    public void verifyEmail() {
+        this.emailVerified = true;
+    }
+
+    public void linkTelegram(Long telegramUserId, String username, String name, String photoUrl) {
+        this.telegramUserId = telegramUserId;
+        this.telegramUsername = username;
+        this.telegramName = name;
+        this.telegramPhotoUrl = photoUrl;
+    }
+
+    public void unlinkTelegram() {
+        this.telegramUserId = null;
+        this.telegramUsername = null;
+        this.telegramName = null;
+        this.telegramPhotoUrl = null;
+        this.notifyTelegram = false;
+        this.statsNotifyTelegram = false;
+    }
+
+    public void updateNotificationPreferences(boolean notifyEmail, boolean notifyTelegram, String notificationEmail) {
+        this.notifyEmail = notifyEmail;
+        this.notifyTelegram = notifyTelegram && this.telegramUserId != null;
+        this.notificationEmail = notificationEmail;
+    }
 }
+

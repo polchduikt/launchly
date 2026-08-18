@@ -1,7 +1,7 @@
 package com.launchly.bot.service.impl;
 
 import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.bot.dto.request.InviteMemberRequest;
 import com.launchly.bot.dto.request.UpdateMemberRequest;
 import com.launchly.bot.dto.response.TeamMemberResponse;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class TeamServiceImpl implements TeamService {
 
     private final BotRepository botRepository;
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
     private final BotMemberRepository botMemberRepository;
     private final BotInvitationRepository botInvitationRepository;
     private final SubscriptionRepository subscriptionRepository;
@@ -148,7 +148,7 @@ public class TeamServiceImpl implements TeamService {
             throw new AppException(HttpStatus.BAD_REQUEST, "Invitation already pending for this email");
         }
 
-        Optional<User> targetUserOpt = userRepository.findByEmailIgnoreCase(request.email());
+        Optional<User> targetUserOpt = userQueryService.findByEmailIgnoreCase(request.email());
         if (targetUserOpt.isPresent()) {
             User targetUser = targetUserOpt.get();
             if (botMemberRepository.existsByBotOwnerIdAndUserId(bot.getUser().getId(), targetUser.getId())) {
@@ -262,8 +262,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @Transactional(readOnly = true)
     public List<TeamMemberResponse> getMyPendingInvitations(Long currentUserId) {
-        User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserOrThrow(currentUserId);
 
         List<BotInvitation> invites = botInvitationRepository.findByEmailIgnoreCaseAndAccepted(user.getEmail(), false);
 
@@ -289,8 +288,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @Transactional
     public void acceptInvitation(Long invitationId, Long currentUserId) {
-        User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserOrThrow(currentUserId);
 
         BotInvitation invite = botInvitationRepository.findByIdAndEmailIgnoreCase(invitationId, user.getEmail())
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Invitation not found"));
@@ -318,8 +316,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @Transactional
     public void declineInvitation(Long invitationId, Long currentUserId) {
-        User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserOrThrow(currentUserId);
 
         BotInvitation invite = botInvitationRepository.findByIdAndEmailIgnoreCase(invitationId, user.getEmail())
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Invitation not found"));
@@ -341,8 +338,7 @@ public class TeamServiceImpl implements TeamService {
         }
 
         User oldOwner = bot.getUser();
-        User newOwner = userRepository.findById(newOwnerUserId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "New owner user not found"));
+        User newOwner = userQueryService.getUserOrThrow(newOwnerUserId);
 
         List<Bot> allOldOwnerBots = botRepository.findAllByUserId(oldOwner.getId());
         if (allOldOwnerBots.isEmpty()) {

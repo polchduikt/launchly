@@ -65,4 +65,25 @@ public class Order extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bot_user_id", nullable = false)
     private BotUser botUser;
+
+    public void changeStatus(OrderStatus newStatus) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException("Order status cannot be null");
+        }
+        this.status = newStatus;
+    }
+
+    public void updateAmount(BigDecimal newAmount) {
+        if (newAmount != null && newAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Order amount cannot be negative");
+        }
+        this.totalAmount = newAmount;
+    }
+
+    public void addNote(String note) {
+        if (note != null && !note.isBlank()) {
+            this.notes = (this.notes == null || this.notes.isBlank()) ? note.trim() : this.notes + "\n" + note.trim();
+        }
+    }
 }
+

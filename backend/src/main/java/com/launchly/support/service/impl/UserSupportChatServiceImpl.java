@@ -7,7 +7,7 @@ import com.launchly.admin.entity.SupportTicket;
 import com.launchly.admin.repository.SupportMessageRepository;
 import com.launchly.admin.repository.SupportTicketRepository;
 import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.MessageUtils;
 import com.launchly.support.dto.CreateTicketRequest;
@@ -32,7 +32,7 @@ public class UserSupportChatServiceImpl implements UserSupportChatService {
 
     private final SupportTicketRepository supportTicketRepository;
     private final SupportMessageRepository supportMessageRepository;
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
     private final MessageUtils messageUtils;
 
     @Override
@@ -162,8 +162,7 @@ public class UserSupportChatServiceImpl implements UserSupportChatService {
     }
 
     private User findUserByEmailOrThrow(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "User not found"));
+        return userQueryService.getUserByEmailOrThrow(email);
     }
 
     private SupportTicket findTicketOrThrow(Long id) {

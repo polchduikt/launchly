@@ -50,4 +50,27 @@ public class SupportTicket extends BaseEntity {
     @OrderBy("createdAt ASC")
     @Builder.Default
     private List<SupportMessage> messages = new ArrayList<>();
+
+    public void assignManager(User manager) {
+        this.assignedManager = manager;
+    }
+
+    public void updateLastMessage(String text, boolean unreadForAdmin, boolean unreadForUser) {
+        this.lastMessage = text;
+        this.unreadForAdmin = unreadForAdmin;
+        this.unreadForUser = unreadForUser;
+    }
+
+    public void toggleFavorite() {
+        this.isFavorite = !Boolean.TRUE.equals(this.isFavorite);
+    }
+
+    public void resolve() {
+        this.status = "RESOLVED";
+    }
+
+    public void reopen() {
+        this.status = "ACTIVE";
+    }
 }
+

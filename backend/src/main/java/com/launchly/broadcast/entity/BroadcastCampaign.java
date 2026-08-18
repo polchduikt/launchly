@@ -97,4 +97,29 @@ public class BroadcastCampaign extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bot_id", nullable = false)
     private Bot bot;
+
+    public void cancel() {
+        this.status = CampaignStatus.CANCELLED;
+    }
+
+    public void block(String reason) {
+        this.blocked = true;
+        this.status = CampaignStatus.CANCELLED;
+        this.blockReason = reason != null && !reason.isBlank() ? reason.trim() : "Campaign blocked by administrator";
+        this.blockedAt = LocalDateTime.now();
+    }
+
+    public void unblock() {
+        this.blocked = false;
+        this.blockReason = null;
+        this.blockedAt = null;
+    }
+
+    public void markCompleted(int sent, int failed, int total) {
+        this.sentCount = sent;
+        this.failedCount = failed;
+        this.totalCount = total;
+        this.status = CampaignStatus.COMPLETED;
+    }
 }
+

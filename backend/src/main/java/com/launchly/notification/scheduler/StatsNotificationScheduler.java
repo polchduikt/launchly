@@ -1,7 +1,7 @@
 package com.launchly.notification.scheduler;
 
 import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.analytics.dto.response.DashboardStatsResponse;
 import com.launchly.analytics.service.AnalyticsService;
 import com.launchly.notification.service.NotificationService;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatsNotificationScheduler {
 
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
     private final AnalyticsService analyticsService;
     private final NotificationService notificationService;
 
@@ -29,7 +29,7 @@ public class StatsNotificationScheduler {
 
         log.info("Running scheduled stats notifications check for day: {}, hour: {}", dayOfWeek, hour);
 
-        List<User> users = userRepository.findUsersForStatsNotification(dayOfWeek, hour);
+        List<User> users = userQueryService.findUsersForStatsNotification(dayOfWeek, hour);
         log.info("Found {} users scheduled for stats notifications at this time", users.size());
 
         for (User user : users) {

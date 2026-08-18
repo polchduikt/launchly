@@ -14,7 +14,7 @@ import com.launchly.admin.util.AdminPeriodResolver;
 import com.launchly.admin.util.BotTokenValidator;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.billing.repository.SubscriptionRepository;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.repository.BotRepository;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminUserServiceImpl implements AdminUserService {
 
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
     private final BotRepository botRepository;
     private final FlowSchemaRepository flowSchemaRepository;
     private final BroadcastCampaignRepository broadcastCampaignRepository;
@@ -55,8 +55,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional
     public AdminUserDetailDto getUserDetails(Long userId, String period, String category, int page, int size) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserOrThrow(userId);
 
         LocalDateTime cutoff = periodResolver.resolve(period);
 
@@ -154,7 +153,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional(readOnly = true)
     public Page<AdminUserDto> getUsers(String search, Role roleFilter, String planFilter, String sort, int page, int size) {
-        List<User> allUsers = userRepository.findAll();
+        List<User> allUsers = userQueryService.findAllUsers();
 
         List<AdminUserDto> filtered = allUsers.stream()
                 .filter(u -> matchesRole(u, roleFilter))
@@ -177,15 +176,14 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional
     public AdminUserDto updateUserRole(Long userId, Role newRole, String currentUserEmail) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserOrThrow(userId);
 
         if (user.getEmail().equalsIgnoreCase(currentUserEmail)) {
             throw new AppException(HttpStatus.BAD_REQUEST, "You cannot change your own administrative role");
         }
 
-        user.setRole(newRole);
-        user = userRepository.save(user);
+        user.changeRole(newRole);
+        user = userQueryService.save(user);
         userAuditService.logRoleChanged(user, newRole.name());
         return mapToUserDto(user);
     }
@@ -199,29 +197,23 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional
     public AdminUserDto toggleUserStatus(Long userId, AdminBlockRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserOrThrow(userId);
 
-        boolean willBeActive = !user.isActive();
-        user.setActive(willBeActive);
-
-        if (!willBeActive) {
+        if (user.isActive()) {
             String reason = request != null ? request.getReason() : null;
             String details = request != null ? request.getDetails() : null;
             String fullReason = (reason != null && !reason.isBlank()) ? reason.trim() : messageUtils.getMessage("admin.reason_rules");
             if (details != null && !details.isBlank()) {
                 fullReason += ": " + details.trim();
             }
-            user.setBlockReason(fullReason);
-            user.setBlockedAt(LocalDateTime.now());
+            user.block(fullReason);
             userAuditService.logUserBlocked(user, fullReason);
         } else {
-            user.setBlockReason(null);
-            user.setBlockedAt(null);
+            user.unblock();
             userAuditService.logUserUnblocked(user);
         }
 
-        user = userRepository.save(user);
+        user = userQueryService.save(user);
         return mapToUserDto(user);
     }
 

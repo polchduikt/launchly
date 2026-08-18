@@ -12,7 +12,6 @@ import com.launchly.admin.util.AdminPeriodResolver;
 import com.launchly.auth.entity.User;
 import com.launchly.bot.entity.Bot;
 import com.launchly.broadcast.entity.BroadcastCampaign;
-import com.launchly.broadcast.entity.CampaignStatus;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.MessageUtils;
@@ -103,7 +102,7 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
             throw new AppException(HttpStatus.BAD_REQUEST, messageUtils.getMessage("admin.support.dialog_closed_err"));
         }
 
-        campaign.setStatus(CampaignStatus.CANCELLED);
+        campaign.cancel();
         broadcastCampaignRepository.save(campaign);
 
         User creator = campaign.getBot() != null ? campaign.getBot().getUser() : null;
@@ -115,11 +114,9 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
     public void blockBroadcast(Long broadcastId, AdminBlockRequest request) {
         BroadcastCampaign campaign = findCampaignOrThrow(broadcastId);
         String reason = request != null ? request.getReason() : null;
+        String fullReason = (reason != null && !reason.isBlank()) ? reason.trim() : messageUtils.getMessage("admin.reason_rules");
 
-        campaign.setBlocked(true);
-        campaign.setBlockReason(reason != null && !reason.isBlank() ? reason.trim() : messageUtils.getMessage("admin.reason_rules"));
-        campaign.setBlockedAt(LocalDateTime.now());
-
+        campaign.block(fullReason);
         broadcastCampaignRepository.save(campaign);
 
         User creator = campaign.getBot() != null ? campaign.getBot().getUser() : null;
@@ -131,10 +128,7 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
     public void unblockBroadcast(Long broadcastId) {
         BroadcastCampaign campaign = findCampaignOrThrow(broadcastId);
 
-        campaign.setBlocked(false);
-        campaign.setBlockReason(null);
-        campaign.setBlockedAt(null);
-
+        campaign.unblock();
         broadcastCampaignRepository.save(campaign);
 
         User creator = campaign.getBot() != null ? campaign.getBot().getUser() : null;

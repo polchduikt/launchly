@@ -5,7 +5,7 @@ import com.launchly.ai.entity.AiUsage;
 import com.launchly.ai.repository.AiUsageRepository;
 import com.launchly.ai.service.AiUsageService;
 import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.billing.entity.Plan;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import java.time.LocalDate;
 public class AiUsageServiceImpl implements AiUsageService {
 
     private final AiUsageRepository aiUsageRepository;
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
     private final StringRedisTemplate redisTemplate;
 
     private static final String AI_TOKENS_KEY = "launchly:ai:tokens:%d:%s";
@@ -58,7 +58,7 @@ public class AiUsageServiceImpl implements AiUsageService {
     @Transactional
     public void recordTokenUsage(Long userId, Plan plan, int tokensConsumed) {
         if (tokensConsumed <= 0) {
-            tokensConsumed = 1500; // Fallback estimate if API response didn't report exact token usage
+            tokensConsumed = 1500;
         }
         
         String key = String.format(AI_TOKENS_KEY, userId, LocalDate.now());
@@ -70,8 +70,7 @@ public class AiUsageServiceImpl implements AiUsageService {
         LocalDate today = LocalDate.now();
         AiUsage aiUsage = aiUsageRepository.findByUserIdAndDate(userId, today)
                 .orElseGet(() -> {
-                    User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+                    User user = userQueryService.getUserOrThrow(userId);
                     return AiUsage.builder()
                             .user(user)
                             .date(today)

@@ -1,7 +1,7 @@
 package com.launchly.billing.service.impl;
 
 import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.billing.dto.response.CheckoutResponse;
 import com.launchly.billing.dto.response.PlanResponse;
 import com.launchly.billing.dto.response.SubscriptionResponse;
@@ -48,7 +48,7 @@ public class BillingServiceImpl implements BillingService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final PlanRepository planRepository;
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
     private final BillingMapper billingMapper;
     private final CacheManager cacheManager;
     private final PlanLimitService planLimitService;
@@ -78,8 +78,7 @@ public class BillingServiceImpl implements BillingService {
             return;
         }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserOrThrow(userId);
 
         Plan freePlan = planRepository.findByName("FREE")
                 .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found"));
@@ -119,8 +118,7 @@ public class BillingServiceImpl implements BillingService {
     @Override
     @Transactional
     public CheckoutResponse createCheckoutSession(Long planId, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserOrThrow(userId);
 
         Plan plan = planLimitService.getPlan(planId);
         if ("FREE".equalsIgnoreCase(plan.getName())) {

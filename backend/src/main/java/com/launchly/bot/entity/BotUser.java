@@ -51,4 +51,18 @@ public class BotUser extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bot_id", nullable = false)
     private Bot bot;
+
+    public void updateTelegramProfile(String firstName, String lastName, String username, String photoUrl) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        if (photoUrl != null && !photoUrl.isBlank()) {
+            this.photoUrl = photoUrl;
+        }
+    }
+
+    public void setCurrentNode(String nodeId) {
+        this.currentNodeId = nodeId;
+    }
 }
+

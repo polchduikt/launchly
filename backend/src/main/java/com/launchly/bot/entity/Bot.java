@@ -82,4 +82,44 @@ public class Bot extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public void activate() {
+        if (this.blocked) {
+            throw new IllegalStateException("Cannot activate a blocked bot");
+        }
+        this.active = true;
+    }
+
+    public void deactivate() {
+        this.active = false;
+    }
+
+    public void block(String reason) {
+        this.blocked = true;
+        this.active = false;
+        this.blockReason = reason != null && !reason.isBlank() ? reason.trim() : "Bot blocked by administrator";
+        this.blockedAt = java.time.LocalDateTime.now();
+    }
+
+    public void unblock() {
+        this.blocked = false;
+        this.blockReason = null;
+        this.blockedAt = null;
+    }
+
+    public void incrementRunsCount() {
+        this.runsCount++;
+    }
+
+    public void updateDetails(String name, String description, String avatar, String avatarPublicId) {
+        if (name != null && !name.isBlank()) {
+            this.name = name.trim();
+        }
+        this.description = description;
+        if (avatar != null) {
+            this.avatar = avatar;
+            this.avatarPublicId = avatarPublicId;
+        }
+    }
 }
+

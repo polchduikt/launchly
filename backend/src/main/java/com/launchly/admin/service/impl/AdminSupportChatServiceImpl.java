@@ -8,7 +8,7 @@ import com.launchly.admin.repository.SupportMessageRepository;
 import com.launchly.admin.repository.SupportTicketRepository;
 import com.launchly.admin.service.AdminSupportChatService;
 import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
@@ -39,7 +39,7 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
 
     private final SupportTicketRepository supportTicketRepository;
     private final SupportMessageRepository supportMessageRepository;
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
     private final BotRepository botRepository;
     private final BotUserRepository botUserRepository;
     private final FlowSchemaRepository flowSchemaRepository;
@@ -93,7 +93,7 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
             throw new IllegalStateException(messageUtils.getMessage("admin.support.dialog_other_manager_err", mName));
         }
 
-        User manager = userRepository.findByEmail(managerEmail).orElse(null);
+        User manager = userQueryService.findByEmail(managerEmail).orElse(null);
 
         SupportMessage message = SupportMessage.builder()
                 .ticket(ticket)
@@ -146,8 +146,7 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
     public SupportTicketDto claimTicket(Long ticketId, String managerEmail) {
         SupportTicket ticket = findTicketOrThrow(ticketId);
 
-        User manager = userRepository.findByEmail(managerEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Manager not found: " + managerEmail));
+        User manager = userQueryService.getUserByEmailOrThrow(managerEmail);
 
         if (ticket.getAssignedManager() != null && !ticket.getAssignedManager().getEmail().equalsIgnoreCase(managerEmail)) {
             String mName = ticket.getAssignedManager().getName() != null ? ticket.getAssignedManager().getName() : ticket.getAssignedManager().getEmail();

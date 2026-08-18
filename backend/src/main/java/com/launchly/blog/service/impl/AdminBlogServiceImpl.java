@@ -3,7 +3,7 @@ package com.launchly.blog.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.blog.dto.BlogArticleDto;
 import com.launchly.blog.dto.SaveBlogArticleRequest;
 import com.launchly.blog.entity.BlogArticle;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class AdminBlogServiceImpl implements AdminBlogService {
 
     private final BlogArticleRepository blogArticleRepository;
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
     private final MessageUtils messageUtils;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -61,7 +61,7 @@ public class AdminBlogServiceImpl implements AdminBlogService {
         String authorName = request.getAuthor();
         if (authorName == null || authorName.isBlank()) {
             if (currentUserEmail != null) {
-                User u = userRepository.findByEmail(currentUserEmail).orElse(null);
+                User u = userQueryService.findByEmail(currentUserEmail).orElse(null);
                 authorName = (u != null && u.getName() != null && !u.getName().isBlank()) ? u.getName() : "Launchly Team";
             } else {
                 authorName = "Launchly Team";

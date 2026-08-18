@@ -1,7 +1,7 @@
 package com.launchly.notification.service.impl;
 
 import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.auth.mapper.AuthMapper;
 import com.launchly.auth.dto.response.UserResponse;
 import com.launchly.bot.entity.BotUser;
@@ -15,14 +15,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
-import com.launchly.common.exception.AppException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -39,7 +37,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final ObjectProvider<JavaMailSender> mailSenderProvider;
     private final ObjectProvider<TelegramBotManager> botManagerProvider;
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
     private final BotUserRepository botUserRepository;
     private final ConversationRepository conversationRepository;
     private final AuthMapper authMapper;
@@ -50,12 +48,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public UserResponse updateSettings(String email, UpdateNotificationSettingsRequest request) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserByEmailOrThrow(email);
         
-        user.setNotifyEmail(request.notifyEmail());
-        user.setNotifyTelegram(request.notifyTelegram());
-        user.setNotificationEmail(request.notificationEmail());
+        user.updateNotificationPreferences(request.notifyEmail(), request.notifyTelegram(), request.notificationEmail());
         
         user.setStatsNotificationsEnabled(request.statsNotificationsEnabled());
         user.setStatsDayOfWeek(request.statsDayOfWeek());
@@ -64,32 +59,25 @@ public class NotificationServiceImpl implements NotificationService {
         user.setStatsNotifyEmail(request.statsNotifyEmail());
         user.setStatsNotifyTelegram(request.statsNotifyTelegram());
         
-        userRepository.save(user);
+        user = userQueryService.save(user);
         return authMapper.toUserResponse(user);
     }
 
     @Override
     @Transactional
     public UserResponse unlinkTelegram(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
-        user.setTelegramUserId(null);
-        user.setTelegramUsername(null);
-        user.setTelegramName(null);
-        user.setTelegramPhotoUrl(null);
-        user.setNotifyTelegram(false);
-        user.setStatsNotifyTelegram(false);
-        userRepository.save(user);
+        User user = userQueryService.getUserByEmailOrThrow(email);
+        user.unlinkTelegram();
+        user = userQueryService.save(user);
         return authMapper.toUserResponse(user);
     }
 
     @Override
     @Transactional
     public UserResponse updateTimezone(String email, String timezone) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserByEmailOrThrow(email);
         user.setTimezone(timezone);
-        userRepository.save(user);
+        user = userQueryService.save(user);
         return authMapper.toUserResponse(user);
     }
 
@@ -97,7 +85,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Async
     @Transactional(readOnly = true)
     public void sendAssignmentNotification(Long userId, Long botUserId) {
-        User user = userRepository.findById(userId).orElse(null);
+        User user = userQueryService.findById(userId).orElse(null);
         BotUser botUser = botUserRepository.findById(botUserId).orElse(null);
         if (user == null || botUser == null) {
             log.warn("User {} or BotUser {} not found, skipping assignment notification.", userId, botUserId);
@@ -169,7 +157,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Async
     @Transactional(readOnly = true)
     public void sendNewMessageNotification(Long userId, Long conversationId, String messageContent) {
-        User user = userRepository.findById(userId).orElse(null);
+        User user = userQueryService.findById(userId).orElse(null);
         Conversation conversation = conversationRepository.findById(conversationId).orElse(null);
         if (user == null || conversation == null) {
             log.warn("User {} or Conversation {} not found, skipping message notification.", userId, conversationId);

@@ -64,4 +64,31 @@ public class Lead extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bot_user_id", nullable = false)
     private BotUser botUser;
+
+
+    public void changeStatus(LeadStatus newStatus) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException("Lead status cannot be null");
+        }
+        this.status = newStatus;
+    }
+
+    public void updateContact(String name, String email, String phone) {
+        if (name != null && !name.isBlank()) {
+            this.name = name.trim();
+        }
+        if (email != null && !email.isBlank()) {
+            this.email = email.trim();
+        }
+        if (phone != null && !phone.isBlank()) {
+            this.phone = phone.trim();
+        }
+    }
+
+    public void addNote(String note) {
+        if (note != null && !note.isBlank()) {
+            this.notes = (this.notes == null || this.notes.isBlank()) ? note.trim() : this.notes + "\n" + note.trim();
+        }
+    }
 }
+

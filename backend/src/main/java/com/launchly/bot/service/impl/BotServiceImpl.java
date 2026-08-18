@@ -6,7 +6,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import com.launchly.auth.entity.User;
-import com.launchly.auth.repository.UserRepository;
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.bot.dto.request.BotCreateRequest;
 import com.launchly.bot.dto.request.BotUpdateRequest;
 import com.launchly.bot.dto.request.FlowSchemaRequest;
@@ -64,7 +64,7 @@ public class BotServiceImpl implements BotService {
     private final BotRepository botRepository;
     private final FlowSchemaRepository flowSchemaRepository;
     private final BotUserRepository botUserRepository;
-    private final UserRepository userRepository;
+    private final UserQueryService userQueryService;
     private final BotMapper botMapper;
     private final EncryptionUtil encryptionUtil;
     private final TelegramBotManager telegramBotManager;
@@ -83,8 +83,7 @@ public class BotServiceImpl implements BotService {
     @Transactional
     @CacheEvict(value = "bots", key = "#userId")
     public BotResponse createBot(BotCreateRequest request, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserOrThrow(userId);
 
         String rawToken = request.telegramToken();
         if (request.copyTokenFromBotId() != null) {
@@ -820,18 +819,16 @@ public class BotServiceImpl implements BotService {
     @Override
     @Transactional(readOnly = true)
     public String getAutomationFolders(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserOrThrow(userId);
         return user.getAutomationFolders() != null ? user.getAutomationFolders() : "{}";
     }
 
     @Override
     @Transactional
     public String saveAutomationFolders(String foldersJson, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userQueryService.getUserOrThrow(userId);
         user.setAutomationFolders(foldersJson);
-        userRepository.save(user);
+        userQueryService.save(user);
         return user.getAutomationFolders();
     }
 
