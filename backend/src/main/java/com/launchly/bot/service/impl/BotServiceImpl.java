@@ -38,6 +38,8 @@ import com.launchly.broadcast.repository.BotUserTagRepository;
 import com.launchly.broadcast.repository.TagRepository;
 import com.launchly.broadcast.entity.BotUserTag;
 import com.launchly.broadcast.entity.Tag;
+import com.launchly.bot.validator.BotAccessValidator;
+import com.launchly.bot.validator.FlowSchemaValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -78,6 +80,8 @@ public class BotServiceImpl implements BotService {
     private final InstalledTemplateRepository installedTemplateRepository;
     private final AccountTemplateRepository accountTemplateRepository;
     private final UserAuditService userAuditService;
+    private final FlowSchemaValidator flowSchemaValidator;
+    private final BotAccessValidator botAccessValidator;
 
     @Override
     @Transactional
@@ -182,7 +186,7 @@ public class BotServiceImpl implements BotService {
     @CacheEvict(value = "bots", key = "#userId")
     public BotResponse updateBot(Long id, BotUpdateRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
-        validateWriteAccess(bot, userId);
+        botAccessValidator.validateWriteAccess(bot, userId);
 
         if (request.name() != null) {
             bot.setName(request.name());
@@ -241,7 +245,7 @@ public class BotServiceImpl implements BotService {
     @CacheEvict(value = "bots", key = "#userId")
     public void deleteBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
-        validateWriteAccess(bot, userId);
+        botAccessValidator.validateWriteAccess(bot, userId);
 
         if (bot.isActive()) {
             telegramBotManager.unregisterBot(bot.getId());
@@ -256,7 +260,7 @@ public class BotServiceImpl implements BotService {
     @CacheEvict(value = "bots", key = "#userId")
     public BotResponse startBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
-        validateWriteAccess(bot, userId);
+        botAccessValidator.validateWriteAccess(bot, userId);
 
         if (bot.isActive()) {
             throw new AppException(HttpStatus.CONFLICT, "Bot is already running");
@@ -303,7 +307,7 @@ public class BotServiceImpl implements BotService {
     @CacheEvict(value = "bots", key = "#userId")
     public BotResponse publishBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
-        validateWriteAccess(bot, userId);
+        botAccessValidator.validateWriteAccess(bot, userId);
 
         bot.setRunsCount(bot.getRunsCount() + 1);
         bot.setUpdatedAt(LocalDateTime.now());
@@ -339,7 +343,7 @@ public class BotServiceImpl implements BotService {
     @CacheEvict(value = "bots", key = "#userId")
     public BotResponse stopBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
-        validateWriteAccess(bot, userId);
+        botAccessValidator.validateWriteAccess(bot, userId);
 
         if (!bot.isActive()) {
             throw new AppException(HttpStatus.CONFLICT, "Bot is not running");
@@ -374,11 +378,11 @@ public class BotServiceImpl implements BotService {
     @Transactional
     public FlowSchemaResponse saveFlowSchema(Long botId, FlowSchemaRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
-        validateWriteAccess(bot, userId);
+        botAccessValidator.validateWriteAccess(bot, userId);
 
         JsonNode nodesNode = objectMapper.valueToTree(request.nodes());
         JsonNode edgesNode = objectMapper.valueToTree(request.edges());
-        validateFlowSchema(nodesNode, edgesNode);
+        flowSchemaValidator.validateFlowSchema(nodesNode, edgesNode);
 
         FlowSchema schema = flowSchemaRepository.findByBotId(bot.getId())
                 .orElseGet(() -> FlowSchema.builder().bot(bot).build());
@@ -449,7 +453,7 @@ public class BotServiceImpl implements BotService {
     @Transactional
     public BotUserResponse updateBotUser(Long botId, Long botUserId, BotUserUpdateRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
-        validateWriteAccess(bot, userId);
+        botAccessValidator.validateWriteAccess(bot, userId);
         BotUser botUser = botUserRepository.findById(botUserId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Contact not found"));
 
@@ -511,7 +515,7 @@ public class BotServiceImpl implements BotService {
     @Transactional
     public BotUserResponse createBotUser(Long botId, BotUserCreateRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
-        validateWriteAccess(bot, userId);
+        botAccessValidator.validateWriteAccess(bot, userId);
         planLimitService.checkBotUserLimit(bot.getId());
 
         Long minTelegramId = botUserRepository.findMinTelegramIdByBotId(bot.getId()).orElse(0L);
@@ -594,7 +598,7 @@ public class BotServiceImpl implements BotService {
     @Transactional
     public void deleteBotUser(Long botId, Long botUserId, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
-        validateWriteAccess(bot, userId);
+        botAccessValidator.validateWriteAccess(bot, userId);
         BotUser botUser = botUserRepository.findById(botUserId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Contact not found"));
 
@@ -623,48 +627,6 @@ public class BotServiceImpl implements BotService {
         }
         String[] parts = token.split(":", 2);
         return parts[0] + ":****";
-    }
-
-    private void validateFlowSchema(JsonNode nodes, JsonNode edges) {
-        if (!nodes.isArray()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Nodes must be an array");
-        }
-        if (!edges.isArray()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Edges must be an array");
-        }
-
-        int startCount = 0;
-        Set<String> nodeIds = new HashSet<>();
-
-        for (JsonNode node : nodes) {
-            String nodeId = node.path("id").asText(null);
-            String type = node.path("type").asText(null);
-            if (nodeId == null || type == null) {
-                throw new AppException(HttpStatus.BAD_REQUEST, "Each node must have an id and type");
-            }
-            nodeIds.add(nodeId);
-            if ("START".equalsIgnoreCase(type)) {
-                startCount++;
-            }
-        }
-
-        if (startCount != 1) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Flow must have exactly one START node");
-        }
-
-        for (JsonNode edge : edges) {
-            String source = edge.path("source").asText(null);
-            String target = edge.path("target").asText(null);
-            if (source == null || target == null) {
-                throw new AppException(HttpStatus.BAD_REQUEST, "Each edge must have source and target");
-            }
-            if (!nodeIds.contains(source)) {
-                throw new AppException(HttpStatus.BAD_REQUEST, "Edge references unknown source node: " + source);
-            }
-            if (!nodeIds.contains(target)) {
-                throw new AppException(HttpStatus.BAD_REQUEST, "Edge references unknown target node: " + target);
-            }
-        }
     }
 
     private FlowSchemaResponse toFlowSchemaResponse(FlowSchema schema) {
@@ -742,13 +704,6 @@ public class BotServiceImpl implements BotService {
         }
     }
 
-    private Optional<BotMember> getWorkspaceMembership(Bot bot, Long userId) {
-        if (bot.getUser().getId().equals(userId)) {
-            return Optional.empty();
-        }
-        return botMemberRepository.findWorkspaceMemberships(bot.getId(), userId).stream().findFirst();
-    }
-
     private BotResponse toBotResponseWithStats(Bot bot) {
         if (bot == null) return null;
         BotResponse response = botMapper.toBotResponse(bot);
@@ -769,7 +724,7 @@ public class BotServiceImpl implements BotService {
             if (auth != null && auth.getPrincipal() instanceof CustomUserDetails userDetails) {
                 Long currentUserId = userDetails.getId();
                 if (!bot.getUser().getId().equals(currentUserId)) {
-                    role = getWorkspaceMembership(bot, currentUserId)
+                    role = botAccessValidator.getWorkspaceMembership(bot, currentUserId)
                             .map(BotMember::getRole)
                             .orElse("Viewer");
                 }
@@ -810,7 +765,7 @@ public class BotServiceImpl implements BotService {
     @Transactional
     public String saveCustomFields(Long botId, String customFieldsJson, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
-        validateWriteAccess(bot, userId);
+        botAccessValidator.validateWriteAccess(bot, userId);
         bot.setCustomFieldsData(customFieldsJson);
         botRepository.save(bot);
         return bot.getCustomFieldsData();
@@ -830,15 +785,5 @@ public class BotServiceImpl implements BotService {
         user.setAutomationFolders(foldersJson);
         userQueryService.save(user);
         return user.getAutomationFolders();
-    }
-
-    private void validateWriteAccess(Bot bot, Long userId) {
-        if (!bot.getUser().getId().equals(userId)) {
-            BotMember member = getWorkspaceMembership(bot, userId)
-                    .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Access denied"));
-            if ("Viewer".equalsIgnoreCase(member.getRole())) {
-                throw new AppException(HttpStatus.FORBIDDEN, "Viewer role cannot modify this bot workspace");
-            }
-        }
     }
 }

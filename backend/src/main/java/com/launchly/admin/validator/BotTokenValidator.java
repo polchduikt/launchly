@@ -1,4 +1,4 @@
-package com.launchly.admin.util;
+package com.launchly.admin.validator;
 
 import com.launchly.bot.entity.Bot;
 import com.launchly.common.utils.EncryptionUtil;

@@ -12,7 +12,7 @@ import com.launchly.admin.service.AdminAutomationService;
 import com.launchly.admin.service.UserAuditService;
 import com.launchly.admin.util.AdminFilterUtils;
 import com.launchly.admin.util.AdminPeriodResolver;
-import com.launchly.admin.util.BotTokenValidator;
+import com.launchly.admin.validator.BotTokenValidator;
 import com.launchly.auth.entity.User;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.FlowSchema;

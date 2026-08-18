@@ -8,7 +8,6 @@ import com.launchly.ai.dto.request.AiSchemaRequest;
 import com.launchly.common.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,7 +19,6 @@ public final class AiSchemaUtils {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private AiSchemaUtils() {
-        // Utility class
     }
 
     public static String cleanJson(String rawResponse) {
