@@ -53,8 +53,12 @@ public class SecurityConfig {
                                 "/api/v1/blog/**",
                                 "/api/v1/support/appeal",
                                 "/api/i18n/**",
-                                "/ws/**"
+                                "/ws/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
                         ).permitAll()
+
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/v1/templates/share/**"
