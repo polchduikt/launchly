@@ -5,6 +5,7 @@ import com.launchly.admin.dto.AdminBroadcastDto;
 import com.launchly.admin.dto.AdminBlockRequest;
 import com.launchly.admin.dto.UserActivityDto;
 import com.launchly.admin.entity.UserAuditLog;
+import com.launchly.admin.mapper.AdminMapper;
 import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminBroadcastService;
 import com.launchly.admin.service.UserAuditService;
@@ -12,6 +13,7 @@ import com.launchly.admin.util.AdminPeriodResolver;
 import com.launchly.auth.entity.User;
 import com.launchly.bot.entity.Bot;
 import com.launchly.broadcast.entity.BroadcastCampaign;
+import com.launchly.broadcast.entity.CampaignStatus;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.MessageUtils;
@@ -33,6 +35,7 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
     private final UserAuditLogRepository userAuditLogRepository;
     private final UserAuditService userAuditService;
     private final AdminPeriodResolver periodResolver;
+    private final AdminMapper adminMapper;
     private final MessageUtils messageUtils;
 
     @Override
@@ -71,26 +74,7 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
                 .timestamp(log.getCreatedAt())
                 .build());
 
-        return AdminBroadcastDetailDto.builder()
-                .id(campaign.getId())
-                .title(campaign.getName())
-                .content(campaign.getMessage())
-                .targetAudience(Boolean.TRUE.equals(campaign.getTargetAllBots()) ? "ALL_USERS" : "SPECIFIC_BOT")
-                .botName(bot != null ? bot.getName() : null)
-                .sentCount(campaign.getSentCount() != null ? campaign.getSentCount() : 0)
-                .failedCount(campaign.getFailedCount() != null ? campaign.getFailedCount() : 0)
-                .totalCount(campaign.getTotalCount() != null ? campaign.getTotalCount() : 0)
-                .status(resolveStatus(campaign))
-                .blocked(campaign.isBlocked())
-                .blockReason(campaign.getBlockReason())
-                .blockedAt(campaign.getBlockedAt())
-                .createdByEmail(creator != null ? creator.getEmail() : messageUtils.getMessage("admin.support_team"))
-                .authorName(creator != null ? creator.getName() : messageUtils.getMessage("admin.support_team"))
-                .authorId(creator != null ? creator.getId() : null)
-                .createdAt(campaign.getCreatedAt() != null ? campaign.getCreatedAt() : LocalDateTime.now())
-                .scheduledAt(campaign.getScheduledAt())
-                .activities(activityPage)
-                .build();
+        return adminMapper.toBroadcastDetailDto(campaign, creator, messageUtils.getMessage("admin.support_team"), activityPage);
     }
 
     @Override
@@ -141,30 +125,8 @@ public class AdminBroadcastServiceImpl implements AdminBroadcastService {
     }
 
     private AdminBroadcastDto mapToListDto(BroadcastCampaign c) {
-        Bot bot = c.getBot();
-        User creator = bot != null ? bot.getUser() : null;
-
-        return AdminBroadcastDto.builder()
-                .id(c.getId())
-                .title(c.getName())
-                .content(c.getMessage())
-                .targetAudience(Boolean.TRUE.equals(c.getTargetAllBots()) ? "ALL_USERS" : "SPECIFIC_BOT")
-                .botName(bot != null ? bot.getName() : null)
-                .sentCount(c.getSentCount() != null ? c.getSentCount() : 0)
-                .failedCount(c.getFailedCount() != null ? c.getFailedCount() : 0)
-                .totalCount(c.getTotalCount() != null ? c.getTotalCount() : 0)
-                .status(resolveStatus(c))
-                .blocked(c.isBlocked())
-                .blockReason(c.getBlockReason())
-                .blockedAt(c.getBlockedAt())
-                .createdByEmail(creator != null ? creator.getEmail() : messageUtils.getMessage("admin.support_team"))
-                .authorName(creator != null ? creator.getName() : messageUtils.getMessage("admin.support_team"))
-                .createdAt(c.getCreatedAt() != null ? c.getCreatedAt() : LocalDateTime.now())
-                .build();
-    }
-
-    private String resolveStatus(BroadcastCampaign c) {
-        if (c.isBlocked()) return "BLOCKED";
-        return c.getStatus() != null ? c.getStatus().name() : "DRAFT";
+        User creator = c.getBot() != null ? c.getBot().getUser() : null;
+        return adminMapper.toBroadcastDto(c, creator, messageUtils.getMessage("admin.support_team"));
     }
 }
+

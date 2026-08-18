@@ -14,6 +14,7 @@ public interface BotMapper {
     @Mapping(target = "hasTelegramToken", ignore = true)
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "runs", ignore = true)
+    @Mapping(target = "isTemplate", expression = "java(bot.isTemplate())")
     BotResponse toBotResponse(Bot bot);
 
     @Mapping(target = "tags", ignore = true)

@@ -16,6 +16,7 @@ import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.billing.entity.SubscriptionStatus;
 import com.launchly.billing.repository.SubscriptionRepository;
 import com.launchly.common.utils.MessageUtils;
+import com.launchly.support.mapper.SupportMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -45,6 +46,7 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
     private final FlowSchemaRepository flowSchemaRepository;
     private final BroadcastCampaignRepository broadcastCampaignRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final SupportMapper supportMapper;
     private final MessageUtils messageUtils;
 
     @Override
@@ -105,20 +107,11 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
 
         supportMessageRepository.save(message);
 
-        ticket.setLastMessage(text);
-        ticket.setUnreadForAdmin(false);
-        ticket.setUnreadForUser(true);
+        ticket.updateLastMessage(text, false, true);
         ticket.setUpdatedAt(LocalDateTime.now());
         supportTicketRepository.save(ticket);
 
-        return SupportMessageDto.builder()
-                .id(message.getId())
-                .ticketId(ticket.getId())
-                .sender(message.getSenderType())
-                .senderName(message.getSenderName())
-                .text(message.getText())
-                .timestamp(message.getCreatedAt() != null ? message.getCreatedAt() : LocalDateTime.now())
-                .build();
+        return supportMapper.toMessageDto(message);
     }
 
     @Override
@@ -256,16 +249,7 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
             }
         }
 
-        List<SupportMessageDto> messageDtos = ticket.getMessages().stream()
-                .map(m -> SupportMessageDto.builder()
-                        .id(m.getId())
-                        .ticketId(ticket.getId())
-                        .sender(m.getSenderType())
-                        .senderName(m.getSenderName())
-                        .text(m.getText())
-                        .timestamp(m.getCreatedAt() != null ? m.getCreatedAt() : LocalDateTime.now())
-                        .build())
-                .collect(Collectors.toList());
+        List<SupportMessageDto> messageDtos = supportMapper.toMessageDtoList(ticket.getMessages());
 
         User mgr = ticket.getAssignedManager();
 

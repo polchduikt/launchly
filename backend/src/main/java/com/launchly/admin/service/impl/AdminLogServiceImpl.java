@@ -2,6 +2,7 @@ package com.launchly.admin.service.impl;
 
 import com.launchly.admin.dto.AdminLogDto;
 import com.launchly.admin.entity.UserAuditLog;
+import com.launchly.admin.mapper.AdminLogMapper;
 import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminLogService;
 import com.launchly.auth.entity.User;
@@ -26,6 +27,7 @@ import java.util.List;
 public class AdminLogServiceImpl implements AdminLogService {
 
     private final UserAuditLogRepository userAuditLogRepository;
+    private final AdminLogMapper adminLogMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -36,7 +38,7 @@ public class AdminLogServiceImpl implements AdminLogService {
         Specification<UserAuditLog> spec = buildSpec(level, serviceFilter, search, parseStart(startDate), parseEnd(endDate));
         Page<UserAuditLog> logPage = userAuditLogRepository.findAll(spec, pageable);
 
-        return logPage.map(this::mapToDto);
+        return logPage.map(adminLogMapper::toDto);
     }
 
     private Specification<UserAuditLog> buildSpec(String level, String serviceFilter, String search, LocalDateTime startDt, LocalDateTime endDt) {
@@ -67,17 +69,6 @@ public class AdminLogServiceImpl implements AdminLogService {
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-    }
-
-    private AdminLogDto mapToDto(UserAuditLog log) {
-        return AdminLogDto.builder()
-                .id(String.valueOf(log.getId()))
-                .level(log.getBadge() != null ? log.getBadge().toUpperCase() : "INFO")
-                .service(log.getCategory() != null ? log.getCategory().toUpperCase() : "SYSTEM")
-                .message(log.getTitle() + (log.getDescription() != null && !log.getDescription().isBlank() ? " - " + log.getDescription() : ""))
-                .userEmail(log.getUser() != null ? log.getUser().getEmail() : "system")
-                .timestamp(log.getCreatedAt() != null ? log.getCreatedAt() : LocalDateTime.now())
-                .build();
     }
 
     private LocalDateTime parseStart(String startDate) {

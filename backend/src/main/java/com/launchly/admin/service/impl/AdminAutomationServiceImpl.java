@@ -6,6 +6,7 @@ import com.launchly.admin.dto.AdminAutomationDto;
 import com.launchly.admin.dto.AdminBlockRequest;
 import com.launchly.admin.dto.UserActivityDto;
 import com.launchly.admin.entity.UserAuditLog;
+import com.launchly.admin.mapper.AdminMapper;
 import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminAutomationService;
 import com.launchly.admin.service.UserAuditService;
@@ -42,6 +43,7 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
     private final UserAuditService userAuditService;
     private final BotTokenValidator botTokenValidator;
     private final AdminPeriodResolver periodResolver;
+    private final AdminMapper adminMapper;
     private final MessageUtils messageUtils;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -188,21 +190,7 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
         long execCount = (bot != null && connected) ? conversationRepository.countByBotId(bot.getId()) : 0;
         int runsCount = connected ? Math.max((int) execCount, f.getVersion()) : 0;
 
-        return AdminAutomationDto.builder()
-                .id(f.getId())
-                .name(bot != null ? bot.getName() : "Flow #" + f.getId())
-                .triggerType("KEYWORD")
-                .ownerEmail(owner != null ? owner.getEmail() : "N/A")
-                .ownerName(owner != null ? owner.getName() : "N/A")
-                .botName(botTokenValidator.resolveBotName(bot))
-                .active(bot != null && bot.isActive() && connected && !bot.isBlocked())
-                .blocked(bot != null && bot.isBlocked())
-                .blockReason(bot != null ? bot.getBlockReason() : null)
-                .blockedAt(bot != null ? bot.getBlockedAt() : null)
-                .triggerCount(runsCount)
-                .errorCount(0)
-                .lastExecutedAt(f.getUpdatedAt() != null ? f.getUpdatedAt() : LocalDateTime.now())
-                .build();
+        return adminMapper.toAutomationDto(f, bot, owner, botTokenValidator.resolveBotName(bot), connected, runsCount);
     }
 
     private boolean matchesStatus(AdminAutomationDto dto, String status) {

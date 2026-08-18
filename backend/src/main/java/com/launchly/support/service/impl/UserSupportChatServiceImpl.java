@@ -11,6 +11,7 @@ import com.launchly.auth.service.UserQueryService;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.MessageUtils;
 import com.launchly.support.dto.CreateTicketRequest;
+import com.launchly.support.mapper.SupportMapper;
 import com.launchly.support.service.UserSupportChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,7 @@ public class UserSupportChatServiceImpl implements UserSupportChatService {
     private final SupportTicketRepository supportTicketRepository;
     private final SupportMessageRepository supportMessageRepository;
     private final UserQueryService userQueryService;
+    private final SupportMapper supportMapper;
     private final MessageUtils messageUtils;
 
     @Override
@@ -43,7 +45,7 @@ public class UserSupportChatServiceImpl implements UserSupportChatService {
         Page<SupportTicket> ticketPage = supportTicketRepository.findByUserId(user.getId(), pageable);
 
         List<SupportTicketDto> dtos = ticketPage.getContent().stream()
-                .map(this::mapToDto)
+                .map(supportMapper::toDto)
                 .collect(Collectors.toList());
 
         return new PageImpl<>(dtos, pageable, ticketPage.getTotalElements());
@@ -64,7 +66,7 @@ public class UserSupportChatServiceImpl implements UserSupportChatService {
             supportTicketRepository.save(ticket);
         }
 
-        return mapToDto(ticket);
+        return supportMapper.toDto(ticket);
     }
 
     @Override
@@ -97,7 +99,7 @@ public class UserSupportChatServiceImpl implements UserSupportChatService {
         supportMessageRepository.save(message);
         ticket.getMessages().add(message);
 
-        return mapToDto(ticket);
+        return supportMapper.toDto(ticket);
     }
 
     @Override
@@ -126,22 +128,14 @@ public class UserSupportChatServiceImpl implements UserSupportChatService {
 
         supportMessageRepository.save(message);
 
-        ticket.setLastMessage(text.trim());
-        ticket.setUnreadForAdmin(true);
+        ticket.updateLastMessage(text.trim(), true, false);
         if ("RESOLVED".equalsIgnoreCase(ticket.getStatus())) {
-            ticket.setStatus("ACTIVE");
+            ticket.reopen();
         }
         ticket.setUpdatedAt(LocalDateTime.now());
         supportTicketRepository.save(ticket);
 
-        return SupportMessageDto.builder()
-                .id(message.getId())
-                .ticketId(ticket.getId())
-                .sender(message.getSenderType())
-                .senderName(message.getSenderName())
-                .text(message.getText())
-                .timestamp(message.getCreatedAt() != null ? message.getCreatedAt() : LocalDateTime.now())
-                .build();
+        return supportMapper.toMessageDto(message);
     }
 
     @Override
@@ -158,7 +152,7 @@ public class UserSupportChatServiceImpl implements UserSupportChatService {
         ticket.setStatus(statusToSet);
         ticket.setUpdatedAt(LocalDateTime.now());
         supportTicketRepository.save(ticket);
-        return mapToDto(ticket);
+        return supportMapper.toDto(ticket);
     }
 
     private User findUserByEmailOrThrow(String email) {
@@ -168,41 +162,5 @@ public class UserSupportChatServiceImpl implements UserSupportChatService {
     private SupportTicket findTicketOrThrow(Long id) {
         return supportTicketRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, messageUtils.getMessage("common.error.not_found")));
-    }
-
-    private SupportTicketDto mapToDto(SupportTicket ticket) {
-        User u = ticket.getUser();
-        User mgr = ticket.getAssignedManager();
-
-        List<SupportMessageDto> messageDtos = ticket.getMessages().stream()
-                .map(m -> SupportMessageDto.builder()
-                        .id(m.getId())
-                        .ticketId(ticket.getId())
-                        .sender(m.getSenderType())
-                        .senderName(m.getSenderName())
-                        .text(m.getText())
-                        .timestamp(m.getCreatedAt() != null ? m.getCreatedAt() : LocalDateTime.now())
-                        .build())
-                .collect(Collectors.toList());
-
-        return SupportTicketDto.builder()
-                .id(ticket.getId())
-                .userId(u != null ? u.getId() : 0L)
-                .userName(u != null && u.getName() != null && !u.getName().isBlank() ? u.getName() : "")
-                .userEmail(u != null ? u.getEmail() : "")
-                .userAvatar(u != null ? u.getAvatar() : null)
-                .unread(ticket.getUnreadForAdmin())
-                .unreadForUser(ticket.getUnreadForUser())
-                .isFavorite(ticket.getIsFavorite())
-                .status(ticket.getStatus())
-                .lastMessage(ticket.getLastMessage())
-                .lastMessageTime(ticket.getUpdatedAt() != null ? ticket.getUpdatedAt() : ticket.getCreatedAt())
-                .messages(messageDtos)
-                .registeredAt(ticket.getCreatedAt())
-                .lastActivityAt(ticket.getUpdatedAt())
-                .assignedManagerId(mgr != null ? mgr.getId() : null)
-                .assignedManagerName(mgr != null && mgr.getName() != null ? mgr.getName() : (mgr != null ? mgr.getEmail() : null))
-                .assignedManagerEmail(mgr != null ? mgr.getEmail() : null)
-                .build();
     }
 }

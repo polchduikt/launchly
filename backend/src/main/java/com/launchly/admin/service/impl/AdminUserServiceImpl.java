@@ -7,6 +7,7 @@ import com.launchly.admin.dto.UserActivityDto;
 import com.launchly.admin.dto.UserAutomationSummaryDto;
 import com.launchly.admin.dto.UserBroadcastSummaryDto;
 import com.launchly.admin.entity.UserAuditLog;
+import com.launchly.admin.mapper.AdminMapper;
 import com.launchly.admin.repository.UserAuditLogRepository;
 import com.launchly.admin.service.AdminUserService;
 import com.launchly.admin.service.UserAuditService;
@@ -50,6 +51,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     private final ConversationRepository conversationRepository;
     private final BotTokenValidator botTokenValidator;
     private final AdminPeriodResolver periodResolver;
+    private final AdminMapper adminMapper;
     private final MessageUtils messageUtils;
 
     @Override
@@ -84,16 +86,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 PageRequest.of(page, size)
         );
 
-        Page<UserActivityDto> activityPage = logPage.map(l -> UserActivityDto.builder()
-                .id(l.getId())
-                .targetId(l.getTargetId())
-                .targetName(l.getTargetName())
-                .title(l.getTitle())
-                .description(l.getDescription())
-                .category(l.getCategory())
-                .badge(l.getBadge())
-                .timestamp(l.getCreatedAt())
-                .build());
+        Page<UserActivityDto> activityPage = logPage.map(adminMapper::toActivityDto);
 
         List<UserAutomationSummaryDto> userAutomations = flowSchemaRepository.findAllByUserId(userId).stream()
                 .map(f -> {
@@ -101,53 +94,27 @@ public class AdminUserServiceImpl implements AdminUserService {
                     boolean connected = botTokenValidator.isConnected(bot);
                     long execCount = (bot != null && connected) ? conversationRepository.countByBotId(bot.getId()) : 0;
                     int runs = connected ? Math.max((int) execCount, f.getVersion()) : 0;
-                    return UserAutomationSummaryDto.builder()
-                            .id(f.getId())
-                            .name(bot != null ? bot.getName() : "Flow #" + f.getId())
-                            .botName(botTokenValidator.resolveBotName(bot))
-                            .active(bot != null && bot.isActive() && connected)
-                            .triggerCount(runs)
-                            .triggerType("KEYWORD")
-                            .build();
+                    return adminMapper.toAutomationSummaryDto(f, botTokenValidator.resolveBotName(bot), connected, runs);
                 })
                 .collect(Collectors.toList());
 
         List<UserBroadcastSummaryDto> userBroadcasts = userBots.stream()
                 .flatMap(b -> broadcastCampaignRepository.findByBotIdOrderByCreatedAtDesc(b.getId()).stream())
-                .map(bc -> UserBroadcastSummaryDto.builder()
-                        .id(bc.getId())
-                        .name(bc.getName())
-                        .botName(bc.getBot() != null ? bc.getBot().getName() : "\u2014")
-                        .status(bc.getStatus() != null ? bc.getStatus().name() : "DRAFT")
-                        .sentCount(bc.getSentCount() != null ? bc.getSentCount() : 0)
-                        .createdAt(bc.getCreatedAt() != null ? bc.getCreatedAt().toString() : "")
-                        .build())
+                .map(adminMapper::toBroadcastSummaryDto)
                 .collect(Collectors.toList());
 
-        return AdminUserDetailDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .avatar(user.getAvatar())
-                .role(user.getRole())
-                .active(user.isActive())
-                .blockReason(user.getBlockReason())
-                .blockedAt(user.getBlockedAt())
-                .provider(user.getProvider())
-                .createdAt(user.getCreatedAt())
-                .telegramUsername(user.getTelegramUsername())
-                .botsCount(botsCount)
-                .automationsCount(automationsCount)
-                .broadcastsCount(broadcastsCount)
-                .contactsCount(contactsCount)
-                .messagesCount(0)
-                .planName(planName)
-                .planStatus("ACTIVE")
-                .lastActivity(lastActivity)
-                .activities(activityPage)
-                .automations(userAutomations)
-                .broadcasts(userBroadcasts)
-                .build();
+        return adminMapper.toUserDetailDto(
+                user,
+                botsCount,
+                automationsCount,
+                broadcastsCount,
+                contactsCount,
+                planName,
+                lastActivity,
+                activityPage,
+                userAutomations,
+                userBroadcasts
+        );
     }
 
     @Override
@@ -227,25 +194,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .map(sub -> sub.getPlan() != null ? sub.getPlan().getName() : "FREE")
                 .orElse("FREE");
 
-        return AdminUserDto.builder()
-                .id(u.getId())
-                .email(u.getEmail())
-                .name(u.getName())
-                .avatar(u.getAvatar())
-                .role(u.getRole())
-                .active(u.isActive())
-                .blockReason(u.getBlockReason())
-                .blockedAt(u.getBlockedAt())
-                .provider(u.getProvider())
-                .createdAt(u.getCreatedAt())
-                .botsCount(uBots.size())
-                .automationsCount(aCount)
-                .broadcastsCount(brCount)
-                .contactsCount(cCount)
-                .messagesCount(0)
-                .planName(pName)
-                .telegramUsername(u.getTelegramUsername())
-                .build();
+        return adminMapper.toUserDto(u, uBots.size(), aCount, brCount, cCount, 0, pName);
     }
 
     private boolean matchesRole(User u, Role roleFilter) {
