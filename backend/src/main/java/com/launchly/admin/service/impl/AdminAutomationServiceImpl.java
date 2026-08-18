@@ -31,10 +31,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminAutomationServiceImpl implements AdminAutomationService {
+
 
     private final FlowSchemaRepository flowSchemaRepository;
     private final BotRepository botRepository;
@@ -93,7 +96,10 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
                 List<?> edgeArray = objectMapper.readValue(schema.getEdges(), List.class);
                 edgesCount = edgeArray.size();
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            log.warn("Failed to parse schema nodes/edges for automationId={}: {}", automationId, e.getMessage());
+        }
+
 
         LocalDateTime cutoff = periodResolver.resolve(period);
         Page<UserAuditLog> logPage = Page.empty();

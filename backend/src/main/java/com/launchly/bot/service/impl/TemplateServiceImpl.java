@@ -342,7 +342,10 @@ public class TemplateServiceImpl implements TemplateService {
                     FilterType fType = FilterType.ALL;
                     try {
                         fType = FilterType.valueOf(filterTypeStr);
-                    } catch (Exception ignored) {}
+                    } catch (Exception e) {
+                        log.warn("Invalid broadcast filterType '{}' in template {}, fallback to ALL", filterTypeStr, template.getId());
+                    }
+
 
                     BroadcastCampaign newCamp = BroadcastCampaign.builder()
                             .name(campName)
@@ -499,7 +502,9 @@ public class TemplateServiceImpl implements TemplateService {
                 Map<String, Object> schema = objectMapper.readValue(t.getSchemaJson(), new TypeReference<Map<String, Object>>() {});
                 automationNodeCount = JsonUtils.countElements(schema.get("nodes"));
                 automationEdgeCount = JsonUtils.countElements(schema.get("edges"));
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                log.warn("Failed to parse schemaJson for template {}: {}", t.getId(), e.getMessage());
+            }
         }
         if (automationNodeCount == 0 && (t.getFlowCount() > 0 || (flowIds != null && !flowIds.isEmpty()))) {
             automationNodeCount = 1;
@@ -514,7 +519,9 @@ public class TemplateServiceImpl implements TemplateService {
                     broadcastNodeCount += JsonUtils.countElements(c.get("nodes"));
                     broadcastEdgeCount += JsonUtils.countElements(c.get("edges"));
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                log.warn("Failed to parse broadcastsDataJson for template {}: {}", t.getId(), e.getMessage());
+            }
         }
 
         int totalNodeCount = automationNodeCount + broadcastNodeCount;
@@ -533,7 +540,9 @@ public class TemplateServiceImpl implements TemplateService {
                 } else if (parsed instanceof List<?> l) {
                     fieldCount = l.size();
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                log.warn("Failed to parse customFieldsDataJson for template {}: {}", t.getId(), e.getMessage());
+            }
         }
 
         int tagCount = t.getTagCount();
@@ -541,8 +550,11 @@ public class TemplateServiceImpl implements TemplateService {
             try {
                 List<?> list = objectMapper.readValue(t.getTagsDataJson(), List.class);
                 tagCount = list.size();
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                log.warn("Failed to parse tagsDataJson for template {}: {}", t.getId(), e.getMessage());
+            }
         }
+
 
         int viewsCount = t.getViewsCount();
         int dbInstalls = (int) installedTemplateRepository.countByTemplateId(t.getId());

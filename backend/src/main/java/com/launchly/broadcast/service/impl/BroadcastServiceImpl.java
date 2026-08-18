@@ -186,114 +186,121 @@ public class BroadcastServiceImpl implements BroadcastService {
         }
 
         List<BotUser> targetUsers = new ArrayList<>();
-        if (Boolean.TRUE.equals(campaign.getTargetAllBots())) {
-            Long ownerId = campaign.getBot().getUser().getId();
-            List<Bot> userBots = new ArrayList<>(botRepository.findAllByUserId(ownerId));
-            List<BotMember> memberships = botMemberRepository.findByUserId(ownerId);
-            for (BotMember bm : memberships) {
-                User owner = bm.getBot().getUser();
-                List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
-                for (Bot b : ownerBots) {
-                    if (userBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
-                        userBots.add(b);
-                    }
-                }
-            }
-            for (Bot b : userBots) {
-                targetUsers.addAll(broadcastFilterService.filterUsers(
-                        b.getId(), campaign.getFilterType(), campaign.getFilterValue()
-                ));
-            }
-        } else {
-            Long botId = campaign.getBot().getId();
-            targetUsers.addAll(broadcastFilterService.filterUsers(
-                    botId, campaign.getFilterType(), campaign.getFilterValue()
-            ));
-        }
-
-        campaign.setStatus(CampaignStatus.IN_PROGRESS);
-        campaign.setTotalCount(campaign.getTotalCount() + targetUsers.size());
-        campaignRepository.save(campaign);
-
-        int previousSent = campaign.getSentCount();
-        int previousFailed = campaign.getFailedCount();
-
-        log.info("Starting broadcast campaign {} to {} users", campaignId, targetUsers.size());
-        String firstConnectedNodeId = null;
         try {
-            String nodesJson = campaign.getNodes();
-            String edgesJson = campaign.getEdges();
-            if (nodesJson != null && !nodesJson.trim().isEmpty() && !"[]".equals(nodesJson)) {
-                JsonNode nodesNode = objectMapper.readTree(nodesJson);
-                JsonNode edgesNode = edgesJson != null && !edgesJson.trim().isEmpty() ? objectMapper.readTree(edgesJson) : objectMapper.createArrayNode();
-
-                String startNodeId = null;
-                for (JsonNode n : nodesNode) {
-                    if ("START_BROADCAST".equals(n.get("type").asText())) {
-                        startNodeId = n.get("id").asText();
-                        break;
-                    }
-                }
-
-                if (startNodeId != null) {
-                    for (JsonNode e : edgesNode) {
-                        if (startNodeId.equals(e.get("source").asText())) {
-                            firstConnectedNodeId = e.get("target").asText();
-                            break;
+            if (Boolean.TRUE.equals(campaign.getTargetAllBots())) {
+                Long ownerId = campaign.getBot().getUser().getId();
+                List<Bot> userBots = new ArrayList<>(botRepository.findAllByUserId(ownerId));
+                List<BotMember> memberships = botMemberRepository.findByUserId(ownerId);
+                for (BotMember bm : memberships) {
+                    User owner = bm.getBot().getUser();
+                    List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
+                    for (Bot b : ownerBots) {
+                        if (userBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
+                            userBots.add(b);
                         }
                     }
                 }
+                for (Bot b : userBots) {
+                    targetUsers.addAll(broadcastFilterService.filterUsers(
+                            b.getId(), campaign.getFilterType(), campaign.getFilterValue()
+                    ));
+                }
+            } else {
+                Long botId = campaign.getBot().getId();
+                targetUsers.addAll(broadcastFilterService.filterUsers(
+                        botId, campaign.getFilterType(), campaign.getFilterValue()
+                ));
             }
-        } catch (Exception e) {
-            log.error("Failed to parse campaign flow for dispatching: {}", e.getMessage());
-        }
 
-        final String connectedNodeId = firstConnectedNodeId;
+            campaign.setStatus(CampaignStatus.IN_PROGRESS);
+            campaign.setTotalCount(campaign.getTotalCount() + targetUsers.size());
+            campaignRepository.save(campaign);
 
-        int sent = 0;
-        int failed = 0;
+            int previousSent = campaign.getSentCount();
+            int previousFailed = campaign.getFailedCount();
 
-        for (int i = 0; i < targetUsers.size(); i++) {
-            BotUser user = targetUsers.get(i);
-            Long userBotId = user.getBot().getId();
+            log.info("Starting broadcast campaign {} to {} users", campaignId, targetUsers.size());
+            String firstConnectedNodeId = null;
             try {
-                if (connectedNodeId != null) {
-                    flowEngineService.runFlow(userBotId, user, connectedNodeId, campaignId);
-                } else if (campaign.getMessage() != null && !campaign.getMessage().trim().isEmpty()) {
-                    String sanitizedText = SanitizationUtil.sanitizeForTelegram(campaign.getMessage());
-                    telegramSendService.sendMessage(userBotId, user.getTelegramId(), sanitizedText);
+                String nodesJson = campaign.getNodes();
+                String edgesJson = campaign.getEdges();
+                if (nodesJson != null && !nodesJson.trim().isEmpty() && !"[]".equals(nodesJson)) {
+                    JsonNode nodesNode = objectMapper.readTree(nodesJson);
+                    JsonNode edgesNode = edgesJson != null && !edgesJson.trim().isEmpty() ? objectMapper.readTree(edgesJson) : objectMapper.createArrayNode();
+
+                    String startNodeId = null;
+                    for (JsonNode n : nodesNode) {
+                        if ("START_BROADCAST".equals(n.get("type").asText())) {
+                            startNodeId = n.get("id").asText();
+                            break;
+                        }
+                    }
+
+                    if (startNodeId != null) {
+                        for (JsonNode e : edgesNode) {
+                            if (startNodeId.equals(e.get("source").asText())) {
+                                firstConnectedNodeId = e.get("target").asText();
+                                break;
+                            }
+                        }
+                    }
                 }
-                sent++;
             } catch (Exception e) {
-                failed++;
-                log.error("Failed to execute broadcast for telegramId={} on botId={}: {}",
-                        user.getTelegramId(), userBotId, e.getMessage());
+                log.error("Failed to parse campaign flow for dispatching: {}", e.getMessage());
             }
 
-            if ((i + 1) % BATCH_SIZE == 0 && i + 1 < targetUsers.size()) {
+            final String connectedNodeId = firstConnectedNodeId;
+
+            int sent = 0;
+            int failed = 0;
+
+            for (int i = 0; i < targetUsers.size(); i++) {
+                BotUser user = targetUsers.get(i);
+                Long userBotId = user.getBot().getId();
                 try {
-                    Thread.sleep(BATCH_DELAY_MS);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    log.error("Broadcast campaign {} interrupted", campaignId);
-                    break;
+                    if (connectedNodeId != null) {
+                        flowEngineService.runFlow(userBotId, user, connectedNodeId, campaignId);
+                    } else if (campaign.getMessage() != null && !campaign.getMessage().trim().isEmpty()) {
+                        String sanitizedText = SanitizationUtil.sanitizeForTelegram(campaign.getMessage());
+                        telegramSendService.sendMessage(userBotId, user.getTelegramId(), sanitizedText);
+                    }
+                    sent++;
+                } catch (Exception e) {
+                    failed++;
+                    log.error("Failed to execute broadcast for telegramId={} on botId={}: {}",
+                            user.getTelegramId(), userBotId, e.getMessage());
+                }
+
+                if ((i + 1) % BATCH_SIZE == 0 && i + 1 < targetUsers.size()) {
+                    try {
+                        Thread.sleep(BATCH_DELAY_MS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        log.error("Broadcast campaign {} interrupted", campaignId);
+                        break;
+                    }
                 }
             }
+
+            campaign.setSentCount(previousSent + sent);
+            campaign.setFailedCount(previousFailed + failed);
+            int totalSent = previousSent + sent;
+            int totalFailed = previousFailed + failed;
+            int totalCount = campaign.getTotalCount();
+            campaign.setStatus(totalFailed == totalCount && totalCount > 0
+                    ? CampaignStatus.FAILED
+                    : CampaignStatus.COMPLETED);
+            campaignRepository.save(campaign);
+
+            log.info("Broadcast campaign {} completed: sent={}, failed={}, total={}",
+                    campaignId, totalSent, totalFailed, totalCount);
+        } catch (Exception fatalEx) {
+            log.error("Fatal error during broadcast campaign {} execution: {}", campaignId, fatalEx.getMessage(), fatalEx);
+            campaign.setStatus(CampaignStatus.FAILED);
+            campaignRepository.save(campaign);
         }
-
-        campaign.setSentCount(previousSent + sent);
-        campaign.setFailedCount(previousFailed + failed);
-        int totalSent = previousSent + sent;
-        int totalFailed = previousFailed + failed;
-        int totalCount = campaign.getTotalCount();
-        campaign.setStatus(totalFailed == totalCount && totalCount > 0
-                ? CampaignStatus.FAILED
-                : CampaignStatus.COMPLETED);
-        campaignRepository.save(campaign);
-
-        log.info("Broadcast campaign {} completed: sent={}, failed={}, total={}",
-                campaignId, totalSent, totalFailed, totalCount);
     }
+
 
     @Override
     @Transactional

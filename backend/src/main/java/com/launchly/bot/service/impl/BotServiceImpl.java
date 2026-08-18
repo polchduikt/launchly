@@ -347,7 +347,7 @@ public class BotServiceImpl implements BotService {
         botAccessValidator.validateWriteAccess(bot, userId);
 
         if (!bot.isActive()) {
-            throw new AppException(HttpStatus.CONFLICT, "Bot is not running");
+            throw new AppException(HttpStatus.CONFLICT, "bot.error.not_running");
         }
 
         telegramBotManager.unregisterBot(bot.getId());
@@ -359,9 +359,11 @@ public class BotServiceImpl implements BotService {
             try {
                 telegramBotManager.registerBot(bot);
             } catch (Exception ex) {
+                log.error("Failed to re-register bot {} after stop failure: {}", bot.getId(), ex.getMessage(), ex);
             }
             throw e;
         }
+
 
         return toBotResponseWithStats(bot);
     }

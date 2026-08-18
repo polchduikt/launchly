@@ -165,7 +165,9 @@ public class TelegramBotManager {
                 Thread.sleep(300);
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
+                log.warn("System bot sleep interrupted: {}", ie.getMessage());
             } catch (Exception e) {
+
                 log.warn("Failed to call deleteWebhook before polling for system bot: {}", e.getMessage());
             }
 

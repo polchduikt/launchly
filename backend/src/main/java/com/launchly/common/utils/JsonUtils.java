@@ -37,6 +37,7 @@ public final class JsonUtils {
                 List<?> list = OBJECT_MAPPER.readValue(trimmed, List.class);
                 return list != null ? list.size() : 0;
             } catch (Exception e) {
+                log.warn("Failed to count elements from json string: {}", e.getMessage());
                 return 0;
             }
         }
@@ -48,6 +49,7 @@ public final class JsonUtils {
         try {
             return OBJECT_MAPPER.readValue(json, new TypeReference<List<String>>() {});
         } catch (Exception e) {
+            log.warn("Failed to read string list from JSON: {}", e.getMessage());
             return Collections.emptyList();
         }
     }
@@ -63,12 +65,16 @@ public final class JsonUtils {
                 } else if (item instanceof String s) {
                     try {
                         result.add(Long.parseLong(s.trim()));
-                    } catch (NumberFormatException ignored) {}
+                    } catch (NumberFormatException e) {
+                        log.warn("Failed to parse Long from item '{}': {}", s, e.getMessage());
+                    }
                 }
             }
             return result;
         } catch (Exception e) {
+            log.warn("Failed to read long list from JSON: {}", e.getMessage());
             return Collections.emptyList();
         }
     }
 }
+

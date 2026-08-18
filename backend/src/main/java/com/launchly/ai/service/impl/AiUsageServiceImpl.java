@@ -107,7 +107,10 @@ public class AiUsageServiceImpl implements AiUsageService {
         if (value != null) {
             try {
                 return Long.parseLong(value);
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException e) {
+                log.warn("Invalid token count in Redis for key {}: {}", key, value);
+            }
+
         }
         long dbUsed = aiUsageRepository.findByUserIdAndDate(userId, LocalDate.now())
                 .map(AiUsage::getTokensUsed)

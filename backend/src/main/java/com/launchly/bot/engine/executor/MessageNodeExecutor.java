@@ -199,7 +199,10 @@ public class MessageNodeExecutor implements NodeExecutor {
                     } else if (delayObj instanceof String) {
                         try {
                             delaySeconds = Integer.parseInt((String) delayObj);
-                        } catch (NumberFormatException ignored) {}
+                        } catch (NumberFormatException e) {
+                            log.warn("Invalid delaySeconds string '{}' in node {}, fallback to 3s", delayObj, node.id());
+                        }
+
                     }
 
                     try {
@@ -575,7 +578,10 @@ public class MessageNodeExecutor implements NodeExecutor {
                                 }
                             }
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception e) {
+                        log.warn("Failed to parse customFields from botUser metadata: {}", e.getMessage());
+                    }
+
                 }
                 if (!found) {
                     replacement = matcher.group(0);
