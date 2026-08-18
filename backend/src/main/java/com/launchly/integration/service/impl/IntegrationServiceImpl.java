@@ -49,7 +49,7 @@ public class IntegrationServiceImpl implements IntegrationService {
             try {
                 configStr = objectMapper.writeValueAsString(request.config());
             } catch (Exception e) {
-                throw new AppException(HttpStatus.BAD_REQUEST, "Invalid config JSON format");
+                throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.invalid_config_json");
             }
         }
 
@@ -71,7 +71,7 @@ public class IntegrationServiceImpl implements IntegrationService {
     @Transactional
     public IntegrationResponse updateIntegration(Long id, IntegrationCreateRequest request, Long userId) {
         Integration integration = integrationRepository.findById(id)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Integration not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "integration.error.not_found"));
 
         validateBotOwnership(integration.getBot().getId(), userId);
 
@@ -80,7 +80,7 @@ public class IntegrationServiceImpl implements IntegrationService {
             try {
                 configStr = objectMapper.writeValueAsString(request.config());
             } catch (Exception e) {
-                throw new AppException(HttpStatus.BAD_REQUEST, "Invalid config JSON format");
+                throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.invalid_config_json");
             }
         }
 
@@ -97,7 +97,7 @@ public class IntegrationServiceImpl implements IntegrationService {
     @Transactional
     public void deleteIntegration(Long id, Long userId) {
         Integration integration = integrationRepository.findById(id)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Integration not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "integration.error.not_found"));
 
         validateBotOwnership(integration.getBot().getId(), userId);
         integrationRepository.delete(integration);
@@ -107,7 +107,7 @@ public class IntegrationServiceImpl implements IntegrationService {
     @Transactional
     public IntegrationResponse toggleIntegration(Long id, Long userId) {
         Integration integration = integrationRepository.findById(id)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Integration not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "integration.error.not_found"));
 
         validateBotOwnership(integration.getBot().getId(), userId);
         integration.setActive(!integration.isActive());
@@ -118,7 +118,8 @@ public class IntegrationServiceImpl implements IntegrationService {
 
     private Bot validateBotOwnership(Long botId, Long userId) {
         return botRepository.findByIdAndUserId(botId, userId)
-                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Bot not found or access denied"));
+                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied"));
     }
 }
+
 

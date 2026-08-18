@@ -13,7 +13,6 @@ import com.launchly.admin.util.AdminPeriodResolver;
 import com.launchly.auth.entity.User;
 import com.launchly.bot.entity.Bot;
 import com.launchly.broadcast.entity.BroadcastCampaign;
-import com.launchly.broadcast.entity.CampaignStatus;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.MessageUtils;

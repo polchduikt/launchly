@@ -45,7 +45,7 @@ public class AiProviderRouter {
             boolean hasConfiguredProvider = orderedProviders.stream().anyMatch(AiProviderClient::isConfigured);
 
             if (!hasConfiguredProvider) {
-                throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "No AI provider API key is configured");
+                throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "ai.error.no_provider_configured");
             }
 
             for (AiProviderClient provider : orderedProviders) {
@@ -66,7 +66,7 @@ public class AiProviderRouter {
                 }
             }
 
-            throw new AppException(HttpStatus.BAD_GATEWAY, "All configured AI providers are unavailable");
+            throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.all_providers_unavailable");
         }
 
         String normName = providerName.trim().toLowerCase(Locale.ROOT);
@@ -94,13 +94,14 @@ public class AiProviderRouter {
             if (responseValidator.test(response)) {
                 return response;
             }
-            throw new AppException(HttpStatus.BAD_GATEWAY, provider.name() + " response did not pass validation");
+            throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.invalid_response");
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
             log.error("AI provider '{}' call failed: {}", provider.name(), e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to call AI provider " + provider.name());
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "ai.error.provider_failed");
         }
+
     }
 
     private List<AiProviderClient> orderedProviders() {

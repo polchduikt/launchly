@@ -69,8 +69,9 @@ public class TemplateServiceImpl implements TemplateService {
             bot = botRepository.findById(request.botId()).orElse(null);
             if (bot != null) {
                 if (!bot.getUser().getId().equals(userId) && !botMemberRepository.existsByBotIdAndUserId(request.botId(), userId)) {
-                    throw new AppException(HttpStatus.FORBIDDEN, "Access denied to source bot");
+                    throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
                 }
+
                 sourceBotName = bot.getName();
                 sourceBotDescription = bot.getDescription() != null ? bot.getDescription() : "";
                 customFieldsData = bot.getCustomFieldsData() != null ? bot.getCustomFieldsData() : "{}";
@@ -227,11 +228,12 @@ public class TemplateServiceImpl implements TemplateService {
     @Transactional
     public TemplateResponse updateTemplate(String shareCode, UpdateTemplateRequest request, Long userId) {
         AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Template not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "common.error.not_found"));
 
         if (!template.getCreator().getId().equals(userId)) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Only creator can update template");
+            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
         }
+
 
         if (request.name() != null) {
             template.setName(request.name());
@@ -461,11 +463,12 @@ public class TemplateServiceImpl implements TemplateService {
     @Transactional
     public void deleteTemplate(String shareCode, Long userId) {
         AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Template not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "common.error.not_found"));
 
         if (!template.getCreator().getId().equals(userId)) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Only creator can delete template");
+            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
         }
+
 
         installedTemplateRepository.deleteAllByTemplateId(template.getId());
         accountTemplateRepository.delete(template);

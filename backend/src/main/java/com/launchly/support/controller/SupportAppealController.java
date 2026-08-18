@@ -1,5 +1,6 @@
 package com.launchly.support.controller;
 
+import com.launchly.common.utils.MessageUtils;
 import com.launchly.support.dto.SupportAppealRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +19,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SupportAppealController {
 
+    private final MessageUtils messageUtils;
+
     @PostMapping("/appeal")
     public ResponseEntity<Map<String, String>> submitAppeal(@Valid @RequestBody SupportAppealRequest request) {
         log.info("Received support appeal from {}: {}", request.getEmail(), request.getMessage());
         return ResponseEntity.ok(Map.of(
                 "status", "success",
-                "message", "Звернення прийнято. Менеджер розгляне його найближчим часом."
+                "message", messageUtils.getMessage("support.appeal.success")
         ));
     }
 }

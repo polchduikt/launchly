@@ -52,7 +52,7 @@ public abstract class OpenAiCompatibleAiClient implements AiProviderClient {
     public String chat(List<AiMessage> messages, Map<String, Object> responseFormat, String customApiKey) {
         String keyToUse = (customApiKey != null && !customApiKey.trim().isEmpty()) ? customApiKey : apiKey();
         if (keyToUse == null || keyToUse.trim().isEmpty()) {
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, name() + " API key is not configured");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "ai.error.no_provider_configured");
         }
 
         try {
@@ -80,7 +80,7 @@ public abstract class OpenAiCompatibleAiClient implements AiProviderClient {
 
             if (response.statusCode() != 200) {
                 log.error("{} API error. Status: {}, Body: {}", name(), response.statusCode(), response.body());
-                throw new AppException(HttpStatus.BAD_GATEWAY, name() + " returned an error");
+                throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.provider_failed");
             }
 
             JsonNode rootNode = objectMapper.readTree(response.body());
@@ -89,12 +89,13 @@ public abstract class OpenAiCompatibleAiClient implements AiProviderClient {
                 return choices.get(0).path("message").path("content").asText();
             }
 
-            throw new AppException(HttpStatus.BAD_GATEWAY, "Invalid response from " + name());
+            throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.invalid_response");
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
             log.error("Exception occurred while calling {} API: {}", name(), e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to connect to " + name());
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "ai.error.failed_connect");
         }
     }
 }
+

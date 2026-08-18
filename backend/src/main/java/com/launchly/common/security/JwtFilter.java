@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import com.launchly.common.utils.MessageUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +23,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
+    private final MessageUtils messageUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -37,12 +39,13 @@ public class JwtFilter extends OncePerRequestFilter {
             if (!userDetails.isEnabled()) {
                 String reason = (userDetails instanceof CustomUserDetails cud && cud.getBlockReason() != null)
                         ? cud.getBlockReason()
-                        : "Порушення правил платформи";
+                        : messageUtils.getMessage("admin.reason_rules");
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write("{\"error\":\"ACCOUNT_BLOCKED\",\"reason\":\"" + reason.replace("\"", "\\\"") + "\"}");
                 return;
             }
+
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

@@ -62,7 +62,7 @@ public class GeminiClient implements AiProviderClient {
     public String chat(List<AiMessage> messages, Map<String, Object> responseFormat, String customApiKey) {
         String keyToUse = (customApiKey != null && !customApiKey.trim().isEmpty()) ? customApiKey : apiKey;
         if (keyToUse == null || keyToUse.trim().isEmpty()) {
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Gemini API key is not configured");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "ai.error.no_provider_configured");
         }
 
         try {
@@ -114,7 +114,7 @@ public class GeminiClient implements AiProviderClient {
 
             if (response.statusCode() != 200) {
                 log.error("Gemini API error. Status: {}, Body: {}", response.statusCode(), response.body());
-                throw new AppException(HttpStatus.BAD_GATEWAY, "Gemini returned an error");
+                throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.provider_failed");
             }
 
             JsonNode rootNode = objectMapper.readTree(response.body());
@@ -126,12 +126,13 @@ public class GeminiClient implements AiProviderClient {
                 }
             }
 
-            throw new AppException(HttpStatus.BAD_GATEWAY, "Invalid response from Gemini");
+            throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.invalid_response");
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
             log.error("Exception occurred while calling Gemini API: {}", e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to connect to Gemini");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "ai.error.failed_connect");
         }
+
     }
 }

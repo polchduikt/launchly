@@ -263,13 +263,14 @@ public class BotServiceImpl implements BotService {
         botAccessValidator.validateWriteAccess(bot, userId);
 
         if (bot.isActive()) {
-            throw new AppException(HttpStatus.CONFLICT, "Bot is already running");
+            throw new AppException(HttpStatus.CONFLICT, "bot.error.already_running");
         }
 
         String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
         if ("0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decryptedToken)) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Please configure a valid Telegram token in settings before starting the automation.");
+            throw new AppException(HttpStatus.BAD_REQUEST, "bot.error.token_required_to_start");
         }
+
 
         List<Bot> activeBotsList = botRepository.findAllByActiveTrue();
         for (Bot activeBot : activeBotsList) {
@@ -450,15 +451,16 @@ public class BotServiceImpl implements BotService {
     }
 
     @Override
+
     @Transactional
     public BotUserResponse updateBotUser(Long botId, Long botUserId, BotUserUpdateRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
         botAccessValidator.validateWriteAccess(bot, userId);
         BotUser botUser = botUserRepository.findById(botUserId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Contact not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.contact_not_found"));
 
         if (!botUser.getBot().getId().equals(bot.getId())) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Access denied to this contact");
+            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.contact_access_denied");
         }
 
         if (request.firstName() != null) {
@@ -600,10 +602,10 @@ public class BotServiceImpl implements BotService {
         Bot bot = findBotByIdAndUser(botId, userId);
         botAccessValidator.validateWriteAccess(bot, userId);
         BotUser botUser = botUserRepository.findById(botUserId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Contact not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.contact_not_found"));
 
         if (!botUser.getBot().getId().equals(bot.getId())) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Access denied to this contact");
+            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.contact_access_denied");
         }
         botUserRepository.delete(botUser);
     }
@@ -618,7 +620,7 @@ public class BotServiceImpl implements BotService {
 
     private Bot findBotByIdAndUser(Long botId, Long userId) {
         return botRepository.findByIdAndUserId(botId, userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
     }
 
     private String maskToken(String token) {
@@ -642,7 +644,7 @@ public class BotServiceImpl implements BotService {
         try {
             return objectMapper.readValue(json, Object.class);
         } catch (JacksonException e) {
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to parse JSON");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "common.error.json_parse");
         }
     }
 
@@ -650,7 +652,7 @@ public class BotServiceImpl implements BotService {
         try {
             return objectMapper.writeValueAsString(jsonNode);
         } catch (JacksonException e) {
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to serialize JSON");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "common.error.json_serialize");
         }
     }
 

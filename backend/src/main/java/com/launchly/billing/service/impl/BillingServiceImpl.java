@@ -120,7 +120,7 @@ public class BillingServiceImpl implements BillingService {
 
         Plan plan = planLimitService.getPlan(planId);
         if ("FREE".equalsIgnoreCase(plan.getName())) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Cannot checkout to FREE plan via Stripe");
+            throw new AppException(HttpStatus.BAD_REQUEST, "billing.error.cannot_checkout_free");
         }
 
         Subscription subscription = subscriptionRepository.findByUserId(userId)
@@ -161,7 +161,7 @@ public class BillingServiceImpl implements BillingService {
             return new CheckoutResponse(session.getUrl());
         } catch (Exception e) {
             log.error("Stripe checkout error for userId={}: {}", userId, e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Stripe session creation failed");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.session_creation_failed");
         }
     }
 
@@ -177,7 +177,7 @@ public class BillingServiceImpl implements BillingService {
 
         String stripeSubId = subscription.getStripeSubscriptionId();
         if (stripeSubId == null || stripeSubId.isEmpty()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "No active Stripe subscription to cancel");
+            throw new AppException(HttpStatus.BAD_REQUEST, "billing.error.no_active_subscription_cancel");
         }
 
         try {
@@ -193,7 +193,7 @@ public class BillingServiceImpl implements BillingService {
             return billingMapper.toSubscriptionResponse(subscription);
         } catch (Exception e) {
             log.error("Stripe cancel error for subscriptionId={}: {}", stripeSubId, e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Stripe subscription cancellation failed");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.cancel_failed");
         }
     }
 
@@ -209,7 +209,7 @@ public class BillingServiceImpl implements BillingService {
 
         String stripeSubId = subscription.getStripeSubscriptionId();
         if (stripeSubId == null || stripeSubId.isEmpty()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "No active Stripe subscription to resume");
+            throw new AppException(HttpStatus.BAD_REQUEST, "billing.error.no_active_subscription_resume");
         }
 
         try {
@@ -225,7 +225,7 @@ public class BillingServiceImpl implements BillingService {
             return billingMapper.toSubscriptionResponse(subscription);
         } catch (Exception e) {
             log.error("Stripe resume error for subscriptionId={}: {}", stripeSubId, e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Stripe subscription resumption failed");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.resume_failed");
         }
     }
 
@@ -233,8 +233,9 @@ public class BillingServiceImpl implements BillingService {
     @Transactional
     public SubscriptionResponse confirmCheckoutSession(String sessionId, Long userId) {
         if (sessionId == null || sessionId.isEmpty()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Session ID is required");
+            throw new AppException(HttpStatus.BAD_REQUEST, "billing.error.session_id_required");
         }
+
 
         try {
             Session session = Session.retrieve(sessionId);
@@ -283,7 +284,7 @@ public class BillingServiceImpl implements BillingService {
             event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
         } catch (Exception e) {
             log.error("Stripe webhook verification failed: {}", e.getMessage());
-            throw new AppException(HttpStatus.BAD_REQUEST, "Invalid signature");
+            throw new AppException(HttpStatus.BAD_REQUEST, "billing.error.invalid_signature");
         }
 
         log.info("Received Stripe webhook event: {}", event.getType());
@@ -330,9 +331,10 @@ public class BillingServiceImpl implements BillingService {
             }
         } catch (Exception e) {
             log.error("Error processing Stripe webhook {}: {}", event.getType(), e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Webhook processing failed");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.webhook_failed");
         }
     }
+
 
     private void handleCheckoutCompleted(Session session) throws Exception {
         String userIdStr = session.getMetadata().get("userId");

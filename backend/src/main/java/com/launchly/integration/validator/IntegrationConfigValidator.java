@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
+
 import java.util.stream.Collectors;
 
 @Component
@@ -24,7 +25,7 @@ public class IntegrationConfigValidator {
 
     public void validateConfig(IntegrationType type, String configStr) {
         if (configStr == null || configStr.trim().isEmpty() || "{}".equals(configStr.trim())) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Configuration details are required");
+            throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.config_required");
         }
         try {
             Object configObj;
@@ -41,7 +42,7 @@ public class IntegrationConfigValidator {
             } else if (type == IntegrationType.HOTMART) {
                 configObj = objectMapper.readValue(configStr, HotmartConfig.class);
             } else {
-                throw new AppException(HttpStatus.BAD_REQUEST, "Unsupported integration type");
+                throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.unsupported_type");
             }
 
             var violations = validator.validate(configObj);
@@ -60,7 +61,7 @@ public class IntegrationConfigValidator {
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Invalid config JSON format");
+            throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.invalid_config_json");
         }
     }
 }

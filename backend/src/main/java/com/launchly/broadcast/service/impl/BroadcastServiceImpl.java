@@ -117,23 +117,24 @@ public class BroadcastServiceImpl implements BroadcastService {
         broadcastValidator.validateWriteAccess(botId, userId);
         broadcastValidator.validateBotOwnership(botId, userId);
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "broadcast.error.not_found"));
 
         if (campaign.isBlocked() || campaign.getStatus() == CampaignStatus.BLOCKED) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Broadcast campaign is blocked by administrator.");
+            throw new AppException(HttpStatus.FORBIDDEN, "broadcast.error.blocked");
         }
 
         if (!campaign.getBot().getId().equals(botId)) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Campaign does not belong to this bot");
+            throw new AppException(HttpStatus.BAD_REQUEST, "broadcast.error.not_belong_to_bot");
         }
 
         if (request.botId() != null && !request.botId().equals(campaign.getBot().getId())) {
             broadcastValidator.validateWriteAccess(request.botId(), userId);
             broadcastValidator.validateBotOwnership(request.botId(), userId);
             Bot newBot = botRepository.findById(request.botId())
-                    .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "New bot not found"));
+                    .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
             campaign.setBot(newBot);
         }
+
 
         String messageText = BroadcastUtils.extractFirstMessageText(request.nodes(), request.edges(), request.message());
 
@@ -298,17 +299,16 @@ public class BroadcastServiceImpl implements BroadcastService {
     @Transactional
     public CampaignResponse sendNow(Long campaignId, Long userId) {
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "broadcast.error.not_found"));
 
         if (campaign.isBlocked() || campaign.getStatus() == CampaignStatus.BLOCKED) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Broadcast campaign is blocked by administrator.");
+            throw new AppException(HttpStatus.FORBIDDEN, "broadcast.error.blocked");
         }
 
         broadcastValidator.validateWriteAccess(campaign.getBot().getId(), userId);
 
         if (campaign.getStatus() == CampaignStatus.IN_PROGRESS) {
-            throw new AppException(HttpStatus.BAD_REQUEST,
-                    "Campaign is already IN_PROGRESS, please wait for it to complete.");
+            throw new AppException(HttpStatus.BAD_REQUEST, "broadcast.error.already_in_progress");
         }
 
         userAuditService.logBroadcastLaunched(campaign.getBot().getUser(), campaign.getId(), campaign.getName(), "FINISHED", LocalDateTime.now());
@@ -321,18 +321,18 @@ public class BroadcastServiceImpl implements BroadcastService {
     @Transactional
     public CampaignResponse cancelSchedule(Long campaignId, Long userId) {
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "broadcast.error.not_found"));
 
         if (campaign.isBlocked() || campaign.getStatus() == CampaignStatus.BLOCKED) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Broadcast campaign is blocked by administrator.");
+            throw new AppException(HttpStatus.FORBIDDEN, "broadcast.error.blocked");
         }
 
         broadcastValidator.validateWriteAccess(campaign.getBot().getId(), userId);
 
         if (campaign.getStatus() != CampaignStatus.SCHEDULED) {
-            throw new AppException(HttpStatus.BAD_REQUEST,
-                    "Campaign is not in SCHEDULED state.");
+            throw new AppException(HttpStatus.BAD_REQUEST, "broadcast.error.not_scheduled");
         }
+
 
         campaign.setStatus(CampaignStatus.DRAFT);
         campaign.setScheduledAt(null);

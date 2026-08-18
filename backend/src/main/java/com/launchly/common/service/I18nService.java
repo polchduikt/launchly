@@ -12,15 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-/**
- * Provides backend-generated translations to the frontend.
- * Only returns keys that the backend itself produces:
- *   - API error messages      (messages_errors*.properties)
- *   - Audit logs & system messages (messages_system*.properties)
- *
- * Frontend UI strings are bundled directly in the frontend JSON files
- * and must NOT be served from here.
- */
 @Service
 @Slf4j
 public class I18nService {
@@ -38,11 +29,9 @@ public class I18nService {
 
     public Map<String, String> getTranslations(String lang) {
         Map<String, String> translations = new HashMap<>();
-        // Load English (default) base
         for (String pattern : BACKEND_FILES) {
             loadResource(translations, pattern);
         }
-        // Override with language-specific if not English
         if (lang != null && !"en".equalsIgnoreCase(lang)) {
             for (String pattern : BACKEND_FILES_LANG_PATTERN) {
                 loadResource(translations, pattern.replace("{lang}", lang.toLowerCase()));

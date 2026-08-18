@@ -65,12 +65,13 @@ public class TokenServiceImpl implements TokenService {
     @Transactional(readOnly = true)
     public RefreshToken verifyRefreshToken(String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "Invalid refresh token"));
+                .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "auth.error.invalid_refresh_token"));
 
         if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
             refreshTokenRepository.delete(refreshToken);
-            throw new AppException(HttpStatus.UNAUTHORIZED, "Refresh token expired");
+            throw new AppException(HttpStatus.UNAUTHORIZED, "auth.error.refresh_token_expired");
         }
+
 
         return refreshToken;
     }

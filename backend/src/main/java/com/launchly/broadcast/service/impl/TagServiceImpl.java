@@ -39,7 +39,7 @@ public class TagServiceImpl implements TagService {
         return tagRepository.findByBotIdAndName(botId, name)
                 .orElseGet(() -> {
                     Bot bot = botRepository.findById(botId)
-                            .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                            .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
                     Tag tag = Tag.builder()
                             .name(name)
                             .bot(bot)
@@ -81,7 +81,7 @@ public class TagServiceImpl implements TagService {
 
         tagRepository.findByBotIdAndName(botId, request.name())
                 .ifPresent(existing -> {
-                    throw new AppException(HttpStatus.CONFLICT, "Tag '" + request.name() + "' already exists for this bot");
+                    throw new AppException(HttpStatus.CONFLICT, "broadcast.error.tag_already_exists");
                 });
 
         Tag tag = Tag.builder()
@@ -98,7 +98,7 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public void deleteTag(Long tagId, Long userId) {
         Tag tag = tagRepository.findById(tagId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Tag not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "broadcast.error.tag_not_found"));
         Long botId = tag.getBot().getId();
         validateBotOwnership(botId, userId);
         botUserTagRepository.deleteByTagId(tagId);
@@ -109,8 +109,9 @@ public class TagServiceImpl implements TagService {
 
     private Bot validateBotOwnership(Long botId, Long userId) {
         return botRepository.findByIdAndUserId(botId, userId)
-                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Bot not found or access denied"));
+                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied"));
     }
+
 
     private void evictTagsCache(Long botId) {
         if (botId != null) {

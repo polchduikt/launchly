@@ -101,7 +101,7 @@ public class ExcelExportServiceImpl implements ExcelExportService {
 
         } catch (Exception e) {
             log.error("Failed to generate Excel orders export: {}", e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to generate Excel file");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "integration.error.excel_export_failed");
         }
     }
 
@@ -140,12 +140,12 @@ public class ExcelExportServiceImpl implements ExcelExportService {
 
         } catch (Exception e) {
             log.error("Failed to generate Excel leads export: {}", e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to generate Excel file");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "integration.error.excel_export_failed");
         }
     }
 
     private Bot validateBotOwnership(Long botId, Long userId) {
         return botRepository.findByIdAndUserId(botId, userId)
-                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Bot not found or access denied"));
+                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied"));
     }
 }

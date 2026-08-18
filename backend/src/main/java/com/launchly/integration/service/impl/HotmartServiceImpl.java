@@ -43,31 +43,31 @@ public class HotmartServiceImpl implements HotmartService {
     @Transactional
     public void processWebhook(Long botId, String tokenHeader, String rawPayload) {
         if (botId == null || rawPayload == null || rawPayload.trim().isEmpty()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Missing required botId or payload");
+            throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.hotmart_missing_payload");
         }
 
         Bot bot = botRepository.findById(botId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
 
         Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.HOTMART)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Hotmart integration not configured for this bot"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "integration.error.hotmart_not_configured"));
 
         if (!integration.isActive() || integration.getConfig() == null) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Hotmart integration is inactive or unconfigured");
+            throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.hotmart_inactive");
         }
 
         HotmartConfig config;
         try {
             config = objectMapper.readValue(integration.getConfig(), HotmartConfig.class);
         } catch (Exception e) {
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid Hotmart integration configuration");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "integration.error.hotmart_invalid_config");
         }
 
         JsonNode root;
         try {
             root = objectMapper.readTree(rawPayload);
         } catch (Exception e) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Invalid JSON payload");
+            throw new AppException(HttpStatus.BAD_REQUEST, "common.error.invalid_input");
         }
 
         String payloadToken = root.path("hottok").asText(null);
@@ -75,8 +75,9 @@ public class HotmartServiceImpl implements HotmartService {
 
         if (config.hottok() == null || !config.hottok().trim().equalsIgnoreCase(providedToken != null ? providedToken.trim() : "")) {
             log.warn("Unauthorized Hotmart webhook attempt for bot {}. Expected token mismatch.", botId);
-            throw new AppException(HttpStatus.UNAUTHORIZED, "Invalid Hotmart token verification");
+            throw new AppException(HttpStatus.UNAUTHORIZED, "integration.error.hotmart_invalid_token");
         }
+
 
         String event = root.path("event").asText("");
         JsonNode dataNode = root.path("data");

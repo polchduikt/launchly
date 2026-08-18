@@ -90,11 +90,11 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             userId = claims.get("userId", Long.class);
         } catch (Exception e) {
             log.error("Google OAuth state token verification failed: {}", e.getMessage());
-            throw new AppException(HttpStatus.BAD_REQUEST, "Invalid OAuth state parameter");
+            throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_oauth_state");
         }
 
         Bot bot = botRepository.findByIdAndUserId(botId, userId)
-                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Access denied"));
+                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied"));
 
         try {
             String requestBody = "code=" + URLEncoder.encode(code, StandardCharsets.UTF_8) +
@@ -113,7 +113,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
             if (response.statusCode() != 200) {
                 log.error("Failed Google OAuth token exchange. Status: {}, Body: {}", response.statusCode(), response.body());
-                throw new AppException(HttpStatus.BAD_REQUEST, "Google authentication failed");
+                throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_auth_failed");
             }
 
             JsonNode tokenResponse = objectMapper.readTree(response.body());
@@ -123,33 +123,11 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             long expiresIn = tokenResponse.path("expires_in").asLong(3599);
 
             String email = extractEmailFromIdToken(idToken);
-            try {
-                HttpRequest userInfoReq = HttpRequest.newBuilder()
-                        .uri(URI.create("https://openidconnect.googleapis.com/v1/userinfo"))
-                        .header("Authorization", "Bearer " + accessToken)
-                        .GET()
-                        .build();
-                HttpResponse<String> userInfoResp = httpClient.send(userInfoReq, HttpResponse.BodyHandlers.ofString());
-                if (userInfoResp.statusCode() == 200) {
-                    if (email == null) {
-                        JsonNode userInfo = objectMapper.readTree(userInfoResp.body());
-                        String fetchedEmail = userInfo.path("email").asText(null);
-                        if (fetchedEmail != null && !fetchedEmail.isBlank()) {
-                            email = fetchedEmail;
-                        }
-                    }
-                } else {
-                    log.warn("Failed to fetch Google user info. Status: {}, Body: {}", userInfoResp.statusCode(), userInfoResp.body());
-                }
-            } catch (Exception e) {
-                log.warn("Failed to fetch Google user info: {}", e.getMessage());
-            }
-
             Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
                     .orElseGet(() -> Integration.builder()
-                            .name("Google Sheets")
-                            .type(IntegrationType.GOOGLE_SHEETS)
                             .bot(bot)
+                            .type(IntegrationType.GOOGLE_SHEETS)
+                            .name("Google Sheets")
                             .active(true)
                             .build());
 
@@ -158,14 +136,13 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                 integration.setGoogleRefreshToken(encryptionUtil.encrypt(refreshToken));
             }
             integration.setGoogleTokenExpiresAt(LocalDateTime.now().plusSeconds(expiresIn));
-            Map<String, String> config = new HashMap<>();
-            copyConfigValue(integration.getConfig(), config, "spreadsheetId");
-            copyConfigValue(integration.getConfig(), config, "sheetName");
-            copyConfigValue(integration.getConfig(), config, "dataType");
-            if (email != null) {
-                config.put("email", email);
-            }
-            integration.setConfig(objectMapper.writeValueAsString(config));
+
+            Map<String, String> configMap = new HashMap<>();
+            copyConfigValue(integration.getConfig(), configMap, "spreadsheetId");
+            copyConfigValue(integration.getConfig(), configMap, "sheetName");
+            configMap.put("email", email != null ? email : "");
+            integration.setConfig(objectMapper.writeValueAsString(configMap));
+
 
             integrationRepository.save(integration);
             log.info("Successfully configured Google Sheets integration for bot {}", botId);
@@ -175,7 +152,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             throw e;
         } catch (Exception e) {
             log.error("Google Sheets OAuth token exchange error: {}", e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Google token exchange failed");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "integration.error.google_token_exchange_failed");
         }
     }
 
@@ -222,7 +199,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
         String encryptedRefreshToken = integration.getGoogleRefreshToken();
         if (encryptedRefreshToken == null || encryptedRefreshToken.isEmpty()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "No refresh token available. Re-authenticate Google Sheets.");
+            throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_no_refresh_token");
         }
 
         String decryptedRefreshToken = encryptionUtil.decrypt(encryptedRefreshToken);
@@ -243,7 +220,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
             if (response.statusCode() != 200) {
                 log.error("Failed to refresh Google token. Status: {}, Body: {}", response.statusCode(), response.body());
-                throw new AppException(HttpStatus.BAD_REQUEST, "Failed to refresh Google session");
+                throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_refresh_failed");
             }
 
             JsonNode tokenResponse = objectMapper.readTree(response.body());
@@ -264,7 +241,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             throw e;
         } catch (Exception e) {
             log.error("Google token refresh error for integration {}: {}", integration.getId(), e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to refresh Google token");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "integration.error.google_token_refresh_failed");
         }
     }
 
@@ -321,7 +298,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
             if (response.statusCode() != 200) {
                 log.error("Failed to append row to Google Sheets. Status: {}, Body: {}", response.statusCode(), response.body());
-                throw new AppException(HttpStatus.BAD_REQUEST, "Failed to append row to Google Sheets.");
+                throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_append_failed");
             } else {
                 log.info("Successfully appended row to Google Sheet {} for integration {}", activeSheetName, integration.getId());
             }
@@ -335,7 +312,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     @Transactional
     public List<Map<String, String>> getSpreadsheets(Long botId) {
         Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "integration.error.not_found"));
         refreshTokenIfNeeded(integration);
 
         try {
@@ -354,13 +331,14 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             if (response.statusCode() != 200) {
                 log.error("Failed to fetch spreadsheets from Google Drive. Status: {}, Body: {}", response.statusCode(), response.body());
                 if (response.body().contains("\"reason\": \"SERVICE_DISABLED\"")) {
-                    throw new AppException(HttpStatus.BAD_REQUEST, "Enable Google Drive API in your Google Cloud project, then reconnect Google Sheets.");
+                    throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_drive_enable");
                 }
                 if (response.statusCode() == 401 || response.statusCode() == 403) {
-                    throw new AppException(HttpStatus.BAD_REQUEST, "Reconnect Google Sheets to grant Drive access for listing spreadsheets.");
+                    throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_drive_grant");
                 }
-                throw new AppException(HttpStatus.BAD_REQUEST, "Failed to load Google spreadsheets.");
+                throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_load_failed");
             }
+
 
             JsonNode responseJson = objectMapper.readTree(response.body());
             JsonNode filesNode = responseJson.path("files");

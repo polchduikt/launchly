@@ -31,20 +31,20 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public MediaUploadResponse upload(MultipartFile file, String folder, Long userId) {
         if (file == null || file.isEmpty()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "File is empty");
+            throw new AppException(HttpStatus.BAD_REQUEST, "media.error.file_empty");
         }
 
         if (file.getSize() > maxFileSize) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "File too large. Max " + (maxFileSize / 1024 / 1024) + "MB");
+            throw new AppException(HttpStatus.BAD_REQUEST, "media.error.file_too_large");
         }
 
         String contentType = file.getContentType();
         if (contentType == null || !allowedTypes.contains(contentType)) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Invalid file type");
+            throw new AppException(HttpStatus.BAD_REQUEST, "media.error.invalid_file_type");
         }
 
         if (folder == null || !folder.matches("^[a-zA-Z0-9_-]+$")) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Invalid folder name");
+            throw new AppException(HttpStatus.BAD_REQUEST, "media.error.invalid_folder_name");
         }
 
         String resourceType;
@@ -82,14 +82,14 @@ public class MediaServiceImpl implements MediaService {
             return new MediaUploadResponse(url, publicId, format, width, height, size);
         } catch (IOException e) {
             log.error("Cloudinary upload failed: {}", e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to upload file to Cloudinary");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "media.error.upload_failed");
         }
     }
 
     @Override
     public void delete(String publicId, Long userId) {
         if (publicId == null || publicId.trim().isEmpty()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Public ID is required");
+            throw new AppException(HttpStatus.BAD_REQUEST, "media.error.public_id_required");
         }
         String cleanedPublicId = publicId.startsWith("/") 
                 ? publicId.substring(1) 
@@ -97,7 +97,7 @@ public class MediaServiceImpl implements MediaService {
 
         String expectedPrefix = "launchly/" + userId + "/";
         if (!cleanedPublicId.startsWith(expectedPrefix)) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Access denied. You do not own this media file.");
+            throw new AppException(HttpStatus.FORBIDDEN, "media.error.not_owner");
         }
         try {
             Map<?, ?> result = cloudinary.uploader().destroy(cleanedPublicId, ObjectUtils.emptyMap());
@@ -107,7 +107,8 @@ public class MediaServiceImpl implements MediaService {
             }
         } catch (IOException e) {
             log.error("Cloudinary deletion failed: {}", e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to delete file from Cloudinary");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "media.error.delete_failed");
         }
     }
 }
+

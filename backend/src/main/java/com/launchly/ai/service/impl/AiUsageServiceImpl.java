@@ -49,9 +49,10 @@ public class AiUsageServiceImpl implements AiUsageService {
         if (used >= limit) {
             throw new AppException(
                 HttpStatus.PAYMENT_REQUIRED,
-                "Daily AI token limit reached (0% remaining). Upgrade your plan for more tokens."
+                "billing.error.ai_token_limit_reached"
             );
         }
+
     }
 
     @Override

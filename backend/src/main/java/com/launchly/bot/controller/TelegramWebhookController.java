@@ -27,8 +27,9 @@ public class TelegramWebhookController {
                                               @RequestBody Update update) {
         TelegramClient client = telegramBotManager.getTelegramClient(botId);
         if (client == null) {
-            throw new AppException(HttpStatus.NOT_FOUND, "Bot not found or not active");
+            throw new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found");
         }
+
 
         flowEngineService.processUpdate(botId, update, client);
         return ResponseEntity.ok().build();

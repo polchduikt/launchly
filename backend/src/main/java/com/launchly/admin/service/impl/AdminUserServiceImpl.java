@@ -152,7 +152,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         User user = userQueryService.getUserOrThrow(userId);
 
         if (user.getEmail().equalsIgnoreCase(currentUserEmail)) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "You cannot change your own administrative role");
+            throw new AppException(HttpStatus.BAD_REQUEST, "admin.error.cannot_change_own_role");
         }
 
         user.changeRole(newRole);

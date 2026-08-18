@@ -83,7 +83,7 @@ public final class AiSchemaUtils {
             JsonNode nodesNode = rootNode.path("nodes");
 
             if (!nodesNode.isArray()) {
-                throw new AppException(HttpStatus.BAD_GATEWAY, "Generated schema is missing a nodes array");
+                throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.missing_nodes");
             }
 
             int startNodeCount = 0;
@@ -109,15 +109,15 @@ public final class AiSchemaUtils {
             }
 
             if (startNodeCount != 1) {
-                throw new AppException(HttpStatus.BAD_REQUEST, "Generated schema must contain exactly one START node");
+                throw new AppException(HttpStatus.BAD_REQUEST, "ai.error.single_start_required");
             }
 
             if (requiresActionIntegration && (!hasActionNode || !hasGoogleSheetsAction)) {
-                throw new AppException(HttpStatus.BAD_GATEWAY, "Generated schema must include an ACTION node with GS_INSERT_ROW");
+                throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.action_node_required");
             }
 
             if (requiresActionIntegration && !hasGoogleSheetsColumnMapping(nodesNode)) {
-                throw new AppException(HttpStatus.BAD_GATEWAY, "Generated schema must include Google Sheets column mappings");
+                throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.column_mappings_required");
             }
 
             return rootNode;
@@ -125,8 +125,9 @@ public final class AiSchemaUtils {
             throw e;
         } catch (Exception e) {
             log.error("Failed to parse generated AI schema as JSON: {}. Cleaned JSON: {}", e.getMessage(), cleanJson);
-            throw new AppException(HttpStatus.BAD_GATEWAY, "Generated schema is not a valid JSON");
+            throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.invalid_json");
         }
+
     }
 
     public static boolean hasGoogleSheetsColumnMapping(JsonNode nodesNode) {

@@ -68,7 +68,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
                 .count();
 
         if (distinctRealTokensCount >= plan.getMaxBots()) {
-            throw new AppException(HttpStatus.PAYMENT_REQUIRED, "Bot limit reached. Upgrade your plan.");
+            throw new AppException(HttpStatus.PAYMENT_REQUIRED, "billing.error.bot_limit_reached");
         }
     }
 
@@ -76,12 +76,12 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     @Transactional(readOnly = true)
     public void checkBotUserLimit(Long botId) {
         var bot = botRepository.findById(botId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
         Long userId = bot.getUser().getId();
         Plan plan = getActivePlan(userId);
         long currentUsers = botUserRepository.countByBotId(botId);
         if (currentUsers >= plan.getMaxBotUsers()) {
-            throw new AppException(HttpStatus.PAYMENT_REQUIRED, "Bot user limit reached. Upgrade your plan.");
+            throw new AppException(HttpStatus.PAYMENT_REQUIRED, "billing.error.user_limit_reached");
         }
     }
 
@@ -89,18 +89,6 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     @Transactional(readOnly = true)
     public void checkBroadcastAccess(Long userId) {
         // Temporarily bypassed for testing and local development
-        /*
-        Plan plan = getActivePlan(userId);
-        if (!plan.isCanUseBroadcast()) {
-            throw new AppException(HttpStatus.PAYMENT_REQUIRED, "Broadcast feature is not available in your plan. Upgrade your plan.");
-        }
-        
-        LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
-        long sentThisMonth = broadcastCampaignRepository.countCampaignsSentThisMonth(userId, CampaignStatus.COMPLETED, startOfMonth);
-        if (sentThisMonth >= plan.getMaxBroadcastsPerMonth()) {
-            throw new AppException(HttpStatus.PAYMENT_REQUIRED, "Monthly broadcast limit reached. Upgrade your plan.");
-        }
-        */
     }
 
     @Override
@@ -108,7 +96,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     public void checkIntegrationAccess(Long userId) {
         Plan plan = getActivePlan(userId);
         if (!plan.isCanUseIntegrations()) {
-            throw new AppException(HttpStatus.PAYMENT_REQUIRED, "Integrations feature is not available in your plan. Upgrade your plan.");
+            throw new AppException(HttpStatus.PAYMENT_REQUIRED, "billing.error.integrations_not_available");
         }
     }
 
@@ -117,9 +105,10 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     public void checkAiAccess(Long userId) {
         Plan plan = getActivePlan(userId);
         if (!plan.isCanUseAiAgent()) {
-            throw new AppException(HttpStatus.PAYMENT_REQUIRED, "AI Agent feature is not available in your plan. Upgrade your plan.");
+            throw new AppException(HttpStatus.PAYMENT_REQUIRED, "billing.error.ai_not_available");
         }
     }
+
 
     @Override
     @Transactional(readOnly = true)

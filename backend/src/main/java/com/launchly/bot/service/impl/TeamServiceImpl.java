@@ -40,14 +40,15 @@ public class TeamServiceImpl implements TeamService {
     @Transactional(readOnly = true)
     public List<TeamMemberResponse> getTeamMembers(Long botId, Long currentUserId) {
         Bot bot = botRepository.findById(botId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
 
         boolean isOwner = bot.getUser().getId().equals(currentUserId);
         boolean isMember = botMemberRepository.existsByBotOwnerIdAndUserId(bot.getUser().getId(), currentUserId);
 
         if (!isOwner && !isMember) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Access denied");
+            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
         }
+
 
         List<TeamMemberResponse> responses = new ArrayList<>();
 
@@ -133,28 +134,29 @@ public class TeamServiceImpl implements TeamService {
     @Transactional
     public TeamMemberResponse inviteMember(Long botId, InviteMemberRequest request, Long currentUserId) {
         Bot bot = botRepository.findById(botId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
 
         if (!bot.getUser().getId().equals(currentUserId)) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Only the workspace owner can invite members");
+            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
         }
 
         if (bot.getUser().getEmail().equalsIgnoreCase(request.email())) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Cannot invite the owner");
+            throw new AppException(HttpStatus.BAD_REQUEST, "team.error.cannot_invite_owner");
         }
 
         Optional<BotInvitation> existingInvite = botInvitationRepository.findByBotOwnerIdAndEmailIgnoreCase(bot.getUser().getId(), request.email());
         if (existingInvite.isPresent() && !existingInvite.get().isAccepted()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Invitation already pending for this email");
+            throw new AppException(HttpStatus.BAD_REQUEST, "team.error.invitation_already_pending");
         }
 
         Optional<User> targetUserOpt = userQueryService.findByEmailIgnoreCase(request.email());
         if (targetUserOpt.isPresent()) {
             User targetUser = targetUserOpt.get();
             if (botMemberRepository.existsByBotOwnerIdAndUserId(bot.getUser().getId(), targetUser.getId())) {
-                throw new AppException(HttpStatus.BAD_REQUEST, "User is already a member of this bot workspace");
+                throw new AppException(HttpStatus.BAD_REQUEST, "team.error.user_already_member");
             }
         }
+
 
         BotInvitation invite = existingInvite.orElseGet(() -> BotInvitation.builder()
                 .bot(bot)
@@ -186,15 +188,15 @@ public class TeamServiceImpl implements TeamService {
     @Transactional
     public void cancelInvitation(Long botId, Long invitationId, Long currentUserId) {
         Bot bot = botRepository.findById(botId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
 
         if (!bot.getUser().getId().equals(currentUserId)) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Access denied");
+            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
         }
 
         Long rawInviteId = invitationId > 1000000000L ? invitationId - 1000000000L : invitationId;
         BotInvitation invite = botInvitationRepository.findById(rawInviteId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Invitation not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "team.error.invitation_not_found"));
 
         botInvitationRepository.delete(invite);
     }
@@ -203,15 +205,15 @@ public class TeamServiceImpl implements TeamService {
     @Transactional
     public TeamMemberResponse updateMember(Long botId, Long userId, UpdateMemberRequest request, Long currentUserId) {
         Bot bot = botRepository.findById(botId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
 
         if (!bot.getUser().getId().equals(currentUserId)) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Access denied");
+            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
         }
 
         List<BotMember> members = botMemberRepository.findByBotOwnerIdAndUserId(bot.getUser().getId(), userId);
         if (members.isEmpty()) {
-            throw new AppException(HttpStatus.NOT_FOUND, "Member not found");
+            throw new AppException(HttpStatus.NOT_FOUND, "team.error.member_not_found");
         }
 
         BotMember firstUpdated = null;
@@ -243,16 +245,17 @@ public class TeamServiceImpl implements TeamService {
     @Transactional
     public void removeMember(Long botId, Long userId, Long currentUserId) {
         Bot bot = botRepository.findById(botId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
 
         if (!bot.getUser().getId().equals(currentUserId) && !currentUserId.equals(userId)) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Access denied");
+            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
         }
 
         List<BotMember> members = botMemberRepository.findByBotOwnerIdAndUserId(bot.getUser().getId(), userId);
         if (members.isEmpty()) {
-            throw new AppException(HttpStatus.NOT_FOUND, "Member not found");
+            throw new AppException(HttpStatus.NOT_FOUND, "team.error.member_not_found");
         }
+
 
         for (BotMember member : members) {
             botMemberRepository.delete(member);
@@ -291,10 +294,10 @@ public class TeamServiceImpl implements TeamService {
         User user = userQueryService.getUserOrThrow(currentUserId);
 
         BotInvitation invite = botInvitationRepository.findByIdAndEmailIgnoreCase(invitationId, user.getEmail())
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Invitation not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "team.error.invitation_not_found"));
 
         if (invite.isAccepted()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Invitation already accepted");
+            throw new AppException(HttpStatus.BAD_REQUEST, "team.error.invitation_already_accepted");
         }
 
         invite.setAccepted(true);
@@ -319,7 +322,7 @@ public class TeamServiceImpl implements TeamService {
         User user = userQueryService.getUserOrThrow(currentUserId);
 
         BotInvitation invite = botInvitationRepository.findByIdAndEmailIgnoreCase(invitationId, user.getEmail())
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Invitation not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "team.error.invitation_not_found"));
 
         botInvitationRepository.delete(invite);
     }
@@ -328,13 +331,13 @@ public class TeamServiceImpl implements TeamService {
     @Transactional
     public void transferOwnership(Long botId, Long newOwnerUserId, Long currentUserId) {
         Bot bot = botRepository.findById(botId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
 
         if (!bot.getUser().getId().equals(currentUserId)) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Only the current workspace owner can transfer ownership");
+            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
         }
         if (currentUserId.equals(newOwnerUserId)) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "You are already the owner of this workspace");
+            throw new AppException(HttpStatus.BAD_REQUEST, "team.error.already_owner");
         }
 
         User oldOwner = bot.getUser();
@@ -400,12 +403,12 @@ public class TeamServiceImpl implements TeamService {
     @Transactional
     public void leaveBot(Long botId, Long currentUserId) {
         Bot bot = botRepository.findById(botId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
 
         if (bot.getUser().getId().equals(currentUserId)) {
             List<BotMember> members = botMemberRepository.findByBotOwnerId(currentUserId);
             if (members.isEmpty()) {
-                throw new AppException(HttpStatus.BAD_REQUEST, "You are the sole member of this workspace. Add a team member first or delete the workspace.");
+                throw new AppException(HttpStatus.BAD_REQUEST, "team.error.sole_member");
             }
             BotMember nextOwnerMember = members.get(0);
             transferOwnership(botId, nextOwnerMember.getUser().getId(), currentUserId);
@@ -416,4 +419,5 @@ public class TeamServiceImpl implements TeamService {
             }
         }
     }
+
 }

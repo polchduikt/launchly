@@ -146,8 +146,10 @@ public class TelegramBotManager {
             telegramClients.put(bot.getId(), telegramClient);
             log.info("Registered bot {} for long polling", bot.getId());
         } catch (Exception e) {
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to register bot: " + e.getMessage());
+            log.error("Failed to register bot {}: {}", bot.getId(), e.getMessage(), e);
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "bot.error.registration_failed");
         }
+
     }
 
     private synchronized void registerSystemBot() {

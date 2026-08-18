@@ -7,6 +7,7 @@ import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
 import java.util.Optional;
 
 @Component
@@ -17,14 +18,14 @@ public class BotAccessValidator {
 
     public void validateWriteAccess(Bot bot, Long userId) {
         if (bot == null || userId == null) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Access denied");
+            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
         }
         if (!bot.getUser().getId().equals(userId)) {
             BotMember member = getWorkspaceMembership(bot, userId)
-                    .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Access denied"));
+                    .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied"));
 
             if ("Viewer".equalsIgnoreCase(member.getRole())) {
-                throw new AppException(HttpStatus.FORBIDDEN, "Viewer role cannot modify this bot workspace");
+                throw new AppException(HttpStatus.FORBIDDEN, "bot.error.viewer_cannot_modify");
             }
         }
     }

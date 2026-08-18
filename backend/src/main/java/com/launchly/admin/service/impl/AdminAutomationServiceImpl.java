@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,7 +72,7 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
     @Transactional(readOnly = true)
     public AdminAutomationDetailDto getAutomationDetails(Long automationId, String period, int page, int size) {
         FlowSchema schema = flowSchemaRepository.findById(automationId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Automation flow not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "admin.error.automation_not_found"));
 
         Bot bot = schema.getBot();
         User owner = bot != null ? bot.getUser() : null;
@@ -134,11 +133,11 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
     @Transactional
     public void toggleAutomation(Long automationId) {
         FlowSchema schema = flowSchemaRepository.findById(automationId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Automation flow not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "admin.error.automation_not_found"));
         if (schema.getBot() != null) {
             Bot bot = schema.getBot();
             if (bot.isBlocked()) {
-                throw new AppException(HttpStatus.BAD_REQUEST, "Automation is blocked by administration");
+                throw new AppException(HttpStatus.BAD_REQUEST, "admin.error.automation_blocked");
             }
             bot.setActive(!bot.isActive());
             botRepository.save(bot);
@@ -149,7 +148,7 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
     @Transactional
     public void blockAutomation(Long automationId, AdminBlockRequest request) {
         FlowSchema schema = flowSchemaRepository.findById(automationId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Automation flow not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "admin.error.automation_not_found"));
         Bot bot = schema.getBot();
         if (bot != null) {
             String reason = request != null ? request.getReason() : null;
@@ -164,7 +163,8 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
     @Transactional
     public void unblockAutomation(Long automationId) {
         FlowSchema schema = flowSchemaRepository.findById(automationId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Automation flow not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "admin.error.automation_not_found"));
+
         Bot bot = schema.getBot();
         if (bot != null) {
             bot.unblock();
