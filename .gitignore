@@ -11,6 +11,11 @@ application.properties.secrets
 **/src/main/resources/application-local.properties
 
 # ===========================
+# PROMPTS
+# ===========================
+**/src/main/resources/prompts/
+
+# ===========================
 # BACKEND
 # ===========================
 backend/target/
