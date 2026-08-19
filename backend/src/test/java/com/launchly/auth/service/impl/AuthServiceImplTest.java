@@ -96,10 +96,6 @@ class AuthServiceImplTest {
         mockUserResponse = mock(UserResponse.class);
     }
 
-    // ==========================================
-    // 1. REGISTER
-    // ==========================================
-
     @Test
     @DisplayName("Should successfully register a new user and assign free tier")
     void register_Success() {
@@ -129,10 +125,6 @@ class AuthServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.CONFLICT);
     }
-
-    // ==========================================
-    // 2. LOGIN
-    // ==========================================
 
     @Test
     @DisplayName("Should successfully login with valid credentials")
@@ -175,10 +167,6 @@ class AuthServiceImplTest {
                 .hasFieldOrPropertyWithValue("status", HttpStatus.FORBIDDEN);
     }
 
-    // ==========================================
-    // 3. REFRESH TOKEN
-    // ==========================================
-
     @Test
     @DisplayName("Should successfully refresh access token with valid refresh token")
     void refreshToken_Success() {
@@ -206,10 +194,6 @@ class AuthServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.FORBIDDEN);
     }
-
-    // ==========================================
-    // 4. LOGOUT & CURRENT USER
-    // ==========================================
 
     @Test
     @DisplayName("Should delete refresh token upon logout")
@@ -239,10 +223,6 @@ class AuthServiceImplTest {
                 .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND);
     }
 
-    // ==========================================
-    // 5. UPDATE PROFILE
-    // ==========================================
-
     @Test
     @DisplayName("Should successfully update profile name and password")
     void updateProfile_Success() {
@@ -270,10 +250,6 @@ class AuthServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
     }
-
-    // ==========================================
-    // 6. TELEGRAM SESSIONS & AUTH
-    // ==========================================
 
     @Test
     @DisplayName("Should create telegram auth session")
@@ -324,10 +300,6 @@ class AuthServiceImplTest {
         assertThat(testUser.getTelegramUserId()).isNull();
         verify(userRepository, times(1)).save(testUser);
     }
-
-    // ==========================================
-    // 7. DELETE ACCOUNT
-    // ==========================================
 
     @Test
     @DisplayName("Should cascade delete user and associated entities")

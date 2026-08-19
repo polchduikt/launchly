@@ -114,10 +114,6 @@ class BotServiceImplTest {
         mockBotResponse = mock(BotResponse.class);
     }
 
-    // ==========================================
-    // 1. CREATE BOT
-    // ==========================================
-
     @Test
     @DisplayName("Should create bot with placeholder token")
     void createBot_WithDummyToken_Success() {
@@ -147,10 +143,6 @@ class BotServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.PAYMENT_REQUIRED);
     }
-
-    // ==========================================
-    // 2. GET BOTS BY USER & GET BY ID
-    // ==========================================
 
     @Test
     @DisplayName("Should return all bots owned or shared with the user")
@@ -188,10 +180,6 @@ class BotServiceImplTest {
                 .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND);
     }
 
-    // ==========================================
-    // 3. UPDATE BOT
-    // ==========================================
-
     @Test
     @DisplayName("Should successfully update bot details")
     void updateBot_Success() {
@@ -219,10 +207,6 @@ class BotServiceImplTest {
                 .hasFieldOrPropertyWithValue("status", HttpStatus.FORBIDDEN);
     }
 
-    // ==========================================
-    // 4. DELETE BOT
-    // ==========================================
-
     @Test
     @DisplayName("Should delete bot when user has ownership/write access")
     void deleteBot_Success() {
@@ -244,10 +228,6 @@ class BotServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.FORBIDDEN);
     }
-
-    // ==========================================
-    // 5. START & STOP BOT
-    // ==========================================
 
     @Test
     @DisplayName("Should start inactive bot with real token")
@@ -311,10 +291,6 @@ class BotServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.CONFLICT);
     }
-
-    // ==========================================
-    // 6. FLOW SCHEMA
-    // ==========================================
 
     @Test
     @DisplayName("Should retrieve flow schema for bot")

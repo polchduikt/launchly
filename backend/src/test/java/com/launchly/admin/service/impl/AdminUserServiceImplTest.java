@@ -103,10 +103,6 @@ class AdminUserServiceImplTest {
         mockUserDto = mock(AdminUserDto.class);
     }
 
-    // ==========================================
-    // 1. UPDATE USER ROLE
-    // ==========================================
-
     @Test
     @DisplayName("Should successfully update user role when not self-modifying")
     void updateUserRole_Success() {
@@ -133,10 +129,6 @@ class AdminUserServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
     }
-
-    // ==========================================
-    // 2. TOGGLE USER STATUS (BLOCK / UNBLOCK)
-    // ==========================================
 
     @Test
     @DisplayName("Should block active user with specified reason")
@@ -176,10 +168,6 @@ class AdminUserServiceImplTest {
         assertThat(targetUser.getBlockReason()).isNull();
         verify(userAuditService, times(1)).logUserUnblocked(eq(targetUser));
     }
-
-    // ==========================================
-    // 3. GET USERS LISTING
-    // ==========================================
 
     @Test
     @DisplayName("Should return paginated users filtered by role and search")

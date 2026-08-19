@@ -111,10 +111,6 @@ class CrmServiceImplTest {
         ReflectionTestUtils.setField(testLead, "id", 80L);
     }
 
-    // ==========================================
-    // 1. ORDERS CRUD
-    // ==========================================
-
     @Test
     @DisplayName("Should successfully create order, increment sequence and notify WebSocket")
     void createOrder_Success() {
@@ -182,10 +178,6 @@ class CrmServiceImplTest {
                 .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND);
     }
 
-    // ==========================================
-    // 2. LEADS CRUD
-    // ==========================================
-
     @Test
     @DisplayName("Should successfully create lead")
     void createLead_Success() {
@@ -239,10 +231,6 @@ class CrmServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND);
     }
-
-    // ==========================================
-    // 3. MESSAGES
-    // ==========================================
 
     @Test
     @DisplayName("Should throw NotFound when getting messages for non-existent conversation")

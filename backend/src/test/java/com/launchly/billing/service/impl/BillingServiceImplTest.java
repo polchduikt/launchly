@@ -83,10 +83,6 @@ class BillingServiceImplTest {
         mockSubscriptionResponse = mock(SubscriptionResponse.class);
     }
 
-    // ==========================================
-    // 1. FREE SUBSCRIPTION
-    // ==========================================
-
     @Test
     @DisplayName("Should create free subscription for new user")
     void createFreeSubscription_Success() {
@@ -108,10 +104,6 @@ class BillingServiceImplTest {
 
         verify(subscriptionRepository, never()).save(any());
     }
-
-    // ==========================================
-    // 2. PLANS & SUBSCRIPTION QUERIES
-    // ==========================================
 
     @Test
     @DisplayName("Should return available active plans")
@@ -137,10 +129,6 @@ class BillingServiceImplTest {
         assertThat(response).isNotNull();
     }
 
-    // ==========================================
-    // 3. CHECKOUT VALIDATION
-    // ==========================================
-
     @Test
     @DisplayName("Should throw BadRequest when creating checkout session for FREE plan")
     void createCheckoutSession_WhenFreePlan_ThrowsBadRequest() {
@@ -151,10 +139,6 @@ class BillingServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
     }
-
-    // ==========================================
-    // 4. CANCEL & RESUME SUBSCRIPTION
-    // ==========================================
 
     @Test
     @DisplayName("Should throw NotFound when cancelling non-existent subscription")

@@ -30,7 +30,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,10 +71,6 @@ class TagServiceImplTest {
         testTag = Tag.builder().name("VIP").bot(testBot).build();
         ReflectionTestUtils.setField(testTag, "id", 100L);
     }
-
-    // ==========================================
-    // 1. GET OR CREATE & ASSIGN TAG
-    // ==========================================
 
     @Test
     @DisplayName("Should return existing tag if found")
@@ -123,10 +118,6 @@ class TagServiceImplTest {
 
         verify(botUserTagRepository, never()).save(any());
     }
-
-    // ==========================================
-    // 2. CREATE TAG & DELETE TAG
-    // ==========================================
 
     @Test
     @DisplayName("Should successfully create a custom tag")

@@ -101,10 +101,6 @@ class BroadcastServiceImplTest {
         ReflectionTestUtils.setField(testCampaign, "id", 100L);
     }
 
-    // ==========================================
-    // 1. CREATE CAMPAIGN
-    // ==========================================
-
     @Test
     @DisplayName("Should successfully create a broadcast campaign with DRAFT status")
     void createCampaign_Draft_Success() {
@@ -153,10 +149,6 @@ class BroadcastServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.FORBIDDEN);
     }
-
-    // ==========================================
-    // 2. UPDATE & GET CAMPAIGNS
-    // ==========================================
 
     @Test
     @DisplayName("Should successfully update an existing campaign")
@@ -219,10 +211,6 @@ class BroadcastServiceImplTest {
         verify(broadcastValidator, times(1)).validateBotOwnership(10L, 1L);
     }
 
-    // ==========================================
-    // 3. SEND NOW & CANCEL SCHEDULE
-    // ==========================================
-
     @Test
     @DisplayName("Should launch campaign immediately")
     void sendNow_Success() {
@@ -272,10 +260,6 @@ class BroadcastServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
     }
-
-    // ==========================================
-    // 4. DELETE CAMPAIGN
-    // ==========================================
 
     @Test
     @DisplayName("Should delete campaign when found")

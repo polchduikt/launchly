@@ -77,10 +77,6 @@ class IntegrationServiceImplTest {
         mockResponse = mock(IntegrationResponse.class);
     }
 
-    // ==========================================
-    // 1. GET & CREATE INTEGRATION
-    // ==========================================
-
     @Test
     @DisplayName("Should return integrations list for user")
     void getIntegrations_Success() {
@@ -131,10 +127,6 @@ class IntegrationServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.FORBIDDEN);
     }
-
-    // ==========================================
-    // 2. UPDATE, TOGGLE & DELETE INTEGRATION
-    // ==========================================
 
     @Test
     @DisplayName("Should update existing integration")
