@@ -13,10 +13,14 @@ public final class BlogUtils {
 
     public static String calculateReadTime(SaveBlogArticleRequest request) {
         if (request == null) return "1 хв";
-        return calculateReadTime(request.getSummary(), request.getContentBlocks());
+        return calculateReadTime(request.getSummary(), request.getContentBlocks(), request.getLanguage());
     }
 
     public static String calculateReadTime(String summary, List<BlogArticleDto.ContentBlockDto> contentBlocks) {
+        return calculateReadTime(summary, contentBlocks, "uk");
+    }
+
+    public static String calculateReadTime(String summary, List<BlogArticleDto.ContentBlockDto> contentBlocks, String language) {
         int wordCount = 0;
         if (summary != null) {
             wordCount += summary.split("\\s+").length;
@@ -34,6 +38,12 @@ public final class BlogUtils {
             }
         }
         int minutes = Math.max(1, (int) Math.ceil((double) wordCount / WORDS_PER_MINUTE));
-        return minutes + " хв";
+        String unit = isEnglish(language) ? "min" : "хв";
+        return minutes + " " + unit;
+    }
+
+    private static boolean isEnglish(String language) {
+        return language != null && language.trim().equalsIgnoreCase("en");
     }
 }
+

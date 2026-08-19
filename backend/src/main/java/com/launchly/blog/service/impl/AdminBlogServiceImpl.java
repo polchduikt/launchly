@@ -65,9 +65,12 @@ public class AdminBlogServiceImpl implements AdminBlogService {
             }
         }
 
+        String lang = (request.getLanguage() != null && !request.getLanguage().isBlank()) ? request.getLanguage().trim().toLowerCase() : "uk";
+
         String dateStr = request.getDate();
         if (dateStr == null || dateStr.isBlank()) {
-            dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM, yyyy", new Locale("uk", "UA")));
+            Locale locale = "en".equalsIgnoreCase(lang) ? Locale.ENGLISH : new Locale("uk", "UA");
+            dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM, yyyy", locale));
         }
 
         String readTimeStr = request.getReadTime();
@@ -77,7 +80,6 @@ public class AdminBlogServiceImpl implements AdminBlogService {
 
         String tagsStr = request.getTags() != null ? String.join(",", request.getTags()) : "";
         String contentBlocksJson = JsonUtils.toJson(request.getContentBlocks());
-        String lang = (request.getLanguage() != null && !request.getLanguage().isBlank()) ? request.getLanguage().trim().toLowerCase() : "uk";
 
         BlogArticle article = BlogArticle.builder()
                 .id(slug)
@@ -102,6 +104,9 @@ public class AdminBlogServiceImpl implements AdminBlogService {
     public BlogArticleDto updateArticle(String id, SaveBlogArticleRequest request) {
         BlogArticle article = findArticleOrThrow(id);
 
+        if (request.getLanguage() != null && !request.getLanguage().isBlank()) {
+            article.setLanguage(request.getLanguage().trim().toLowerCase());
+        }
         if (request.getTitle() != null && !request.getTitle().isBlank()) {
             article.setTitle(request.getTitle().trim());
         }
@@ -117,16 +122,18 @@ public class AdminBlogServiceImpl implements AdminBlogService {
         if (request.getReadTime() != null && !request.getReadTime().isBlank()) {
             article.setReadTime(request.getReadTime().trim());
         } else {
-            article.setReadTime(BlogUtils.calculateReadTime(request));
+            article.setReadTime(BlogUtils.calculateReadTime(
+                    request.getSummary() != null ? request.getSummary() : article.getSummary(),
+                    request.getContentBlocks(),
+                    article.getLanguage()
+            ));
         }
+
         if (request.getSummary() != null) {
             article.setSummary(request.getSummary().trim());
         }
         if (request.getCoverImage() != null) {
             article.setCoverImage(request.getCoverImage().trim());
-        }
-        if (request.getLanguage() != null && !request.getLanguage().isBlank()) {
-            article.setLanguage(request.getLanguage().trim().toLowerCase());
         }
         if (request.getTags() != null) {
             article.setTags(String.join(",", request.getTags()));
@@ -136,6 +143,7 @@ public class AdminBlogServiceImpl implements AdminBlogService {
         }
 
         BlogArticle saved = blogArticleRepository.save(article);
+
         return blogMapper.toDto(saved);
     }
 
