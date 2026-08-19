@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -60,6 +61,7 @@ public abstract class BaseIntegrationTest {
     @MockitoBean
     protected CacheManager cacheManager;
 
+    @SuppressWarnings("unchecked")
     @BeforeEach
     void setUpBase() {
         this.mockMvc = MockMvcBuilders
@@ -69,6 +71,9 @@ public abstract class BaseIntegrationTest {
 
         Mockito.when(cacheManager.getCache(anyString()))
                 .thenAnswer(inv -> new ConcurrentMapCache(inv.getArgument(0)));
+
+        ValueOperations<String, String> valueOperations = Mockito.mock(ValueOperations.class);
+        Mockito.when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 
     protected User createTestUser(String emailPrefix, Role role) {
