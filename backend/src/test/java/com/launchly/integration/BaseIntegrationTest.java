@@ -1,4 +1,4 @@
-package com.launchly;
+package com.launchly.integration;
 
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;

@@ -1,6 +1,5 @@
-package com.launchly.broadcast;
+package com.launchly.integration;
 
-import com.launchly.BaseIntegrationTest;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import com.launchly.bot.entity.Bot;
@@ -31,10 +30,10 @@ class BroadcastIntegrationTest extends BaseIntegrationTest {
     private BroadcastCampaignRepository broadcastCampaignRepository;
 
     @Test
-    @DisplayName("Should create tag, persist in database, and list all tags for bot")
-    void createTag_And_ListTags_Success() throws Exception {
+    @DisplayName("Should create tag, persist in database, and retrieve tags for bot")
+    void createTag_And_GetTags_Success() throws Exception {
         User user = createTestUser("taguser", Role.ROLE_OWNER);
-        Bot bot = createTestBot(user, "Broadcast Bot");
+        Bot bot = createTestBot(user, "Tag Bot");
 
         CreateTagRequest request = new CreateTagRequest("VIP_CUSTOMERS");
 
@@ -97,7 +96,7 @@ class BroadcastIntegrationTest extends BaseIntegrationTest {
     @DisplayName("Should delete tag from database")
     void deleteTag_Success() throws Exception {
         User user = createTestUser("deltag", Role.ROLE_OWNER);
-        Bot bot = createTestBot(user, "Tag Delete Bot");
+        Bot bot = createTestBot(user, "Del Tag Bot");
 
         Tag tag = Tag.builder()
                 .name("OLD_TAG")

@@ -1,6 +1,5 @@
 package com.launchly.integration;
 
-import com.launchly.BaseIntegrationTest;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import com.launchly.billing.entity.Plan;
@@ -25,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-class IntegrationIntegrationTest extends BaseIntegrationTest {
+class ThirdPartyIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private IntegrationRepository integrationRepository;

@@ -1,6 +1,5 @@
-package com.launchly.blog;
+package com.launchly.integration;
 
-import com.launchly.BaseIntegrationTest;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import com.launchly.blog.entity.BlogArticle;
