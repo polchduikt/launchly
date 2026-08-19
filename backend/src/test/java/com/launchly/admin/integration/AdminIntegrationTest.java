@@ -1,5 +1,6 @@
-package com.launchly.integration;
+package com.launchly.admin.integration;
 
+import com.launchly.BaseIntegrationTest;
 import com.launchly.admin.dto.UpdateUserRoleRequest;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;

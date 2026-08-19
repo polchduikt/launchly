@@ -1,5 +1,6 @@
-package com.launchly.integration;
+package com.launchly.auth.integration;
 
+import com.launchly.BaseIntegrationTest;
 import com.launchly.auth.dto.request.LoginRequest;
 import com.launchly.auth.dto.request.RefreshRequest;
 import com.launchly.auth.dto.request.RegisterRequest;

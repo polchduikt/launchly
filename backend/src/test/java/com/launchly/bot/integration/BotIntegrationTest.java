@@ -1,5 +1,6 @@
-package com.launchly.integration;
+package com.launchly.bot.integration;
 
+import com.launchly.BaseIntegrationTest;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import com.launchly.bot.dto.request.BotCreateRequest;
@@ -11,7 +12,6 @@ import com.launchly.bot.entity.Bot;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-
 import java.util.List;
 import java.util.Map;
 
