@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JsonUtilsTest {
 
     @Test
-    @DisplayName("Повинен серіалізувати об'єкт у валідний JSON")
+    @DisplayName("Should serialize object to valid JSON string")
     void toJson_ValidObject_ReturnsJsonString() {
         Map<String, Object> map = Map.of("key", "value", "count", 42);
         String json = JsonUtils.toJson(map);
@@ -19,13 +19,13 @@ class JsonUtilsTest {
     }
 
     @Test
-    @DisplayName("Повинен повертати '[]' для null об'єкта")
+    @DisplayName("Should return '[]' for null object")
     void toJson_NullObject_ReturnsDefaultArray() {
         assertThat(JsonUtils.toJson(null)).isEqualTo("[]");
     }
 
     @Test
-    @DisplayName("Повинен підраховувати кількість елементів у списку або JSON-масиві")
+    @DisplayName("Should count elements in list or JSON array")
     void countElements_CalculatesCorrectCount() {
         assertThat(JsonUtils.countElements(List.of("a", "b", "c"))).isEqualTo(3);
         assertThat(JsonUtils.countElements("[\"a\", \"b\"]")).isEqualTo(2);

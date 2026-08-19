@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BlogUtilsTest {
 
     @Test
-    @DisplayName("Should return '1 хв' for null request by default")
+    @DisplayName("Should return default reading time for null request")
     void calculateReadTime_WhenNullRequest_ReturnsDefault() {
         assertThat(BlogUtils.calculateReadTime(null)).isEqualTo("1 хв");
     }
