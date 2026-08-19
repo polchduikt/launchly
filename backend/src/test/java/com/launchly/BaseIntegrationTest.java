@@ -37,12 +37,15 @@ public abstract class BaseIntegrationTest {
     protected static PostgreSQLContainer<?> postgres;
 
     static {
+        System.setProperty("DOCKER_HOST", "tcp://localhost:2375");
+        System.setProperty("docker.host", "tcp://localhost:2375");
         try {
             if (DockerClientFactory.instance().isDockerAvailable()) {
                 postgres = new PostgreSQLContainer<>("postgres:16-alpine");
                 postgres.start();
             }
-        } catch (Exception ignored) {
+        } catch (Throwable t) {
+            System.err.println("Testcontainers fallback: " + t.getMessage());
         }
     }
 
