@@ -4,10 +4,15 @@ import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.repository.UserRepository;
 import com.launchly.auth.service.TokenService;
+import com.launchly.bot.entity.Bot;
+import com.launchly.bot.repository.BotRepository;
+import com.launchly.bot.telegram.TelegramBotManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,10 +39,19 @@ public abstract class BaseIntegrationTest {
     protected UserRepository userRepository;
 
     @Autowired
+    protected BotRepository botRepository;
+
+    @Autowired
     protected TokenService tokenService;
 
     @Autowired
     protected PasswordEncoder passwordEncoder;
+
+    @MockitoBean
+    protected TelegramBotManager telegramBotManager;
+
+    @MockitoBean
+    protected StringRedisTemplate stringRedisTemplate;
 
     @BeforeEach
     void setUpMockMvc() {
@@ -58,6 +72,16 @@ public abstract class BaseIntegrationTest {
                 .emailVerified(true)
                 .build();
         return userRepository.save(user);
+    }
+
+    protected Bot createTestBot(User owner, String name) {
+        Bot bot = Bot.builder()
+                .name(name)
+                .user(owner)
+                .telegramToken("123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ123456789")
+                .active(false)
+                .build();
+        return botRepository.save(bot);
     }
 
     protected String getAuthHeader(User user) {
