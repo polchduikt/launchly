@@ -19,8 +19,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.CacheManager;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +48,9 @@ class BillingServiceImplTest {
     private BillingMapper billingMapper;
 
     @Mock
+    private CacheManager cacheManager;
+
+    @Mock
     private PlanLimitService planLimitService;
 
     @InjectMocks
@@ -53,22 +59,38 @@ class BillingServiceImplTest {
     private User testUser;
     private Plan freePlan;
     private Plan proPlan;
+    private Subscription testSubscription;
+    private SubscriptionResponse mockSubscriptionResponse;
 
     @BeforeEach
     void setUp() {
-        testUser = User.builder().email("user@test.com").name("User").build();
+        testUser = User.builder().email("billing@launchly.pro").name("Billing User").build();
         ReflectionTestUtils.setField(testUser, "id", 1L);
 
-        freePlan = Plan.builder().name("FREE").active(true).build();
-        ReflectionTestUtils.setField(freePlan, "id", 1L);
+        freePlan = Plan.builder().name("FREE").price(BigDecimal.ZERO).active(true).build();
+        ReflectionTestUtils.setField(freePlan, "id", 10L);
 
-        proPlan = Plan.builder().name("PRO").active(true).build();
-        ReflectionTestUtils.setField(proPlan, "id", 2L);
+        proPlan = Plan.builder().name("PRO").price(new BigDecimal("29.00")).active(true).build();
+        ReflectionTestUtils.setField(proPlan, "id", 20L);
+
+        testSubscription = Subscription.builder()
+                .status(SubscriptionStatus.ACTIVE)
+                .plan(freePlan)
+                .user(testUser)
+                .build();
+        ReflectionTestUtils.setField(testSubscription, "id", 100L);
+
+        mockSubscriptionResponse = mock(SubscriptionResponse.class);
     }
 
+    // ==========================================
+    // 1. FREE SUBSCRIPTION
+    // ==========================================
+
     @Test
-    @DisplayName("Should create free subscription for user")
+    @DisplayName("Should create free subscription for new user")
     void createFreeSubscription_Success() {
+        when(subscriptionRepository.findByUserId(1L)).thenReturn(Optional.empty());
         when(userQueryService.getUserOrThrow(1L)).thenReturn(testUser);
         when(planRepository.findByName("FREE")).thenReturn(Optional.of(freePlan));
 
@@ -78,13 +100,26 @@ class BillingServiceImplTest {
     }
 
     @Test
+    @DisplayName("Should skip creating subscription if user already has one")
+    void createFreeSubscription_WhenAlreadyExists_SkipsSaving() {
+        when(subscriptionRepository.findByUserId(1L)).thenReturn(Optional.of(testSubscription));
+
+        billingService.createFreeSubscription(1L);
+
+        verify(subscriptionRepository, never()).save(any());
+    }
+
+    // ==========================================
+    // 2. PLANS & SUBSCRIPTION QUERIES
+    // ==========================================
+
+    @Test
     @DisplayName("Should return available active plans")
-    void getAvailablePlans_ReturnsActivePlans() {
-        when(planRepository.findAll()).thenReturn(List.of(freePlan, proPlan));
-        when(billingMapper.toPlanResponseList(any())).thenReturn(List.of(
-                mock(PlanResponse.class),
-                mock(PlanResponse.class)
-        ));
+    void getAvailablePlans_ReturnsActiveOnly() {
+        Plan inactivePlan = Plan.builder().name("LEGACY").active(false).build();
+        when(planRepository.findAll()).thenReturn(List.of(freePlan, proPlan, inactivePlan));
+        when(billingMapper.toPlanResponseList(List.of(freePlan, proPlan)))
+                .thenReturn(List.of(mock(PlanResponse.class), mock(PlanResponse.class)));
 
         List<PlanResponse> plans = billingService.getAvailablePlans();
 
@@ -92,27 +127,72 @@ class BillingServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should return subscription for user")
-    void getSubscriptionByUser_WhenExists_ReturnsSubscription() {
-        Subscription sub = Subscription.builder().user(testUser).plan(proPlan).status(SubscriptionStatus.ACTIVE).build();
-        SubscriptionResponse mockResponse = mock(SubscriptionResponse.class);
+    @DisplayName("Should get user subscription details")
+    void getSubscriptionByUser_Success() {
+        when(subscriptionRepository.findByUserId(1L)).thenReturn(Optional.of(testSubscription));
+        when(billingMapper.toSubscriptionResponse(testSubscription)).thenReturn(mockSubscriptionResponse);
 
-        when(subscriptionRepository.findByUserId(1L)).thenReturn(Optional.of(sub));
-        when(billingMapper.toSubscriptionResponse(sub)).thenReturn(mockResponse);
+        SubscriptionResponse response = billingService.getSubscriptionByUser(1L);
 
-        SubscriptionResponse result = billingService.getSubscriptionByUser(1L);
+        assertThat(response).isNotNull();
+    }
 
-        assertThat(result).isNotNull();
-        verify(subscriptionRepository, times(1)).findByUserId(1L);
+    // ==========================================
+    // 3. CHECKOUT VALIDATION
+    // ==========================================
+
+    @Test
+    @DisplayName("Should throw BadRequest when creating checkout session for FREE plan")
+    void createCheckoutSession_WhenFreePlan_ThrowsBadRequest() {
+        when(userQueryService.getUserOrThrow(1L)).thenReturn(testUser);
+        when(planLimitService.getPlan(10L)).thenReturn(freePlan);
+
+        assertThatThrownBy(() -> billingService.createCheckoutSession(10L, 1L))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
+    }
+
+    // ==========================================
+    // 4. CANCEL & RESUME SUBSCRIPTION
+    // ==========================================
+
+    @Test
+    @DisplayName("Should throw NotFound when cancelling non-existent subscription")
+    void cancelSubscription_WhenNotFound_ThrowsNotFound() {
+        when(subscriptionRepository.findByUserId(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> billingService.cancelSubscription(1L))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND);
     }
 
     @Test
-    @DisplayName("Should throw bad request when creating checkout session for FREE plan")
-    void createCheckoutSession_WhenFreePlan_ThrowsBadRequest() {
-        when(userQueryService.getUserOrThrow(1L)).thenReturn(testUser);
-        when(planLimitService.getPlan(1L)).thenReturn(freePlan);
+    @DisplayName("Should throw BadRequest when cancelling subscription without stripe ID")
+    void cancelSubscription_WhenNoStripeId_ThrowsBadRequest() {
+        when(subscriptionRepository.findByUserId(1L)).thenReturn(Optional.of(testSubscription));
 
-        assertThatThrownBy(() -> billingService.createCheckoutSession(1L, 1L))
-                .isInstanceOf(AppException.class);
+        assertThatThrownBy(() -> billingService.cancelSubscription(1L))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    @DisplayName("Should throw NotFound when resuming non-existent subscription")
+    void resumeSubscription_WhenNotFound_ThrowsNotFound() {
+        when(subscriptionRepository.findByUserId(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> billingService.resumeSubscription(1L))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("Should throw BadRequest when resuming subscription without stripe ID")
+    void resumeSubscription_WhenNoStripeId_ThrowsBadRequest() {
+        when(subscriptionRepository.findByUserId(1L)).thenReturn(Optional.of(testSubscription));
+
+        assertThatThrownBy(() -> billingService.resumeSubscription(1L))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
     }
 }
