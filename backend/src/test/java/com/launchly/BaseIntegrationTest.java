@@ -8,8 +8,11 @@ import com.launchly.bot.entity.Bot;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.telegram.TelegramBotManager;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -21,6 +24,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -53,12 +57,18 @@ public abstract class BaseIntegrationTest {
     @MockitoBean
     protected StringRedisTemplate stringRedisTemplate;
 
+    @MockitoBean
+    protected CacheManager cacheManager;
+
     @BeforeEach
-    void setUpMockMvc() {
+    void setUpBase() {
         this.mockMvc = MockMvcBuilders
                 .webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
+
+        Mockito.when(cacheManager.getCache(anyString()))
+                .thenAnswer(inv -> new ConcurrentMapCache(inv.getArgument(0)));
     }
 
     protected User createTestUser(String emailPrefix, Role role) {
