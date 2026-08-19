@@ -16,11 +16,15 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.DockerClientFactory;
+import org.testcontainers.containers.PostgreSQLContainer;
 import tools.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -29,6 +33,27 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
 public abstract class BaseIntegrationTest {
+
+    protected static PostgreSQLContainer<?> postgres;
+
+    static {
+        try {
+            if (DockerClientFactory.instance().isDockerAvailable()) {
+                postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+                postgres.start();
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    @DynamicPropertySource
+    static void configureDynamicProperties(DynamicPropertyRegistry registry) {
+        if (postgres != null && postgres.isRunning()) {
+            registry.add("spring.datasource.url", postgres::getJdbcUrl);
+            registry.add("spring.datasource.username", postgres::getUsername);
+            registry.add("spring.datasource.password", postgres::getPassword);
+        }
+    }
 
     protected MockMvc mockMvc;
 
