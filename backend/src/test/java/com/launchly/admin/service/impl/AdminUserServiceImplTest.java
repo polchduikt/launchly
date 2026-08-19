@@ -25,14 +25,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -97,6 +103,10 @@ class AdminUserServiceImplTest {
         mockUserDto = mock(AdminUserDto.class);
     }
 
+    // ==========================================
+    // 1. UPDATE USER ROLE
+    // ==========================================
+
     @Test
     @DisplayName("Should successfully update user role when not self-modifying")
     void updateUserRole_Success() {
@@ -120,8 +130,13 @@ class AdminUserServiceImplTest {
         when(userQueryService.getUserOrThrow(10L)).thenReturn(targetUser);
 
         assertThatThrownBy(() -> adminUserService.updateUserRole(10L, Role.ROLE_ADMIN, "target@example.com"))
-                .isInstanceOf(AppException.class);
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
     }
+
+    // ==========================================
+    // 2. TOGGLE USER STATUS (BLOCK / UNBLOCK)
+    // ==========================================
 
     @Test
     @DisplayName("Should block active user with specified reason")
@@ -139,5 +154,45 @@ class AdminUserServiceImplTest {
         assertThat(result).isNotNull();
         assertThat(targetUser.isActive()).isFalse();
         verify(userAuditService, times(1)).logUserBlocked(eq(targetUser), contains("Spam Violation"));
+    }
+
+    @Test
+    @DisplayName("Should unblock previously blocked user")
+    void toggleUserStatus_WhenBlocked_UnblocksUser() {
+        targetUser.setActive(false);
+        targetUser.setBlockReason("Past violation");
+
+        when(userQueryService.getUserOrThrow(10L)).thenReturn(targetUser);
+        when(userQueryService.save(any(User.class))).thenReturn(targetUser);
+        when(botRepository.findByUserId(10L)).thenReturn(Collections.emptyList());
+        when(subscriptionRepository.findByUserId(10L)).thenReturn(Optional.empty());
+        when(adminMapper.toUserDto(any(), anyInt(), anyLong(), anyLong(), anyLong(), anyLong(), anyString()))
+                .thenReturn(mockUserDto);
+
+        AdminUserDto result = adminUserService.toggleUserStatus(10L, null);
+
+        assertThat(result).isNotNull();
+        assertThat(targetUser.isActive()).isTrue();
+        assertThat(targetUser.getBlockReason()).isNull();
+        verify(userAuditService, times(1)).logUserUnblocked(eq(targetUser));
+    }
+
+    // ==========================================
+    // 3. GET USERS LISTING
+    // ==========================================
+
+    @Test
+    @DisplayName("Should return paginated users filtered by role and search")
+    void getUsers_WithFilters_ReturnsPage() {
+        when(userQueryService.findAllUsers()).thenReturn(List.of(targetUser));
+        when(botRepository.findByUserId(10L)).thenReturn(Collections.emptyList());
+        when(subscriptionRepository.findByUserId(10L)).thenReturn(Optional.empty());
+        when(adminMapper.toUserDto(any(), anyInt(), anyLong(), anyLong(), anyLong(), anyLong(), anyString()))
+                .thenReturn(mockUserDto);
+
+        Page<AdminUserDto> page = adminUserService.getUsers("target", Role.ROLE_MANAGER, "all", "desc", 0, 10);
+
+        assertThat(page).isNotEmpty();
+        assertThat(page.getTotalElements()).isEqualTo(1);
     }
 }
