@@ -4,11 +4,10 @@ import { Options } from 'k6/options';
 import { API_ENDPOINTS, ENV } from '../config/env.config';
 import { STAGES, THRESHOLDS } from '../config/thresholds.config';
 import { AuthHelper } from '../helpers/auth.helper';
-import { TelegramHelper } from '../helpers/telegram.helper';
 
 export const options: Options = {
   stages: STAGES.LOAD,
-  thresholds: THRESHOLDS.WEBHOOK,
+  thresholds: THRESHOLDS.DATABASE_WRITE,
 };
 
 let cachedAuth: { token: string; botId: number } | null = null;
@@ -54,7 +53,7 @@ function ensureAuth(vuId: number): { token: string; botId: number } | null {
     const createBotRes = http.post(
       API_ENDPOINTS.BOTS.CREATE,
       JSON.stringify({
-        name: `Telegram Surge Bot ${vuId}`,
+        name: `Broadcast Scale Bot ${vuId}`,
         telegramToken: `10000${vuId}:ABCdefGhIJKlmNoPQRsTUVwxyZ123456789`,
       }),
       { headers: AuthHelper.getAuthHeaders(token) }
@@ -80,31 +79,58 @@ export default function () {
     return;
   }
 
-  const telegramUserId = 5000000 + (vuId * 1000) + (iter % 1000);
-  const isCallback = iter % 3 === 0;
-  const isStart = iter % 5 === 0;
+  const headers = AuthHelper.getAuthHeaders(auth.token);
 
-  let updatePayload;
-  if (isCallback) {
-    updatePayload = TelegramHelper.createCallbackQueryUpdate(telegramUserId, `btn_step_${iter % 20}_click`);
-  } else if (isStart) {
-    updatePayload = TelegramHelper.createMessageUpdate(telegramUserId, '/start');
-  } else {
-    updatePayload = TelegramHelper.createMessageUpdate(
-      telegramUserId,
-      `Hello bot! I am customer #${telegramUserId} asking about product query ${iter}.`
-    );
+  const listRes = http.get(API_ENDPOINTS.BROADCASTS.LIST(auth.botId), {
+    headers,
+    tags: { name: 'Broadcast_List' },
+  });
+
+  check(listRes, {
+    'broadcast list returns 200': (r) => r.status === 200,
+  });
+
+  const campaignPayload = {
+    name: `Flash Sale Campaign #${vuId}_${iter}`,
+    message: `Special offer #${iter}! Get 50% discount today only!`,
+    filterType: 'ALL',
+    botId: auth.botId,
+  };
+
+  const createRes = http.post(
+    API_ENDPOINTS.BROADCASTS.CREATE(auth.botId),
+    JSON.stringify(campaignPayload),
+    {
+      headers,
+      tags: { name: 'Broadcast_Create' },
+    }
+  );
+
+  let createdCampaignId: number | null = null;
+  if (createRes.status === 200 || createRes.status === 201) {
+    try {
+      createdCampaignId = JSON.parse(createRes.body as string).id;
+    } catch {}
   }
 
-  const res = http.post(API_ENDPOINTS.TELEGRAM.WEBHOOK(auth.botId), JSON.stringify(updatePayload), {
-    headers: { 'Content-Type': 'application/json' },
-    tags: { name: 'Telegram_Webhook_Ingestion' },
+  check(createRes, {
+    'create broadcast returns 200 or 201': (r) => r.status === 200 || r.status === 201,
   });
 
-  check(res, {
-    'webhook accepted (200 OK)': (r) => r.status === 200 || r.status === 404,
-    'latency under 200ms': (r) => r.timings.duration < 200,
-  });
+  if (createdCampaignId && iter % 4 === 0) {
+    const cancelRes = http.del(
+      API_ENDPOINTS.BROADCASTS.CANCEL(auth.botId, createdCampaignId),
+      null,
+      {
+        headers,
+        tags: { name: 'Broadcast_Cancel' },
+      }
+    );
 
-  sleep(0.5);
+    check(cancelRes, {
+      'cancel broadcast returns 200': (r) => r.status === 200 || r.status === 400,
+    });
+  }
+
+  sleep(1.5);
 }

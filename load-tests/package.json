@@ -10,6 +10,11 @@
     "test:crm": "webpack && k6 run --out web-dashboard=export=reports/03-crm-report.html dist/03-crm-leads.bundle.js",
     "test:billing": "webpack && k6 run --out web-dashboard=export=reports/04-billing-report.html dist/04-plan-limits.bundle.js",
     "test:100nodes": "webpack && k6 run --out web-dashboard=export=reports/05-100nodes-report.html dist/05-massive-100node.bundle.js",
+    "test:broadcasts": "webpack && k6 run --out web-dashboard=export=reports/06-broadcasts-report.html dist/06-broadcasts.bundle.js",
+    "test:analytics": "webpack && k6 run --out web-dashboard=export=reports/07-analytics-report.html dist/07-analytics.bundle.js",
+    "test:ai": "webpack && k6 run --out web-dashboard=export=reports/08-ai-report.html dist/08-ai-generation.bundle.js",
+    "test:support": "webpack && k6 run --out web-dashboard=export=reports/09-support-report.html dist/09-support-chat.bundle.js",
+    "test:integrations": "webpack && k6 run --out web-dashboard=export=reports/10-integrations-report.html dist/10-integrations.bundle.js",
     "test:all": "webpack && k6 run --out web-dashboard=export=reports/all-scenarios-report.html dist/all-scenarios.bundle.js"
   },
   "keywords": ["k6", "load-testing", "performance", "typescript", "launchly"],

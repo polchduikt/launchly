@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Options } from 'k6/options';
-import { API_ENDPOINTS } from '../config/env.config';
+import { API_ENDPOINTS, ENV } from '../config/env.config';
 import { STAGES, THRESHOLDS } from '../config/thresholds.config';
 import { AuthHelper } from '../helpers/auth.helper';
 
@@ -10,16 +10,44 @@ export const options: Options = {
   thresholds: THRESHOLDS.DATABASE_WRITE,
 };
 
+let cachedToken: string | null = null;
+
+function ensureAuth(vuId: number): string | null {
+  if (cachedToken) return cachedToken;
+
+  const email = `billing_scale_${vuId}@launchly-scale.com`;
+  const password = ENV.DEFAULT_PASSWORD;
+
+  const loginRes = http.post(
+    API_ENDPOINTS.AUTH.LOGIN,
+    JSON.stringify({ email, password }),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
+
+  if (loginRes.status === 200) {
+    try {
+      cachedToken = JSON.parse(loginRes.body as string).accessToken;
+      return cachedToken;
+    } catch {}
+  }
+
+  cachedToken = AuthHelper.register(email, `Billing User ${vuId}`, password);
+  return cachedToken;
+}
+
 export default function () {
   const vuId = __VU;
-  const email = `billing_vu_${vuId % 100}@launchly-loadtest.com`;
-  const token = AuthHelper.register(email, `Billing User ${vuId % 100}`);
+  const token = ensureAuth(vuId);
 
-  if (!token) return;
+  if (!token) {
+    sleep(1);
+    return;
+  }
+
   const authHeaders = AuthHelper.getAuthHeaders(token);
 
   const plansRes = http.get(API_ENDPOINTS.BILLING.PLANS, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders,
     tags: { name: 'Billing_Get_Plans' },
   });
 
@@ -41,8 +69,8 @@ export default function () {
   });
 
   check(subRes, {
-    'subscription status is 200 or 404': (r) => r.status === 200 || r.status === 404,
+    'subscription status is 200': (r) => r.status === 200,
   });
 
-  sleep(0.5);
+  sleep(1);
 }

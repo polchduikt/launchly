@@ -31,5 +31,28 @@ export const API_ENDPOINTS = {
     PLANS: `${ENV.BASE_URL}${ENV.API_PREFIX}/billing/plans`,
     SUBSCRIPTION: `${ENV.BASE_URL}${ENV.API_PREFIX}/billing/subscription`,
     USAGE: `${ENV.BASE_URL}${ENV.API_PREFIX}/billing/usage`,
+    STRIPE_WEBHOOK: `${ENV.BASE_URL}${ENV.API_PREFIX}/billing/webhook`,
+  },
+  BROADCASTS: {
+    LIST: (botId: string | number) => `${ENV.BASE_URL}${ENV.API_PREFIX}/broadcast/bots/${botId}/campaigns`,
+    CREATE: (botId: string | number) => `${ENV.BASE_URL}${ENV.API_PREFIX}/broadcast/bots/${botId}/campaigns`,
+    CANCEL: (botId: string | number, id: string | number) => `${ENV.BASE_URL}${ENV.API_PREFIX}/broadcast/bots/${botId}/campaigns/${id}/schedule`,
+  },
+  ANALYTICS: {
+    DASHBOARD: (botId: string | number) => `${ENV.BASE_URL}${ENV.API_PREFIX}/analytics/bots/${botId}/dashboard`,
+  },
+  AI: {
+    GENERATE_FLOW: `${ENV.BASE_URL}${ENV.API_PREFIX}/ai/generate-flow`,
+    CHAT: `${ENV.BASE_URL}${ENV.API_PREFIX}/ai/chat`,
+    USAGE: `${ENV.BASE_URL}${ENV.API_PREFIX}/ai/usage`,
+  },
+  SUPPORT: {
+    APPEALS: `${ENV.BASE_URL}${ENV.API_PREFIX}/support/appeal`,
+    TICKETS: `${ENV.BASE_URL}${ENV.API_PREFIX}/support/tickets`,
+    MESSAGES: (ticketId: string | number) => `${ENV.BASE_URL}${ENV.API_PREFIX}/support/tickets/${ticketId}/messages`,
+  },
+  INTEGRATIONS: {
+    LIST: `${ENV.BASE_URL}${ENV.API_PREFIX}/integrations`,
+    HOTMART_WEBHOOK: (botId: string | number) => `${ENV.BASE_URL}${ENV.API_PREFIX}/integrations/hotmart/webhook?botId=${botId}`,
   },
 };

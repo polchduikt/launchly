@@ -4,11 +4,13 @@ import { Options } from 'k6/options';
 import { API_ENDPOINTS, ENV } from '../config/env.config';
 import { STAGES, THRESHOLDS } from '../config/thresholds.config';
 import { AuthHelper } from '../helpers/auth.helper';
-import { TelegramHelper } from '../helpers/telegram.helper';
 
 export const options: Options = {
   stages: STAGES.LOAD,
-  thresholds: THRESHOLDS.WEBHOOK,
+  thresholds: {
+    http_req_failed: ['rate<0.01'],
+    http_req_duration: ['p(95)<200', 'p(99)<400'],
+  },
 };
 
 let cachedAuth: { token: string; botId: number } | null = null;
@@ -54,7 +56,7 @@ function ensureAuth(vuId: number): { token: string; botId: number } | null {
     const createBotRes = http.post(
       API_ENDPOINTS.BOTS.CREATE,
       JSON.stringify({
-        name: `Telegram Surge Bot ${vuId}`,
+        name: `Analytics Bot ${vuId}`,
         telegramToken: `10000${vuId}:ABCdefGhIJKlmNoPQRsTUVwxyZ123456789`,
       }),
       { headers: AuthHelper.getAuthHeaders(token) }
@@ -72,7 +74,6 @@ function ensureAuth(vuId: number): { token: string; botId: number } | null {
 
 export default function () {
   const vuId = __VU;
-  const iter = __ITER;
   const auth = ensureAuth(vuId);
 
   if (!auth) {
@@ -80,31 +81,16 @@ export default function () {
     return;
   }
 
-  const telegramUserId = 5000000 + (vuId * 1000) + (iter % 1000);
-  const isCallback = iter % 3 === 0;
-  const isStart = iter % 5 === 0;
+  const headers = AuthHelper.getAuthHeaders(auth.token);
 
-  let updatePayload;
-  if (isCallback) {
-    updatePayload = TelegramHelper.createCallbackQueryUpdate(telegramUserId, `btn_step_${iter % 20}_click`);
-  } else if (isStart) {
-    updatePayload = TelegramHelper.createMessageUpdate(telegramUserId, '/start');
-  } else {
-    updatePayload = TelegramHelper.createMessageUpdate(
-      telegramUserId,
-      `Hello bot! I am customer #${telegramUserId} asking about product query ${iter}.`
-    );
-  }
-
-  const res = http.post(API_ENDPOINTS.TELEGRAM.WEBHOOK(auth.botId), JSON.stringify(updatePayload), {
-    headers: { 'Content-Type': 'application/json' },
-    tags: { name: 'Telegram_Webhook_Ingestion' },
+  const dashboardRes = http.get(API_ENDPOINTS.ANALYTICS.DASHBOARD(auth.botId), {
+    headers,
+    tags: { name: 'Analytics_Dashboard_Stats' },
   });
 
-  check(res, {
-    'webhook accepted (200 OK)': (r) => r.status === 200 || r.status === 404,
-    'latency under 200ms': (r) => r.timings.duration < 200,
+  check(dashboardRes, {
+    'analytics dashboard returns 200': (r) => r.status === 200,
   });
 
-  sleep(0.5);
+  sleep(0.3);
 }
