@@ -52,13 +52,13 @@ describe('useBotMutations', () => {
     const { result: startRes } = renderHook(() => useStartBotMutation(), { wrapper });
     const { result: stopRes } = renderHook(() => useStopBotMutation(), { wrapper });
     const { result: pubRes } = renderHook(() => usePublishBotMutation(), { wrapper });
-    const { result: updRes } = renderHook(() => useUpdateBotMutation(10), { wrapper });
+    const { result: updRes } = renderHook(() => useUpdateBotMutation(), { wrapper });
 
     await delRes.current.mutateAsync(10);
     await startRes.current.mutateAsync(10);
     await stopRes.current.mutateAsync(10);
     const published = await pubRes.current.mutateAsync(10);
-    const updated = await updRes.current.mutateAsync({ name: 'Updated Bot' });
+    const updated = await updRes.current.mutateAsync({ id: 10, data: { name: 'Updated Bot' } });
 
     expect(published).toEqual({ id: 10, name: 'New Bot', active: true });
     expect(updated).toEqual({ id: 10, name: 'Updated Bot' });
