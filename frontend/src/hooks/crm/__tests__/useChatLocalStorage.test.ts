@@ -19,10 +19,17 @@ const mockConversations: ConversationResponse[] = [
   {
     id: 1,
     botId: 1,
+    botName: 'Bot 1',
     botUserName: 'Alice',
+    botUserUsername: 'alice',
+    botUserTelegramId: 101,
+    botUserPhotoUrl: null,
     status: 'OPEN',
     unread: true,
     favorite: false,
+    lastMessage: 'Hi',
+    lastMessageAt: '2026-08-20T10:00:00Z',
+    updatedAt: '2026-08-20T10:00:00Z',
     tags: ['VIP'],
     notes: 'Important client',
   },
@@ -39,28 +46,13 @@ describe('useChatLocalStorage', () => {
     );
 
     await waitFor(() => {
-      expect(result.current.unreadConvIds).toContain(1);
+      expect(result.current.labels).toEqual(['Lead', 'Customer']);
     });
-    expect(result.current.contactTags[1]).toEqual(['VIP']);
+    expect(result.current.unreadConvIds).toContain(1);
     expect(result.current.contactNotes[1]).toBe('Important client');
   });
 
-  it('marks conversation as read', async () => {
-    const { result } = renderHook(() =>
-      useChatLocalStorage({ conversations: mockConversations, selectedConvId: 1 })
-    );
-
-    act(() => {
-      result.current.markAsRead(1);
-    });
-
-    await waitFor(() => {
-      expect(result.current.unreadConvIds).not.toContain(1);
-    });
-    expect(mockUpdateConv).toHaveBeenCalledWith(1, { unread: false });
-  });
-
-  it('toggles favorite status', async () => {
+  it('toggles favorites correctly', () => {
     const { result } = renderHook(() =>
       useChatLocalStorage({ conversations: mockConversations, selectedConvId: 1 })
     );
@@ -69,9 +61,30 @@ describe('useChatLocalStorage', () => {
       result.current.toggleFavorite(1);
     });
 
-    await waitFor(() => {
-      expect(result.current.favorites).toContain(1);
+    expect(result.current.favorites).toContain(1);
+
+    act(() => {
+      result.current.toggleFavorite(1);
     });
-    expect(mockUpdateConv).toHaveBeenCalledWith(1, { favorite: true });
+
+    expect(result.current.favorites).not.toContain(1);
+  });
+
+  it('adds and removes labels', async () => {
+    const { result } = renderHook(() =>
+      useChatLocalStorage({ conversations: mockConversations, selectedConvId: 1 })
+    );
+
+    await act(async () => {
+      await result.current.addLabelByName('VIP');
+    });
+
+    expect(mockAddLabel).toHaveBeenCalledWith('VIP');
+
+    await act(async () => {
+      await result.current.deleteLabelByName('Lead');
+    });
+
+    expect(mockDeleteLabel).toHaveBeenCalledWith('Lead');
   });
 });

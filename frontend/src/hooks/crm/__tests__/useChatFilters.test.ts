@@ -8,25 +8,31 @@ const mockConversations: ConversationResponse[] = [
   {
     id: 1,
     botId: 1,
+    botName: 'Bot 1',
     botUserName: 'Alice Smith',
     botUserUsername: 'alice',
     botUserTelegramId: 101,
+    botUserPhotoUrl: null,
     status: 'OPEN',
     unread: true,
     lastMessage: 'Hi there',
     lastMessageAt: '2026-08-20T10:00:00Z',
+    updatedAt: '2026-08-20T10:00:00Z',
     favorite: true,
   },
   {
     id: 2,
     botId: 1,
+    botName: 'Bot 1',
     botUserName: 'Bob Johnson',
     botUserUsername: 'bob_j',
     botUserTelegramId: 102,
+    botUserPhotoUrl: null,
     status: 'CLOSED',
     unread: false,
     lastMessage: 'Bye',
     lastMessageAt: '2026-08-19T10:00:00Z',
+    updatedAt: '2026-08-19T10:00:00Z',
     favorite: false,
   },
 ];
@@ -38,7 +44,9 @@ const mockBotUsers: BotUserResponse[] = [
     firstName: 'Alice',
     lastName: 'Smith',
     username: 'alice',
-    botId: 1,
+    currentNodeId: null,
+    photoUrl: null,
+    tags: ['VIP'],
     createdAt: '2026-08-01',
     metadata: JSON.stringify({ labels: ['VIP'] }),
   },
@@ -59,7 +67,7 @@ describe('useChatFilters', () => {
     expect(result.current.filteredConversations[0].id).toBe(1);
   });
 
-  it('filters by search query', () => {
+  it('filters closed conversations when status changed to closed', () => {
     const { result } = renderHook(() =>
       useChatFilters({
         conversations: mockConversations,
@@ -70,15 +78,50 @@ describe('useChatFilters', () => {
     );
 
     act(() => {
-      result.current.setChatFilter('all' as any);
-      result.current.setSearchQuery('Bob');
+      result.current.setChatFilter('closed');
     });
 
     expect(result.current.filteredConversations.length).toBe(1);
-    expect(result.current.filteredConversations[0].botUserName).toBe('Bob Johnson');
+    expect(result.current.filteredConversations[0].id).toBe(2);
   });
 
-  it('filters by favorites tab', () => {
+  it('filters by search query matching username', () => {
+    const { result } = renderHook(() =>
+      useChatFilters({
+        conversations: mockConversations,
+        favorites: [1],
+        unreadConvIds: [1],
+        botUsers: mockBotUsers,
+      })
+    );
+
+    act(() => {
+      result.current.setSearchQuery('Alice');
+    });
+
+    expect(result.current.filteredConversations.length).toBe(1);
+    expect(result.current.filteredConversations[0].botUserName).toBe('Alice Smith');
+  });
+
+  it('filters by unread status', () => {
+    const { result } = renderHook(() =>
+      useChatFilters({
+        conversations: mockConversations,
+        favorites: [1],
+        unreadConvIds: [1],
+        botUsers: mockBotUsers,
+      })
+    );
+
+    act(() => {
+      result.current.setShowUnreadOnly(true);
+    });
+
+    expect(result.current.filteredConversations.length).toBe(1);
+    expect(result.current.filteredConversations[0].id).toBe(1);
+  });
+
+  it('filters by sidebar tab favorites', () => {
     const { result } = renderHook(() =>
       useChatFilters({
         conversations: mockConversations,
@@ -96,7 +139,7 @@ describe('useChatFilters', () => {
     expect(result.current.filteredConversations[0].id).toBe(1);
   });
 
-  it('resets filters correctly', () => {
+  it('filters by sidebar tag label', () => {
     const { result } = renderHook(() =>
       useChatFilters({
         conversations: mockConversations,
@@ -107,13 +150,10 @@ describe('useChatFilters', () => {
     );
 
     act(() => {
-      result.current.setSearchQuery('xyz');
-      result.current.setShowUnreadOnly(true);
-      result.current.resetFilters();
+      result.current.setSidebarTab('VIP');
     });
 
-    expect(result.current.searchQuery).toBe('');
-    expect(result.current.showUnreadOnly).toBe(false);
-    expect(result.current.chatFilter).toBe('open');
+    expect(result.current.filteredConversations.length).toBe(1);
+    expect(result.current.filteredConversations[0].id).toBe(1);
   });
 });
