@@ -1,0 +1,27 @@
+{
+  "name": "launchly-load-tests",
+  "version": "1.0.0",
+  "description": "High-Load and Performance Testing Suite for Launchly SaaS using Grafana k6 and TypeScript",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "webpack",
+    "test:auth": "webpack && k6 run --out web-dashboard=export=reports/01-auth-report.html dist/01-auth-burst.bundle.js",
+    "test:telegram": "webpack && k6 run --out web-dashboard=export=reports/02-telegram-report.html dist/02-telegram-surge.bundle.js",
+    "test:crm": "webpack && k6 run --out web-dashboard=export=reports/03-crm-report.html dist/03-crm-leads.bundle.js",
+    "test:billing": "webpack && k6 run --out web-dashboard=export=reports/04-billing-report.html dist/04-plan-limits.bundle.js",
+    "test:100nodes": "webpack && k6 run --out web-dashboard=export=reports/05-100nodes-report.html dist/05-massive-100node.bundle.js",
+    "test:all": "webpack && k6 run --out web-dashboard=export=reports/all-scenarios-report.html dist/all-scenarios.bundle.js"
+  },
+  "keywords": ["k6", "load-testing", "performance", "typescript", "launchly"],
+  "author": "Launchly Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/k6": "^0.54.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.7.3",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1",
+    "clean-webpack-plugin": "^4.0.0",
+    "glob": "^11.0.1"
+  }
+}

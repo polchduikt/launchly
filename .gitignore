@@ -25,12 +25,28 @@ backend/.mvn/wrapper/maven-wrapper.jar
 !backend/**/src/test/**/target/
 
 # ===========================
+# NODE / JS (Global, Frontend, Load-tests)
+# ===========================
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+reports/
+**/reports/
+*.html.report
+
+# ===========================
 # FRONTEND
 # ===========================
-frontend/node_modules/
-frontend/dist/
 frontend/.env
 frontend/.env.*
+
+# ===========================
+# LOAD TESTS
+# ===========================
+load-tests/node_modules/
+load-tests/dist/
+load-tests/reports/
 
 # ===========================
 # AGENT
@@ -41,6 +57,7 @@ agent/
 # IntelliJ IDEA
 # ===========================
 .idea/
+**/.idea/
 *.iws
 *.iml
 *.ipr
