@@ -26,7 +26,7 @@ describe('ContactsFilterBuilder', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders filter builder when isOpen=true', () => {
+  it('renders filter builder when isOpen=true', async () => {
     render(
       <ContactsFilterBuilder
         isOpen={true}
@@ -37,6 +37,6 @@ describe('ContactsFilterBuilder', () => {
         botId={1}
       />
     );
-    expect(screen.getByText(/audience.panel.add_condition/i)).toBeInTheDocument();
+    expect(await screen.findByText(/audience.panel.add_condition/i)).toBeInTheDocument();
   });
 });

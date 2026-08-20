@@ -30,7 +30,7 @@ vi.mock('../../../../../api/broadcast', () => ({
 const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
 describe('ContactInfoPanel', () => {
-  it('renders button when isOpen=false', () => {
+  it('renders button when isOpen=false', async () => {
     render(
       <QueryClientProvider client={qc}>
         <MemoryRouter>
@@ -44,10 +44,10 @@ describe('ContactInfoPanel', () => {
         </MemoryRouter>
       </QueryClientProvider>
     );
-    expect(screen.getByRole('button')).toBeInTheDocument();
+    expect(await screen.findByRole('button')).toBeInTheDocument();
   });
 
-  it('renders panel content when isOpen=true', () => {
+  it('renders panel content when isOpen=true', async () => {
     render(
       <QueryClientProvider client={qc}>
         <MemoryRouter>
@@ -61,6 +61,6 @@ describe('ContactInfoPanel', () => {
         </MemoryRouter>
       </QueryClientProvider>
     );
-    expect(screen.getAllByText('Jane').length).toBeGreaterThan(0);
+    expect((await screen.findAllByText('Jane')).length).toBeGreaterThan(0);
   });
 });

@@ -27,7 +27,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('ConditionNodeEditor', () => {
-  it('renders ConditionNodeEditor with branches', () => {
+  it('renders ConditionNodeEditor with branches', async () => {
     render(
       <ConditionNodeEditor
         data={{ branches: [] }}
@@ -36,6 +36,6 @@ describe('ConditionNodeEditor', () => {
       { wrapper: Wrapper }
     );
 
-    expect(screen.getByText('editor.condition.if_not')).toBeInTheDocument();
+    expect(await screen.findByText('editor.condition.if_not')).toBeInTheDocument();
   });
 });

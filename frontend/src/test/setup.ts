@@ -23,7 +23,12 @@ globalThis.ResizeObserver = class ResizeObserver {
 
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
+const DummyIcon = () => null;
+
 vi.mock('@icons-pack/react-simple-icons', () => ({
-  SiClaude: () => null,
-  SiGooglegemini: () => null,
+  SiClaude: DummyIcon,
+  SiGooglegemini: DummyIcon,
+  SiGooglesheets: DummyIcon,
+  SiHubspot: DummyIcon,
+  SiMailchimp: DummyIcon,
 }));

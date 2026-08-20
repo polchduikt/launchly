@@ -36,7 +36,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('ActionNodeEditor', () => {
-  it('renders ActionNodeEditor with actions list and add action button', () => {
+  it('renders ActionNodeEditor with actions list and add action button', async () => {
     render(
       <ActionNodeEditor
         data={{ actions: [] }}
@@ -45,6 +45,6 @@ describe('ActionNodeEditor', () => {
       { wrapper: Wrapper }
     );
 
-    expect(screen.getByText(/editor.action.add_action|editor.action.actions/i)).toBeInTheDocument();
+    expect(await screen.findByText(/editor.action.add_action|editor.action.actions/i)).toBeInTheDocument();
   });
 });
