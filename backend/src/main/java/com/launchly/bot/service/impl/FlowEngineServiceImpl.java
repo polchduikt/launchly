@@ -1,5 +1,6 @@
 package com.launchly.bot.service.impl;
 
+import com.launchly.analytics.entity.AnalyticsEventType;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import com.launchly.bot.engine.executor.NodeExecutor;
@@ -30,6 +31,10 @@ import com.cloudinary.Cloudinary;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.File;
+import com.launchly.bot.engine.validator.BotInputValidator;
+import com.launchly.bot.engine.callstack.BotCallStackManager;
+import com.launchly.bot.engine.callstack.CallStackFrame;
+import com.launchly.common.utils.MessageUtils;
 import org.springframework.context.annotation.Lazy;
 import lombok.extern.slf4j.Slf4j;
 import com.launchly.auth.service.AuthService;
@@ -63,6 +68,9 @@ public class FlowEngineServiceImpl implements FlowEngineService {
     private final Cloudinary cloudinary;
     private final AnalyticsService analyticsService;
     private final AuthService authService;
+    private final BotInputValidator inputValidator;
+    private final BotCallStackManager callStackManager;
+    private final MessageUtils messageUtils;
     private static final String SCHEMA_KEY = "launchly:bot:schema:%d";
     private static final Duration SCHEMA_TTL = Duration.ofMinutes(30);
 
@@ -80,7 +88,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                   @Lazy CrmService crmService,
                                   Cloudinary cloudinary,
                                   AnalyticsService analyticsService,
-                                  @Lazy AuthService authService) {
+                                  @Lazy AuthService authService,
+                                  BotInputValidator inputValidator,
+                                  BotCallStackManager callStackManager,
+                                  MessageUtils messageUtils) {
         this.botRepository = botRepository;
         this.botUserRepository = botUserRepository;
         this.flowSchemaRepository = flowSchemaRepository;
@@ -95,6 +106,9 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         this.cloudinary = cloudinary;
         this.analyticsService = analyticsService;
         this.authService = authService;
+        this.inputValidator = inputValidator;
+        this.callStackManager = callStackManager;
+        this.messageUtils = messageUtils;
         this.executors = new EnumMap<>(NodeType.class);
         nodeExecutors.forEach(e -> executors.put(e.getType(), e));
     }
@@ -125,24 +139,24 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 return;
             }
 
-            analyticsService.logEvent(botId, botUser, com.launchly.analytics.entity.AnalyticsEventType.USER_ACTIVITY, update.hasCallbackQuery() ? "CALLBACK" : "MESSAGE");
+            analyticsService.logEvent(botId, botUser, AnalyticsEventType.USER_ACTIVITY, update.hasCallbackQuery() ? "CALLBACK" : "MESSAGE");
             if (update.hasCallbackQuery()) {
                 String callbackData = update.getCallbackQuery().getData();
                 String buttonLabel = resolveButtonLabel(botId, callbackData);
-                analyticsService.logEvent(botId, botUser, com.launchly.analytics.entity.AnalyticsEventType.CLICK, buttonLabel);
+                analyticsService.logEvent(botId, botUser, AnalyticsEventType.CLICK, buttonLabel);
             }
 
             if (update.hasMessage() && update.getMessage().hasText()
                     && "/start".equals(update.getMessage().getText().trim())) {
                 stateService.clearActiveCampaignId(botId, telegramUserId);
                 stateService.setCurrentNodeId(botId, telegramUserId, null);
-                clearCallStack(botId, telegramUserId);
-                setExecutingBotId(botId, telegramUserId, botId);
+                callStackManager.clear(botId, telegramUserId);
+                callStackManager.setExecutingBotId(botId, telegramUserId, botId);
                 botUser.setCurrentNodeId(null);
                 botUser = botUserRepository.save(botUser);
             }
 
-            Long executingBotId = getExecutingBotId(botId, telegramUserId);
+            Long executingBotId = callStackManager.getExecutingBotId(botId, telegramUserId);
             List<FlowNode> nodes;
             List<FlowEdge> edges;
             if (!executingBotId.equals(botId)) {
@@ -200,7 +214,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                     botUser = botUserRepository.save(botUser);
                 } else if (update.hasMessage() && update.getMessage().hasText()) {
                     String text = update.getMessage().getText().trim();
-                    boolean isValid = validateInput(text, dcState.getReplyType());
+                    boolean isValid = inputValidator.validate(text, dcState.getReplyType());
                     if (isValid) {
                         saveCustomField(botUser, dcState.getSaveToField(), text);
                         redisTemplate.delete(dcKey);
@@ -216,7 +230,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                         if (retriesLeft >= 0) {
                             dcState.setRetryCount(retriesLeft);
                             redisTemplate.opsForValue().set(dcKey, objectMapper.writeValueAsString(dcState));
-                            sendValidationErrorMessage(telegramUserId.toString(), dcState.getReplyType(), client);
+                            inputValidator.sendValidationErrorMessage(telegramUserId.toString(), dcState.getReplyType(), client);
                             return;
                         } else {
                             redisTemplate.delete(dcKey);
@@ -267,10 +281,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                     if (targetBotId != null && !targetBotId.equals(executingBotId)) {
                         Long campaignId = stateService.getActiveCampaignId(botId, telegramUserId).orElse(null);
                         CallStackFrame frame = new CallStackFrame(executingBotId, returnNodeId, campaignId);
-                        pushCallStack(botId, telegramUserId, frame);
+                        callStackManager.push(botId, telegramUserId, frame);
 
                         executingBotId = targetBotId;
-                        setExecutingBotId(botId, telegramUserId, executingBotId);
+                        callStackManager.setExecutingBotId(botId, telegramUserId, executingBotId);
                         stateService.clearActiveCampaignId(botId, telegramUserId);
 
                         FlowSchema schema = getSchema(executingBotId);
@@ -314,10 +328,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 }
 
                 if (nextNodeId == null) {
-                    CallStackFrame poppedFrame = popCallStack(botId, telegramUserId);
+                    CallStackFrame poppedFrame = callStackManager.pop(botId, telegramUserId);
                     if (poppedFrame != null) {
                         executingBotId = poppedFrame.getExecutingBotId();
-                        setExecutingBotId(botId, telegramUserId, executingBotId);
+                        callStackManager.setExecutingBotId(botId, telegramUserId, executingBotId);
 
                         if (!executingBotId.equals(botId)) {
                             FlowSchema schema = getSchema(executingBotId);
@@ -358,11 +372,9 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                             stateService.clearActiveCampaignId(botId, telegramUserId);
                             stateService.setCurrentNodeId(botId, telegramUserId, null);
                             botUser.setCurrentNodeId(null);
-                            botUserRepository.save(botUser);
                         } else {
                             stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
                             botUser.setCurrentNodeId(currentNodeId);
-                            botUserRepository.save(botUser);
                         }
                         break;
                     }
@@ -371,7 +383,12 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 currentNodeId = nextNodeId;
                 stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
                 botUser.setCurrentNodeId(currentNodeId);
-                botUser = botUserRepository.save(botUser);
+            }
+
+            try {
+                botUserRepository.save(botUser);
+            } catch (Exception e) {
+                log.warn("Failed to persist final botUser state for user {}: {}", botUser.getId(), e.getMessage());
             }
 
         } catch (Exception e) {
@@ -549,8 +566,8 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 return;
             }
 
-            clearCallStack(botId, telegramUserId);
-            setExecutingBotId(botId, telegramUserId, botId);
+            callStackManager.clear(botId, telegramUserId);
+            callStackManager.setExecutingBotId(botId, telegramUserId, botId);
             Long executingBotId = botId;
 
             if (campaignId != null) {
@@ -611,10 +628,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                     if (targetBotId != null && !targetBotId.equals(executingBotId)) {
                         Long currentCampaignId = stateService.getActiveCampaignId(botId, telegramUserId).orElse(null);
                         CallStackFrame frame = new CallStackFrame(executingBotId, returnNodeId, currentCampaignId);
-                        pushCallStack(botId, telegramUserId, frame);
+                        callStackManager.push(botId, telegramUserId, frame);
 
                         executingBotId = targetBotId;
-                        setExecutingBotId(botId, telegramUserId, executingBotId);
+                        callStackManager.setExecutingBotId(botId, telegramUserId, executingBotId);
                         stateService.clearActiveCampaignId(botId, telegramUserId);
 
                         FlowSchema schema = getSchema(executingBotId);
@@ -657,10 +674,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 }
 
                 if (nextNodeId == null) {
-                    CallStackFrame poppedFrame = popCallStack(botId, telegramUserId);
+                    CallStackFrame poppedFrame = callStackManager.pop(botId, telegramUserId);
                     if (poppedFrame != null) {
                         executingBotId = poppedFrame.getExecutingBotId();
-                        setExecutingBotId(botId, telegramUserId, executingBotId);
+                        callStackManager.setExecutingBotId(botId, telegramUserId, executingBotId);
 
                         if (!executingBotId.equals(botId)) {
                             FlowSchema schema = getSchema(executingBotId);
@@ -701,11 +718,9 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                             stateService.clearActiveCampaignId(botId, telegramUserId);
                             stateService.setCurrentNodeId(botId, telegramUserId, null);
                             botUser.setCurrentNodeId(null);
-                            botUserRepository.save(botUser);
                         } else {
                             stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
                             botUser.setCurrentNodeId(currentNodeId);
-                            botUserRepository.save(botUser);
                         }
                         break;
                     }
@@ -714,7 +729,12 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 currentNodeId = nextNodeId;
                 stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
                 botUser.setCurrentNodeId(currentNodeId);
-                botUser = botUserRepository.save(botUser);
+            }
+
+            try {
+                botUserRepository.save(botUser);
+            } catch (Exception e) {
+                log.warn("Failed to persist final botUser state for user {}: {}", botUser.getId(), e.getMessage());
             }
         } catch (Exception e) {
             log.error("Error running flow for bot {}: {}", botId, e.getMessage(), e);
@@ -758,18 +778,49 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                 if (t instanceof String s && !s.isBlank()) {
                                     caption.append(s);
                                 } else {
-                                    caption.append("📷 Photo");
+                                    Object cap = block.get("caption");
+                                    if (cap instanceof String c && !c.isBlank()) { caption.append(c); }
                                 }
-                                Object btns = block.get("buttons");
-                                if (btns instanceof List<?> btnList) {
-                                    for (Object btn : btnList) {
-                                        if (btn instanceof Map<?,?> b) {
-                                            Object lbl = b.get("label");
-                                            if (lbl instanceof String l) { caption.append(" [").append(l).append("]"); }
-                                        }
-                                    }
+                                crmService.saveBotMessage(botId, botUser.getId(), caption.length() > 0 ? caption.toString() : "[Image]", imageUrl, "IMAGE");
+                            }
+                        } else if ("video".equals(type)) {
+                            String videoUrl = (String) block.get("videoUrl");
+                            if (videoUrl != null && !videoUrl.trim().isEmpty()) {
+                                StringBuilder caption = new StringBuilder();
+                                Object t = block.get("text");
+                                if (t instanceof String s && !s.isBlank()) {
+                                    caption.append(s);
+                                } else {
+                                    Object cap = block.get("caption");
+                                    if (cap instanceof String c && !c.isBlank()) { caption.append(c); }
                                 }
-                                crmService.saveBotMessage(botId, botUser.getId(), caption.toString(), imageUrl, "image");
+                                crmService.saveBotMessage(botId, botUser.getId(), caption.length() > 0 ? caption.toString() : "[Video]", videoUrl, "VIDEO");
+                            }
+                        } else if ("audio".equals(type)) {
+                            String audioUrl = (String) block.get("audioUrl");
+                            if (audioUrl != null && !audioUrl.trim().isEmpty()) {
+                                StringBuilder caption = new StringBuilder();
+                                Object t = block.get("text");
+                                if (t instanceof String s && !s.isBlank()) {
+                                    caption.append(s);
+                                } else {
+                                    Object cap = block.get("caption");
+                                    if (cap instanceof String c && !c.isBlank()) { caption.append(c); }
+                                }
+                                crmService.saveBotMessage(botId, botUser.getId(), caption.length() > 0 ? caption.toString() : "[Audio]", audioUrl, "AUDIO");
+                            }
+                        } else if ("file".equals(type)) {
+                            String fileUrl = (String) block.get("fileUrl");
+                            if (fileUrl != null && !fileUrl.trim().isEmpty()) {
+                                String fileName = (String) block.get("fileName");
+                                StringBuilder caption = new StringBuilder();
+                                if (fileName != null && !fileName.isBlank()) { caption.append(fileName); }
+                                Object t = block.get("text");
+                                if (t instanceof String s && !s.isBlank()) {
+                                    if (caption.length() > 0) caption.append(": ");
+                                    caption.append(s);
+                                }
+                                crmService.saveBotMessage(botId, botUser.getId(), caption.length() > 0 ? caption.toString() : "[File]", fileUrl, "FILE");
                             }
                         }
                     }
@@ -802,45 +853,30 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 }
             }
         } catch (Exception e) {
-            log.warn("Failed to save bot node message to CRM for bot {}: {}", botId, e.getMessage(), e);
+            log.warn("Failed to save bot message in CRM for bot {}: {}", botId, e.getMessage());
         }
     }
 
     @SuppressWarnings("unchecked")
     private String resolveButtonLabel(Long botId, String callbackData) {
-        if (callbackData == null) {
-            return "Unknown Button";
-        }
+        if (callbackData == null || callbackData.isBlank()) return "";
         try {
             FlowSchema schema = getSchema(botId);
-            if (schema != null && schema.getNodes() != null) {
-                List<FlowNode> nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-                for (FlowNode node : nodes) {
-                    Map<String, Object> data = node.data();
-                    if (data == null) continue;
+            if (schema == null || schema.getNodes() == null) return callbackData;
 
-                    List<?> topLevelButtons = (List<?>) data.get("buttons");
-                    if (topLevelButtons != null) {
-                        for (Object btnObj : topLevelButtons) {
-                            if (btnObj instanceof Map) {
-                                Map<String, Object> btn = (Map<String, Object>) btnObj;
-                                if (callbackData.equals(btn.get("value"))) {
-                                    Object label = btn.get("label");
-                                    return label != null ? label.toString() : callbackData;
-                                }
-                            }
-                        }
-                    }
-
-                    List<Map<String, Object>> blocks = (List<Map<String, Object>>) data.get("blocks");
-                    if (blocks != null) {
-                        for (Map<String, Object> block : blocks) {
-                            List<?> blockButtons = (List<?>) block.get("buttons");
-                            if (blockButtons != null) {
-                                for (Object btnObj : blockButtons) {
-                                    if (btnObj instanceof Map) {
-                                        Map<String, Object> btn = (Map<String, Object>) btnObj;
-                                        if (callbackData.equals(btn.get("value"))) {
+            List<FlowNode> nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+            for (FlowNode node : nodes) {
+                if (node.data() == null) continue;
+                Object blocksObj = node.data().get("blocks");
+                if (blocksObj instanceof List<?> blocks) {
+                    for (Object blockObj : blocks) {
+                        if (blockObj instanceof Map<?, ?> block) {
+                            Object btnsObj = block.get("buttons");
+                            if (btnsObj instanceof List<?> buttons) {
+                                for (Object btnObj : buttons) {
+                                    if (btnObj instanceof Map<?, ?> btn) {
+                                        Object targetNodeId = btn.get("targetNodeId");
+                                        if (callbackData.equals(targetNodeId)) {
                                             Object label = btn.get("label");
                                             return label != null ? label.toString() : callbackData;
                                         }
@@ -855,40 +891,6 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             log.warn("Failed to resolve button label for callback data {} in bot {}: {}", callbackData, botId, e.getMessage());
         }
         return callbackData;
-    }
-
-    private boolean validateInput(String text, String replyType) {
-        if (text == null || text.trim().isEmpty()) return false;
-        if ("Number".equalsIgnoreCase(replyType)) {
-            return text.matches("-?\\d+(\\.\\d+)?");
-        }
-        if ("Email".equalsIgnoreCase(replyType)) {
-            return text.matches("^[A-Za-z0-9+_.-]+@(.+)$");
-        }
-        if ("Phone".equalsIgnoreCase(replyType)) {
-            return text.matches("^\\+?[0-9\\s\\-\\(\\)]+$");
-        }
-        return true;
-    }
-
-    private void sendValidationErrorMessage(String chatId, String replyType, TelegramClient client) {
-        String msgText = "Некоректний формат. Будь ласка, введіть дійсні дані.";
-        if ("Email".equalsIgnoreCase(replyType)) {
-            msgText = "Будь ласка, введіть коректну адресу електронної пошти (наприклад: name@example.com).";
-        } else if ("Phone".equalsIgnoreCase(replyType)) {
-            msgText = "Будь ласка, введіть коректний номер телефону (наприклад: +380123456789).";
-        } else if ("Number".equalsIgnoreCase(replyType)) {
-            msgText = "Будь ласка, введіть число.";
-        }
-        try {
-            SendMessage message = SendMessage.builder()
-                    .chatId(chatId)
-                    .text(msgText)
-                    .build();
-            client.execute(message);
-        } catch (Exception e) {
-            log.error("Failed to send validation error message: {}", e.getMessage());
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -920,87 +922,6 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 .orElse(null);
     }
 
-    private static class CallStackFrame {
-        private Long executingBotId;
-        private String returnNodeId;
-        private Long campaignId;
-
-        public CallStackFrame() {}
-        public CallStackFrame(Long executingBotId, String returnNodeId, Long campaignId) {
-            this.executingBotId = executingBotId;
-            this.returnNodeId = returnNodeId;
-            this.campaignId = campaignId;
-        }
-
-        public Long getExecutingBotId() { return executingBotId; }
-        public void setExecutingBotId(Long executingBotId) { this.executingBotId = executingBotId; }
-        public String getReturnNodeId() { return returnNodeId; }
-        public void setReturnNodeId(String returnNodeId) { this.returnNodeId = returnNodeId; }
-        public Long getCampaignId() { return campaignId; }
-        public void setCampaignId(Long campaignId) { this.campaignId = campaignId; }
-    }
-
-    private void pushCallStack(Long originalBotId, Long telegramUserId, CallStackFrame frame) {
-        try {
-            String key = "launchly:bot:callstack:" + originalBotId + ":" + telegramUserId;
-            String json = objectMapper.writeValueAsString(frame);
-            redisTemplate.opsForList().rightPush(key, json);
-            redisTemplate.expire(key, Duration.ofHours(24));
-        } catch (Exception e) {
-            log.error("Failed to push to call stack: {}", e.getMessage(), e);
-        }
-    }
-
-    private CallStackFrame popCallStack(Long originalBotId, Long telegramUserId) {
-        try {
-            String key = "launchly:bot:callstack:" + originalBotId + ":" + telegramUserId;
-            String json = redisTemplate.opsForList().rightPop(key);
-            if (json == null || json.trim().isEmpty()) {
-                return null;
-            }
-            return objectMapper.readValue(json, CallStackFrame.class);
-        } catch (Exception e) {
-            log.error("Failed to pop from call stack: {}", e.getMessage(), e);
-            return null;
-        }
-    }
-
-    private void clearCallStack(Long originalBotId, Long telegramUserId) {
-        try {
-            String key = "launchly:bot:callstack:" + originalBotId + ":" + telegramUserId;
-            redisTemplate.delete(key);
-        } catch (Exception e) {
-            log.error("Failed to clear call stack: {}", e.getMessage(), e);
-        }
-    }
-
-    private Long getExecutingBotId(Long originalBotId, Long telegramUserId) {
-        try {
-            String key = "launchly:bot:executing_bot:" + originalBotId + ":" + telegramUserId;
-            String val = redisTemplate.opsForValue().get(key);
-            if (val == null || val.trim().isEmpty()) {
-                return originalBotId;
-            }
-            return Long.parseLong(val);
-        } catch (Exception e) {
-            log.error("Failed to get executing bot id: {}", e.getMessage(), e);
-            return originalBotId;
-        }
-    }
-
-    private void setExecutingBotId(Long originalBotId, Long telegramUserId, Long executingBotId) {
-        try {
-            String key = "launchly:bot:executing_bot:" + originalBotId + ":" + telegramUserId;
-            if (executingBotId == null || executingBotId.equals(originalBotId)) {
-                redisTemplate.delete(key);
-            } else {
-                redisTemplate.opsForValue().set(key, executingBotId.toString(), Duration.ofHours(24));
-            }
-        } catch (Exception e) {
-            log.error("Failed to set executing bot id: {}", e.getMessage(), e);
-        }
-    }
-
     private void handleSystemBotUpdate(Update update, TelegramClient client) {
         if (!update.hasMessage() || !update.getMessage().hasText()) {
             return;
@@ -1016,7 +937,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
 
             if (token == null || token.isBlank()) {
-                sendSystemBotMessage(chatId, "Welcome to Launchly! Please use the website to log in or link your account.", client);
+                String welcomeMsg = messageUtils.getMessageWithDefault(
+                        "bot.system.welcome",
+                        "Welcome to Launchly! Please use the website to log in or link your account.");
+                sendSystemBotMessage(chatId, welcomeMsg, client);
                 return;
             }
 
@@ -1058,16 +982,29 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 boolean isSubscription = authService.handleTelegramAuth(token, telegramUserId, telegramUsername, telegramName, telegramPhotoUrl);
 
                 if (isSubscription) {
-                    sendSystemBotMessage(chatId, "You are successfully opted-in. Now you are able to receive 'Launchly Official' bot notifications.\nIf you want to stop notifications in Telegram you have to opt-out.\nVisit 'My Telegram for Notifications' section in Settings -> Notifications.", client);
+                    String optinMsg = messageUtils.getMessageWithDefault(
+                            "bot.system.optin_success",
+                            "You are successfully opted-in. Now you are able to receive 'Launchly Official' bot notifications.\nIf you want to stop notifications in Telegram you have to opt-out.\nVisit 'My Telegram for Notifications' section in Settings -> Notifications.");
+                    sendSystemBotMessage(chatId, optinMsg, client);
                 } else {
-                    sendSystemBotMessage(chatId, "Hi! You successfully signed up/logged in with Telegram. Thank you! You can now return to the website.", client);
+                    String authSuccessMsg = messageUtils.getMessageWithDefault(
+                            "bot.system.auth_success",
+                            "Hi! You successfully signed up/logged in with Telegram. Thank you! You can now return to the website.");
+                    sendSystemBotMessage(chatId, authSuccessMsg, client);
                 }
             } catch (Exception e) {
                 log.error("Failed to process system bot auth: {}", e.getMessage());
-                sendSystemBotMessage(chatId, "Failed to authorize: " + e.getMessage(), client);
+                String authFailedMsg = messageUtils.getMessageWithDefault(
+                        "bot.system.auth_failed",
+                        "Failed to authorize: " + e.getMessage(),
+                        e.getMessage());
+                sendSystemBotMessage(chatId, authFailedMsg, client);
             }
         } else {
-            sendSystemBotMessage(chatId, "Please use the website to log in or link your account.", client);
+            String useWebsiteMsg = messageUtils.getMessageWithDefault(
+                    "bot.system.use_website",
+                    "Please use the website to log in or link your account.");
+            sendSystemBotMessage(chatId, useWebsiteMsg, client);
         }
     }
 
