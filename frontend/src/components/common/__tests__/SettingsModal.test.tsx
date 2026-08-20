@@ -15,7 +15,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 vi.mock('../../../store/useBotStore', () => ({
-  useBotStore: (selector: any) => selector ? selector({ activeBotId: 1 }) : { activeBotId: 1 },
+  useBotStore: (selector?: (state: Record<string, unknown>) => unknown) => selector ? selector({ activeBotId: 1 }) : { activeBotId: 1 },
 }));
 
 vi.mock('../../../hooks/bot/useBotsQuery', () => ({

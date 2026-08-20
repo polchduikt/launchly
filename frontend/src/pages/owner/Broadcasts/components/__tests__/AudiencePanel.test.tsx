@@ -4,8 +4,8 @@ import { AudiencePanel } from '../AudiencePanel';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('../../../../../i18n/config', () => ({
-  useTranslation: () => ({ t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k) }),
-  t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k) }),
+  t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k),
 }));
 
 vi.mock('../../../../../hooks/bot/useBotsQuery', () => ({
@@ -13,7 +13,7 @@ vi.mock('../../../../../hooks/bot/useBotsQuery', () => ({
 }));
 
 vi.mock('../../../../../store/useBotStore', () => ({
-  useBotStore: (selector: any) => selector ? selector({ activeBotId: 1, setActiveBotId: vi.fn() }) : ({ activeBotId: 1, setActiveBotId: vi.fn() }),
+  useBotStore: (selector?: (state: Record<string, unknown>) => unknown) => selector ? selector({ activeBotId: 1, setActiveBotId: vi.fn() }) : ({ activeBotId: 1, setActiveBotId: vi.fn() }),
 }));
 
 const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });

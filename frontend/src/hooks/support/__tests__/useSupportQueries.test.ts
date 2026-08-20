@@ -45,7 +45,7 @@ describe('useSupportQueries', () => {
     const { result: sendRes } = renderHook(() => useSendTicketMessageMutation(1), { wrapper });
     const { result: updateRes } = renderHook(() => useUpdateTicketStatusMutation(1), { wrapper });
 
-    const created = await createRes.current.mutateAsync({ subject: 'New Ticket' } as any);
+    const created = await createRes.current.mutateAsync({ subject: 'New Ticket' } as unknown as never);
     const sent = await sendRes.current.mutateAsync('Hello support');
     const updated = await updateRes.current.mutateAsync('CLOSED');
 

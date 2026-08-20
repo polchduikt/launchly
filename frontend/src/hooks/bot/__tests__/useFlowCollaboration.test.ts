@@ -8,7 +8,7 @@ const mockAuthState = {
 };
 
 vi.mock('../../../store/useAuthStore', () => {
-  const useAuthStoreMock = (selector: any) =>
+  const useAuthStoreMock = (selector?: (state: Record<string, unknown>) => unknown) =>
     selector ? selector(mockAuthState) : mockAuthState;
   useAuthStoreMock.getState = () => mockAuthState;
   return { useAuthStore: useAuthStoreMock };

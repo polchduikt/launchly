@@ -6,7 +6,7 @@ import React from 'react';
 
 const mockLogout = vi.fn();
 vi.mock('../../../store/useAuthStore', () => ({
-  useAuthStore: (selector: any) =>
+  useAuthStore: (selector?: (state: Record<string, unknown>) => unknown) =>
     selector
       ? selector({ logout: mockLogout, refreshToken: 'sample_refresh_token' })
       : { logout: mockLogout, refreshToken: 'sample_refresh_token' },

@@ -10,7 +10,7 @@ vi.mock('../../bot/useBotsQuery', () => ({
 }));
 
 vi.mock('../../../store/useAuthStore', () => ({
-  useAuthStore: (selector: any) =>
+  useAuthStore: (selector?: (state: Record<string, unknown>) => unknown) =>
     selector ? selector({ user: { role: 'ROLE_USER' } }) : { user: { role: 'ROLE_USER' } },
 }));
 

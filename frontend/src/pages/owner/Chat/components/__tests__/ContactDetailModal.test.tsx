@@ -7,7 +7,7 @@ import { MemoryRouter } from 'react-router-dom';
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
-    ...actual as any,
+    ...actual as Record<string, unknown>,
     useNavigate: () => vi.fn()
   };
 });
@@ -38,14 +38,13 @@ vi.mock('../../FlowBuilder/components/sidebar/editors/TagSearchSelect', () => ({
 const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
 describe('ContactDetailModal', () => {
-  it('renders contact name, avatar, and action buttons', () => {
-    const mockContact = { id: 1, firstName: 'Jane', lastName: 'Smith', metadata: '{}' } as any;
+  it('renders correctly with contact data', () => {
     render(
       <QueryClientProvider client={qc}>
         <MemoryRouter>
           <ContactDetailModal
             botId={1}
-            selectedContact={mockContact}
+            selectedContact={{ id: 1, firstName: 'John', lastName: 'Doe', username: 'johndoe', telegramId: 12345, metadata: '{}', createdAt: '2023-01-01', photoUrl: null, tags: [], currentNodeId: null }}
             conversations={[]}
             tags={[]}
             onClose={vi.fn()}
@@ -55,6 +54,7 @@ describe('ContactDetailModal', () => {
         </MemoryRouter>
       </QueryClientProvider>
     );
-    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+    expect(screen.getByText('@johndoe')).toBeInTheDocument();
   });
 });

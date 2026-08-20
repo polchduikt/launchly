@@ -6,7 +6,7 @@ import React from 'react';
 
 const mockSetActiveBotId = vi.fn();
 vi.mock('../../../store/useBotStore', () => ({
-  useBotStore: (selector: any) =>
+  useBotStore: (selector?: (state: Record<string, unknown>) => unknown) =>
     selector
       ? selector({ activeBotId: null, setActiveBotId: mockSetActiveBotId })
       : { activeBotId: null, setActiveBotId: mockSetActiveBotId },

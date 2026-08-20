@@ -4,8 +4,8 @@ import CheckoutCancelPage from '../CheckoutCancelPage';
 import { MemoryRouter } from 'react-router-dom';
 
 vi.mock('../../../../i18n/config', () => ({
-  t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k),
-  useTranslation: () => ({ t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k) }),
+  t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k) }),
   getLanguage: () => 'uk',
 }));
 

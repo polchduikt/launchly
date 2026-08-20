@@ -54,7 +54,7 @@ describe('useTelegramSettings', () => {
     const { result } = renderHook(() => useTelegramSettings());
 
     await act(async () => {
-      await result.current.handleToggleBot(mockBots[0] as any);
+      await result.current.handleToggleBot(mockBots[0] as unknown as never);
     });
 
     expect(mockStop).toHaveBeenCalledWith(1);

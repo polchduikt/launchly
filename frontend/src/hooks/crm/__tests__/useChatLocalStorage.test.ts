@@ -12,7 +12,7 @@ vi.mock('../../../api/crm', () => ({
   getLabelsApi: () => mockGetLabels(),
   addLabelApi: (name: string) => mockAddLabel(name),
   deleteLabelApi: (name: string) => mockDeleteLabel(name),
-  updateConversationApi: (id: number, data: any) => mockUpdateConv(id, data),
+  updateConversationApi: (id: number, data: unknown) => mockUpdateConv(id, data),
 }));
 
 const mockConversations: ConversationResponse[] = [

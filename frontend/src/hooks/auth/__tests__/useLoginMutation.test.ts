@@ -6,7 +6,7 @@ import React from 'react';
 
 const mockLogin = vi.fn();
 vi.mock('../../../store/useAuthStore', () => ({
-  useAuthStore: (selector: any) =>
+  useAuthStore: (selector?: (state: Record<string, unknown>) => unknown) =>
     selector ? selector({ login: mockLogin }) : { login: mockLogin },
 }));
 

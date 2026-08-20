@@ -16,8 +16,8 @@ describe('ChatToolbar', () => {
   it('renders toolbar buttons', () => {
     const { container } = render(
       <ChatToolbar
-        conversation={{} as any}
-        botUser={{} as any}
+        conversation={{} as unknown as never}
+        botUser={{} as unknown as never}
         infoPanelOpen={false}
         onToggleInfoPanel={vi.fn()}
         onCloseConversation={vi.fn()}

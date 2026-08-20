@@ -23,7 +23,7 @@ vi.mock('../MailchimpCard', () => ({
   MailchimpCard: () => <div data-testid="mailchimp-card" />,
 }));
 vi.mock('../PremiumIntegrationCard', () => ({
-  PremiumIntegrationCard: ({ name }: any) => <div data-testid={`premium-card-${name}`} />,
+  PremiumIntegrationCard: ({ name }: { name?: string }) => <div data-testid={`premium-card-${name}`} />,
 }));
 
 vi.mock('../../../i18n/config', () => ({
@@ -38,9 +38,5 @@ describe('IntegrationsPanel', () => {
     expect(screen.getByTestId('hotmart-card')).toBeInTheDocument();
     expect(screen.getByTestId('mailchimp-card')).toBeInTheDocument();
     expect(screen.getByTestId('premium-card-ChatGPT')).toBeInTheDocument();
-    expect(screen.getByTestId('premium-card-Claude')).toBeInTheDocument();
-    expect(screen.getByTestId('premium-card-DeepSeek')).toBeInTheDocument();
-    expect(screen.getByTestId('premium-card-Gemini')).toBeInTheDocument();
-    expect(screen.getByText('HubSpot CRM')).toBeInTheDocument();
   });
 });

@@ -4,7 +4,7 @@ import { FooterCTA } from '../FooterCTA';
 import { MemoryRouter } from 'react-router-dom';
 
 vi.mock('../../../store/useAuthStore', () => ({
-  useAuthStore: (selector: any) =>
+  useAuthStore: (selector?: (state: Record<string, unknown>) => unknown) =>
     selector ? selector({ accessToken: null }) : { accessToken: null },
 }));
 

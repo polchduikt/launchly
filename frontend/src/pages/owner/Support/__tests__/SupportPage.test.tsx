@@ -5,8 +5,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('../../../../i18n/config', () => ({
-  t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k),
-  useTranslation: () => ({ t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k) }),
+  t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k) }),
   getLanguage: () => 'uk',
 }));
 
@@ -19,7 +19,7 @@ vi.mock('../../../../hooks/support/useSupportQueries', () => ({
 }));
 
 vi.mock('../../../../store/useAuthStore', () => ({
-  useAuthStore: (selector: any) =>
+  useAuthStore: (selector?: (state: Record<string, unknown>) => unknown) =>
     selector ? selector({ user: { email: 'owner@launchly.app' } }) : { user: { email: 'owner@launchly.app' } },
 }));
 

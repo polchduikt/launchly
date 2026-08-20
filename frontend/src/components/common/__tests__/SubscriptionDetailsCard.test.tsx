@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { SubscriptionDetailsCard } from '../SubscriptionDetailsCard';
+import type { SubscriptionResponse } from '../../../types';
 
-const mockSub: any = {
+const mockSub: SubscriptionResponse = {
   id: 1,
   currentPeriodStart: '2023-01-01T00:00:00Z',
   plan: {

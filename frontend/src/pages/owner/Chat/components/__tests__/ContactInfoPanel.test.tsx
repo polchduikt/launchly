@@ -36,7 +36,7 @@ describe('ContactInfoPanel', () => {
         <MemoryRouter>
           <ContactInfoPanel
             botId={1}
-            conversation={{ id: 1, botId: 1, botUserName: 'Jane' } as any}
+            conversation={{ id: 1, botId: 1, botUserName: 'Jane' } as unknown as never}
             isOpen={false}
             onClose={vi.fn()}
             onOpen={vi.fn()}
@@ -53,7 +53,7 @@ describe('ContactInfoPanel', () => {
         <MemoryRouter>
           <ContactInfoPanel
             botId={1}
-            conversation={{ id: 1, botId: 1, botUserName: 'Jane' } as any}
+            conversation={{ id: 1, botId: 1, botUserName: 'Jane' } as unknown as never}
             isOpen={true}
             onClose={vi.fn()}
             onOpen={vi.fn()}

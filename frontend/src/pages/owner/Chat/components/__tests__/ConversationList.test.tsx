@@ -39,7 +39,7 @@ describe('ConversationList', () => {
     ];
     render(
       <ConversationList
-        conversations={convs as any}
+        conversations={convs as unknown as never}
         selectedConvId={null}
         onSelect={vi.fn()}
         isLoading={false}

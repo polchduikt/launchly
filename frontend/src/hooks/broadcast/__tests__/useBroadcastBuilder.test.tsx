@@ -7,7 +7,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import React from 'react';
 
 vi.mock('../../../store/useBotStore', () => ({
-  useBotStore: (selector: any) =>
+  useBotStore: (selector?: (state: Record<string, unknown>) => unknown) =>
     selector ? selector({ activeBotId: 1 }) : { activeBotId: 1 },
 }));
 

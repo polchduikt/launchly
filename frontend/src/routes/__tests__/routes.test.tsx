@@ -10,8 +10,8 @@ vi.mock('../../store/useAuthStore', () => {
     user: null,
     setUser: vi.fn(),
   };
-  const useAuthStoreMock = (selector: any) => (selector ? selector(state) : state);
-  useAuthStoreMock.setState = (newState: any) => {
+  const useAuthStoreMock = (selector?: (state: Record<string, unknown>) => unknown) => (selector ? selector(state) : state);
+  useAuthStoreMock.setState = (newState: Record<string, unknown>) => {
     state = { ...state, ...newState };
   };
   useAuthStoreMock.getState = () => state;
@@ -29,7 +29,7 @@ vi.mock('../../pages/public/Landing/LandingPage', () => ({
 describe('AppRouter & Route Guards', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAuthStore as any).setState({
+    (useAuthStore as unknown as { setState: (s: Record<string, unknown>) => void }).setState({
       accessToken: null,
       user: null,
     });

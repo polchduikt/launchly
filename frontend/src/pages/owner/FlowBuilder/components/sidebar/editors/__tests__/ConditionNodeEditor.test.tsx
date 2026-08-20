@@ -4,12 +4,12 @@ import { ConditionNodeEditor } from '../ConditionNodeEditor';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('../../../../../../../i18n/config', () => ({
-  t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k),
-  useTranslation: () => ({ t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k) }),
+  t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k) }),
 }));
 
 vi.mock('../../../../../../../store/useBotStore', () => ({
-  useBotStore: (selector: any) => selector ? selector({ activeBotId: 1 }) : ({ activeBotId: 1 }),
+  useBotStore: (selector?: (state: Record<string, unknown>) => unknown) => selector ? selector({ activeBotId: 1 }) : ({ activeBotId: 1 }),
 }));
 
 vi.mock('../../../../../../../hooks/broadcast/useBroadcastQueries', () => ({

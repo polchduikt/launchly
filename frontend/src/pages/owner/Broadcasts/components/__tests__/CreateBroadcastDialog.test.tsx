@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CreateBroadcastDialog } from '../CreateBroadcastDialog';
+import type { CreateBroadcastDialogProps } from '../../../../../types/broadcast';
 
 vi.mock('../../../../../i18n/config', () => ({
   t: (k: string) => k,
@@ -13,11 +14,11 @@ describe('CreateBroadcastDialog', () => {
     formState: { errors: {} }
   };
 
-  const defaultProps: any = {
+  const defaultProps: CreateBroadcastDialogProps = {
     isOpen: true,
     onClose: vi.fn(),
     onSubmit: vi.fn(),
-    form: mockForm as any,
+    form: mockForm as unknown as never,
     isCreating: false,
     createError: null,
     bots: [],
@@ -30,7 +31,7 @@ describe('CreateBroadcastDialog', () => {
   });
 
   it('renders correctly when open', () => {
-    render(<CreateBroadcastDialog {...defaultProps} bots={[{ id: 1, name: 'Bot 1', hasTelegramToken: true } as any]} />);
+    render(<CreateBroadcastDialog {...defaultProps} bots={[{ id: 1, name: 'Bot 1', hasTelegramToken: true } as unknown as never]} />);
     expect(screen.getByText('broadcast.dialog.create_title')).toBeInTheDocument();
     expect(screen.getByText('broadcast.dialog.campaign_name')).toBeInTheDocument();
   });

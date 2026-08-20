@@ -20,7 +20,7 @@ const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
 describe('ChatHistoryModal', () => {
   it('renders modal with conversation user name and close button', () => {
-    const mockConv = { id: 1, botUserName: 'John Doe', botUserPhotoUrl: '' } as any;
+    const mockConv = { id: 1, botUserName: 'John Doe', botUserPhotoUrl: '' } as unknown as never;
     render(
       <QueryClientProvider client={qc}>
         <ChatHistoryModal

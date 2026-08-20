@@ -21,8 +21,8 @@ describe('EditBroadcastDialog', () => {
   const defaultProps = {
     isOpen: true,
     onClose: vi.fn(),
-    campaign: { id: 1, name: 'Test Campaign', message: 'Hello', targetAllBots: true } as any,
-    bots: [{ id: 1, name: 'Test Bot', hasTelegramToken: true } as any],
+    campaign: { id: 1, name: 'Test Campaign', message: 'Hello', targetAllBots: true } as unknown as never,
+    bots: [{ id: 1, name: 'Test Bot', hasTelegramToken: true } as unknown as never],
     botId: 1,
   };
 

@@ -33,8 +33,8 @@ describe('useAiQueries', () => {
     const { result: chatRes } = renderHook(() => useAiChatMutation(), { wrapper });
     const { result: schemaRes } = renderHook(() => useAiSchemaMutation(), { wrapper });
 
-    const chatData = await chatRes.current.mutateAsync({ message: 'Hi' } as any);
-    const schemaData = await schemaRes.current.mutateAsync({ prompt: 'Generate bot' } as any);
+    const chatData = await chatRes.current.mutateAsync({ message: 'Hi' } as unknown as never);
+    const schemaData = await schemaRes.current.mutateAsync({ prompt: 'Generate bot' } as unknown as never);
 
     expect(chatData).toEqual({ message: 'Hello from AI' });
     expect(schemaData).toEqual({ nodes: [], edges: [] });

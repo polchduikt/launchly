@@ -4,8 +4,8 @@ import { RandomizerNodeEditor } from '../RandomizerNodeEditor';
 import { ReactFlowProvider } from '@xyflow/react';
 
 vi.mock('../../../../../../../i18n/config', () => ({
-  t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k),
-  useTranslation: () => ({ t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k) }),
+  t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k) }),
 }));
 
 describe('RandomizerNodeEditor', () => {

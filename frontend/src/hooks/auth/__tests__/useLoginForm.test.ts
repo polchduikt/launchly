@@ -42,7 +42,7 @@ describe('useLoginForm', () => {
     await act(async () => {
       await result.current.onSubmit({
         preventDefault: vi.fn(),
-      } as any);
+      } as unknown as never);
     });
 
     act(() => {

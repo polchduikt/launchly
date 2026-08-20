@@ -5,8 +5,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('../../../../i18n/config', () => ({
-  t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k),
-  useTranslation: () => ({ t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k) }),
+  t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k) }),
   getLanguage: () => 'uk',
 }));
 
@@ -28,7 +28,7 @@ vi.mock('../../../../hooks/bot/useBotsQuery', () => ({
 }));
 
 vi.mock('../../../../store/useBotStore', () => ({
-  useBotStore: (selector: any) =>
+  useBotStore: (selector?: (state: Record<string, unknown>) => unknown) =>
     selector ? selector({ activeBotId: 1 }) : { activeBotId: 1 },
 }));
 

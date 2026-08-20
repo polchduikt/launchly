@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { ManageSignInOptionsModal } from '../ManageSignInOptionsModal';
 
 vi.mock('../../../store/useAuthStore', () => ({
-  useAuthStore: (selector: any) => selector ? selector({
+  useAuthStore: (selector?: (state: Record<string, unknown>) => unknown) => selector ? selector({
     user: { provider: 'GOOGLE', email: 'test@gmail.com', telegramUserId: '123' },
     setUser: vi.fn(),
   }) : ({

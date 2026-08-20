@@ -43,8 +43,8 @@ describe('useIntegrationQueries', () => {
     const { result: delRes } = renderHook(() => useDeleteIntegrationMutation(), { wrapper });
     const { result: toggleRes } = renderHook(() => useToggleIntegrationMutation(), { wrapper });
 
-    const created = await createRes.current.mutateAsync({ type: 'OPENAI' } as any);
-    const updated = await updRes.current.mutateAsync({ id: 1, request: { type: 'TELEGRAM' } as any });
+    const created = await createRes.current.mutateAsync({ type: 'OPENAI' } as unknown as never);
+    const updated = await updRes.current.mutateAsync({ id: 1, request: { type: 'TELEGRAM' } as unknown as never });
     const deleted = await delRes.current.mutateAsync(1);
     const toggled = await toggleRes.current.mutateAsync(1);
 

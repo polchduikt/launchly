@@ -61,7 +61,7 @@ describe('useCrmQueries', () => {
     const { result: orderRes } = renderHook(() => useUpdateOrderMutation(1), { wrapper });
 
     const sent = await sendRes.current.mutateAsync({ content: 'Reply' });
-    const upd = await orderRes.current.mutateAsync({ orderId: 1, status: 'COMPLETED' as any, notes: 'Done' });
+    const upd = await orderRes.current.mutateAsync({ orderId: 1, status: 'COMPLETED' as unknown as never, notes: 'Done' });
 
     expect(sent).toEqual({ id: 2, content: 'Reply' });
     expect(upd).toEqual({ id: 1, status: 'COMPLETED' });

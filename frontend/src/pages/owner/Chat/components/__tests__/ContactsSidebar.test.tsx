@@ -13,7 +13,7 @@ describe('ContactsSidebar', () => {
       { id: 'Seq 1', count: 5 },
       { id: 'Seq 2', count: 10 },
     ];
-    render(<ContactsSidebar sequences={sequences as any} />);
+    render(<ContactsSidebar sequences={sequences as unknown as never} />);
     expect(screen.getByText('Seq 1')).toBeInTheDocument();
     expect(screen.getByText('Seq 2')).toBeInTheDocument();
   });

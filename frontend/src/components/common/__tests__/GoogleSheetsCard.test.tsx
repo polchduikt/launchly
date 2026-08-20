@@ -33,7 +33,7 @@ describe('GoogleSheetsCard Component', () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <GoogleSheetsCard botId={10} integration={mockIntegration as any} />
+        <GoogleSheetsCard botId={10} integration={mockIntegration as unknown as never} />
       </QueryClientProvider>
     );
 

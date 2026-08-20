@@ -3,9 +3,9 @@ import { renderHook } from '@testing-library/react';
 import { useScrollReveal } from '../useScrollReveal';
 
 describe('useScrollReveal', () => {
-  let mockObserve: any;
-  let mockUnobserve: any;
-  let mockDisconnect: any;
+  let mockObserve: unknown;
+  let mockUnobserve: unknown;
+  let mockDisconnect: unknown;
 
   beforeEach(() => {
     mockObserve = vi.fn();
@@ -18,7 +18,7 @@ describe('useScrollReveal', () => {
       disconnect = mockDisconnect;
     }
 
-    window.IntersectionObserver = MockIntersectionObserver as any;
+    window.IntersectionObserver = MockIntersectionObserver as unknown as never;
   });
 
   afterEach(() => {

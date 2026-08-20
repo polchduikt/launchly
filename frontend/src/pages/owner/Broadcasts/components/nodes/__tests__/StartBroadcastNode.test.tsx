@@ -14,7 +14,7 @@ vi.mock('@xyflow/react', async () => {
     ...actual,
     useConnection: () => ({ inProgress: false }),
     useNodeConnections: () => [],
-    Handle: ({ type }: any) => <div data-testid={`handle-${type}`} />,
+    Handle: ({ type }: { type?: string }) => <div data-testid={`handle-${type}`} />,
   };
 });
 

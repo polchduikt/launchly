@@ -47,7 +47,7 @@ describe('ContactsTable', () => {
         <ContactsTable
           botId={1}
           isContactsLoading={false}
-          filteredContacts={contacts as any}
+          filteredContacts={contacts as unknown as never}
           selectedContactIds={new Set()}
           onSelectAll={vi.fn()}
           onSelectContact={vi.fn()}

@@ -29,7 +29,7 @@ describe('BulkActionModal', () => {
         onClose={vi.fn()}
         actionType="add-tag"
         selectedCount={5}
-        tags={[{ id: 1, botId: 1, name: 'VIP', createdAt: '', updatedAt: '' } as any]}
+        tags={[{ id: 1, botId: 1, name: 'VIP', createdAt: '', updatedAt: '' } as unknown as never]}
         onApply={vi.fn()}
       />
     );

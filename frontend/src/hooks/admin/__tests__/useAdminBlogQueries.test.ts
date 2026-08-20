@@ -51,8 +51,8 @@ describe('useAdminBlogQueries', () => {
     const { result: updateRes } = renderHook(() => useUpdateBlogArticleMutation('1'), { wrapper });
     const { result: deleteRes } = renderHook(() => useDeleteBlogArticleMutation(), { wrapper });
 
-    const created = await createRes.current.mutateAsync({ title: 'New' } as any);
-    const updated = await updateRes.current.mutateAsync({ title: 'Updated' } as any);
+    const created = await createRes.current.mutateAsync({ title: 'New' } as unknown as never);
+    const updated = await updateRes.current.mutateAsync({ title: 'Updated' } as unknown as never);
     const deleted = await deleteRes.current.mutateAsync('1');
 
     expect(created).toEqual({ id: '2', title: 'Created Article' });

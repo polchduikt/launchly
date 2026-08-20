@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react';
 import { NodeEditorPanel } from '../NodeEditorPanel';
 
 vi.mock('../../../../../../i18n/config', () => ({
-  t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k),
-  useTranslation: () => ({ t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k) }),
+  t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k) }),
 }));
 
 vi.mock('../../../../../../hooks/bot/useNodeEditor', () => ({

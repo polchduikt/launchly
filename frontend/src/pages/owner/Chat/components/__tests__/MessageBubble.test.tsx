@@ -17,7 +17,7 @@ describe('MessageBubble', () => {
     const msg = { id: '1', content: 'Hello user', createdAt: '2023-01-01', senderType: 'OWNER' };
     render(
       <MessageBubble
-        message={msg as any}
+        message={msg as unknown as never}
         isOwner={true}
         ownerAvatar={<div data-testid="owner-avatar" />}
         userAvatar={<div data-testid="user-avatar" />}
@@ -34,7 +34,7 @@ describe('MessageBubble', () => {
     const msg = { id: '2', content: 'Hello owner', createdAt: '2023-01-01', senderType: 'BOT_USER' };
     render(
       <MessageBubble
-        message={msg as any}
+        message={msg as unknown as never}
         isOwner={false}
         ownerAvatar={<div data-testid="owner-avatar" />}
         userAvatar={<div data-testid="user-avatar" />}

@@ -10,7 +10,7 @@ describe('useNodeEditor & getBlocks', () => {
       buttons: [{ text: 'Start', value: 'start' }],
     };
 
-    const blocks = getBlocks(data as any);
+    const blocks = getBlocks(data as unknown as never);
     expect(blocks.length).toBeGreaterThan(0);
     expect(blocks[0].text).toBe('Welcome to bot');
   });

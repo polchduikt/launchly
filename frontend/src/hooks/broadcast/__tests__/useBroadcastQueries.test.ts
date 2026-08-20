@@ -53,8 +53,8 @@ describe('useBroadcastQueries', () => {
     const { result: sendRes } = renderHook(() => useSendCampaignMutation(), { wrapper });
     const { result: delRes } = renderHook(() => useDeleteCampaignMutation(), { wrapper });
 
-    const created = await createRes.current.mutateAsync({ name: 'New Campaign' } as any);
-    const updated = await updRes.current.mutateAsync({ campaignId: 1, req: { name: 'Updated Campaign' } as any });
+    const created = await createRes.current.mutateAsync({ name: 'New Campaign' } as unknown as never);
+    const updated = await updRes.current.mutateAsync({ campaignId: 1, req: { name: 'Updated Campaign' } as unknown as never });
     const sent = await sendRes.current.mutateAsync(1);
     const deleted = await delRes.current.mutateAsync({ campaignId: 1, botId: 1 });
 

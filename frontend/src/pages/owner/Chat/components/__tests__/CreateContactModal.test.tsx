@@ -21,14 +21,14 @@ vi.mock('../../../../../schemas/crm.schema', () => ({
 describe('CreateContactModal', () => {
   it('returns null when isOpen=false', () => {
     const { container } = render(
-      <CreateContactModal isOpen={false} onClose={vi.fn()} onSubmit={vi.fn() as any} />
+      <CreateContactModal isOpen={false} onClose={vi.fn()} onSubmit={vi.fn() as unknown as never} />
     );
     expect(container.firstChild).toBeNull();
   });
 
   it('renders form fields when open', () => {
     render(
-      <CreateContactModal isOpen={true} onClose={vi.fn()} onSubmit={vi.fn() as any} />
+      <CreateContactModal isOpen={true} onClose={vi.fn()} onSubmit={vi.fn() as unknown as never} />
     );
     expect(screen.getByText('crm.contact.first_name')).toBeInTheDocument();
   });

@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react';
 import { EditDataCollectionDrawer } from '../EditDataCollectionDrawer';
 
 vi.mock('../../../../../../../i18n/config', () => ({
-  t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k),
-  useTranslation: () => ({ t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k) }),
+  t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k) }),
 }));
 
 describe('EditDataCollectionDrawer', () => {
@@ -31,7 +31,7 @@ describe('EditDataCollectionDrawer', () => {
           replyType: 'Text',
           expirationMinutes: 30,
           retryCount: 3,
-        } as any}
+        } as unknown as never}
         onSave={vi.fn()}
         onRemove={vi.fn()}
       />

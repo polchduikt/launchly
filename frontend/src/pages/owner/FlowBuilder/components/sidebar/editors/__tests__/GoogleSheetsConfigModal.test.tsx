@@ -1,24 +1,25 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { GoogleSheetsConfigModal } from '../GoogleSheetsConfigModal';
+import type { GoogleSheetsConfigModalProps } from '../../../../../../../types/bot';
 
 vi.mock('../../../../../../../i18n/config', () => ({
-  t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k),
-  useTranslation: () => ({ t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k) }),
+  t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k) }),
 }));
 
 describe('GoogleSheetsConfigModal', () => {
-  const defaultProps: any = {
+  const defaultProps: GoogleSheetsConfigModalProps = {
     isOpen: false,
     onClose: vi.fn(),
     sheetsAction: { type: 'INSERT_ROW' },
     isGoogleSheetsConnected: true,
     isLoadingSpreadsheets: false,
     spreadsheets: [],
-    spreadsheetsError: undefined,
+    spreadsheetsError: '',
     isLoadingWorksheets: false,
     worksheets: [],
-    worksheetsError: undefined,
+    worksheetsError: '',
     isLoadingHeaders: false,
     headers: [],
     tags: [],

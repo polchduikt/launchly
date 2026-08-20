@@ -3,15 +3,15 @@ import { render, screen } from '@testing-library/react';
 import { ApiCallNodeEditor } from '../ApiCallNodeEditor';
 
 vi.mock('../../../../../../../i18n/config', () => ({
-  t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k),
-  useTranslation: () => ({ t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k) }),
+  t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k) }),
 }));
 
 describe('ApiCallNodeEditor', () => {
   it('renders ApiCallNodeEditor with tabs and URL field', () => {
     render(
       <ApiCallNodeEditor
-        data={{ method: 'POST', url: 'https://example.com/api', headers: [] as any, body: '{}' }}
+        data={{ method: 'POST', url: 'https://example.com/api', headers: [] as unknown as never, body: '{}' }}
         handleChange={vi.fn()}
       />
     );
