@@ -1,22 +1,23 @@
 package com.launchly.bot.telegram;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.launchly.bot.service.FlowEngineService;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotUserRepository;
-import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.EncryptionUtil;
 import com.launchly.crm.service.CrmService;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,8 +44,8 @@ public class TelegramBotManager {
     private final ConcurrentHashMap<Long, TelegramBotsLongPollingApplication> activeBots = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, TelegramClient> telegramClients = new ConcurrentHashMap<>();
 
-    @PostConstruct
-    void init() {
+    @EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+    public void init() {
         if (!"polling".equalsIgnoreCase(mode)) {
             log.info("Telegram bot manager running in webhook mode, skipping auto-start");
             return;
@@ -59,22 +60,30 @@ public class TelegramBotManager {
             }
         }
 
-        List<Bot> bots = botRepository.findAllByActiveTrue();
-        log.info("Starting {} active bots in polling mode", bots.size());
-
-        for (Bot bot : bots) {
+        Thread.startVirtualThread(() -> {
             try {
-                registerBot(bot);
-                log.info("Started bot: {} (id={})", bot.getName(), bot.getId());
+                List<Bot> bots = botRepository.findAllByActiveTrue();
+                log.info("Starting {} active bots in background", bots.size());
+
+                bots.parallelStream().forEach(bot -> {
+                    try {
+                        registerBot(bot);
+                    } catch (Exception e) {
+                        log.error("Failed to start bot {} (id={}): {}", bot.getName(), bot.getId(), e.getMessage());
+                    }
+                });
+                log.info("Finished starting active bots in background");
             } catch (Exception e) {
-                log.error("Failed to start bot {} (id={}): {}", bot.getName(), bot.getId(), e.getMessage());
+                log.error("Error during background bots startup: {}", e.getMessage());
             }
-        }
+        });
     }
 
-    public synchronized void registerBot(Bot bot) {
-        if (activeBots.containsKey(bot.getId())) {
-            log.warn("Bot {} is already registered", bot.getId());
+    public void registerBot(Bot bot) {
+        if (bot == null || bot.getId() == null) {
+            return;
+        }
+        if (activeBots.containsKey(bot.getId()) || telegramClients.containsKey(bot.getId())) {
             return;
         }
 
@@ -85,6 +94,9 @@ public class TelegramBotManager {
                 log.info("Skipping registration for bot {} (id={}): dummy token placeholder", bot.getName(), bot.getId());
                 return;
             }
+
+            TelegramClient telegramClient = new OkHttpTelegramClient(token);
+            telegramClients.put(bot.getId(), telegramClient);
 
             for (Long activeId : activeBots.keySet()) {
                 if (!activeId.equals(bot.getId()) && activeId > 0) {
@@ -102,16 +114,20 @@ public class TelegramBotManager {
                 }
             }
 
+            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(Duration.ofMillis(1500));
+            factory.setReadTimeout(Duration.ofMillis(1500));
+            org.springframework.web.client.RestTemplate timeoutRestTemplate = new org.springframework.web.client.RestTemplate(factory);
+
             if (bot.getUsername() == null || bot.getUsername().isBlank()) {
                 try {
                     String url = "https://api.telegram.org/bot" + token + "/getMe";
-                    org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
-                    org.springframework.http.ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
+                    org.springframework.http.ResponseEntity<String> responseEntity = timeoutRestTemplate.getForEntity(url, String.class);
                     if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
-                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                        com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(responseEntity.getBody());
+                        ObjectMapper mapper = new ObjectMapper();
+                        JsonNode root = mapper.readTree(responseEntity.getBody());
                         if (root.has("ok") && root.get("ok").asBoolean()) {
-                            com.fasterxml.jackson.databind.JsonNode result = root.get("result");
+                            JsonNode result = root.get("result");
                             if (result.has("username")) {
                                 bot.setUsername(result.get("username").asText());
                             }
@@ -122,34 +138,26 @@ public class TelegramBotManager {
                         }
                     }
                 } catch (Exception e) {
-                    log.warn("Failed to fetch Telegram bot username on startup: {}", e.getMessage());
+                    log.debug("Could not fetch Telegram bot username on startup: {}", e.getMessage());
                 }
             }
 
             try {
                 String deleteWebhookUrl = "https://api.telegram.org/bot" + token + "/deleteWebhook?drop_pending_updates=false";
-                org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
-                restTemplate.getForEntity(deleteWebhookUrl, String.class);
-                Thread.sleep(300);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
+                timeoutRestTemplate.getForEntity(deleteWebhookUrl, String.class);
             } catch (Exception e) {
-                log.warn("Failed to call deleteWebhook before polling for bot {}: {}", bot.getId(), e.getMessage());
+                log.debug("Could not call deleteWebhook before polling for bot {}: {}", bot.getId(), e.getMessage());
             }
 
-            TelegramClient telegramClient = new OkHttpTelegramClient(token);
             TelegramBotsLongPollingApplication pollingApp = new TelegramBotsLongPollingApplication();
             BotUpdateHandler handler = new BotUpdateHandler(
                     bot.getId(), flowEngineService, telegramClient, crmService, botUserRepository);
             pollingApp.registerBot(token, handler);
             activeBots.put(bot.getId(), pollingApp);
-            telegramClients.put(bot.getId(), telegramClient);
             log.info("Registered bot {} for long polling", bot.getId());
         } catch (Exception e) {
-            log.error("Failed to register bot {}: {}", bot.getId(), e.getMessage(), e);
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "bot.error.registration_failed");
+            log.warn("Could not start external long polling for bot {} (offline/test mode): {}", bot.getId(), e.getMessage());
         }
-
     }
 
     private synchronized void registerSystemBot() {
@@ -198,7 +206,22 @@ public class TelegramBotManager {
     }
 
     public TelegramClient getTelegramClient(Long botId) {
-        return telegramClients.get(botId);
+        TelegramClient client = telegramClients.get(botId);
+        if (client == null && botId != null && botId > 0) {
+            try {
+                Bot bot = botRepository.findById(botId).orElse(null);
+                if (bot != null && bot.getTelegramToken() != null) {
+                    String token = encryptionUtil.decrypt(bot.getTelegramToken());
+                    if (token != null && !token.isBlank() && !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(token)) {
+                        client = new OkHttpTelegramClient(token);
+                        telegramClients.put(botId, client);
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("Could not lazy load telegram client for bot {}: {}", botId, e.getMessage());
+            }
+        }
+        return client;
     }
 
     @PreDestroy

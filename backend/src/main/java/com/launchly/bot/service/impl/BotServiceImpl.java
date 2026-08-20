@@ -47,12 +47,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Optional;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
@@ -661,7 +659,10 @@ public class BotServiceImpl implements BotService {
     private void updateBotTelegramInfo(Bot bot, String unencryptedToken) {
         try {
             String url = "https://api.telegram.org/bot" + unencryptedToken + "/getMe";
-            RestTemplate restTemplate = new RestTemplate();
+            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(Duration.ofMillis(1500));
+            factory.setReadTimeout(Duration.ofMillis(1500));
+            RestTemplate restTemplate = new RestTemplate(factory);
             org.springframework.http.ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
             if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
                 JsonNode responseNode = objectMapper.readTree(responseEntity.getBody());
@@ -676,7 +677,7 @@ public class BotServiceImpl implements BotService {
                 }
             }
         } catch (Exception e) {
-            log.warn("Failed to fetch Telegram bot info: {}", e.getMessage());
+            log.debug("Could not fetch Telegram bot info: {}", e.getMessage());
         }
     }
 

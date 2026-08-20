@@ -31,6 +31,9 @@ public class TelegramWebhookController {
     private final FlowEngineService flowEngineService;
     private final TelegramBotManager telegramBotManager;
 
+    private static final com.fasterxml.jackson.databind.ObjectMapper TELEGRAM_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper()
+            .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
     @Operation(summary = "Telegram bot webhook listener", description = "Endpoint configured as the Telegram Webhook callback URL to receive real-time Update payloads (messages, button clicks, callbacks).")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Update processed successfully"),
@@ -39,13 +42,19 @@ public class TelegramWebhookController {
     @PostMapping("/{botId}")
     public ResponseEntity<Void> handleUpdate(
             @Parameter(description = "Target bot ID") @PathVariable Long botId,
-            @RequestBody Update update) {
+            @RequestBody String rawUpdate) {
         TelegramClient client = telegramBotManager.getTelegramClient(botId);
         if (client == null) {
             throw new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found");
         }
 
-        flowEngineService.processUpdate(botId, update, client);
+        try {
+            Update update = TELEGRAM_MAPPER.readValue(rawUpdate, Update.class);
+            flowEngineService.processUpdate(botId, update, client);
+        } catch (Exception e) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "bot.error.invalid_update");
+        }
+
         return ResponseEntity.ok().build();
     }
 }
