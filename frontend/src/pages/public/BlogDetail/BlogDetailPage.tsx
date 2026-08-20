@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { BLOG_ARTICLES } from '../../../const/blogData';
 import { useBlogArticleDetailQuery } from '../../../hooks/dashboard/useBlogQueries';
 import { ArrowLeft, Share2, Calendar, User, Clock, Loader2, Check } from 'lucide-react';
-import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../routes/paths';
 import { useTranslation } from '../../../i18n/config';
 import { useSEO } from '../../../hooks/useSEO';
@@ -13,7 +12,6 @@ import { PublicHeader } from '../../../components/layout/PublicHeader';
 export const BlogDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isAuthenticated = useAuthStore((state) => !!state.accessToken);
   const { t } = useTranslation();
   const [isCopied, setIsCopied] = useState<boolean>(false);
 

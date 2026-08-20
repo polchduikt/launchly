@@ -8,6 +8,28 @@ describe('useAuthStore', () => {
     useAuthStore.getState().logout();
   });
 
+  const mockUser: User = {
+    id: 1,
+    email: 'alex@launchly.com',
+    name: 'Alex Dev',
+    avatar: null,
+    role: 'ROLE_OWNER',
+    telegramUserId: null,
+    telegramUsername: null,
+    telegramName: null,
+    telegramPhotoUrl: null,
+    notifyEmail: true,
+    notifyTelegram: false,
+    notificationEmail: null,
+    statsNotificationsEnabled: false,
+    statsDayOfWeek: 'MONDAY',
+    statsHour: 9,
+    statsDaysRange: 7,
+    statsNotifyEmail: false,
+    statsNotifyTelegram: false,
+    timezone: 'UTC',
+  };
+
   it('initializes with null credentials when localStorage is empty', () => {
     const state = useAuthStore.getState();
     expect(state.user).toBeNull();
@@ -16,14 +38,6 @@ describe('useAuthStore', () => {
   });
 
   it('updates state and localStorage on login', () => {
-    const mockUser: User = {
-      id: 1,
-      email: 'alex@launchly.com',
-      firstName: 'Alex',
-      lastName: 'Dev',
-      role: 'ROLE_OWNER',
-    };
-
     useAuthStore.getState().login('access_jwt_123', 'refresh_jwt_456', mockUser);
 
     const state = useAuthStore.getState();
@@ -37,14 +51,6 @@ describe('useAuthStore', () => {
   });
 
   it('clears state and localStorage on logout', () => {
-    const mockUser: User = {
-      id: 1,
-      email: 'alex@launchly.com',
-      firstName: 'Alex',
-      lastName: 'Dev',
-      role: 'ROLE_OWNER',
-    };
-
     useAuthStore.getState().login('access_123', 'refresh_456', mockUser);
     useAuthStore.getState().logout();
 

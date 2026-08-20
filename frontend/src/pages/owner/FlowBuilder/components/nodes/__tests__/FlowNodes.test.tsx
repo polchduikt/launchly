@@ -6,6 +6,18 @@ import { EndNode } from '../EndNode';
 import { CommentNode } from '../CommentNode';
 import { AiNode } from '../AiNode';
 
+const defaultNodeProps = {
+  selected: false,
+  zIndex: 1,
+  isConnectable: true,
+  positionAbsoluteX: 0,
+  positionAbsoluteY: 0,
+  dragging: false,
+  draggable: true,
+  selectable: true,
+  deletable: true,
+};
+
 describe('FlowBuilder Node Components', () => {
   it('renders StartNode with initial trigger card', () => {
     render(
@@ -14,12 +26,7 @@ describe('FlowBuilder Node Components', () => {
           id="start-1"
           type="start"
           data={{}}
-          selected={false}
-          zIndex={1}
-          isConnectable={true}
-          positionAbsoluteX={0}
-          positionAbsoluteY={0}
-          dragging={false}
+          {...defaultNodeProps}
         />
       </ReactFlowProvider>
     );
@@ -34,12 +41,7 @@ describe('FlowBuilder Node Components', () => {
           id="end-1"
           type="end"
           data={{}}
-          selected={false}
-          zIndex={1}
-          isConnectable={true}
-          positionAbsoluteX={0}
-          positionAbsoluteY={0}
-          dragging={false}
+          {...defaultNodeProps}
         />
       </ReactFlowProvider>
     );
@@ -54,12 +56,7 @@ describe('FlowBuilder Node Components', () => {
           id="comment-1"
           type="comment"
           data={{ text: 'Remember to connect Stripe checkout here' }}
-          selected={false}
-          zIndex={1}
-          isConnectable={true}
-          positionAbsoluteX={0}
-          positionAbsoluteY={0}
-          dragging={false}
+          {...defaultNodeProps}
         />
       </ReactFlowProvider>
     );
@@ -74,12 +71,7 @@ describe('FlowBuilder Node Components', () => {
           id="ai-1"
           type="ai"
           data={{ generated: true, prompt: 'Recommend top 3 bestselling products' }}
-          selected={false}
-          zIndex={1}
-          isConnectable={true}
-          positionAbsoluteX={0}
-          positionAbsoluteY={0}
-          dragging={false}
+          {...defaultNodeProps}
         />
       </ReactFlowProvider>
     );
