@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, HelpCircle, Send, RotateCcw, Pencil, Plus, Trash2, ChevronDown, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { SiClaude, SiGooglegemini } from '@icons-pack/react-simple-icons';
 import { t } from '../../../../../../i18n/config';
 import { useIntegrationsQuery } from '../../../../../../hooks/integration/useIntegrationQueries';
 import type { IntegrationResponse } from '../../../../../../types';
@@ -52,7 +51,11 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
         list.push({
           id: 'claude',
           name: 'Claude',
-          icon: <SiClaude className="w-3.5 h-3.5 text-[#D97757]" />,
+          icon: (
+            <svg className="w-3.5 h-3.5 text-[#D97757] fill-current" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9" />
+            </svg>
+          ),
         });
       } else if (i.type === 'DEEPSEEK') {
         list.push({
@@ -68,7 +71,11 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
         list.push({
           id: 'gemini',
           name: 'Gemini',
-          icon: <SiGooglegemini className="w-3.5 h-3.5 text-[#4285F4]" />,
+          icon: (
+            <svg className="w-3.5 h-3.5 text-[#4285F4] fill-current" viewBox="0 0 24 24">
+              <polygon points="12,2 15,9 22,12 15,15 12,22 9,15 2,12 9,9" />
+            </svg>
+          ),
         });
       }
     });

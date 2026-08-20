@@ -20,3 +20,10 @@ globalThis.ResizeObserver = class ResizeObserver {
   unobserve() {}
   disconnect() {}
 };
+
+window.HTMLElement.prototype.scrollIntoView = vi.fn();
+
+vi.mock('@icons-pack/react-simple-icons', () => ({
+  SiClaude: () => null,
+  SiGooglegemini: () => null,
+}));

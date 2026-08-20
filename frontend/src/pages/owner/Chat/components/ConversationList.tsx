@@ -48,9 +48,17 @@ export const ConversationList: React.FC<ConversationListProps> = ({
           const isFav = favorites.includes(c.id);
           const isUnrd = c.unread || unreadConvIds.includes(c.id);
           return (
-            <button
+            <div
               key={c.id}
+              role="button"
+              tabIndex={0}
               onClick={() => onSelect(c.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelect(c.id);
+                }
+              }}
               className={`w-full text-left px-4 py-3 flex items-start gap-2.5 transition-all cursor-pointer border-b-2 border-[#0A0A0A] group ${isSel ? 'bg-white font-black' : 'bg-[#F2EBDD] hover:bg-white'}`}
             >
               <div className="relative shrink-0">
@@ -72,12 +80,13 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                 </div>
               </div>
               <button
+                type="button"
                 onClick={(e) => { e.stopPropagation(); onToggleFavorite(c.id); }}
                 className={`shrink-0 mt-0.5 transition-all cursor-pointer ${isFav ? 'text-rose-600' : 'text-transparent group-hover:text-[#0A0A0A]'}`}
               >
                 <Heart size={13} className={isFav ? 'fill-rose-600' : ''} />
               </button>
-            </button>
+            </div>
           );
         })
       )}
