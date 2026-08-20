@@ -3,7 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { AppRouter } from '../index';
 import { ROUTES } from '../paths';
 import { useAuthStore } from '../../store/useAuthStore';
-import React from 'react';
 
 vi.mock('../../store/useAuthStore', () => {
   let state = {

@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import { DashboardLayout } from '../DashboardLayout';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 
 vi.mock('../../../store/useAuthStore', () => ({
   useAuthStore: (selector: any) =>

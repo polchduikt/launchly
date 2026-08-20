@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { AdminLayout } from '../AdminLayout';
 import { MemoryRouter } from 'react-router-dom';
-import React from 'react';
 
 vi.mock('../../../store/useAuthStore', () => ({
   useAuthStore: () => ({
