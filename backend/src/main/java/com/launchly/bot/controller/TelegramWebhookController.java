@@ -1,8 +1,6 @@
 package com.launchly.bot.controller;
 
-import com.launchly.bot.service.FlowEngineService;
-import com.launchly.bot.telegram.TelegramBotManager;
-import com.launchly.common.exception.AppException;
+import com.launchly.bot.service.TelegramWebhookService;
 import com.launchly.common.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,15 +10,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 @Tag(name = "Bot: Webhooks", description = "Telegram Bot API incoming message update webhook gateway")
 @RestController
@@ -28,11 +23,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 @RequiredArgsConstructor
 public class TelegramWebhookController {
 
-    private final FlowEngineService flowEngineService;
-    private final TelegramBotManager telegramBotManager;
-
-    private static final com.fasterxml.jackson.databind.ObjectMapper TELEGRAM_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper()
-            .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private final TelegramWebhookService telegramWebhookService;
 
     @Operation(summary = "Telegram bot webhook listener", description = "Endpoint configured as the Telegram Webhook callback URL to receive real-time Update payloads (messages, button clicks, callbacks).")
     @ApiResponses({
@@ -43,18 +34,7 @@ public class TelegramWebhookController {
     public ResponseEntity<Void> handleUpdate(
             @Parameter(description = "Target bot ID") @PathVariable Long botId,
             @RequestBody String rawUpdate) {
-        TelegramClient client = telegramBotManager.getTelegramClient(botId);
-        if (client == null) {
-            throw new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found");
-        }
-
-        try {
-            Update update = TELEGRAM_MAPPER.readValue(rawUpdate, Update.class);
-            flowEngineService.processUpdate(botId, update, client);
-        } catch (Exception e) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "bot.error.invalid_update");
-        }
-
+        telegramWebhookService.processWebhookUpdate(botId, rawUpdate);
         return ResponseEntity.ok().build();
     }
 }
