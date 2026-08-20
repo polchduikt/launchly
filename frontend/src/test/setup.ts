@@ -21,6 +21,15 @@ globalThis.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
+globalThis.IntersectionObserver = class IntersectionObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [];
+  }
+} as any;
+
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
 const DummyIcon = () => null;
