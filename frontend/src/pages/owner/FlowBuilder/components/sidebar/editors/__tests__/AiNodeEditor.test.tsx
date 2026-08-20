@@ -1,0 +1,36 @@
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { AiNodeEditor } from '../AiNodeEditor';
+import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+vi.mock('../../../../../../../i18n/config', () => ({
+  t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: any) => (typeof fb === 'string' ? fb : k) }),
+}));
+
+vi.mock('../../../../../../../hooks/integration/useIntegrationQueries', () => ({
+  useIntegrationsQuery: () => ({ data: [] }),
+}));
+
+const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+const Wrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={qc}>
+    <MemoryRouter>{children}</MemoryRouter>
+  </QueryClientProvider>
+);
+
+describe('AiNodeEditor', () => {
+  it('renders AI node editor', () => {
+    render(
+      <AiNodeEditor
+        data={{ prompt: 'Assist users', context: 'Support agent' }}
+        handleChange={vi.fn()}
+      />,
+      { wrapper: Wrapper }
+    );
+
+    expect(screen.getByText('editor.ai.goal_label')).toBeInTheDocument();
+    expect(screen.getByText('editor.ai.context_label')).toBeInTheDocument();
+  });
+});
