@@ -36,7 +36,7 @@ export const SubscriptionsPanel: React.FC = () => {
     );
   }
 
-  if (error || !subscription) {
+  if (error || !subscription || !subscription.plan) {
     return (
       <div className="bg-rose-50 border border-rose-200 text-rose-800 p-6 rounded-3xl flex items-start gap-3 max-w-md mx-auto shadow-sm">
         <AlertCircle size={20} className="text-rose-600 shrink-0 mt-0.5" />

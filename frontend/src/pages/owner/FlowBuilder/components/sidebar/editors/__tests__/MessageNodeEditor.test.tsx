@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MessageNodeEditor } from '../MessageNodeEditor';
 import { ReactFlowProvider } from '@xyflow/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
 vi.mock('../../../../../../../i18n/config', () => ({
@@ -14,7 +15,7 @@ vi.mock('../../../../../../../store/useBotStore', () => ({
     selector ? selector({ activeBotId: 1 }) : { activeBotId: 1 },
 }));
 
-vi.mock('../../../../../../../hooks/crm/useCrmQueries', () => ({
+vi.mock('../../../../../../../hooks/broadcast/useBroadcastQueries', () => ({
   useTagsQuery: () => ({ data: [] }),
 }));
 
@@ -37,8 +38,12 @@ vi.mock('../../../../../../../hooks/bot/useNodeEditor', () => ({
   }),
 }));
 
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
-  <ReactFlowProvider>{children}</ReactFlowProvider>
+  <QueryClientProvider client={queryClient}>
+    <ReactFlowProvider>{children}</ReactFlowProvider>
+  </QueryClientProvider>
 );
 
 describe('MessageNodeEditor', () => {

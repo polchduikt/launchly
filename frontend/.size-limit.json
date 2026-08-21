@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Main JavaScript Entry Bundle",
+    "path": "dist/assets/index-*.js",
+    "limit": "360 kB",
+    "gzip": true
+  },
+  {
+    "name": "Main Global CSS Stylesheet",
+    "path": "dist/assets/index-*.css",
+    "limit": "35 kB",
+    "gzip": true
+  },
+  {
+    "name": "FlowBuilder Canvas Component Chunk",
+    "path": "dist/assets/FlowBuilderPage-*.js",
+    "limit": "20 kB",
+    "gzip": true
+  },
+  {
+    "name": "AI Assistant Drawer Chunk",
+    "path": "dist/assets/AiAssistantDrawer-*.js",
+    "limit": "75 kB",
+    "gzip": true
+  }
+]
