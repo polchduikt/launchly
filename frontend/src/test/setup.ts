@@ -31,6 +31,7 @@ globalThis.IntersectionObserver = class IntersectionObserver {
 } as any;
 
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
+window.scrollTo = vi.fn();
 
 const DummyIcon = () => null;
 
@@ -40,4 +41,12 @@ vi.mock('@icons-pack/react-simple-icons', () => ({
   SiGooglesheets: DummyIcon,
   SiHubspot: DummyIcon,
   SiMailchimp: DummyIcon,
+}));
+
+vi.mock('@emoji-mart/react', () => ({
+  default: () => null,
+}));
+
+vi.mock('@emoji-mart/data', () => ({
+  default: {},
 }));
