@@ -11,11 +11,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -23,39 +25,34 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import tools.jackson.databind.ObjectMapper;
+
 import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
+@ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
 public abstract class BaseIntegrationTest {
 
-    protected static PostgreSQLContainer<?> postgres;
+    @ServiceConnection
+    public static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
     static {
-        System.setProperty("DOCKER_HOST", "tcp://localhost:2375");
-        System.setProperty("docker.host", "tcp://localhost:2375");
-        try {
-            if (DockerClientFactory.instance().isDockerAvailable()) {
-                postgres = new PostgreSQLContainer<>("postgres:16-alpine");
-                postgres.start();
-            }
-        } catch (Throwable t) {
-            System.err.println("Testcontainers fallback: " + t.getMessage());
-        }
+        postgres.start();
     }
 
     @DynamicPropertySource
-    static void configureDynamicProperties(DynamicPropertyRegistry registry) {
-        if (postgres != null && postgres.isRunning()) {
-            registry.add("spring.datasource.url", postgres::getJdbcUrl);
-            registry.add("spring.datasource.username", postgres::getUsername);
-            registry.add("spring.datasource.password", postgres::getPassword);
-        }
+    public static void configureDynamicProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.datasource.driver-class-name", postgres::getDriverClassName);
+        registry.add("spring.docker.compose.enabled", () -> "false");
+        registry.add("spring.docker.compose.mode", () -> "off");
     }
 
     protected MockMvc mockMvc;

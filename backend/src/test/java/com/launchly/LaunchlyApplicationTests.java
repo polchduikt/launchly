@@ -1,10 +1,8 @@
 package com.launchly;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class LaunchlyApplicationTests {
+class LaunchlyApplicationTests extends BaseIntegrationTest {
 
     @Test
     void contextLoads() {

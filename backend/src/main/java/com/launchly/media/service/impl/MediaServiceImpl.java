@@ -22,10 +22,10 @@ public class MediaServiceImpl implements MediaService {
 
     private final Cloudinary cloudinary;
 
-    @Value("${app.media.max-file-size:5242880}")
+    @Value("${app.media.max-file-size:20971520}")
     private long maxFileSize;
 
-    @Value("${app.media.allowed-types}")
+    @Value("${app.media.allowed-types:image/jpeg,image/png,image/webp,image/gif,audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/m4a,audio/x-m4a,audio/mp4,audio/amr,video/mp4,video/mpeg,video/quicktime,video/webm,video/x-matroska,video/x-msvideo,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,application/x-zip-compressed,application/x-rar-compressed,text/plain,application/octet-stream}")
     private List<String> allowedTypes;
 
     @Override

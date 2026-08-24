@@ -36,23 +36,28 @@ public class AiServiceImpl implements AiService {
     private final PlanLimitService planLimitService;
     private final ObjectMapper objectMapper;
 
-    @Value("classpath:prompts/chat-system.txt")
+    @Value("${ai.prompt.chat-path:classpath:prompts/chat-system.txt}")
     private Resource chatPromptResource;
 
-    @Value("classpath:prompts/schema-system.txt")
+    @Value("${ai.prompt.schema-path:classpath:prompts/schema-system.txt}")
     private Resource schemaPromptResource;
-    private String chatSystemPrompt;
-    private String schemaSystemPrompt;
+
+    private String chatSystemPrompt = "You are Launchly AI Assistant — a helpful assistant for business owners.";
+    private String schemaSystemPrompt = "You are a Launchly bot flow generator.";
 
     @PostConstruct
     void init() {
         try {
-            chatSystemPrompt = chatPromptResource.getContentAsString(StandardCharsets.UTF_8);
-            schemaSystemPrompt = schemaPromptResource.getContentAsString(StandardCharsets.UTF_8);
+            if (chatPromptResource != null && chatPromptResource.exists()) {
+                chatSystemPrompt = chatPromptResource.getContentAsString(StandardCharsets.UTF_8);
+            }
+            if (schemaPromptResource != null && schemaPromptResource.exists()) {
+                schemaSystemPrompt = schemaPromptResource.getContentAsString(StandardCharsets.UTF_8);
+            }
             log.info("Loaded AI prompt templates (chat: {} chars, schema: {} chars)",
                     chatSystemPrompt.length(), schemaSystemPrompt.length());
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to load AI prompt templates", e);
+        } catch (Exception e) {
+            log.warn("Could not load external AI prompt templates, using default fallbacks: {}", e.getMessage());
         }
     }
 
