@@ -24,19 +24,6 @@ It serves as a full-scale technical showcase of building resilient, high-concurr
 
 ---
 
-## Video & UI Walkthrough
-
-The complete Launchly platform experience includes:
-- **Visual Drag-and-Drop Bot Builder**: Interactive node canvas with instant branch testing and schema export.
-- **Omnichannel CRM Live Inbox**: Real-time two-way Telegram live chat with human agent takeover, color-coded tags, and conversation notes.
-- **AI Flow Generator & Copilot**: Prompt-to-bot generation with multi-model fallback (Groq, Gemini, OpenRouter, Cerebras).
-- **Leads & Order Pipeline**: Automated customer capture, status pipelines, and currency fulfillment tracking.
-- **Scheduled Broadcast Campaigns**: Filtered cohort messaging with delivery metrics.
-- **Stripe Subscription Billing**: Tiered monetization, usage limits enforcement, and customer portal.
-- **Templates Marketplace**: One-click bot cloning and community workflow sharing.
-
----
-
 ## Tech Stack
 
 ### Backend — `backend/`
