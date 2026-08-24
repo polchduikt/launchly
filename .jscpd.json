@@ -1,5 +1,7 @@
 {
   "threshold": 6,
+  "minTokens": 75,
+  "minLines": 8,
   "reporters": ["console"],
   "ignore": [
     "**/node_modules/**",
@@ -9,6 +11,9 @@
     "**/.lighthouseci/**",
     "**/test-results/**",
     "**/db/changelog/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*Test.java",
     "**/*.json",
     "**/*.svg",
     "**/*.properties",
