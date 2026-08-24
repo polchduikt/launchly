@@ -1,6 +1,7 @@
 # Launchly — Telegram Bot Builder, Multi-Channel CRM
 
 [![Checks & Validation](https://github.com/polchduikt/launchly/actions/workflows/checks.yml/badge.svg)](https://github.com/polchduikt/launchly/actions/workflows/checks.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
