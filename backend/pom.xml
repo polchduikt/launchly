@@ -31,6 +31,12 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <jjwt.version>0.12.6</jjwt.version>
         <testcontainers.version>1.20.4</testcontainers.version>
+        <sonar.projectKey>polchduikt_launchly</sonar.projectKey>
+        <sonar.organization>polchduikt</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.exclusions>**/dto/**,**/entity/**,**/config/**,**/exception/**,**/db/changelog/**</sonar.exclusions>
+        <sonar.cpd.exclusions>**/dto/**,**/entity/**</sonar.cpd.exclusions>
     </properties>
     <dependencies>
         <dependency>
