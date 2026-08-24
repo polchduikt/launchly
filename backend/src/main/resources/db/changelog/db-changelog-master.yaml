@@ -101,5 +101,14 @@ databaseChangeLog:
       file: db/changelog/changes/V050__add_language_to_blog_articles.sql
   - include:
       file: db/changelog/changes/V051__add_runs_count_to_bots.sql
+  - include:
+      file: db/changelog/changes/V052__add_automation_folders_to_users.sql
+  - include:
+      file: db/changelog/changes/V053__add_missing_entity_columns.sql
+  - include:
+      file: db/changelog/changes/V054__create_crm_labels_and_add_tokens_used.sql
+
+
+
 
 
