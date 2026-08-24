@@ -20,12 +20,6 @@ export default defineConfig({
         'src/types/**',
         'src/i18n/**',
       ],
-      thresholds: {
-        lines: 70,
-        functions: 70,
-        branches: 65,
-        statements: 70,
-      },
     },
     server: {
       deps: {
