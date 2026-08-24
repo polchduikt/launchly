@@ -5,8 +5,13 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=bugs)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
 [![Tests: 700+ Passing](https://img.shields.io/badge/Tests-700%2B%20passing-brightgreen.svg)](docs/CONTRIBUTING.md)
+[![Gitleaks: Clean](https://img.shields.io/badge/Gitleaks-clean-brightgreen.svg?logo=git)](https://github.com/gitleaks/gitleaks)
+[![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0_Spec-6BA539.svg?logo=openapiinitiative&logoColor=white)](docs/API_DOCUMENTATION.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 [![Java 21](https://img.shields.io/badge/Java-21-orange.svg?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
