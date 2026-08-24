@@ -25,6 +25,8 @@ public class EncryptionUtil {
     private static final int AES_192_KEY_SIZE = 24;
     private static final int AES_256_KEY_SIZE = 32;
 
+    private final SecureRandom secureRandom = new SecureRandom();
+
     @Value("${app.encryption.key}")
     private String encodedKey;
 
@@ -49,7 +51,7 @@ public class EncryptionUtil {
         }
         try {
             byte[] iv = new byte[GCM_IV_LENGTH];
-            new SecureRandom().nextBytes(iv);
+            secureRandom.nextBytes(iv);
 
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(GCM_TAG_LENGTH, iv));

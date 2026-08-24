@@ -92,6 +92,10 @@ public abstract class OpenAiCompatibleAiClient implements AiProviderClient {
             throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.invalid_response");
         } catch (AppException e) {
             throw e;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Interrupted while calling {} API: {}", name(), e.getMessage());
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "ai.error.failed_connect");
         } catch (Exception e) {
             log.error("Exception occurred while calling {} API: {}", name(), e.getMessage(), e);
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "ai.error.failed_connect");

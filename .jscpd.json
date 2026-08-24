@@ -1,0 +1,33 @@
+{
+  "threshold": 6,
+  "minTokens": 75,
+  "minLines": 8,
+  "reporters": ["console"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/target/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/.lighthouseci/**",
+    "**/test-results/**",
+    "**/db/changelog/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*Test.java",
+    "**/*.json",
+    "**/*.svg",
+    "**/*.properties",
+    "**/*.sql",
+    "**/*.md",
+    "**/*.txt"
+  ],
+  "format": [
+    "java",
+    "typescript",
+    "javascript"
+  ],
+  "path": [
+    "backend/src/main/java",
+    "frontend/src"
+  ]
+}

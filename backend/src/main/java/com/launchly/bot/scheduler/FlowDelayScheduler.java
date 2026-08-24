@@ -46,17 +46,16 @@ public class FlowDelayScheduler {
     }
 
     private void processUserDelay(BotUser user) throws Exception {
-        if (isAutomationPaused(user)) {
+        if (user == null || user.getBot() == null || user.getCurrentNodeId() == null || isAutomationPaused(user)) {
             return;
         }
         Long botId = user.getBot().getId();
         String currentNodeId = user.getCurrentNodeId();
-        Optional<FlowSchema> schemaOpt = flowSchemaRepository.findByBotId(botId);
-        if (schemaOpt.isEmpty()) {
+        FlowSchema schema = flowSchemaRepository.findByBotId(botId).orElse(null);
+        if (schema == null) {
             return;
         }
 
-        FlowSchema schema = schemaOpt.get();
         List<FlowNode> nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
         List<FlowEdge> edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
 

@@ -6,6 +6,7 @@ import com.launchly.billing.entity.SubscriptionStatus;
 import com.launchly.common.metric.PerformanceMonitoringFilter;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public final class AdminStatsCalculator {
                     ? sub.getUpdatedAt()
                     : LocalDateTime.now();
 
-            long months = Duration.between(subStart, subEnd).toDays() / 30;
+            long months = Duration.between(subStart.atZone(ZoneOffset.UTC), subEnd.atZone(ZoneOffset.UTC)).toDays() / 30;
             if (months < 1) months = 1;
             totalRevenue += sub.getPlan().getPrice().doubleValue() * months;
         }

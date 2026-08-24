@@ -141,9 +141,10 @@ public class TemplateServiceImpl implements TemplateService {
         }
 
         List<Map<String, Object>> broadcastsList = new ArrayList<>();
-        if (!broadcastIds.isEmpty()) {
+        if (broadcastIds != null && !broadcastIds.isEmpty()) {
             List<BroadcastCampaign> camps = broadcastCampaignRepository.findAllById(broadcastIds);
             for (BroadcastCampaign c : camps) {
+                if (c == null) continue;
                 Map<String, Object> campMap = new HashMap<>();
                 campMap.put("name", c.getName());
                 campMap.put("message", c.getMessage());
@@ -157,10 +158,10 @@ public class TemplateServiceImpl implements TemplateService {
         String broadcastsDataJson = JsonUtils.toJson(broadcastsList);
 
         List<String> tagNames = new ArrayList<>();
-        if (!tagIds.isEmpty()) {
+        if (tagIds != null && !tagIds.isEmpty()) {
             List<Tag> tags = tagRepository.findAllById(tagIds);
             for (Tag t : tags) {
-                if (t.getName() != null && !t.getName().isBlank()) {
+                if (t != null && t.getName() != null && !t.getName().isBlank()) {
                     tagNames.add(t.getName());
                 }
             }
@@ -192,9 +193,9 @@ public class TemplateServiceImpl implements TemplateService {
                 .selectedBroadcastIdsJson(broadcastIdsJson)
                 .selectedTagIdsJson(tagIdsJson)
                 .selectedFieldIdsJson(fieldIdsJson)
-                .flowCount(flowIds.isEmpty() ? 1 : flowIds.size())
-                .broadcastCount(broadcastsList.size())
-                .tagCount(tagNames.size())
+                .flowCount(flowIds != null && !flowIds.isEmpty() ? flowIds.size() : 1)
+                .broadcastCount(broadcastsList != null ? broadcastsList.size() : 0)
+                .tagCount(tagNames != null ? tagNames.size() : 0)
                 .fieldCount(resolvedFieldCount)
                 .build();
 

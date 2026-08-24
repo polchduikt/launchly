@@ -1,6 +1,12 @@
 # Launchly — Telegram Bot Builder, Multi-Channel CRM
 
 [![Checks & Validation](https://github.com/polchduikt/launchly/actions/workflows/checks.yml/badge.svg)](https://github.com/polchduikt/launchly/actions/workflows/checks.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=polchduikt_launchly&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=polchduikt_launchly)
+[![Tests: 700+ Passing](https://img.shields.io/badge/Tests-700%2B%20passing-brightgreen.svg)](docs/CONTRIBUTING.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Java 21](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot 4.0.6](https://img.shields.io/badge/Spring%20Boot-4.0.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
@@ -94,6 +100,11 @@ Detailed backend architecture & ADRs: [docs/backend/ARCHITECTURE.md](docs/backen
 - **Silent JWT Refresh Interceptor**: Axios queue mechanism ensuring transparent token rotation on HTTP 401 without user disruption.
 
 Detailed frontend architecture & ADRs: [docs/frontend/ARCHITECTURE.md](docs/frontend/ARCHITECTURE.md) | [docs/frontend/decisions/README.md](docs/frontend/decisions/README.md)
+
+### Code Quality & Tooling
+- **Code Duplication Protection**: Enforces a strict maximum of **<= 6% code duplication** via `jscpd` across all Java backend and TypeScript/TSX frontend files, validated in CI.
+- **SonarCloud & JaCoCo**: Continuous inspection of code quality, security vulnerabilities, reliability rating, and test coverage on every push.
+- **Gitleaks Secret Scanning**: Automated secret scanning on every pull request and push to prevent credential leakage.
 
 ---
 
@@ -222,4 +233,4 @@ Launchly is actively maintained, thoroughly tested, and continuously updated wit
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

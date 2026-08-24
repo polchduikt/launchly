@@ -10,9 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
@@ -20,7 +20,7 @@ import java.util.Random;
 public class RandomizerNodeExecutor implements NodeExecutor {
 
     private final BotDialogStateService stateService;
-    private final Random random = new Random();
+    private final SecureRandom random = new SecureRandom();
 
     @Override
     public NodeType getType() {

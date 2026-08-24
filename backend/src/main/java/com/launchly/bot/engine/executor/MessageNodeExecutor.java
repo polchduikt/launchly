@@ -40,6 +40,9 @@ import com.launchly.bot.engine.model.DataCollectionState;
 @RequiredArgsConstructor
 public class MessageNodeExecutor implements NodeExecutor {
 
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{\\{([^}]+)\\}\\}");
+    private static final Pattern MARKDOWN_LINK_PATTERN = Pattern.compile("\\[([^\\]]+)\\]\\(([^\\s)]+)\\)");
+
     private final BotDialogStateService stateService;
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
@@ -53,6 +56,9 @@ public class MessageNodeExecutor implements NodeExecutor {
     @SuppressWarnings("unchecked")
     public String execute(FlowNode node, List<FlowEdge> edges, BotUser botUser,
                           Update update, TelegramClient client) {
+        if (botUser == null || botUser.getTelegramId() == null) {
+            return null;
+        }
         Map<String, Object> data = node.data();
         List<Map<String, Object>> blocks = null;
         if (data != null && data.get("blocks") instanceof List) {
@@ -128,7 +134,8 @@ public class MessageNodeExecutor implements NodeExecutor {
         }
 
         if (blocks != null && !blocks.isEmpty()) {
-            Map<String, String> sessionData = stateService.getSessionData(botUser.getBot().getId(), botUser.getTelegramId());
+            Long botId = botUser.getBot() != null ? botUser.getBot().getId() : null;
+            Map<String, String> sessionData = botId != null ? stateService.getSessionData(botId, botUser.getTelegramId()) : Map.of();
             int blockIdx = 0;
             for (Map<String, Object> block : blocks) {
                 String type = (String) block.get("type");
@@ -524,8 +531,7 @@ public class MessageNodeExecutor implements NodeExecutor {
         if (text == null) return "";
         String result = text;
 
-        Pattern pattern = Pattern.compile("\\{\\{\\s*(.*?)\\s*\\}\\}");
-        Matcher matcher = pattern.matcher(result);
+        Matcher matcher = PLACEHOLDER_PATTERN.matcher(result);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             String rawName = matcher.group(1).trim();
@@ -602,8 +608,7 @@ public class MessageNodeExecutor implements NodeExecutor {
 
     private String convertMarkdownLinksToHtml(String text) {
         if (text == null) return "";
-        Pattern pattern = Pattern.compile("\\[([^\\]]+)\\]\\(([^\\s)]+)\\)");
-        Matcher matcher = pattern.matcher(text);
+        Matcher matcher = MARKDOWN_LINK_PATTERN.matcher(text);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             String linkText = matcher.group(1);

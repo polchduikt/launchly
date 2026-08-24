@@ -107,6 +107,9 @@ public class MailchimpServiceImpl implements MailchimpService {
             } else {
                 log.warn("Failed to sync subscriber {} to Mailchimp. Status: {}, Response: {}", trimmedEmail, response.statusCode(), response.body());
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Mailchimp request interrupted for email {}: {}", trimmedEmail, e.getMessage());
         } catch (Exception e) {
             log.error("Error executing Mailchimp API request for email {}: {}", trimmedEmail, e.getMessage(), e);
         }
@@ -125,6 +128,7 @@ public class MailchimpServiceImpl implements MailchimpService {
         return "us1";
     }
 
+    @SuppressWarnings("java:S4790") // Mailchimp API protocol explicitly mandates MD5 email hashing
     private String calculateMd5(String input) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");

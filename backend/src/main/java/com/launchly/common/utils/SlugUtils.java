@@ -1,6 +1,11 @@
 package com.launchly.common.utils;
 
+import java.util.regex.Pattern;
+
 public final class SlugUtils {
+
+    private static final Pattern NON_ALPHANUMERIC_PATTERN = Pattern.compile("[^a-z0-9-]+");
+    private static final Pattern LEADING_TRAILING_HYPHENS = Pattern.compile("(^-+)|(-+$)");
 
     private SlugUtils() {
     }
@@ -11,7 +16,8 @@ public final class SlugUtils {
             return "post-" + System.currentTimeMillis();
         }
         String transliterated = transliterate(raw.trim().toLowerCase());
-        String slug = transliterated.replaceAll("[^a-z0-9\\-]+", "-").replaceAll("^-+|-+$", "");
+        String slug = NON_ALPHANUMERIC_PATTERN.matcher(transliterated).replaceAll("-");
+        slug = LEADING_TRAILING_HYPHENS.matcher(slug).replaceAll("");
         return slug.isBlank() ? "post-" + System.currentTimeMillis() : slug;
     }
 

@@ -554,8 +554,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
 
     @Override
     public void runFlow(Long botId, BotUser botUser, String startNodeId, Long campaignId) {
-        if (isAutomationPaused(botUser)) {
-            log.info("Automation is paused for user {}, skipping runFlow", botUser.getId());
+        if (botUser == null || isAutomationPaused(botUser)) {
+            if (botUser != null) {
+                log.info("Automation is paused for user {}, skipping runFlow", botUser.getId());
+            }
             return;
         }
         try {

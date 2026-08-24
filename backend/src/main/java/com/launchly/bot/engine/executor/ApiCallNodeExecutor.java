@@ -80,6 +80,10 @@ public class ApiCallNodeExecutor implements NodeExecutor {
                 log.info("API Response received: status={}", statusCode);
                 stateService.setSessionData(botId, telegramUserId, responseVariable, responseBody);
                 stateService.setSessionData(botId, telegramUserId, responseVariable + "_status", String.valueOf(statusCode));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error("API call interrupted in bot {}: {}", botId, e.getMessage());
+                stateService.setSessionData(botId, telegramUserId, responseVariable + "_error", "Request interrupted");
             } catch (Exception e) {
                 log.error("Failed to execute API call in bot {}: {}", botId, e.getMessage());
                 stateService.setSessionData(botId, telegramUserId, responseVariable + "_error", e.getMessage());

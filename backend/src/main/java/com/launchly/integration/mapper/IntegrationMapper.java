@@ -13,8 +13,12 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public abstract class IntegrationMapper {
 
-    @Autowired
     protected ObjectMapper objectMapper;
+
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Mapping(target = "botId", source = "bot.id")
     @Mapping(target = "config", source = "config", qualifiedByName = "jsonStringToObject")

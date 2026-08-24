@@ -11,18 +11,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 @Service
 @Slf4j
 public class I18nService {
 
+    private static final Set<String> SUPPORTED_LOCALES = Set.of("uk", "en", "es", "de", "fr");
+
     private static final String[] BACKEND_FILES = {
             "classpath:messages_errors.properties",
             "classpath:messages_system.properties"
-    };
-    private static final String[] BACKEND_FILES_LANG_PATTERN = {
-            "classpath:messages_errors_{lang}.properties",
-            "classpath:messages_system_{lang}.properties"
     };
 
     private final ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
@@ -32,9 +31,11 @@ public class I18nService {
         for (String pattern : BACKEND_FILES) {
             loadResource(translations, pattern);
         }
-        if (lang != null && !"en".equalsIgnoreCase(lang)) {
-            for (String pattern : BACKEND_FILES_LANG_PATTERN) {
-                loadResource(translations, pattern.replace("{lang}", lang.toLowerCase()));
+        if (lang != null) {
+            String cleanLang = lang.trim().toLowerCase();
+            if (SUPPORTED_LOCALES.contains(cleanLang) && !"en".equals(cleanLang)) {
+                loadResource(translations, "classpath:messages_errors_" + cleanLang + ".properties");
+                loadResource(translations, "classpath:messages_system_" + cleanLang + ".properties");
             }
         }
         return translations;
@@ -55,7 +56,7 @@ public class I18nService {
                 }
             }
         } catch (Exception e) {
-            log.debug("Could not load resource '{}': {}", location, e.getMessage());
+            log.debug("Could not load localization resource");
         }
     }
 }

@@ -41,7 +41,10 @@ public class WebhookServiceImpl implements WebhookService {
                     return;
                 }
 
-                log.warn("Webhook attempt {} failed with status: {}", attempt, response.statusCode());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error("Webhook dispatch interrupted for {}: {}", url, e.getMessage());
+                return;
             } catch (Exception e) {
                 log.warn("Webhook attempt {} failed with exception: {}", attempt, e.getMessage());
             }

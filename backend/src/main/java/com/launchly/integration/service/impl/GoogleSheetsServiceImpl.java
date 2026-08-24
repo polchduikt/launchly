@@ -150,6 +150,10 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
         } catch (AppException e) {
             throw e;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Google Sheets OAuth interrupted: {}", e.getMessage());
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "integration.error.google_token_exchange_failed");
         } catch (Exception e) {
             log.error("Google Sheets OAuth token exchange error: {}", e.getMessage(), e);
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "integration.error.google_token_exchange_failed");
@@ -165,49 +169,46 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             if (parts.length < 2) {
                 return null;
             }
-            String payload = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
-            JsonNode claims = objectMapper.readTree(payload);
-            String email = claims.path("email").asText(null);
-            return email != null && !email.isBlank() ? email : null;
+            byte[] decoded = Base64.getUrlDecoder().decode(parts[1]);
+            JsonNode payload = objectMapper.readTree(decoded);
+            return payload.path("email").asText(null);
         } catch (Exception e) {
-            log.warn("Failed to extract email from Google ID token: {}", e.getMessage());
+            log.warn("Could not extract email from id_token: {}", e.getMessage());
             return null;
         }
     }
 
-    private void copyConfigValue(String configStr, Map<String, String> target, String key) {
-        if (configStr == null || configStr.isBlank()) {
+    private void copyConfigValue(String configJson, Map<String, String> targetMap, String key) {
+        if (configJson == null || configJson.isBlank()) {
             return;
         }
         try {
-            String value = objectMapper.readTree(configStr).path(key).asText(null);
-            if (value != null && !value.isBlank()) {
-                target.put(key, value);
+            JsonNode jsonNode = objectMapper.readTree(configJson);
+            if (jsonNode.hasNonNull(key)) {
+                targetMap.put(key, jsonNode.get(key).asText());
             }
         } catch (Exception e) {
-            log.warn("Failed to read Google Sheets config key {}: {}", key, e.getMessage());
+            log.debug("Could not copy {} from config", key);
         }
     }
 
     @Override
     @Transactional
     public void refreshTokenIfNeeded(Integration integration) {
-        LocalDateTime expiresAt = integration.getGoogleTokenExpiresAt();
-        if (expiresAt != null && expiresAt.isAfter(LocalDateTime.now().plusMinutes(1))) {
+        if (integration.getGoogleAccessToken() == null || integration.getGoogleRefreshToken() == null) {
             return;
         }
 
-        String encryptedRefreshToken = integration.getGoogleRefreshToken();
-        if (encryptedRefreshToken == null || encryptedRefreshToken.isEmpty()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_no_refresh_token");
+        if (integration.getGoogleTokenExpiresAt() != null &&
+                integration.getGoogleTokenExpiresAt().isAfter(LocalDateTime.now().plusMinutes(5))) {
+            return;
         }
 
-        String decryptedRefreshToken = encryptionUtil.decrypt(encryptedRefreshToken);
-
         try {
-            String requestBody = "refresh_token=" + URLEncoder.encode(decryptedRefreshToken, StandardCharsets.UTF_8) +
-                    "&client_id=" + URLEncoder.encode(googleClientId, StandardCharsets.UTF_8) +
+            String decryptedRefreshToken = encryptionUtil.decrypt(integration.getGoogleRefreshToken());
+            String requestBody = "client_id=" + URLEncoder.encode(googleClientId, StandardCharsets.UTF_8) +
                     "&client_secret=" + URLEncoder.encode(googleClientSecret, StandardCharsets.UTF_8) +
+                    "&refresh_token=" + URLEncoder.encode(decryptedRefreshToken, StandardCharsets.UTF_8) +
                     "&grant_type=refresh_token";
 
             HttpRequest request = HttpRequest.newBuilder()
@@ -239,6 +240,10 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
         } catch (AppException e) {
             throw e;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Google token refresh interrupted for integration {}: {}", integration.getId(), e.getMessage());
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "integration.error.google_token_refresh_failed");
         } catch (Exception e) {
             log.error("Google token refresh error for integration {}: {}", integration.getId(), e.getMessage(), e);
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "integration.error.google_token_refresh_failed");
@@ -303,6 +308,9 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                 log.info("Successfully appended row to Google Sheet {} for integration {}", activeSheetName, integration.getId());
             }
 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Error writing to Google Sheets in integration {}: interrupted", integration.getId());
         } catch (Exception e) {
             log.error("Error writing to Google Sheets in integration {}: {}", integration.getId(), e.getMessage(), e);
         }
@@ -354,6 +362,10 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             return spreadsheets;
         } catch (AppException e) {
             throw e;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Error fetching spreadsheets for bot {}: interrupted", botId);
+            return List.of();
         } catch (Exception e) {
             log.error("Error fetching spreadsheets for bot {}: {}", botId, e.getMessage(), e);
             return List.of();
@@ -394,6 +406,10 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                 }
             }
             return sheets;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Error fetching worksheets for spreadsheet {}: interrupted", spreadsheetId);
+            return List.of();
         } catch (Exception e) {
             log.error("Error fetching worksheets for spreadsheet {}: {}", spreadsheetId, e.getMessage(), e);
             return List.of();
@@ -435,6 +451,10 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                 }
             }
             return headers;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Error fetching headers for sheet {} in spreadsheet {}: interrupted", worksheetName, spreadsheetId);
+            return List.of();
         } catch (Exception e) {
             log.error("Error fetching headers for sheet {} in spreadsheet {}: {}", worksheetName, spreadsheetId, e.getMessage(), e);
             return List.of();
@@ -479,6 +499,10 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                 }
             }
             return rowList;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Error fetching values for sheet {} in spreadsheet {}: interrupted", worksheetName, spreadsheetId);
+            return List.of();
         } catch (Exception e) {
             log.error("Error fetching values for sheet {} in spreadsheet {}: {}", worksheetName, spreadsheetId, e.getMessage(), e);
             return List.of();
@@ -517,6 +541,9 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             if (response.statusCode() != 200) {
                 log.error("Failed to update cell {}. Status: {}, Body: {}", fullRange, response.statusCode(), response.body());
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Error updating cell {} in spreadsheet {}: interrupted", cellReference, spreadsheetId);
         } catch (Exception e) {
             log.error("Error updating cell {} in spreadsheet {}: {}", cellReference, spreadsheetId, e.getMessage(), e);
         }

@@ -60,7 +60,7 @@ public class TelegramBotManager {
             }
         }
 
-        Thread.startVirtualThread(() -> {
+        new Thread(() -> {
             try {
                 List<Bot> bots = botRepository.findAllByActiveTrue();
                 log.info("Starting {} active bots in background", bots.size());
@@ -170,12 +170,11 @@ public class TelegramBotManager {
                 String deleteWebhookUrl = "https://api.telegram.org/bot" + systemBotToken + "/deleteWebhook?drop_pending_updates=false";
                 org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
                 restTemplate.getForEntity(deleteWebhookUrl, String.class);
-                Thread.sleep(300);
+                wait(300);
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
-                log.warn("System bot sleep interrupted: {}", ie.getMessage());
+                log.warn("System bot wait interrupted: {}", ie.getMessage());
             } catch (Exception e) {
-
                 log.warn("Failed to call deleteWebhook before polling for system bot: {}", e.getMessage());
             }
 

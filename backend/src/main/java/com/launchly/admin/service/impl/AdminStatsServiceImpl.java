@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -134,7 +135,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         double mrrVal = AdminStatsCalculator.calculateMrr(allSubscriptions);
         double ltvVal = AdminStatsCalculator.calculateLtv(allSubscriptions);
 
-        LocalDateTime previousStart = resolvedStart.minus(Duration.between(resolvedStart, resolvedEnd));
+        LocalDateTime previousStart = resolvedStart.minus(Duration.between(resolvedStart.atZone(ZoneOffset.UTC), resolvedEnd.atZone(ZoneOffset.UTC)));
         List<User> prevUsers = DateTimeUtils.filterByDateRange(allUsers, u -> u.getCreatedAt(), previousStart, finalStart);
         List<BotUser> prevBotUsers = DateTimeUtils.filterByDateRange(allBotUsers, bu -> bu.getCreatedAt(), previousStart, finalStart);
         List<Bot> prevBots = DateTimeUtils.filterByDateRange(allBots, b -> b.getCreatedAt(), previousStart, finalStart);
@@ -202,7 +203,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
             List<FlowSchema> schemas, List<BroadcastCampaign> broadcasts, long activeOwners) {
 
         List<AdminStatsDto.GrowthMetric> growth = new ArrayList<>();
-        long daysDiff = Duration.between(start, end).toDays();
+        long daysDiff = Duration.between(start.atZone(ZoneOffset.UTC), end.atZone(ZoneOffset.UTC)).toDays();
 
         if (daysDiff <= 1) {
             Map<Integer, Long> regByHour = users.stream()
