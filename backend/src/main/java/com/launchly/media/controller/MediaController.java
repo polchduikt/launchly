@@ -1,5 +1,7 @@
 package com.launchly.media.controller;
 
+import com.launchly.common.ratelimit.RateLimit;
+import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
 import com.launchly.common.security.CustomUserDetails;
 import com.launchly.media.dto.response.MediaUploadResponse;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.concurrent.TimeUnit;
 
 @Tag(name = "Media: Cloud CDN Storage", description = "Upload, host, and manage images/files on Cloudinary CDN")
 @RestController
@@ -34,6 +37,7 @@ public class MediaController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @RateLimit(type = RateLimitType.USER, capacity = 10, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.media_upload")
     public ResponseEntity<MediaUploadResponse> upload(
             @Parameter(description = "Multipart binary file to upload") @RequestParam("file") MultipartFile file,
             @Parameter(description = "Storage folder category (e.g. avatars, bots, broadcasts)") @RequestParam("folder") String folder,

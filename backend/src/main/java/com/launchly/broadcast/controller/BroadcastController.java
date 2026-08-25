@@ -6,8 +6,11 @@ import com.launchly.broadcast.dto.response.CampaignResponse;
 import com.launchly.broadcast.dto.response.TagResponse;
 import com.launchly.broadcast.service.BroadcastService;
 import com.launchly.broadcast.service.TagService;
+import com.launchly.common.ratelimit.RateLimit;
+import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
 import com.launchly.common.security.CustomUserDetails;
+import java.util.concurrent.TimeUnit;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -122,6 +125,7 @@ public class BroadcastController {
             @ApiResponse(responseCode = "404", description = "Campaign not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/campaigns/{campaignId}/send")
+    @RateLimit(type = RateLimitType.USER, capacity = 5, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.broadcast")
     public ResponseEntity<CampaignResponse> sendCampaign(
             @Parameter(description = "Target Bot ID") @PathVariable Long botId,
             @Parameter(description = "Campaign ID") @PathVariable Long campaignId,

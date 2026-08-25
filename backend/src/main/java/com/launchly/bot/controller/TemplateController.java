@@ -4,6 +4,8 @@ import com.launchly.bot.dto.request.CreateTemplateRequest;
 import com.launchly.bot.dto.request.UpdateTemplateRequest;
 import com.launchly.bot.dto.response.TemplateResponse;
 import com.launchly.bot.service.TemplateService;
+import com.launchly.common.ratelimit.RateLimit;
+import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
 import com.launchly.common.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Tag(name = "Bot: Templates & Marketplace", description = "Create, share, install, and manage reusable bot workflow templates")
 @RestController
@@ -82,6 +85,7 @@ public class TemplateController {
             @ApiResponse(responseCode = "200", description = "View tracked successfully")
     })
     @PostMapping("/share/{shareCode}/view")
+    @RateLimit(type = RateLimitType.IP, capacity = 10, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.template_view")
     public ResponseEntity<Void> trackView(
             @Parameter(description = "Template unique share code") @PathVariable String shareCode,
             @AuthenticationPrincipal CustomUserDetails userDetails
