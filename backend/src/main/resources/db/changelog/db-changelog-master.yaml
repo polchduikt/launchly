@@ -107,6 +107,8 @@ databaseChangeLog:
       file: db/changelog/changes/V053__add_missing_entity_columns.sql
   - include:
       file: db/changelog/changes/V054__create_crm_labels_and_add_tokens_used.sql
+  - include:
+      file: db/changelog/changes/V055__optimize_performance_indexes.sql
 
 
 
