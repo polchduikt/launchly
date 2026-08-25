@@ -183,4 +183,28 @@ class BillingServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
     }
+
+    @Test
+    @DisplayName("Should throw ServiceUnavailable when Stripe createCheckoutSession fallback is triggered")
+    void createCheckoutSessionFallback_ThrowsServiceUnavailable() {
+        assertThatThrownBy(() -> billingService.createCheckoutSessionFallback(1L, 1L, new RuntimeException("Stripe is down")))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    @Test
+    @DisplayName("Should throw ServiceUnavailable when Stripe cancelSubscription fallback is triggered")
+    void cancelSubscriptionFallback_ThrowsServiceUnavailable() {
+        assertThatThrownBy(() -> billingService.cancelSubscriptionFallback(1L, new RuntimeException("Stripe is down")))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    @Test
+    @DisplayName("Should throw ServiceUnavailable when Stripe resumeSubscription fallback is triggered")
+    void resumeSubscriptionFallback_ThrowsServiceUnavailable() {
+        assertThatThrownBy(() -> billingService.resumeSubscriptionFallback(1L, new RuntimeException("Stripe is down")))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.SERVICE_UNAVAILABLE);
+    }
 }

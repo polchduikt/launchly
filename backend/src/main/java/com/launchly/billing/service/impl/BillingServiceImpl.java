@@ -15,6 +15,8 @@ import com.launchly.billing.service.BillingService;
 import com.launchly.billing.service.PlanLimitService;
 import com.launchly.billing.util.StripeUtils;
 import com.launchly.common.exception.AppException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import com.stripe.Stripe;
 import com.stripe.model.Event;
 import com.stripe.model.Invoice;
@@ -119,6 +121,8 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     @Transactional
+    @CircuitBreaker(name = "stripe", fallbackMethod = "createCheckoutSessionFallback")
+    @Retry(name = "stripe")
     public CheckoutResponse createCheckoutSession(Long planId, Long userId) {
         User user = userQueryService.getUserOrThrow(userId);
 
@@ -175,6 +179,8 @@ public class BillingServiceImpl implements BillingService {
         @CacheEvict(value = "subscription", key = "#userId"),
         @CacheEvict(value = "subscription", key = "'plan:' + #userId")
     })
+    @CircuitBreaker(name = "stripe", fallbackMethod = "cancelSubscriptionFallback")
+    @Retry(name = "stripe")
     public SubscriptionResponse cancelSubscription(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
@@ -207,6 +213,8 @@ public class BillingServiceImpl implements BillingService {
         @CacheEvict(value = "subscription", key = "#userId"),
         @CacheEvict(value = "subscription", key = "'plan:' + #userId")
     })
+    @CircuitBreaker(name = "stripe", fallbackMethod = "resumeSubscriptionFallback")
+    @Retry(name = "stripe")
     public SubscriptionResponse resumeSubscription(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
@@ -231,6 +239,30 @@ public class BillingServiceImpl implements BillingService {
             log.error("Stripe resume error for subscriptionId={}: {}", stripeSubId, e.getMessage(), e);
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.resume_failed");
         }
+    }
+
+    public CheckoutResponse createCheckoutSessionFallback(Long planId, Long userId, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("Stripe createCheckoutSession fallback triggered for userId={}: {}", userId, t.getMessage());
+        throw new AppException(HttpStatus.SERVICE_UNAVAILABLE, "billing.error.stripe_unavailable");
+    }
+
+    public SubscriptionResponse cancelSubscriptionFallback(Long userId, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("Stripe cancelSubscription fallback triggered for userId={}: {}", userId, t.getMessage());
+        throw new AppException(HttpStatus.SERVICE_UNAVAILABLE, "billing.error.stripe_unavailable");
+    }
+
+    public SubscriptionResponse resumeSubscriptionFallback(Long userId, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("Stripe resumeSubscription fallback triggered for userId={}: {}", userId, t.getMessage());
+        throw new AppException(HttpStatus.SERVICE_UNAVAILABLE, "billing.error.stripe_unavailable");
     }
 
     @Override
