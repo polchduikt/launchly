@@ -31,6 +31,7 @@ public class CacheConfig {
                         .fromSerializer(GenericJacksonJsonRedisSerializer.builder().enableUnsafeDefaultTyping().build()));
 
         Map<String, RedisCacheConfiguration> configs = Map.of(
+            "users",        defaultConfig.entryTtl(Duration.ofMinutes(15)),
             "plans",        defaultConfig.entryTtl(Duration.ofHours(24)),
             "plan",         defaultConfig.entryTtl(Duration.ofHours(24)),
             "flow_schemas", defaultConfig.entryTtl(Duration.ofHours(1)),
