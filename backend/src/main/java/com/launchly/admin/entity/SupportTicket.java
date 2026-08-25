@@ -19,6 +19,9 @@ import java.util.List;
 @Builder
 public class SupportTicket extends BaseEntity {
 
+    @Version
+    private Long version;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

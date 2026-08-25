@@ -26,6 +26,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -69,6 +71,12 @@ class CrmServiceImplTest {
     @Mock
     private IntegrationEventService integrationEventService;
 
+    @Mock
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Mock
+    private ValueOperations<String, String> valueOperations;
+
     @InjectMocks
     private CrmServiceImpl crmService;
 
@@ -80,6 +88,8 @@ class CrmServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        lenient().when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
         testUser = User.builder().email("crm@launchly.pro").name("CRM User").build();
         ReflectionTestUtils.setField(testUser, "id", 1L);
 

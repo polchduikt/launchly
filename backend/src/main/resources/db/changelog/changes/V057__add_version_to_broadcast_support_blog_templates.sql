@@ -1,0 +1,7 @@
+--liquibase formatted sql
+
+--changeset launchly:057
+ALTER TABLE broadcast_campaigns ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE support_tickets ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE blog_articles ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE account_templates ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 0;

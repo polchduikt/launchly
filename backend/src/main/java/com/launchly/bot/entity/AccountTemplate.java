@@ -16,6 +16,9 @@ import lombok.*;
 @AllArgsConstructor
 public class AccountTemplate extends BaseEntity {
 
+    @Version
+    private Long version;
+
     @Column(name = "share_code", nullable = false, unique = true)
     private String shareCode;
 
