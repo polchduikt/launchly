@@ -22,7 +22,7 @@ public class CacheConfig {
     public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration
                 .defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(5))
+                .entryTtl(Duration.ofMinutes(10))
                 .serializeKeysWith(
                     RedisSerializationContext.SerializationPair
                         .fromSerializer(new StringRedisSerializer()))
@@ -31,10 +31,13 @@ public class CacheConfig {
                         .fromSerializer(GenericJacksonJsonRedisSerializer.builder().enableUnsafeDefaultTyping().build()));
 
         Map<String, RedisCacheConfiguration> configs = Map.of(
-            "subscription", defaultConfig.entryTtl(Duration.ofMinutes(10)),
-            "plan",         defaultConfig.entryTtl(Duration.ofMinutes(60)),
-            "bots",         defaultConfig.entryTtl(Duration.ofMinutes(5)),
-            "tags",         defaultConfig.entryTtl(Duration.ofMinutes(5))
+            "plans",        defaultConfig.entryTtl(Duration.ofHours(24)),
+            "plan",         defaultConfig.entryTtl(Duration.ofHours(24)),
+            "flow_schemas", defaultConfig.entryTtl(Duration.ofHours(1)),
+            "admin_stats",  defaultConfig.entryTtl(Duration.ofMinutes(5)),
+            "subscription", defaultConfig.entryTtl(Duration.ofMinutes(30)),
+            "bots",         defaultConfig.entryTtl(Duration.ofMinutes(10)),
+            "tags",         defaultConfig.entryTtl(Duration.ofMinutes(10))
         );
 
         return RedisCacheManager.builder(factory)
