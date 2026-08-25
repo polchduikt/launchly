@@ -70,4 +70,7 @@ Thumbs.db
 desktop.ini
 
 *.log
+*.log.*
 logs/
+**/logs/
+backend/logs/
