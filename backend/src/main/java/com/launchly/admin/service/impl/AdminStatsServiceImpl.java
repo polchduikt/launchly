@@ -28,6 +28,7 @@ import com.launchly.integration.entity.Integration;
 import com.launchly.integration.entity.IntegrationType;
 import com.launchly.integration.repository.IntegrationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
@@ -67,6 +68,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "admin_stats", key = "#period != null ? #period : 'all'", condition = "#search == null && #startDate == null && #endDate == null")
     public AdminStatsDto getStats(String search, String period, LocalDateTime startDate, LocalDateTime endDate) {
         LocalDateTime resolvedEnd = endDate != null ? endDate : LocalDateTime.now();
         LocalDateTime resolvedStart = periodResolver.resolve(period, startDate);
