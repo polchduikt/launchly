@@ -3,6 +3,8 @@ package com.launchly.support.controller;
 import com.launchly.admin.dto.CreateMessageRequest;
 import com.launchly.admin.dto.SupportMessageDto;
 import com.launchly.admin.dto.SupportTicketDto;
+import com.launchly.common.ratelimit.RateLimit;
+import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
 import com.launchly.support.dto.CreateTicketRequest;
 import com.launchly.support.service.UserSupportChatService;
@@ -20,6 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.TimeUnit;
 
 @Tag(name = "Support: User Tickets & Chat", description = "Authenticated user help desk tickets, conversation messages, and status updates")
 @RestController
@@ -48,6 +52,7 @@ public class UserSupportChatController {
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
+    @RateLimit(type = RateLimitType.USER, capacity = 5, duration = 1, unit = TimeUnit.HOURS, messageKey = "rate_limit.error.support_chat")
     public ResponseEntity<SupportTicketDto> createTicket(
             @Valid @RequestBody CreateTicketRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -72,6 +77,7 @@ public class UserSupportChatController {
             @ApiResponse(responseCode = "404", description = "Ticket not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/{id}/messages")
+    @RateLimit(type = RateLimitType.USER, capacity = 15, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.support_chat")
     public ResponseEntity<SupportMessageDto> addMessage(
             @Parameter(description = "Ticket ID") @PathVariable Long id,
             @Valid @RequestBody CreateMessageRequest request,
