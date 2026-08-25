@@ -33,7 +33,9 @@ import java.util.List;
 }, indexes = {
         @Index(name = "idx_conversations_bot_id", columnList = "bot_id"),
         @Index(name = "idx_conversations_bot_user_id", columnList = "bot_user_id"),
-        @Index(name = "idx_conversations_updated_at", columnList = "updated_at DESC")
+        @Index(name = "idx_conversations_updated_at", columnList = "updated_at DESC"),
+        @Index(name = "idx_conversations_bot_updated", columnList = "bot_id, updated_at DESC"),
+        @Index(name = "idx_conversations_bot_status", columnList = "bot_id, status, updated_at DESC")
 })
 @Data
 @EqualsAndHashCode(callSuper = true, exclude = {"messages"})

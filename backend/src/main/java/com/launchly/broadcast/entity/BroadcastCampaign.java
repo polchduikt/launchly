@@ -24,7 +24,8 @@ import java.time.LocalDateTime;
 @Table(name = "broadcast_campaigns", indexes = {
     @Index(name = "idx_broadcast_campaigns_bot_id", columnList = "bot_id"),
     @Index(name = "idx_broadcast_campaigns_status", columnList = "status"),
-    @Index(name = "idx_broadcast_scheduled", columnList = "status, scheduled_at")
+    @Index(name = "idx_broadcast_scheduled", columnList = "status, scheduled_at"),
+    @Index(name = "idx_broadcast_bot_status_created", columnList = "bot_id, status, created_at DESC")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)

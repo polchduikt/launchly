@@ -27,7 +27,8 @@ import java.math.BigDecimal;
     @Index(name = "idx_orders_bot_user_id", columnList = "bot_user_id"),
     @Index(name = "idx_orders_status", columnList = "status"),
     @Index(name = "idx_orders_created_at", columnList = "created_at DESC"),
-    @Index(name = "idx_orders_bot_status", columnList = "bot_id, status")
+    @Index(name = "idx_orders_bot_status", columnList = "bot_id, status"),
+    @Index(name = "idx_orders_bot_created", columnList = "bot_id, created_at DESC")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)

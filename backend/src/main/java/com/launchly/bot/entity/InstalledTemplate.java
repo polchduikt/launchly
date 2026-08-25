@@ -6,7 +6,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "installed_templates")
+@Table(name = "installed_templates", indexes = {
+    @Index(name = "idx_installed_templates_user_created", columnList = "user_id, created_at DESC"),
+    @Index(name = "idx_installed_templates_bot", columnList = "bot_id")
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder

@@ -20,7 +20,8 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "bots", indexes = {
     @Index(name = "idx_bots_user_id", columnList = "user_id"),
-    @Index(name = "idx_bots_active", columnList = "is_active")
+    @Index(name = "idx_bots_active", columnList = "is_active"),
+    @Index(name = "idx_bots_user_updated", columnList = "user_id, updated_at DESC")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)

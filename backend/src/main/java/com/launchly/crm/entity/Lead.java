@@ -25,7 +25,9 @@ import org.hibernate.type.SqlTypes;
     @Index(name = "idx_leads_bot_id", columnList = "bot_id"),
     @Index(name = "idx_leads_bot_user_id", columnList = "bot_user_id"),
     @Index(name = "idx_leads_status", columnList = "status"),
-    @Index(name = "idx_leads_created_at", columnList = "created_at DESC")
+    @Index(name = "idx_leads_created_at", columnList = "created_at DESC"),
+    @Index(name = "idx_leads_bot_created", columnList = "bot_id, created_at DESC"),
+    @Index(name = "idx_leads_bot_user_bot", columnList = "bot_user_id, bot_id")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)

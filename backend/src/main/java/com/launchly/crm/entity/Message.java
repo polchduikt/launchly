@@ -20,7 +20,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "messages", indexes = {
     @Index(name = "idx_messages_conversation_id", columnList = "conversation_id"),
-    @Index(name = "idx_messages_created_at", columnList = "created_at ASC")
+    @Index(name = "idx_messages_created_at", columnList = "created_at ASC"),
+    @Index(name = "idx_messages_conversation_created", columnList = "conversation_id, created_at DESC")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)
