@@ -52,6 +52,11 @@ public class JwtFilter extends OncePerRequestFilter {
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            if (userDetails instanceof CustomUserDetails cud) {
+                org.slf4j.MDC.put("userId", String.valueOf(cud.getId()));
+            }
+            org.slf4j.MDC.put("userEmail", email);
         }
 
         filterChain.doFilter(request, response);

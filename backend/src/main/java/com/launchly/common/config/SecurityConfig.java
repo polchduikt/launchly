@@ -1,5 +1,6 @@
 package com.launchly.common.config;
 
+import com.launchly.common.security.CorrelationIdFilter;
 import com.launchly.common.security.JwtFilter;
 import com.launchly.common.security.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final CorrelationIdFilter correlationIdFilter;
     private final JwtFilter jwtFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
@@ -56,8 +58,12 @@ public class SecurityConfig {
                                 "/ws/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/actuator/health/**",
+                                "/actuator/info",
+                                "/actuator/prometheus"
                         ).permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
 
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -69,6 +75,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(correlationIdFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         if (StringUtils.hasText(googleClientId)) {
