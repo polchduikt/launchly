@@ -1,5 +1,6 @@
 package com.launchly.common.config;
 
+import com.launchly.common.ratelimit.TierRateLimitFilter;
 import com.launchly.common.security.CorrelationIdFilter;
 import com.launchly.common.security.JwtFilter;
 import com.launchly.common.security.OAuth2SuccessHandler;
@@ -29,6 +30,7 @@ public class SecurityConfig {
 
     private final CorrelationIdFilter correlationIdFilter;
     private final JwtFilter jwtFilter;
+    private final TierRateLimitFilter tierRateLimitFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id:}")
@@ -76,7 +78,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(correlationIdFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(tierRateLimitFilter, JwtFilter.class);
 
         if (StringUtils.hasText(googleClientId)) {
             http.oauth2Login(oauth2 -> oauth2
