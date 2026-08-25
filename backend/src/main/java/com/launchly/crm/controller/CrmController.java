@@ -1,5 +1,7 @@
 package com.launchly.crm.controller;
 
+import com.launchly.common.ratelimit.RateLimit;
+import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
 import com.launchly.common.security.CustomUserDetails;
 import com.launchly.crm.dto.request.AddNoteRequest;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Tag(name = "CRM: Live Chat, Leads & Orders", description = "Live agent inbox, Telegram two-way chat, pipeline leads, order fulfillment, and conversation labels")
 @RestController
@@ -177,6 +180,7 @@ public class CrmController {
             @ApiResponse(responseCode = "404", description = "Conversation not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/conversations/{conversationId}/messages")
+    @RateLimit(type = RateLimitType.USER, capacity = 30, duration = 1, unit = TimeUnit.MINUTES)
     public ResponseEntity<MessageResponse> sendMessage(
             @Parameter(description = "Conversation ID") @PathVariable Long conversationId,
             @RequestBody @Valid SendMessageRequest request,

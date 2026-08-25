@@ -5,6 +5,8 @@ import com.launchly.bot.dto.request.TransferOwnershipRequest;
 import com.launchly.bot.dto.request.UpdateMemberRequest;
 import com.launchly.bot.dto.response.TeamMemberResponse;
 import com.launchly.bot.service.TeamService;
+import com.launchly.common.ratelimit.RateLimit;
+import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
 import com.launchly.common.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Tag(name = "Bot: Team & Collaboration", description = "Team members, role permissions, invitation flow, and bot ownership transfer")
 @RestController
@@ -50,6 +53,7 @@ public class TeamController {
             @ApiResponse(responseCode = "404", description = "Bot not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/bots/{botId}/invitations")
+    @RateLimit(type = RateLimitType.USER, capacity = 10, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.email")
     public ResponseEntity<TeamMemberResponse> inviteMember(
             @Parameter(description = "Bot ID") @PathVariable Long botId,
             @Valid @RequestBody InviteMemberRequest request,
@@ -142,6 +146,7 @@ public class TeamController {
             @ApiResponse(responseCode = "404", description = "Bot not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/bots/{botId}/transfer-ownership")
+    @RateLimit(type = RateLimitType.USER, capacity = 3, duration = 1, unit = TimeUnit.HOURS)
     public ResponseEntity<Void> transferOwnership(
             @Parameter(description = "Bot ID") @PathVariable Long botId,
             @Valid @RequestBody TransferOwnershipRequest request,
