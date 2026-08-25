@@ -6,12 +6,15 @@ import com.launchly.bot.service.FlowEngineService;
 import com.launchly.bot.service.TelegramWebhookService;
 import com.launchly.bot.telegram.TelegramBotManager;
 import com.launchly.common.exception.AppException;
+import com.launchly.common.ratelimit.RateLimitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+
+import java.time.Duration;
 
 @Slf4j
 @Service
@@ -20,6 +23,7 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
 
     private final FlowEngineService flowEngineService;
     private final TelegramBotManager telegramBotManager;
+    private final RateLimitService rateLimitService;
 
     private static final ObjectMapper TELEGRAM_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -33,10 +37,34 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
 
         try {
             Update update = TELEGRAM_MAPPER.readValue(rawUpdate, Update.class);
+            Long telegramUserId = extractTelegramUserId(update);
+            if (telegramUserId != null) {
+                String rateKey = "rate:tg:user:" + botId + ":" + telegramUserId;
+                if (!rateLimitService.isAllowed(rateKey, 30, Duration.ofMinutes(1))) {
+                    log.warn("Rate limit exceeded for Telegram user {} in bot {}", telegramUserId, botId);
+                    return;
+                }
+            }
+
             flowEngineService.processUpdate(botId, update, client);
+        } catch (AppException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Failed to parse Telegram webhook update for bot {}: {}", botId, e.getMessage());
             throw new AppException(HttpStatus.BAD_REQUEST, "bot.error.invalid_update");
         }
+    }
+
+    private Long extractTelegramUserId(Update update) {
+        if (update.hasMessage() && update.getMessage().getFrom() != null) {
+            return update.getMessage().getFrom().getId();
+        }
+        if (update.hasCallbackQuery() && update.getCallbackQuery().getFrom() != null) {
+            return update.getCallbackQuery().getFrom().getId();
+        }
+        if (update.hasChannelPost() && update.getChannelPost().getFrom() != null) {
+            return update.getChannelPost().getFrom().getId();
+        }
+        return null;
     }
 }

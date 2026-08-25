@@ -3,6 +3,7 @@ package com.launchly.bot.service.impl;
 import com.launchly.bot.service.FlowEngineService;
 import com.launchly.bot.telegram.TelegramBotManager;
 import com.launchly.common.exception.AppException;
+import com.launchly.common.ratelimit.RateLimitService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,11 +29,14 @@ class TelegramWebhookServiceImplTest {
     @Mock
     private TelegramBotManager telegramBotManager;
 
+    @Mock
+    private RateLimitService rateLimitService;
+
     private TelegramWebhookServiceImpl webhookService;
 
     @BeforeEach
     void setUp() {
-        webhookService = new TelegramWebhookServiceImpl(flowEngineService, telegramBotManager);
+        webhookService = new TelegramWebhookServiceImpl(flowEngineService, telegramBotManager, rateLimitService);
     }
 
     @Test
@@ -44,6 +48,18 @@ class TelegramWebhookServiceImplTest {
         webhookService.processWebhookUpdate(10L, "{\"update_id\": 12345}");
 
         verify(flowEngineService, times(1)).processUpdate(eq(10L), any(Update.class), eq(client));
+    }
+
+    @Test
+    @DisplayName("Should drop update when user rate limit is exceeded")
+    void shouldDropUpdateWhenRateLimitExceeded() {
+        TelegramClient client = mock(TelegramClient.class);
+        when(telegramBotManager.getTelegramClient(10L)).thenReturn(client);
+        when(rateLimitService.isAllowed(anyString(), anyLong(), any())).thenReturn(false);
+
+        webhookService.processWebhookUpdate(10L, "{\"update_id\": 12345, \"message\": {\"message_id\": 1, \"date\": 1234567, \"chat\": {\"id\": 100, \"type\": \"private\"}, \"from\": {\"id\": 999, \"is_bot\": false, \"first_name\": \"User\"}}}");
+
+        verifyNoInteractions(flowEngineService);
     }
 
     @Test
