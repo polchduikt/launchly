@@ -29,6 +29,8 @@ import com.launchly.common.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -277,6 +279,10 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "bots", key = "#userId"),
+            @CacheEvict(value = "flow_schemas", allEntries = true)
+    })
     public void installTemplate(String shareCode, Long targetBotId, Long userId) {
         AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Template not found"));
