@@ -194,11 +194,6 @@ public class BroadcastServiceImpl implements BroadcastService {
                 return;
             }
 
-            if (campaign.getStatus() == CampaignStatus.IN_PROGRESS) {
-                log.warn("Campaign {} is already IN_PROGRESS — skipping", campaignId);
-                return;
-            }
-
             List<BotUser> targetUsers = new ArrayList<>();
             if (Boolean.TRUE.equals(campaign.getTargetAllBots())) {
                 Long ownerId = campaign.getBot().getUser().getId();
@@ -225,12 +220,13 @@ public class BroadcastServiceImpl implements BroadcastService {
                 ));
             }
 
-            campaign.setStatus(CampaignStatus.IN_PROGRESS);
-            campaign.setTotalCount(campaign.getTotalCount() + targetUsers.size());
-            campaign = campaignRepository.save(campaign);
-
             int previousSent = campaign.getSentCount();
             int previousFailed = campaign.getFailedCount();
+            int previousTotal = campaign.getTotalCount();
+
+            campaign.setStatus(CampaignStatus.IN_PROGRESS);
+            campaign.setTotalCount(previousTotal + targetUsers.size());
+            campaign = campaignRepository.save(campaign);
 
             log.info("Starting broadcast campaign {} to {} users", campaignId, targetUsers.size());
             String firstConnectedNodeId = null;
@@ -297,11 +293,12 @@ public class BroadcastServiceImpl implements BroadcastService {
 
             BroadcastCampaign freshCampaign = campaignRepository.findById(campaignId).orElse(campaign);
             if (freshCampaign != null) {
-                freshCampaign.setSentCount(previousSent + sent);
-                freshCampaign.setFailedCount(previousFailed + failed);
                 int totalSent = previousSent + sent;
                 int totalFailed = previousFailed + failed;
-                int totalCount = freshCampaign.getTotalCount();
+                int totalCount = previousTotal + targetUsers.size();
+                freshCampaign.setSentCount(totalSent);
+                freshCampaign.setFailedCount(totalFailed);
+                freshCampaign.setTotalCount(totalCount);
                 freshCampaign.setStatus(totalFailed == totalCount && totalCount > 0
                         ? CampaignStatus.FAILED
                         : CampaignStatus.COMPLETED);
@@ -339,7 +336,11 @@ public class BroadcastServiceImpl implements BroadcastService {
         broadcastValidator.validateWriteAccess(campaign.getBot().getId(), userId);
 
         if (campaign.getStatus() == CampaignStatus.IN_PROGRESS) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "broadcast.error.already_in_progress");
+            String lockKey = "lock:broadcast:send:" + campaignId;
+            Boolean hasLock = stringRedisTemplate.hasKey(lockKey);
+            if (Boolean.TRUE.equals(hasLock)) {
+                throw new AppException(HttpStatus.BAD_REQUEST, "broadcast.error.already_in_progress");
+            }
         }
 
         userAuditService.logBroadcastLaunched(campaign.getBot().getUser(), campaign.getId(), campaign.getName(), "FINISHED", LocalDateTime.now());

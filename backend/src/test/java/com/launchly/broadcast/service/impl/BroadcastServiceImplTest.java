@@ -238,6 +238,7 @@ class BroadcastServiceImplTest {
     void sendNow_WhenAlreadyInProgress_ThrowsBadRequest() {
         testCampaign.setStatus(CampaignStatus.IN_PROGRESS);
         when(campaignRepository.findById(100L)).thenReturn(Optional.of(testCampaign));
+        when(stringRedisTemplate.hasKey(anyString())).thenReturn(true);
 
         assertThatThrownBy(() -> broadcastService.sendNow(100L, 1L))
                 .isInstanceOf(AppException.class)
