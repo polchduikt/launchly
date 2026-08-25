@@ -27,7 +27,6 @@ import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.MessageUtils;
 import com.launchly.crm.repository.ConversationRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -149,7 +148,6 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "users", allEntries = true)
     public AdminUserDto updateUserRole(Long userId, Role newRole, String currentUserEmail) {
         User user = userQueryService.getUserOrThrow(userId);
 
@@ -165,14 +163,12 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "users", allEntries = true)
     public AdminUserDto toggleUserStatus(Long userId) {
         return toggleUserStatus(userId, (AdminBlockRequest) null);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "users", allEntries = true)
     public AdminUserDto toggleUserStatus(Long userId, AdminBlockRequest request) {
         User user = userQueryService.getUserOrThrow(userId);
 

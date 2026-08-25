@@ -24,7 +24,6 @@ import com.launchly.auth.dto.response.TelegramSessionResponse;
 import com.launchly.auth.dto.response.TelegramStatusResponse;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -318,7 +317,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "users", allEntries = true)
     public void deleteUserAccount(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
