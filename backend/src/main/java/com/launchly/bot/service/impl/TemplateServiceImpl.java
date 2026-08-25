@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -208,6 +209,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "templates", key = "#shareCode")
     public TemplateResponse getTemplateByShareCode(String shareCode) {
         AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Template not found"));
@@ -229,6 +231,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "templates", key = "#shareCode")
     public TemplateResponse updateTemplate(String shareCode, UpdateTemplateRequest request, Long userId) {
         AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "common.error.not_found"));
@@ -471,6 +474,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "templates", key = "#shareCode")
     public void deleteTemplate(String shareCode, Long userId) {
         AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "common.error.not_found"));

@@ -40,7 +40,8 @@ public class CacheConfig {
             Map.entry("bots",          defaultConfig.entryTtl(Duration.ofMinutes(10))),
             Map.entry("tags",          defaultConfig.entryTtl(Duration.ofMinutes(10))),
             Map.entry("blog_articles", defaultConfig.entryTtl(Duration.ofHours(1))),
-            Map.entry("blog_article",  defaultConfig.entryTtl(Duration.ofHours(2)))
+            Map.entry("blog_article",  defaultConfig.entryTtl(Duration.ofHours(2))),
+            Map.entry("templates",     defaultConfig.entryTtl(Duration.ofHours(2)))
         );
 
         return RedisCacheManager.builder(factory)
