@@ -401,14 +401,11 @@ public class BotServiceImpl implements BotService {
 
         schema.setNodes(toJsonString(nodesNode));
         schema.setEdges(toJsonString(edgesNode));
-        schema.setVersion(schema.getVersion() + 1);
 
         schema = flowSchemaRepository.save(schema);
         redisTemplate.delete("launchly:bot:schema:" + botId);
 
-        bot.setUpdatedAt(LocalDateTime.now());
-
-        userAuditService.logAutomationModified(bot.getUser(), bot.getId(), bot.getName(), bot.getUpdatedAt());
+        userAuditService.logAutomationModified(bot.getUser(), bot.getId(), bot.getName(), LocalDateTime.now());
         if (!bot.isActive()) {
             boolean hasRealToken = false;
             try {
@@ -426,12 +423,13 @@ public class BotServiceImpl implements BotService {
                 try {
                     telegramBotManager.registerBot(bot);
                     bot.setActive(true);
+                    bot.setUpdatedAt(LocalDateTime.now());
+                    botRepository.save(bot);
                 } catch (Exception e) {
                     log.error("Failed to register bot: {}", e.getMessage(), e);
                 }
             }
         }
-        botRepository.save(bot);
 
         return toFlowSchemaResponse(schema);
     }

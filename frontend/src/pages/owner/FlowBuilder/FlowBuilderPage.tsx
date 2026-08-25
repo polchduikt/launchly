@@ -314,7 +314,7 @@ const FlowBuilderInner: React.FC = () => {
 
   const handleLaunchOrUpdate = () => {
     handleSaveFlow();
-    if (activeBotId) {
+    if (activeBotId && !isBotLive) {
       publishBotMutation.mutate(activeBotId, {
         onSuccess: () => {
           setPublishedKey(getFlowLogicKey(nodes, edges));
