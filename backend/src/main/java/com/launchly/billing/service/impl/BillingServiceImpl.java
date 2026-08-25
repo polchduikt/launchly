@@ -94,6 +94,7 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "plans", key = "'all'")
     public List<PlanResponse> getAvailablePlans() {
         return billingMapper.toPlanResponseList(
                 planRepository.findAll().stream().filter(Plan::isActive).toList()
