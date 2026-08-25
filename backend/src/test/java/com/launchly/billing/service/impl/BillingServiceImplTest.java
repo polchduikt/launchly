@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -52,6 +53,9 @@ class BillingServiceImplTest {
 
     @Mock
     private PlanLimitService planLimitService;
+
+    @Mock
+    private StringRedisTemplate stringRedisTemplate;
 
     @InjectMocks
     private BillingServiceImpl billingService;

@@ -1,9 +1,11 @@
 package com.launchly.common.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -187,6 +189,15 @@ public class GlobalExceptionHandler {
         String message = ex.getMessage() != null && !ex.getMessage().isBlank()
                 ? ex.getMessage()
                 : messageUtils.getMessage("common.error.illegal_argument");
+        ErrorResponse response = ErrorResponse.of(status, message, request.getRequestURI());
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler({ObjectOptimisticLockingFailureException.class, OptimisticLockException.class})
+    public ResponseEntity<ErrorResponse> handleOptimisticLocking(Exception ex, HttpServletRequest request) {
+        log.warn("Optimistic locking conflict on path {}: {}", request.getRequestURI(), ex.getMessage());
+        HttpStatus status = HttpStatus.CONFLICT;
+        String message = messageUtils.getMessage("common.error.concurrent_update");
         ErrorResponse response = ErrorResponse.of(status, message, request.getRequestURI());
         return ResponseEntity.status(status).body(response);
     }

@@ -109,6 +109,8 @@ databaseChangeLog:
       file: db/changelog/changes/V054__create_crm_labels_and_add_tokens_used.sql
   - include:
       file: db/changelog/changes/V055__optimize_performance_indexes.sql
+  - include:
+      file: db/changelog/changes/V056__add_optimistic_locking_version.sql
 
 
 
