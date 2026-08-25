@@ -6,6 +6,8 @@ import com.launchly.ai.dto.response.AiChatResponse;
 import com.launchly.ai.dto.response.AiSchemaResponse;
 import com.launchly.ai.dto.response.AiUsageResponse;
 import com.launchly.ai.service.AiService;
+import com.launchly.common.ratelimit.RateLimit;
+import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
 import com.launchly.common.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.TimeUnit;
+
 @Tag(name = "AI: Assistant & Flow Generator", description = "AI-powered chatbot assistant, conversational helper, and automatic workflow schema generation")
 @RestController
 @RequestMapping("/api/v1/ai")
@@ -40,6 +44,7 @@ public class AiController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/chat")
+    @RateLimit(type = RateLimitType.USER, capacity = 15, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.ai")
     public ResponseEntity<AiChatResponse> chat(
             @Valid @RequestBody AiChatRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -54,6 +59,7 @@ public class AiController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/generate-schema")
+    @RateLimit(type = RateLimitType.USER, capacity = 10, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.ai")
     public ResponseEntity<AiSchemaResponse> generateSchema(
             @Valid @RequestBody AiSchemaRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
