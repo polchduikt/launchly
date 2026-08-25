@@ -7,6 +7,8 @@ import com.launchly.auth.dto.request.UpdateProfileRequest;
 import com.launchly.auth.dto.response.AuthResponse;
 import com.launchly.auth.dto.response.UserResponse;
 import com.launchly.auth.service.AuthService;
+import com.launchly.common.ratelimit.RateLimit;
+import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,6 +22,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.TimeUnit;
 
 @Tag(name = "Auth: Authentication & Profile", description = "Registration, local login, token rotation, user profile, and account settings")
 @RestController
@@ -36,6 +40,7 @@ public class AuthController {
             @ApiResponse(responseCode = "409", description = "User with this email already exists", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/register")
+    @RateLimit(type = RateLimitType.IP, capacity = 10, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.auth")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
@@ -47,6 +52,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Bad credentials", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/login")
+    @RateLimit(type = RateLimitType.IP, capacity = 10, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.auth")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
@@ -58,6 +64,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/refresh")
+    @RateLimit(type = RateLimitType.IP, capacity = 30, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.auth")
     public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) {
         return ResponseEntity.ok(authService.refreshToken(request.refreshToken()));
     }

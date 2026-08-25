@@ -3,6 +3,8 @@ package com.launchly.auth.controller;
 import com.launchly.auth.dto.response.TelegramSessionResponse;
 import com.launchly.auth.dto.response.TelegramStatusResponse;
 import com.launchly.auth.service.AuthService;
+import com.launchly.common.ratelimit.RateLimit;
+import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.TimeUnit;
+
 @Tag(name = "Auth: Telegram Login & Linking", description = "Telegram QR code authentication, bot deep-linking login, and account unlinking")
 @RestController
 @RequestMapping("/api/v1/auth/telegram")
@@ -34,6 +38,7 @@ public class TelegramAuthController {
             @ApiResponse(responseCode = "200", description = "Telegram session generated successfully")
     })
     @PostMapping("/session")
+    @RateLimit(type = RateLimitType.IP, capacity = 15, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.auth")
     public ResponseEntity<TelegramSessionResponse> createSession(
             @Parameter(description = "Whether this session is for subscription checkout linking") @RequestParam(required = false, defaultValue = "false") boolean isSubscription,
             Authentication authentication) {
