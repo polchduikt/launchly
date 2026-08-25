@@ -227,7 +227,7 @@ public class BroadcastServiceImpl implements BroadcastService {
 
             campaign.setStatus(CampaignStatus.IN_PROGRESS);
             campaign.setTotalCount(campaign.getTotalCount() + targetUsers.size());
-            campaignRepository.save(campaign);
+            campaign = campaignRepository.save(campaign);
 
             int previousSent = campaign.getSentCount();
             int previousFailed = campaign.getFailedCount();
@@ -295,23 +295,30 @@ public class BroadcastServiceImpl implements BroadcastService {
                 }
             }
 
-            campaign.setSentCount(previousSent + sent);
-            campaign.setFailedCount(previousFailed + failed);
-            int totalSent = previousSent + sent;
-            int totalFailed = previousFailed + failed;
-            int totalCount = campaign.getTotalCount();
-            campaign.setStatus(totalFailed == totalCount && totalCount > 0
-                    ? CampaignStatus.FAILED
-                    : CampaignStatus.COMPLETED);
-            campaignRepository.save(campaign);
+            BroadcastCampaign freshCampaign = campaignRepository.findById(campaignId).orElse(campaign);
+            if (freshCampaign != null) {
+                freshCampaign.setSentCount(previousSent + sent);
+                freshCampaign.setFailedCount(previousFailed + failed);
+                int totalSent = previousSent + sent;
+                int totalFailed = previousFailed + failed;
+                int totalCount = freshCampaign.getTotalCount();
+                freshCampaign.setStatus(totalFailed == totalCount && totalCount > 0
+                        ? CampaignStatus.FAILED
+                        : CampaignStatus.COMPLETED);
+                campaignRepository.save(freshCampaign);
 
-            log.info("Broadcast campaign {} completed: sent={}, failed={}, total={}",
-                    campaignId, totalSent, totalFailed, totalCount);
+                log.info("Broadcast campaign {} completed: sent={}, failed={}, total={}",
+                        campaignId, totalSent, totalFailed, totalCount);
+            }
         } catch (Exception fatalEx) {
             log.error("Fatal error during broadcast campaign {} execution: {}", campaignId, fatalEx.getMessage(), fatalEx);
-            if (campaign != null) {
-                campaign.setStatus(CampaignStatus.FAILED);
-                campaignRepository.save(campaign);
+            try {
+                campaignRepository.findById(campaignId).ifPresent(c -> {
+                    c.setStatus(CampaignStatus.FAILED);
+                    campaignRepository.save(c);
+                });
+            } catch (Exception ex) {
+                log.error("Failed to set campaign {} to FAILED: {}", campaignId, ex.getMessage());
             }
         } finally {
             stringRedisTemplate.delete(lockKey);
