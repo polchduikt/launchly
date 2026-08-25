@@ -7,6 +7,7 @@ import com.launchly.blog.repository.BlogArticleRepository;
 import com.launchly.blog.service.BlogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -21,6 +22,7 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "blog_articles", key = "#language != null ? #language : 'all'")
     public List<BlogArticleDto> getAllArticles(String language) {
         List<BlogArticle> articles;
         if (language != null && !language.isBlank()) {
@@ -33,6 +35,7 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "blog_article", key = "#id")
     public BlogArticleDto getArticleById(String id) {
         String cleanId = id != null ? id.trim() : "";
         BlogArticle article = blogArticleRepository.findById(cleanId)
