@@ -44,6 +44,9 @@ class PlanLimitServiceImplTest {
     @Mock
     private EncryptionUtil encryptionUtil;
 
+    @Mock
+    private com.launchly.auth.repository.UserRepository userRepository;
+
     @InjectMocks
     private PlanLimitServiceImpl planLimitService;
 

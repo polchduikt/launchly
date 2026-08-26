@@ -62,14 +62,14 @@ class TierRateLimitFilterTest {
 
         ConsumptionProbe probe = mock(ConsumptionProbe.class);
         when(probe.isConsumed()).thenReturn(true);
-        when(probe.getRemainingTokens()).thenReturn(119L);
+        when(probe.getRemainingTokens()).thenReturn(11999L);
         when(probe.getNanosToWaitForRefill()).thenReturn(1000000L);
-        when(rateLimitService.tryConsume(eq("rate:tier:user:1"), eq(120L), any(Duration.class), eq(1L))).thenReturn(probe);
+        when(rateLimitService.tryConsume(eq("rate:tier:user:1"), eq(12000L), any(Duration.class), eq(1L))).thenReturn(probe);
 
         filter.doFilter(request, response, filterChain);
 
-        assertThat(response.getHeader("X-RateLimit-Limit")).isEqualTo("120");
-        assertThat(response.getHeader("X-RateLimit-Remaining")).isEqualTo("119");
+        assertThat(response.getHeader("X-RateLimit-Limit")).isEqualTo("12000");
+        assertThat(response.getHeader("X-RateLimit-Remaining")).isEqualTo("11999");
         verify(filterChain).doFilter(request, response);
     }
 
@@ -88,7 +88,7 @@ class TierRateLimitFilterTest {
         when(probe.isConsumed()).thenReturn(false);
         when(probe.getRemainingTokens()).thenReturn(0L);
         when(probe.getNanosToWaitForRefill()).thenReturn(15_000_000_000L);
-        when(rateLimitService.tryConsume(eq("rate:tier:user:1"), eq(120L), any(Duration.class), eq(1L))).thenReturn(probe);
+        when(rateLimitService.tryConsume(eq("rate:tier:user:1"), eq(12000L), any(Duration.class), eq(1L))).thenReturn(probe);
         when(messageUtils.getMessageWithDefault(anyString(), anyString(), any())).thenReturn("Rate limit exceeded");
 
         filter.doFilter(request, response, filterChain);
