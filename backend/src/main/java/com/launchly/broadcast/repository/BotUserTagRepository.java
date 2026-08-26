@@ -1,6 +1,7 @@
 package com.launchly.broadcast.repository;
 
 import com.launchly.broadcast.entity.BotUserTag;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -8,6 +9,7 @@ import java.util.List;
 
 public interface BotUserTagRepository extends JpaRepository<BotUserTag, Long> {
 
+    @EntityGraph(attributePaths = {"tag", "botUser"})
     List<BotUserTag> findByBotUserId(Long botUserId);
 
     boolean existsByBotUserIdAndTagId(Long botUserId, Long tagId);
