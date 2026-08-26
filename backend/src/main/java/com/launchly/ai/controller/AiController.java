@@ -6,6 +6,7 @@ import com.launchly.ai.dto.response.AiChatResponse;
 import com.launchly.ai.dto.response.AiSchemaResponse;
 import com.launchly.ai.dto.response.AiUsageResponse;
 import com.launchly.ai.service.AiService;
+import com.launchly.common.idempotency.Idempotent;
 import com.launchly.common.ratelimit.RateLimit;
 import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
@@ -44,6 +45,7 @@ public class AiController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/chat")
+    @Idempotent
     @RateLimit(type = RateLimitType.USER, capacity = 15, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.ai")
     public ResponseEntity<AiChatResponse> chat(
             @Valid @RequestBody AiChatRequest request,
@@ -59,6 +61,7 @@ public class AiController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/generate-schema")
+    @Idempotent
     @RateLimit(type = RateLimitType.USER, capacity = 10, duration = 1, unit = TimeUnit.MINUTES, messageKey = "rate_limit.error.ai")
     public ResponseEntity<AiSchemaResponse> generateSchema(
             @Valid @RequestBody AiSchemaRequest request,

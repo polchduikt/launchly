@@ -1,5 +1,6 @@
 package com.launchly.support.controller;
 
+import com.launchly.common.idempotency.Idempotent;
 import com.launchly.common.ratelimit.RateLimit;
 import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
@@ -38,6 +39,7 @@ public class SupportAppealController {
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/appeal")
+    @Idempotent
     @RateLimit(type = RateLimitType.IP, capacity = 3, duration = 1, unit = TimeUnit.HOURS, messageKey = "rate_limit.error.support_appeal")
     public ResponseEntity<Map<String, String>> submitAppeal(@Valid @RequestBody SupportAppealRequest request) {
         log.info("Received support appeal from {}: {}", request.getEmail(), request.getMessage());

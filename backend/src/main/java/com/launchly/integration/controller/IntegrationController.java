@@ -1,5 +1,6 @@
 package com.launchly.integration.controller;
 
+import com.launchly.common.idempotency.Idempotent;
 import com.launchly.common.exception.ErrorResponse;
 import com.launchly.common.security.CustomUserDetails;
 import com.launchly.integration.dto.ExportDataType;
@@ -67,6 +68,7 @@ public class IntegrationController {
             @ApiResponse(responseCode = "403", description = "Plan feature limit exceeded", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
+    @Idempotent
     public ResponseEntity<IntegrationResponse> createIntegration(@Valid @RequestBody IntegrationCreateRequest request,
                                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.status(HttpStatus.CREATED).body(integrationService.createIntegration(request, userDetails.getId()));
