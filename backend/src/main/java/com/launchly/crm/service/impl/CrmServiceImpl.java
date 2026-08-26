@@ -17,6 +17,7 @@ import com.launchly.crm.dto.response.OrderResponse;
 import com.launchly.crm.entity.Conversation;
 import com.launchly.crm.entity.Lead;
 import com.launchly.crm.entity.Message;
+import com.launchly.common.outbox.OutboxService;
 import com.launchly.crm.entity.Order;
 import com.launchly.crm.entity.SenderType;
 import com.launchly.crm.mapper.CrmMapper;
@@ -72,6 +73,7 @@ public class CrmServiceImpl implements CrmService {
     private final CrmLabelRepository crmLabelRepository;
     private final UserRepository userRepository;
     private final StringRedisTemplate stringRedisTemplate;
+    private final OutboxService outboxService;
 
     @Autowired
     public CrmServiceImpl(OrderRepository orderRepository,
@@ -90,7 +92,8 @@ public class CrmServiceImpl implements CrmService {
                           NotificationService notificationService,
                           CrmLabelRepository crmLabelRepository,
                           UserRepository userRepository,
-                          StringRedisTemplate stringRedisTemplate) {
+                          StringRedisTemplate stringRedisTemplate,
+                          @Autowired(required = false) OutboxService outboxService) {
         this.orderRepository = orderRepository;
         this.leadRepository = leadRepository;
         this.conversationRepository = conversationRepository;
@@ -108,6 +111,7 @@ public class CrmServiceImpl implements CrmService {
         this.crmLabelRepository = crmLabelRepository;
         this.userRepository = userRepository;
         this.stringRedisTemplate = stringRedisTemplate;
+        this.outboxService = outboxService;
     }
 
     @Override
@@ -147,6 +151,9 @@ public class CrmServiceImpl implements CrmService {
         }
 
         OrderResponse response = crmMapper.toOrderResponse(order);
+        if (outboxService != null) {
+            outboxService.publish("CRM_ORDER", String.valueOf(order.getId()), "ORDER_CREATED", response);
+        }
         webSocketService.notifyNewOrder(botId, response);
         return response;
     }
@@ -215,6 +222,9 @@ public class CrmServiceImpl implements CrmService {
         }
 
         LeadResponse response = crmMapper.toLeadResponse(lead);
+        if (outboxService != null) {
+            outboxService.publish("CRM_LEAD", String.valueOf(lead.getId()), "LEAD_CREATED", response);
+        }
         webSocketService.notifyNewLead(botId, response);
         return response;
     }

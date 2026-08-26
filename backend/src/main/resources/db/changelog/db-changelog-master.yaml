@@ -113,6 +113,9 @@ databaseChangeLog:
       file: db/changelog/changes/V056__add_optimistic_locking_version.sql
   - include:
       file: db/changelog/changes/V057__add_version_to_broadcast_support_blog_templates.sql
+  - include:
+      file: db/changelog/changes/V058__create_outbox_events_table.sql
+
 
 
 
