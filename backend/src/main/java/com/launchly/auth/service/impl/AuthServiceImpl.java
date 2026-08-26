@@ -52,17 +52,26 @@ public class AuthServiceImpl implements AuthService {
     @Value("${telegram.system-bot-username:}")
     private String systemBotUsername;
 
+    @Value("${app.security.super-admin-email:}")
+    private String superAdminEmail;
+
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new AppException(HttpStatus.CONFLICT, messageUtils.getMessage("auth.error.email_already_in_use"));
         }
+
+        Role role = Role.ROLE_OWNER;
+        if (superAdminEmail != null && !superAdminEmail.isBlank() && superAdminEmail.trim().equalsIgnoreCase(request.email().trim())) {
+            role = Role.ROLE_ADMIN;
+        }
+
         User user = User.builder()
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .name(request.name())
-                .role(Role.ROLE_OWNER)
+                .role(role)
                 .provider(Provider.LOCAL)
                 .active(true)
                 .emailVerified(false)
@@ -92,6 +101,13 @@ public class AuthServiceImpl implements AuthService {
 
         if (user.getPassword() == null || !passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new AppException(HttpStatus.UNAUTHORIZED, messageUtils.getMessage("auth.error.invalid_credentials"));
+        }
+
+        if (superAdminEmail != null && !superAdminEmail.isBlank() && superAdminEmail.trim().equalsIgnoreCase(user.getEmail().trim())) {
+            if (user.getRole() != Role.ROLE_ADMIN) {
+                user.setRole(Role.ROLE_ADMIN);
+                user = userRepository.save(user);
+            }
         }
 
         userAuditService.logLogin(user, user.getProvider() != null ? user.getProvider().name() : "LOCAL");

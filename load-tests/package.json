@@ -15,6 +15,13 @@
     "test:ai": "webpack && k6 run --out web-dashboard=export=reports/08-ai-report.html dist/08-ai-generation.bundle.js",
     "test:support": "webpack && k6 run --out web-dashboard=export=reports/09-support-report.html dist/09-support-chat.bundle.js",
     "test:integrations": "webpack && k6 run --out web-dashboard=export=reports/10-integrations-report.html dist/10-integrations.bundle.js",
+    "test:ratelimit": "webpack && k6 run --out web-dashboard=export=reports/11-ratelimit-report.html dist/11-rate-limiting.bundle.js",
+    "test:idempotency": "webpack && k6 run --out web-dashboard=export=reports/12-idempotency-report.html dist/12-idempotency.bundle.js",
+    "test:security": "webpack && k6 run --out web-dashboard=export=reports/13-security-report.html dist/13-security-headers.bundle.js",
+    "test:outbox": "webpack && k6 run --out web-dashboard=export=reports/14-outbox-report.html dist/14-transactional-outbox.bundle.js",
+    "test:batching": "webpack && k6 run --out web-dashboard=export=reports/15-batching-report.html dist/15-jdbc-batching.bundle.js",
+    "test:tierlimits": "webpack && k6 run --out web-dashboard=export=reports/16-tierlimits-report.html dist/16-tier-rate-limits.bundle.js",
+    "test:entitygraph": "webpack && k6 run --out web-dashboard=export=reports/17-entitygraph-report.html dist/17-deep-entity-graph.bundle.js",
     "test:all": "webpack && k6 run --out web-dashboard=export=reports/all-scenarios-report.html dist/all-scenarios.bundle.js"
   },
   "keywords": ["k6", "load-testing", "performance", "typescript", "launchly"],
