@@ -5,6 +5,7 @@ import com.launchly.billing.dto.response.CheckoutResponse;
 import com.launchly.billing.dto.response.PlanResponse;
 import com.launchly.billing.dto.response.SubscriptionResponse;
 import com.launchly.billing.service.BillingService;
+import com.launchly.common.idempotency.Idempotent;
 import com.launchly.common.ratelimit.RateLimit;
 import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
@@ -62,6 +63,7 @@ public class BillingController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/subscription/checkout")
+    @Idempotent
     @RateLimit(type = RateLimitType.USER, capacity = 10, duration = 1, unit = TimeUnit.MINUTES)
     public ResponseEntity<CheckoutResponse> checkout(@Valid @RequestBody CheckoutRequest request,
                                                      @AuthenticationPrincipal CustomUserDetails userDetails) {

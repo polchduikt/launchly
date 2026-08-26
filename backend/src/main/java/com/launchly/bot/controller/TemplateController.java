@@ -4,6 +4,7 @@ import com.launchly.bot.dto.request.CreateTemplateRequest;
 import com.launchly.bot.dto.request.UpdateTemplateRequest;
 import com.launchly.bot.dto.response.TemplateResponse;
 import com.launchly.bot.service.TemplateService;
+import com.launchly.common.idempotency.Idempotent;
 import com.launchly.common.ratelimit.RateLimit;
 import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
@@ -39,6 +40,7 @@ public class TemplateController {
             @ApiResponse(responseCode = "404", description = "Source bot not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/create")
+    @Idempotent
     public ResponseEntity<TemplateResponse> createTemplate(
             @RequestBody CreateTemplateRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -144,6 +146,7 @@ public class TemplateController {
             @ApiResponse(responseCode = "404", description = "Template not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/install/{shareCode}")
+    @Idempotent
     public ResponseEntity<Void> installTemplate(
             @Parameter(description = "Template unique share code") @PathVariable String shareCode,
             @Parameter(description = "Target bot ID") @RequestParam(required = false) Long botId,

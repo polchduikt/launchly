@@ -11,6 +11,7 @@ import com.launchly.bot.dto.response.BotStatsResponse;
 import com.launchly.bot.dto.response.BotUserResponse;
 import com.launchly.bot.dto.response.FlowSchemaResponse;
 import com.launchly.bot.service.BotService;
+import com.launchly.common.idempotency.Idempotent;
 import com.launchly.common.ratelimit.RateLimit;
 import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
@@ -56,6 +57,7 @@ public class BotController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
+    @Idempotent
     @RateLimit(type = RateLimitType.USER, capacity = 10, duration = 1, unit = TimeUnit.MINUTES)
     public ResponseEntity<BotResponse> createBot(@Valid @RequestBody BotCreateRequest request,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
