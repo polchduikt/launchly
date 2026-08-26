@@ -1,6 +1,7 @@
 package com.launchly.bot.repository;
 
 import com.launchly.bot.entity.InstalledTemplate;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,10 +18,17 @@ public interface InstalledTemplateRepository extends JpaRepository<InstalledTemp
     @Query("SELECT COUNT(it) > 0 FROM InstalledTemplate it WHERE it.user.id = :userId AND it.template.id = :templateId")
     boolean existsByUserIdAndTemplate_Id(@Param("userId") Long userId, @Param("templateId") Long templateId);
 
+    @EntityGraph(attributePaths = {"template", "template.creator", "bot"})
     Optional<InstalledTemplate> findByUserIdAndTemplateId(Long userId, Long templateId);
+
+    @Override
+    @EntityGraph(attributePaths = {"template", "template.creator", "bot"})
+    Optional<InstalledTemplate> findById(Long id);
     
+    @EntityGraph(attributePaths = {"template", "template.creator", "bot"})
     List<InstalledTemplate> findAllByUserIdOrderByCreatedAtDesc(Long userId);
     
+    @EntityGraph(attributePaths = {"template", "template.creator", "bot"})
     @Query("SELECT it FROM InstalledTemplate it WHERE it.user.id = :userId ORDER BY it.createdAt DESC")
     List<InstalledTemplate> findAllByUserIdOrderByInstalledAtDesc(@Param("userId") Long userId);
     
