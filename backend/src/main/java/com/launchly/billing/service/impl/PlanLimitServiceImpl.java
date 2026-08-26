@@ -96,12 +96,19 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     @Override
     @Transactional(readOnly = true)
     public void checkIntegrationAccess(Long userId) {
+        if (userRepository != null && userRepository.findById(userId).map(u -> u.getRole() == Role.ROLE_ADMIN).orElse(false)) {
+            return;
+        }
+        Plan plan = getActivePlan(userId);
+        if (!plan.isCanUseIntegrations()) {
+            throw new AppException(HttpStatus.PAYMENT_REQUIRED, "billing.error.integration_not_available");
+        }
     }
 
     @Override
     @Transactional(readOnly = true)
     public void checkAiAccess(Long userId) {
-        if (userRepository.findById(userId).map(u -> u.getRole() == Role.ROLE_ADMIN).orElse(false)) {
+        if (userRepository != null && userRepository.findById(userId).map(u -> u.getRole() == Role.ROLE_ADMIN).orElse(false)) {
             return;
         }
         Plan plan = getActivePlan(userId);
@@ -113,7 +120,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     @Override
     @Transactional(readOnly = true)
     public Plan getActivePlan(Long userId) {
-        if (userRepository.findById(userId).map(u -> u.getRole() == Role.ROLE_ADMIN).orElse(false)) {
+        if (userRepository != null && userRepository.findById(userId).map(u -> u.getRole() == Role.ROLE_ADMIN).orElse(false)) {
             return (Plan) Hibernate.unproxy(planRepository.findByName("ENTERPRISE")
                     .orElseGet(() -> planRepository.findByName("FREE")
                             .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found"))));
