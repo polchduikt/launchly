@@ -45,14 +45,20 @@ It serves as a full-scale technical showcase of building resilient, high-concurr
 - **Clean Architecture & Package-by-Feature Modular Design**
 - **PostgreSQL** (Relational data & native `JSONB` for graph storage)
 - **Liquibase**: Zero-downtime database migrations (54 versioned changelogs)
-- **Redis**: Fast distributed caching and token blacklist management
+- **Redis**: Distributed caching, token blacklist, tier rate limiting, and idempotency locks
+- **Transactional Outbox & DLQ**: Resilient asynchronous event delivery with retry backoff and Dead Letter Queue
+- **Distributed Idempotency Layer**: Redis-backed replay protection on all critical mutation endpoints
+- **Dynamic Tier-Based Rate Limiter**: Token-bucket algorithm with RFC headers and role-based quotas
+- **Enterprise Security Headers**: Strict HSTS, Content-Type Options, Frame Options, Referrer and Permissions policies
+- **GDPR & SOC2 PII Masking**: Automatic redacting of emails, phone numbers, and secrets in runtime logs
+- **JPA Deep Entity Graphs & JDBC Batching**: High-throughput statement batching (size=50) and N+1 query elimination
 - **Spring Security 7 & JWT**: Stateless authentication with HMAC-SHA256 and Google OAuth2 SSO
 - **Spring WebSockets & STOMP**: Low-latency bidirectional live chat streaming over SockJS
 - **Multi-Provider AI Router**: Dynamic failover across **Groq**, **Google Gemini**, **OpenRouter**, and **Cerebras**
 - **Cloudinary SDK**: Media processing, image transformations, and asset management
 - **Stripe Java SDK**: Recurring subscriptions, webhooks, and tier limit verification
 - **Resilience4j**: Circuit breakers, rate limiters, and retry pipelines
-- **Testcontainers & JaCoCo**: Hermetic PostgreSQL container testing (part of 700+ automated full-stack test suite)
+- **Testcontainers & JaCoCo**: Hermetic PostgreSQL container testing (part of 700+ automated test suite)
 
 ### Frontend — `frontend/`
 - **React 19 + TypeScript + Vite 8**
@@ -66,14 +72,22 @@ It serves as a full-scale technical showcase of building resilient, high-concurr
 - **Vitest & Testing Library**: Unit and component test suites with v8 coverage
 - **Playwright**: End-to-end browser automation suite
 
+### Load & Stress Testing — `load-tests/`
+- **Grafana k6 + TypeScript**: 17 automated high-concurrency performance and stress test scenarios
+- **Modular Test Harness**: Automated setup hooks, isolated multi-tenant VU pools, and HTML reporting dashboards
+
 ---
 
 ## Core Features
 
 - **Visual Bot Constructor**: Drag-and-drop conversational graph builder supporting Message, Menu, Action, Condition, and AI nodes.
 - **Omnichannel CRM & Live Inbox**: Two-way Telegram chat with live agent intervention, conversation search, and lead status pipelines.
+- **Transactional Outbox & Integrations**: Guaranteed at-least-once delivery for webhooks (Hotmart, e-commerce, CRM leads) with automatic retry backoff and DLQ tracking.
+- **Distributed Idempotency Protection**: Safe concurrent execution prevention for AI generation, campaign dispatches, team invites, and support appeals.
+- **Dynamic Tier Rate Limiting**: Multi-tenant token-bucket rate limiting per plan tier (`ROLE_OWNER`, `ROLE_PRO`, `ROLE_ENTERPRISE`, `ROLE_ADMIN`).
 - **AI-Powered Bot Generation**: Natural language prompt-to-bot generation with automatic JSON graph repair.
 - **Scheduled Broadcast Engine**: Mass cohort notifications with rich media, interactive buttons, and delivery analytics.
+- **Enterprise Security & Privacy**: Production security headers and zero-leakage GDPR/SOC2 PII log masking.
 - **Granular RBAC & Team Management**: Multi-tier roles (`ROLE_SUPER_ADMIN`, `ROLE_OWNER`, `ROLE_ADMIN`, `ROLE_MANAGER`) with email invites.
 - **Tiered Subscriptions & Stripe Billing**: Automatic plan quota enforcement (`PlanLimitService`) and customer portal management.
 - **Community Templates Marketplace**: Shareable bot flow codes with one-click installation.
@@ -87,9 +101,11 @@ Full specification & feature matrix: [docs/FEATURES.md](docs/FEATURES.md)
 This platform follows a decoupled Client-Server architecture.
 
 ### Backend Architecture
-- **Clean Architecture Monolith**: Structured as a modular package-by-feature codebase (`admin`, `ai`, `bot`, `crm`, `billing`, `broadcast`, `auth`).
+- **Clean Architecture Monolith**: Structured as a modular package-by-feature codebase (`admin`, `ai`, `bot`, `crm`, `billing`, `broadcast`, `auth`, `integration`, `common`).
+- **Transactional Outbox Pattern**: Decouples database state mutations from asynchronous event streaming and external webhooks.
 - **Resilient AI Router**: Automated fallback engine preventing downtime across external AI inference providers.
-- **JSONB Graph Persistence**: Combines relational integrity for users/orders with PostgreSQL JSONB for flexible bot schemas.
+- **JSONB Graph Persistence & Deep Entity Graphs**: High-speed graph serialization and N+1 query elimination under heavy concurrent read load.
+- **Automatic JDBC Batching**: Optimized batch size (50) and insert/update ordering for bulk writes and high-volume CRM ingestion.
 - **Hermetic Integration Tests**: Real PostgreSQL Testcontainers ensuring zero disparity between local development, CI, and production.
 
 Detailed backend architecture & ADRs: [docs/backend/ARCHITECTURE.md](docs/backend/ARCHITECTURE.md) | [docs/backend/decisions/README.md](docs/backend/decisions/README.md)
@@ -105,14 +121,16 @@ Detailed frontend architecture & ADRs: [docs/frontend/ARCHITECTURE.md](docs/fron
 - **Code Duplication Protection**: Enforces a strict maximum of **<= 6% code duplication** via `jscpd` across all Java backend and TypeScript/TSX frontend files, validated in CI.
 - **SonarCloud & JaCoCo**: Continuous inspection of code quality, security vulnerabilities, reliability rating, and test coverage on every push.
 - **Gitleaks Secret Scanning**: Automated secret scanning on every pull request and push to prevent credential leakage.
+- **Grafana k6 Load Testing**: 17 stress test scenarios validating SLAs, sub-millisecond query performance, and rate limit enforcement under 1,000+ RPS.
 
 ---
 
 ## Testing & Code Quality
 
-The platform undergoes rigorous automated testing and static analysis across both backend and frontend, boasting over **700+ automated tests**:
+The platform undergoes rigorous automated testing and static analysis across both backend and frontend, boasting over **700+ automated tests** and **17 k6 load scenarios**:
 
 - **700+ Automated Full-Stack Tests**: Complete test coverage spanning 389+ Spring Boot JUnit 5 & PostgreSQL Testcontainers integration/unit tests alongside 310+ Vitest, React Testing Library, and Playwright E2E tests.
+- **17 k6 Load & Stress Test Scenarios**: High-concurrency performance verification across Authentication, Telegram Webhooks, CRM Pipelines, AI Streaming, Transactional Outbox Ingress, JDBC Batching, Tier Rate Limits, and Deep Entity Graphs.
 - **JaCoCo Coverage**: Automated backend code coverage analysis reporting to SonarCloud.
 - **Vitest & Testing Library**: Component lifecycle, state mutations, and integration tests with v8 code coverage.
 - **ESLint & TypeScript Compiler**: Zero-warning strict typechecking gate.

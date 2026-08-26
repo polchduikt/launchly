@@ -120,3 +120,38 @@ mindmap
 - **Shareable Codes**: Generate unique public or protected share codes for any configured bot flow.
 - **One-Click Clone**: Instantly clone templates into a new bot instance including nodes, edges, tags, and broadcast templates.
 - **Analytics**: Track template views and install counts.
+
+---
+
+## 8. Transactional Outbox & Webhook Ingress Engine
+
+- **Guaranteed Delivery (At-Least-Once)**: Atomically stores integration events (Hotmart purchases, refunds, lead synchronizations) in PostgreSQL outbox table alongside domain mutations.
+- **Asynchronous Dispatcher**: Background worker dispatches outbox events with exponential backoff and jitter.
+- **Dead Letter Queue (DLQ)**: Automatically isolates unprocessable events after 5 failed retry attempts.
+- **Admin Outbox Inspector**: Real-time REST endpoints (`/api/v1/admin/outbox`) for searching, filtering, and manually retrying failed/dead-letter events.
+
+---
+
+## 9. Distributed Idempotency & Concurrency Protection
+
+- **Replay Prevention**: `@Idempotent` annotation and filter backed by Redis distributed locks (`idempotency:lock:`) and cached response storage (`idempotency:response:`).
+- **Protected Mutations**: AI bot generation, broadcast dispatches, team invitations, support appeals, and external webhook deliveries.
+- **Graceful Conflict Handling**: Returns HTTP 409 on active concurrent requests and transparently returns cached successful responses on retried client submissions.
+
+---
+
+## 10. Multi-Tenant Tier-Based Rate Limiting & Enterprise Security
+
+- **Token-Bucket Rate Limiter**: Per-user and per-IP dynamic request throttling powered by Bucket4j and Redis.
+- **Tier Capacities**: Dynamically scales request capacities according to subscription tier (`FREE`: 12,000 req/min, `PRO`: 30,000 req/min, `ENTERPRISE`: 60,000 req/min, `ADMIN`: 120,000 req/min).
+- **Standardized RFC Headers**: Emits `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, and `Retry-After`.
+- **Enterprise Security Headers**: Strict HSTS (`max-age=31536000; includeSubDomains; preload`), `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy`.
+- **Zero-Leakage PII Masking**: Real-time redaction of sensitive credentials, payment details, phone numbers, and email identifiers across all application log appenders for GDPR and SOC2 compliance.
+
+---
+
+## 11. High-Concurrency Performance & Stress Testing
+
+- **Deep Entity Graphs**: JPA `@EntityGraph` and `JOIN FETCH` queries eliminating N+1 SELECT latency under 200+ RPS read traffic.
+- **Automatic JDBC Batching**: Configured Hibernate statement batching (batch size = 50) and insert/update ordering for high-volume database writes.
+- **Automated k6 Test Suite**: 17 specialized TypeScript load and stress scenarios covering authentication bursts, Telegram webhook surges, CRM lead pipelines, AI generation, and entity graph traversal.
