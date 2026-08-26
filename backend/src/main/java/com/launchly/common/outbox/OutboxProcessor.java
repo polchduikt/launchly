@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -31,7 +30,6 @@ public class OutboxProcessor {
         }
     }
 
-    @Transactional
     public void processSingleEvent(OutboxEvent event) {
         try {
             boolean handled = false;
