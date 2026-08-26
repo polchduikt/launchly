@@ -11,6 +11,9 @@ import com.launchly.bot.dto.response.BotStatsResponse;
 import com.launchly.bot.dto.response.BotUserResponse;
 import com.launchly.bot.dto.response.FlowSchemaResponse;
 import com.launchly.bot.service.BotService;
+import com.launchly.common.idempotency.Idempotent;
+import com.launchly.common.ratelimit.RateLimit;
+import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
 import com.launchly.common.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Tag(name = "Bot: Management & Builder", description = "Telegram bot lifecycle, visual flow schemas, subscriber contacts, custom fields, and folders")
 @RestController
@@ -53,6 +57,8 @@ public class BotController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
+    @Idempotent
+    @RateLimit(type = RateLimitType.USER, capacity = 10, duration = 1, unit = TimeUnit.MINUTES)
     public ResponseEntity<BotResponse> createBot(@Valid @RequestBody BotCreateRequest request,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.status(HttpStatus.CREATED).body(botService.createBot(request, userDetails.getId()));
@@ -113,6 +119,7 @@ public class BotController {
             @ApiResponse(responseCode = "404", description = "Bot not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/{id}/start")
+    @RateLimit(type = RateLimitType.USER, capacity = 10, duration = 1, unit = TimeUnit.MINUTES)
     public ResponseEntity<BotResponse> startBot(@Parameter(description = "Bot ID") @PathVariable Long id,
                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(botService.startBot(id, userDetails.getId()));
@@ -135,6 +142,7 @@ public class BotController {
             @ApiResponse(responseCode = "404", description = "Bot not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/{id}/stop")
+    @RateLimit(type = RateLimitType.USER, capacity = 10, duration = 1, unit = TimeUnit.MINUTES)
     public ResponseEntity<BotResponse> stopBot(@Parameter(description = "Bot ID") @PathVariable Long id,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(botService.stopBot(id, userDetails.getId()));

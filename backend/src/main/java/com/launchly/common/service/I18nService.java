@@ -1,6 +1,7 @@
 package com.launchly.common.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -26,6 +27,7 @@ public class I18nService {
 
     private final ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
 
+    @Cacheable(value = "i18n", key = "#lang != null ? #lang : 'en'")
     public Map<String, String> getTranslations(String lang) {
         Map<String, String> translations = new HashMap<>();
         for (String pattern : BACKEND_FILES) {

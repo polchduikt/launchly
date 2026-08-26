@@ -9,6 +9,7 @@ import com.launchly.common.exception.AppException;
 import com.launchly.common.ratelimit.RateLimitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -24,6 +25,7 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
     private final FlowEngineService flowEngineService;
     private final TelegramBotManager telegramBotManager;
     private final RateLimitService rateLimitService;
+    private final StringRedisTemplate stringRedisTemplate;
 
     private static final ObjectMapper TELEGRAM_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -37,6 +39,16 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
 
         try {
             Update update = TELEGRAM_MAPPER.readValue(rawUpdate, Update.class);
+
+            if (update.getUpdateId() != null) {
+                String dedupKey = "telegram:update:" + botId + ":" + update.getUpdateId();
+                Boolean isNew = stringRedisTemplate.opsForValue().setIfAbsent(dedupKey, "1", Duration.ofSeconds(120));
+                if (Boolean.FALSE.equals(isNew)) {
+                    log.info("Duplicate Telegram update ignored: botId={}, updateId={}", botId, update.getUpdateId());
+                    return;
+                }
+            }
+
             Long telegramUserId = extractTelegramUserId(update);
             if (telegramUserId != null) {
                 String rateKey = "rate:tg:user:" + botId + ":" + telegramUserId;

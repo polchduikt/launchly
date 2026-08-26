@@ -43,6 +43,8 @@ import com.launchly.bot.validator.FlowSchemaValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -131,6 +133,7 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "bots", key = "#userId")
     public List<BotResponse> getBotsByUser(Long userId) {
         List<Bot> ownedBots = botRepository.findAllByUserId(userId);
         List<BotMember> memberships = botMemberRepository.findByUserId(userId);
@@ -240,7 +243,10 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "bots", key = "#userId")
+    @Caching(evict = {
+            @CacheEvict(value = "bots", key = "#userId"),
+            @CacheEvict(value = "flow_schemas", key = "#id")
+    })
     public void deleteBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
         botAccessValidator.validateWriteAccess(bot, userId);
@@ -303,7 +309,10 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "bots", key = "#userId")
+    @Caching(evict = {
+            @CacheEvict(value = "bots", key = "#userId"),
+            @CacheEvict(value = "flow_schemas", key = "#id")
+    })
     public BotResponse publishBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
         botAccessValidator.validateWriteAccess(bot, userId);
@@ -368,6 +377,7 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional
+    @Cacheable(value = "flow_schemas", key = "#botId")
     public FlowSchemaResponse getFlowSchema(Long botId, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
         FlowSchema schema = flowSchemaRepository.findByBotId(bot.getId())
@@ -377,6 +387,7 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "flow_schemas", key = "#botId")
     public FlowSchemaResponse saveFlowSchema(Long botId, FlowSchemaRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
         botAccessValidator.validateWriteAccess(bot, userId);
@@ -390,14 +401,11 @@ public class BotServiceImpl implements BotService {
 
         schema.setNodes(toJsonString(nodesNode));
         schema.setEdges(toJsonString(edgesNode));
-        schema.setVersion(schema.getVersion() + 1);
 
         schema = flowSchemaRepository.save(schema);
         redisTemplate.delete("launchly:bot:schema:" + botId);
 
-        bot.setUpdatedAt(LocalDateTime.now());
-
-        userAuditService.logAutomationModified(bot.getUser(), bot.getId(), bot.getName(), bot.getUpdatedAt());
+        userAuditService.logAutomationModified(bot.getUser(), bot.getId(), bot.getName(), LocalDateTime.now());
         if (!bot.isActive()) {
             boolean hasRealToken = false;
             try {
@@ -415,12 +423,13 @@ public class BotServiceImpl implements BotService {
                 try {
                     telegramBotManager.registerBot(bot);
                     bot.setActive(true);
+                    bot.setUpdatedAt(LocalDateTime.now());
+                    botRepository.save(bot);
                 } catch (Exception e) {
                     log.error("Failed to register bot: {}", e.getMessage(), e);
                 }
             }
         }
-        botRepository.save(bot);
 
         return toFlowSchemaResponse(schema);
     }

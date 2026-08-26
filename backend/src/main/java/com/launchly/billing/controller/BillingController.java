@@ -5,6 +5,9 @@ import com.launchly.billing.dto.response.CheckoutResponse;
 import com.launchly.billing.dto.response.PlanResponse;
 import com.launchly.billing.dto.response.SubscriptionResponse;
 import com.launchly.billing.service.BillingService;
+import com.launchly.common.idempotency.Idempotent;
+import com.launchly.common.ratelimit.RateLimit;
+import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;
 import com.launchly.common.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Tag(name = "Billing: Plans & Subscriptions", description = "Subscription tiers, Stripe Checkout session management, and plan lifecycle operations")
 @RestController
@@ -59,6 +63,8 @@ public class BillingController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/subscription/checkout")
+    @Idempotent
+    @RateLimit(type = RateLimitType.USER, capacity = 10, duration = 1, unit = TimeUnit.MINUTES)
     public ResponseEntity<CheckoutResponse> checkout(@Valid @RequestBody CheckoutRequest request,
                                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(billingService.createCheckoutSession(request.planId(), userDetails.getId()));
@@ -71,6 +77,7 @@ public class BillingController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/subscription/cancel")
+    @RateLimit(type = RateLimitType.USER, capacity = 5, duration = 1, unit = TimeUnit.MINUTES)
     public ResponseEntity<SubscriptionResponse> cancelSubscription(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(billingService.cancelSubscription(userDetails.getId()));
     }
@@ -82,6 +89,7 @@ public class BillingController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/subscription/resume")
+    @RateLimit(type = RateLimitType.USER, capacity = 5, duration = 1, unit = TimeUnit.MINUTES)
     public ResponseEntity<SubscriptionResponse> resumeSubscription(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(billingService.resumeSubscription(userDetails.getId()));
     }

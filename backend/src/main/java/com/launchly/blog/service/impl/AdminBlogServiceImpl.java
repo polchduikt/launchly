@@ -15,6 +15,7 @@ import com.launchly.common.utils.MessageUtils;
 import com.launchly.common.utils.SlugUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +49,7 @@ public class AdminBlogServiceImpl implements AdminBlogService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"blog_articles", "blog_article"}, allEntries = true)
     public BlogArticleDto createArticle(SaveBlogArticleRequest request, String currentUserEmail) {
         String slug = SlugUtils.generateOrSanitizeSlug(request.getId(), request.getTitle());
 
@@ -101,6 +103,7 @@ public class AdminBlogServiceImpl implements AdminBlogService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"blog_articles", "blog_article"}, allEntries = true)
     public BlogArticleDto updateArticle(String id, SaveBlogArticleRequest request) {
         BlogArticle article = findArticleOrThrow(id);
 
@@ -121,7 +124,7 @@ public class AdminBlogServiceImpl implements AdminBlogService {
         }
         if (request.getReadTime() != null && !request.getReadTime().isBlank()) {
             article.setReadTime(request.getReadTime().trim());
-        } else {
+        } else if (request.getSummary() != null || request.getContentBlocks() != null) {
             article.setReadTime(BlogUtils.calculateReadTime(
                     request.getSummary() != null ? request.getSummary() : article.getSummary(),
                     request.getContentBlocks(),
@@ -129,10 +132,10 @@ public class AdminBlogServiceImpl implements AdminBlogService {
             ));
         }
 
-        if (request.getSummary() != null) {
+        if (request.getSummary() != null && !request.getSummary().isBlank()) {
             article.setSummary(request.getSummary().trim());
         }
-        if (request.getCoverImage() != null) {
+        if (request.getCoverImage() != null && !request.getCoverImage().isBlank()) {
             article.setCoverImage(request.getCoverImage().trim());
         }
         if (request.getTags() != null) {
@@ -149,6 +152,7 @@ public class AdminBlogServiceImpl implements AdminBlogService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"blog_articles", "blog_article"}, allEntries = true)
     public void deleteArticle(String id) {
         String cleanId = id != null ? id.trim() : "";
         if (cleanId.isEmpty()) {

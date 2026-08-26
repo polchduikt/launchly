@@ -22,7 +22,7 @@ public class CacheConfig {
     public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration
                 .defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(5))
+                .entryTtl(Duration.ofMinutes(10))
                 .serializeKeysWith(
                     RedisSerializationContext.SerializationPair
                         .fromSerializer(new StringRedisSerializer()))
@@ -30,11 +30,18 @@ public class CacheConfig {
                     RedisSerializationContext.SerializationPair
                         .fromSerializer(GenericJacksonJsonRedisSerializer.builder().enableUnsafeDefaultTyping().build()));
 
-        Map<String, RedisCacheConfiguration> configs = Map.of(
-            "subscription", defaultConfig.entryTtl(Duration.ofMinutes(10)),
-            "plan",         defaultConfig.entryTtl(Duration.ofMinutes(60)),
-            "bots",         defaultConfig.entryTtl(Duration.ofMinutes(5)),
-            "tags",         defaultConfig.entryTtl(Duration.ofMinutes(5))
+        Map<String, RedisCacheConfiguration> configs = Map.ofEntries(
+            Map.entry("plans",         defaultConfig.entryTtl(Duration.ofHours(24))),
+            Map.entry("plan",          defaultConfig.entryTtl(Duration.ofHours(24))),
+            Map.entry("flow_schemas",  defaultConfig.entryTtl(Duration.ofHours(1))),
+            Map.entry("admin_stats",   defaultConfig.entryTtl(Duration.ofMinutes(5))),
+            Map.entry("subscription",  defaultConfig.entryTtl(Duration.ofMinutes(30))),
+            Map.entry("bots",          defaultConfig.entryTtl(Duration.ofMinutes(10))),
+            Map.entry("tags",          defaultConfig.entryTtl(Duration.ofMinutes(10))),
+            Map.entry("blog_articles", defaultConfig.entryTtl(Duration.ofHours(1))),
+            Map.entry("blog_article",  defaultConfig.entryTtl(Duration.ofHours(2))),
+            Map.entry("templates",     defaultConfig.entryTtl(Duration.ofHours(2))),
+            Map.entry("i18n",          defaultConfig.entryTtl(Duration.ofHours(24)))
         );
 
         return RedisCacheManager.builder(factory)

@@ -14,6 +14,13 @@ module.exports = {
     '08-ai-generation': path.resolve(__dirname, 'src/scenarios/08-ai-generation-load.test.ts'),
     '09-support-chat': path.resolve(__dirname, 'src/scenarios/09-live-chat-support.test.ts'),
     '10-integrations': path.resolve(__dirname, 'src/scenarios/10-integrations-webhooks.test.ts'),
+    '11-rate-limiting': path.resolve(__dirname, 'src/scenarios/11-rate-limiting.test.ts'),
+    '12-idempotency': path.resolve(__dirname, 'src/scenarios/12-idempotency-concurrency.test.ts'),
+    '13-security-headers': path.resolve(__dirname, 'src/scenarios/13-security-headers.test.ts'),
+    '14-transactional-outbox': path.resolve(__dirname, 'src/scenarios/14-transactional-outbox.test.ts'),
+    '15-jdbc-batching': path.resolve(__dirname, 'src/scenarios/15-jdbc-batching-pool.test.ts'),
+    '16-tier-rate-limits': path.resolve(__dirname, 'src/scenarios/16-tier-rate-limits.test.ts'),
+    '17-deep-entity-graph': path.resolve(__dirname, 'src/scenarios/17-deep-entity-graph.test.ts'),
     'all-scenarios': path.resolve(__dirname, 'src/scenarios/all-scenarios.test.ts'),
   },
   output: {

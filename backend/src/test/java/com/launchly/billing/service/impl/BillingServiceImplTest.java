@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -52,6 +53,9 @@ class BillingServiceImplTest {
 
     @Mock
     private PlanLimitService planLimitService;
+
+    @Mock
+    private StringRedisTemplate stringRedisTemplate;
 
     @InjectMocks
     private BillingServiceImpl billingService;
@@ -178,5 +182,29 @@ class BillingServiceImplTest {
         assertThatThrownBy(() -> billingService.resumeSubscription(1L))
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    @DisplayName("Should throw ServiceUnavailable when Stripe createCheckoutSession fallback is triggered")
+    void createCheckoutSessionFallback_ThrowsServiceUnavailable() {
+        assertThatThrownBy(() -> billingService.createCheckoutSessionFallback(1L, 1L, new RuntimeException("Stripe is down")))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    @Test
+    @DisplayName("Should throw ServiceUnavailable when Stripe cancelSubscription fallback is triggered")
+    void cancelSubscriptionFallback_ThrowsServiceUnavailable() {
+        assertThatThrownBy(() -> billingService.cancelSubscriptionFallback(1L, new RuntimeException("Stripe is down")))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    @Test
+    @DisplayName("Should throw ServiceUnavailable when Stripe resumeSubscription fallback is triggered")
+    void resumeSubscriptionFallback_ThrowsServiceUnavailable() {
+        assertThatThrownBy(() -> billingService.resumeSubscriptionFallback(1L, new RuntimeException("Stripe is down")))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.SERVICE_UNAVAILABLE);
     }
 }

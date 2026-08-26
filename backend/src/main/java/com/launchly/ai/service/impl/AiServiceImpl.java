@@ -16,6 +16,10 @@ import com.launchly.billing.entity.Plan;
 import com.launchly.billing.service.PlanLimitService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import com.launchly.common.exception.AppException;
+import org.springframework.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -62,6 +66,8 @@ public class AiServiceImpl implements AiService {
     }
 
     @Override
+    @CircuitBreaker(name = "aiProvider", fallbackMethod = "chatFallback")
+    @Retry(name = "aiProvider")
     public AiChatResponse chat(AiChatRequest request, Long userId) {
         Plan plan = planLimitService.getActivePlan(userId);
         aiUsageService.checkTokenLimit(userId, plan);
@@ -83,6 +89,8 @@ public class AiServiceImpl implements AiService {
     }
 
     @Override
+    @CircuitBreaker(name = "aiProvider", fallbackMethod = "generateSchemaFallback")
+    @Retry(name = "aiProvider")
     public AiSchemaResponse generateSchema(AiSchemaRequest request, Long userId) {
         Plan plan = planLimitService.getActivePlan(userId);
         aiUsageService.checkTokenLimit(userId, plan);
@@ -118,11 +126,27 @@ public class AiServiceImpl implements AiService {
             nodesNode = AiSchemaUtils.normalizeUsernameActions(nodesNode);
         }
 
-        int estimatedTokens = Math.max(1200, (schemaSystemPrompt.length() + request.description().length() + cleanJson.length()) / 3);
+        int estimatedTokens = Math.max(1000, (schemaSystemPrompt.length() + request.description().length() + rawResponse.length()) / 3);
         aiUsageService.recordTokenUsage(userId, plan, estimatedTokens);
 
         AiUsageResponse usage = aiUsageService.getUsage(userId, plan);
         return new AiSchemaResponse(nodesNode, edgesNode, usage);
+    }
+
+    public AiChatResponse chatFallback(AiChatRequest request, Long userId, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("AI chat fallback triggered for userId {}: {}", userId, t.getMessage());
+        throw new AppException(HttpStatus.SERVICE_UNAVAILABLE, "ai.error.provider_unavailable");
+    }
+
+    public AiSchemaResponse generateSchemaFallback(AiSchemaRequest request, Long userId, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("AI generateSchema fallback triggered for userId {}: {}", userId, t.getMessage());
+        throw new AppException(HttpStatus.SERVICE_UNAVAILABLE, "ai.error.provider_unavailable");
     }
 
     @Override

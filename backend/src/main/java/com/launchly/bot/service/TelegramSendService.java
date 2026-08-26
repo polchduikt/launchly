@@ -1,11 +1,15 @@
 package com.launchly.bot.service;
 
 import com.launchly.bot.telegram.TelegramBotManager;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
@@ -20,7 +24,8 @@ public class TelegramSendService {
         this.botManager = botManager;
     }
 
-
+    @CircuitBreaker(name = "telegram", fallbackMethod = "sendMessageFallback")
+    @Retry(name = "telegram")
     public void sendMessage(Long botId, Long telegramUserId, String text) {
         TelegramClient client = botManager.getTelegramClient(botId);
         if (client == null) {
@@ -38,6 +43,8 @@ public class TelegramSendService {
         }
     }
 
+    @CircuitBreaker(name = "telegram", fallbackMethod = "sendPhotoFallback")
+    @Retry(name = "telegram")
     public void sendPhoto(Long botId, Long telegramUserId, String photoUrl, String caption) {
         TelegramClient client = botManager.getTelegramClient(botId);
         if (client == null) {
@@ -45,9 +52,9 @@ public class TelegramSendService {
             return;
         }
         try {
-            org.telegram.telegrambots.meta.api.methods.send.SendPhoto sendPhoto = org.telegram.telegrambots.meta.api.methods.send.SendPhoto.builder()
+            SendPhoto sendPhoto = SendPhoto.builder()
                     .chatId(telegramUserId.toString())
-                    .photo(new org.telegram.telegrambots.meta.api.objects.InputFile(photoUrl))
+                    .photo(new InputFile(photoUrl))
                     .caption(caption != null ? caption : "")
                     .build();
             client.execute(sendPhoto);
@@ -55,5 +62,13 @@ public class TelegramSendService {
         } catch (TelegramApiException e) {
             log.error("Failed to send photo to user {} from bot {}: {}", telegramUserId, botId, e.getMessage());
         }
+    }
+
+    public void sendMessageFallback(Long botId, Long telegramUserId, String text, Throwable t) {
+        log.warn("Telegram sendMessage fallback triggered for botId={}, userId={}: {}", botId, telegramUserId, t.getMessage());
+    }
+
+    public void sendPhotoFallback(Long botId, Long telegramUserId, String photoUrl, String caption, Throwable t) {
+        log.warn("Telegram sendPhoto fallback triggered for botId={}, userId={}: {}", botId, telegramUserId, t.getMessage());
     }
 }

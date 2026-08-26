@@ -15,6 +15,8 @@ import com.launchly.billing.service.BillingService;
 import com.launchly.billing.service.PlanLimitService;
 import com.launchly.billing.util.StripeUtils;
 import com.launchly.common.exception.AppException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import com.stripe.Stripe;
 import com.stripe.model.Event;
 import com.stripe.model.Invoice;
@@ -32,9 +34,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +54,7 @@ public class BillingServiceImpl implements BillingService {
     private final BillingMapper billingMapper;
     private final CacheManager cacheManager;
     private final PlanLimitService planLimitService;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Value("${stripe.api.key:}")
     private String apiKey;
@@ -94,6 +99,7 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "plans", key = "'all'")
     public List<PlanResponse> getAvailablePlans() {
         return billingMapper.toPlanResponseList(
                 planRepository.findAll().stream().filter(Plan::isActive).toList()
@@ -115,6 +121,8 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     @Transactional
+    @CircuitBreaker(name = "stripe", fallbackMethod = "createCheckoutSessionFallback")
+    @Retry(name = "stripe")
     public CheckoutResponse createCheckoutSession(Long planId, Long userId) {
         User user = userQueryService.getUserOrThrow(userId);
 
@@ -171,6 +179,8 @@ public class BillingServiceImpl implements BillingService {
         @CacheEvict(value = "subscription", key = "#userId"),
         @CacheEvict(value = "subscription", key = "'plan:' + #userId")
     })
+    @CircuitBreaker(name = "stripe", fallbackMethod = "cancelSubscriptionFallback")
+    @Retry(name = "stripe")
     public SubscriptionResponse cancelSubscription(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
@@ -203,6 +213,8 @@ public class BillingServiceImpl implements BillingService {
         @CacheEvict(value = "subscription", key = "#userId"),
         @CacheEvict(value = "subscription", key = "'plan:' + #userId")
     })
+    @CircuitBreaker(name = "stripe", fallbackMethod = "resumeSubscriptionFallback")
+    @Retry(name = "stripe")
     public SubscriptionResponse resumeSubscription(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
@@ -227,6 +239,30 @@ public class BillingServiceImpl implements BillingService {
             log.error("Stripe resume error for subscriptionId={}: {}", stripeSubId, e.getMessage(), e);
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.resume_failed");
         }
+    }
+
+    public CheckoutResponse createCheckoutSessionFallback(Long planId, Long userId, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("Stripe createCheckoutSession fallback triggered for userId={}: {}", userId, t.getMessage());
+        throw new AppException(HttpStatus.SERVICE_UNAVAILABLE, "billing.error.stripe_unavailable");
+    }
+
+    public SubscriptionResponse cancelSubscriptionFallback(Long userId, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("Stripe cancelSubscription fallback triggered for userId={}: {}", userId, t.getMessage());
+        throw new AppException(HttpStatus.SERVICE_UNAVAILABLE, "billing.error.stripe_unavailable");
+    }
+
+    public SubscriptionResponse resumeSubscriptionFallback(Long userId, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("Stripe resumeSubscription fallback triggered for userId={}: {}", userId, t.getMessage());
+        throw new AppException(HttpStatus.SERVICE_UNAVAILABLE, "billing.error.stripe_unavailable");
     }
 
     @Override
@@ -288,6 +324,15 @@ public class BillingServiceImpl implements BillingService {
         }
 
         log.info("Received Stripe webhook event: {}", event.getType());
+
+        if (event.getId() != null) {
+            String dedupKey = "stripe:event:" + event.getId();
+            Boolean isNew = stringRedisTemplate.opsForValue().setIfAbsent(dedupKey, "1", Duration.ofDays(3));
+            if (Boolean.FALSE.equals(isNew)) {
+                log.info("Duplicate Stripe webhook event ignored: {}", event.getId());
+                return;
+            }
+        }
 
         try {
             StripeObject stripeObject = deserializeEventObject(event);

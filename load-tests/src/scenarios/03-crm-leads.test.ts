@@ -10,35 +10,48 @@ export const options: Options = {
   thresholds: THRESHOLDS.DATABASE_WRITE,
 };
 
-let cachedAuth: { token: string; botId: number } | null = null;
+interface TestContext {
+  token: string;
+  botId: number;
+}
 
-function ensureAuth(vuId: number): { token: string; botId: number } | null {
-  if (cachedAuth) return cachedAuth;
-
-  const email = `crm_scale_${vuId}@launchly-scale.com`;
+export function setup(): TestContext {
+  const email = 'crm_perf_tester@launchly.com';
   const password = ENV.DEFAULT_PASSWORD;
 
-  const loginRes = http.post(
-    API_ENDPOINTS.AUTH.LOGIN,
-    JSON.stringify({ email, password }),
+  const regRes = http.post(
+    API_ENDPOINTS.AUTH.REGISTER,
+    JSON.stringify({ email, name: 'CRM User', password }),
     { headers: { 'Content-Type': 'application/json' } }
   );
 
   let token: string | null = null;
-  if (loginRes.status === 200) {
+  if (regRes.status === 200 || regRes.status === 201) {
     try {
-      token = JSON.parse(loginRes.body as string).accessToken;
+      token = JSON.parse(regRes.body as string).accessToken;
     } catch {}
-  } else {
-    token = AuthHelper.register(email, `CRM Owner ${vuId}`, password);
   }
 
-  if (!token) return null;
+  if (!token) {
+    const loginRes = http.post(
+      API_ENDPOINTS.AUTH.LOGIN,
+      JSON.stringify({ email, password }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    if (loginRes.status === 200) {
+      try {
+        token = JSON.parse(loginRes.body as string).accessToken;
+      } catch {}
+    }
+  }
 
-  const botsRes = http.get(API_ENDPOINTS.BOTS.LIST, {
-    headers: AuthHelper.getAuthHeaders(token),
-  });
+  if (!token) {
+    throw new Error('Failed to obtain authentication token during setup');
+  }
 
+  const authHeaders = AuthHelper.getAuthHeaders(token);
+
+  const botsRes = http.get(API_ENDPOINTS.BOTS.LIST, { headers: authHeaders });
   let botId: number | null = null;
   if (botsRes.status === 200) {
     try {
@@ -53,10 +66,10 @@ function ensureAuth(vuId: number): { token: string; botId: number } | null {
     const createBotRes = http.post(
       API_ENDPOINTS.BOTS.CREATE,
       JSON.stringify({
-        name: `CRM Bot ${vuId}`,
-        telegramToken: `10000${vuId}:ABCdefGhIJKlmNoPQRsTUVwxyZ123456789`,
+        name: 'CRM Perf Bot',
+        description: 'Bot for CRM load testing',
       }),
-      { headers: AuthHelper.getAuthHeaders(token) }
+      { headers: authHeaders }
     );
     if (createBotRes.status === 200 || createBotRes.status === 201) {
       try {
@@ -65,23 +78,23 @@ function ensureAuth(vuId: number): { token: string; botId: number } | null {
     }
   }
 
-  cachedAuth = { token, botId: botId || 1 };
-  return cachedAuth;
-}
-
-export default function () {
-  const vuId = __VU;
-  const iter = __ITER;
-  const auth = ensureAuth(vuId);
-
-  if (!auth) {
-    sleep(1);
-    return;
+  if (!botId) {
+    throw new Error('Failed to obtain or create bot for CRM testing');
   }
 
-  const headers = AuthHelper.getAuthHeaders(auth.token);
+  return {
+    token,
+    botId,
+  };
+}
 
-  const leadsRes = http.get(API_ENDPOINTS.CRM.LEADS(String(auth.botId)), {
+export default function (data?: TestContext) {
+  const vuId = __VU;
+  const iter = __ITER;
+  const ctx = data || setup();
+  const headers = AuthHelper.getAuthHeaders(ctx.token);
+
+  const leadsRes = http.get(API_ENDPOINTS.CRM.LEADS(String(ctx.botId)), {
     headers,
     tags: { name: 'CRM_Get_Leads' },
   });
@@ -90,7 +103,7 @@ export default function () {
     'crm leads returns 200': (r) => r.status === 200,
   });
 
-  const convRes = http.get(API_ENDPOINTS.CRM.CONVERSATIONS(String(auth.botId)), {
+  const convRes = http.get(API_ENDPOINTS.CRM.CONVERSATIONS(String(ctx.botId)), {
     headers,
     tags: { name: 'CRM_Get_Conversations' },
   });
@@ -102,7 +115,7 @@ export default function () {
   if (iter % 5 === 0) {
     const labelRes = http.post(
       `${ENV.BASE_URL}${ENV.API_PREFIX}/crm/labels`,
-      JSON.stringify({ name: `VIP_${vuId}` }),
+      JSON.stringify({ name: `VIP_${vuId}_${iter}` }),
       {
         headers,
         tags: { name: 'CRM_Add_Label' },
@@ -110,9 +123,9 @@ export default function () {
     );
 
     check(labelRes, {
-      'add crm label returns 200': (r) => r.status === 200,
+      'add crm label returns 200 or 201': (r) => r.status === 200 || r.status === 201,
     });
   }
 
-  sleep(1);
+  sleep(0.5);
 }

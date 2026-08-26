@@ -1,7 +1,7 @@
 package com.launchly.bot.telegram;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.launchly.bot.service.FlowEngineService;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.repository.BotRepository;
@@ -76,14 +76,14 @@ public class TelegramBotManager {
             } catch (Exception e) {
                 log.error("Error during background bots startup: {}", e.getMessage());
             }
-        });
+        }).start();
     }
 
-    public void registerBot(Bot bot) {
+    public synchronized void registerBot(Bot bot) {
         if (bot == null || bot.getId() == null) {
             return;
         }
-        if (activeBots.containsKey(bot.getId()) || telegramClients.containsKey(bot.getId())) {
+        if (activeBots.containsKey(bot.getId())) {
             return;
         }
 

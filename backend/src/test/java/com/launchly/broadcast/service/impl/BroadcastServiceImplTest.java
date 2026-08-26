@@ -25,6 +25,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import tools.jackson.databind.ObjectMapper;
@@ -74,6 +76,12 @@ class BroadcastServiceImplTest {
     @Mock
     private BotMemberRepository botMemberRepository;
 
+    @Mock
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Mock
+    private ValueOperations<String, String> valueOperations;
+
     @InjectMocks
     private BroadcastServiceImpl broadcastService;
 
@@ -83,6 +91,8 @@ class BroadcastServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        lenient().when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
         testUser = User.builder().email("owner@launchly.pro").name("Owner").build();
         ReflectionTestUtils.setField(testUser, "id", 1L);
 
@@ -228,6 +238,7 @@ class BroadcastServiceImplTest {
     void sendNow_WhenAlreadyInProgress_ThrowsBadRequest() {
         testCampaign.setStatus(CampaignStatus.IN_PROGRESS);
         when(campaignRepository.findById(100L)).thenReturn(Optional.of(testCampaign));
+        when(stringRedisTemplate.hasKey(anyString())).thenReturn(true);
 
         assertThatThrownBy(() -> broadcastService.sendNow(100L, 1L))
                 .isInstanceOf(AppException.class)

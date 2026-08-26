@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +21,8 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "bots", indexes = {
     @Index(name = "idx_bots_user_id", columnList = "user_id"),
-    @Index(name = "idx_bots_active", columnList = "is_active")
+    @Index(name = "idx_bots_active", columnList = "is_active"),
+    @Index(name = "idx_bots_user_updated", columnList = "user_id, updated_at DESC")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -28,6 +30,9 @@ import org.hibernate.type.SqlTypes;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Bot extends BaseEntity {
+
+    @Version
+    private Long version;
 
     @Column(name = "name", nullable = false, length = 500)
     private String name;

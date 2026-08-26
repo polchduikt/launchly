@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +26,9 @@ import org.hibernate.type.SqlTypes;
     @Index(name = "idx_leads_bot_id", columnList = "bot_id"),
     @Index(name = "idx_leads_bot_user_id", columnList = "bot_user_id"),
     @Index(name = "idx_leads_status", columnList = "status"),
-    @Index(name = "idx_leads_created_at", columnList = "created_at DESC")
+    @Index(name = "idx_leads_created_at", columnList = "created_at DESC"),
+    @Index(name = "idx_leads_bot_created", columnList = "bot_id, created_at DESC"),
+    @Index(name = "idx_leads_bot_user_bot", columnList = "bot_user_id, bot_id")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -33,6 +36,9 @@ import org.hibernate.type.SqlTypes;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Lead extends BaseEntity {
+
+    @Version
+    private Long version;
 
     private String name;
 

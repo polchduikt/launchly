@@ -20,7 +20,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "tags", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"bot_id", "name"})
 }, indexes = {
-        @Index(name = "idx_tags_bot_id", columnList = "bot_id")
+        @Index(name = "idx_tags_bot_id", columnList = "bot_id"),
+        @Index(name = "idx_tags_bot_created", columnList = "bot_id, created_at DESC")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)

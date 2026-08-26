@@ -147,11 +147,12 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
 
             if (update.hasMessage() && update.getMessage().hasText()
-                    && "/start".equals(update.getMessage().getText().trim())) {
+                    && update.getMessage().getText().trim().startsWith("/start")) {
                 stateService.clearActiveCampaignId(botId, telegramUserId);
                 stateService.setCurrentNodeId(botId, telegramUserId, null);
                 callStackManager.clear(botId, telegramUserId);
                 callStackManager.setExecutingBotId(botId, telegramUserId, botId);
+                redisTemplate.delete("launchly:bot:data_collection:" + botId + ":" + telegramUserId);
                 botUser.setCurrentNodeId(null);
                 botUser = botUserRepository.save(botUser);
             }

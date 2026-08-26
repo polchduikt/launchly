@@ -6,13 +6,18 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "account_templates")
+@Table(name = "account_templates", indexes = {
+    @Index(name = "idx_account_templates_creator_created", columnList = "creator_id, created_at DESC")
+})
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccountTemplate extends BaseEntity {
+
+    @Version
+    private Long version;
 
     @Column(name = "share_code", nullable = false, unique = true)
     private String shareCode;

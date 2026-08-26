@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +25,8 @@ import java.time.LocalDateTime;
 @Table(name = "broadcast_campaigns", indexes = {
     @Index(name = "idx_broadcast_campaigns_bot_id", columnList = "bot_id"),
     @Index(name = "idx_broadcast_campaigns_status", columnList = "status"),
-    @Index(name = "idx_broadcast_scheduled", columnList = "status, scheduled_at")
+    @Index(name = "idx_broadcast_scheduled", columnList = "status, scheduled_at"),
+    @Index(name = "idx_broadcast_bot_status_created", columnList = "bot_id, status, created_at DESC")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -32,6 +34,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BroadcastCampaign extends BaseEntity {
+
+    @Version
+    private Long version;
 
     @Column(nullable = false)
     private String name;

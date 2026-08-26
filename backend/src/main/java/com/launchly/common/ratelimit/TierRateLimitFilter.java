@@ -112,16 +112,16 @@ public class TierRateLimitFilter extends OncePerRequestFilter {
         for (GrantedAuthority authority : auth.getAuthorities()) {
             String role = authority.getAuthority();
             if ("ROLE_ADMIN".equals(role) || "ROLE_SUPER_ADMIN".equals(role)) {
-                return 2400;
+                return 120000;
             }
             if ("ROLE_ENTERPRISE".equals(role)) {
-                return 1200;
+                return 60000;
             }
             if ("ROLE_PRO".equals(role)) {
-                return 600;
+                return 30000;
             }
         }
-        return 120;
+        return 12000;
     }
 
     private String extractClientIp(HttpServletRequest request) {

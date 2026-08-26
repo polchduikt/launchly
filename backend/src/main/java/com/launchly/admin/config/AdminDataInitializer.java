@@ -22,25 +22,22 @@ public class AdminDataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        if (superAdminEmail == null || superAdminEmail.isBlank()) {
-            log.warn("No app.security.super-admin-email configured.");
-            return;
+        if (superAdminEmail != null && !superAdminEmail.isBlank()) {
+            String targetEmail = superAdminEmail.trim();
+            log.info("AdminDataInitializer running. Checking super admin email: [{}]", targetEmail);
+
+            userRepository.findByEmailIgnoreCase(targetEmail).ifPresentOrElse(
+                    user -> {
+                        if (user.getRole() != Role.ROLE_ADMIN) {
+                            user.setRole(Role.ROLE_ADMIN);
+                            userRepository.save(user);
+                            log.info("SUCCESS: User [{}] role elevated to ROLE_ADMIN.", targetEmail);
+                        } else {
+                            log.info("User [{}] is already ROLE_ADMIN.", targetEmail);
+                        }
+                    },
+                    () -> log.info("Super admin user [{}] does not exist in DB yet. It will be promoted on first login.", targetEmail)
+            );
         }
-
-        String targetEmail = superAdminEmail.trim();
-        log.info("AdminDataInitializer running. Checking super admin email: [{}]", targetEmail);
-
-        userRepository.findByEmailIgnoreCase(targetEmail).ifPresentOrElse(
-                user -> {
-                    if (user.getRole() != Role.ROLE_ADMIN) {
-                        user.setRole(Role.ROLE_ADMIN);
-                        userRepository.save(user);
-                        log.info("SUCCESS: User [{}] role elevated to ROLE_ADMIN.", targetEmail);
-                    } else {
-                        log.info("User [{}] is already ROLE_ADMIN.", targetEmail);
-                    }
-                },
-                () -> log.info("Super admin user [{}] does not exist in DB yet. It will be promoted on first login.", targetEmail)
-        );
     }
 }

@@ -17,6 +17,7 @@ import com.launchly.crm.dto.response.OrderResponse;
 import com.launchly.crm.entity.Conversation;
 import com.launchly.crm.entity.Lead;
 import com.launchly.crm.entity.Message;
+import com.launchly.common.outbox.OutboxService;
 import com.launchly.crm.entity.Order;
 import com.launchly.crm.entity.SenderType;
 import com.launchly.crm.mapper.CrmMapper;
@@ -31,7 +32,12 @@ import com.launchly.common.utils.EncryptionUtil;
 import com.launchly.crm.service.CrmService;
 import com.launchly.crm.websocket.CrmWebSocketService;
 import com.cloudinary.Cloudinary;
+import com.launchly.auth.repository.UserRepository;
+import com.launchly.crm.repository.CrmLabelRepository;
+import com.launchly.notification.service.NotificationService;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.client.RestTemplate;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Map;
@@ -63,9 +69,11 @@ public class CrmServiceImpl implements CrmService {
     private final TelegramBotManager botManager;
     private final EncryptionUtil encryptionUtil;
     private final Cloudinary cloudinary;
-    private final com.launchly.notification.service.NotificationService notificationService;
-    private final com.launchly.crm.repository.CrmLabelRepository crmLabelRepository;
-    private final com.launchly.auth.repository.UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final CrmLabelRepository crmLabelRepository;
+    private final UserRepository userRepository;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final OutboxService outboxService;
 
     @Autowired
     public CrmServiceImpl(OrderRepository orderRepository,
@@ -81,9 +89,11 @@ public class CrmServiceImpl implements CrmService {
                           @Lazy TelegramBotManager botManager,
                           EncryptionUtil encryptionUtil,
                           Cloudinary cloudinary,
-                          com.launchly.notification.service.NotificationService notificationService,
-                          com.launchly.crm.repository.CrmLabelRepository crmLabelRepository,
-                          com.launchly.auth.repository.UserRepository userRepository) {
+                          NotificationService notificationService,
+                          CrmLabelRepository crmLabelRepository,
+                          UserRepository userRepository,
+                          StringRedisTemplate stringRedisTemplate,
+                          @Autowired(required = false) OutboxService outboxService) {
         this.orderRepository = orderRepository;
         this.leadRepository = leadRepository;
         this.conversationRepository = conversationRepository;
@@ -100,6 +110,8 @@ public class CrmServiceImpl implements CrmService {
         this.notificationService = notificationService;
         this.crmLabelRepository = crmLabelRepository;
         this.userRepository = userRepository;
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.outboxService = outboxService;
     }
 
     @Override
@@ -139,6 +151,9 @@ public class CrmServiceImpl implements CrmService {
         }
 
         OrderResponse response = crmMapper.toOrderResponse(order);
+        if (outboxService != null) {
+            outboxService.publish("CRM_ORDER", String.valueOf(order.getId()), "ORDER_CREATED", response);
+        }
         webSocketService.notifyNewOrder(botId, response);
         return response;
     }
@@ -207,6 +222,9 @@ public class CrmServiceImpl implements CrmService {
         }
 
         LeadResponse response = crmMapper.toLeadResponse(lead);
+        if (outboxService != null) {
+            outboxService.publish("CRM_LEAD", String.valueOf(lead.getId()), "LEAD_CREATED", response);
+        }
         webSocketService.notifyNewLead(botId, response);
         return response;
     }
@@ -603,6 +621,12 @@ public class CrmServiceImpl implements CrmService {
         log.info("Found {} scheduled messages ready to send", dueMessages.size());
 
         for (Message message : dueMessages) {
+            String lockKey = "lock:crm:scheduled:" + message.getId();
+            Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", Duration.ofMinutes(5));
+            if (Boolean.FALSE.equals(acquired)) {
+                continue;
+            }
+
             try {
                 Conversation conversation = message.getConversation();
 

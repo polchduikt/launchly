@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
@@ -32,11 +34,19 @@ class TelegramWebhookServiceImplTest {
     @Mock
     private RateLimitService rateLimitService;
 
+    @Mock
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Mock
+    private ValueOperations<String, String> valueOperations;
+
     private TelegramWebhookServiceImpl webhookService;
 
     @BeforeEach
     void setUp() {
-        webhookService = new TelegramWebhookServiceImpl(flowEngineService, telegramBotManager, rateLimitService);
+        lenient().when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        lenient().when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
+        webhookService = new TelegramWebhookServiceImpl(flowEngineService, telegramBotManager, rateLimitService, stringRedisTemplate);
     }
 
     @Test
@@ -48,6 +58,18 @@ class TelegramWebhookServiceImplTest {
         webhookService.processWebhookUpdate(10L, "{\"update_id\": 12345}");
 
         verify(flowEngineService, times(1)).processUpdate(eq(10L), any(Update.class), eq(client));
+    }
+
+    @Test
+    @DisplayName("Should drop update when update is a duplicate")
+    void shouldDropUpdateWhenDuplicate() {
+        TelegramClient client = mock(TelegramClient.class);
+        when(telegramBotManager.getTelegramClient(10L)).thenReturn(client);
+        when(valueOperations.setIfAbsent(eq("telegram:update:10:12345"), eq("1"), any())).thenReturn(false);
+
+        webhookService.processWebhookUpdate(10L, "{\"update_id\": 12345}");
+
+        verifyNoInteractions(flowEngineService);
     }
 
     @Test

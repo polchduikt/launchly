@@ -2,15 +2,17 @@
 <configuration scan="true" scanPeriod="30 seconds">
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
+    <conversionRule conversionWord="piiMask" class="com.launchly.common.security.PiiMaskingConverter"/>
+
     <springProperty scope="context" name="springAppName" source="spring.application.name" defaultValue="launchly"/>
     <property name="LOG_PATH" value="logs"/>
     <property name="LOG_FILE" value="${LOG_PATH}/${springAppName}.log"/>
 
     <property name="CONSOLE_LOG_PATTERN"
-              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr([${springAppName:-},%X{traceId:-NO_TRACE},%X{userId:-anon}]){yellow} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"/>
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr([${springAppName:-},%X{traceId:-NO_TRACE},%X{userId:-anon}]){yellow} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %piiMask%n%wEx"/>
 
     <property name="FILE_LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [${springAppName:-},%X{traceId:-NO_TRACE},%X{userId:-anon}] [%15.15t] %-40.40logger{39} : %m%n%wEx"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [${springAppName:-},%X{traceId:-NO_TRACE},%X{userId:-anon}] [%15.15t] %-40.40logger{39} : %piiMask%n%wEx"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

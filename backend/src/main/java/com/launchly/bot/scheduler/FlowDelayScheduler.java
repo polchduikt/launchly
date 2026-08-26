@@ -13,8 +13,10 @@ import com.launchly.bot.service.BotDialogStateService;
 import com.launchly.bot.service.FlowEngineService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -32,6 +34,7 @@ public class FlowDelayScheduler {
     private final BotDialogStateService stateService;
     private final FlowEngineService flowEngineService;
     private final ObjectMapper objectMapper;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Scheduled(fixedDelay = 15000)
     public void processDelays() {
@@ -49,6 +52,13 @@ public class FlowDelayScheduler {
         if (user == null || user.getBot() == null || user.getCurrentNodeId() == null || isAutomationPaused(user)) {
             return;
         }
+
+        String lockKey = "lock:flow:delay:" + user.getId() + ":" + user.getCurrentNodeId();
+        Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", Duration.ofSeconds(60));
+        if (Boolean.FALSE.equals(acquired)) {
+            return;
+        }
+
         Long botId = user.getBot().getId();
         String currentNodeId = user.getCurrentNodeId();
         FlowSchema schema = flowSchemaRepository.findByBotId(botId).orElse(null);

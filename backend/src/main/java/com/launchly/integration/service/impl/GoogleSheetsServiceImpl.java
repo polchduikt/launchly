@@ -10,6 +10,8 @@ import com.launchly.integration.entity.Integration;
 import com.launchly.integration.entity.IntegrationType;
 import com.launchly.integration.repository.IntegrationRepository;
 import com.launchly.integration.service.GoogleSheetsService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -252,6 +254,8 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
     @Override
     @Transactional
+    @CircuitBreaker(name = "googleSheets", fallbackMethod = "appendRowFallback")
+    @Retry(name = "googleSheets")
     public void appendRow(Integration integration, String spreadsheetId, String sheetName, List<Object> values) {
         refreshTokenIfNeeded(integration);
 
@@ -318,6 +322,8 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
     @Override
     @Transactional
+    @CircuitBreaker(name = "googleSheets", fallbackMethod = "getSpreadsheetsFallback")
+    @Retry(name = "googleSheets")
     public List<Map<String, String>> getSpreadsheets(Long botId) {
         Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "integration.error.not_found"));
@@ -374,6 +380,8 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
     @Override
     @Transactional
+    @CircuitBreaker(name = "googleSheets", fallbackMethod = "getWorksheetsFallback")
+    @Retry(name = "googleSheets")
     public List<String> getWorksheets(Long botId, String spreadsheetId) {
         Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
@@ -418,6 +426,8 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
     @Override
     @Transactional
+    @CircuitBreaker(name = "googleSheets", fallbackMethod = "getHeadersFallback")
+    @Retry(name = "googleSheets")
     public List<String> getHeaders(Long botId, String spreadsheetId, String worksheetName) {
         Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
@@ -463,6 +473,8 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
     @Override
     @Transactional
+    @CircuitBreaker(name = "googleSheets", fallbackMethod = "getSheetValuesFallback")
+    @Retry(name = "googleSheets")
     public List<List<Object>> getSheetValues(Long botId, String spreadsheetId, String worksheetName) {
         Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
@@ -511,6 +523,8 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
     @Override
     @Transactional
+    @CircuitBreaker(name = "googleSheets", fallbackMethod = "updateCellFallback")
+    @Retry(name = "googleSheets")
     public void updateCell(Long botId, String spreadsheetId, String worksheetName, String cellReference, Object value) {
         Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
@@ -547,5 +561,51 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         } catch (Exception e) {
             log.error("Error updating cell {} in spreadsheet {}: {}", cellReference, spreadsheetId, e.getMessage(), e);
         }
+    }
+
+    public void appendRowFallback(Integration integration, String spreadsheetId, String sheetName, List<Object> values, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("Google Sheets appendRow fallback triggered for integration {}: {}", integration != null ? integration.getId() : null, t.getMessage());
+    }
+
+    public List<Map<String, String>> getSpreadsheetsFallback(Long botId, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("Google Sheets getSpreadsheets fallback triggered for botId {}: {}", botId, t.getMessage());
+        return List.of();
+    }
+
+    public List<String> getWorksheetsFallback(Long botId, String spreadsheetId, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("Google Sheets getWorksheets fallback triggered for spreadsheet {}: {}", spreadsheetId, t.getMessage());
+        return List.of();
+    }
+
+    public List<String> getHeadersFallback(Long botId, String spreadsheetId, String worksheetName, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("Google Sheets getHeaders fallback triggered for sheet {}: {}", worksheetName, t.getMessage());
+        return List.of();
+    }
+
+    public List<List<Object>> getSheetValuesFallback(Long botId, String spreadsheetId, String worksheetName, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("Google Sheets getSheetValues fallback triggered for sheet {}: {}", worksheetName, t.getMessage());
+        return List.of();
+    }
+
+    public void updateCellFallback(Long botId, String spreadsheetId, String worksheetName, String cellReference, Object value, Throwable t) {
+        if (t instanceof AppException appException) {
+            throw appException;
+        }
+        log.warn("Google Sheets updateCell fallback triggered for cell {}: {}", cellReference, t.getMessage());
     }
 }

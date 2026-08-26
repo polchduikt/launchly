@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Options } from 'k6/options';
 import { API_ENDPOINTS, ENV } from '../config/env.config';
-import { STAGES, THRESHOLDS } from '../config/thresholds.config';
+import { STAGES } from '../config/thresholds.config';
 import { AuthHelper } from '../helpers/auth.helper';
 
 export const options: Options = {
@@ -13,35 +13,48 @@ export const options: Options = {
   },
 };
 
-let cachedAuth: { token: string; botId: number } | null = null;
+interface TestContext {
+  token: string;
+  botId: number;
+}
 
-function ensureAuth(vuId: number): { token: string; botId: number } | null {
-  if (cachedAuth) return cachedAuth;
-
-  const email = `owner_scale_${vuId}@launchly-scale.com`;
+export function setup(): TestContext {
+  const email = 'analytics_perf_tester@launchly.com';
   const password = ENV.DEFAULT_PASSWORD;
 
-  const loginRes = http.post(
-    API_ENDPOINTS.AUTH.LOGIN,
-    JSON.stringify({ email, password }),
+  const regRes = http.post(
+    API_ENDPOINTS.AUTH.REGISTER,
+    JSON.stringify({ email, name: 'Analytics User', password }),
     { headers: { 'Content-Type': 'application/json' } }
   );
 
   let token: string | null = null;
-  if (loginRes.status === 200) {
+  if (regRes.status === 200 || regRes.status === 201) {
     try {
-      token = JSON.parse(loginRes.body as string).accessToken;
+      token = JSON.parse(regRes.body as string).accessToken;
     } catch {}
-  } else {
-    token = AuthHelper.register(email, `Scale User ${vuId}`, password);
   }
 
-  if (!token) return null;
+  if (!token) {
+    const loginRes = http.post(
+      API_ENDPOINTS.AUTH.LOGIN,
+      JSON.stringify({ email, password }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    if (loginRes.status === 200) {
+      try {
+        token = JSON.parse(loginRes.body as string).accessToken;
+      } catch {}
+    }
+  }
 
-  const botsRes = http.get(API_ENDPOINTS.BOTS.LIST, {
-    headers: AuthHelper.getAuthHeaders(token),
-  });
+  if (!token) {
+    throw new Error('Failed to obtain authentication token during setup');
+  }
 
+  const authHeaders = AuthHelper.getAuthHeaders(token);
+
+  const botsRes = http.get(API_ENDPOINTS.BOTS.LIST, { headers: authHeaders });
   let botId: number | null = null;
   if (botsRes.status === 200) {
     try {
@@ -56,10 +69,10 @@ function ensureAuth(vuId: number): { token: string; botId: number } | null {
     const createBotRes = http.post(
       API_ENDPOINTS.BOTS.CREATE,
       JSON.stringify({
-        name: `Analytics Bot ${vuId}`,
-        telegramToken: `10000${vuId}:ABCdefGhIJKlmNoPQRsTUVwxyZ123456789`,
+        name: 'Analytics Perf Bot',
+        description: 'Bot for load testing',
       }),
-      { headers: AuthHelper.getAuthHeaders(token) }
+      { headers: authHeaders }
     );
     if (createBotRes.status === 200 || createBotRes.status === 201) {
       try {
@@ -68,22 +81,21 @@ function ensureAuth(vuId: number): { token: string; botId: number } | null {
     }
   }
 
-  cachedAuth = { token, botId: botId || 1 };
-  return cachedAuth;
-}
-
-export default function () {
-  const vuId = __VU;
-  const auth = ensureAuth(vuId);
-
-  if (!auth) {
-    sleep(1);
-    return;
+  if (!botId) {
+    throw new Error('Failed to obtain or create bot for analytics testing');
   }
 
-  const headers = AuthHelper.getAuthHeaders(auth.token);
+  return {
+    token,
+    botId,
+  };
+}
 
-  const dashboardRes = http.get(API_ENDPOINTS.ANALYTICS.DASHBOARD(auth.botId), {
+export default function (data?: TestContext) {
+  const ctx = data || setup();
+  const headers = AuthHelper.getAuthHeaders(ctx.token);
+
+  const dashboardRes = http.get(API_ENDPOINTS.ANALYTICS.DASHBOARD(ctx.botId), {
     headers,
     tags: { name: 'Analytics_Dashboard_Stats' },
   });
@@ -92,5 +104,5 @@ export default function () {
     'analytics dashboard returns 200': (r) => r.status === 200,
   });
 
-  sleep(0.3);
+  sleep(0.1);
 }

@@ -22,7 +22,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "analytics_events", indexes = {
     @Index(name = "idx_analytics_events_bot", columnList = "bot_id"),
     @Index(name = "idx_analytics_events_bot_user", columnList = "bot_user_id"),
-    @Index(name = "idx_analytics_events_type_created", columnList = "event_type, created_at")
+    @Index(name = "idx_analytics_events_type_created", columnList = "event_type, created_at"),
+    @Index(name = "idx_analytics_bot_type_created", columnList = "bot_id, event_type, created_at DESC")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)

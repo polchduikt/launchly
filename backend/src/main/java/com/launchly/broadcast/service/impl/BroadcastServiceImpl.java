@@ -33,6 +33,8 @@ import java.util.stream.Collectors;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.entity.BotMember;
 import com.launchly.admin.service.UserAuditService;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Service
@@ -52,6 +54,7 @@ public class BroadcastServiceImpl implements BroadcastService {
     private final BroadcastValidator broadcastValidator;
     private final BotRepository botRepository;
     private final BotMemberRepository botMemberRepository;
+    private final StringRedisTemplate stringRedisTemplate;
 
     public BroadcastServiceImpl(BroadcastCampaignRepository campaignRepository,
                                 BroadcastFilterService broadcastFilterService,
@@ -63,7 +66,8 @@ public class BroadcastServiceImpl implements BroadcastService {
                                 UserAuditService userAuditService,
                                 BroadcastValidator broadcastValidator,
                                 BotRepository botRepository,
-                                BotMemberRepository botMemberRepository) {
+                                BotMemberRepository botMemberRepository,
+                                StringRedisTemplate stringRedisTemplate) {
         this.campaignRepository = campaignRepository;
         this.broadcastFilterService = broadcastFilterService;
         this.telegramSendService = telegramSendService;
@@ -75,6 +79,7 @@ public class BroadcastServiceImpl implements BroadcastService {
         this.broadcastValidator = broadcastValidator;
         this.botRepository = botRepository;
         this.botMemberRepository = botMemberRepository;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     @Override
@@ -172,21 +177,24 @@ public class BroadcastServiceImpl implements BroadcastService {
     @Override
     @Async("broadcastExecutor")
     public void sendCampaign(Long campaignId) {
-        BroadcastCampaign campaign = campaignRepository.findById(campaignId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
-
-        if (campaign.isBlocked() || campaign.getStatus() == CampaignStatus.BLOCKED) {
-            log.warn("Campaign {} is BLOCKED by administrator — skipping execution", campaignId);
+        String lockKey = "lock:broadcast:send:" + campaignId;
+        Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", Duration.ofMinutes(10));
+        if (Boolean.FALSE.equals(acquired)) {
+            log.warn("Broadcast campaign {} is already being dispatched by another process", campaignId);
             return;
         }
 
-        if (campaign.getStatus() == CampaignStatus.IN_PROGRESS) {
-            log.warn("Campaign {} is already IN_PROGRESS — skipping", campaignId);
-            return;
-        }
-
-        List<BotUser> targetUsers = new ArrayList<>();
+        BroadcastCampaign campaign = null;
         try {
+            campaign = campaignRepository.findById(campaignId)
+                    .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
+
+            if (campaign.isBlocked() || campaign.getStatus() == CampaignStatus.BLOCKED) {
+                log.warn("Campaign {} is BLOCKED by administrator — skipping execution", campaignId);
+                return;
+            }
+
+            List<BotUser> targetUsers = new ArrayList<>();
             if (Boolean.TRUE.equals(campaign.getTargetAllBots())) {
                 Long ownerId = campaign.getBot().getUser().getId();
                 List<Bot> userBots = new ArrayList<>(botRepository.findAllByUserId(ownerId));
@@ -212,12 +220,13 @@ public class BroadcastServiceImpl implements BroadcastService {
                 ));
             }
 
-            campaign.setStatus(CampaignStatus.IN_PROGRESS);
-            campaign.setTotalCount(campaign.getTotalCount() + targetUsers.size());
-            campaignRepository.save(campaign);
-
             int previousSent = campaign.getSentCount();
             int previousFailed = campaign.getFailedCount();
+            int previousTotal = campaign.getTotalCount();
+
+            campaign.setStatus(CampaignStatus.IN_PROGRESS);
+            campaign.setTotalCount(previousTotal + targetUsers.size());
+            campaign = campaignRepository.save(campaign);
 
             log.info("Starting broadcast campaign {} to {} users", campaignId, targetUsers.size());
             String firstConnectedNodeId = null;
@@ -282,22 +291,34 @@ public class BroadcastServiceImpl implements BroadcastService {
                 }
             }
 
-            campaign.setSentCount(previousSent + sent);
-            campaign.setFailedCount(previousFailed + failed);
-            int totalSent = previousSent + sent;
-            int totalFailed = previousFailed + failed;
-            int totalCount = campaign.getTotalCount();
-            campaign.setStatus(totalFailed == totalCount && totalCount > 0
-                    ? CampaignStatus.FAILED
-                    : CampaignStatus.COMPLETED);
-            campaignRepository.save(campaign);
+            BroadcastCampaign freshCampaign = campaignRepository.findById(campaignId).orElse(campaign);
+            if (freshCampaign != null) {
+                int totalSent = previousSent + sent;
+                int totalFailed = previousFailed + failed;
+                int totalCount = previousTotal + targetUsers.size();
+                freshCampaign.setSentCount(totalSent);
+                freshCampaign.setFailedCount(totalFailed);
+                freshCampaign.setTotalCount(totalCount);
+                freshCampaign.setStatus(totalFailed == totalCount && totalCount > 0
+                        ? CampaignStatus.FAILED
+                        : CampaignStatus.COMPLETED);
+                campaignRepository.save(freshCampaign);
 
-            log.info("Broadcast campaign {} completed: sent={}, failed={}, total={}",
-                    campaignId, totalSent, totalFailed, totalCount);
+                log.info("Broadcast campaign {} completed: sent={}, failed={}, total={}",
+                        campaignId, totalSent, totalFailed, totalCount);
+            }
         } catch (Exception fatalEx) {
             log.error("Fatal error during broadcast campaign {} execution: {}", campaignId, fatalEx.getMessage(), fatalEx);
-            campaign.setStatus(CampaignStatus.FAILED);
-            campaignRepository.save(campaign);
+            try {
+                campaignRepository.findById(campaignId).ifPresent(c -> {
+                    c.setStatus(CampaignStatus.FAILED);
+                    campaignRepository.save(c);
+                });
+            } catch (Exception ex) {
+                log.error("Failed to set campaign {} to FAILED: {}", campaignId, ex.getMessage());
+            }
+        } finally {
+            stringRedisTemplate.delete(lockKey);
         }
     }
 
@@ -315,7 +336,11 @@ public class BroadcastServiceImpl implements BroadcastService {
         broadcastValidator.validateWriteAccess(campaign.getBot().getId(), userId);
 
         if (campaign.getStatus() == CampaignStatus.IN_PROGRESS) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "broadcast.error.already_in_progress");
+            String lockKey = "lock:broadcast:send:" + campaignId;
+            Boolean hasLock = stringRedisTemplate.hasKey(lockKey);
+            if (Boolean.TRUE.equals(hasLock)) {
+                throw new AppException(HttpStatus.BAD_REQUEST, "broadcast.error.already_in_progress");
+            }
         }
 
         userAuditService.logBroadcastLaunched(campaign.getBot().getUser(), campaign.getId(), campaign.getName(), "FINISHED", LocalDateTime.now());
