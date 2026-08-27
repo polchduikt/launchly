@@ -6,6 +6,8 @@ import {
   sendTicketMessageApi,
   updateTicketStatusApi,
   type CreateTicketPayload,
+  type SupportTicketItem,
+  type SupportMessageItem,
 } from '../../api/support';
 
 export const useUserTicketsQuery = (params?: { page?: number; size?: number }) => {

@@ -29,6 +29,11 @@ import type {
   LeadResponse,
   ConversationResponse,
 } from '../../types/crm';
+import type {
+  BotUserResponse,
+  BotUserUpdateRequest,
+  BotUserCreateRequest,
+} from '../../types/bot';
 
 export const useOrdersQuery = (botId: number, enabled: boolean = true) => {
   return useQuery({

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, AlertCircle, Plus } from 'lucide-react';
+import { AlertCircle, Plus } from 'lucide-react';
 import type { BotUserResponse } from '../../../../types/bot';
 import { ContactAvatar } from './ContactAvatar';
 import { t } from '../../../../i18n/config';

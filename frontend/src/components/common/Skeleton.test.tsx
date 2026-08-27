@@ -6,7 +6,6 @@ import {
   MessageAreaSkeleton,
   TableSkeleton,
 } from './Skeleton';
-import React from 'react';
 
 describe('Skeleton components', () => {
   it('renders basic Skeleton element with custom className', () => {

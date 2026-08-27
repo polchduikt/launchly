@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAdminLogsApi } from '../../../api/admin';
 import { AdminLayout } from '../../../components/layout/AdminLayout';
-import { Search, ChevronDown, ChevronLeft, ChevronRight, Loader2, Filter } from 'lucide-react';
+import { Search, ChevronDown, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { useTranslation } from '../../../i18n/config';
 
 import { useAuthStore } from '../../../store/useAuthStore';
