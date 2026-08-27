@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import type { BotState } from '../types/bot';
+import { broadcastEvent } from '../utils/multiTabSync';
 
 export const useBotStore = create<BotState>((set) => {
   const savedActiveBotIdStr = localStorage.getItem('activeBotId');
   let savedActiveBotId: number | null = null;
-  
+
   if (savedActiveBotIdStr) {
     const parsed = parseInt(savedActiveBotIdStr, 10);
     if (!isNaN(parsed)) {
@@ -23,6 +24,7 @@ export const useBotStore = create<BotState>((set) => {
       } else {
         localStorage.removeItem('activeBotId');
       }
+      broadcastEvent('BOT_CHANGED', { botId: id });
       set({ activeBotId: id });
     },
 

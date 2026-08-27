@@ -5,16 +5,25 @@ import { AppRouter } from './routes';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { LanguageProvider } from './i18n/config';
 import { NetworkStatusBanner } from './components/common/NetworkStatusBanner';
+import { useMultiTabSync } from './hooks/useMultiTabSync';
+
+const AppContent: React.FC = () => {
+  useMultiTabSync();
+
+  return (
+    <ErrorBoundary>
+      <LanguageProvider>
+        <NetworkStatusBanner />
+        <AppRouter />
+      </LanguageProvider>
+    </ErrorBoundary>
+  );
+};
 
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
-        <LanguageProvider>
-          <NetworkStatusBanner />
-          <AppRouter />
-        </LanguageProvider>
-      </ErrorBoundary>
+      <AppContent />
     </QueryClientProvider>
   );
 };
