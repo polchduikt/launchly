@@ -42,8 +42,40 @@ export const useSendTicketMessageMutation = (ticketId: number | string | null) =
       if (!ticketId) throw new Error('No ticket selected');
       return sendTicketMessageApi(ticketId, text);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-support-ticket', ticketId] });
+    onMutate: async (text: string) => {
+      if (!ticketId) return;
+      await queryClient.cancelQueries({ queryKey: ['user-support-ticket', ticketId] });
+      const previousTicket = queryClient.getQueryData<SupportTicketItem>(['user-support-ticket', ticketId]);
+
+      if (previousTicket) {
+        const optimisticMsg: SupportMessageItem = {
+          id: -Date.now(),
+          ticketId: Number(ticketId),
+          sender: 'USER',
+          senderName: 'Ви',
+          text,
+          timestamp: new Date().toISOString(),
+        };
+
+        queryClient.setQueryData<SupportTicketItem>(['user-support-ticket', ticketId], {
+          ...previousTicket,
+          messages: [...(previousTicket.messages || []), optimisticMsg],
+          lastMessage: text,
+          lastMessageTime: new Date().toISOString(),
+        });
+      }
+
+      return { previousTicket };
+    },
+    onError: (_err, _text, context) => {
+      if (ticketId && context?.previousTicket) {
+        queryClient.setQueryData(['user-support-ticket', ticketId], context.previousTicket);
+      }
+    },
+    onSettled: () => {
+      if (ticketId) {
+        queryClient.invalidateQueries({ queryKey: ['user-support-ticket', ticketId] });
+      }
       queryClient.invalidateQueries({ queryKey: ['user-support-tickets'] });
     },
   });
@@ -56,8 +88,29 @@ export const useUpdateTicketStatusMutation = (ticketId: number | string | null) 
       if (!ticketId) throw new Error('No ticket selected');
       return updateTicketStatusApi(ticketId, status);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-support-ticket', ticketId] });
+    onMutate: async (status: string) => {
+      if (!ticketId) return;
+      await queryClient.cancelQueries({ queryKey: ['user-support-ticket', ticketId] });
+      const previousTicket = queryClient.getQueryData<SupportTicketItem>(['user-support-ticket', ticketId]);
+
+      if (previousTicket) {
+        queryClient.setQueryData<SupportTicketItem>(['user-support-ticket', ticketId], {
+          ...previousTicket,
+          status: status as SupportTicketItem['status'],
+        });
+      }
+
+      return { previousTicket };
+    },
+    onError: (_err, _status, context) => {
+      if (ticketId && context?.previousTicket) {
+        queryClient.setQueryData(['user-support-ticket', ticketId], context.previousTicket);
+      }
+    },
+    onSettled: () => {
+      if (ticketId) {
+        queryClient.invalidateQueries({ queryKey: ['user-support-ticket', ticketId] });
+      }
       queryClient.invalidateQueries({ queryKey: ['user-support-tickets'] });
     },
   });
