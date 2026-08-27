@@ -4,6 +4,7 @@ import { Loader2, AlertCircle, Plus } from 'lucide-react';
 import type { BotUserResponse } from '../../../../types/bot';
 import { ContactAvatar } from './ContactAvatar';
 import { t } from '../../../../i18n/config';
+import { useVirtualList } from '../../../../hooks/useVirtualList';
 
 interface ContactsTableProps {
   botId: number;
@@ -25,6 +26,17 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
   onSelectContactDetail,
 }) => {
   const navigate = useNavigate();
+
+  const { parentRef, virtualItems, totalHeight } = useVirtualList({
+    count: filteredContacts.length,
+    itemHeight: 64,
+    overscan: 4,
+  });
+
+  const firstItem = virtualItems[0];
+  const lastItem = virtualItems[virtualItems.length - 1];
+  const paddingTop = firstItem ? firstItem.offsetTop : 0;
+  const paddingBottom = lastItem ? Math.max(0, totalHeight - (lastItem.offsetTop + lastItem.size)) : 0;
 
   const parseMetadata = (metaStr: string | null) => {
     try {
@@ -89,7 +101,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
   }
 
   return (
-    <div className="flex-1 overflow-auto p-6 font-['JetBrains_Mono',monospace]">
+    <div ref={parentRef} className="flex-1 overflow-auto p-6 font-['JetBrains_Mono',monospace]">
       <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -112,7 +124,15 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A]">
-            {filteredContacts.map((c) => {
+            {paddingTop > 0 && (
+              <tr>
+                <td style={{ height: `${paddingTop}px` }} colSpan={5} />
+              </tr>
+            )}
+            {virtualItems.map(({ index }) => {
+              const c = filteredContacts[index];
+              if (!c) return null;
+
               const isSelected = selectedContactIds.has(c.id);
               const meta = parseMetadata(c.metadata);
               const isPaused = meta.paused;
@@ -171,6 +191,11 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
                 </tr>
               );
             })}
+            {paddingBottom > 0 && (
+              <tr>
+                <td style={{ height: `${paddingBottom}px` }} colSpan={5} />
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
