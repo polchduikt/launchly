@@ -108,7 +108,7 @@ public class AuthController {
             @ApiResponse(responseCode = "204", description = "Account deleted successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @DeleteMapping("/delete-account")
+    @DeleteMapping("/account")
     public ResponseEntity<Void> deleteAccount(Authentication authentication) {
         UserResponse currentUser = authService.getCurrentUser(authentication.getName());
         authService.deleteUserAccount(currentUser.id());

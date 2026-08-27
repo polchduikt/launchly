@@ -157,7 +157,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
     void deleteAccount_Success() throws Exception {
         User user = createTestUser("delacc", Role.ROLE_OWNER);
 
-        mockMvc.perform(delete("/api/v1/auth/delete-account")
+        mockMvc.perform(delete("/api/v1/auth/account")
                         .header("Authorization", getAuthHeader(user)))
                 .andExpect(status().isNoContent());
 

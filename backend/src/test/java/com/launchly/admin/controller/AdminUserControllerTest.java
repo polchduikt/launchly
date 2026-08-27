@@ -106,12 +106,12 @@ class AdminUserControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/admin/users/{userId}/details - Should return user details")
+    @DisplayName("GET /api/v1/admin/users/{userId} - Should return user details")
     void getUserDetails_Success() throws Exception {
         AdminUserDetailDto dto = new AdminUserDetailDto();
         when(adminUserService.getUserDetails(eq(5L), eq("all"), eq("all"), eq(0), eq(20))).thenReturn(dto);
 
-        mockMvc.perform(get("/api/v1/admin/users/5/details"))
+        mockMvc.perform(get("/api/v1/admin/users/5"))
                 .andExpect(status().isOk());
     }
 }

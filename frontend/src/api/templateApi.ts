@@ -67,7 +67,7 @@ export interface TemplateResponse {
 }
 
 export const createTemplateApi = async (payload: CreateTemplatePayload): Promise<TemplateResponse> => {
-  const response = await apiClient.post<TemplateResponse>('/templates/create', payload);
+  const response = await apiClient.post<TemplateResponse>('/templates', payload);
   return response.data;
 };
 

@@ -49,7 +49,7 @@ public class AdminBroadcastController {
             @ApiResponse(responseCode = "404", description = "Broadcast campaign not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "Forbidden - requires ADMIN or MANAGER role", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/{broadcastId}/details")
+    @GetMapping("/{broadcastId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<AdminBroadcastDetailDto> getBroadcastDetails(
             @Parameter(description = "Broadcast campaign ID") @PathVariable Long broadcastId,

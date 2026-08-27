@@ -166,7 +166,7 @@ class BotIntegrationTest extends BaseIntegrationTest {
                 List.of()
         );
 
-        mockMvc.perform(post("/api/v1/templates/create")
+        mockMvc.perform(post("/api/v1/templates")
                         .header("Authorization", getAuthHeader(user))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))

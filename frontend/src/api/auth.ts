@@ -34,7 +34,7 @@ export const updateProfileApi = async (data: UpdateProfileRequest): Promise<User
 };
 
 export const deleteAccountApi = async (): Promise<void> => {
-  await apiClient.delete('/auth/delete-account');
+  await apiClient.delete('/auth/account');
 };
 
 export interface TelegramSessionResponse {

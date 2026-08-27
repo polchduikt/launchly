@@ -49,7 +49,7 @@ public class AdminAutomationController {
             @ApiResponse(responseCode = "404", description = "Automation flow not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "Forbidden - requires ADMIN or MANAGER role", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/{automationId}/details")
+    @GetMapping("/{automationId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<AdminAutomationDetailDto> getAutomationDetails(
             @Parameter(description = "Automation schema ID") @PathVariable Long automationId,
