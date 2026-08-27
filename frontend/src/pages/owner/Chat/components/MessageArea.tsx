@@ -1,6 +1,5 @@
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useRef, useEffect, useCallback } from 'react';
 import {
-  Loader2,
   MessageSquare,
   ExternalLink,
 } from 'lucide-react';
@@ -12,7 +11,6 @@ import { MessageBubble } from './MessageBubble';
 import { ChatToolbar } from './ChatToolbar';
 import { formatDateSeparator, getDateKey } from '../../../../utils/crmChat';
 import { t } from '../../../../i18n/config';
-import { useVirtualList } from '../../../../hooks/useVirtualList';
 import { MessageAreaSkeleton } from '../../../../components/common/Skeleton';
 
 interface MessageAreaProps {
@@ -38,10 +36,6 @@ interface MessageAreaProps {
   meta?: Record<string, unknown>;
 }
 
-type FlatChatMessage =
-  | { type: 'date'; key: string; date: string }
-  | { type: 'message'; key: string; message: MessageResponse };
-
 export const MessageArea: React.FC<MessageAreaProps> = ({
   conversation,
   botUser,
@@ -64,53 +58,44 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
   onDeleteGlobalLabel = () => {},
   meta = {},
 }) => {
-  const flatItems = useMemo<FlatChatMessage[]>(() => {
-    const items: FlatChatMessage[] = [];
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = useCallback((behavior: 'auto' | 'smooth' = 'auto') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  }, []);
+
+  useEffect(() => {
+    if (!conversation) return;
+
+    scrollToBottom('auto');
+    const t1 = setTimeout(() => scrollToBottom('auto'), 50);
+    const t2 = setTimeout(() => scrollToBottom('auto'), 150);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [messages.length, conversation?.id, scrollToBottom]);
+
+  const handleImageLoad = () => {
+    scrollToBottom('auto');
+  };
+
+  const groupedMessages = useMemo(() => {
+    const groups: { date: string; msgs: MessageResponse[] }[] = [];
     let currentDate = '';
     const visibleMessages = messages.filter(m => !(m.content && m.content.startsWith('🖱️ ')));
     visibleMessages.forEach(m => {
       const dk = getDateKey(m.createdAt);
       if (dk !== currentDate) {
         currentDate = dk;
-        items.push({ type: 'date', key: `date-${dk}`, date: m.createdAt });
+        groups.push({ date: m.createdAt, msgs: [m] });
+      } else {
+        groups[groups.length - 1].msgs.push(m);
       }
-      items.push({ type: 'message', key: `msg-${m.id}`, message: m });
     });
-    return items;
+    return groups;
   }, [messages]);
-
-  const getItemHeight = useCallback((index: number): number => {
-    const item = flatItems[index];
-    if (!item) return 72;
-    if (item.type === 'date') return 48;
-    const length = item.message.content?.length || 0;
-    if (length > 250) return 160;
-    if (length > 120) return 110;
-    return 72;
-  }, [flatItems]);
-
-  const { parentRef, virtualItems, totalHeight, scrollToIndex } = useVirtualList({
-    count: flatItems.length,
-    itemHeight: getItemHeight,
-    overscan: 6,
-  });
-
-  const handleImageLoad = () => {
-    if (flatItems.length > 0) {
-      scrollToIndex(flatItems.length - 1, 'end');
-    }
-  };
-
-  useEffect(() => {
-    if (!conversation) return;
-    if (flatItems.length > 0) {
-      scrollToIndex(flatItems.length - 1, 'end');
-      const timer = setTimeout(() => {
-        scrollToIndex(flatItems.length - 1, 'end');
-      }, 60);
-      return () => clearTimeout(timer);
-    }
-  }, [flatItems.length, conversation?.id, scrollToIndex]);
 
   if (!conversation) {
     return (
@@ -161,63 +146,35 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
         />
       </div>
 
-      <div ref={parentRef} className="flex-1 overflow-y-auto px-5 py-4 bg-[#F2EBDD] font-['JetBrains_Mono',monospace]" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex-1 overflow-y-auto px-5 py-4 bg-[#F2EBDD] font-['JetBrains_Mono',monospace]" style={{ scrollbarWidth: 'none' }}>
         {isMsgLoading ? (
           <MessageAreaSkeleton />
-        ) : flatItems.length === 0 ? (
+        ) : groupedMessages.length === 0 ? (
           <div className="h-full flex items-center justify-center text-xs text-[#0A0A0A] font-bold italic">No messages in this conversation.</div>
         ) : (
-          <div style={{ height: `${totalHeight}px`, width: '100%', position: 'relative' }}>
-            {virtualItems.map(({ index, offsetTop, size }) => {
-              const item = flatItems[index];
-              if (!item) return null;
-
-              if (item.type === 'date') {
-                return (
-                  <div
-                    key={item.key}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: `${size}px`,
-                      transform: `translateY(${offsetTop}px)`,
-                    }}
-                    className="flex items-center justify-center"
-                  >
-                    <span className="text-[10px] text-[#0A0A0A] font-black uppercase bg-white border-2 border-[#0A0A0A] px-3 py-1 rounded-full shadow-[2px_2px_0px_0px_#0A0A0A]">
-                      {formatDateSeparator(item.date)}
-                    </span>
-                  </div>
-                );
-              }
-
-              return (
-                <div
-                  key={item.key}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    transform: `translateY(${offsetTop}px)`,
-                  }}
-                >
-                  <MessageBubble
-                    message={item.message}
-                    isOwner={item.message.senderType === 'OWNER'}
-                    ownerAvatar={<OwnerAvatar size={28} />}
-                    userAvatar={<UserAvatar name={conversation.botUserName} photoUrl={conversation.botUserPhotoUrl} size={28} />}
-                    allMessages={messages}
-                    onButtonClick={onButtonClick}
-                    onImageLoad={handleImageLoad}
-                  />
-                </div>
-              );
-            })}
-          </div>
+          groupedMessages.map((group, gi) => (
+            <div key={gi}>
+              <div className="flex items-center justify-center my-4">
+                <span className="text-[10px] text-[#0A0A0A] font-black uppercase bg-white border-2 border-[#0A0A0A] px-3 py-1 rounded-full shadow-[2px_2px_0px_0px_#0A0A0A]">
+                  {formatDateSeparator(group.date)}
+                </span>
+              </div>
+              {group.msgs.map(m => (
+                <MessageBubble
+                  key={m.id}
+                  message={m}
+                  isOwner={m.senderType === 'OWNER'}
+                  ownerAvatar={<OwnerAvatar size={28} />}
+                  userAvatar={<UserAvatar name={conversation.botUserName} photoUrl={conversation.botUserPhotoUrl} size={28} />}
+                  allMessages={messages}
+                  onButtonClick={onButtonClick}
+                  onImageLoad={handleImageLoad}
+                />
+              ))}
+            </div>
+          ))
         )}
+        <div ref={messagesEndRef} />
       </div>
     </>
   );
