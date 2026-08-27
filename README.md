@@ -101,19 +101,28 @@ Full specification & feature matrix: [docs/FEATURES.md](docs/FEATURES.md)
 This platform follows a decoupled Client-Server architecture.
 
 ### Backend Architecture
-- **Clean Architecture Monolith**: Structured as a modular package-by-feature codebase (`admin`, `ai`, `bot`, `crm`, `billing`, `broadcast`, `auth`, `integration`, `common`).
-- **Transactional Outbox Pattern**: Decouples database state mutations from asynchronous event streaming and external webhooks.
-- **Resilient AI Router**: Automated fallback engine preventing downtime across external AI inference providers.
-- **JSONB Graph Persistence & Deep Entity Graphs**: High-speed graph serialization and N+1 query elimination under heavy concurrent read load.
-- **Automatic JDBC Batching**: Optimized batch size (50) and insert/update ordering for bulk writes and high-volume CRM ingestion.
-- **Hermetic Integration Tests**: Real PostgreSQL Testcontainers ensuring zero disparity between local development, CI, and production.
+- **Clean Architecture Monolith**: Modular, package-by-feature layout strictly separating core domain logic, infrastructure adapters, and web controllers.
+- **Project Loom Virtual Threads**: Java 21 virtual threads enabled across the entire servlet container for massive concurrent I/O throughput (Telegram webhooks, AI generation streams, and external API connectors).
+- **Transactional Outbox Pattern**: Guaranteed at-least-once asynchronous event dispatching (CRM actions, external webhooks, Google Sheets exports) with a Dead Letter Queue (DLQ) retry mechanism.
+- **Distributed Rate Limiting & Tier Throttling**: Bucket4j integrated with Redis for dynamic token-bucket rate limiting based on subscription tiers (Free, Pro, Enterprise) and IP reputations.
+- **Idempotency & Distributed Locking**: Custom `@Idempotent` annotation backed by Redis distributed locks, eliminating duplicate execution risks for payment webhooks and critical state mutations.
+- **JSONB Graph Persistence & Deep Entity Graphs**: High-speed conversational graph serialization in PostgreSQL with JPA `@EntityGraph` fetching to eliminate N+1 query overhead.
+- **Optimistic Concurrency Control**: Hibernate `@Version` locking to protect concurrent schema updates and multi-operator CRM interactions from race conditions.
+- **Automatic JDBC Batching**: Tuned batch sizing (`50`) and insert/update statement ordering for high-throughput CRM lead ingestion and bulk broadcasts.
+- **Enterprise PII Masking**: Contextual Logback converters automatically sanitizing Telegram bot tokens, credentials, and customer emails across application log outputs.
+- **Hermetic Integration Testing**: Containerized PostgreSQL Testcontainers ensuring exact production parity during automated CI/CD test runs.
 
 Detailed backend architecture & ADRs: [docs/backend/ARCHITECTURE.md](docs/backend/ARCHITECTURE.md) | [docs/backend/decisions/README.md](docs/backend/decisions/README.md)
 
 ### Frontend Architecture
-- **Layer-Based & Feature-Sliced**: Clear separation between API clients, shared UI primitives, custom hooks, and route views.
-- **Strict State Separation**: Server state managed exclusively via TanStack Query; client state managed via Zustand.
-- **Silent JWT Refresh Interceptor**: Axios queue mechanism ensuring transparent token rotation on HTTP 401 without user disruption.
+- **Layer-Based & Feature-Sliced**: Strict modular hierarchy dividing low-level UI primitives, REST API clients, custom React hooks, and domain-specific route views.
+- **Interactive Visual Flow Builder**: Custom node-graph editor powered by `@xyflow/react` (React Flow), featuring real-time node validation, connection rules, and seamless JSON schema serialization.
+- **Strict State Separation**: Server state cached and invalidated via TanStack Query v5; UI/client state (modals, auth sessions, canvas selection) isolated in Zustand stores.
+- **Real-Time Live Chat (STOMP / SockJS)**: Low-latency bidirectional WebSocket connection for live CRM messaging, operator typing indicators, and instant lead status updates.
+- **Optimistic UI Updates**: Immediate client-side reflection of CRM lead state changes, tag assignments, and message delivery with automatic rollback on network failure.
+- **Silent JWT Refresh Interceptor**: Axios queue mechanism ensuring transparent access token rotation on HTTP 401 without disrupting in-flight operations or prompting re-login.
+- **Type-Safe Validation & Form Pipelines**: Unified runtime and compile-time validation powered by Zod v4 and React Hook Form across all bot configurations and integration settings.
+- **Role & Tier-Aware Route Protection**: Granular client-side route guards restricting capabilities based on active user roles (`OWNER`, `OPERATOR`, `ADMIN`) and subscription tier limits.
 
 Detailed frontend architecture & ADRs: [docs/frontend/ARCHITECTURE.md](docs/frontend/ARCHITECTURE.md) | [docs/frontend/decisions/README.md](docs/frontend/decisions/README.md)
 
