@@ -2,12 +2,13 @@ import { create } from 'zustand';
 import type { User, AuthState } from '../types/auth';
 import { queryClient } from '../api/queryClient';
 import { useBotStore } from './useBotStore';
+import { broadcastEvent } from '../utils/multiTabSync';
 
 export const useAuthStore = create<AuthState>((set) => {
   const savedAccessToken = localStorage.getItem('accessToken');
   const savedRefreshToken = localStorage.getItem('refreshToken');
   const savedUserJson = localStorage.getItem('user');
-  
+
   let savedUser: User | null = null;
   if (savedUserJson) {
     try {
@@ -26,6 +27,7 @@ export const useAuthStore = create<AuthState>((set) => {
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
+      broadcastEvent('AUTH_LOGIN', { accessToken, refreshToken, user });
       set({
         accessToken,
         refreshToken,
@@ -39,6 +41,7 @@ export const useAuthStore = create<AuthState>((set) => {
       localStorage.removeItem('user');
       useBotStore.getState().clearBots();
       queryClient.clear();
+      broadcastEvent('AUTH_LOGOUT');
       set({
         accessToken: null,
         refreshToken: null,

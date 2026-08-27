@@ -14,6 +14,7 @@ import {
   Mic,
 } from 'lucide-react';
 import { useTranslation } from '../../../../i18n/config';
+import { createSafeHtml } from '../../../../utils/sanitize';
 
 interface StickySolutionsSectionProps {
   onCtaClick: () => void;
@@ -454,7 +455,7 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
                               : 'bg-[#182533] text-white rounded-2xl rounded-tl-xs shadow-xs border border-white/5'
                           }`}
                         >
-                          <div dangerouslySetInnerHTML={{ __html: msg.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                          <div dangerouslySetInnerHTML={createSafeHtml(msg.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'))} />
                           <div
                             className={`flex items-center gap-1 justify-end text-[9px] mt-1 ${
                               msg.sender === 'user' ? 'text-white/70' : 'text-white/40'

@@ -1,5 +1,16 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
+import {
+  IDEMPOTENCY_HEADER_NAME,
+  generateIdempotencyKey,
+  shouldAttachIdempotencyKey,
+} from '../utils/idempotency';
+
+import {
+  registerRequest,
+  removePendingRequest,
+  isRequestCanceled,
+} from '../utils/requestCancellation';
 
 const apiClient = axios.create({
   baseURL: '/api/v1',
@@ -14,7 +25,22 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
+
+    if (shouldAttachIdempotencyKey(config.method)) {
+      const existingKey = typeof config.headers.get === 'function'
+        ? config.headers.get(IDEMPOTENCY_HEADER_NAME)
+        : config.headers[IDEMPOTENCY_HEADER_NAME];
+
+      if (!existingKey) {
+        if (typeof config.headers.set === 'function') {
+          config.headers.set(IDEMPOTENCY_HEADER_NAME, generateIdempotencyKey());
+        } else {
+          config.headers[IDEMPOTENCY_HEADER_NAME] = generateIdempotencyKey();
+        }
+      }
+    }
+
+    return registerRequest(config);
   },
   (error) => Promise.reject(error)
 );
@@ -34,8 +60,21 @@ const processQueue = (error: unknown, token: string | null = null) => {
 };
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.config) {
+      removePendingRequest(response.config);
+    }
+    return response;
+  },
   async (error) => {
+    if (error.config) {
+      removePendingRequest(error.config);
+    }
+
+    if (isRequestCanceled(error)) {
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config;
     if (error.response?.status === 403 || error.response?.data?.error === 'ACCOUNT_BLOCKED') {
       const reason = error.response?.data?.reason || 'Violation of platform rules';

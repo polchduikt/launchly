@@ -80,14 +80,14 @@ class TemplateControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/templates/create - Should create template and return 201 Created")
+    @DisplayName("POST /api/v1/templates - Should create template and return 201 Created")
     void createTemplate_Success() throws Exception {
         CreateTemplateRequest request = mock(CreateTemplateRequest.class);
         TemplateResponse response = mock(TemplateResponse.class);
         when(response.shareCode()).thenReturn("tpl_abc");
         when(templateService.createTemplate(any(CreateTemplateRequest.class), eq(1L))).thenReturn(response);
 
-        mockMvc.perform(post("/api/v1/templates/create")
+        mockMvc.perform(post("/api/v1/templates")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())

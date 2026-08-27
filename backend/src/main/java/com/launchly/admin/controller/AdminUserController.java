@@ -85,7 +85,7 @@ public class AdminUserController {
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "Forbidden - requires ADMIN or MANAGER role", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/{userId}/details")
+    @GetMapping("/{userId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<AdminUserDetailDto> getUserDetails(
             @Parameter(description = "Target user ID") @PathVariable Long userId,

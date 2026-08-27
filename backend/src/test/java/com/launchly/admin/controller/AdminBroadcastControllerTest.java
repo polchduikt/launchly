@@ -65,12 +65,12 @@ class AdminBroadcastControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/admin/broadcasts/{broadcastId}/details - Should return broadcast details")
+    @DisplayName("GET /api/v1/admin/broadcasts/{broadcastId} - Should return broadcast details")
     void getBroadcastDetails_Success() throws Exception {
         AdminBroadcastDetailDto dto = new AdminBroadcastDetailDto();
         when(adminBroadcastService.getBroadcastDetails(eq(15L), eq("all"), eq(0), eq(10))).thenReturn(dto);
 
-        mockMvc.perform(get("/api/v1/admin/broadcasts/15/details"))
+        mockMvc.perform(get("/api/v1/admin/broadcasts/15"))
                 .andExpect(status().isOk());
     }
 

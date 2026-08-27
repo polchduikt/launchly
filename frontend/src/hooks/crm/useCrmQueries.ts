@@ -20,8 +20,15 @@ import {
   createBotUserApi,
   deleteBotUserApi,
 } from '../../api/bot';
-import type { OrderStatus, LeadStatus, ConversationStatus } from '../../types/crm';
-import type { BotUserUpdateRequest, BotUserCreateRequest, BotUserResponse } from '../../types/bot';
+import type {
+  OrderStatus,
+  LeadStatus,
+  ConversationStatus,
+  MessageResponse,
+  OrderResponse,
+  LeadResponse,
+  ConversationResponse,
+} from '../../types/crm';
 
 export const useOrdersQuery = (botId: number, enabled: boolean = true) => {
   return useQuery({
@@ -76,7 +83,22 @@ export const useUpdateOrderMutation = (botId: number) => {
   return useMutation({
     mutationFn: ({ orderId, status, notes }: { orderId: number; status: OrderStatus; notes: string }) =>
       updateOrderApi(orderId, status, notes),
-    onSuccess: () => {
+    onMutate: async ({ orderId, status, notes }) => {
+      await queryClient.cancelQueries({ queryKey: ['orders', botId] });
+      const previousOrders = queryClient.getQueryData<OrderResponse[]>(['orders', botId]);
+      if (previousOrders) {
+        queryClient.setQueryData<OrderResponse[]>(['orders', botId], (old = []) =>
+          old.map((order) => (order.id === orderId ? { ...order, status, notes } : order))
+        );
+      }
+      return { previousOrders };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousOrders) {
+        queryClient.setQueryData(['orders', botId], context.previousOrders);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['orders', botId] });
     },
   });
@@ -87,7 +109,22 @@ export const useUpdateLeadMutation = (botId: number) => {
   return useMutation({
     mutationFn: ({ leadId, status, notes }: { leadId: number; status: LeadStatus; notes: string }) =>
       updateLeadApi(leadId, status, notes),
-    onSuccess: () => {
+    onMutate: async ({ leadId, status, notes }) => {
+      await queryClient.cancelQueries({ queryKey: ['leads', botId] });
+      const previousLeads = queryClient.getQueryData<LeadResponse[]>(['leads', botId]);
+      if (previousLeads) {
+        queryClient.setQueryData<LeadResponse[]>(['leads', botId], (old = []) =>
+          old.map((lead) => (lead.id === leadId ? { ...lead, status, notes } : lead))
+        );
+      }
+      return { previousLeads };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousLeads) {
+        queryClient.setQueryData(['leads', botId], context.previousLeads);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['leads', botId] });
     },
   });
@@ -98,7 +135,57 @@ export const useSendMessageMutation = (conversationId: number, botId: number) =>
   return useMutation({
     mutationFn: ({ content, mediaUrl, mediaType, scheduledAt }: { content: string; mediaUrl?: string; mediaType?: string; scheduledAt?: string }) =>
       sendOwnerMessageApi(conversationId, content, mediaUrl, mediaType, scheduledAt),
-    onSuccess: () => {
+    onMutate: async ({ content, mediaUrl, mediaType, scheduledAt }) => {
+      await queryClient.cancelQueries({ queryKey: ['messages', conversationId] });
+      await queryClient.cancelQueries({ queryKey: ['conversations', botId] });
+      await queryClient.cancelQueries({ queryKey: ['conversations', 'all'] });
+
+      const previousMessages = queryClient.getQueryData<MessageResponse[]>(['messages', conversationId]);
+      const previousBotConversations = queryClient.getQueryData<ConversationResponse[]>(['conversations', botId]);
+      const previousAllConversations = queryClient.getQueryData<ConversationResponse[]>(['conversations', 'all']);
+
+      const optimisticMessage: MessageResponse = {
+        id: -Date.now(),
+        conversationId,
+        content,
+        senderType: 'OWNER',
+        mediaUrl: mediaUrl || null,
+        mediaType: mediaType || null,
+        createdAt: new Date().toISOString(),
+        scheduledAt,
+        sent: true,
+      };
+
+      queryClient.setQueryData<MessageResponse[]>(['messages', conversationId], (old = []) => [...old, optimisticMessage]);
+
+      const updateConversationsPreview = (list?: ConversationResponse[]) =>
+        list?.map((conv) =>
+          conv.id === conversationId
+            ? { ...conv, lastMessage: content, lastMessageAt: new Date().toISOString() }
+            : conv
+        );
+
+      if (previousBotConversations) {
+        queryClient.setQueryData(['conversations', botId], updateConversationsPreview(previousBotConversations));
+      }
+      if (previousAllConversations) {
+        queryClient.setQueryData(['conversations', 'all'], updateConversationsPreview(previousAllConversations));
+      }
+
+      return { previousMessages, previousBotConversations, previousAllConversations };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousMessages) {
+        queryClient.setQueryData(['messages', conversationId], context.previousMessages);
+      }
+      if (context?.previousBotConversations) {
+        queryClient.setQueryData(['conversations', botId], context.previousBotConversations);
+      }
+      if (context?.previousAllConversations) {
+        queryClient.setQueryData(['conversations', 'all'], context.previousAllConversations);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
@@ -110,7 +197,30 @@ export const useSendNoteMutation = (conversationId: number, botId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (content: string) => sendNoteApi(conversationId, content),
-    onSuccess: () => {
+    onMutate: async (content: string) => {
+      await queryClient.cancelQueries({ queryKey: ['messages', conversationId] });
+      const previousMessages = queryClient.getQueryData<MessageResponse[]>(['messages', conversationId]);
+
+      const optimisticNote: MessageResponse = {
+        id: -Date.now(),
+        conversationId,
+        content: `Note: ${content}`,
+        senderType: 'OWNER',
+        mediaUrl: null,
+        mediaType: null,
+        createdAt: new Date().toISOString(),
+        sent: true,
+      };
+
+      queryClient.setQueryData<MessageResponse[]>(['messages', conversationId], (old = []) => [...old, optimisticNote]);
+      return { previousMessages };
+    },
+    onError: (_err, _content, context) => {
+      if (context?.previousMessages) {
+        queryClient.setQueryData(['messages', conversationId], context.previousMessages);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
@@ -198,8 +308,52 @@ export const useUpdateConversationMutation = (botId: number) => {
   return useMutation({
     mutationFn: ({ conversationId, status, unread }: { conversationId: number; status?: ConversationStatus; unread?: boolean }) =>
       updateConversationApi(conversationId, { status, unread }),
-    onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: ['conversation', updated.id] });
+    onMutate: async ({ conversationId, status, unread }) => {
+      await queryClient.cancelQueries({ queryKey: ['conversation', conversationId] });
+      await queryClient.cancelQueries({ queryKey: ['conversations', botId] });
+      await queryClient.cancelQueries({ queryKey: ['conversations', 'all'] });
+
+      const previousConversation = queryClient.getQueryData<ConversationResponse>(['conversation', conversationId]);
+      const previousBotConversations = queryClient.getQueryData<ConversationResponse[]>(['conversations', botId]);
+      const previousAllConversations = queryClient.getQueryData<ConversationResponse[]>(['conversations', 'all']);
+
+      if (previousConversation) {
+        queryClient.setQueryData<ConversationResponse>(['conversation', conversationId], {
+          ...previousConversation,
+          status: status ?? previousConversation.status,
+          unread: unread ?? previousConversation.unread,
+        });
+      }
+
+      const updateList = (list?: ConversationResponse[]) =>
+        list?.map((conv) =>
+          conv.id === conversationId
+            ? { ...conv, status: status ?? conv.status, unread: unread ?? conv.unread }
+            : conv
+        );
+
+      if (previousBotConversations) {
+        queryClient.setQueryData(['conversations', botId], updateList(previousBotConversations));
+      }
+      if (previousAllConversations) {
+        queryClient.setQueryData(['conversations', 'all'], updateList(previousAllConversations));
+      }
+
+      return { previousConversation, previousBotConversations, previousAllConversations };
+    },
+    onError: (_err, { conversationId }, context) => {
+      if (context?.previousConversation) {
+        queryClient.setQueryData(['conversation', conversationId], context.previousConversation);
+      }
+      if (context?.previousBotConversations) {
+        queryClient.setQueryData(['conversations', botId], context.previousBotConversations);
+      }
+      if (context?.previousAllConversations) {
+        queryClient.setQueryData(['conversations', 'all'], context.previousAllConversations);
+      }
+    },
+    onSettled: (updated, _err, { conversationId }) => {
+      queryClient.invalidateQueries({ queryKey: ['conversation', updated?.id || conversationId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
       queryClient.invalidateQueries({ queryKey: ['conversations', 'all'] });
     },

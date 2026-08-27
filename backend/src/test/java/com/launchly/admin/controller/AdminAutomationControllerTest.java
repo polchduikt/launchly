@@ -65,12 +65,12 @@ class AdminAutomationControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/admin/automations/{automationId}/details - Should return automation details")
+    @DisplayName("GET /api/v1/admin/automations/{automationId} - Should return automation details")
     void getAutomationDetails_Success() throws Exception {
         AdminAutomationDetailDto dto = new AdminAutomationDetailDto();
         when(adminAutomationService.getAutomationDetails(eq(10L), eq("all"), eq(0), eq(20))).thenReturn(dto);
 
-        mockMvc.perform(get("/api/v1/admin/automations/10/details"))
+        mockMvc.perform(get("/api/v1/admin/automations/10"))
                 .andExpect(status().isOk());
     }
 

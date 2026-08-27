@@ -35,6 +35,10 @@
 
 It serves as a full-scale technical showcase of building resilient, high-concurrency monoliths using **Clean Architecture**, **Domain-Driven Design (DDD)** principles, and modern reactive frontend design.
 
+<p align="center">
+  <img src="docs/images/landing.jpg" alt="Launchly Platform Overview" width="100%" />
+</p>
+
 ---
 
 ## Tech Stack
@@ -65,10 +69,14 @@ It serves as a full-scale technical showcase of building resilient, high-concurr
 - **@xyflow/react (React Flow)**: Interactive visual bot graph and node constructor
 - **Tailwind CSS v4**: High-performance modern utility styling
 - **TanStack Query v5**: Server state caching, background synchronization, and optimistic mutations
-- **Zustand v5**: Client-only synchronous state (auth session, canvas selection, UI theme)
+- **Zustand v5**: Client-only synchronous state (auth session, canvas selection, network health)
 - **React Hook Form + Zod v4**: Strict type-safe form validation and DTO transformations
 - **React Router v7**: Nested dashboard layouts and role-based route guards
 - **STOMP & SockJS Client**: Real-time live chat subscriptions
+- **TanStack Virtual & Custom Virtualizer**: Scalable windowing for high-volume conversation and contact lists
+- **DOMPurify**: Industrial-grade XSS sanitization and URL validation pipeline
+- **BroadcastChannel & Storage Events**: Real-time multi-tab session synchronization
+- **Axios Idempotency & AbortController Interceptors**: Automatic idempotency injection and query deduplication
 - **Vitest & Testing Library**: Unit and component test suites with v8 coverage
 - **Playwright**: End-to-end browser automation suite
 
@@ -117,9 +125,15 @@ Detailed backend architecture & ADRs: [docs/backend/ARCHITECTURE.md](docs/backen
 ### Frontend Architecture
 - **Layer-Based & Feature-Sliced**: Strict modular hierarchy dividing low-level UI primitives, REST API clients, custom React hooks, and domain-specific route views.
 - **Interactive Visual Flow Builder**: Custom node-graph editor powered by `@xyflow/react` (React Flow), featuring real-time node validation, connection rules, and seamless JSON schema serialization.
-- **Strict State Separation**: Server state cached and invalidated via TanStack Query v5; UI/client state (modals, auth sessions, canvas selection) isolated in Zustand stores.
+- **Strict State Separation**: Server state cached and invalidated via TanStack Query v5; UI/client state (modals, auth sessions, canvas selection, network health) isolated in Zustand stores.
 - **Real-Time Live Chat (STOMP / SockJS)**: Low-latency bidirectional WebSocket connection for live CRM messaging, operator typing indicators, and instant lead status updates.
-- **Optimistic UI Updates**: Immediate client-side reflection of CRM lead state changes, tag assignments, and message delivery with automatic rollback on network failure.
+- **Optimistic UI Updates**: Immediate client-side reflection of CRM messages, notes, lead states, tag assignments, and support tickets with automatic rollback on network failure.
+- **Automatic Client Idempotency**: Transparent injection of UUID v4 `Idempotency-Key` headers on `POST`, `DELETE`, and `PATCH` requests, synchronized with backend replay-protection filters.
+- **Race Condition Prevention & Request Cancellation**: Automated query deduplication and superseded search request abortion via native `AbortController` in Axios.
+- **Zero-CLS Skeleton Screens**: Purpose-built Neo-Brutalist skeleton states maintaining layout stability (CLS = 0) during async data fetches.
+- **Multi-Tab State Synchronization**: `BroadcastChannel` event-driven architecture synchronizing auth sessions, active bot context, and logout triggers across concurrent browser tabs.
+- **Defensive XSS Pipeline**: Deep DOMPurify sanitization and safe link filtering on all dynamic markdown and HTML solutions.
+- **Real-Time Network & WebSocket Health**: Sticky connection banner monitoring browser connectivity and STOMP session lifecycles with debounced auto-reconnection.
 - **Silent JWT Refresh Interceptor**: Axios queue mechanism ensuring transparent access token rotation on HTTP 401 without disrupting in-flight operations or prompting re-login.
 - **Type-Safe Validation & Form Pipelines**: Unified runtime and compile-time validation powered by Zod v4 and React Hook Form across all bot configurations and integration settings.
 - **Role & Tier-Aware Route Protection**: Granular client-side route guards restricting capabilities based on active user roles (`OWNER`, `OPERATOR`, `ADMIN`) and subscription tier limits.

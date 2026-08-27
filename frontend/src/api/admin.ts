@@ -197,7 +197,7 @@ export const fetchAdminBroadcastDetailsApi = async (
   size = 10
 ): Promise<AdminBroadcastDetail> => {
   const params: Record<string, string | number> = { period, page, size };
-  const response = await apiClient.get<AdminBroadcastDetail>(`/admin/broadcasts/${broadcastId}/details`, { params });
+  const response = await apiClient.get<AdminBroadcastDetail>(`/admin/broadcasts/${broadcastId}`, { params });
   return response.data;
 };
 
@@ -327,7 +327,7 @@ export const fetchAdminAutomationDetailsApi = async (
   size = 20
 ): Promise<AdminAutomationDetail> => {
   const params: Record<string, string | number> = { period, page, size };
-  const response = await apiClient.get<AdminAutomationDetail>(`/admin/automations/${automationId}/details`, { params });
+  const response = await apiClient.get<AdminAutomationDetail>(`/admin/automations/${automationId}`, { params });
   return response.data;
 };
 
@@ -453,7 +453,7 @@ export const fetchAdminUserDetailsApi = async (
   size = 20
 ): Promise<AdminUserDetail> => {
   const params: Record<string, string | number> = { period, category, page, size };
-  const response = await apiClient.get<AdminUserDetail>(`/admin/users/${userId}/details`, { params });
+  const response = await apiClient.get<AdminUserDetail>(`/admin/users/${userId}`, { params });
   return response.data;
 };
 

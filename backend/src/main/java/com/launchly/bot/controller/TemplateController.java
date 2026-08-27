@@ -39,7 +39,7 @@ public class TemplateController {
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Source bot not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/create")
+    @PostMapping
     @Idempotent
     public ResponseEntity<TemplateResponse> createTemplate(
             @RequestBody CreateTemplateRequest request,

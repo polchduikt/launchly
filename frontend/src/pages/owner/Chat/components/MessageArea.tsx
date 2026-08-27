@@ -1,6 +1,5 @@
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useMemo, useRef, useEffect, useCallback } from 'react';
 import {
-  Loader2,
   MessageSquare,
   ExternalLink,
 } from 'lucide-react';
@@ -12,6 +11,7 @@ import { MessageBubble } from './MessageBubble';
 import { ChatToolbar } from './ChatToolbar';
 import { formatDateSeparator, getDateKey } from '../../../../utils/crmChat';
 import { t } from '../../../../i18n/config';
+import { MessageAreaSkeleton } from '../../../../components/common/Skeleton';
 
 interface MessageAreaProps {
   conversation: ConversationResponse | null;
@@ -60,24 +60,22 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
 }) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToBottom = (behavior: 'auto' | 'smooth' = 'auto') => {
+  const scrollToBottom = useCallback((behavior: 'auto' | 'smooth' = 'auto') => {
     messagesEndRef.current?.scrollIntoView({ behavior });
-  };
+  }, []);
 
   useEffect(() => {
     if (!conversation) return;
 
-    const behavior = 'auto';
-    scrollToBottom(behavior);
-
-    const t1 = setTimeout(() => scrollToBottom(behavior), 50);
-    const t2 = setTimeout(() => scrollToBottom(behavior), 150);
+    scrollToBottom('auto');
+    const t1 = setTimeout(() => scrollToBottom('auto'), 50);
+    const t2 = setTimeout(() => scrollToBottom('auto'), 150);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [messages, conversation?.id]);
+  }, [messages.length, conversation?.id, scrollToBottom]);
 
   const handleImageLoad = () => {
     scrollToBottom('auto');
@@ -150,8 +148,8 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
 
       <div className="flex-1 overflow-y-auto px-5 py-4 bg-[#F2EBDD] font-['JetBrains_Mono',monospace]" style={{ scrollbarWidth: 'none' }}>
         {isMsgLoading ? (
-          <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-[#0A0A0A]" size={24} /></div>
-        ) : messages.length === 0 ? (
+          <MessageAreaSkeleton />
+        ) : groupedMessages.length === 0 ? (
           <div className="h-full flex items-center justify-center text-xs text-[#0A0A0A] font-bold italic">No messages in this conversation.</div>
         ) : (
           groupedMessages.map((group, gi) => (
@@ -176,7 +174,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
             </div>
           ))
         )}
-        {messages.length > 0 && <div ref={messagesEndRef} />}
+        <div ref={messagesEndRef} />
       </div>
     </>
   );

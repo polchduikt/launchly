@@ -186,7 +186,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/v1/auth/delete-account - Should delete account and return 204 No Content")
+    @DisplayName("DELETE /api/v1/auth/account - Should delete account and return 204 No Content")
     void deleteAccount_Success() throws Exception {
         UserResponse userResponse = mock(UserResponse.class);
         when(userResponse.id()).thenReturn(1L);
@@ -194,7 +194,7 @@ class AuthControllerTest {
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken("user@launchly.pro", null, Collections.emptyList());
 
-        mockMvc.perform(delete("/api/v1/auth/delete-account").principal(auth))
+        mockMvc.perform(delete("/api/v1/auth/account").principal(auth))
                 .andExpect(status().isNoContent());
 
         verify(authService, times(1)).deleteUserAccount(1L);
