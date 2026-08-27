@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { MyTemplatesPage } from './MyTemplatesPage';
 import { TemplateDetailPage } from './TemplateDetailPage';
 import { CreateTemplateWizardPage } from './CreateTemplateWizardPage';
@@ -46,9 +46,12 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('Templates Pages', () => {
-  it('renders MyTemplatesPage', () => {
+  it('renders MyTemplatesPage', async () => {
     const { container } = render(<MyTemplatesPage />, { wrapper: Wrapper });
     expect(container).toBeDefined();
+    await waitFor(() => {
+      expect(container.querySelector('[data-testid="dashboard-layout"]')).toBeInTheDocument();
+    });
   });
 
   it('renders TemplateDetailPage', () => {

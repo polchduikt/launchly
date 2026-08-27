@@ -75,7 +75,9 @@ describe('useCrmQueries', () => {
       await orderRes.current.mutateAsync({ orderId: 1, status: 'COMPLETED' as unknown as never, notes: 'Done' });
     });
 
-    expect(sendRes.current.data).toEqual({ id: 2, content: 'Reply', senderType: 'OWNER' });
-    expect(orderRes.current.data).toEqual({ id: 1, status: 'COMPLETED' });
+    await waitFor(() => {
+      expect(sendRes.current.data).toEqual({ id: 2, content: 'Reply', senderType: 'OWNER' });
+      expect(orderRes.current.data).toEqual({ id: 1, status: 'COMPLETED' });
+    });
   });
 });

@@ -7,6 +7,18 @@ const mockAuthState = {
   accessToken: 'mock_access_token',
 };
 
+vi.mock('@stomp/stompjs', () => {
+  class MockClient {
+    activate = vi.fn();
+    deactivate = vi.fn();
+    publish = vi.fn();
+    subscribe = vi.fn();
+  }
+  return {
+    Client: MockClient,
+  };
+});
+
 vi.mock('../../store/useAuthStore', () => {
   const useAuthStoreMock = (selector?: (state: Record<string, unknown>) => unknown) =>
     selector ? selector(mockAuthState) : mockAuthState;

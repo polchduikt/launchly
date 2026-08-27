@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { AdminStatsPage } from './AdminStatsPage';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -44,8 +44,11 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('AdminStatsPage', () => {
-  it('renders admin statistics overview page', () => {
+  it('renders admin statistics overview page', async () => {
     const { container } = render(<AdminStatsPage />, { wrapper: Wrapper });
     expect(container).toBeDefined();
+    await waitFor(() => {
+      expect(container.querySelector('[data-testid="admin-layout"]')).toBeInTheDocument();
+    });
   });
 });
