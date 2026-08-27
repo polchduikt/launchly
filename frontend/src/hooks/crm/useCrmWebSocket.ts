@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNetworkStore } from '../../store/useNetworkStore';
 
 export const useCrmWebSocket = (botId: number) => {
   const queryClient = useQueryClient();
@@ -13,17 +14,27 @@ export const useCrmWebSocket = (botId: number) => {
     const socket = new SockJS('/ws');
     const client = new Client({
       webSocketFactory: () => socket,
-      reconnectDelay: 10000,
-      connectionTimeout: 3000,
+      reconnectDelay: 5000,
+      connectionTimeout: 4000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
+      onWebSocketClose: () => {
+        useNetworkStore.getState().setWebSocketStatus('reconnecting');
+      },
       onWebSocketError: () => {
+        useNetworkStore.getState().setWebSocketStatus('reconnecting');
       },
       onStompError: () => {
+        useNetworkStore.getState().setWebSocketStatus('reconnecting');
+      },
+      onDisconnect: () => {
+        useNetworkStore.getState().setWebSocketStatus('disconnected');
       },
     });
 
     client.onConnect = () => {
+      useNetworkStore.getState().setWebSocketStatus('connected');
+
       client.subscribe(`/topic/crm/${botId}/messages`, (msg) => {
         try {
           const body = JSON.parse(msg.body);
@@ -45,6 +56,7 @@ export const useCrmWebSocket = (botId: number) => {
       });
     };
 
+    useNetworkStore.getState().setWebSocketStatus('connecting');
     client.activate();
     stompClientRef.current = client;
 
@@ -52,6 +64,7 @@ export const useCrmWebSocket = (botId: number) => {
       if (stompClientRef.current) {
         stompClientRef.current.deactivate();
       }
+      useNetworkStore.getState().setWebSocketStatus('disconnected');
     };
   }, [botId, queryClient]);
 };
