@@ -30,7 +30,7 @@ describe('ConversationList', () => {
         chatFilter="all"
       />
     );
-    expect(container.querySelector('.animate-spin')).toBeInTheDocument();
+    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
   });
 
   it('renders conversation items', () => {

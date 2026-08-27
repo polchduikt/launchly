@@ -129,4 +129,19 @@ describe('apiClient request interceptor', () => {
 
     expect(authHeader).toBe('Bearer sample-jwt-token');
   });
+
+  it('should automatically attach AbortSignal to search GET requests', async () => {
+    let capturedConfig: any = null;
+
+    vi.spyOn(apiClient, 'request').mockImplementation(async (config: any) => {
+      capturedConfig = config;
+      return { data: [], status: 200, statusText: 'OK', headers: {}, config };
+    });
+
+    await apiClient.get('/search-items', { params: { search: 'launchly' } });
+
+    expect(capturedConfig).not.toBeNull();
+    expect(capturedConfig.signal).toBeDefined();
+    expect(capturedConfig.signal.aborted).toBe(false);
+  });
 });

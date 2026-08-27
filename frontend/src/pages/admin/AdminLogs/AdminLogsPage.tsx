@@ -8,6 +8,7 @@ import { useTranslation } from '../../../i18n/config';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { Navigate } from 'react-router-dom';
 import { ROUTES } from '../../../routes/paths';
+import { TableSkeleton } from '../../../components/common/Skeleton';
 
 export const AdminLogsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -288,9 +289,7 @@ export const AdminLogsPage: React.FC = () => {
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-20 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-[4px_4px_0px_#0A0A0A]">
-              <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
-            </div>
+            <TableSkeleton rows={8} columns={5} />
           ) : (
             <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl overflow-hidden shadow-[4px_4px_0px_#0A0A0A]">
               <div className="overflow-x-auto">

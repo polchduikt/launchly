@@ -6,6 +6,12 @@ import {
   shouldAttachIdempotencyKey,
 } from '../utils/idempotency';
 
+import {
+  registerRequest,
+  removePendingRequest,
+  isRequestCanceled,
+} from '../utils/requestCancellation';
+
 const apiClient = axios.create({
   baseURL: '/api/v1',
   headers: {
@@ -34,7 +40,7 @@ apiClient.interceptors.request.use(
       }
     }
 
-    return config;
+    return registerRequest(config);
   },
   (error) => Promise.reject(error)
 );
@@ -54,8 +60,21 @@ const processQueue = (error: unknown, token: string | null = null) => {
 };
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.config) {
+      removePendingRequest(response.config);
+    }
+    return response;
+  },
   async (error) => {
+    if (error.config) {
+      removePendingRequest(error.config);
+    }
+
+    if (isRequestCanceled(error)) {
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config;
     if (error.response?.status === 403 || error.response?.data?.error === 'ACCOUNT_BLOCKED') {
       const reason = error.response?.data?.reason || 'Violation of platform rules';

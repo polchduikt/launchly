@@ -5,6 +5,7 @@ import type { BotUserResponse } from '../../../../types/bot';
 import { ContactAvatar } from './ContactAvatar';
 import { t } from '../../../../i18n/config';
 import { useVirtualList } from '../../../../hooks/useVirtualList';
+import { TableSkeleton } from '../../../../components/common/Skeleton';
 
 interface ContactsTableProps {
   botId: number;
@@ -86,8 +87,8 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
 
   if (isContactsLoading) {
     return (
-      <div className="h-full flex items-center justify-center m-6">
-        <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
+      <div className="flex-1 overflow-auto p-6 font-['JetBrains_Mono',monospace]">
+        <TableSkeleton rows={7} columns={5} />
       </div>
     );
   }
