@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import { NetworkStatusBanner } from './NetworkStatusBanner';
 import { useNetworkStore } from '../../store/useNetworkStore';
@@ -27,6 +27,10 @@ describe('NetworkStatusBanner', () => {
     });
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('renders nothing when online and connected', () => {
     const { container } = render(<NetworkStatusBanner />, { wrapper: createWrapper() });
     expect(container.firstChild).toBeNull();
@@ -42,18 +46,35 @@ describe('NetworkStatusBanner', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders reconnecting alert when webSocketStatus is reconnecting after being offline', () => {
+  it('renders reconnecting alert after debounce when webSocketStatus is reconnecting after being offline', () => {
+    vi.useFakeTimers();
     useNetworkStore.setState({
       isOnline: true,
       webSocketStatus: 'reconnecting',
       hasBeenOffline: true,
     });
+
     render(<NetworkStatusBanner />, { wrapper: createWrapper() });
+
+    act(() => {
+      vi.advanceTimersByTime(1300);
+    });
 
     expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(
       screen.getByText(/З'єднання в реальному часі втрачено/i)
     ).toBeInTheDocument();
+  });
+
+  it('does not render alert when webSocketStatus is disconnected', () => {
+    useNetworkStore.setState({
+      isOnline: true,
+      webSocketStatus: 'disconnected',
+      hasBeenOffline: false,
+    });
+
+    const { container } = render(<NetworkStatusBanner />, { wrapper: createWrapper() });
+    expect(container.firstChild).toBeNull();
   });
 
   it('shows connection restored status on online event', () => {

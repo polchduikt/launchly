@@ -9,6 +9,18 @@ export const NetworkStatusBanner: React.FC = () => {
   const { isOnline, webSocketStatus, hasBeenOffline, setOnline, setHasBeenOffline } = useNetworkStore();
   const [showRestored, setShowRestored] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [debouncedReconnecting, setDebouncedReconnecting] = useState(false);
+
+  useEffect(() => {
+    if (webSocketStatus === 'reconnecting') {
+      const timer = setTimeout(() => {
+        setDebouncedReconnecting(true);
+      }, 1200);
+      return () => clearTimeout(timer);
+    } else {
+      setDebouncedReconnecting(false);
+    }
+  }, [webSocketStatus]);
 
   const handleOnline = useCallback(() => {
     setOnline(true);
@@ -43,11 +55,12 @@ export const NetworkStatusBanner: React.FC = () => {
     try {
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         setOnline(true);
+        setHasBeenOffline(false);
+        setDebouncedReconnecting(false);
         await queryClient.invalidateQueries();
         setShowRestored(true);
         setTimeout(() => {
           setShowRestored(false);
-          setHasBeenOffline(false);
         }, 3000);
       }
     } finally {
@@ -90,11 +103,7 @@ export const NetworkStatusBanner: React.FC = () => {
     );
   }
 
-  if (
-    isOnline &&
-    (webSocketStatus === 'reconnecting' || webSocketStatus === 'disconnected') &&
-    hasBeenOffline
-  ) {
+  if (isOnline && debouncedReconnecting && hasBeenOffline) {
     return (
       <div
         role="alert"
@@ -140,7 +149,7 @@ export const NetworkStatusBanner: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowRestored(false)}
-            className="p-1 hover:bg-black/10 rounded cursor-pointer transition-colors"
+            className="p-1 hover:bg-[#0A0A0A]/10 rounded cursor-pointer transition-all"
           >
             <X size={14} />
           </button>

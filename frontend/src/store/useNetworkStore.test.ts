@@ -38,6 +38,11 @@ describe('useNetworkStore', () => {
     useNetworkStore.getState().setWebSocketStatus('connected');
     state = useNetworkStore.getState();
     expect(state.webSocketStatus).toBe('connected');
+
+    useNetworkStore.getState().setWebSocketStatus('disconnected');
+    state = useNetworkStore.getState();
+    expect(state.webSocketStatus).toBe('disconnected');
+    expect(state.hasBeenOffline).toBe(false);
   });
 
   it('allows manual reset of hasBeenOffline flag', () => {

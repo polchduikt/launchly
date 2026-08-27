@@ -26,8 +26,10 @@ export const useNetworkStore = create<NetworkState>((set) => ({
     set((state) => ({
       webSocketStatus: status,
       hasBeenOffline:
-        status === 'disconnected' || status === 'reconnecting'
+        status === 'reconnecting'
           ? true
+          : status === 'disconnected'
+          ? false
           : state.hasBeenOffline,
     })),
 

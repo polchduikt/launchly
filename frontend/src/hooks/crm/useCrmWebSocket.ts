@@ -7,10 +7,12 @@ import { useNetworkStore } from '../../store/useNetworkStore';
 export const useCrmWebSocket = (botId: number) => {
   const queryClient = useQueryClient();
   const stompClientRef = useRef<Client | null>(null);
+  const isIntentionalDisconnectRef = useRef(false);
 
   useEffect(() => {
     if (!botId || botId <= 0) return;
 
+    isIntentionalDisconnectRef.current = false;
     const socket = new SockJS('/ws');
     const client = new Client({
       webSocketFactory: () => socket,
@@ -19,16 +21,24 @@ export const useCrmWebSocket = (botId: number) => {
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
       onWebSocketClose: () => {
-        useNetworkStore.getState().setWebSocketStatus('reconnecting');
+        if (!isIntentionalDisconnectRef.current) {
+          useNetworkStore.getState().setWebSocketStatus('reconnecting');
+        }
       },
       onWebSocketError: () => {
-        useNetworkStore.getState().setWebSocketStatus('reconnecting');
+        if (!isIntentionalDisconnectRef.current) {
+          useNetworkStore.getState().setWebSocketStatus('reconnecting');
+        }
       },
       onStompError: () => {
-        useNetworkStore.getState().setWebSocketStatus('reconnecting');
+        if (!isIntentionalDisconnectRef.current) {
+          useNetworkStore.getState().setWebSocketStatus('reconnecting');
+        }
       },
       onDisconnect: () => {
-        useNetworkStore.getState().setWebSocketStatus('disconnected');
+        if (!isIntentionalDisconnectRef.current) {
+          useNetworkStore.getState().setWebSocketStatus('reconnecting');
+        }
       },
     });
 
@@ -61,6 +71,7 @@ export const useCrmWebSocket = (botId: number) => {
     stompClientRef.current = client;
 
     return () => {
+      isIntentionalDisconnectRef.current = true;
       if (stompClientRef.current) {
         stompClientRef.current.deactivate();
       }
