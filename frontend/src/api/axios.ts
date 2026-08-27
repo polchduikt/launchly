@@ -1,5 +1,10 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
+import {
+  IDEMPOTENCY_HEADER_NAME,
+  generateIdempotencyKey,
+  shouldAttachIdempotencyKey,
+} from '../utils/idempotency';
 
 const apiClient = axios.create({
   baseURL: '/api/v1',
@@ -14,6 +19,21 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    if (shouldAttachIdempotencyKey(config.method)) {
+      const existingKey = typeof config.headers.get === 'function'
+        ? config.headers.get(IDEMPOTENCY_HEADER_NAME)
+        : config.headers[IDEMPOTENCY_HEADER_NAME];
+
+      if (!existingKey) {
+        if (typeof config.headers.set === 'function') {
+          config.headers.set(IDEMPOTENCY_HEADER_NAME, generateIdempotencyKey());
+        } else {
+          config.headers[IDEMPOTENCY_HEADER_NAME] = generateIdempotencyKey();
+        }
+      }
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
