@@ -19,6 +19,7 @@ import {
   updateBotUserApi,
   createBotUserApi,
   deleteBotUserApi,
+} from '../../api/bot';
 import type {
   OrderStatus,
   LeadStatus,
