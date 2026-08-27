@@ -52,10 +52,14 @@ describe('useChatLocalStorage', () => {
     expect(result.current.contactNotes[1]).toBe('Important client');
   });
 
-  it('toggles favorites correctly', () => {
+  it('toggles favorites correctly', async () => {
     const { result } = renderHook(() =>
       useChatLocalStorage({ conversations: mockConversations, selectedConvId: 1 })
     );
+
+    await waitFor(() => {
+      expect(result.current.labels).toEqual(['Lead', 'Customer']);
+    });
 
     act(() => {
       result.current.toggleFavorite(1);

@@ -12,7 +12,7 @@ vi.mock('../../../../api/bot', () => ({
 }));
 
 describe('ContactsFilterBuilder', () => {
-  it('returns null when isOpen=false', () => {
+  it('returns null when isOpen=false', async () => {
     const { container } = render(
       <ContactsFilterBuilder
         isOpen={false}
