@@ -36,7 +36,7 @@
 It serves as a full-scale technical showcase of building resilient, high-concurrency monoliths using **Clean Architecture**, **Domain-Driven Design (DDD)** principles, and modern reactive frontend design.
 
 <p align="center">
-  <img src="docs/images/landing.jpg" alt="Launchly Platform Overview" width="100%" />
+  <img src="docs/images/preview.gif" alt="Launchly Platform Overview" width="100%" />
 </p>
 
 ---
