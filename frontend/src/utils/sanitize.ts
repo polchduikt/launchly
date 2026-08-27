@@ -5,6 +5,7 @@ export interface SanitizeOptions {
 }
 
 const DEFAULT_ALLOWED_TAGS = new Set([
+  'div',
   'b',
   'strong',
   'i',
