@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useAiAssistant } from '../../hooks/ai/useAiAssistant';
 import { QUICK_QUESTIONS, AI_FLOW_TEMPLATES } from '../../const/aiConfig';
-import { Sparkles, X, Send, Bot, User, Loader2, RefreshCw, AlertCircle, AlertTriangle } from 'lucide-react';
+import { X, Send, User, Loader2, RefreshCw, AlertCircle, AlertTriangle } from 'lucide-react';
+import { AiIcon } from '../ui/AiIcon';
 import { t } from '../../i18n/config';
 
 export const AiAssistantDrawer: React.FC = () => {
@@ -53,7 +54,7 @@ export const AiAssistantDrawer: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-purple-200 border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A]">
-                <Sparkles size={18} className="animate-pulse" />
+                <AiIcon size={18} />
               </div>
               <div>
                 <h3 className="text-sm font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">
@@ -64,7 +65,7 @@ export const AiAssistantDrawer: React.FC = () => {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1.5 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-[#0A0A0A] transition-colors cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
             >
               <X size={16} />
             </button>
@@ -143,7 +144,7 @@ export const AiAssistantDrawer: React.FC = () => {
                           : 'bg-[#0A0A0A] text-[#F2EBDD]'
                       }`}
                     >
-                      {isAI ? <Bot size={15} /> : <User size={15} />}
+                      {isAI ? <AiIcon size={15} /> : <User size={15} />}
                     </div>
 
                     <div
@@ -162,7 +163,7 @@ export const AiAssistantDrawer: React.FC = () => {
               {chatMutation.isPending && (
                 <div className="flex gap-3 max-w-[85%] mr-auto">
                   <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center border-2 border-[#0A0A0A] bg-purple-200 text-[#0A0A0A]">
-                    <Bot size={15} />
+                    <AiIcon size={15} />
                   </div>
                   <div className="bg-white border-2 border-[#0A0A0A] p-3 rounded-2xl rounded-tl-none flex items-center gap-1.5">
                     <span className="w-2 h-2 bg-[#0A0A0A] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
@@ -335,7 +336,7 @@ export const AiAssistantDrawer: React.FC = () => {
                 onClick={handleGenerate}
                 className="flex items-center gap-1.5 px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 disabled:bg-[#0A0A0A]/20 disabled:text-[#0A0A0A]/40 text-[#F2EBDD] text-xs font-black rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer disabled:cursor-not-allowed uppercase tracking-wider font-['Anybody',sans-serif]"
               >
-                <Sparkles size={14} />
+                <AiIcon size={14} />
                 <span>{t('ai.drawer.generate_btn')}</span>
               </button>
             </footer>

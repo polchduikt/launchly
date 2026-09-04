@@ -33,7 +33,7 @@
   "flow_builder.set_live": "Set Live",
   "flow_builder.step_connected": "Step Connected",
   "flow_builder.telegram_flow_schema": "Telegram Flow Schema",
-  "flow_builder.telegram_menu": "+ Telegram Menu",
+  "flow_builder.telegram_menu": "Telegram Menu",
   "flow_builder.telegram_menu_block": "Telegram Menu",
   "flow_builder.text_block": "Text Block",
   "flow_builder.video_block": "Video Block"

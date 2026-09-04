@@ -33,7 +33,7 @@
   "flow_builder.set_live": "Запустити",
   "flow_builder.step_connected": "Крок підключено",
   "flow_builder.telegram_flow_schema": "Схема потоку Telegram",
-  "flow_builder.telegram_menu": "+ Меню Telegram",
+  "flow_builder.telegram_menu": "Меню Telegram",
   "flow_builder.telegram_menu_block": "Меню Telegram",
   "flow_builder.text_block": "Текстовий блок",
   "flow_builder.video_block": "Блок відео"

@@ -51,7 +51,7 @@ const ConditionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected
           ? 'shadow-lg ring-2 ring-[#0A0A0A]'
           : 'shadow-md'
@@ -59,7 +59,7 @@ const ConditionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 
-      <div className="relative flex items-center gap-2 bg-[#C6F8ED] rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-[#C6F8ED]/75 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}

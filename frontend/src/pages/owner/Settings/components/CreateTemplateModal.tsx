@@ -50,14 +50,14 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
       }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/40 animate-fade-in font-['JetBrains_Mono',monospace]"
     >
-      <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] rounded-3xl max-w-lg w-full overflow-hidden text-[#0A0A0A] relative">
-        <div className="p-6 border-b-2 border-[#0A0A0A] flex items-center justify-between bg-amber-100">
+      <div className="bg-white border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] rounded-3xl max-w-lg w-full overflow-hidden text-[#0A0A0A] relative">
+        <div className="p-6 border-b-2 border-[#0A0A0A] flex items-center justify-between bg-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-400 text-[#0A0A0A] border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
+            <div className="w-10 h-10 rounded-2xl bg-[#0A0A0A] text-white border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
               <Sparkles size={22} />
             </div>
             <div>
-              <h2 className="font-extrabold text-base uppercase tracking-tight">
+              <h2 className="font-extrabold text-base uppercase tracking-tight text-[#0A0A0A]">
                 {t('settings.template.title', 'Шаблон')}
               </h2>
               <p className="text-[11px] font-bold text-slate-600">
@@ -67,7 +67,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
           >
             <X size={16} />
           </button>
@@ -75,7 +75,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
         <div className="p-6 space-y-5">
           <div className="bg-white border-2 border-[#0A0A0A] p-4 rounded-2xl space-y-2">
             <div className="flex items-center gap-2 text-xs font-extrabold uppercase text-[#0A0A0A]">
-              <Layout size={16} className="text-amber-600 shrink-0" />
+              <Layout size={16} className="text-indigo-600 shrink-0" />
               <span>{t('settings.template.info_title', 'Як працює шаблон:')}</span>
             </div>
             <p className="text-[11.5px] font-bold text-slate-700 leading-relaxed">
@@ -106,7 +106,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
                 />
                 <button
                   onClick={handleCopyLink}
-                  className="px-4 py-2.5 bg-amber-400 hover:bg-amber-500 text-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                  className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
                 >
                   {copied ? (
                     <>

@@ -10,14 +10,16 @@ import { useStartBotMutation, usePublishBotMutation, useUpdateBotMutation } from
 import { getFlowLogicKey } from '../../../utils/flowHelpers';
 import { getCustomFieldsApi } from '../../../api/bot';
 import { NodeEditorPanel } from './components/sidebar/NodeEditorPanel';
-import { FLOW_BLOCKS } from '../../../const/flowBlocks';
+import { FLOW_BLOCKS, FLOW_BLOCK_COLORS } from '../../../const/flowBlocks';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { NODE_TYPES } from '../../../const/nodeTypes';
 import { FLOW_EDGE_DEFAULTS, EDGE_TYPES } from '../../../const/flowEdges';
 import { CONTEXT_MENU_OPTIONS } from '../../../const/contextMenuOptions';
+import { NODE_ICON_COMPONENTS } from '../../../const/nodeDisplay';
 import { useFlowBuilder } from '../../../hooks/bot/useFlowBuilder';
 import { ROUTES } from '../../../routes/paths';
-import { ArrowLeft, Loader2, Plus, GitFork, Route, GitCommit, Undo2, Redo2, Sparkles, Eye, X } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, GitFork, Route, GitCommit, Undo2, Redo2, Eye, X } from 'lucide-react';
+import { AiIcon } from '../../../components/ui/AiIcon';
 import { useState } from 'react';
 import { FlowPreviewPanel } from '../../../components/common/FlowPreviewPanel';
 import { useAiStore } from '../../../store/useAiStore';
@@ -64,8 +66,8 @@ const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
     <g>
       <path
         fill="none"
-        stroke="#7b8794"
-        strokeWidth={2.2}
+        stroke="#64748b"
+        strokeWidth={2.4}
         d={edgePath}
         style={{
           ...connectionLineStyle,
@@ -391,10 +393,11 @@ const FlowBuilderInner: React.FC = () => {
         <header className="h-16 border-b-2 border-[#0A0A0A] bg-[#F2EBDD] px-6 flex justify-between items-center z-10 shrink-0 select-none">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate(ROUTES.AUTOMATIONS)}
-              className="p-2 text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-sm"
+              onClick={() => navigate(ROUTES.AUTOMATIONS || '/automations')}
+              className="w-9 h-9 rounded-xl border-2 border-[#0A0A0A] bg-white flex items-center justify-center text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer shadow-sm"
+              title={t('flow_builder.automations', 'Автоматизації')}
             >
-               <ArrowLeft size={16} />
+              <ArrowLeft size={16} />
             </button>
             <div className="flex items-center gap-2 text-[#0A0A0A]/60 text-xs font-bold font-['JetBrains_Mono',monospace]">
               <span>{t('flow_builder.automations')}</span>
@@ -511,7 +514,7 @@ const FlowBuilderInner: React.FC = () => {
                 className="flex items-center gap-1.5 px-3.5 py-2 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer shadow-sm"
                 title="Generate flow with AI"
               >
-                <Sparkles size={14} className="animate-pulse" />
+                <AiIcon size={14} />
                 <span>{t('flow_builder.ai_gen')}</span>
               </button>
             )}
@@ -725,21 +728,27 @@ const FlowBuilderInner: React.FC = () => {
                       <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-1 font-['Anybody',sans-serif]">
                         {t('flow_builder.add_standalone_node')}
                       </span>
-                      {FLOW_BLOCKS.map((item) => (
-                        <button
-                          key={item.type}
-                          onClick={() => {
-                            handleAddNode(item.type);
-                            setIsAddDropdownOpen(false);
-                          }}
-                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A]/10 hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group"
-                        >
-                          <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${item.color}`}>
-                            <Plus size={12} className="group-hover:scale-110 transition-transform" />
-                          </span>
-                          <span>{item.label}</span>
-                        </button>
-                      ))}
+                      {FLOW_BLOCKS.map((item) => {
+                        const IconComp = NODE_ICON_COMPONENTS[item.type] || Plus;
+                        return (
+                          <button
+                            key={item.type}
+                            onClick={() => {
+                              handleAddNode(item.type);
+                              setIsAddDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A]/10 hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group"
+                          >
+                            <span
+                              data-block-type={item.type}
+                              className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${item.color}`}
+                            >
+                              <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+                            </span>
+                            <span>{item.label}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </>
                 )}
@@ -762,25 +771,40 @@ const FlowBuilderInner: React.FC = () => {
                   <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-3 pt-1 select-none font-['Anybody',sans-serif]">
                     {t('flow_builder.connect_to')}
                   </span>
-                  {filteredContextMenuOptions.map((opt, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleCreateAndConnectNode(opt.type)}
-                      className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-transparent hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group select-none"
-                    >
-                      <span className="font-bold">{opt.label}</span>
-                      {opt.isPro && (
-                        <span className="text-[8px] font-black bg-amber-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
-                          PRO
-                        </span>
-                      )}
-                      {opt.isAi && (
-                        <span className="text-[8px] font-black bg-purple-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
-                          AI
-                        </span>
-                      )}
-                    </button>
-                  ))}
+                  {filteredContextMenuOptions.map((opt, idx) => {
+                    const IconComp = NODE_ICON_COMPONENTS[opt.type] || Plus;
+                    const colorClass = FLOW_BLOCK_COLORS[opt.type] || 'text-slate-500 bg-slate-50';
+                    const cleanLabel = opt.label.replace(/^\+\s*/, '');
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => handleCreateAndConnectNode(opt.type)}
+                        className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-transparent hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group select-none"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span
+                            data-block-type={opt.type}
+                            className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${colorClass}`}
+                          >
+                            <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+                          </span>
+                          <span className="font-bold truncate">{cleanLabel}</span>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {opt.isPro && (
+                            <span className="text-[8px] font-black bg-amber-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                              PRO
+                            </span>
+                          )}
+                          {opt.isAi && (
+                            <span className="text-[8px] font-black bg-purple-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                              AI
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                   
                   <button
                     onClick={() => setContextMenu(null)}

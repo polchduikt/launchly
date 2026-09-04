@@ -205,7 +205,7 @@ export const ProfilePanel: React.FC = () => {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={avatarUploadMutation.isPending}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-100 text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
               >
                 <Camera size={14} />
                 <span>{t('settings.profile.btn_upload_avatar', 'Upload new photo')}</span>

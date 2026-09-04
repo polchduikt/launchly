@@ -184,7 +184,7 @@ export const TemplateDetailPage: React.FC = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/templates')}
-              className="px-3 py-1.5 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border border-[#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1 shrink-0"
+              className="px-3 py-1.5 bg-white hover:bg-[#0A0A0A] hover:text-white border border-[#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1 shrink-0"
             >
               <ChevronLeft size={15} />
               <span>{t('common.back', 'Назад')}</span>
@@ -222,7 +222,7 @@ export const TemplateDetailPage: React.FC = () => {
             <span className="shrink-0 text-[#0A0A0A] font-black uppercase">
               {t('template.share_permanent_link', 'Поділіться цим шаблоном за постійним посиланням:')}
             </span>
-            <div className="flex-1 flex items-center gap-2 min-w-0 bg-[#F2EBDD]/60 border-2 border-[#0A0A0A] px-3 py-1.5 rounded-lg">
+            <div className="flex-1 flex items-center gap-2 min-w-0 bg-slate-50 border-2 border-[#0A0A0A] px-3 py-1.5 rounded-lg">
               <ExternalLink size={14} className="text-indigo-600 shrink-0" />
               <input
                 type="text"
@@ -236,11 +236,11 @@ export const TemplateDetailPage: React.FC = () => {
 
           <button
             onClick={handleCopyLink}
-            className="px-5 py-2 bg-amber-400 hover:bg-amber-500 border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+            className="px-5 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
           >
             {copied ? (
               <>
-                <Check size={14} className="text-emerald-950 font-black" />
+                <Check size={14} className="text-emerald-400 font-black" />
                 <span>{t('template.copied', 'Скопійовано')}</span>
               </>
             ) : (
@@ -287,7 +287,7 @@ export const TemplateDetailPage: React.FC = () => {
                 <div className="border-2 border-[#0A0A0A] bg-white shadow-[3px_3px_0px_0px_#0A0A0A] overflow-hidden rounded-xl">
                   <button
                     onClick={() => setCollapsedAutomations(!collapsedAutomations)}
-                    className="w-full p-3.5 flex items-center justify-between bg-[#F2EBDD] border-b-2 border-[#0A0A0A] cursor-pointer"
+                    className="w-full p-3.5 flex items-center justify-between bg-slate-50 border-b-2 border-[#0A0A0A] cursor-pointer"
                   >
                     <span className="font-black text-xs uppercase text-[#0A0A0A] flex items-center gap-2">
                       <Workflow size={15} className="text-[#0A0A0A]" />
@@ -316,7 +316,7 @@ export const TemplateDetailPage: React.FC = () => {
                   <div className="border-2 border-[#0A0A0A] bg-white shadow-[3px_3px_0px_0px_#0A0A0A] overflow-hidden rounded-xl">
                     <button
                       onClick={() => setCollapsedBroadcasts(!collapsedBroadcasts)}
-                      className="w-full p-3.5 flex items-center justify-between bg-[#F2EBDD] border-b-2 border-[#0A0A0A] cursor-pointer"
+                      className="w-full p-3.5 flex items-center justify-between bg-slate-50 border-b-2 border-[#0A0A0A] cursor-pointer"
                     >
                       <span className="font-black text-xs uppercase text-[#0A0A0A] flex items-center gap-2">
                         <Radio size={15} className="text-[#0A0A0A]" />
@@ -348,7 +348,7 @@ export const TemplateDetailPage: React.FC = () => {
                   <div className="border-2 border-[#0A0A0A] bg-white shadow-[3px_3px_0px_0px_#0A0A0A] overflow-hidden rounded-xl">
                     <button
                       onClick={() => setCollapsedFields(!collapsedFields)}
-                      className="w-full p-3.5 flex items-center justify-between bg-[#F2EBDD] border-b-2 border-[#0A0A0A] cursor-pointer"
+                      className="w-full p-3.5 flex items-center justify-between bg-slate-50 border-b-2 border-[#0A0A0A] cursor-pointer"
                     >
                       <span className="font-black text-xs uppercase text-[#0A0A0A] flex items-center gap-2">
                         <Sliders size={15} className="text-[#0A0A0A]" />
@@ -373,7 +373,7 @@ export const TemplateDetailPage: React.FC = () => {
                   <div className="border-2 border-[#0A0A0A] bg-white shadow-[3px_3px_0px_0px_#0A0A0A] overflow-hidden rounded-xl">
                     <button
                       onClick={() => setCollapsedTags(!collapsedTags)}
-                      className="w-full p-3.5 flex items-center justify-between bg-[#F2EBDD] border-b-2 border-[#0A0A0A] cursor-pointer"
+                      className="w-full p-3.5 flex items-center justify-between bg-slate-50 border-b-2 border-[#0A0A0A] cursor-pointer"
                     >
                       <span className="font-black text-xs uppercase text-[#0A0A0A] flex items-center gap-2">
                         <TagIcon size={15} className="text-[#0A0A0A]" />
@@ -444,15 +444,15 @@ export const TemplateDetailPage: React.FC = () => {
                   </div>
 
                   {template.broadcastCount > 0 && (
-                    <div className="p-2.5 bg-amber-50/70 border border-amber-200 rounded-lg space-y-1">
-                      <div className="flex items-center justify-between text-amber-950 font-black">
+                    <div className="p-2.5 bg-slate-50 border border-[#0A0A0A] rounded-lg space-y-1">
+                      <div className="flex items-center justify-between text-slate-900 font-black">
                         <span className="flex items-center gap-1.5">
-                          <Radio size={13} className="text-amber-600" />
+                          <Radio size={13} className="text-indigo-600" />
                           <span>{t('common.nav.broadcasts', 'Розсилки')}</span>
                         </span>
                         <span>{`${template.broadcastCount} ${t('template.count_broadcasts', 'розсилок')}`}</span>
                       </div>
-                      <div className="text-[11px] text-amber-800 flex items-center justify-between pt-0.5">
+                      <div className="text-[11px] text-slate-700 flex items-center justify-between pt-0.5">
                         <span className="font-semibold text-slate-500">{t('template.stats.structure', 'Структура:')}</span>
                         <span className="font-bold">
                           {`${template.broadcastNodeCount ?? 0} ${t('template.count_nodes', 'нодів')} • ${template.broadcastEdgeCount ?? 0} ${t('template.count_edges', 'зв\'язків')}`}
@@ -489,7 +489,7 @@ export const TemplateDetailPage: React.FC = () => {
                 </h3>
 
                 <div className="space-y-4">
-                  <div className="bg-[#F2EBDD]/50 border-2 border-[#0A0A0A] p-4 text-xs font-medium leading-relaxed text-slate-800 rounded-lg">
+                  <div className="bg-slate-50 border-2 border-[#0A0A0A] p-4 text-xs font-medium leading-relaxed text-slate-800 rounded-lg">
                     {template.description ? template.description : t('template.no_description', 'Опис відсутній.')}
                   </div>
 
@@ -511,7 +511,7 @@ export const TemplateDetailPage: React.FC = () => {
                           href={template.videoUrl.startsWith('http') ? template.videoUrl : `https://${template.videoUrl}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex items-center gap-2 text-amber-700 hover:underline p-2 bg-amber-50 border border-amber-200 rounded-lg"
+                          className="flex items-center gap-2 text-indigo-600 hover:underline p-2 bg-indigo-50 border border-indigo-200 rounded-lg"
                         >
                           <PlayCircle size={16} />
                           <span>{t('template.video_label', 'Відео-презентація шаблону')}</span>

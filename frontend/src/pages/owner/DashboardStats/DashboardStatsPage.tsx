@@ -12,11 +12,12 @@ import {
   ChevronDown,
   MessageSquare,
   Clock,
-  Sparkles,
+  Bot,
   HelpCircle,
   MoreVertical,
   Plus
 } from 'lucide-react';
+import { AiIcon } from '../../../components/ui/AiIcon';
 
 interface MiniBarChartProps {
   data: number[];
@@ -915,7 +916,7 @@ export const DashboardStatsPage: React.FC = () => {
                       <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
                         <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_messages')}</span>
                         <span className="text-base font-black text-[#0A0A0A] flex items-center gap-1.5">
-                          <Sparkles size={13} className="text-indigo-600 animate-pulse" />
+                          <AiIcon size={13} className="text-indigo-600" />
                           {aiStats.messagesProcessed}
                         </span>
                       </div>

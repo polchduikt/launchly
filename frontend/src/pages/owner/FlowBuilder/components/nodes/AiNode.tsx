@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
-import { Sparkles } from 'lucide-react';
+import { AiIcon } from '../../../../../components/ui/AiIcon';
 import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../../types/bot';
 import { useNodeHover } from '../../../../../hooks/bot/useNodeHover';
@@ -43,7 +43,7 @@ const AiNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, 
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected
           ? 'shadow-lg ring-2 ring-[#0A0A0A]'
           : 'shadow-md'
@@ -51,14 +51,14 @@ const AiNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, 
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 
-      <div className="relative flex items-center gap-2 bg-emerald-100 rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-emerald-100/75 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
           isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
         />
         <span className="w-7 h-7 rounded-lg bg-emerald-100/60 text-emerald-700 flex items-center justify-center shrink-0">
-          <Sparkles size={13} strokeWidth={2.5} />
+          <AiIcon size={15} strokeWidth={2.5} />
         </span>
         <div className="flex-1 min-w-0">
           <span className="font-extrabold text-[9px] text-emerald-600/70 uppercase tracking-wider block leading-none">
@@ -84,8 +84,8 @@ const AiNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, 
         )}
       </div>
 
-      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">{t('node.ai.next_step')}</span>
+      <div className="flex justify-end items-center px-4 py-2 bg-transparent select-none relative rounded-b-[22px]">
+        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-2 select-none">{t('node.ai.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}

@@ -165,7 +165,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 bg-amber-50 border-2 border-[#0A0A0A]">
+                <div className="flex items-center gap-3 p-3 bg-slate-50 border-2 border-[#0A0A0A]">
                   <div className="w-12 h-12 bg-[#0A0A0A] border border-[#0A0A0A] flex items-center justify-center shrink-0 overflow-hidden text-[#F2EBDD]">
                     {template.avatarUrl ? (
                       <img src={template.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -308,7 +308,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                         href={template.videoUrl.startsWith('http') ? template.videoUrl : `https://${template.videoUrl}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-2 text-amber-600 hover:underline"
+                        className="flex items-center gap-2 text-indigo-600 hover:underline"
                       >
                         <PlayCircle size={15} />
                         <span>{t('template.video_label', 'Відео-презентація шаблону')}</span>
@@ -348,7 +348,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-amber-100 border-2 border-[#0A0A0A] p-8 text-center space-y-4 shadow-[2px_2px_0px_#0A0A0A]">
+              <div className="bg-slate-100 border-2 border-[#0A0A0A] p-8 text-center space-y-4 shadow-[2px_2px_0px_#0A0A0A]">
                 <p className="text-xs font-black text-slate-800">
                   {t('template.install.login_prompt', 'Увійдіть у свій акаунт Launchly, щоб встановити цей шаблон.')}
                 </p>

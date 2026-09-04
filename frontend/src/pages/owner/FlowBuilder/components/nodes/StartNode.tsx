@@ -23,13 +23,13 @@ const StartNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ selected, d
 
   return (
     <div
-      className={`w-72 bg-white border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected 
           ? 'shadow-lg ring-2 ring-[#0A0A0A]' 
           : 'shadow-md'
       } ${isConnecting ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
-      <div className="flex items-center gap-2 px-4 py-3 bg-emerald-100/60 select-none rounded-t-[22px]">
+      <div className="flex items-center gap-2 px-4 py-3 bg-emerald-100/75 select-none rounded-t-[22px]">
         <span className="text-emerald-700 shrink-0 font-bold">
           <Zap size={15} fill="currentColor" />
         </span>

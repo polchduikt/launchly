@@ -892,9 +892,9 @@ export const AdminChatsPage: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setShowDetailModal(false)}
-                    className="p-1.5 text-[#0A0A0A] hover:bg-white rounded-xl border-2 border-transparent hover:border-[#0A0A0A] transition cursor-pointer"
+                    className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
                   >
-                    <X size={18} />
+                    <X size={16} />
                   </button>
                 </div>
               </div>

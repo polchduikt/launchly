@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { t } from '../../../../i18n/config';
 import { Search, Plus, MoreVertical, X, Folder, ChevronRight, Edit2 } from 'lucide-react';
 import { useBotStore } from '../../../../store/useBotStore';
@@ -23,6 +24,18 @@ export const TagsSettingsPanel: React.FC = () => {
   const [tagFolderMap, setTagFolderMap] = useState<Record<number, string>>({});
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeMenuTag, setActiveMenuTag] = useState<number | string | null>(null);
+  const [activeMenuFolder, setActiveMenuFolder] = useState<string | null>(null);
+  const [menuCoords, setMenuCoords] = useState<{ top: number; right: number } | null>(null);
+
+  useEffect(() => {
+    const handleGlobalClick = () => {
+      setActiveMenuTag(null);
+      setActiveMenuFolder(null);
+    };
+    document.addEventListener('click', handleGlobalClick);
+    return () => document.removeEventListener('click', handleGlobalClick);
+  }, []);
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
   const [newTagName, setNewTagName] = useState('');
 
@@ -31,9 +44,6 @@ export const TagsSettingsPanel: React.FC = () => {
 
   const [isRenameFolderOpen, setIsRenameFolderOpen] = useState(false);
   const [renameFolderName, setRenameFolderName] = useState('');
-
-  const [activeMenuTag, setActiveMenuTag] = useState<number | string | null>(null);
-  const [activeMenuFolder, setActiveMenuFolder] = useState<string | null>(null);
 
   useEffect(() => {
     if (botId > 0) {
@@ -270,11 +280,11 @@ export const TagsSettingsPanel: React.FC = () => {
             </div>
           )}
 
-          <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-visible">
+          <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-hidden shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
-                  <th className="px-5 py-3 w-10 rounded-tl-[14px]">
+                  <th className="px-5 py-3 w-10">
                     <input
                       type="checkbox"
                       disabled
@@ -282,56 +292,39 @@ export const TagsSettingsPanel: React.FC = () => {
                     />
                   </th>
                   <th className="px-5 py-3">{t('settings.tags.table_name')}</th>
-                  <th className="px-5 py-3 w-12 text-right rounded-tr-[14px]"></th>
+                  <th className="px-5 py-3 w-12 text-right"></th>
                 </tr>
               </thead>
               <tbody className="divide-y-2 divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A]">
-                {filteredTags.map((tag, index) => {
-                  const isLastItems = filteredTags.length <= 2 || index >= filteredTags.length - 2;
-                  const isLastRow = index === filteredTags.length - 1;
-                  return (
-                    <tr key={tag.id} className={`hover:bg-[#F2EBDD]/50 bg-white ${activeMenuTag === tag.id ? 'relative z-50' : ''}`}>
-                      <td className={`px-5 py-3.5 ${isLastRow ? 'rounded-bl-[14px]' : ''}`}>
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
-                        />
-                      </td>
-                      <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">
-                        {tag.name}
-                      </td>
-                      <td className={`px-5 py-3.5 text-right relative overflow-visible ${isLastRow ? 'rounded-br-[14px]' : ''}`}>
-                        <button
-                          onClick={() => setActiveMenuTag(activeMenuTag === tag.id ? null : tag.id)}
-                          className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
-                        >
-                          <MoreVertical size={15} />
-                        </button>
-
-                        {activeMenuTag === tag.id && (
-                          <div
-                            className={`absolute right-5 z-[100] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 w-28 text-left animate-in fade-in duration-100 ${isLastItems ? 'bottom-8' : 'top-10'}`}
-                            onMouseDown={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              onMouseDown={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                handleDeleteTag(tag);
-                              }}
-                              className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer uppercase select-none"
-                            >
-                              {t('settings.tags.action_delete')}
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {filteredTags.map((tag) => (
+                  <tr key={tag.id} className="hover:bg-[#F2EBDD]/50 bg-white">
+                    <td className="px-5 py-3.5">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
+                      />
+                    </td>
+                    <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">
+                      {tag.name}
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setMenuCoords({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+                          setActiveMenuTag(activeMenuTag === tag.id ? null : tag.id);
+                        }}
+                        className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
+                      >
+                        <MoreVertical size={15} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
                 {filteredTags.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="text-center py-10 text-slate-700 italic bg-white font-bold select-none rounded-b-[14px]">
+                    <td colSpan={3} className="text-center py-10 text-slate-700 italic bg-white font-bold select-none">
                       {t('settings.tags.empty_state')}
                     </td>
                   </tr>
@@ -341,6 +334,26 @@ export const TagsSettingsPanel: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {activeMenuTag && menuCoords && createPortal(
+        <div
+          style={{ top: menuCoords.top, right: menuCoords.right }}
+          className="fixed z-[9999] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 w-28 text-left animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={() => {
+              const tag = filteredTags.find((t) => t.id === activeMenuTag);
+              if (tag) handleDeleteTag(tag);
+              setActiveMenuTag(null);
+            }}
+            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
+          >
+            {t('settings.tags.action_delete')}
+          </button>
+        </div>,
+        document.body
+      )}
 
       {isTagModalOpen && (
         <div 

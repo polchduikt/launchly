@@ -330,10 +330,17 @@ html, body {
 [data-theme="light"] body,
 [data-theme="light"] #root {
   background-color: #F8FAFC !important;
+  color: #0F172A !important;
 }
 
-[data-theme="light"] .bg-\[\#F2EBDD\] {
+/* Backgrounds: Convert all cream/beige to clean white/slate */
+[data-theme="light"] .bg-\[\#F2EBDD\],
+[data-theme="light"] [class*="bg-\[\#F2EBDD\]"] {
   background-color: #F8FAFC !important;
+}
+
+[data-theme="light"] .bg-white {
+  background-color: #FFFFFF !important;
 }
 
 [data-theme="light"] aside {
@@ -346,6 +353,16 @@ html, body {
   border-color: #E2E8F0 !important;
 }
 
+/* Hover & Active states: Convert cream hover to crisp slate-100 hover */
+[data-theme="light"] .hover\:bg-\[\#F2EBDD\]:hover,
+[data-theme="light"] .hover\:bg-\[\#F2EBDD\]\/60:hover,
+[data-theme="light"] .hover\:bg-\[\#F2EBDD\]\/50:hover,
+[data-theme="light"] .hover\:bg-\[\#F2EBDD\]\/40:hover,
+[data-theme="light"] [class*="hover\:bg-\[\#F2EBDD\]"]:hover {
+  background-color: #F1F5F9 !important;
+}
+
+/* Borders */
 [data-theme="light"] .border-\[\#0A0A0A\],
 [data-theme="light"] .border-2.border-\[\#0A0A0A\],
 [data-theme="light"] .border-b-2.border-\[\#0A0A0A\],
@@ -358,13 +375,15 @@ html, body {
   border-color: #E2E8F0 !important;
 }
 
+/* Typography & Text */
 [data-theme="light"] .text-\[\#0A0A0A\] {
   color: #0F172A !important;
 }
 
+[data-theme="light"] .text-\[\#0A0A0A\]\/90,
 [data-theme="light"] .text-\[\#0A0A0A\]\/80,
 [data-theme="light"] .text-\[\#0A0A0A\]\/70 {
-  color: #475569 !important;
+  color: #334155 !important;
 }
 
 [data-theme="light"] .text-\[\#0A0A0A\]\/60,
@@ -372,14 +391,549 @@ html, body {
   color: #64748B !important;
 }
 
-[data-theme="light"] [class*="shadow-"][class*="\#0A0A0A"] {
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+/* Primary Dark Buttons & Elements: Always preserve white text and icons */
+[data-theme="light"] .bg-\[\#0A0A0A\],
+[data-theme="light"] .bg-\[\#0A0A0A\] *,
+[data-theme="light"] button.bg-\[\#0A0A0A\],
+[data-theme="light"] button.bg-\[\#0A0A0A\] *,
+[data-theme="light"] a.bg-\[\#0A0A0A\],
+[data-theme="light"] a.bg-\[\#0A0A0A\] *,
+[data-theme="light"] .bg-slate-900,
+[data-theme="light"] .bg-slate-900 *,
+[data-theme="light"] .bg-black,
+[data-theme="light"] .bg-black *,
+[data-theme="light"] .text-\[\#F2EBDD\] {
+  color: #FFFFFF !important;
 }
 
+/* Badges / Counters inside dark elements MUST retain their dark text */
+[data-theme="light"] .bg-\[\#0A0A0A\] .bg-white,
+[data-theme="light"] .bg-\[\#0A0A0A\] .bg-white *,
+[data-theme="light"] button.bg-\[\#0A0A0A\] .bg-white,
+[data-theme="light"] button.bg-\[\#0A0A0A\] .bg-white *,
+[data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-white"],
+[data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-white"] *,
+[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-white"],
+[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-white"] *,
+[data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-slate-100"],
+[data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-slate-100"] *,
+[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-slate-100"],
+[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-slate-100"] *,
+[data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-emerald-"],
+[data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-emerald-"] *,
+[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-emerald-"],
+[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-emerald-"] *,
+[data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-amber-"],
+[data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-amber-"] *,
+[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-amber-"],
+[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-amber-"] * {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .bg-\[\#0A0A0A\] svg,
+[data-theme="light"] button.bg-\[\#0A0A0A\] svg,
+[data-theme="light"] a.bg-\[\#0A0A0A\] svg,
+[data-theme="light"] .bg-slate-900 svg,
+[data-theme="light"] .bg-black svg {
+  stroke: #FFFFFF !important;
+  color: #FFFFFF !important;
+}
+
+/* ReactFlow Controls Toolbar: Perfect pixel alignment & uniform button sizing */
+.react-flow__controls.custom-controls-panel,
+.react-flow__controls {
+  display: flex !important;
+  flex-direction: column !important;
+  border: 2px solid #0A0A0A !important;
+  border-radius: 1rem !important;
+  overflow: hidden !important;
+  box-shadow: 2px 2px 0px #0A0A0A !important;
+  background-color: #FFFFFF !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.react-flow__controls .react-flow__controls-button {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  background-color: #FFFFFF !important;
+  color: #0A0A0A !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.react-flow__controls .react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+
+.react-flow__controls .react-flow__controls-button:hover {
+  background-color: #0A0A0A !important;
+  color: #FFFFFF !important;
+}
+
+.react-flow__controls .react-flow__controls-button:hover svg {
+  stroke: #FFFFFF !important;
+  color: #FFFFFF !important;
+}
+
+.react-flow__controls .react-flow__controls-button svg {
+  width: 16px !important;
+  height: 16px !important;
+  max-width: 16px !important;
+  max-height: 16px !important;
+  stroke: #0A0A0A !important;
+}
+
+/* Dark hover states - Pure Solid Black #0A0A0A (not bluish slate) */
+.hover\:bg-\[\#0A0A0A\]:hover,
+.hover\:bg-black:hover,
+.hover\:bg-slate-900:hover,
+button.hover\:bg-\[\#0A0A0A\]:hover,
+a.hover\:bg-\[\#0A0A0A\]:hover,
+[data-theme="light"] .hover\:bg-\[\#0A0A0A\]:hover,
+[data-theme="light"] .hover\:bg-black:hover,
+[data-theme="light"] .hover\:bg-slate-900:hover,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover,
+[data-theme="light"] a.hover\:bg-\[\#0A0A0A\]:hover {
+  background-color: #0A0A0A !important;
+  color: #FFFFFF !important;
+  border-color: #0A0A0A !important;
+}
+
+.hover\:bg-\[\#2A2A2A\]:hover,
+button.hover\:bg-\[\#2A2A2A\]:hover,
+a.hover\:bg-\[\#2A2A2A\]:hover,
+[data-theme="light"] .hover\:bg-\[\#2A2A2A\]:hover,
+[data-theme="light"] button.hover\:bg-\[\#2A2A2A\]:hover,
+[data-theme="light"] a.hover\:bg-\[\#2A2A2A\]:hover {
+  background-color: #262626 !important;
+  color: #FFFFFF !important;
+}
+
+/* Children inside dark-hovered containers/cards/buttons:
+   - Must turn crisp white for text and icons (excluding node icon badges). */
+.hover\:bg-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+.hover\:bg-\[\#2A2A2A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+.hover\:bg-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+.hover\:bg-slate-900:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+button.hover\:bg-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+a.hover\:bg-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] .hover\:bg-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] .hover\:bg-\[\#2A2A2A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] .hover\:bg-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] .hover\:bg-slate-900:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] a.hover\:bg-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] .group:hover .group-hover\:text-\[\#F2EBDD\],
+[data-theme="light"] .group:hover .group-hover\:text-white {
+  color: #FFFFFF !important;
+}
+
+/* Icons inside dark-hovered elements must turn crisp white (excluding node icon badges) */
+.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+.hover\:bg-\[\#2A2A2A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+.hover\:bg-\[\#2A2A2A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+.hover\:bg-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+.hover\:bg-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+.hover\:bg-slate-900:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+.hover\:bg-slate-900:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+button.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+button.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+a.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+a.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] .hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] .hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] .hover\:bg-\[\#2A2A2A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] .hover\:bg-\[\#2A2A2A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] .hover\:bg-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] .hover\:bg-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] .hover\:bg-slate-900:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] .hover\:bg-slate-900:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] a.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] a.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) * {
+  stroke: #FFFFFF !important;
+  color: #FFFFFF !important;
+}
+
+/* Preserve colors and background for node-icon-badge in ALL states (hover or non-hover) */
+.node-icon-badge,
+button:hover .node-icon-badge,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge {
+  border-color: #0A0A0A !important;
+}
+
+.node-icon-badge svg,
+.node-icon-badge svg *,
+button:hover .node-icon-badge svg,
+button:hover .node-icon-badge svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge svg * {
+  stroke: currentColor !important;
+}
+
+.node-icon-badge[data-block-type="MESSAGE"],
+button:hover .node-icon-badge[data-block-type="MESSAGE"],
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MESSAGE"],
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="MESSAGE"],
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MESSAGE"],
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MESSAGE"] {
+  background-color: #E0F2FE !important;
+  color: #0284C7 !important;
+}
+.node-icon-badge[data-block-type="MESSAGE"] svg,
+.node-icon-badge[data-block-type="MESSAGE"] svg *,
+button:hover .node-icon-badge[data-block-type="MESSAGE"] svg,
+button:hover .node-icon-badge[data-block-type="MESSAGE"] svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MESSAGE"] svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MESSAGE"] svg *,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="MESSAGE"] svg,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="MESSAGE"] svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MESSAGE"] svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MESSAGE"] svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MESSAGE"] svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MESSAGE"] svg * {
+  stroke: #0284C7 !important;
+  color: #0284C7 !important;
+}
+
+.node-icon-badge[data-block-type="CONDITION"],
+button:hover .node-icon-badge[data-block-type="CONDITION"],
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="CONDITION"],
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="CONDITION"],
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="CONDITION"],
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="CONDITION"] {
+  background-color: #F3E8FF !important;
+  color: #7E22CE !important;
+}
+.node-icon-badge[data-block-type="CONDITION"] svg,
+.node-icon-badge[data-block-type="CONDITION"] svg *,
+button:hover .node-icon-badge[data-block-type="CONDITION"] svg,
+button:hover .node-icon-badge[data-block-type="CONDITION"] svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="CONDITION"] svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="CONDITION"] svg *,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="CONDITION"] svg,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="CONDITION"] svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="CONDITION"] svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="CONDITION"] svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="CONDITION"] svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="CONDITION"] svg * {
+  stroke: #7E22CE !important;
+  color: #7E22CE !important;
+}
+
+.node-icon-badge[data-block-type="ACTION"],
+button:hover .node-icon-badge[data-block-type="ACTION"],
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="ACTION"],
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="ACTION"],
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="ACTION"],
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="ACTION"] {
+  background-color: #FEF3C7 !important;
+  color: #B45309 !important;
+}
+.node-icon-badge[data-block-type="ACTION"] svg,
+.node-icon-badge[data-block-type="ACTION"] svg *,
+button:hover .node-icon-badge[data-block-type="ACTION"] svg,
+button:hover .node-icon-badge[data-block-type="ACTION"] svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="ACTION"] svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="ACTION"] svg *,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="ACTION"] svg,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="ACTION"] svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="ACTION"] svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="ACTION"] svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="ACTION"] svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="ACTION"] svg * {
+  stroke: #B45309 !important;
+  color: #B45309 !important;
+}
+
+.node-icon-badge[data-block-type="API_CALL"],
+button:hover .node-icon-badge[data-block-type="API_CALL"],
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="API_CALL"],
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="API_CALL"],
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="API_CALL"],
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="API_CALL"] {
+  background-color: #E0E7FF !important;
+  color: #4F46E5 !important;
+}
+.node-icon-badge[data-block-type="API_CALL"] svg,
+.node-icon-badge[data-block-type="API_CALL"] svg *,
+button:hover .node-icon-badge[data-block-type="API_CALL"] svg,
+button:hover .node-icon-badge[data-block-type="API_CALL"] svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="API_CALL"] svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="API_CALL"] svg *,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="API_CALL"] svg,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="API_CALL"] svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="API_CALL"] svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="API_CALL"] svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="API_CALL"] svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="API_CALL"] svg * {
+  stroke: #4F46E5 !important;
+  color: #4F46E5 !important;
+}
+
+.node-icon-badge[data-block-type="SMART_DELAY"],
+button:hover .node-icon-badge[data-block-type="SMART_DELAY"],
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SMART_DELAY"],
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="SMART_DELAY"],
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SMART_DELAY"],
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SMART_DELAY"] {
+  background-color: #FFE4E6 !important;
+  color: #E11D48 !important;
+}
+.node-icon-badge[data-block-type="SMART_DELAY"] svg,
+.node-icon-badge[data-block-type="SMART_DELAY"] svg *,
+button:hover .node-icon-badge[data-block-type="SMART_DELAY"] svg,
+button:hover .node-icon-badge[data-block-type="SMART_DELAY"] svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SMART_DELAY"] svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SMART_DELAY"] svg *,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="SMART_DELAY"] svg,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="SMART_DELAY"] svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SMART_DELAY"] svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SMART_DELAY"] svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SMART_DELAY"] svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SMART_DELAY"] svg * {
+  stroke: #E11D48 !important;
+  color: #E11D48 !important;
+}
+
+.node-icon-badge[data-block-type="RANDOMIZER"],
+button:hover .node-icon-badge[data-block-type="RANDOMIZER"],
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="RANDOMIZER"],
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="RANDOMIZER"],
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="RANDOMIZER"],
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="RANDOMIZER"] {
+  background-color: #F3E8FF !important;
+  color: #7E22CE !important;
+}
+.node-icon-badge[data-block-type="RANDOMIZER"] svg,
+.node-icon-badge[data-block-type="RANDOMIZER"] svg *,
+button:hover .node-icon-badge[data-block-type="RANDOMIZER"] svg,
+button:hover .node-icon-badge[data-block-type="RANDOMIZER"] svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="RANDOMIZER"] svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="RANDOMIZER"] svg *,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="RANDOMIZER"] svg,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="RANDOMIZER"] svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="RANDOMIZER"] svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="RANDOMIZER"] svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="RANDOMIZER"] svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="RANDOMIZER"] svg * {
+  stroke: #7E22CE !important;
+  color: #7E22CE !important;
+}
+
+.node-icon-badge[data-block-type="START_AUTOMATION"],
+button:hover .node-icon-badge[data-block-type="START_AUTOMATION"],
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="START_AUTOMATION"],
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="START_AUTOMATION"],
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="START_AUTOMATION"],
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="START_AUTOMATION"] {
+  background-color: #ECFCCB !important;
+  color: #4D7C0F !important;
+}
+.node-icon-badge[data-block-type="START_AUTOMATION"] svg,
+.node-icon-badge[data-block-type="START_AUTOMATION"] svg *,
+button:hover .node-icon-badge[data-block-type="START_AUTOMATION"] svg,
+button:hover .node-icon-badge[data-block-type="START_AUTOMATION"] svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="START_AUTOMATION"] svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="START_AUTOMATION"] svg *,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="START_AUTOMATION"] svg,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="START_AUTOMATION"] svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="START_AUTOMATION"] svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="START_AUTOMATION"] svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="START_AUTOMATION"] svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="START_AUTOMATION"] svg * {
+  stroke: #4D7C0F !important;
+  color: #4D7C0F !important;
+}
+
+.node-icon-badge[data-block-type="COMMENT"],
+button:hover .node-icon-badge[data-block-type="COMMENT"],
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="COMMENT"],
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="COMMENT"],
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="COMMENT"],
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="COMMENT"] {
+  background-color: #FEF3C7 !important;
+  color: #D97706 !important;
+}
+.node-icon-badge[data-block-type="COMMENT"] svg,
+.node-icon-badge[data-block-type="COMMENT"] svg *,
+button:hover .node-icon-badge[data-block-type="COMMENT"] svg,
+button:hover .node-icon-badge[data-block-type="COMMENT"] svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="COMMENT"] svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="COMMENT"] svg *,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="COMMENT"] svg,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="COMMENT"] svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="COMMENT"] svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="COMMENT"] svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="COMMENT"] svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="COMMENT"] svg * {
+  stroke: #D97706 !important;
+  color: #D97706 !important;
+}
+
+.node-icon-badge[data-block-type="AI"],
+button:hover .node-icon-badge[data-block-type="AI"],
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="AI"],
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="AI"],
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="AI"],
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="AI"] {
+  background-color: #D1FAE5 !important;
+  color: #047857 !important;
+}
+.node-icon-badge[data-block-type="AI"] svg,
+.node-icon-badge[data-block-type="AI"] svg *,
+button:hover .node-icon-badge[data-block-type="AI"] svg,
+button:hover .node-icon-badge[data-block-type="AI"] svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="AI"] svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="AI"] svg *,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="AI"] svg,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="AI"] svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="AI"] svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="AI"] svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="AI"] svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="AI"] svg * {
+  stroke: #047857 !important;
+  color: #047857 !important;
+}
+
+.node-icon-badge[data-block-type="END"],
+button:hover .node-icon-badge[data-block-type="END"],
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="END"],
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="END"],
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="END"],
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="END"] {
+  background-color: #E2E8F0 !important;
+  color: #475569 !important;
+}
+.node-icon-badge[data-block-type="END"] svg,
+.node-icon-badge[data-block-type="END"] svg *,
+button:hover .node-icon-badge[data-block-type="END"] svg,
+button:hover .node-icon-badge[data-block-type="END"] svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="END"] svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="END"] svg *,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="END"] svg,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="END"] svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="END"] svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="END"] svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="END"] svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="END"] svg * {
+  stroke: #475569 !important;
+  color: #475569 !important;
+}
+
+/* Modal / Dialog / Drawer Close Buttons (X) */
+.fixed.inset-0 button:has(> svg.lucide-x):hover,
+[role="dialog"] button:has(> svg.lucide-x):hover,
+button[aria-label="Close"]:hover,
+button[aria-label="close"]:hover,
+button:has(> svg.lucide-x).hover\:bg-\[\#0A0A0A\]:hover,
+[data-theme="light"] .fixed.inset-0 button:has(> svg.lucide-x):hover,
+[data-theme="light"] [role="dialog"] button:has(> svg.lucide-x):hover,
+[data-theme="light"] button[aria-label="Close"]:hover,
+[data-theme="light"] button[aria-label="close"]:hover,
+[data-theme="light"] button:has(> svg.lucide-x):hover {
+  background-color: #0A0A0A !important;
+  color: #FFFFFF !important;
+  border-color: #0A0A0A !important;
+}
+
+.fixed.inset-0 button:has(> svg.lucide-x):hover svg,
+.fixed.inset-0 button:has(> svg.lucide-x):hover svg *,
+[role="dialog"] button:has(> svg.lucide-x):hover svg,
+[role="dialog"] button:has(> svg.lucide-x):hover svg *,
+button[aria-label="Close"]:hover svg,
+button[aria-label="Close"]:hover svg *,
+[data-theme="light"] .fixed.inset-0 button:has(> svg.lucide-x):hover svg,
+[data-theme="light"] .fixed.inset-0 button:has(> svg.lucide-x):hover svg *,
+[data-theme="light"] [role="dialog"] button:has(> svg.lucide-x):hover svg,
+[data-theme="light"] [role="dialog"] button:has(> svg.lucide-x):hover svg *,
+[data-theme="light"] button[aria-label="Close"]:hover svg,
+[data-theme="light"] button[aria-label="Close"]:hover svg *,
+[data-theme="light"] button:has(> svg.lucide-x):hover svg,
+[data-theme="light"] button:has(> svg.lucide-x):hover svg * {
+  stroke: #FFFFFF !important;
+  color: #FFFFFF !important;
+}
+
+/* Light Theme Amber/Yellow overrides in Template Pages */
+[data-theme="light"] .bg-amber-50,
+[data-theme="light"] .bg-amber-50\/70,
+[data-theme="light"] .bg-amber-100,
+[data-theme="light"] .bg-amber-100\/60 {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .hover\:bg-amber-50:hover,
+[data-theme="light"] .hover\:bg-amber-100:hover {
+  background-color: #F1F5F9 !important;
+}
+
+/* Subtle border inside dark-hovered cards */
+[data-theme="light"] .hover\:bg-\[\#0A0A0A\]:hover .border-t,
+[data-theme="light"] .hover\:bg-\[\#0A0A0A\]:hover .border-b,
+[data-theme="light"] .hover\:bg-\[\#0A0A0A\]:hover [class*="group-hover\:border-"] {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Tables */
+[data-theme="light"] table {
+  background-color: #FFFFFF !important;
+}
+
+[data-theme="light"] thead,
+[data-theme="light"] thead tr,
+[data-theme="light"] th,
+[data-theme="light"] thead .bg-white,
+[data-theme="light"] thead .bg-slate-50,
+[data-theme="light"] thead .bg-\[\#F2EBDD\] {
+  background-color: #F8FAFC !important;
+  color: #475569 !important;
+  border-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] tbody tr {
+  background-color: #FFFFFF !important;
+}
+
+[data-theme="light"] tbody tr:hover {
+  background-color: #F8FAFC !important;
+}
+
+/* Shadows */
+[data-theme="light"] [class*="shadow-"][class*="\#0A0A0A"] {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Modals & Dialogs */
 [data-theme="light"] [role="dialog"],
 [data-theme="light"] .fixed.inset-0 > div {
+  background-color: #FFFFFF !important;
   border-color: #E2E8F0 !important;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
 }
 
 [data-theme="light"] [role="dialog"] .bg-\[\#F2EBDD\],
@@ -392,6 +946,7 @@ html, body {
   border-color: #E2E8F0 !important;
 }
 
+/* Form Inputs */
 [data-theme="light"] input:not([type="checkbox"]):not([type="radio"]),
 [data-theme="light"] textarea,
 [data-theme="light"] select {
@@ -400,6 +955,30 @@ html, body {
   color: #0F172A !important;
 }
 
+[data-theme="light"] ::placeholder,
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #94A3B8 !important;
+  opacity: 1 !important;
+}
+
+/* Chat & Messages in CRM */
+[data-theme="light"] [data-message-id] .bg-white {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+}
+
+[data-theme="light"] [data-message-id] button {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] [data-message-id] button:hover {
+  background-color: #F1F5F9 !important;
+}
+
+/* Scrollbars */
 [data-theme="light"] ::-webkit-scrollbar-track {
   background: #F8FAFC !important;
   border-left: 1px solid #E2E8F0 !important;
@@ -439,6 +1018,10 @@ html, body {
   color: #D4D4D8 !important;
 }
 
+[data-theme="dark"] table {
+  background-color: #18181B !important;
+}
+
 [data-theme="dark"] thead,
 [data-theme="dark"] thead tr,
 [data-theme="dark"] th,
@@ -448,6 +1031,30 @@ html, body {
   background-color: #1F1F23 !important;
   color: #A1A1AA !important;
   border-color: #27272A !important;
+}
+
+[data-theme="dark"] tbody,
+[data-theme="dark"] tbody tr,
+[data-theme="dark"] tbody td,
+[data-theme="dark"] tbody .bg-white {
+  background-color: #18181B !important;
+  color: #E4E4E7 !important;
+  border-color: #27272A !important;
+}
+
+[data-theme="dark"] tbody tr:hover,
+[data-theme="dark"] tbody tr:hover td {
+  background-color: #1F1F23 !important;
+}
+
+[data-theme="dark"] tbody tr.bg-rose-50,
+[data-theme="dark"] tbody tr.bg-rose-50 td {
+  background-color: #2D1418 !important;
+}
+
+[data-theme="dark"] tbody tr.bg-rose-50:hover,
+[data-theme="dark"] tbody tr.bg-rose-50:hover td {
+  background-color: #3B181E !important;
 }
 
 [data-theme="dark"] .border-\[\#0A0A0A\],
@@ -508,8 +1115,10 @@ html, body {
 }
 
 [data-theme="dark"] .bg-indigo-50,
+[data-theme="dark"] .bg-indigo-100,
 [data-theme="dark"] .bg-indigo-50\/50,
 [data-theme="dark"] .bg-blue-50,
+[data-theme="dark"] .bg-blue-100,
 [data-theme="dark"] .bg-slate-50,
 [data-theme="dark"] .bg-slate-100,
 [data-theme="dark"] .bg-slate-100\/60 {
@@ -519,8 +1128,86 @@ html, body {
 }
 
 [data-theme="dark"] .bg-indigo-50 *,
-[data-theme="dark"] .bg-blue-50 * {
+[data-theme="dark"] .bg-indigo-100 *,
+[data-theme="dark"] .bg-blue-50 *,
+[data-theme="dark"] .bg-blue-100 * {
   color: #CBD5E1 !important;
+}
+
+/* Status Badges and Destructive / Accent Buttons in Dark Theme */
+[data-theme="dark"] .bg-\[\#FCE7E7\],
+[data-theme="dark"] .bg-rose-100,
+[data-theme="dark"] .bg-rose-200,
+[data-theme="dark"] .bg-red-100,
+[data-theme="dark"] .bg-red-200 {
+  background-color: #3B1219 !important;
+  border-color: #991B1B !important;
+  color: #FDA4AF !important;
+}
+
+[data-theme="dark"] .bg-\[\#FCE7E7\]:hover,
+[data-theme="dark"] .bg-rose-100:hover,
+[data-theme="dark"] .bg-rose-200:hover,
+[data-theme="dark"] .bg-red-100:hover,
+[data-theme="dark"] .bg-red-200:hover {
+  background-color: #4C1D24 !important;
+  color: #FECDD3 !important;
+}
+
+[data-theme="dark"] .bg-\[\#FCE7E7\] *,
+[data-theme="dark"] .bg-rose-100 *,
+[data-theme="dark"] .bg-rose-200 *,
+[data-theme="dark"] .bg-red-100 *,
+[data-theme="dark"] .bg-red-200 * {
+  color: inherit !important;
+}
+
+[data-theme="dark"] .bg-emerald-100,
+[data-theme="dark"] .bg-emerald-200,
+[data-theme="dark"] .bg-green-100,
+[data-theme="dark"] .bg-green-200 {
+  background-color: #064E3B !important;
+  border-color: #059669 !important;
+  color: #A7F3D0 !important;
+}
+
+[data-theme="dark"] .bg-emerald-100 *,
+[data-theme="dark"] .bg-emerald-200 *,
+[data-theme="dark"] .bg-green-100 *,
+[data-theme="dark"] .bg-green-200 * {
+  color: inherit !important;
+}
+
+[data-theme="dark"] .bg-amber-100,
+[data-theme="dark"] .bg-amber-200,
+[data-theme="dark"] .bg-yellow-100,
+[data-theme="dark"] .bg-yellow-200 {
+  background-color: #451A03 !important;
+  border-color: #D97706 !important;
+  color: #FDE68A !important;
+}
+
+[data-theme="dark"] .bg-amber-100 *,
+[data-theme="dark"] .bg-amber-200 *,
+[data-theme="dark"] .bg-yellow-100 *,
+[data-theme="dark"] .bg-yellow-200 * {
+  color: inherit !important;
+}
+
+[data-theme="dark"] .bg-slate-200,
+[data-theme="dark"] .bg-slate-300,
+[data-theme="dark"] .bg-gray-200,
+[data-theme="dark"] .bg-gray-300 {
+  background-color: #27272A !important;
+  border-color: #3F3F46 !important;
+  color: #E4E4E7 !important;
+}
+
+[data-theme="dark"] .bg-slate-200 *,
+[data-theme="dark"] .bg-slate-300 *,
+[data-theme="dark"] .bg-gray-200 *,
+[data-theme="dark"] .bg-gray-300 * {
+  color: inherit !important;
 }
 
 [data-theme="dark"] [class*="shadow-"][class*="\#0A0A0A"] {
@@ -559,7 +1246,8 @@ html, body {
 
 [data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
 [data-theme="dark"] textarea,
-[data-theme="dark"] select {
+[data-theme="dark"] select,
+[data-theme="dark"] select option {
   background-color: #18181B !important;
   border-color: #3F3F46 !important;
   color: #E4E4E7 !important;
@@ -572,6 +1260,7 @@ html, body {
   opacity: 1 !important;
 }
 
+/* FlowBuilder Canvas, Nodes, Edges & Controls */
 [data-theme="dark"] .react-flow,
 [data-theme="dark"] .react-flow__pane,
 [data-theme="dark"] .react-flow__background {
@@ -579,15 +1268,40 @@ html, body {
 }
 
 [data-theme="dark"] .react-flow__node {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   color: #D4D4D8 !important;
 }
 
-[data-theme="dark"] .react-flow__node .bg-white,
-[data-theme="dark"] .react-flow__node .bg-slate-50,
-[data-theme="dark"] .react-flow__node .bg-slate-100 {
+[data-theme="dark"] .react-flow__node > div {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .react-flow__node .rounded-3xl {
   background-color: #18181B !important;
-  color: #D4D4D8 !important;
   border-color: #27272A !important;
+}
+
+[data-theme="dark"] .react-flow__node.selected .rounded-3xl {
+  border-color: #38BDF8 !important;
+  box-shadow: 0 0 0 2px #38BDF8 !important;
+}
+
+[data-theme="dark"] .react-flow__node .rounded-3xl .bg-white,
+[data-theme="dark"] .react-flow__node .rounded-3xl [class*="bg-white"],
+[data-theme="dark"] .react-flow__node .rounded-3xl .bg-slate-50,
+[data-theme="dark"] .react-flow__node .rounded-3xl .bg-slate-100,
+[data-theme="dark"] .react-flow__node .rounded-3xl .bg-slate-200 {
+  background-color: #121214 !important;
+  border-color: #27272A !important;
+  color: #E4E4E7 !important;
+}
+
+[data-theme="dark"] .react-flow__node .rounded-3xl .rounded-b-\[22px\] {
+  background-color: transparent !important;
 }
 
 [data-theme="dark"] .react-flow__node [class*="border-dashed"] {
@@ -595,6 +1309,50 @@ html, body {
   border-color: #3F3F46 !important;
   color: #A1A1AA !important;
 }
+
+/* Node Headers in Dark Theme */
+[data-theme="dark"] .react-flow__node div[class*="bg-sky-100"] {
+  background-color: rgba(14, 165, 233, 0.16) !important;
+}
+[data-theme="dark"] .react-flow__node div[class*="bg-emerald-100"] {
+  background-color: rgba(16, 185, 129, 0.16) !important;
+}
+[data-theme="dark"] .react-flow__node div[class*="bg-purple-100"],
+[data-theme="dark"] .react-flow__node div[class*="bg-violet-100"] {
+  background-color: rgba(168, 85, 247, 0.16) !important;
+}
+[data-theme="dark"] .react-flow__node div[class*="bg-amber-100"],
+[data-theme="dark"] .react-flow__node div[class*="bg-orange-100"] {
+  background-color: rgba(245, 158, 11, 0.16) !important;
+}
+[data-theme="dark"] .react-flow__node div[class*="bg-rose-100"],
+[data-theme="dark"] .react-flow__node div[class*="bg-red-100"] {
+  background-color: rgba(244, 63, 94, 0.16) !important;
+}
+[data-theme="dark"] .react-flow__node div[class*="bg-indigo-100"] {
+  background-color: rgba(99, 102, 241, 0.16) !important;
+}
+[data-theme="dark"] .react-flow__node div[class*="bg-yellow-100"] {
+  background-color: rgba(234, 179, 8, 0.16) !important;
+}
+
+[data-theme="dark"] .react-flow__node .text-sky-900,
+[data-theme="dark"] .react-flow__node .text-sky-800 { color: #7DD3FC !important; }
+[data-theme="dark"] .react-flow__node .text-emerald-900,
+[data-theme="dark"] .react-flow__node .text-emerald-800 { color: #6EE7B7 !important; }
+[data-theme="dark"] .react-flow__node .text-purple-900,
+[data-theme="dark"] .react-flow__node .text-purple-800,
+[data-theme="dark"] .react-flow__node .text-violet-900 { color: #D8B4FE !important; }
+[data-theme="dark"] .react-flow__node .text-amber-900,
+[data-theme="dark"] .react-flow__node .text-amber-800,
+[data-theme="dark"] .react-flow__node .text-orange-900 { color: #FCD34D !important; }
+[data-theme="dark"] .react-flow__node .text-rose-900,
+[data-theme="dark"] .react-flow__node .text-rose-800,
+[data-theme="dark"] .react-flow__node .text-red-900 { color: #FDA4AF !important; }
+[data-theme="dark"] .react-flow__node .text-indigo-900,
+[data-theme="dark"] .react-flow__node .text-indigo-800 { color: #A5B4FC !important; }
+[data-theme="dark"] .react-flow__node .text-yellow-900,
+[data-theme="dark"] .react-flow__node .text-yellow-800 { color: #FDE047 !important; }
 
 [data-theme="dark"] .react-flow__node .text-slate-800,
 [data-theme="dark"] .react-flow__node .text-slate-700 {
@@ -608,6 +1366,123 @@ html, body {
 
 [data-theme="dark"] .react-flow__node button {
   border-color: #3F3F46 !important;
+}
+
+/* Edges & Markers in Dark Theme */
+.edge-arrow-default {
+  fill: #475569;
+}
+.edge-arrow-highlight {
+  fill: #0A0A0A;
+}
+.edge-path-default {
+  stroke: #475569;
+}
+.edge-path-highlight {
+  stroke: #0A0A0A;
+}
+
+[data-theme="dark"] .edge-arrow-default {
+  fill: #94A3B8 !important;
+}
+[data-theme="dark"] .edge-arrow-highlight {
+  fill: #FFFFFF !important;
+}
+[data-theme="dark"] .edge-path-default {
+  stroke: #94A3B8 !important;
+}
+[data-theme="dark"] .edge-path-highlight {
+  stroke: #FFFFFF !important;
+}
+
+[data-theme="dark"] .react-flow__edge-path {
+  stroke: #94A3B8 !important;
+}
+[data-theme="dark"] .react-flow__edge.selected .react-flow__edge-path,
+[data-theme="dark"] .react-flow__edge:hover .react-flow__edge-path {
+  stroke: #FFFFFF !important;
+}
+
+[data-theme="dark"] .react-flow__connection-path {
+  stroke: #94A3B8 !important;
+}
+
+/* Handles */
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background-color: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  transition: all 0.15s ease;
+}
+
+.react-flow__handle:hover {
+  border-color: #64748B;
+}
+
+.react-flow__handle.handle-connected {
+  background-color: #7b8794 !important;
+  border-color: #7b8794 !important;
+}
+
+.react-flow__handle.handle-unconnected {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+}
+
+.react-flow__handle.handle-unconnected:hover {
+  border-color: #64748B !important;
+}
+
+[data-theme="dark"] .react-flow__handle {
+  background-color: #18181B;
+  border-color: #64748B;
+}
+
+[data-theme="dark"] .react-flow__handle.handle-unconnected {
+  background-color: #18181B !important;
+  border-color: #64748B !important;
+}
+
+[data-theme="dark"] .react-flow__handle.handle-unconnected:hover {
+  border-color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .react-flow__handle.handle-connected {
+  background-color: #94A3B8 !important;
+  border-color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .react-flow__handle:hover,
+[data-theme="dark"] .react-flow__handle.connecting,
+[data-theme="dark"] .react-flow__handle.valid {
+  background-color: #38BDF8 !important;
+  border-color: #FFFFFF !important;
+}
+
+/* Flow Controls & Minimap */
+[data-theme="dark"] .react-flow__controls {
+  background-color: #18181B !important;
+  border-color: #27272A !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="dark"] .react-flow__controls button {
+  background-color: #18181B !important;
+  border-color: #27272A !important;
+  color: #E4E4E7 !important;
+  fill: #E4E4E7 !important;
+}
+[data-theme="dark"] .react-flow__controls button:hover {
+  background-color: #27272A !important;
+}
+[data-theme="dark"] .react-flow__controls button svg {
+  fill: #E4E4E7 !important;
+}
+
+[data-theme="dark"] .react-flow__minimap {
+  background-color: #121214 !important;
+  border-color: #27272A !important;
 }
 
 [data-theme="dark"] ::-webkit-scrollbar-track {

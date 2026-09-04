@@ -474,7 +474,7 @@ export const TeamMembersPanel: React.FC = () => {
                   setIsInviteOpen(false);
                   setInviteEmail('');
                 }}
-                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
+                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
               >
                 <X size={16} />
               </button>

@@ -97,7 +97,7 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected
           ? 'shadow-lg ring-2 ring-[#0A0A0A]'
           : 'shadow-md'
@@ -105,7 +105,7 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
       
-      <div className="relative flex items-center gap-2 bg-amber-100 rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-amber-100/75 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
@@ -147,8 +147,8 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
         </div>
       </div>
 
-      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">{t('node.action.next_step')}</span>
+      <div className="flex justify-end items-center px-4 py-2 bg-transparent select-none relative rounded-b-[22px]">
+        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-2 select-none">{t('node.action.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}

@@ -13,7 +13,6 @@ import { PublicHeader } from '../../../components/layout/PublicHeader';
 import { useScrollReveal } from '../../../hooks/useScrollReveal';
 import {
   Workflow,
-  Bot,
   Users,
   CreditCard,
   BookOpen,
@@ -26,12 +25,12 @@ import {
   Lock,
   ChevronDown,
   TrendingUp,
-  Sparkles,
   MessageSquare,
   GitBranch,
   Plug,
   BrainCircuit
 } from 'lucide-react';
+import { AiIcon } from '../../../components/ui/AiIcon';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -249,7 +248,7 @@ export const LandingPage: React.FC = () => {
 
             <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-4 sm:p-8 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all duration-200 group cursor-pointer reveal-slide-right reveal-delay-100">
               <div className="w-10 h-10 sm:w-16 sm:h-16 border-2 border-[#0A0A0A] group-hover:border-[#F2EBDD] flex items-center justify-center mb-3 sm:mb-6 bg-white group-hover:bg-[#0A0A0A]">
-                <Bot className="w-5 h-5 sm:w-8 sm:h-8 text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors" />
+                <AiIcon className="w-5 h-5 sm:w-8 sm:h-8 text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors" />
               </div>
               <h3 className="font-['Anybody',sans-serif] text-sm sm:text-2xl font-black text-[#0A0A0A] group-hover:text-[#F2EBDD] mb-1.5 sm:mb-3 uppercase leading-tight">
                 {t('landing.features.card_2_title', 'AI Assistants')}
@@ -289,10 +288,6 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-12 lg:gap-16 items-center">
             <div className="space-y-8 reveal-slide-left">
               <div className="border-l-8 border-[#0A0A0A] pl-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-600 text-white font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg mb-3 border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A]">
-                  <Sparkles size={14} className="text-amber-300 fill-amber-300" />
-                  <span>{t('landing.ai.badge', 'AI AUTOMATION LAYER')}</span>
-                </div>
                 <h2 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-black text-[#0A0A0A] uppercase leading-none mb-4">
                   {t('landing.ai.title_1', 'AI THAT')}<br />
                   {t('landing.ai.title_2', 'BUILDS AND')}<br />
@@ -438,10 +433,6 @@ export const LandingPage: React.FC = () => {
         <section id="how-it-works" className="py-20 md:py-28 bg-[#0A0A0A] text-[#F2EBDD] px-6 lg:px-12 border-y-4 border-[#0A0A0A] relative z-10" data-header-theme="dark">
           <div className="max-w-7xl mx-auto relative z-20 space-y-12">
             <div className="text-left border-l-8 border-[#F2EBDD] pl-6 reveal-blur-in">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-400 text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg mb-3 border border-white shadow-[2px_2px_0px_rgba(255,255,255,0.2)]">
-                <Zap size={14} className="fill-[#0A0A0A]" />
-                <span>{t('landing.how.badge', '3 SIMPLE STEPS')}</span>
-              </div>
               <h2 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-3 uppercase leading-none">
                 {t('landing.how.title', 'How It Works')}
               </h2>
@@ -495,9 +486,6 @@ export const LandingPage: React.FC = () => {
         <section id="comparison" className="py-20 md:py-28 bg-[#0A0A0A] text-[#F2EBDD] px-6 lg:px-12 border-y-4 border-[#0A0A0A] relative z-10" data-header-theme="dark">
           <div className="max-w-7xl mx-auto">
             <div className="text-left mb-12 border-l-8 border-[#F2EBDD] pl-6 reveal-blur-in">
-              <p className="font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-widest text-emerald-300 mb-3">
-                {t('landing.comparison.eyebrow', 'BUSINESS COMPARISON')}
-              </p>
               <h2 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-black uppercase leading-none mb-3">
                 {t('landing.comparison.title', 'WHY LAUNCHLY WINS')}
               </h2>
@@ -662,10 +650,6 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-7xl mx-auto space-y-10">
             
             <div className="text-left border-l-8 border-[#0A0A0A] pl-6 reveal-blur-in">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg mb-2.5">
-                <Users size={14} className="text-amber-400" />
-                <span>{t('landing.testimonials.badge', 'Відгуки та Історії Успіху')}</span>
-              </div>
               <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl font-black text-[#0A0A0A] mb-2 uppercase leading-none">
                 {t('landing.testimonials.title', 'Що кажуть наші клієнти')}
               </h2>
@@ -858,10 +842,6 @@ export const LandingPage: React.FC = () => {
         <section id="trust" className="py-20 md:py-28 bg-[#0A0A0A] text-[#F2EBDD] border-b-4 border-[#F2EBDD] px-6 lg:px-12 relative z-10" data-header-theme="dark">
           <div className="max-w-7xl mx-auto space-y-10">
             <div className="text-left border-l-8 border-[#F2EBDD] pl-6 reveal-blur-in">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg mb-2.5">
-                <Shield size={14} className="text-amber-500" />
-                <span>{t('landing.trust.badge', 'БЕЗПЕКА & НАДІЙНІСТЬ')}</span>
-              </div>
               <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl font-black text-white mb-2 uppercase leading-none">
                 {t('landing.trust.title', 'Ваш бізнес у надійних руках')}
               </h2>
@@ -1014,10 +994,6 @@ export const LandingPage: React.FC = () => {
         <section id="faq" className="py-20 md:py-28 px-6 lg:px-12 relative z-10">
           <div className="max-w-4xl mx-auto space-y-10">
             <div className="text-left border-l-8 border-[#0A0A0A] pl-6 reveal-blur-in">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg mb-2.5">
-                <BookOpen size={14} className="text-amber-400" />
-                <span>{t('landing.faq.badge', 'ЧАСТІ ЗАПИТАННЯ')}</span>
-              </div>
               <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl font-black text-[#0A0A0A] mb-2 uppercase leading-none">
                 {t('landing.faq.title', 'Маєте питання?')}
               </h2>

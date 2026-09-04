@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type AppTheme = 'yellow' | 'light' | 'dark';
+export type AppTheme = 'light' | 'yellow' | 'dark';
 
 interface ThemeState {
   theme: AppTheme;
@@ -11,7 +11,7 @@ export const useThemeStore = create<ThemeState>((set) => {
   const savedTheme = localStorage.getItem('launchly_theme') as AppTheme | null;
   const initialTheme: AppTheme = savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'yellow'
     ? savedTheme
-    : 'yellow';
+    : 'light';
 
   return {
     theme: initialTheme,

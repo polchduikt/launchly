@@ -22,6 +22,7 @@ import { t } from '../../../../i18n/config';
 import { createTagApi } from '../../../../api/broadcast';
 import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../api/bot';
 import { TagSearchSelect } from '../../FlowBuilder/components/sidebar/editors/TagSearchSelect';
+import { ConfirmModal } from '../../../../components/common/ConfirmModal';
 
 import type { ConversationResponse, BotUserMetadata } from '../../../../types/crm';
 
@@ -45,6 +46,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
   onContactDeleted,
 }) => {
   const navigate = useNavigate();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const updateBotUserMut = useUpdateBotUserMutation(botId);
   const deleteBotUserMut = useDeleteBotUserMutation(botId);
@@ -127,6 +129,25 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
     navigate(conv ? `${ROUTES.CHAT}?conversationId=${conv.id}` : ROUTES.CHAT);
   };
 
+  if (showDeleteConfirm) {
+    return (
+      <ConfirmModal
+        isOpen={true}
+        title={t('crm.contact.delete_tooltip', 'Видалити контакт').toUpperCase()}
+        message={t('crm.contact.delete_confirm', 'Ви впевнені, що хочете видалити цього контакту?')}
+        confirmText={t('common.delete', 'ВИДАЛИТИ').toUpperCase()}
+        cancelText={t('common.cancel', 'Скасувати')}
+        isDanger
+        onConfirm={() => {
+          deleteBotUserMut.mutate(selectedContact.id);
+          onContactDeleted();
+          setShowDeleteConfirm(false);
+        }}
+        onClose={() => setShowDeleteConfirm(false)}
+      />
+    );
+  }
+
   return (
     <div
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
@@ -207,12 +228,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
             </span>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => {
-                  if (confirm(t('crm.contact.delete_confirm'))) {
-                    deleteBotUserMut.mutate(selectedContact.id);
-                    onContactDeleted();
-                  }
-                }}
+                onClick={() => setShowDeleteConfirm(true)}
                 className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-rose-600 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all cursor-pointer"
                 title={t('crm.contact.delete_tooltip')}
               >
@@ -220,7 +236,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
               </button>
               <button
                 onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
               >
                 <X size={15} />
               </button>

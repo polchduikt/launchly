@@ -2,6 +2,8 @@ package com.launchly.common.idempotency;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -37,7 +40,15 @@ public class IdempotencyAspect {
     public IdempotencyAspect(@Autowired(required = false) StringRedisTemplate stringRedisTemplate,
                              @Autowired(required = false) ObjectMapper objectMapper) {
         this.stringRedisTemplate = stringRedisTemplate;
-        this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
+        ObjectMapper mapper = objectMapper != null ? objectMapper : new ObjectMapper();
+        try {
+            mapper.registerModule(new JavaTimeModule());
+            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        } catch (Throwable ignored) {
+            mapper.findAndRegisterModules();
+        }
+        this.objectMapper = mapper;
     }
 
     @Around("@annotation(idempotent)")

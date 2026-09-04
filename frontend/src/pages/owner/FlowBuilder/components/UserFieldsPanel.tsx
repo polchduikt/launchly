@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, Plus, MoreVertical, HelpCircle, X, Folder, ChevronRight, Edit2 } from 'lucide-react';
 import { useBotStore } from '../../../../store/useBotStore';
 import { useBotsQuery } from '../../../../hooks/bot/useBotsQuery';
@@ -32,6 +33,18 @@ export const UserFieldsPanel: React.FC = () => {
   const [activeMenuField, setActiveMenuField] = useState<string | null>(null);
   const [activeMenuFolder, setActiveMenuFolder] = useState<string | null>(null);
   const [activeMenuArchivedField, setActiveMenuArchivedField] = useState<string | null>(null);
+  const [menuCoords, setMenuCoords] = useState<{ top: number; right: number } | null>(null);
+  const [archivedMenuCoords, setArchivedMenuCoords] = useState<{ top: number; right: number } | null>(null);
+
+  useEffect(() => {
+    const handleGlobalClick = () => {
+      setActiveMenuField(null);
+      setActiveMenuFolder(null);
+      setActiveMenuArchivedField(null);
+    };
+    document.addEventListener('click', handleGlobalClick);
+    return () => document.removeEventListener('click', handleGlobalClick);
+  }, []);
 
   useEffect(() => {
     if (botId > 0) {
@@ -288,11 +301,11 @@ export const UserFieldsPanel: React.FC = () => {
             </div>
           )}
 
-          <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-visible">
+          <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-hidden shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
-                  <th className="px-5 py-3 w-10 rounded-tl-[14px]">
+                  <th className="px-5 py-3 w-10">
                     <input
                       type="checkbox"
                       disabled
@@ -317,72 +330,45 @@ export const UserFieldsPanel: React.FC = () => {
                       <HelpCircle size={12} />
                     </div>
                   </th>
-                  <th className="px-5 py-3 w-12 text-right rounded-tr-[14px]"></th>
+                  <th className="px-5 py-3 w-12 text-right"></th>
                 </tr>
               </thead>
               <tbody className="divide-y-2 divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A]">
-                {filteredFields.map((field, index) => {
-                  const isLastItems = filteredFields.length <= 2 || index >= filteredFields.length - 2;
-                  const isLastRow = index === filteredFields.length - 1;
-                  return (
-                    <tr key={field.name} className={`hover:bg-[#F2EBDD]/50 bg-white ${activeMenuField === field.name ? 'relative z-50' : ''}`}>
-                      <td className={`px-5 py-3.5 ${isLastRow ? 'rounded-bl-[14px]' : ''}`}>
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
-                        />
-                      </td>
-                      <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">
-                        {field.name}
-                      </td>
-                      <td className="px-5 py-3.5 text-slate-700">
-                        {field.type}
-                      </td>
-                      <td className="px-5 py-3.5 text-slate-700">
-                        {field.description || '-'}
-                      </td>
-                      <td className={`px-5 py-3.5 text-right relative overflow-visible ${isLastRow ? 'rounded-br-[14px]' : ''}`}>
-                        <button
-                          onClick={() => setActiveMenuField(activeMenuField === field.name ? null : field.name)}
-                          className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
-                        >
-                          <MoreVertical size={15} />
-                        </button>
-
-                        {activeMenuField === field.name && (
-                          <div
-                            className={`absolute right-5 z-[100] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_0px_#0A0A0A] py-1 w-32 text-left animate-in fade-in duration-100 ${isLastItems ? 'bottom-8' : 'top-10'}`}
-                            onMouseDown={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              onMouseDown={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                handleArchiveField(field.name);
-                              }}
-                              className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none"
-                            >
-                              {t('settings.fields.action_archive')}
-                            </button>
-                            <button
-                              onMouseDown={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                handleDeleteField(field.name, false);
-                              }}
-                              className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/15 uppercase select-none"
-                            >
-                              {t('settings.fields.action_delete')}
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {filteredFields.map((field) => (
+                  <tr key={field.name} className="hover:bg-[#F2EBDD]/50 bg-white">
+                    <td className="px-5 py-3.5">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
+                      />
+                    </td>
+                    <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">
+                      {field.name}
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-700">
+                      {field.type}
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-700">
+                      {field.description || '-'}
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setMenuCoords({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+                          setActiveMenuField(activeMenuField === field.name ? null : field.name);
+                        }}
+                        className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
+                      >
+                        <MoreVertical size={15} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
                 {filteredFields.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="text-center py-10 text-slate-700 italic bg-white font-bold rounded-b-[14px]">
+                    <td colSpan={5} className="text-center py-10 text-slate-700 italic bg-white font-bold select-none">
                       {t('settings.fields.empty_state')}
                     </td>
                   </tr>
@@ -393,6 +379,34 @@ export const UserFieldsPanel: React.FC = () => {
         </div>
       </div>
 
+      {activeMenuField && menuCoords && createPortal(
+        <div
+          style={{ top: menuCoords.top, right: menuCoords.right }}
+          className="fixed z-[9999] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 w-32 text-left animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={() => {
+              handleArchiveField(activeMenuField);
+              setActiveMenuField(null);
+            }}
+            className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
+          >
+            {t('settings.fields.action_archive')}
+          </button>
+          <button
+            onClick={() => {
+              handleDeleteField(activeMenuField, false);
+              setActiveMenuField(null);
+            }}
+            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/15 uppercase select-none transition-colors"
+          >
+            {t('settings.fields.action_delete')}
+          </button>
+        </div>,
+        document.body
+      )}
+
       <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-left overflow-visible">
         <div className="p-5 border-b-2 border-[#0A0A0A]">
           <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
@@ -400,11 +414,11 @@ export const UserFieldsPanel: React.FC = () => {
           </h3>
         </div>
         <div className="p-5">
-          <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-visible">
+          <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-hidden shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
-                  <th className="px-5 py-3 w-10 rounded-tl-[14px]">
+                  <th className="px-5 py-3 w-10">
                     <input
                       type="checkbox"
                       disabled
@@ -414,72 +428,48 @@ export const UserFieldsPanel: React.FC = () => {
                   <th className="px-5 py-3">{t('settings.fields.table_name')}</th>
                   <th className="px-5 py-3">{t('settings.fields.table_type')}</th>
                   <th className="px-5 py-3">{t('settings.fields.table_desc')}</th>
-                  <th className="px-5 py-3 w-12 text-right rounded-tr-[14px]"></th>
+                  <th className="px-5 py-3 w-12 text-right"></th>
                 </tr>
               </thead>
               <tbody className="divide-y-2 divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A]">
-                {filteredArchived.map((field, index) => {
-                  const isLastItems = filteredArchived.length <= 2 || index >= filteredArchived.length - 2;
-                  const isLastRow = index === filteredArchived.length - 1;
-                  return (
-                    <tr key={field.name} className={`hover:bg-[#F2EBDD]/50 bg-white ${activeMenuArchivedField === field.name ? 'relative z-50' : ''}`}>
-                      <td className={`px-5 py-3.5 ${isLastRow ? 'rounded-bl-[14px]' : ''}`}>
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
-                        />
-                      </td>
-                      <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">
-                        {field.name}
-                      </td>
-                      <td className="px-5 py-3.5 text-slate-700">
-                        {field.type}
-                      </td>
-                      <td className="px-5 py-3.5 text-slate-700">
-                        {field.description || '-'}
-                      </td>
-                      <td className={`px-5 py-3.5 text-right relative overflow-visible ${isLastRow ? 'rounded-br-[14px]' : ''}`}>
-                        <button
-                          onClick={() => setActiveMenuArchivedField(activeMenuArchivedField === field.name ? null : field.name)}
-                          className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
-                        >
-                          <MoreVertical size={15} />
-                        </button>
-
-                        {activeMenuArchivedField === field.name && (
-                          <div
-                            className={`absolute right-5 z-[100] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_0px_#0A0A0A] py-1 w-32 text-left animate-in fade-in duration-100 ${isLastItems ? 'bottom-8' : 'top-10'}`}
-                            onMouseDown={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              onMouseDown={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                handleUnarchiveField(field.name);
-                              }}
-                              className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none"
-                            >
-                              Unarchive
-                            </button>
-                            <button
-                              onMouseDown={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                handleDeleteField(field.name, true);
-                              }}
-                              className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/15 uppercase select-none"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {filteredArchived.map((field) => (
+                  <tr key={field.name} className="hover:bg-[#F2EBDD]/50 bg-white">
+                    <td className="px-5 py-3.5">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
+                      />
+                    </td>
+                    <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">
+                      {field.name}
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-700">
+                      {field.type}
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-700">
+                      {field.description || '-'}
+                    </td>
+                    <td className="px-5 py-3.5 text-right relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setArchivedMenuCoords({
+                            top: rect.bottom + 4,
+                            right: window.innerWidth - rect.right,
+                          });
+                          setActiveMenuArchivedField(activeMenuArchivedField === field.name ? null : field.name);
+                        }}
+                        className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
+                      >
+                        <MoreVertical size={15} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
                 {filteredArchived.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="text-center py-10 text-slate-700 italic bg-white font-bold rounded-b-[14px]">
+                    <td colSpan={5} className="text-center py-10 text-slate-700 italic bg-white font-bold select-none">
                       {t('settings.fields.empty_state')}
                     </td>
                   </tr>
@@ -489,6 +479,34 @@ export const UserFieldsPanel: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {activeMenuArchivedField && archivedMenuCoords && createPortal(
+        <div
+          style={{ top: archivedMenuCoords.top, right: archivedMenuCoords.right }}
+          className="fixed z-[9999] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 w-32 text-left animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={() => {
+              handleUnarchiveField(activeMenuArchivedField);
+              setActiveMenuArchivedField(null);
+            }}
+            className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
+          >
+            Unarchive
+          </button>
+          <button
+            onClick={() => {
+              handleDeleteField(activeMenuArchivedField, true);
+              setActiveMenuArchivedField(null);
+            }}
+            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/15 uppercase select-none transition-colors"
+          >
+            Delete
+          </button>
+        </div>,
+        document.body
+      )}
 
       {isFieldModalOpen && (
         <div 

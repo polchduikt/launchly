@@ -3,7 +3,6 @@ import {
   Plus,
   Trash2,
   RotateCcw,
-  Sparkles,
   MessageSquare,
   Smartphone,
   ArrowRight,
@@ -14,9 +13,9 @@ import {
   UserCheck,
   Zap,
   CheckCircle2,
-  Bot,
   Layers
 } from 'lucide-react';
+import { AiIcon } from '../../../../components/ui/AiIcon';
 import { useTranslation } from '../../../../i18n/config';
 
 export interface CanvasButton {
@@ -348,10 +347,6 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto">
         <div className="text-left mb-10 border-l-8 border-[#0A0A0A] pl-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded mb-3 shadow-[2px_2px_0px_#0A0A0A]">
-            <Sparkles size={14} className="text-amber-400" />
-            <span>{t('landing.builder_demo.badge', 'INTERACTIVE DEMO')}</span>
-          </div>
           <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl font-black text-[#0A0A0A] mb-3 uppercase leading-tight">
             {t('landing.builder_demo.title', 'TRY THE NODE BUILDER RIGHT NOW')}
           </h2>
@@ -397,7 +392,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
               onClick={() => handleAddNode('ai')}
               className="px-3 py-1.5 bg-[#1E293B] hover:bg-purple-600 text-white font-['JetBrains_Mono',monospace] text-xs font-extrabold rounded-lg border border-slate-700 transition-all flex items-center gap-1 cursor-pointer"
             >
-              <Bot size={13} className="text-purple-400" />
+              <AiIcon size={13} className="text-purple-400" />
               <span>+ AI Асистент</span>
             </button>
           </div>
@@ -514,7 +509,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                           >
                             {node.type === 'promo' && <Gift size={12} />}
                             {node.type === 'form' && <UserCheck size={12} />}
-                            {node.type === 'ai' && <Bot size={12} />}
+                            {node.type === 'ai' && <AiIcon size={12} />}
                             {node.type === 'buttons' && <MessageSquare size={12} />}
                             {node.type === 'text' && <MessageSquare size={12} />}
                           </div>

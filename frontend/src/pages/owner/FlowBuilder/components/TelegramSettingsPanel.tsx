@@ -136,14 +136,17 @@ export const TelegramSettingsPanel: React.FC = () => {
                 <div className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-xl border-2 border-[#0A0A0A]">
                   <span className="text-xs font-black text-[#0A0A0A] uppercase">{t('settings.telegram.enabled')}</span>
                   <button
+                    type="button"
+                    role="switch"
+                    aria-checked={bot.active}
                     onClick={() => handleToggleBot(bot)}
-                    className={`w-9 h-5 rounded-full transition-all relative outline-none cursor-pointer border-2 border-[#0A0A0A] ${
+                    className={`w-11 h-6 rounded-full transition-all relative outline-none cursor-pointer border-2 border-[#0A0A0A] p-0.5 inline-flex items-center shrink-0 ${
                       bot.active ? 'bg-[#0A0A0A]' : 'bg-slate-300'
                     }`}
                   >
                     <span
-                      className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-[#F2EBDD] rounded-full transition-all ${
-                        bot.active ? 'translate-x-4' : 'translate-x-0'
+                      className={`w-4 h-4 bg-white rounded-full transition-transform border border-[#0A0A0A] shrink-0 ${
+                        bot.active ? 'translate-x-5' : 'translate-x-0'
                       }`}
                     />
                   </button>
@@ -443,13 +446,18 @@ export const TelegramSettingsPanel: React.FC = () => {
               <div className="flex items-center justify-between py-2 border-t-2 border-[#0A0A0A]/15">
                 <span className="text-xs font-black text-[#0A0A0A] uppercase">{t('settings.telegram.modal.trigger_toggle')}</span>
                 <button
+                  type="button"
+                  role="switch"
+                  aria-checked={getBotSettings(activeEditAutomation.botId)[
+                    activeEditAutomation.type === 'opt-in' ? 'optInEnabled' : 'optOutEnabled'
+                  ]}
                   onClick={() => {
                     const key =
                       activeEditAutomation.type === 'opt-in' ? 'optInEnabled' : 'optOutEnabled';
                     const cur = getBotSettings(activeEditAutomation.botId);
                     updateBotSetting(activeEditAutomation.botId, key, !cur[key]);
                   }}
-                  className={`w-9 h-5 rounded-full transition-all relative outline-none cursor-pointer border-2 border-[#0A0A0A] ${
+                  className={`w-11 h-6 rounded-full transition-all relative outline-none cursor-pointer border-2 border-[#0A0A0A] p-0.5 inline-flex items-center shrink-0 ${
                     getBotSettings(activeEditAutomation.botId)[
                       activeEditAutomation.type === 'opt-in' ? 'optInEnabled' : 'optOutEnabled'
                     ]
@@ -458,11 +466,11 @@ export const TelegramSettingsPanel: React.FC = () => {
                   }`}
                 >
                   <span
-                    className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-[#F2EBDD] rounded-full transition-all ${
+                    className={`w-4 h-4 bg-white rounded-full transition-transform border border-[#0A0A0A] shrink-0 ${
                       getBotSettings(activeEditAutomation.botId)[
                         activeEditAutomation.type === 'opt-in' ? 'optInEnabled' : 'optOutEnabled'
                       ]
-                        ? 'translate-x-4'
+                        ? 'translate-x-5'
                         : 'translate-x-0'
                     }`}
                   />

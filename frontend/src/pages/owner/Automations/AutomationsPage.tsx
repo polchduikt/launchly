@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
+import { CustomSelect } from '../../../components/ui/CustomSelect';
 import {
   Search,
   FolderPlus,
@@ -577,14 +578,14 @@ export const AutomationsPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsNewFolderModalOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] bg-white hover:bg-slate-100 border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <FolderPlus size={14} />
                   <span>{t('automations.btn.new_folder')}</span>
                 </button>
                 <button
                   onClick={() => setIsNewBotModalOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-[#2A2A2A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-white bg-[#0A0A0A] hover:bg-[#2A2A2A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <Plus size={14} />
                   <span>{t('automations.btn.new_automation')}</span>
@@ -679,7 +680,7 @@ export const AutomationsPage: React.FC = () => {
                           className={`border-b-2 border-[#0A0A0A] transition-all group cursor-pointer ${
                             bot.blocked
                               ? 'bg-rose-50 hover:bg-rose-100/60'
-                              : 'hover:bg-[#F2EBDD]/60'
+                              : 'hover:bg-slate-50'
                           }`}
                         >
                           <td className="py-4 px-4 w-12 text-center" onClick={(e) => e.stopPropagation()}>
@@ -946,9 +947,9 @@ export const AutomationsPage: React.FC = () => {
               <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-[#0A0A0A]">{t('automations.modal.new_automation')}</h3>
               <button
                 onClick={() => setIsNewBotModalOpen(false)}
-                className="p-1 text-[#0A0A0A] hover:bg-white rounded-lg border border-transparent hover:border-[#0A0A0A] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
             <div className="p-6 space-y-4 bg-white">
@@ -1087,7 +1088,7 @@ export const AutomationsPage: React.FC = () => {
             <div className="p-6 pt-4 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] flex items-center justify-end gap-2">
               <button
                 onClick={() => setIsNewBotModalOpen(false)}
-                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-white border-2 border-transparent hover:border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] dark:text-[#E4E4E7] hover:bg-white dark:hover:bg-[#27272A] border-2 border-transparent hover:border-[#0A0A0A] dark:hover:border-[#3F3F46] rounded-xl transition-all cursor-pointer"
               >
                 Cancel
               </button>
@@ -1123,9 +1124,9 @@ export const AutomationsPage: React.FC = () => {
               <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-[#0A0A0A]">{t('automations.edit_modal.title')}</h3>
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="p-1 text-[#0A0A0A] hover:bg-white rounded-lg border border-transparent hover:border-[#0A0A0A] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
             <div className="p-6 space-y-4 bg-white">
@@ -1287,7 +1288,7 @@ export const AutomationsPage: React.FC = () => {
             <div className="p-6 pt-4 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] flex items-center justify-end gap-2">
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-white border-2 border-transparent hover:border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] dark:text-[#E4E4E7] hover:bg-white dark:hover:bg-[#27272A] border-2 border-transparent hover:border-[#0A0A0A] dark:hover:border-[#3F3F46] rounded-xl transition-all cursor-pointer"
               >
                 {t('automations.edit_modal.cancel')}
               </button>
@@ -1323,30 +1324,26 @@ export const AutomationsPage: React.FC = () => {
               <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-[#0A0A0A]">{t('automations.move_modal.title')}</h3>
               <button
                 onClick={() => setIsMoveModalOpen(false)}
-                className="p-1 text-[#0A0A0A] hover:bg-white rounded-lg border border-transparent hover:border-[#0A0A0A] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
             <div className="p-6 space-y-4 bg-white">
               <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider">{t('automations.move_modal.select_folder')}</label>
-              <select
+              <CustomSelect
                 value={tempFolderId}
-                onChange={(e) => setTempFolderId(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
-              >
-                <option value="">{t('automations.move_modal.no_folder')}</option>
-                {folders.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setTempFolderId(val)}
+                options={[
+                  { value: '', label: t('automations.move_modal.no_folder') },
+                  ...folders.map((f) => ({ value: String(f.id), label: f.name })),
+                ]}
+              />
             </div>
             <div className="p-6 pt-4 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] flex items-center justify-end gap-2">
               <button
                 onClick={() => setIsMoveModalOpen(false)}
-                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-white border-2 border-transparent hover:border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] dark:text-[#E4E4E7] hover:bg-white dark:hover:bg-[#27272A] border-2 border-transparent hover:border-[#0A0A0A] dark:hover:border-[#3F3F46] rounded-xl transition-all cursor-pointer"
               >
                 {t('automations.move_modal.cancel')}
               </button>
@@ -1374,9 +1371,9 @@ export const AutomationsPage: React.FC = () => {
               <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-[#0A0A0A]">{t('automations.folder.create_title')}</h3>
               <button
                 onClick={() => setIsNewFolderModalOpen(false)}
-                className="p-1 text-[#0A0A0A] hover:bg-white rounded-lg border border-transparent hover:border-[#0A0A0A] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
             <div className="p-6 space-y-4 bg-white">
@@ -1392,7 +1389,7 @@ export const AutomationsPage: React.FC = () => {
             <div className="p-6 pt-4 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] flex items-center justify-end gap-2">
               <button
                 onClick={() => setIsNewFolderModalOpen(false)}
-                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-white border-2 border-transparent hover:border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] dark:text-[#E4E4E7] hover:bg-white dark:hover:bg-[#27272A] border-2 border-transparent hover:border-[#0A0A0A] dark:hover:border-[#3F3F46] rounded-xl transition-all cursor-pointer"
               >
                 {t('automations.folder.cancel')}
               </button>
@@ -1432,9 +1429,9 @@ export const AutomationsPage: React.FC = () => {
               </div>
               <button
                 onClick={() => setBlockedDetailsBot(null)}
-                className="p-1 text-[#0A0A0A] hover:bg-white rounded-lg border border-transparent hover:border-[#0A0A0A] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
 

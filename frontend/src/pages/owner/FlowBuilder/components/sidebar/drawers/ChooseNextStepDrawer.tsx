@@ -34,7 +34,10 @@ export const ChooseNextStepDrawer: React.FC<ChooseNextStepDrawerProps> = ({ onCl
               }}
               className="w-full flex items-start gap-4 p-4 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl cursor-pointer transition-all text-left group shadow-sm select-none"
             >
-              <span className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border-2 border-[#0A0A0A] ${opt.color} group-hover:scale-105 transition-transform`}>
+              <span
+                data-block-type={opt.type}
+                className={`node-icon-badge w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border-2 border-[#0A0A0A] ${opt.color} group-hover:scale-105 transition-transform`}
+              >
                 <Icon size={18} />
               </span>
               <div className="space-y-0.5">

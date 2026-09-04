@@ -530,9 +530,10 @@ export const DashboardPage: React.FC = () => {
               
               <button
                 onClick={handleCloseAll}
-                className="absolute top-5 right-5 z-[10000] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] p-2 rounded-full transition-colors cursor-pointer"
+                className="absolute top-5 right-5 z-[10000] w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer shadow-md"
+                title="Close"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
 
               {selectedTemplate ? (

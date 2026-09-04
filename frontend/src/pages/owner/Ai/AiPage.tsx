@@ -4,7 +4,8 @@ import { useAiAssistant } from '../../../hooks/ai/useAiAssistant';
 import { QUICK_QUESTIONS } from '../../../const/aiConfig';
 import { t } from '../../../i18n/config';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
-import { Sparkles, Send, Bot, User, Loader2, RefreshCw, AlertCircle, Trash2 } from 'lucide-react';
+import { Send, User, Loader2, RefreshCw, AlertCircle, Trash2 } from 'lucide-react';
+import { AiIcon } from '../../../components/ui/AiIcon';
 
 const AiPage: React.FC = () => {
   const {
@@ -51,7 +52,7 @@ const AiPage: React.FC = () => {
         <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-6 py-4 flex flex-row justify-between items-center gap-4 shrink-0 z-10 font-['JetBrains_Mono',monospace]">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-white border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A]">
-              <Sparkles size={18} className="animate-pulse text-indigo-600" />
+              <AiIcon size={18} className="text-indigo-600" />
             </div>
             <div>
               <h1 className="font-['Anybody',sans-serif] text-lg font-black text-[#0A0A0A] uppercase tracking-tight select-none">Launchly AI</h1>
@@ -131,7 +132,7 @@ const AiPage: React.FC = () => {
                           : 'bg-white text-[#0A0A0A]'
                       }`}
                     >
-                      {isUser ? <User size={16} /> : <Bot size={16} />}
+                      {isUser ? <User size={16} /> : <AiIcon size={16} />}
                     </div>
 
                     <div
@@ -150,7 +151,7 @@ const AiPage: React.FC = () => {
               {chatMutation.isPending && (
                 <div className="flex items-start gap-3.5 max-w-[85%] animate-pulse">
                   <div className="w-9 h-9 rounded-xl bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] flex items-center justify-center shrink-0">
-                    <Bot size={16} />
+                    <AiIcon size={16} />
                   </div>
                   <div className="p-4 rounded-2xl bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-tl-none flex items-center gap-2">
                     <Loader2 size={14} className="animate-spin text-[#0A0A0A]" />

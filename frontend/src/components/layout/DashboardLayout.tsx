@@ -37,9 +37,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    return () => {
-      document.documentElement.removeAttribute('data-theme');
-    };
   }, [theme]);
 
   useEffect(() => {
@@ -63,6 +60,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const maxBotUsers = subscription?.plan?.maxBotUsers || 100;
   const contactsCount = contacts?.length || 0;
   const percentage = Math.min(100, Math.round((contactsCount / maxBotUsers) * 100));
+  const isPaidPlan = subscription?.plan && subscription.plan.name.toUpperCase() !== 'FREE';
+
+  const handlePlanClick = () => {
+    if (isPaidPlan) {
+      navigate('/settings?tab=subscriptions');
+    } else {
+      setShowPricing(true);
+    }
+  };
 
   return (
     <div data-theme={theme} className="dashboard-themed flex h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased overflow-hidden selection:bg-[#0A0A0A] selection:text-[#F2EBDD] relative">
@@ -216,15 +222,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     <span className="text-xs font-bold text-[#0A0A0A] uppercase">{t('common.theme', 'Theme:')}</span>
                     <div className="flex items-center gap-1.5">
                       <button
-                        onClick={() => setTheme('yellow')}
-                        className={`w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-[#F2EBDD] flex items-center justify-center cursor-pointer transition-all shadow-[1px_1px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
-                          theme === 'yellow' ? 'ring-2 ring-[#0A0A0A] ring-offset-1 scale-105' : ''
-                        }`}
-                        title={t('common.theme_yellow', 'Yellow')}
-                      >
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-[#0A0A0A]" />
-                      </button>
-                      <button
                         onClick={() => setTheme('light')}
                         className={`w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-white flex items-center justify-center cursor-pointer transition-all shadow-[1px_1px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
                           theme === 'light' ? 'ring-2 ring-[#0A0A0A] ring-offset-1 scale-105' : ''
@@ -232,6 +229,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                         title={t('common.theme_light', 'Light')}
                       >
                         <span className="w-2.5 h-2.5 rounded-full bg-slate-200 border border-[#0A0A0A]" />
+                      </button>
+                      <button
+                        onClick={() => setTheme('yellow')}
+                        className={`w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-[#F2EBDD] flex items-center justify-center cursor-pointer transition-all shadow-[1px_1px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
+                          theme === 'yellow' ? 'ring-2 ring-[#0A0A0A] ring-offset-1 scale-105' : ''
+                        }`}
+                        title={t('common.theme_yellow', 'Yellow')}
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-[#0A0A0A]" />
                       </button>
                       <button
                         onClick={() => setTheme('dark')}
@@ -250,7 +256,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     <div className="relative">
                       <button
                         onClick={() => setShowLangMenu(!showLangMenu)}
-                        className="text-xs font-black uppercase text-[#0A0A0A] border-2 border-[#0A0A0A] px-2.5 py-1 bg-white shadow-[1px_1px_0px_#0A0A0A] cursor-pointer flex items-center gap-1.5 hover:bg-amber-100 transition-colors"
+                        className="text-xs font-black uppercase text-[#0A0A0A] border-2 border-[#0A0A0A] px-2.5 py-1 bg-white shadow-[1px_1px_0px_#0A0A0A] cursor-pointer flex items-center gap-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors"
                       >
                         <span>{language.toUpperCase()}</span>
                         <ChevronDown size={12} className={`transition-transform ${showLangMenu ? 'rotate-180' : ''}`} />
@@ -264,7 +270,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                               setShowLangMenu(false);
                             }}
                             className={`w-full text-left px-3 py-1.5 text-xs font-black uppercase transition-colors cursor-pointer ${
-                              language === 'en' ? 'bg-amber-300 text-[#0A0A0A]' : 'bg-white hover:bg-amber-100 text-[#0A0A0A]'
+                              language === 'en' ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A]'
                             }`}
                           >
                             EN
@@ -275,7 +281,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                               setShowLangMenu(false);
                             }}
                             className={`w-full text-left px-3 py-1.5 text-xs font-black uppercase transition-colors cursor-pointer ${
-                              language === 'uk' ? 'bg-amber-300 text-[#0A0A0A]' : 'bg-white hover:bg-amber-100 text-[#0A0A0A]'
+                              language === 'uk' ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A]'
                             }`}
                           >
                             UK
@@ -319,7 +325,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <Link
                   to={ROUTES.SUPPORT}
                   onClick={() => setShowHelpMenu(false)}
-                  className="flex items-center justify-between px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-white transition-all text-[#0A0A0A]"
+                  className="flex items-center justify-between px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all text-[#0A0A0A]"
                 >
                   <span>{t('common.contact_support', 'Contact Support')}</span>
                   {hasUnreadSupport && (
@@ -333,28 +339,28 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <Link
                   to={ROUTES.TERMS}
                   onClick={() => setShowHelpMenu(false)}
-                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-white transition-all text-[#0A0A0A]"
+                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all text-[#0A0A0A]"
                 >
                   {t('common.terms_of_service', 'Terms of Service')}
                 </Link>
                 <Link
                   to={ROUTES.PRIVACY}
                   onClick={() => setShowHelpMenu(false)}
-                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-white transition-all text-[#0A0A0A]"
+                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all text-[#0A0A0A]"
                 >
                   {t('common.privacy_policy', 'Privacy Policy')}
                 </Link>
                 <Link
                   to={ROUTES.BLOG}
                   onClick={() => setShowHelpMenu(false)}
-                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-white transition-all text-[#0A0A0A]"
+                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all text-[#0A0A0A]"
                 >
                   {t('common.blog', 'Blog')}
                 </Link>
                 <Link
                   to={ROUTES.FAQ}
                   onClick={() => setShowHelpMenu(false)}
-                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-white transition-all text-[#0A0A0A]"
+                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all text-[#0A0A0A]"
                 >
                   {t('common.faq_guides', 'FAQ & Guides')}
                 </Link>
@@ -363,7 +369,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </div>
 
           <div
-            onClick={() => setShowPricing(true)}
+            onClick={handlePlanClick}
             className="relative group flex items-center justify-center cursor-pointer select-none"
           >
             <svg className="w-9 h-9 transform -rotate-90" viewBox="0 0 36 36">
@@ -396,7 +402,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </div>
 
           <button
-            onClick={() => setShowPricing(true)}
+            onClick={handlePlanClick}
             className="px-2 py-0.5 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest border border-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] transition-colors cursor-pointer"
           >
             {planName}

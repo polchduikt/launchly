@@ -130,7 +130,7 @@ export const MyTemplatesPage: React.FC = () => {
 
           <button
             onClick={() => navigate('/templates/create')}
-            className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-2"
+            className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-2"
           >
             <Plus size={15} />
             <span>{t('template.my.create_btn', 'Новий темплейт')}</span>
@@ -153,7 +153,7 @@ export const MyTemplatesPage: React.FC = () => {
             </div>
           ) : activeTab === 'my' ? (
             myTemplates.length === 0 ? (
-              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 md:p-16 text-center max-w-4xl mx-auto shadow-[2px_2px_0px_#0A0A0A]">
+              <div className="bg-white border-2 border-[#0A0A0A] rounded-3xl p-10 md:p-16 text-center max-w-4xl mx-auto shadow-[2px_2px_0px_#0A0A0A]">
                 <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] mx-auto mb-4">
                   <Layers size={32} />
                 </div>
@@ -165,14 +165,14 @@ export const MyTemplatesPage: React.FC = () => {
                 </p>
                 <button
                   onClick={() => navigate('/templates/create')}
-                  className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer inline-flex items-center gap-2 rounded-xl"
+                  className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer inline-flex items-center gap-2 rounded-xl"
                 >
                   <Plus size={15} />
                   <span>{t('template.my.create_btn', 'Новий темплейт')}</span>
                 </button>
               </div>
             ) : (
-              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-[2px_2px_0px_#0A0A0A]">
+              <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-[2px_2px_0px_#0A0A0A]">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse font-['JetBrains_Mono',monospace]">
                     <thead>
@@ -202,7 +202,7 @@ export const MyTemplatesPage: React.FC = () => {
                                   className="w-10 h-10 object-cover border-2 border-[#0A0A0A] shadow-[1px_1px_0px_#0A0A0A] shrink-0 rounded-lg"
                                 />
                               ) : (
-                                <div className="w-10 h-10 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[1px_1px_0px_#0A0A0A] flex items-center justify-center shrink-0 rounded-lg text-xs font-black font-['Anybody',sans-serif]">
+                                <div className="w-10 h-10 bg-[#0A0A0A] text-white border-2 border-[#0A0A0A] shadow-[1px_1px_0px_#0A0A0A] flex items-center justify-center shrink-0 rounded-lg text-xs font-black font-['Anybody',sans-serif]">
                                   {getInitials(tpl.creatorName || tpl.name)}
                                 </div>
                               )}
@@ -226,7 +226,7 @@ export const MyTemplatesPage: React.FC = () => {
                           <td className="py-3.5 px-4 whitespace-nowrap text-center">
                             {tpl.broadcastCount > 0 ? (
                               <div className="text-center">
-                                <div className="text-xs font-extrabold text-amber-700">
+                                <div className="text-xs font-extrabold text-slate-800">
                                   {`${tpl.broadcastCount} ${t('template.count_broadcasts', 'Розсилок')}`}
                                 </div>
                                 <div className="text-[10.5px] font-bold text-slate-500 mt-0.5">
@@ -278,14 +278,14 @@ export const MyTemplatesPage: React.FC = () => {
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 onClick={() => navigate(`/templates/edit/${tpl.shareCode}`)}
-                                className="p-1.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border border-[#0A0A0A] text-[#0A0A0A] rounded-lg transition-all cursor-pointer shadow-[1px_1px_0px_#0A0A0A]"
+                                className="p-1.5 bg-white hover:bg-[#0A0A0A] hover:text-white border border-[#0A0A0A] text-[#0A0A0A] rounded-lg transition-all cursor-pointer shadow-[1px_1px_0px_#0A0A0A]"
                                 title={t('common.edit', 'Редагувати')}
                               >
                                 <Pencil size={13} />
                               </button>
                               <button
                                 onClick={() => navigate(`/templates/detail/${tpl.shareCode}`)}
-                                className="p-1.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border border-[#0A0A0A] text-[#0A0A0A] rounded-lg transition-all cursor-pointer shadow-[1px_1px_0px_#0A0A0A]"
+                                className="p-1.5 bg-white hover:bg-[#0A0A0A] hover:text-white border border-[#0A0A0A] text-[#0A0A0A] rounded-lg transition-all cursor-pointer shadow-[1px_1px_0px_#0A0A0A]"
                                 title={t('template.view_template', 'Переглянути')}
                               >
                                 <Eye size={13} />
@@ -312,7 +312,7 @@ export const MyTemplatesPage: React.FC = () => {
             )
           ) : (
             installedTemplates.length === 0 ? (
-              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 md:p-16 text-center max-w-4xl mx-auto shadow-[2px_2px_0px_#0A0A0A]">
+              <div className="bg-white border-2 border-[#0A0A0A] rounded-3xl p-10 md:p-16 text-center max-w-4xl mx-auto shadow-[2px_2px_0px_#0A0A0A]">
                 <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] mx-auto mb-4">
                   <Layers size={32} />
                 </div>
@@ -324,7 +324,7 @@ export const MyTemplatesPage: React.FC = () => {
                 </p>
               </div>
             ) : (
-              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-[2px_2px_0px_#0A0A0A]">
+              <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-[2px_2px_0px_#0A0A0A]">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse font-['JetBrains_Mono',monospace]">
                     <thead>
@@ -354,7 +354,7 @@ export const MyTemplatesPage: React.FC = () => {
                                   className="w-10 h-10 object-cover border-2 border-[#0A0A0A] shadow-[1px_1px_0px_#0A0A0A] shrink-0 rounded-lg"
                                 />
                               ) : (
-                                <div className="w-10 h-10 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[1px_1px_0px_#0A0A0A] flex items-center justify-center shrink-0 rounded-lg text-xs font-black font-['Anybody',sans-serif]">
+                                <div className="w-10 h-10 bg-[#0A0A0A] text-white border-2 border-[#0A0A0A] shadow-[1px_1px_0px_#0A0A0A] flex items-center justify-center shrink-0 rounded-lg text-xs font-black font-['Anybody',sans-serif]">
                                   {getInitials(tpl.creatorName || tpl.name)}
                                 </div>
                               )}
@@ -384,7 +384,7 @@ export const MyTemplatesPage: React.FC = () => {
                           <td className="py-3.5 px-4 whitespace-nowrap text-center">
                             {tpl.broadcastCount > 0 ? (
                               <div className="text-center">
-                                <div className="text-xs font-extrabold text-amber-700">
+                                <div className="text-xs font-extrabold text-slate-800">
                                   {`${tpl.broadcastCount} ${t('template.count_broadcasts', 'Розсилок')}`}
                                 </div>
                                 <div className="text-[10.5px] font-bold text-slate-500 mt-0.5">
@@ -423,7 +423,7 @@ export const MyTemplatesPage: React.FC = () => {
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 onClick={() => navigate(`/templates/detail/${tpl.shareCode}`)}
-                                className="p-1.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border border-[#0A0A0A] text-[#0A0A0A] rounded-lg transition-all cursor-pointer shadow-[1px_1px_0px_#0A0A0A]"
+                                className="p-1.5 bg-white hover:bg-[#0A0A0A] hover:text-white border border-[#0A0A0A] text-[#0A0A0A] rounded-lg transition-all cursor-pointer shadow-[1px_1px_0px_#0A0A0A]"
                                 title={t('template.view_template', 'Переглянути шаблон')}
                               >
                                 <Eye size={13} />

@@ -46,7 +46,7 @@ const CommentNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
   return (
     <div
       {...bindHover}
-      className={`bg-amber-50 border-2 border-[#0A0A0A] rounded-3xl p-4 transition-all relative overflow-visible isolate ${getSizeClasses()} ${
+      className={`bg-amber-50/75 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl p-4 transition-all relative overflow-visible isolate ${getSizeClasses()} ${
         selected
           ? 'shadow-lg ring-2 ring-[#0A0A0A]'
           : 'shadow-md'

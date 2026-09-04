@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, HelpCircle, Send, RotateCcw, Pencil, Plus, Trash2, ChevronDown, Settings } from 'lucide-react';
+import { HelpCircle, Send, RotateCcw, Pencil, Plus, Trash2, ChevronDown, Settings } from 'lucide-react';
+import { AiIcon } from '../../../../../../components/ui/AiIcon';
 import { useNavigate } from 'react-router-dom';
 import { t } from '../../../../../../i18n/config';
 import { useIntegrationsQuery } from '../../../../../../hooks/integration/useIntegrationQueries';
@@ -278,7 +279,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
                 className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 text-xs font-bold text-slate-800 transition-all bg-white shadow-xs resize-none"
               />
               <div className="absolute bottom-2.5 right-3 text-slate-350">
-                <Sparkles size={14} />
+                <AiIcon size={14} />
               </div>
             </div>
           </div>
@@ -323,7 +324,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
                 : 'bg-slate-300 cursor-not-allowed'
             }`}
           >
-            <Sparkles size={14} />
+            <AiIcon size={14} />
             {t('editor.ai.generate')}
           </button>
         </div>

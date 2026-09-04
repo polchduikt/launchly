@@ -126,22 +126,22 @@ export const InteractiveEdge: React.FC<EdgeProps> = ({
           viewBox="0 0 10 10"
           refX="8"
           refY="5"
-          markerWidth="5.5"
-          markerHeight="5.5"
+          markerWidth="6.5"
+          markerHeight="6.5"
           orient="auto-start-reverse"
         >
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="#7b8794" />
+          <path d="M 0 0 L 10 5 L 0 10 z" className="edge-arrow-default" />
         </marker>
         <marker
-          id={`arrow-indigo-${id}`}
+          id={`arrow-black-${id}`}
           viewBox="0 0 10 10"
           refX="8"
           refY="5"
-          markerWidth="5.5"
-          markerHeight="5.5"
+          markerWidth="6.5"
+          markerHeight="6.5"
           orient="auto-start-reverse"
         >
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1" />
+          <path d="M 0 0 L 10 5 L 0 10 z" className="edge-arrow-highlight" />
         </marker>
       </defs>
 
@@ -149,7 +149,7 @@ export const InteractiveEdge: React.FC<EdgeProps> = ({
         d={edgePath}
         fill="none"
         stroke="transparent"
-        strokeWidth={20}
+        strokeWidth={22}
         className="react-flow__edge-interaction"
         style={{ cursor: 'pointer' }}
         onMouseEnter={handleMouseEnter}
@@ -160,13 +160,12 @@ export const InteractiveEdge: React.FC<EdgeProps> = ({
         id={id}
         d={edgePath}
         fill="none"
-        style={{
-          ...style,
-          stroke: isHighlighted ? '#6366f1' : (style.stroke || '#7b8794'),
-        }}
-        strokeWidth={style.strokeWidth || 1.6}
-        markerEnd={isHighlighted ? `url(#arrow-indigo-${id})` : `url(#arrow-grey-${id})`}
-        className="react-flow__edge-path transition-colors duration-155"
+        style={style}
+        strokeWidth={isHighlighted ? 2.8 : (style.strokeWidth || 2.4)}
+        markerEnd={isHighlighted ? `url(#arrow-black-${id})` : `url(#arrow-grey-${id})`}
+        className={`react-flow__edge-path transition-colors duration-150 ${
+          isHighlighted ? 'edge-path-highlight' : 'edge-path-default'
+        }`}
       />
 
       {showDelete && (
@@ -183,7 +182,7 @@ export const InteractiveEdge: React.FC<EdgeProps> = ({
           >
             <button
               onClick={handleDelete}
-              className="w-8 h-8 bg-white border border-slate-200 rounded-xl shadow-md flex items-center justify-center text-rose-500 hover:text-rose-700 transition-colors cursor-pointer"
+              className="w-8 h-8 bg-white dark:bg-[#18181B] border-2 border-[#0A0A0A] dark:border-[#27272A] rounded-xl shadow-[2px_2px_0px_#0A0A0A] dark:shadow-none flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-[#3B1219] transition-colors cursor-pointer"
               title="Delete Connection"
             >
               <Trash2 size={15} />

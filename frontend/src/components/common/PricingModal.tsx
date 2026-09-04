@@ -84,9 +84,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
         <div className="bg-[#F2EBDD] px-6 py-4 flex flex-col items-center relative shrink-0 border-b-2 border-[#0A0A0A]">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-1.5 text-[#0A0A0A] hover:bg-white border-2 border-transparent hover:border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
 
           <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black text-[#0A0A0A] uppercase tracking-tight text-center">

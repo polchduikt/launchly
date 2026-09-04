@@ -229,7 +229,7 @@ export const BroadcastsPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer select-none"
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-white bg-[#0A0A0A] hover:bg-[#2A2A2A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] select-none"
             >
               <Plus size={14} />
               <span>{t('broadcasts.btn.new')}</span>
@@ -476,9 +476,9 @@ export const BroadcastsPage: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setBlockedDetailsCampaign(null)}
-                  className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-all cursor-pointer"
+                  className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
                 >
-                  <X size={18} />
+                  <X size={16} />
                 </button>
               </div>
 

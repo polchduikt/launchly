@@ -78,7 +78,7 @@ export const FaqPage: React.FC = () => {
     { id: 'n1', category: 'nodes', icon: MessageSquare, question: t('faq.n1.q'), answer: t('faq.n1.a') },
     { id: 'n2', category: 'nodes', icon: Split, question: t('faq.n2.q'), answer: t('faq.n2.a') },
     { id: 'n3', category: 'nodes', icon: Layers, question: t('faq.n3.q'), answer: t('faq.n3.a') },
-    { id: 'n4', category: 'nodes', icon: Sparkles, question: t('faq.n4.q'), answer: t('faq.n4.a') },
+    { id: 'n4', category: 'nodes', icon: Bot, question: t('faq.n4.q'), answer: t('faq.n4.a') },
     { id: 'n5', category: 'nodes', icon: Globe, question: t('faq.n5.q'), answer: t('faq.n5.a') },
     { id: 'n6', category: 'nodes', icon: Clock, question: t('faq.n6.q'), answer: t('faq.n6.a') },
     { id: 'n7', category: 'nodes', icon: Split, question: t('faq.n7.q'), answer: t('faq.n7.a') },

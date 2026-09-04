@@ -329,7 +329,7 @@ export const SupportPage: React.FC = () => {
           <main className="flex-1 flex flex-col bg-white overflow-hidden">
             {selectedTicketId && currentTicket ? (
               <>
-                <div className="px-6 py-3.5 border-b-2 border-[#0A0A0A] bg-[#FAF8F5] flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <div className="px-6 py-3.5 border-b-2 border-[#0A0A0A] bg-white flex flex-wrap items-center justify-between gap-3 shrink-0">
                   <div className="space-y-0.5">
                     <h2 className="font-['Anybody',sans-serif] text-sm md:text-base font-black text-[#0A0A0A] uppercase tracking-tight">
                       {currentTicket.subject}
@@ -367,7 +367,7 @@ export const SupportPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-slate-50/50 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-white custom-scrollbar">
                   {isDetailLoading ? (
                     <div className="h-full flex items-center justify-center">
                       <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
@@ -458,7 +458,7 @@ export const SupportPage: React.FC = () => {
                     </div>
                   ) : (
                     <>
-                      <div className="p-2.5 bg-[#FAF8F5] border-2 border-[#0A0A0A] rounded-2xl flex items-center justify-between gap-3 shadow-[2px_2px_0px_#0A0A0A]">
+                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-2xl flex items-center justify-between gap-3 shadow-[2px_2px_0px_#0A0A0A]">
                         <div className="text-xs font-black uppercase text-[#0A0A0A] flex items-center gap-2">
                           <CheckCircle2 size={15} className="text-[#0A0A0A]" />
                           <span>{t('support.actions_label', 'Дії з діалогом:')}</span>
@@ -507,7 +507,7 @@ export const SupportPage: React.FC = () => {
                 </div>
               </>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-3 bg-[#FAF8F5]">
+              <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-3 bg-white">
                 <div className="w-14 h-14 rounded-full bg-white border-2 border-[#0A0A0A] flex items-center justify-center shadow-[3px_3px_0px_#0A0A0A]">
                   <MessageSquare size={26} className="text-[#0A0A0A]" />
                 </div>

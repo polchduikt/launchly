@@ -1,4 +1,6 @@
 import { t } from '../i18n/config';
+import { NODE_ICON_COMPONENTS } from './nodeDisplay';
+import type { LucideIcon } from 'lucide-react';
 
 export interface FlowBlockConfig {
   type: string;
@@ -6,26 +8,27 @@ export interface FlowBlockConfig {
   color: string;
 }
 
-const FLOW_BLOCK_COLORS: Record<string, string> = {
-  MESSAGE: 'text-sky-500 bg-sky-50',
-  CONDITION: 'text-purple-700 bg-purple-50',
-  ACTION: 'text-amber-600 bg-amber-50',
-  API_CALL: 'text-indigo-500 bg-indigo-50',
-  SMART_DELAY: 'text-rose-500 bg-rose-50',
-  RANDOMIZER: 'text-purple-600 bg-purple-50',
-  START_AUTOMATION: 'text-lime-600 bg-lime-50',
-  COMMENT: 'text-amber-500 bg-amber-50',
-  AI: 'text-emerald-600 bg-emerald-50',
-  END: 'text-slate-500 bg-slate-50',
+export const FLOW_BLOCK_COLORS: Record<string, string> = {
+  MESSAGE: 'text-sky-600 bg-sky-100',
+  CONDITION: 'text-purple-700 bg-purple-100',
+  ACTION: 'text-amber-700 bg-amber-100',
+  API_CALL: 'text-indigo-600 bg-indigo-100',
+  SMART_DELAY: 'text-rose-600 bg-rose-100',
+  RANDOMIZER: 'text-purple-700 bg-purple-100',
+  START_AUTOMATION: 'text-lime-700 bg-lime-100',
+  COMMENT: 'text-amber-600 bg-amber-100',
+  AI: 'text-emerald-700 bg-emerald-100',
+  END: 'text-slate-600 bg-slate-200',
 };
 
-const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'ACTION', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMENT', 'AI', 'END'];
+export const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'ACTION', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMENT', 'AI', 'END'];
 
-export const getFlowBlocks = (): Array<{ type: string; label: string; color: string }> =>
+export const getFlowBlocks = (): Array<{ type: string; label: string; color: string; icon?: LucideIcon | React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }> }> =>
   FLOW_BLOCK_TYPES.map((type) => ({
     type,
     label: t(`flow_block.${type}`),
     color: FLOW_BLOCK_COLORS[type] || 'text-slate-500 bg-slate-50',
+    icon: NODE_ICON_COMPONENTS[type],
   }));
 
 // Legacy export for backward compatibility — static labels (English fallback)
@@ -33,6 +36,7 @@ export const FLOW_BLOCKS = FLOW_BLOCK_TYPES.map((type) => ({
   type,
   get label() { return t(`flow_block.${type}`); },
   color: FLOW_BLOCK_COLORS[type] || 'text-slate-500 bg-slate-50',
+  icon: NODE_ICON_COMPONENTS[type],
 }));
 
 export const createDefaultNodeData = (type: string): Record<string, unknown> => {

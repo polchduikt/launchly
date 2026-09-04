@@ -131,10 +131,10 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({
       <div className="relative w-full max-w-md bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] p-6 sm:p-8 transform transition-all animate-in zoom-in-95 duration-200">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer rounded-lg"
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer"
           aria-label="Close"
         >
-          <X size={18} strokeWidth={2.5} />
+          <X size={16} strokeWidth={2.5} />
         </button>
 
         <div className="flex flex-col items-center text-center">

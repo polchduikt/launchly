@@ -299,7 +299,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
               </button>
             </div>
           )}
-          <button onClick={onClose} className="text-[#0A0A0A] hover:bg-white cursor-pointer p-1 rounded-lg border-2 border-transparent hover:border-[#0A0A0A] transition-all">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm">
             <X size={16} />
           </button>
         </div>

@@ -45,7 +45,7 @@ export const DropdownPortal: React.FC<DropdownPortalProps> = ({ anchorRef, isOpe
   return ReactDOM.createPortal(
     <div
       style={{ top: coords.top, left: coords.left, minWidth: minWidth ?? 'auto' }}
-      className="fixed bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_0px_#0A0A0A] z-[9999] py-1 font-['JetBrains_Mono',monospace] overflow-hidden"
+      className="fixed bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_0px_#0A0A0A] z-[9999] py-1 font-['JetBrains_Mono',monospace] overflow-hidden"
     >
       {children}
     </div>,
@@ -90,7 +90,11 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
                 onChatFilterChange(f.value);
                 onShowChatFilterDrop(false);
               }}
-              className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap ${chatFilter === f.value ? 'text-[#0A0A0A] bg-[#F2EBDD]' : 'text-[#0A0A0A] hover:bg-slate-100'}`}
+              className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap transition-colors ${
+                chatFilter === f.value
+                  ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                  : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+              }`}
             >
               {f.value === 'open' ? t('crm.chat.open_chats') : f.value === 'closed' ? t('crm.chat.closed_chats') : t('crm.chat.all_chats')}
             </button>
@@ -117,13 +121,21 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
         <DropdownPortal anchorRef={sortRef} isOpen={showSortDrop} minWidth={140}>
           <button
             onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onSortOrderChange('newest'); onShowSortDrop(false); }}
-            className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap ${sortOrder === 'newest' ? 'text-[#0A0A0A] bg-[#F2EBDD]' : 'text-[#0A0A0A] hover:bg-slate-100'}`}
+            className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap transition-colors ${
+              sortOrder === 'newest'
+                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+            }`}
           >
             {t('crm.chat.sort_newest_opt')}
           </button>
           <button
             onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onSortOrderChange('oldest'); onShowSortDrop(false); }}
-            className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap ${sortOrder === 'oldest' ? 'text-[#0A0A0A] bg-[#F2EBDD]' : 'text-[#0A0A0A] hover:bg-slate-100'}`}
+            className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap transition-colors ${
+              sortOrder === 'oldest'
+                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+            }`}
           >
             {t('crm.chat.sort_oldest_opt')}
           </button>

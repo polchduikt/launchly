@@ -36,30 +36,30 @@ const EndNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected 
   return (
     <div
       {...bindHover}
-      className={`w-64 bg-white border-2 border-[#0A0A0A] rounded-2xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected 
           ? 'shadow-lg ring-2 ring-[#0A0A0A]' 
           : 'shadow-md'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
-      <div className="relative flex items-center gap-2 px-4 py-3 bg-slate-200 select-none rounded-t-[22px]">
+      <div className="relative flex items-center gap-2 px-4 py-3 bg-rose-100/75 select-none rounded-t-[22px]">
         <NodeHandle
           type="target"
           position={Position.Left}
           isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
         />
-        <span className="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
-          <Octagon size={14} strokeWidth={2.5} />
+        <span className="w-7 h-7 rounded-lg bg-rose-200/80 text-rose-700 flex items-center justify-center shrink-0">
+          <Octagon size={13} strokeWidth={2.5} />
         </span>
-        <div>
-          <span className="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider block leading-none">{t('node.end.flow_end')}</span>
-          <span className="text-xs font-bold text-slate-700 truncate block mt-0.5">{t('node.end.terminate')}</span>
+        <div className="flex-1 min-w-0">
+          <span className="font-extrabold text-[9px] text-rose-600/80 uppercase tracking-wider block leading-none">{t('node.end.flow_end')}</span>
+          <span className="text-xs font-bold text-rose-950 truncate block mt-0.5">{t('node.end.terminate')}</span>
         </div>
       </div>
 
-      <div className="p-3.5">
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-500 leading-relaxed text-center font-semibold select-none">
+      <div className="p-4">
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-600 leading-relaxed text-center font-semibold select-none">
           {t('node.end.description')}
         </div>
       </div>

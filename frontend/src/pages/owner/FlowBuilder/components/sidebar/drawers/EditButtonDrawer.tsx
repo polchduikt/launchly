@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, Trash2, Send, Sparkles, Globe, CreditCard, Zap, GitFork, Shuffle, Clock, Play } from 'lucide-react';
+import { X, Trash2, Send, Globe, CreditCard, Zap, GitFork, Shuffle, Clock, Play } from 'lucide-react';
+import { AiIcon } from '../../../../../../components/ui/AiIcon';
 import type { EditButtonDrawerProps } from '../../../../../../types/bot';
 import type { Node, Edge } from '@xyflow/react';
 import { NODE_TITLES } from '../../../../../../const/nodeDisplay';
@@ -101,15 +102,15 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   };
 
   const actionOptions = [
-    { type: 'TELEGRAM', label: t('editor.edit_button.action.telegram', 'Telegram'), icon: Send, color: 'text-sky-600 bg-sky-100' },
-    { type: 'AI_STEP', label: t('editor.edit_button.action.ai_step', 'AI step'), icon: Sparkles, color: 'text-indigo-600 bg-indigo-100' },
-    { type: 'URL', label: t('editor.edit_button.action.open_website'), icon: Globe, color: 'text-emerald-600 bg-emerald-100' },
+    { type: 'TELEGRAM', label: t('editor.edit_button.action.telegram', 'Telegram'), icon: Send, blockType: 'MESSAGE', color: 'text-sky-600 bg-sky-100' },
+    { type: 'AI_STEP', label: t('editor.edit_button.action.ai_step', 'AI step'), icon: AiIcon, blockType: 'AI', color: 'text-emerald-700 bg-emerald-100' },
+    { type: 'URL', label: t('editor.edit_button.action.open_website'), icon: Globe, blockType: 'API_CALL', color: 'text-indigo-600 bg-indigo-100' },
     { type: 'BUY', label: t('editor.edit_button.action.buy_button'), icon: CreditCard, color: 'text-amber-600 bg-amber-100', pro: true },
-    { type: 'ACTIONS', label: t('editor.edit_button.action.perform_actions', 'Perform actions'), icon: Zap, color: 'text-purple-600 bg-purple-100' },
-    { type: 'CONDITION', label: t('editor.edit_button.action.condition', 'Condition'), icon: GitFork, color: 'text-rose-600 bg-rose-100', pro: true },
-    { type: 'RANDOM', label: t('editor.edit_button.action.randomizer', 'Randomizer'), icon: Shuffle, color: 'text-violet-600 bg-violet-100', pro: true },
-    { type: 'DELAY', label: t('editor.edit_button.action.smart_delay', 'Smart delay'), icon: Clock, color: 'text-cyan-600 bg-cyan-100', pro: true },
-    { type: 'AUTOMATION', label: t('editor.edit_button.action.start_automation'), icon: Play, color: 'text-teal-600 bg-teal-100' },
+    { type: 'ACTIONS', label: t('editor.edit_button.action.perform_actions', 'Perform actions'), icon: Zap, blockType: 'ACTION', color: 'text-amber-700 bg-amber-100' },
+    { type: 'CONDITION', label: t('editor.edit_button.action.condition', 'Condition'), icon: GitFork, blockType: 'CONDITION', color: 'text-purple-700 bg-purple-100', pro: true },
+    { type: 'RANDOM', label: t('editor.edit_button.action.randomizer', 'Randomizer'), icon: Shuffle, blockType: 'RANDOMIZER', color: 'text-purple-700 bg-purple-100', pro: true },
+    { type: 'DELAY', label: t('editor.edit_button.action.smart_delay', 'Smart delay'), icon: Clock, blockType: 'SMART_DELAY', color: 'text-rose-600 bg-rose-100', pro: true },
+    { type: 'AUTOMATION', label: t('editor.edit_button.action.start_automation'), icon: Play, blockType: 'START_AUTOMATION', color: 'text-lime-700 bg-lime-100' },
   ];
 
 
@@ -202,7 +203,10 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
-                        <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${opt.color}`}>
+                        <span
+                          data-block-type={opt.blockType}
+                          className={`node-icon-badge w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${opt.color}`}
+                        >
                           <IconComponent size={13} />
                         </span>
                         <span className="text-[11px] font-bold">{opt.label}</span>

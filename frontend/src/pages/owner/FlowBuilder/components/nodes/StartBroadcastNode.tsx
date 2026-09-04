@@ -23,7 +23,7 @@ const StartBroadcastNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ da
   const isConnected = data?._tempSourceHandle !== 'then' && sourceConns.some((c) => c.sourceHandle === 'then');
 
   return (
-    <div className={`w-64 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl p-4 shadow-md select-none transition-all border-[#0A0A0A] relative overflow-visible isolate ${
+    <div className={`w-64 bg-white/70 backdrop-blur-[2px] border-2 rounded-3xl p-4 shadow-md select-none transition-all border-[#0A0A0A] relative overflow-visible isolate ${
       isConnecting ? 'opacity-40 grayscale pointer-events-none' : ''
     }`}>
       <div className="flex items-center gap-2 mb-3">

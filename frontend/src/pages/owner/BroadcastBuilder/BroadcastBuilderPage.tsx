@@ -23,9 +23,11 @@ import { getAutoLayoutedElements } from '../../../utils/flowLayout';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { NODE_TYPES } from '../../../const/nodeTypes';
-import { getCustomFieldsApi } from '../../../api/bot';
 import { FLOW_EDGE_DEFAULTS, EDGE_TYPES } from '../../../const/flowEdges';
+import { getCustomFieldsApi } from '../../../api/bot';
 import { BROADCAST_BLOCKS, BROADCAST_CONTEXT_MENU_OPTIONS } from '../../../const/broadcastBlocks';
+import { FLOW_BLOCK_COLORS } from '../../../const/flowBlocks';
+import { NODE_ICON_COMPONENTS } from '../../../const/nodeDisplay';
 import { ROUTES } from '../../../routes/paths';
 import { useFlowCollaboration } from '../../../hooks/bot/useFlowCollaboration';
 import type { FlowBlock } from '../../../types/bot';
@@ -46,8 +48,8 @@ import {
   GitCommit,
   Undo2,
   Redo2,
-  Sparkles,
 } from 'lucide-react';
+import { AiIcon } from '../../../components/ui/AiIcon';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { t } from '../../../i18n/config';
 import { useAiStore } from '../../../store/useAiStore';
@@ -667,7 +669,7 @@ const BroadcastBuilderInner: React.FC = () => {
               className="flex items-center gap-1.5 px-3.5 py-2 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer shadow-sm"
               title="Generate flow with AI"
             >
-              <Sparkles size={14} className="animate-pulse" />
+              <AiIcon size={14} />
               <span>{t('flow_builder.ai_gen')}</span>
             </button>
           )}
@@ -746,21 +748,27 @@ const BroadcastBuilderInner: React.FC = () => {
                     <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-1 font-['Anybody',sans-serif]">
                       {t('broadcast.builder.add_standalone_node')}
                     </span>
-                    {BROADCAST_BLOCKS.map((item) => (
-                      <button
-                        key={item.type}
-                        onClick={() => {
-                          handleAddNode(item.type);
-                          setIsAddDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A]/10 hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group"
-                      >
-                        <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${item.color}`}>
-                          <Plus size={12} className="group-hover:scale-110 transition-transform" />
-                        </span>
-                        <span>{item.label}</span>
-                      </button>
-                    ))}
+                    {BROADCAST_BLOCKS.map((item) => {
+                      const IconComp = NODE_ICON_COMPONENTS[item.type] || Plus;
+                      return (
+                        <button
+                          key={item.type}
+                          onClick={() => {
+                            handleAddNode(item.type);
+                            setIsAddDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A]/10 hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group"
+                        >
+                          <span
+                            data-block-type={item.type}
+                            className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${item.color}`}
+                          >
+                            <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+                          </span>
+                          <span>{item.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </>
               )}
@@ -860,20 +868,46 @@ const BroadcastBuilderInner: React.FC = () => {
                 <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-3 pt-1 select-none font-['Anybody',sans-serif]">
                   {t('flow_builder.connect_to')}
                 </span>
-                {filteredContextMenuOptions.map((opt, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleCreateAndConnectNode(opt.type)}
-                    className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-transparent hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group select-none"
-                  >
-                    <span className="font-bold">{opt.label}</span>
-                    {opt.isPro && (
-                      <span className="text-[8px] font-black bg-amber-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
-                        PRO
-                      </span>
-                    )}
-                  </button>
-                ))}
+                {filteredContextMenuOptions.map((opt, idx) => {
+                  const IconComp = NODE_ICON_COMPONENTS[opt.type] || Plus;
+                  const colorClass = FLOW_BLOCK_COLORS[opt.type] || 'text-slate-500 bg-slate-50';
+                  const cleanLabel = opt.label.replace(/^\+\s*/, '');
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleCreateAndConnectNode(opt.type)}
+                      className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-transparent hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group select-none"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          data-block-type={opt.type}
+                          className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${colorClass}`}
+                        >
+                          <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+                        </span>
+                        <span className="font-bold truncate">{cleanLabel}</span>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {opt.isPro && (
+                          <span className="text-[8px] font-black bg-amber-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                            PRO
+                          </span>
+                        )}
+                        {opt.isAi && (
+                          <span className="text-[8px] font-black bg-purple-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                            AI
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => setContextMenu(null)}
+                  className="w-full text-center py-2 text-xs font-black text-[#0A0A0A]/60 hover:text-[#0A0A0A] hover:bg-[#0A0A0A]/10 rounded-xl transition-all border-t-2 border-[#0A0A0A]/20 mt-1 cursor-pointer select-none uppercase tracking-wider font-['JetBrains_Mono',monospace]"
+                >
+                  {t('flow_builder.cancel')}
+                </button>
               </div>
             </div>
           )}

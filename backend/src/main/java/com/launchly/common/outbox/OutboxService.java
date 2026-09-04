@@ -1,8 +1,9 @@
 package com.launchly.common.outbox;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.launchly.common.exception.AppException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 
 import java.time.Instant;
 import java.util.List;
@@ -25,15 +27,22 @@ public class OutboxService {
     public OutboxService(OutboxEventRepository outboxEventRepository,
                          @Autowired(required = false) ObjectMapper objectMapper) {
         this.outboxEventRepository = outboxEventRepository;
-        this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
+        if (objectMapper != null) {
+            this.objectMapper = objectMapper;
+        } else {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            this.objectMapper = mapper;
+        }
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
     public OutboxEvent publish(String aggregateType, String aggregateId, String eventType, Object payload) {
         String jsonPayload;
         try {
-            ObjectMapper mapper = objectMapper != null ? objectMapper : new ObjectMapper();
-            jsonPayload = mapper.writeValueAsString(payload);
+            jsonPayload = objectMapper.writeValueAsString(payload);
         } catch (Exception e) {
             log.error("Failed to serialize outbox event payload for {} - {}", aggregateType, aggregateId, e);
             jsonPayload = "{}";

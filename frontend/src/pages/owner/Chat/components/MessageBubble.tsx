@@ -126,7 +126,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                       ? 'bg-emerald-400 text-[#0A0A0A]'
                       : hasSelection
                       ? 'bg-slate-100 text-slate-400 opacity-60'
-                      : 'bg-white hover:bg-[#F2EBDD] text-[#0A0A0A]'
+                      : 'bg-white hover:bg-slate-100 text-[#0A0A0A]'
                   }`}
                 >
                   {btnLabel}

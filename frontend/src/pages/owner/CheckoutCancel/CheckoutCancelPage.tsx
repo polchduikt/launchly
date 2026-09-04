@@ -9,7 +9,7 @@ const CheckoutCancelPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F2EBDD] flex items-center justify-center p-6 font-['JetBrains_Mono',monospace]">
-      <div className="max-w-lg w-full bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[12px_12px_0px_#0A0A0A] rounded-3xl p-8 text-center space-y-6 text-[#0A0A0A]">
+      <div className="max-w-lg w-full bg-white border-4 border-[#0A0A0A] shadow-[12px_12px_0px_#0A0A0A] rounded-3xl p-8 text-center space-y-6 text-[#0A0A0A]">
         
         <div className="w-16 h-16 bg-rose-300 text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-2xl flex items-center justify-center mx-auto shadow-[3px_3px_0px_#0A0A0A]">
           <X size={32} strokeWidth={3} />

@@ -56,7 +56,7 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer shrink-0 ml-4"
+              className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shrink-0 ml-4 shadow-sm"
             >
               <X size={16} />
             </button>

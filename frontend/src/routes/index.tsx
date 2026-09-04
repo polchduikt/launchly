@@ -126,6 +126,40 @@ const AdminRoute = () => {
   return <Outlet />;
 };
 
+import { useThemeStore } from '../store/useThemeStore';
+
+const PUBLIC_BRAND_ROUTES = new Set<string>([
+  ROUTES.LANDING,
+  ROUTES.BLOG,
+  ROUTES.TERMS,
+  ROUTES.PRIVACY,
+  ROUTES.FAQ,
+  ROUTES.ACCEPTABLE_USE,
+  ROUTES.AI_TERMS,
+  ROUTES.PAYMENT_TERMS,
+]);
+
+const isPublicBrandPath = (pathname: string): boolean => {
+  if (PUBLIC_BRAND_ROUTES.has(pathname)) return true;
+  if (pathname.startsWith('/blog/')) return true;
+  return false;
+};
+
+const GlobalThemeSync = () => {
+  const { pathname } = useLocation();
+  const theme = useThemeStore((state) => state.theme);
+
+  useEffect(() => {
+    if (isPublicBrandPath(pathname)) {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  }, [pathname, theme]);
+
+  return null;
+};
+
 const ScrollToTop = () => {
   const { pathname, hash } = useLocation();
 
@@ -141,6 +175,7 @@ const ScrollToTop = () => {
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
+      <GlobalThemeSync />
       <ScrollToTop />
       <Suspense fallback={null}>
         <Routes>

@@ -232,27 +232,27 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected 
           ? 'shadow-lg ring-2 ring-[#0A0A0A]' 
           : 'shadow-md'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
-      <div className="relative flex items-center gap-2 px-4 py-3 bg-sky-100/80 select-none rounded-t-[22px]">
+      <div className="relative flex items-center gap-2 px-4 py-3 bg-sky-100/75 rounded-t-[22px] select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
           isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
         />
-        <span className="w-7 h-7 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center shrink-0">
-          <Send size={14} />
+        <span className="w-7 h-7 rounded-lg bg-sky-100/60 text-sky-600 flex items-center justify-center shrink-0">
+          <Send size={13} strokeWidth={2.5} />
         </span>
         <div className="flex-1 min-w-0">
-          <span className="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider block leading-none">
-            Telegram
+          <span className="font-extrabold text-[9px] text-sky-600/70 uppercase tracking-wider block leading-none">
+            {t('node.message.category', 'Message')}
           </span>
-          <span className="text-xs font-bold text-slate-700 truncate block mt-0.5">
+          <span className="text-xs font-bold text-sky-900 truncate block mt-0.5">
             {t('node.title.message')}
           </span>
         </div>
@@ -445,8 +445,8 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                                 }}
                                 className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
                                   data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')
-                                    ? '!bg-[#7b8794] !border-[#7b8794]'
-                                    : '!bg-white !border-slate-300 hover:!border-slate-400'
+                                    ? 'handle-connected'
+                                    : 'handle-unconnected'
                                 }`}
                               />
                             )}
@@ -473,7 +473,7 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
 
       {hasDataCollection && (
         <>
-          <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative">
+          <div className="flex justify-end items-center px-4 py-2 bg-transparent border-t border-slate-100 dark:border-[#27272A] select-none relative">
             <div className="flex items-center gap-1 mr-2 text-[9px] font-extrabold text-amber-650 uppercase tracking-wider">
               <Zap size={10} className="text-amber-500 shrink-0" />
               <span>{t('flow_builder.action_on_reply')}</span>
@@ -486,7 +486,7 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
               padded={false}
             />
           </div>
-          <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 border-t border-slate-100 select-none relative">
+          <div className="flex justify-end items-center px-4 py-2 bg-transparent border-t border-slate-100 dark:border-[#27272A] select-none relative">
             <div className="flex items-center gap-1 mr-2 text-[9px] font-extrabold text-rose-600 uppercase tracking-wider">
               <AlertCircle size={10} className="text-rose-500 shrink-0" />
               <span>{t('flow_builder.if_not_responded')}</span>
@@ -502,8 +502,8 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
         </>
       )}
 
-      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mr-2">{t('flow_builder.next_step')}</span>
+      <div className="flex justify-end items-center px-4 py-2 bg-transparent select-none relative rounded-b-[22px]">
+        <span className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-2">{t('flow_builder.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}
