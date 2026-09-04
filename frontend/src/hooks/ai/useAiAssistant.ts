@@ -4,17 +4,20 @@ import { useAiUsageQuery, useAiChatMutation, useAiSchemaMutation } from './useAi
 import { getAutoLayoutedElements } from '../../utils/flowLayout';
 import type { Node, Edge } from '@xyflow/react';
 
+import type { GroqMessage } from '../../types/ai';
+
 export const useAiAssistant = () => {
   const {
     isOpen,
     setIsOpen,
-    messages,
-    addMessage,
     activeTab,
     setActiveTab,
     onGenerate,
     hasExistingNodes,
   } = useAiStore();
+
+  const [messages, setMessages] = useState<GroqMessage[]>([]);
+  const addMessage = (msg: GroqMessage) => setMessages((prev) => [...prev, msg]);
 
   const [inputValue, setInputValue] = useState('');
   const [description, setDescription] = useState('');
@@ -69,9 +72,7 @@ export const useAiAssistant = () => {
     addMessage(userMsg);
 
     try {
-      const historyToSend = messages
-        .filter((_, idx) => idx > 0)
-        .map((m) => ({ role: m.role, content: m.content }));
+      const historyToSend = messages.map((m) => ({ role: m.role, content: m.content }));
 
       const response = await chatMutation.mutateAsync({
         message: text,

@@ -1,4 +1,10 @@
 {
+  "ai.new_chat": "Новий чат",
+  "ai.recent_chats": "Історія чатів",
+  "ai.no_chats": "Немає збережених чатів",
+  "ai.tokens": "токенів",
+  "ai.tokens_used": "Використання токенів",
+  "ai.resets_daily": "Оновлюється щодня о 00:00",
   "ai.builder.add_button": "Додати кнопку",
   "ai.builder.add_content_blocks_header": "Додайте один із контент-блоків:",
   "ai.builder.block_audio_desc": "Надсилайте голосові повідомлення в чат",

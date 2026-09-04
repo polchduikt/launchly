@@ -8,6 +8,19 @@
     <meta name="theme-color" content="#0A0A0A" />
     <meta name="msapplication-TileColor" content="#0A0A0A" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('launchly_theme');
+          var theme = (saved === 'dark' || saved === 'yellow' || saved === 'light') ? saved : 'light';
+          var path = window.location.pathname;
+          var isPublicBrand = path === '/' || path === '/blog' || path.indexOf('/blog/') === 0 || path === '/terms' || path === '/privacy' || path === '/faq' || path === '/acceptable-use' || path === '/ai-terms' || path === '/payment-terms';
+          if (!isPublicBrand) {
+            document.documentElement.setAttribute('data-theme', theme);
+          }
+        } catch (e) {}
+      })();
+    </script>
     <title>Launchly — No-Code автоматизація Telegram-ботів та CRM платформа</title>
     <meta name="description" content="Будуйте Telegram чат-боти, автоматизуйте воронки продажів та керуйте лідами без коду. Універсальна no-code платформа для сучасного бізнесу." />
     <meta name="keywords" content="telegram бот, no-code автоматизація, конструктор чат-ботів, crm, воронка продажів, telegram маркетинг, launchly" />

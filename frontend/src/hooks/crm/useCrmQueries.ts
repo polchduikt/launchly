@@ -56,6 +56,7 @@ export const useConversationsQuery = (botId: number, enabled: boolean = true) =>
     queryKey: ['conversations', botId],
     queryFn: () => getConversationsApi(botId),
     enabled: enabled && botId > 0,
+    staleTime: 1000 * 30,
   });
 };
 
@@ -64,6 +65,7 @@ export const useConversationQuery = (conversationId: number, enabled: boolean = 
     queryKey: ['conversation', conversationId],
     queryFn: () => getConversationApi(conversationId),
     enabled: enabled && conversationId > 0,
+    staleTime: 1000 * 30,
   });
 };
 
@@ -72,6 +74,7 @@ export const useAllConversationsQuery = (enabled: boolean = true) => {
     queryKey: ['conversations', 'all'],
     queryFn: () => getAllConversationsApi(),
     enabled: enabled,
+    staleTime: 1000 * 30,
   });
 };
 

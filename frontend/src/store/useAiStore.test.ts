@@ -3,36 +3,28 @@ import { useAiStore } from './useAiStore';
 
 describe('useAiStore', () => {
   beforeEach(() => {
-    useAiStore.getState().clearMessages();
     useAiStore.getState().setIsOpen(false);
     useAiStore.getState().setActiveTab('chat');
+    useAiStore.getState().setOnGenerate(null);
+    useAiStore.getState().setHasExistingNodes(false);
   });
 
-  it('initializes with default welcome message and closed drawer', () => {
+  it('initializes with default drawer state', () => {
     const state = useAiStore.getState();
     expect(state.isOpen).toBe(false);
-    expect(state.messages.length).toBe(1);
-    expect(state.messages[0].role).toBe('assistant');
+    expect(state.activeTab).toBe('chat');
+    expect(state.onGenerate).toBeNull();
+    expect(state.hasExistingNodes).toBe(false);
   });
 
-  it('adds and clears chat messages', () => {
-    useAiStore.getState().addMessage({
-      role: 'user',
-      content: 'How do I add a Delay node?',
-    });
-
-    expect(useAiStore.getState().messages.length).toBe(2);
-    expect(useAiStore.getState().messages[1].content).toBe('How do I add a Delay node?');
-
-    useAiStore.getState().clearMessages();
-    expect(useAiStore.getState().messages.length).toBe(1);
-  });
-
-  it('toggles drawer visibility and active tabs', () => {
+  it('updates drawer open and tab state', () => {
     useAiStore.getState().setIsOpen(true);
     expect(useAiStore.getState().isOpen).toBe(true);
 
     useAiStore.getState().setActiveTab('generator');
     expect(useAiStore.getState().activeTab).toBe('generator');
+
+    useAiStore.getState().setHasExistingNodes(true);
+    expect(useAiStore.getState().hasExistingNodes).toBe(true);
   });
 });

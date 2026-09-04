@@ -37,7 +37,7 @@ import { DISPLAY_KEY_CONTACTS_HIDE_UNSUB } from '../FlowBuilder/components/Displ
 export const ContactsPage: React.FC = () => {
   const { t } = useTranslation();
   const activeBotId = useBotStore((state) => state.activeBotId);
-  const { data: bots = [] } = useBotsQuery();
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
 
   const botId = activeBotId || (bots[0]?.id || 0);
 
@@ -366,6 +366,7 @@ export const ContactsPage: React.FC = () => {
 
           <ContactsTable
             botId={botId}
+            isBotsLoading={isBotsLoading}
             isContactsLoading={isContactsLoading}
             filteredContacts={filteredContacts}
             selectedContactIds={selectedContactIds}

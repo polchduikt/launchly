@@ -16,12 +16,15 @@ import {
 } from 'lucide-react';
 import type { OrderStatus } from '../../../types/crm';
 import { exportExcelApi } from '../../../api/integration';
+import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
+import { TableSkeleton } from '../../../components/common/Skeleton';
 
 export const OrdersPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
-  const botId = activeBotId || 0;
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
+  const botId = activeBotId || (bots[0]?.id || 0);
   const { data: orders = [], isLoading: isOrdersLoading } = useOrdersQuery(botId);
   const updateOrderMut = useUpdateOrderMutation(botId);
 
@@ -57,7 +60,11 @@ export const OrdersPage: React.FC = () => {
         </header>
 
         <div className="flex-1 overflow-hidden">
-          {botId === 0 ? (
+          {isOrdersLoading || isBotsLoading ? (
+            <div className="h-full overflow-y-auto p-6 font-['JetBrains_Mono',monospace]">
+              <TableSkeleton rows={6} columns={5} />
+            </div>
+          ) : botId === 0 ? (
             <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">
               <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
                 <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">

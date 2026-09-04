@@ -71,6 +71,6 @@ describe('useAiAssistant', () => {
       await result.current.handleSend();
     });
 
-    expect(mockAddMessage).toHaveBeenCalled();
+    expect(result.current.messages.some((m) => m.content === 'Help me build a bot')).toBe(true);
   });
 });

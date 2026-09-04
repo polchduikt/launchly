@@ -9,6 +9,7 @@ import { TableSkeleton } from '../../../../components/common/Skeleton';
 
 interface ContactsTableProps {
   botId: number;
+  isBotsLoading?: boolean;
   isContactsLoading: boolean;
   filteredContacts: BotUserResponse[];
   selectedContactIds: Set<number>;
@@ -19,6 +20,7 @@ interface ContactsTableProps {
 
 export const ContactsTable: React.FC<ContactsTableProps> = ({
   botId,
+  isBotsLoading,
   isContactsLoading,
   filteredContacts,
   selectedContactIds,
@@ -62,6 +64,14 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
     return date.toLocaleDateString();
   };
 
+  if (isContactsLoading || isBotsLoading) {
+    return (
+      <div className="flex-1 overflow-auto p-6 font-['JetBrains_Mono',monospace]">
+        <TableSkeleton rows={7} columns={5} />
+      </div>
+    );
+  }
+
   if (botId === 0) {
     return (
       <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD] m-6">
@@ -81,14 +91,6 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
             </button>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  if (isContactsLoading) {
-    return (
-      <div className="flex-1 overflow-auto p-6 font-['JetBrains_Mono',monospace]">
-        <TableSkeleton rows={7} columns={5} />
       </div>
     );
   }

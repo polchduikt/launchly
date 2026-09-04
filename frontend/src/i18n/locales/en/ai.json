@@ -1,4 +1,10 @@
 {
+  "ai.new_chat": "New chat",
+  "ai.recent_chats": "Chat history",
+  "ai.no_chats": "No chats yet",
+  "ai.tokens": "tokens",
+  "ai.tokens_used": "Token usage",
+  "ai.resets_daily": "Refreshes daily at 00:00",
   "ai.builder.add_button": "Add Button",
   "ai.builder.add_content_blocks_header": "Add one of the content blocks:",
   "ai.builder.block_audio_desc": "Send voice snippets in chat",

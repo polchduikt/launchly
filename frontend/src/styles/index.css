@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme {
   --color-primary: #003ec7;
   --color-on-primary: #ffffff;
@@ -21,8 +23,20 @@
 html, body, #root {
   margin: 0;
   padding: 0;
-  background-color: #F2EBDD;
+  background-color: #F8FAFC;
   min-height: 100vh;
+}
+
+[data-theme="yellow"] html,
+[data-theme="yellow"] body,
+[data-theme="yellow"] #root {
+  background-color: #F2EBDD !important;
+}
+
+[data-theme="dark"] html,
+[data-theme="dark"] body,
+[data-theme="dark"] #root {
+  background-color: #0A0A0A !important;
 }
 
 ::-webkit-scrollbar {
@@ -31,14 +45,24 @@ html, body, #root {
 }
 
 ::-webkit-scrollbar-track {
-  background: #F2EBDD;
+  background: #F1F5F9;
   border-left: 2px solid #0A0A0A;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #121212 !important;
+  border-left: 2px solid #2A2A2A !important;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #0A0A0A;
-  border: 2px solid #F2EBDD;
+  border: 2px solid #F1F5F9;
   border-radius: 4px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #333333 !important;
+  border: 2px solid #121212 !important;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -51,7 +75,7 @@ html {
 
 html, body {
   scrollbar-width: thin;
-  scrollbar-color: #0A0A0A #F2EBDD;
+  scrollbar-color: #0A0A0A #F1F5F9;
 }
 
 .reveal-on-scroll {

@@ -36,8 +36,8 @@ import {
 export const BroadcastsPage: React.FC = () => {
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
-  const { data: bots = [] } = useBotsQuery();
-  const { data: installedTemplates = [] } = useQuery({
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
+  const { data: installedTemplates = [], isLoading: isTemplatesLoading } = useQuery({
     queryKey: ['installed_templates'],
     queryFn: getInstalledTemplatesApi,
   });
@@ -177,34 +177,8 @@ export const BroadcastsPage: React.FC = () => {
     return enMap[reason] || t(reason) || reason;
   };
 
-  if (bots.length === 0 && installedTemplates.length === 0) {
-    return (
-      <DashboardLayout>
-        <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">
-          <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
-            <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
-              <Bell size={32} />
-            </div>
-            <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">
-              {t('broadcasts.connect_bot_title')}
-            </p>
-            <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">
-              {t('broadcasts.connect_bot_desc')}
-            </p>
-            <div className="pt-2">
-              <button
-                onClick={() => navigate('/connect-bot')}
-                className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
-              >
-                <Plus size={14} />
-                <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const isLoadingTotal = isBotsLoading || isTemplatesLoading || isCampaignsLoading;
+  const hasNoBots = !isBotsLoading && !isTemplatesLoading && bots.length === 0 && installedTemplates.length === 0;
 
   return (
     <DashboardLayout>
@@ -237,9 +211,33 @@ export const BroadcastsPage: React.FC = () => {
           </div>
         </div>
 
-        {isCampaignsLoading ? (
-          <div className="flex items-center justify-center py-20">
+        {isLoadingTotal ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-3 font-['JetBrains_Mono',monospace]">
             <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
+            <span className="text-xs font-bold text-[#0A0A0A] uppercase tracking-wider">{t('common.loading', 'Loading...')}</span>
+          </div>
+        ) : hasNoBots ? (
+          <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">
+            <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
+              <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
+                <Bell size={32} />
+              </div>
+              <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">
+                {t('broadcasts.connect_bot_title')}
+              </p>
+              <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">
+                {t('broadcasts.connect_bot_desc')}
+              </p>
+              <div className="pt-2">
+                <button
+                  onClick={() => navigate('/connect-bot')}
+                  className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
+                >
+                  <Plus size={14} />
+                  <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
+                </button>
+              </div>
+            </div>
           </div>
         ) : campaigns.length === 0 ? (
           <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 md:p-16 text-center max-w-4xl mx-auto mt-6">

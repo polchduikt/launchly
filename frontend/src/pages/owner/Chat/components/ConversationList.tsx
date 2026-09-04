@@ -5,7 +5,6 @@ import { UserAvatar } from './UserAvatar';
 import { timeAgo } from '../../../../utils/crmChat';
 import { t } from '../../../../i18n/config';
 import { useVirtualList } from '../../../../hooks/useVirtualList';
-import { ConversationListSkeleton } from '../../../../components/common/Skeleton';
 
 interface ConversationListProps {
   conversations: ConversationResponse[];
@@ -39,8 +38,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   return (
     <div className="w-[280px] border-r-2 border-[#0A0A0A] flex flex-col bg-[#F2EBDD] shrink-0 overflow-hidden font-['JetBrains_Mono',monospace]">
       <div ref={parentRef} className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
-        {isLoading ? (
-          <ConversationListSkeleton />
+        {isLoading && conversations.length === 0 ? (
+          <div className="animate-pulse flex-1 p-4" />
         ) : conversations.length === 0 ? (
           <div className="p-8 text-center text-xs text-[#0A0A0A] font-bold italic">
             {searchQuery

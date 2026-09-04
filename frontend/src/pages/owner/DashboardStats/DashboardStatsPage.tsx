@@ -12,7 +12,6 @@ import {
   ChevronDown,
   MessageSquare,
   Clock,
-  Bot,
   HelpCircle,
   MoreVertical,
   Plus
@@ -124,7 +123,7 @@ export const DashboardStatsPage: React.FC = () => {
   const [days, setDays] = useState<number>(7);
   const [isBotSelectorOpen, setIsBotSelectorOpen] = useState(false);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-  const { data: bots = [] } = useBotsQuery();
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
   const { data: stats, isLoading, error } = useDashboardStatsQuery(selectedBotId, days, true);
   const connectedBots = React.useMemo(() => bots.filter((b) => b.hasTelegramToken), [bots]);
 
@@ -600,7 +599,7 @@ export const DashboardStatsPage: React.FC = () => {
     );
   };
 
-  const hasNoBots = connectedBots.length === 0;
+  const hasNoBots = !isBotsLoading && connectedBots.length === 0;
   const isMultipleBots = connectedBots.length > 1;
 
   return (
@@ -692,7 +691,7 @@ export const DashboardStatsPage: React.FC = () => {
                 </div>
               </div>
             </div>
-          ) : isLoading ? (
+          ) : (isLoading || isBotsLoading) ? (
             <div className="h-96 flex flex-col items-center justify-center gap-3 font-['JetBrains_Mono',monospace]">
               <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
               <span className="text-xs font-bold text-[#0A0A0A] uppercase tracking-wider">{t('dashboard.stats.loading')}</span>

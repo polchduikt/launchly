@@ -36,7 +36,7 @@ export const ChatPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { activeBotId, setActiveBotId } = useBotStore();
-  const { data: bots = [] } = useBotsQuery();
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
 
   const botId = activeBotId || (bots[0]?.id || 0);
 
@@ -174,7 +174,7 @@ export const ChatPage: React.FC = () => {
     setSelectedConvId(null);
   }, [selectedConvId, updateConvMut]);
 
-  if (botId === 0) {
+  if (!isBotsLoading && botId === 0) {
     return (
       <DashboardLayout>
         <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">

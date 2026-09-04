@@ -116,7 +116,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </nav>
         </div>
 
-        <div className="p-3 border-t-2 border-[#0A0A0A] flex flex-col items-center gap-3.5 bg-[#F2EBDD]">
+        <div className="p-3 border-t-2 border-[#0A0A0A] flex flex-col items-center gap-3.5 bg-[#F2EBDD] shrink-0 h-[190px]">
           
           <div ref={profileMenuRef} className="relative">
             <div
