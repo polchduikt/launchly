@@ -63,6 +63,21 @@ public class BroadcastController {
                 .body(tagService.createTag(botId, userDetails.getId(), request));
     }
 
+    @Operation(summary = "Update tag", description = "Rename an existing tag.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Tag updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation error / duplicate tag", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Tag not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PutMapping("/tags/{tagId}")
+    public ResponseEntity<TagResponse> updateTag(
+            @Parameter(description = "Target Bot ID") @PathVariable Long botId,
+            @Parameter(description = "Tag ID") @PathVariable Long tagId,
+            @Valid @RequestBody CreateTagRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(tagService.updateTag(tagId, userDetails.getId(), request));
+    }
+
     @Operation(summary = "Delete tag", description = "Remove a tag and untag subscribers.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Tag deleted successfully"),
