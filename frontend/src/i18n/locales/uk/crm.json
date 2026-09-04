@@ -139,6 +139,7 @@
   "crm.panel.fields.no_fields": "Немає користувацьких полів.",
   "crm.panel.fields.placeholder_key": "Ключ",
   "crm.panel.fields.placeholder_val": "Значення",
+  "crm.panel.fields.select_field": "Оберіть поле",
   "crm.panel.history_btn": "Вся історія чату",
   "crm.panel.notes_title": "Нотатки",
   "crm.panel.notes.add_btn": "+ Додати нотатку",

@@ -22,6 +22,7 @@ export type BotSchemaType = z.infer<typeof botSchema>;
 export const customFieldSchema = z.object({
   name: z.string().min(1),
   type: z.string().default('Text'),
+  value: z.string().optional(),
   description: z.string().optional(),
   folder: z.string().nullable().optional(),
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Play,
@@ -12,6 +12,7 @@ import {
   X,
   Check,
   Plus,
+  ChevronDown,
 } from 'lucide-react';
 import type { BotUserResponse, BotUserUpdateRequest } from '../../../../types/bot';
 import type { TagResponse } from '../../../../types';
@@ -57,6 +58,37 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
   const [showAddCustomFieldInline, setShowAddCustomFieldInline] = useState(false);
   const [customFieldName, setCustomFieldName] = useState('');
   const [customFieldValue, setCustomFieldValue] = useState('');
+  const [availableFields, setAvailableFields] = useState<any[]>([]);
+  const [isFieldDropdownOpen, setIsFieldDropdownOpen] = useState(false);
+  const fieldDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (fieldDropdownRef.current && !fieldDropdownRef.current.contains(e.target as Node)) {
+        setIsFieldDropdownOpen(false);
+      }
+    };
+    if (isFieldDropdownOpen) {
+      document.addEventListener('mousedown', handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [isFieldDropdownOpen]);
+
+  useEffect(() => {
+    if (botId) {
+      getCustomFieldsApi(botId)
+        .then((data) => {
+          if (data && typeof data === 'object') {
+            if (Array.isArray(data.fields)) setAvailableFields(data.fields);
+            else if (Array.isArray(data)) setAvailableFields(data);
+            else setAvailableFields([]);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [botId]);
 
   const parseMetadata = (metaStr: string | null): BotUserMetadata => {
     try {
@@ -104,11 +136,11 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
       getCustomFieldsApi(botId).then((existing) => {
         const list = existing && Array.isArray(existing.fields) ? existing.fields : Array.isArray(existing) ? existing : [];
         if (!list.some((f: any) => f.name === nameTrimmed)) {
-          saveCustomFieldsApi(botId, { fields: [...list, { name: nameTrimmed, type: 'Text', description: '', folder: null }] }).catch(() => {});
+          saveCustomFieldsApi(botId, { fields: [...list, { name: nameTrimmed, type: 'Text', value: customFieldValue, description: '', folder: null }] }).catch(() => {});
         }
       }).catch(() => {});
     }
-    setCustomFieldName(''); setCustomFieldValue(''); setShowAddCustomFieldInline(false);
+    setCustomFieldName(''); setCustomFieldValue(''); setIsFieldDropdownOpen(false); setShowAddCustomFieldInline(false);
   };
 
   const handleRemoveCustomFieldInline = (fieldKey: string) => {
@@ -365,28 +397,72 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
               </div>
 
               {showAddCustomFieldInline && (
-                <div className="flex gap-2 items-center bg-white border-2 border-[#0A0A0A] p-3 rounded-2xl">
-                  <input
-                    type="text"
-                    placeholder={t('crm.contact.field_key_placeholder')}
-                    value={customFieldName}
-                    onChange={(e) => setCustomFieldName(e.target.value)}
-                    className="flex-1 px-3 py-1.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none"
-                    autoFocus
-                  />
-                  <input
-                    type="text"
-                    placeholder={t('crm.contact.value_placeholder')}
-                    value={customFieldValue}
-                    onChange={(e) => setCustomFieldValue(e.target.value)}
-                    className="flex-1 px-3 py-1.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none"
-                  />
-                  <button
-                    onClick={handleAddCustomFieldInline}
-                    className="w-8 h-8 flex items-center justify-center bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl cursor-pointer hover:bg-[#2A2A2A] transition-all shrink-0"
-                  >
-                    <Check size={13} />
-                  </button>
+                <div className="flex flex-col gap-2 bg-white border-2 border-[#0A0A0A] p-3 rounded-2xl">
+                  {availableFields.length > 0 && (
+                    <div className="relative w-full" ref={fieldDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsFieldDropdownOpen(!isFieldDropdownOpen)}
+                        className="w-full px-3 py-1.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] flex items-center justify-between cursor-pointer focus:outline-none select-none"
+                      >
+                        <span className="truncate">{customFieldName || t('crm.panel.fields.select_field', 'Оберіть поле')}</span>
+                        <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform ${isFieldDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {isFieldDropdownOpen && (
+                        <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl overflow-hidden py-1 text-left max-h-40 overflow-y-auto animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]">
+                          {availableFields.map((f: any) => {
+                            const fname = typeof f === 'string' ? f : f.name;
+                            const fval = typeof f === 'object' ? f.value : undefined;
+                            return (
+                              <button
+                                key={fname}
+                                type="button"
+                                onClick={() => {
+                                  setCustomFieldName(fname);
+                                  if (fval !== undefined) setCustomFieldValue(fval);
+                                  setIsFieldDropdownOpen(false);
+                                }}
+                                className={`w-full px-3 py-1.5 text-xs font-bold text-left cursor-pointer transition-colors ${
+                                  customFieldName === fname
+                                    ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                                    : 'text-[#0A0A0A] hover:bg-white'
+                                }`}
+                              >
+                                {fname}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      placeholder={t('crm.contact.field_key_placeholder', 'Ключ поля (напр. Стать)')}
+                      value={customFieldName}
+                      onChange={(e) => setCustomFieldName(e.target.value)}
+                      className="flex-1 px-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none"
+                      autoFocus
+                    />
+                    <input
+                      type="text"
+                      placeholder={t('crm.contact.value_placeholder', 'Значення (напр. Чоловіча)')}
+                      value={customFieldValue}
+                      onChange={(e) => setCustomFieldValue(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddCustomFieldInline()}
+                      className="flex-1 px-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none"
+                    />
+                    <button
+                      onClick={handleAddCustomFieldInline}
+                      disabled={!customFieldName.trim()}
+                      className="w-8 h-8 flex items-center justify-center bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl cursor-pointer hover:bg-[#2A2A2A] disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
+                    >
+                      <Check size={13} />
+                    </button>
+                  </div>
                 </div>
               )}
 

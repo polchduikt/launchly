@@ -139,6 +139,7 @@
   "crm.panel.fields.no_fields": "No custom fields set.",
   "crm.panel.fields.placeholder_key": "Key",
   "crm.panel.fields.placeholder_val": "Value",
+  "crm.panel.fields.select_field": "Select field",
   "crm.panel.history_btn": "All Chat History",
   "crm.panel.notes_title": "Notes",
   "crm.panel.notes.add_btn": "+ Add Note",

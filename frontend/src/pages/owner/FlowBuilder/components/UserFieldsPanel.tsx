@@ -7,6 +7,7 @@ import { t } from '../../../../i18n/config';
 import type { UserField, UserFieldFolder } from '../../../../types/bot';
 import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../api/bot';
 import { customFieldSchema, automationFolderSchema } from '../../../../schemas';
+import { CustomSelect } from '../../../../components/ui/CustomSelect';
 
 export const UserFieldsPanel: React.FC = () => {
   const activeBotId = useBotStore((state) => state.activeBotId);
@@ -22,7 +23,15 @@ export const UserFieldsPanel: React.FC = () => {
   const [isFieldModalOpen, setIsFieldModalOpen] = useState(false);
   const [newFieldName, setNewFieldName] = useState('');
   const [newFieldType, setNewFieldType] = useState('Text');
+  const [newFieldValue, setNewFieldValue] = useState('');
   const [newFieldDesc, setNewFieldDesc] = useState('');
+
+  const [isEditFieldModalOpen, setIsEditFieldModalOpen] = useState(false);
+  const [editFieldOriginalName, setEditFieldOriginalName] = useState('');
+  const [editFieldName, setEditFieldName] = useState('');
+  const [editFieldType, setEditFieldType] = useState('Text');
+  const [editFieldValue, setEditFieldValue] = useState('');
+  const [editFieldDesc, setEditFieldDesc] = useState('');
 
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -86,19 +95,42 @@ export const UserFieldsPanel: React.FC = () => {
     const newField: UserField = {
       name: newFieldName.trim(),
       type: newFieldType,
+      value: newFieldValue.trim(),
       description: newFieldDesc.trim(),
-      folder: activeFolderId
+      folder: activeFolderId,
     };
 
     const validation = customFieldSchema.safeParse(newField);
     if (!validation.success) return;
 
-    const updated = [...fields.filter(f => f.name !== newField.name), newField];
+    const updated = [...fields.filter((f) => f.name !== newField.name), newField];
     saveFieldsData(updated, archivedFields, folders);
     setIsFieldModalOpen(false);
     setNewFieldName('');
+    setNewFieldValue('');
     setNewFieldDesc('');
     setNewFieldType('Text');
+  };
+
+  const handleEditField = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editFieldName.trim()) return;
+
+    const originalField = fields.find((f) => f.name === editFieldOriginalName);
+    const updatedField: UserField = {
+      name: editFieldName.trim(),
+      type: editFieldType,
+      value: editFieldValue.trim(),
+      description: editFieldDesc.trim(),
+      folder: originalField?.folder ?? activeFolderId,
+    };
+
+    const validation = customFieldSchema.safeParse(updatedField);
+    if (!validation.success) return;
+
+    const updated = fields.map((f) => (f.name === editFieldOriginalName ? updatedField : f));
+    saveFieldsData(updated, archivedFields, folders);
+    setIsEditFieldModalOpen(false);
   };
 
   const handleCreateFolder = (e: React.FormEvent) => {
@@ -304,7 +336,7 @@ export const UserFieldsPanel: React.FC = () => {
           <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-hidden shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
+                <tr className="bg-white border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
                   <th className="px-5 py-3 w-10">
                     <input
                       type="checkbox"
@@ -326,6 +358,12 @@ export const UserFieldsPanel: React.FC = () => {
                   </th>
                   <th className="px-5 py-3">
                     <div className="flex items-center gap-1">
+                      <span>{t('settings.fields.table_value', 'Значення')}</span>
+                      <HelpCircle size={12} />
+                    </div>
+                  </th>
+                  <th className="px-5 py-3">
+                    <div className="flex items-center gap-1">
                       <span>{t('settings.fields.table_desc')}</span>
                       <HelpCircle size={12} />
                     </div>
@@ -333,9 +371,9 @@ export const UserFieldsPanel: React.FC = () => {
                   <th className="px-5 py-3 w-12 text-right"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y-2 divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A]">
+              <tbody className="divide-y divide-[#0A0A0A]/10 text-xs font-bold text-[#0A0A0A]">
                 {filteredFields.map((field) => (
-                  <tr key={field.name} className="hover:bg-[#F2EBDD]/50 bg-white">
+                  <tr key={field.name} className="hover:bg-slate-50 bg-white transition-colors">
                     <td className="px-5 py-3.5">
                       <input
                         type="checkbox"
@@ -347,6 +385,9 @@ export const UserFieldsPanel: React.FC = () => {
                     </td>
                     <td className="px-5 py-3.5 text-slate-700">
                       {field.type}
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-700">
+                      {field.value || '-'}
                     </td>
                     <td className="px-5 py-3.5 text-slate-700">
                       {field.description || '-'}
@@ -368,7 +409,7 @@ export const UserFieldsPanel: React.FC = () => {
                 ))}
                 {filteredFields.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="text-center py-10 text-slate-700 italic bg-white font-bold select-none">
+                    <td colSpan={6} className="text-center py-10 text-slate-700 italic bg-white font-bold select-none">
                       {t('settings.fields.empty_state')}
                     </td>
                   </tr>
@@ -387,10 +428,27 @@ export const UserFieldsPanel: React.FC = () => {
         >
           <button
             onClick={() => {
-              handleArchiveField(activeMenuField);
+              const target = fields.find((f) => f.name === activeMenuField);
+              if (target) {
+                setEditFieldOriginalName(target.name);
+                setEditFieldName(target.name);
+                setEditFieldType(target.type || 'Text');
+                setEditFieldValue(target.value || '');
+                setEditFieldDesc(target.description || '');
+                setIsEditFieldModalOpen(true);
+              }
               setActiveMenuField(null);
             }}
             className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
+          >
+            {t('settings.fields.action_edit', 'Редагувати')}
+          </button>
+          <button
+            onClick={() => {
+              handleArchiveField(activeMenuField);
+              setActiveMenuField(null);
+            }}
+            className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
           >
             {t('settings.fields.action_archive')}
           </button>
@@ -399,7 +457,7 @@ export const UserFieldsPanel: React.FC = () => {
               handleDeleteField(activeMenuField, false);
               setActiveMenuField(null);
             }}
-            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/15 uppercase select-none transition-colors"
+            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
           >
             {t('settings.fields.action_delete')}
           </button>
@@ -417,7 +475,7 @@ export const UserFieldsPanel: React.FC = () => {
           <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-hidden shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
+                <tr className="bg-white border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
                   <th className="px-5 py-3 w-10">
                     <input
                       type="checkbox"
@@ -427,13 +485,14 @@ export const UserFieldsPanel: React.FC = () => {
                   </th>
                   <th className="px-5 py-3">{t('settings.fields.table_name')}</th>
                   <th className="px-5 py-3">{t('settings.fields.table_type')}</th>
+                  <th className="px-5 py-3">{t('settings.fields.table_value', 'Значення')}</th>
                   <th className="px-5 py-3">{t('settings.fields.table_desc')}</th>
                   <th className="px-5 py-3 w-12 text-right"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y-2 divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A]">
+              <tbody className="divide-y divide-[#0A0A0A]/10 text-xs font-bold text-[#0A0A0A]">
                 {filteredArchived.map((field) => (
-                  <tr key={field.name} className="hover:bg-[#F2EBDD]/50 bg-white">
+                  <tr key={field.name} className="hover:bg-slate-50 bg-white transition-colors">
                     <td className="px-5 py-3.5">
                       <input
                         type="checkbox"
@@ -445,6 +504,9 @@ export const UserFieldsPanel: React.FC = () => {
                     </td>
                     <td className="px-5 py-3.5 text-slate-700">
                       {field.type}
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-700">
+                      {field.value || '-'}
                     </td>
                     <td className="px-5 py-3.5 text-slate-700">
                       {field.description || '-'}
@@ -469,7 +531,7 @@ export const UserFieldsPanel: React.FC = () => {
                 ))}
                 {filteredArchived.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="text-center py-10 text-slate-700 italic bg-white font-bold select-none">
+                    <td colSpan={6} className="text-center py-10 text-slate-700 italic bg-white font-bold select-none">
                       {t('settings.fields.empty_state')}
                     </td>
                   </tr>
@@ -500,7 +562,7 @@ export const UserFieldsPanel: React.FC = () => {
               handleDeleteField(activeMenuArchivedField, true);
               setActiveMenuArchivedField(null);
             }}
-            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/15 uppercase select-none transition-colors"
+            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
           >
             Delete
           </button>
@@ -550,16 +612,29 @@ export const UserFieldsPanel: React.FC = () => {
                 <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
                   {t('settings.fields.type_label')}
                 </label>
-                <select
+                <CustomSelect
                   value={newFieldType}
-                  onChange={(e) => setNewFieldType(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] cursor-pointer focus:outline-none"
-                >
-                  <option value="Text">{t('settings.fields.type_text')}</option>
-                  <option value="Number">{t('settings.fields.type_number')}</option>
-                  <option value="Date">{t('settings.fields.type_date')}</option>
-                  <option value="Boolean">{t('settings.fields.type_boolean')}</option>
-                </select>
+                  onChange={setNewFieldType}
+                  options={[
+                    { value: 'Text', label: t('settings.fields.type_text') },
+                    { value: 'Number', label: t('settings.fields.type_number') },
+                    { value: 'Date', label: t('settings.fields.type_date') },
+                    { value: 'Boolean', label: t('settings.fields.type_boolean') },
+                  ]}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
+                  {t('settings.fields.value_label', 'Значення (необов\'язково)')}
+                </label>
+                <input
+                  type="text"
+                  value={newFieldValue}
+                  onChange={(e) => setNewFieldValue(e.target.value)}
+                  placeholder={t('settings.fields.placeholder_value', 'Введіть значення поля')}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
+                />
               </div>
 
               <div>
@@ -589,6 +664,106 @@ export const UserFieldsPanel: React.FC = () => {
                 className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {t('settings.fields.btn_create_field')}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {isEditFieldModalOpen && (
+        <div 
+          onClick={() => setIsEditFieldModalOpen(false)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+        >
+          <form 
+            onSubmit={handleEditField}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+          >
+            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
+              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
+                {t('settings.fields.edit_field_title', 'Редагувати поле користувача')}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsEditFieldModalOpen(false)}
+                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="space-y-3.5">
+              <div>
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
+                  {t('settings.fields.name_label')}
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editFieldName}
+                  onChange={(e) => setEditFieldName(e.target.value)}
+                  placeholder={t('settings.fields.placeholder_field_name')}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
+                  {t('settings.fields.type_label')}
+                </label>
+                <CustomSelect
+                  value={editFieldType}
+                  onChange={setEditFieldType}
+                  options={[
+                    { value: 'Text', label: t('settings.fields.type_text') },
+                    { value: 'Number', label: t('settings.fields.type_number') },
+                    { value: 'Date', label: t('settings.fields.type_date') },
+                    { value: 'Boolean', label: t('settings.fields.type_boolean') },
+                  ]}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
+                  {t('settings.fields.value_label', 'Значення (необов\'язково)')}
+                </label>
+                <input
+                  type="text"
+                  value={editFieldValue}
+                  onChange={(e) => setEditFieldValue(e.target.value)}
+                  placeholder={t('settings.fields.placeholder_value', 'Введіть значення поля')}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
+                  {t('settings.fields.desc_label')}
+                </label>
+                <input
+                  type="text"
+                  value={editFieldDesc}
+                  onChange={(e) => setEditFieldDesc(e.target.value)}
+                  placeholder={t('settings.fields.placeholder_desc')}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
+              <button
+                type="button"
+                onClick={() => setIsEditFieldModalOpen(false)}
+                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+              >
+                {t('settings.fields.btn_cancel')}
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+              >
+                {t('settings.fields.btn_save')}
               </button>
             </div>
           </form>

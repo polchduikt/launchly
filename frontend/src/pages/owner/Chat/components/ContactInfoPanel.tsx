@@ -109,7 +109,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
   const [showAddCustomField, setShowAddCustomField] = useState(false);
   const [customFieldName, setCustomFieldName] = useState('');
   const [customFieldValue, setCustomFieldValue] = useState('');
-  const [availableFields, setAvailableFields] = useState<string[]>([]);
+  const [availableFields, setAvailableFields] = useState<any[]>([]);
   const [isFieldDropdownOpen, setIsFieldDropdownOpen] = useState(false);
   const fieldDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -132,8 +132,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
       getCustomFieldsApi(conversation.botId)
         .then((res) => {
           const list = res && Array.isArray(res.fields) ? res.fields : Array.isArray(res) ? res : [];
-          const names = list.map((f: any) => f.name).filter(Boolean);
-          setAvailableFields(names);
+          setAvailableFields(list);
         })
         .catch(() => {});
     }
@@ -249,6 +248,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
 
     setCustomFieldName('');
     setCustomFieldValue('');
+    setIsFieldDropdownOpen(false);
     setShowAddCustomField(false);
   };
 
@@ -474,29 +474,34 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
                       onClick={() => setIsFieldDropdownOpen(!isFieldDropdownOpen)}
                       className="w-full px-2.5 py-1.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-lg text-xs font-bold text-[#0A0A0A] flex items-center justify-between cursor-pointer focus:outline-none select-none"
                     >
-                      <span className="truncate">{customFieldName || '-- Оберіть поле --'}</span>
+                      <span className="truncate">{customFieldName || t('crm.panel.fields.select_field', 'Оберіть поле')}</span>
                       <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform ${isFieldDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     {isFieldDropdownOpen && (
-                      <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl overflow-hidden py-1 text-left max-h-40 overflow-y-auto animate-in fade-in duration-100">
-                        {availableFields.map((fname) => (
-                          <button
-                            key={fname}
-                            type="button"
-                            onClick={() => {
-                              setCustomFieldName(fname);
-                              setIsFieldDropdownOpen(false);
-                            }}
-                            className={`w-full px-3 py-1.5 text-xs font-bold text-left cursor-pointer transition-colors ${
-                              customFieldName === fname
-                                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                                : 'text-[#0A0A0A] hover:bg-white'
-                            }`}
-                          >
-                            {fname}
-                          </button>
-                        ))}
+                      <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl overflow-hidden py-1 text-left max-h-40 overflow-y-auto animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]">
+                        {availableFields.map((f: any) => {
+                          const fname = typeof f === 'string' ? f : f.name;
+                          const fval = typeof f === 'object' ? f.value : undefined;
+                          return (
+                            <button
+                              key={fname}
+                              type="button"
+                              onClick={() => {
+                                setCustomFieldName(fname);
+                                if (fval !== undefined) setCustomFieldValue(fval);
+                                setIsFieldDropdownOpen(false);
+                              }}
+                              className={`w-full px-3 py-1.5 text-xs font-bold text-left cursor-pointer transition-colors ${
+                                customFieldName === fname
+                                  ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                                  : 'text-[#0A0A0A] hover:bg-white'
+                              }`}
+                            >
+                              {fname}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

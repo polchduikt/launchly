@@ -363,6 +363,7 @@ export interface UserField {
   id?: number | string;
   name: string;
   type: string;
+  value?: string;
   description?: string;
   folderId?: string | null;
   folder?: string | null;
