@@ -3,6 +3,8 @@ package com.launchly.ai.controller;
 import com.launchly.ai.dto.request.AiChatRequest;
 import com.launchly.ai.dto.request.AiSchemaRequest;
 import com.launchly.ai.dto.response.AiChatResponse;
+import com.launchly.ai.dto.response.AiChatSessionDetailResponse;
+import com.launchly.ai.dto.response.AiChatSessionResponse;
 import com.launchly.ai.dto.response.AiSchemaResponse;
 import com.launchly.ai.service.AiService;
 import com.launchly.common.exception.GlobalExceptionHandler;
@@ -31,6 +33,9 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -76,6 +81,61 @@ class AiControllerTest {
                 .setCustomArgumentResolvers(authResolver)
                 .setControllerAdvice(exceptionHandler)
                 .build();
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/ai/sessions - Should return user sessions list")
+    void getSessions_Success() throws Exception {
+        when(aiService.getSessions(1L)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/v1/ai/sessions"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/ai/sessions - Should create new session 201 Created")
+    void createSession_Success() throws Exception {
+        AiChatSessionResponse res = new AiChatSessionResponse(1L, "New chat", null, null, null);
+        when(aiService.createSession(any(), eq(1L))).thenReturn(res);
+
+        mockMvc.perform(post("/api/v1/ai/sessions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/ai/sessions/{id} - Should return session details")
+    void getSessionDetails_Success() throws Exception {
+        AiChatSessionDetailResponse res = new AiChatSessionDetailResponse(1L, "New chat", null, null, List.of());
+        when(aiService.getSessionDetails(eq(1L), eq(1L))).thenReturn(res);
+
+        mockMvc.perform(get("/api/v1/ai/sessions/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/ai/sessions/{id} - Should update session title")
+    void updateSessionTitle_Success() throws Exception {
+        AiChatSessionResponse res = new AiChatSessionResponse(1L, "Updated title", null, null, null);
+        when(aiService.updateSessionTitle(eq(1L), any(), eq(1L))).thenReturn(res);
+
+        mockMvc.perform(patch("/api/v1/ai/sessions/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Updated title\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Updated title"));
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/ai/sessions/{id} - Should delete session 204 No Content")
+    void deleteSession_Success() throws Exception {
+        doNothing().when(aiService).deleteSession(eq(1L), eq(1L));
+
+        mockMvc.perform(delete("/api/v1/ai/sessions/1"))
+                .andExpect(status().isNoContent());
     }
 
     @Test

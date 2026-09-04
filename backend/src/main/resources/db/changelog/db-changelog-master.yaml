@@ -115,6 +115,8 @@ databaseChangeLog:
       file: db/changelog/changes/V057__add_version_to_broadcast_support_blog_templates.sql
   - include:
       file: db/changelog/changes/V058__create_outbox_events_table.sql
+  - include:
+      file: db/changelog/changes/V059__create_ai_chat_sessions_and_messages.sql
 
 
 
