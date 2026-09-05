@@ -2,6 +2,7 @@ package com.launchly.broadcast.validator;
 
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotMember;
+import com.launchly.bot.entity.WorkspaceRole;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.common.exception.AppException;
@@ -34,7 +35,7 @@ public class BroadcastValidator {
         if (!bot.getUser().getId().equals(userId)) {
             BotMember member = botMemberRepository.findWorkspaceMemberships(botId, userId).stream().findFirst()
                     .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied"));
-            if ("Viewer".equalsIgnoreCase(member.getRole())) {
+            if (WorkspaceRole.VIEWER.getValue().equalsIgnoreCase(member.getRole())) {
                 throw new AppException(HttpStatus.FORBIDDEN, "broadcast.error.viewer_cannot_modify");
             }
         }

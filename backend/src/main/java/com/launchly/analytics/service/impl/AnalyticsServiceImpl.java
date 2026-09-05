@@ -21,9 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import com.launchly.bot.repository.BotMemberRepository;
-import com.launchly.bot.entity.BotMember;
-import com.launchly.auth.entity.User;
 import com.launchly.broadcast.repository.BotUserTagRepository;
 
 @Slf4j
@@ -35,7 +32,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final BotRepository botRepository;
     private final BotUserRepository botUserRepository;
     private final FlowSchemaRepository flowSchemaRepository;
-    private final BotMemberRepository botMemberRepository;
     private final BotUserTagRepository botUserTagRepository;
     private final ObjectMapper objectMapper;
 
@@ -90,17 +86,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         List<Object[]> rawHeatmap = new ArrayList<>();
 
         if (botId == 0) {
-            List<Bot> userBots = new ArrayList<>(botRepository.findAllByUserId(userId));
-            List<BotMember> memberships = botMemberRepository.findByUserId(userId);
-            for (BotMember bm : memberships) {
-                User owner = bm.getBot().getUser();
-                List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
-                for (Bot b : ownerBots) {
-                    if (userBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
-                        userBots.add(b);
-                    }
-                }
-            }
+            List<Bot> userBots = botRepository.findAllAccessibleByUserId(userId);
 
             if (userBots.isEmpty()) {
                 return new DashboardStatsResponse(0L, 0L, 0L, 0L, new ArrayList<>(), new ArrayList<>(), 0L, 0, 0L, 0.0, new ArrayList<>(), new ArrayList<>(), 0.0, 0.0, 0.0, 0.0);
@@ -138,17 +124,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             activeUsers24h = analyticsEventRepository.countActiveUsersByBotIdAndCreatedAtAfter(botId, start24h);
             clicksCount30d = analyticsEventRepository.countClicksByBotIdAndCreatedAtAfter(botId, startClicks30d);
 
-            List<Bot> userBots = new ArrayList<>(botRepository.findAllByUserId(userId));
-            List<BotMember> memberships = botMemberRepository.findByUserId(userId);
-            for (BotMember bm : memberships) {
-                User owner = bm.getBot().getUser();
-                List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
-                for (Bot b : ownerBots) {
-                    if (userBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
-                        userBots.add(b);
-                    }
-                }
-            }
+            List<Bot> userBots = botRepository.findAllAccessibleByUserId(userId);
             activeAutomations = userBots.stream()
                     .filter(Bot::isActive)
                     .count();

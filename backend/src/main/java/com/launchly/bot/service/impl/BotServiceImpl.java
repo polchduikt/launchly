@@ -15,9 +15,11 @@ import com.launchly.bot.dto.response.BotResponse;
 import com.launchly.bot.dto.response.BotStatsResponse;
 import com.launchly.bot.dto.response.BotUserResponse;
 import com.launchly.bot.dto.response.FlowSchemaResponse;
+import com.launchly.bot.constant.BotConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotMember;
 import com.launchly.bot.entity.FlowSchema;
+import com.launchly.bot.entity.WorkspaceRole;
 import com.launchly.bot.mapper.BotMapper;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotMemberRepository;
@@ -95,13 +97,13 @@ public class BotServiceImpl implements BotService {
             rawToken = encryptionUtil.decrypt(sourceBot.getTelegramToken());
         }
 
-        boolean isDummy = (rawToken == null || rawToken.trim().isEmpty() || "0000000000:dummyTokenPlaceholderForNoBotConfig".equals(rawToken));
+        boolean isDummy = (rawToken == null || rawToken.trim().isEmpty() || BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(rawToken));
         if (!isDummy) {
             planLimitService.checkBotLimit(userId, rawToken);
         }
 
         if (rawToken == null || rawToken.trim().isEmpty()) {
-            rawToken = "0000000000:dummyTokenPlaceholderForNoBotConfig";
+            rawToken = BotConstants.DUMMY_TOKEN_PLACEHOLDER;
         }
 
         String encryptedToken = encryptionUtil.encrypt(rawToken);
@@ -115,7 +117,7 @@ public class BotServiceImpl implements BotService {
 
         bot = botRepository.save(bot);
 
-        if (!"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(rawToken)) {
+        if (!BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(rawToken)) {
             releaseTokenFromOtherBots(rawToken, userId, bot.getId());
             updateBotTelegramInfo(bot, rawToken);
             bot = botRepository.save(bot);
@@ -200,8 +202,8 @@ public class BotServiceImpl implements BotService {
 
         if (rawToken != null) {
             String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
-            boolean wasDummy = "0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decryptedToken);
-            boolean isNewReal = !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(rawToken);
+            boolean wasDummy = BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decryptedToken);
+            boolean isNewReal = !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(rawToken);
 
             if (wasDummy && isNewReal) {
                 planLimitService.checkBotLimit(userId, rawToken);
@@ -213,7 +215,7 @@ public class BotServiceImpl implements BotService {
             }
 
             bot.setTelegramToken(encryptionUtil.encrypt(rawToken));
-            if (!"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(rawToken)) {
+            if (!BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(rawToken)) {
                 updateBotTelegramInfo(bot, rawToken);
             } else {
                 bot.setUsername(null);
@@ -271,7 +273,7 @@ public class BotServiceImpl implements BotService {
         }
 
         String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
-        if ("0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decryptedToken)) {
+        if (BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decryptedToken)) {
             throw new AppException(HttpStatus.BAD_REQUEST, "bot.error.token_required_to_start");
         }
 
@@ -300,6 +302,7 @@ public class BotServiceImpl implements BotService {
             try {
                 telegramBotManager.unregisterBot(bot.getId());
             } catch (Exception ex) {
+                log.warn("Failed to unregister bot on start rollback: {}", ex.getMessage());
             }
             throw e;
         }
@@ -326,11 +329,12 @@ public class BotServiceImpl implements BotService {
                 if (bot.getTelegramToken() != null && !bot.getTelegramToken().isBlank()) {
                     String decrypted = encryptionUtil.decrypt(bot.getTelegramToken());
                     if (decrypted != null && !decrypted.isBlank() && 
-                        !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decrypted)) {
+                        !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decrypted)) {
                         hasRealToken = true;
                     }
                 }
             } catch (Exception e) {
+                log.warn("Failed to decrypt bot token during publish: {}", e.getMessage());
             }
 
             if (hasRealToken) {
@@ -412,11 +416,12 @@ public class BotServiceImpl implements BotService {
                 if (bot.getTelegramToken() != null && !bot.getTelegramToken().isBlank()) {
                     String decrypted = encryptionUtil.decrypt(bot.getTelegramToken());
                     if (decrypted != null && !decrypted.isBlank() && 
-                        !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decrypted)) {
+                        !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decrypted)) {
                         hasRealToken = true;
                     }
                 }
             } catch (Exception e) {
+                log.warn("Failed to decrypt bot token during flow save: {}", e.getMessage());
             }
 
             if (hasRealToken) {
@@ -691,7 +696,7 @@ public class BotServiceImpl implements BotService {
     }
 
     private void releaseTokenFromOtherBots(String token, Long userId, Long currentBotId) {
-        if (token == null || "0000000000:dummyTokenPlaceholderForNoBotConfig".equals(token)) {
+        if (token == null || BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(token)) {
             return;
         }
 
@@ -705,7 +710,7 @@ public class BotServiceImpl implements BotService {
                             telegramBotManager.unregisterBot(otherBot.getId());
                             otherBot.setActive(false);
                         }
-                        otherBot.setTelegramToken(encryptionUtil.encrypt("0000000000:dummyTokenPlaceholderForNoBotConfig"));
+                        otherBot.setTelegramToken(encryptionUtil.encrypt(BotConstants.DUMMY_TOKEN_PLACEHOLDER));
                         otherBot.setUsername(null);
                         botRepository.save(otherBot);
                         log.info("Reassigned token to bot id={}. Automatically reset bot id={} ('{}') to Without bot (inactive)",
@@ -725,14 +730,14 @@ public class BotServiceImpl implements BotService {
         boolean hasToken = false;
         try {
             String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
-            hasToken = decryptedToken != null && !decryptedToken.isBlank() && !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(decryptedToken);
+            hasToken = decryptedToken != null && !decryptedToken.isBlank() && !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decryptedToken);
         } catch (Exception e) {
             log.error("Failed to decrypt token for bot id={}", bot.getId(), e);
         }
 
         long totalUsers = hasToken ? botUserRepository.countByBotId(bot.getId()) : 0;
 
-        String role = "Owner";
+        String role = WorkspaceRole.OWNER.getValue();
         try {
             org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.getPrincipal() instanceof CustomUserDetails userDetails) {
@@ -740,7 +745,7 @@ public class BotServiceImpl implements BotService {
                 if (!bot.getUser().getId().equals(currentUserId)) {
                     role = botAccessValidator.getWorkspaceMembership(bot, currentUserId)
                             .map(BotMember::getRole)
-                            .orElse("Viewer");
+                            .orElse(WorkspaceRole.VIEWER.getValue());
                 }
             }
         } catch (Exception e) {

@@ -1,6 +1,5 @@
 package com.launchly.broadcast.service.impl;
 
-import com.launchly.auth.entity.User;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotRepository;
@@ -30,8 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-import com.launchly.bot.repository.BotMemberRepository;
-import com.launchly.bot.entity.BotMember;
 import com.launchly.admin.service.UserAuditService;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import java.time.Duration;
@@ -53,7 +50,6 @@ public class BroadcastServiceImpl implements BroadcastService {
     private final UserAuditService userAuditService;
     private final BroadcastValidator broadcastValidator;
     private final BotRepository botRepository;
-    private final BotMemberRepository botMemberRepository;
     private final StringRedisTemplate stringRedisTemplate;
 
     public BroadcastServiceImpl(BroadcastCampaignRepository campaignRepository,
@@ -66,7 +62,6 @@ public class BroadcastServiceImpl implements BroadcastService {
                                 UserAuditService userAuditService,
                                 BroadcastValidator broadcastValidator,
                                 BotRepository botRepository,
-                                BotMemberRepository botMemberRepository,
                                 StringRedisTemplate stringRedisTemplate) {
         this.campaignRepository = campaignRepository;
         this.broadcastFilterService = broadcastFilterService;
@@ -78,7 +73,6 @@ public class BroadcastServiceImpl implements BroadcastService {
         this.userAuditService = userAuditService;
         this.broadcastValidator = broadcastValidator;
         this.botRepository = botRepository;
-        this.botMemberRepository = botMemberRepository;
         this.stringRedisTemplate = stringRedisTemplate;
     }
 
@@ -197,17 +191,7 @@ public class BroadcastServiceImpl implements BroadcastService {
             List<BotUser> targetUsers = new ArrayList<>();
             if (Boolean.TRUE.equals(campaign.getTargetAllBots())) {
                 Long ownerId = campaign.getBot().getUser().getId();
-                List<Bot> userBots = new ArrayList<>(botRepository.findAllByUserId(ownerId));
-                List<BotMember> memberships = botMemberRepository.findByUserId(ownerId);
-                for (BotMember bm : memberships) {
-                    User owner = bm.getBot().getUser();
-                    List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
-                    for (Bot b : ownerBots) {
-                        if (userBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
-                            userBots.add(b);
-                        }
-                    }
-                }
+                List<Bot> userBots = botRepository.findAllAccessibleByUserId(ownerId);
                 for (Bot b : userBots) {
                     targetUsers.addAll(broadcastFilterService.filterUsers(
                             b.getId(), campaign.getFilterType(), campaign.getFilterValue()

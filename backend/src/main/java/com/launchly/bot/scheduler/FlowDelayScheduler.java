@@ -174,6 +174,7 @@ public class FlowDelayScheduler {
                             return false;
                         }
                     } catch (NumberFormatException e) {
+                        log.warn("Failed to parse pausedUntil timestamp: {}", pausedUntilObj);
                     }
                 }
                 return true;

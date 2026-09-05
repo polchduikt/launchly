@@ -1,9 +1,10 @@
 package com.launchly.bot.service.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.service.UserQueryService;
+import com.launchly.bot.constant.BotConstants;
 import com.launchly.bot.dto.request.CreateTemplateRequest;
 import com.launchly.bot.dto.request.UpdateTemplateRequest;
 import com.launchly.bot.dto.response.TemplateResponse;
@@ -51,7 +52,7 @@ public class TemplateServiceImpl implements TemplateService {
     private final BroadcastCampaignRepository broadcastCampaignRepository;
     private final TagRepository tagRepository;
     private final EncryptionUtil encryptionUtil;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
@@ -62,7 +63,7 @@ public class TemplateServiceImpl implements TemplateService {
         User creator = userQueryService.getUserOrThrow(userId);
 
         Bot bot = null;
-        String sourceBotName = "Автоматизація";
+        String sourceBotName = BotConstants.DEFAULT_AUTOMATION_NAME;
         String sourceBotDescription = "";
         String nodes = "[]";
         String edges = "[]";
@@ -94,6 +95,7 @@ public class TemplateServiceImpl implements TemplateService {
         try {
             schemaJson = objectMapper.writeValueAsString(payload);
         } catch (Exception e) {
+            log.warn("Failed to serialize template flow schema: {}", e.getMessage());
             schemaJson = "{\"nodes\":\"[]\",\"edges\":\"[]\"}";
         }
 
@@ -313,7 +315,7 @@ public class TemplateServiceImpl implements TemplateService {
                     .avatar(template.getAvatarUrl())
                     .templateName(template.getName())
                     .template(true)
-                    .telegramToken(encryptionUtil.encrypt("0000000000:dummyTokenPlaceholderForNoBotConfig"))
+                    .telegramToken(encryptionUtil.encrypt(BotConstants.DUMMY_TOKEN_PLACEHOLDER))
                     .active(false)
                     .user(user)
                     .customFieldsData(customFields)

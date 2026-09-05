@@ -2,6 +2,7 @@ package com.launchly.bot.validator;
 
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotMember;
+import com.launchly.bot.entity.WorkspaceRole;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class BotAccessValidator {
             BotMember member = getWorkspaceMembership(bot, userId)
                     .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied"));
 
-            if ("Viewer".equalsIgnoreCase(member.getRole())) {
+            if (WorkspaceRole.VIEWER.getValue().equalsIgnoreCase(member.getRole())) {
                 throw new AppException(HttpStatus.FORBIDDEN, "bot.error.viewer_cannot_modify");
             }
         }

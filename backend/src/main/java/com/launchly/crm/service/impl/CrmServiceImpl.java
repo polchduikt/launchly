@@ -31,16 +31,13 @@ import com.launchly.bot.telegram.TelegramBotManager;
 import com.launchly.common.utils.EncryptionUtil;
 import com.launchly.crm.service.CrmService;
 import com.launchly.crm.websocket.CrmWebSocketService;
-import com.cloudinary.Cloudinary;
+import com.launchly.bot.service.UserAvatarService;
 import com.launchly.auth.repository.UserRepository;
 import com.launchly.crm.repository.CrmLabelRepository;
 import com.launchly.notification.service.NotificationService;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -68,7 +65,7 @@ public class CrmServiceImpl implements CrmService {
     private final IntegrationEventService integrationEventService;
     private final TelegramBotManager botManager;
     private final EncryptionUtil encryptionUtil;
-    private final Cloudinary cloudinary;
+    private final UserAvatarService userAvatarService;
     private final NotificationService notificationService;
     private final CrmLabelRepository crmLabelRepository;
     private final UserRepository userRepository;
@@ -88,7 +85,7 @@ public class CrmServiceImpl implements CrmService {
                           IntegrationEventService integrationEventService,
                           @Lazy TelegramBotManager botManager,
                           EncryptionUtil encryptionUtil,
-                          Cloudinary cloudinary,
+                          UserAvatarService userAvatarService,
                           NotificationService notificationService,
                           CrmLabelRepository crmLabelRepository,
                           UserRepository userRepository,
@@ -106,7 +103,7 @@ public class CrmServiceImpl implements CrmService {
         this.integrationEventService = integrationEventService;
         this.botManager = botManager;
         this.encryptionUtil = encryptionUtil;
-        this.cloudinary = cloudinary;
+        this.userAvatarService = userAvatarService;
         this.notificationService = notificationService;
         this.crmLabelRepository = crmLabelRepository;
         this.userRepository = userRepository;
@@ -431,7 +428,7 @@ public class CrmServiceImpl implements CrmService {
     private ConversationResponse toConversationResponse(Conversation conversation) {
         BotUser botUser = conversation.getBotUser();
         if (botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith("https://api.telegram.org/")) {
-            fetchAndSetPhotoUrl(botUser);
+            userAvatarService.fetchAndSetPhotoUrl(botUser);
         }
         String botUserName = botUser.getFirstName() + (botUser.getLastName() != null ? " " + botUser.getLastName() : "");
 
@@ -460,65 +457,6 @@ public class CrmServiceImpl implements CrmService {
                 conversation.getBot().getId(),
                 conversation.getBot().getName()
         );
-    }
-
-    private void fetchAndSetPhotoUrl(BotUser botUser) {
-        Long botId = botUser.getBot().getId();
-        org.telegram.telegrambots.meta.generics.TelegramClient telegramClient = botManager.getTelegramClient(botId);
-        if (telegramClient == null) {
-            return;
-        }
-        try {
-            org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos getUserProfilePhotos =
-                    org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos.builder()
-                            .userId(botUser.getTelegramId())
-                            .limit(1)
-                            .build();
-            org.telegram.telegrambots.meta.api.objects.UserProfilePhotos photos = telegramClient.execute(getUserProfilePhotos);
-            if (photos != null && photos.getTotalCount() > 0 && photos.getPhotos() != null && !photos.getPhotos().isEmpty()) {
-                List<org.telegram.telegrambots.meta.api.objects.PhotoSize> photoSizes = photos.getPhotos().get(0);
-                org.telegram.telegrambots.meta.api.objects.PhotoSize largest = photoSizes.stream()
-                        .max(Comparator.comparingInt(size -> size.getWidth() * size.getHeight()))
-                        .orElse(null);
-                if (largest != null) {
-                    org.telegram.telegrambots.meta.api.methods.GetFile getFile =
-                            org.telegram.telegrambots.meta.api.methods.GetFile.builder()
-                                    .fileId(largest.getFileId())
-                                    .build();
-                    org.telegram.telegrambots.meta.api.objects.File file = telegramClient.execute(getFile);
-                    if (file != null && file.getFilePath() != null) {
-                        Bot bot = botRepository.findById(botId).orElse(null);
-                        if (bot == null) {
-                            return;
-                        }
-                        String botToken = encryptionUtil.decrypt(bot.getTelegramToken());
-                        String fileUrl = "https://api.telegram.org/file/bot" + botToken + "/" + file.getFilePath();
-                        try {
-                            RestTemplate restTemplate = new RestTemplate();
-                            byte[] fileBytes = restTemplate.getForObject(fileUrl, byte[].class);
-                            if (fileBytes != null && fileBytes.length > 0) {
-                                Map<String, Object> params = Map.of(
-                                    "folder", "launchly/" + bot.getUser().getId() + "/contacts",
-                                    "transformation", "c_limit,w_400,h_400,q_auto,f_auto"
-                                );
-                                Map<?, ?> result = cloudinary.uploader().upload(fileBytes, params);
-                                String secureUrl = (String) result.get("secure_url");
-                                botUser.setPhotoUrl(secureUrl);
-                            } else {
-                                botUser.setPhotoUrl(fileUrl);
-                            }
-                        } catch (Exception uploadEx) {
-                            log.warn("Failed to upload profile photo to Cloudinary: {}", uploadEx.getMessage());
-                            botUser.setPhotoUrl(fileUrl);
-                        }
-                        botUserRepository.save(botUser);
-                        log.debug("Fetched profile photo for user {}", botUser.getTelegramId());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Could not fetch profile photo for user {}: {}", botUser.getTelegramId(), e.getMessage());
-        }
     }
 
     @Override

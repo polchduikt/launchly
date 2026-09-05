@@ -24,13 +24,8 @@ import com.launchly.billing.service.PlanLimitService;
 import com.launchly.common.utils.EncryptionUtil;
 import com.launchly.crm.service.CrmService;
 import com.launchly.analytics.service.AnalyticsService;
-import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.objects.UserProfilePhotos;
-import com.cloudinary.Cloudinary;
-import org.springframework.web.client.RestTemplate;
-import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import org.telegram.telegrambots.meta.api.objects.File;
+import com.launchly.bot.constant.BotConstants;
+import com.launchly.bot.service.UserAvatarService;
 import com.launchly.bot.engine.validator.BotInputValidator;
 import com.launchly.bot.engine.callstack.BotCallStackManager;
 import com.launchly.bot.engine.callstack.CallStackFrame;
@@ -65,7 +60,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
     private final TelegramBotManager botManager;
     private final EncryptionUtil encryptionUtil;
     private final CrmService crmService;
-    private final Cloudinary cloudinary;
+    private final UserAvatarService userAvatarService;
     private final AnalyticsService analyticsService;
     private final AuthService authService;
     private final BotInputValidator inputValidator;
@@ -86,7 +81,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                   @Lazy TelegramBotManager botManager,
                                   EncryptionUtil encryptionUtil,
                                   @Lazy CrmService crmService,
-                                  Cloudinary cloudinary,
+                                  UserAvatarService userAvatarService,
                                   AnalyticsService analyticsService,
                                   @Lazy AuthService authService,
                                   BotInputValidator inputValidator,
@@ -103,7 +98,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         this.botManager = botManager;
         this.encryptionUtil = encryptionUtil;
         this.crmService = crmService;
-        this.cloudinary = cloudinary;
+        this.userAvatarService = userAvatarService;
         this.analyticsService = analyticsService;
         this.authService = authService;
         this.inputValidator = inputValidator;
@@ -250,7 +245,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
             String currentNodeId = resolveCurrentNodeId(botId, telegramUserId, botUser, nodes);
 
-            int maxIterations = 50;
+            int maxIterations = BotConstants.MAX_FLOW_ITERATIONS;
             int iteration = 0;
 
             while (currentNodeId != null && iteration < maxIterations) {
@@ -274,6 +269,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                         try {
                             targetBotId = Long.parseLong((String) targetIdObj);
                         } catch (NumberFormatException e) {
+                            log.warn("Failed to parse targetBotId from string: {}", targetIdObj);
                         }
                     }
 
@@ -438,58 +434,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 });
 
         if ((botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith("https://api.telegram.org/")) && telegramClient != null) {
-            fetchAndSetPhotoUrl(botUser, bot, telegramClient);
+            userAvatarService.fetchAndSetPhotoUrl(botUser, bot, telegramClient);
         }
 
         return botUser;
-    }
-
-    private void fetchAndSetPhotoUrl(BotUser botUser, Bot bot, TelegramClient telegramClient) {
-        try {
-            GetUserProfilePhotos getUserProfilePhotos = GetUserProfilePhotos.builder()
-                    .userId(botUser.getTelegramId())
-                    .limit(1)
-                    .build();
-            UserProfilePhotos photos = telegramClient.execute(getUserProfilePhotos);
-            if (photos != null && photos.getTotalCount() > 0 && photos.getPhotos() != null && !photos.getPhotos().isEmpty()) {
-                List<PhotoSize> photoSizes = photos.getPhotos().get(0);
-                PhotoSize largest = photoSizes.stream()
-                        .max(Comparator.comparingInt(size -> size.getWidth() * size.getHeight()))
-                        .orElse(null);
-                if (largest != null) {
-                    GetFile getFile = GetFile.builder()
-                            .fileId(largest.getFileId())
-                            .build();
-                    File file = telegramClient.execute(getFile);
-                    if (file != null && file.getFilePath() != null) {
-                        String botToken = encryptionUtil.decrypt(bot.getTelegramToken());
-                        String fileUrl = "https://api.telegram.org/file/bot" + botToken + "/" + file.getFilePath();
-                        try {
-                            RestTemplate restTemplate = new RestTemplate();
-                            byte[] fileBytes = restTemplate.getForObject(fileUrl, byte[].class);
-                            if (fileBytes != null && fileBytes.length > 0) {
-                                Map<String, Object> params = Map.of(
-                                    "folder", "launchly/" + bot.getUser().getId() + "/contacts",
-                                    "transformation", "c_limit,w_400,h_400,q_auto,f_auto"
-                                );
-                                Map<?, ?> result = cloudinary.uploader().upload(fileBytes, params);
-                                String secureUrl = (String) result.get("secure_url");
-                                botUser.setPhotoUrl(secureUrl);
-                            } else {
-                                botUser.setPhotoUrl(fileUrl);
-                            }
-                        } catch (Exception uploadEx) {
-                            log.warn("Failed to upload profile photo to Cloudinary: {}", uploadEx.getMessage());
-                            botUser.setPhotoUrl(fileUrl);
-                        }
-                        botUserRepository.save(botUser);
-                        log.debug("Fetched profile photo for user {}", botUser.getTelegramId());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Could not fetch profile photo for user {}: {}", botUser.getTelegramId(), e.getMessage());
-        }
     }
 
     private String resolveCurrentNodeId(Long botId, Long telegramUserId, BotUser botUser, List<FlowNode> nodes) {
@@ -599,7 +547,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
 
             String currentNodeId = startNodeId;
-            int maxIterations = 50;
+            int maxIterations = BotConstants.MAX_FLOW_ITERATIONS;
             int iteration = 0;
 
             while (currentNodeId != null && iteration < maxIterations) {
@@ -623,6 +571,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                         try {
                             targetBotId = Long.parseLong((String) targetIdObj);
                         } catch (NumberFormatException e) {
+                            log.warn("Failed to parse targetBotId from string: {}", targetIdObj);
                         }
                     }
 
@@ -1069,6 +1018,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                             return false;
                         }
                     } catch (NumberFormatException e) {
+                        log.warn("Failed to parse pausedUntil timestamp: {}", pausedUntilObj);
                     }
                 }
                 return true;

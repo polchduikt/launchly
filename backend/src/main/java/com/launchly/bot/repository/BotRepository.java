@@ -28,5 +28,9 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
     @EntityGraph(attributePaths = {"user"})
     Optional<Bot> findById(Long id);
 
+    @EntityGraph(attributePaths = {"user"})
+    @Query("SELECT DISTINCT b FROM Bot b WHERE b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.user.id = b.user.id AND bm.user.id = :userId)")
+    List<Bot> findAllAccessibleByUserId(@org.springframework.data.repository.query.Param("userId") Long userId);
+
     boolean existsByTelegramToken(String telegramToken);
 }

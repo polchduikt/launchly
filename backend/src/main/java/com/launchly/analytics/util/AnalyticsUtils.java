@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.launchly.bot.engine.model.FlowNode;
 import com.launchly.bot.entity.FlowSchema;
 import com.launchly.bot.repository.FlowSchemaRepository;
+import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public final class AnalyticsUtils {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -88,7 +90,8 @@ public final class AnalyticsUtils {
                         }
                     }
                 }
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                log.debug("Failed to resolve button label from botId {}: {}", bId, e.getMessage());
             }
         }
         return callbackData;

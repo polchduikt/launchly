@@ -8,6 +8,7 @@ import com.launchly.bot.dto.response.TeamMemberResponse;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotInvitation;
 import com.launchly.bot.entity.BotMember;
+import com.launchly.bot.entity.WorkspaceRole;
 import com.launchly.bot.repository.BotInvitationRepository;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.repository.BotRepository;
@@ -58,7 +59,7 @@ public class TeamServiceImpl implements TeamService {
                 bot.getUser().getEmail(),
                 bot.getUser().getName(),
                 bot.getUser().getAvatar(),
-                "Owner",
+                WorkspaceRole.OWNER.getValue(),
                 true,
                 true,
                 false,
@@ -121,13 +122,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     private int getRolePrivilege(String role) {
-        if (role == null) return 0;
-        return switch (role.toLowerCase()) {
-            case "admin" -> 3;
-            case "editor" -> 2;
-            case "viewer" -> 1;
-            default -> 0;
-        };
+        return WorkspaceRole.resolvePrivilege(role);
     }
 
     @Override

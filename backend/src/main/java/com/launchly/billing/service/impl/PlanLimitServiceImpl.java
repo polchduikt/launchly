@@ -1,5 +1,6 @@
 package com.launchly.billing.service.impl;
 
+import com.launchly.bot.constant.BotConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.common.utils.EncryptionUtil;
 import com.launchly.billing.entity.Plan;
@@ -14,6 +15,7 @@ import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PlanLimitServiceImpl implements PlanLimitService {
@@ -42,7 +45,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
         
         List<Bot> userBots = botRepository.findAllByUserId(userId);
         boolean tokenAlreadyExists = false;
-        if (newTelegramToken != null && !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(newTelegramToken)) {
+        if (newTelegramToken != null && !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(newTelegramToken)) {
             for (com.launchly.bot.entity.Bot b : userBots) {
                 try {
                     String decrypted = encryptionUtil.decrypt(b.getTelegramToken());
@@ -51,6 +54,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
                         break;
                     }
                 } catch (Exception e) {
+                    log.warn("Failed to decrypt token for bot id={}: {}", b.getId(), e.getMessage());
                 }
             }
         }
@@ -66,7 +70,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
                         return b.getTelegramToken();
                     }
                 })
-                .filter(token -> !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(token))
+                .filter(token -> !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(token))
                 .distinct()
                 .count();
 

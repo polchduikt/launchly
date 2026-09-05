@@ -3,6 +3,7 @@ package com.launchly.bot.telegram;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import com.launchly.bot.service.FlowEngineService;
+import com.launchly.bot.constant.BotConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotUserRepository;
@@ -90,7 +91,7 @@ public class TelegramBotManager {
         try {
             String token = encryptionUtil.decrypt(bot.getTelegramToken());
 
-            if (token == null || token.isBlank() || "0000000000:dummyTokenPlaceholderForNoBotConfig".equals(token)) {
+            if (token == null || token.isBlank() || BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(token)) {
                 log.info("Skipping registration for bot {} (id={}): dummy token placeholder", bot.getName(), bot.getId());
                 return;
             }
@@ -211,7 +212,7 @@ public class TelegramBotManager {
                 Bot bot = botRepository.findById(botId).orElse(null);
                 if (bot != null && bot.getTelegramToken() != null) {
                     String token = encryptionUtil.decrypt(bot.getTelegramToken());
-                    if (token != null && !token.isBlank() && !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(token)) {
+                    if (token != null && !token.isBlank() && !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(token)) {
                         client = new OkHttpTelegramClient(token);
                         telegramClients.put(botId, client);
                     }
