@@ -149,9 +149,7 @@ public class BotServiceImpl implements BotService {
             }
         }
 
-        return allBots.stream()
-                .map(this::toBotResponseWithStats)
-                .collect(Collectors.toList());
+        return botResponseFactory.toBotResponseListWithStats(allBots, userId, memberships);
     }
 
     @Override

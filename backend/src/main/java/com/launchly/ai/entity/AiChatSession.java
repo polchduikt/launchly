@@ -14,9 +14,10 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
@@ -29,8 +30,9 @@ import java.util.List;
         @Index(name = "idx_ai_chat_sessions_user_updated", columnList = "user_id, updated_at DESC")
     }
 )
-@Data
-@EqualsAndHashCode(callSuper = true, exclude = {"user", "messages"})
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @ToString(exclude = {"user", "messages"})
 @Builder
 @NoArgsConstructor

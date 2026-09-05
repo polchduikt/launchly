@@ -9,8 +9,10 @@ import lombok.*;
 @Table(name = "account_templates", indexes = {
     @Index(name = "idx_account_templates_creator_created", columnList = "creator_id, created_at DESC")
 })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@ToString(exclude = {"creator", "sourceBot"})
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -14,6 +14,8 @@ import java.util.List;
 })
 @Getter
 @Setter
+@ToString(exclude = {"user", "assignedManager", "messages"})
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -11,6 +11,8 @@ import lombok.*;
 })
 @Getter
 @Setter
+@ToString(exclude = {"ticket", "sender"})
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -36,8 +36,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @Slf4j
 @Service
@@ -128,22 +132,18 @@ public class CrmServiceImpl implements CrmService {
 
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ConversationResponse> getConversationsByBot(Long botId, Long userId) {
         verifyBotOwnership(botId, userId);
         List<Conversation> conversations = conversationRepository.findByBotIdOrderByUpdatedAtDesc(botId);
-        return conversations.stream()
-                .map(this::toConversationResponse)
-                .toList();
+        return toConversationResponseList(conversations);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ConversationResponse> getAllConversations(Long userId) {
         List<Conversation> conversations = conversationRepository.findByBotUserIdOrderByUpdatedAtDesc(userId);
-        return conversations.stream()
-                .map(this::toConversationResponse)
-                .toList();
+        return toConversationResponseList(conversations);
     }
 
     @Override
@@ -236,25 +236,43 @@ public class CrmServiceImpl implements CrmService {
         message = messageRepository.save(message);
         log.info("Owner saved message to conversation {} in DB (scheduled={})", conversationId, request.scheduledAt() != null);
 
-        if (message.getSent()) {
-            if (request.mediaUrl() != null && !request.mediaUrl().isBlank()) {
-                telegramSendService.sendPhoto(
-                        conversation.getBot().getId(),
-                        conversation.getBotUser().getTelegramId(),
-                        request.mediaUrl(),
-                        request.content()
-                );
-            } else {
-                telegramSendService.sendMessage(
-                        conversation.getBot().getId(),
-                        conversation.getBotUser().getTelegramId(),
-                        request.content()
-                );
+        final Message savedMessage = message;
+        final MessageResponse response = crmMapper.toMessageResponse(savedMessage);
+        final Long botId = conversation.getBot().getId();
+        final Long telegramUserId = conversation.getBotUser().getTelegramId();
+        final String mediaUrl = request.mediaUrl();
+        final String content = request.content();
+        final boolean isSent = savedMessage.getSent();
+
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    if (isSent) {
+                        try {
+                            if (mediaUrl != null && !mediaUrl.isBlank()) {
+                                telegramSendService.sendPhoto(botId, telegramUserId, mediaUrl, content);
+                            } else {
+                                telegramSendService.sendMessage(botId, telegramUserId, content);
+                            }
+                        } catch (Exception e) {
+                            log.error("Failed to send telegram message after commit: {}", e.getMessage(), e);
+                        }
+                    }
+                    webSocketService.notifyNewMessage(botId, response);
+                }
+            });
+        } else {
+            if (isSent) {
+                if (mediaUrl != null && !mediaUrl.isBlank()) {
+                    telegramSendService.sendPhoto(botId, telegramUserId, mediaUrl, content);
+                } else {
+                    telegramSendService.sendMessage(botId, telegramUserId, content);
+                }
             }
+            webSocketService.notifyNewMessage(botId, response);
         }
 
-        MessageResponse response = crmMapper.toMessageResponse(message);
-        webSocketService.notifyNewMessage(conversation.getBot().getId(), response);
         return response;
     }
 
@@ -295,14 +313,33 @@ public class CrmServiceImpl implements CrmService {
                 });
     }
 
-    private ConversationResponse toConversationResponse(Conversation conversation) {
-        BotUser botUser = conversation.getBotUser();
-        if (botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith("https://api.telegram.org/")) {
-            userAvatarService.fetchAndSetPhotoUrl(botUser);
+    private List<ConversationResponse> toConversationResponseList(List<Conversation> conversations) {
+        if (conversations == null || conversations.isEmpty()) {
+            return List.of();
         }
+
+        List<Long> conversationIds = conversations.stream().map(Conversation::getId).toList();
+        Map<Long, Message> latestMessages = new HashMap<>();
+        try {
+            List<Message> messages = messageRepository.findLatestMessagesByConversationIds(conversationIds);
+            for (Message m : messages) {
+                if (m.getConversation() != null) {
+                    latestMessages.put(m.getConversation().getId(), m);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to batch load latest messages for conversations: {}", e.getMessage());
+        }
+
+        return conversations.stream()
+                .map(c -> toConversationResponseWithLastMessage(c, latestMessages.get(c.getId())))
+                .toList();
+    }
+
+    private ConversationResponse toConversationResponseWithLastMessage(Conversation conversation, Message last) {
+        BotUser botUser = conversation.getBotUser();
         String botUserName = botUser.getFirstName() + (botUser.getLastName() != null ? " " + botUser.getLastName() : "");
 
-        Message last = messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(conversation.getId()).orElse(null);
         String lastMessage = null;
         LocalDateTime lastMessageAt = null;
         if (last != null) {
@@ -327,6 +364,15 @@ public class CrmServiceImpl implements CrmService {
                 conversation.getBot().getId(),
                 conversation.getBot().getName()
         );
+    }
+
+    private ConversationResponse toConversationResponse(Conversation conversation) {
+        BotUser botUser = conversation.getBotUser();
+        if (botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith("https://api.telegram.org/")) {
+            userAvatarService.fetchAndSetPhotoUrl(botUser);
+        }
+        Message last = messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(conversation.getId()).orElse(null);
+        return toConversationResponseWithLastMessage(conversation, last);
     }
 
     @Override

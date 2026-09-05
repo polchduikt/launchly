@@ -40,4 +40,7 @@ public interface BotUserRepository extends JpaRepository<BotUser, Long> {
 
     @Query("SELECT MIN(bu.telegramId) FROM BotUser bu WHERE bu.bot.id = :botId")
     Optional<Long> findMinTelegramIdByBotId(@Param("botId") Long botId);
+
+    @Query("SELECT bu.bot.id, COUNT(bu.id) FROM BotUser bu WHERE bu.bot.id IN :botIds GROUP BY bu.bot.id")
+    List<Object[]> countGroupedByBotIdIn(@Param("botIds") java.util.Collection<Long> botIds);
 }

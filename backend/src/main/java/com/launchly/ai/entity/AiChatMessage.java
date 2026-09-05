@@ -10,9 +10,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
@@ -22,8 +23,9 @@ import lombok.ToString;
         @Index(name = "idx_ai_chat_messages_session_created", columnList = "session_id, created_at ASC")
     }
 )
-@Data
-@EqualsAndHashCode(callSuper = true, exclude = {"session"})
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @ToString(exclude = {"session"})
 @Builder
 @NoArgsConstructor

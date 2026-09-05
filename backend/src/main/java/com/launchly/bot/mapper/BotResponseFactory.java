@@ -74,4 +74,73 @@ public class BotResponseFactory {
                 bot.getRunsCount()
         );
     }
+
+    public java.util.List<BotResponse> toBotResponseListWithStats(java.util.List<Bot> bots, Long currentUserId, java.util.List<BotMember> memberships) {
+        if (bots == null || bots.isEmpty()) {
+            return java.util.List.of();
+        }
+
+        java.util.List<Long> botIds = bots.stream().map(Bot::getId).toList();
+        java.util.Map<Long, Long> countsByBotId = new java.util.HashMap<>();
+        try {
+            java.util.List<Object[]> groupedCounts = botUserRepository.countGroupedByBotIdIn(botIds);
+            for (Object[] row : groupedCounts) {
+                Long bId = (Long) row[0];
+                Long count = ((Number) row[1]).longValue();
+                countsByBotId.put(bId, count);
+            }
+        } catch (Exception e) {
+            log.error("Failed to load grouped bot user counts: {}", e.getMessage());
+        }
+
+        java.util.Map<Long, String> rolesByBotId = new java.util.HashMap<>();
+        if (memberships != null) {
+            for (BotMember bm : memberships) {
+                if (bm.getBot() != null && bm.getRole() != null) {
+                    rolesByBotId.put(bm.getBot().getId(), bm.getRole());
+                }
+            }
+        }
+
+        java.util.List<BotResponse> result = new java.util.ArrayList<>(bots.size());
+        for (Bot bot : bots) {
+            BotResponse response = botMapper.toBotResponse(bot);
+            boolean hasToken = false;
+            try {
+                String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
+                hasToken = decryptedToken != null && !decryptedToken.isBlank() && !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decryptedToken);
+            } catch (Exception e) {
+                log.error("Failed to decrypt token for bot id={}", bot.getId(), e);
+            }
+
+            long totalUsers = hasToken ? countsByBotId.getOrDefault(bot.getId(), 0L) : 0L;
+
+            String role = WorkspaceRole.OWNER.getValue();
+            if (currentUserId != null && !bot.getUser().getId().equals(currentUserId)) {
+                role = rolesByBotId.getOrDefault(bot.getId(), WorkspaceRole.VIEWER.getValue());
+            }
+
+            result.add(new BotResponse(
+                    response.id(),
+                    response.name(),
+                    response.username(),
+                    response.description(),
+                    response.avatar(),
+                    response.avatarPublicId(),
+                    bot.isBlocked() ? false : response.active(),
+                    bot.isBlocked(),
+                    bot.getBlockReason(),
+                    response.createdAt(),
+                    response.updatedAt(),
+                    totalUsers,
+                    hasToken,
+                    role,
+                    bot.isTemplate(),
+                    bot.getTemplateName(),
+                    bot.getRunsCount()
+            ));
+        }
+
+        return result;
+    }
 }
