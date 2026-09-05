@@ -3,6 +3,7 @@ package com.launchly.bot.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 @Schema(description = "Request payload to invite a team member to collaborate on a bot")
 public record InviteMemberRequest(
@@ -11,8 +12,9 @@ public record InviteMemberRequest(
     @Email(message = "Invalid email format")
     String email,
 
-    @Schema(description = "Bot member role: ADMIN, EDITOR, VIEWER, SUPPORT", example = "EDITOR", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Bot member role: ADMIN, EDITOR, VIEWER", example = "EDITOR", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Role is required")
+    @Pattern(regexp = "^(?i)(ADMIN|EDITOR|VIEWER)$", message = "Invalid role. Allowed values: ADMIN, EDITOR, VIEWER")
     String role,
 
     @Schema(description = "Grant Live Chat / Inbox management access", example = "true")
@@ -21,4 +23,3 @@ public record InviteMemberRequest(
     @Schema(description = "Grant billing management permissions", example = "false")
     boolean billingPermission
 ) {}
-

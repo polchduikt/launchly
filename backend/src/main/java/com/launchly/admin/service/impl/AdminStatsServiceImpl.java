@@ -28,6 +28,7 @@ import com.launchly.integration.entity.Integration;
 import com.launchly.integration.entity.IntegrationType;
 import com.launchly.integration.repository.IntegrationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminStatsServiceImpl implements AdminStatsService {
@@ -281,6 +283,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         try {
             userQueryService.countTotalUsers();
         } catch (Exception e) {
+            log.warn("Database health check ping failed: {}", e.getMessage());
             dbHealthy = false;
             dbStatus = "Error";
         }

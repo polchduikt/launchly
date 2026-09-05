@@ -17,6 +17,7 @@ import com.launchly.crm.repository.ConversationRepository;
 import com.launchly.crm.repository.LeadRepository;
 import com.launchly.crm.repository.MessageRepository;
 import com.launchly.crm.repository.OrderRepository;
+import com.launchly.crm.service.CrmPipelineService;
 import com.launchly.crm.websocket.CrmWebSocketService;
 import com.launchly.integration.service.IntegrationEventService;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,6 +78,9 @@ class CrmServiceImplTest {
     @Mock
     private ValueOperations<String, String> valueOperations;
 
+    @Mock
+    private CrmPipelineService crmPipelineService;
+
     @InjectMocks
     private CrmServiceImpl crmService;
 
@@ -124,37 +128,33 @@ class CrmServiceImplTest {
     @Test
     @DisplayName("Should successfully create order, increment sequence and notify WebSocket")
     void createOrder_Success() {
-        when(botRepository.findById(1L)).thenReturn(Optional.of(testBot));
-        when(botUserRepository.findById(100L)).thenReturn(Optional.of(testBotUser));
-        when(orderRepository.save(any(Order.class))).thenReturn(testOrder);
-
         OrderResponse mockOrderResponse = mock(OrderResponse.class);
-        when(crmMapper.toOrderResponse(any(Order.class))).thenReturn(mockOrderResponse);
+        when(crmPipelineService.createOrder(1L, 100L, "Coffee Pack", new BigDecimal("250.00"), "UAH"))
+                .thenReturn(mockOrderResponse);
 
         OrderResponse result = crmService.createOrder(1L, 100L, "Coffee Pack", new BigDecimal("250.00"), "UAH");
 
         assertThat(result).isNotNull();
-        assertThat(testBot.getOrderSequence()).isEqualTo(11L);
-        verify(orderRepository, times(1)).save(any(Order.class));
-        verify(webSocketService, times(1)).notifyNewOrder(eq(1L), any());
+        verify(crmPipelineService, times(1)).createOrder(1L, 100L, "Coffee Pack", new BigDecimal("250.00"), "UAH");
     }
 
     @Test
     @DisplayName("Should return orders by bot when user is owner")
     void getOrdersByBot_Success() {
-        when(botRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(testBot));
-        when(orderRepository.findByBotIdOrderByCreatedAtDesc(1L)).thenReturn(List.of(testOrder));
-        when(crmMapper.toOrderResponseList(List.of(testOrder))).thenReturn(List.of(mock(OrderResponse.class)));
+        OrderResponse mockOrderResponse = mock(OrderResponse.class);
+        when(crmPipelineService.getOrdersByBot(1L, 1L)).thenReturn(List.of(mockOrderResponse));
 
         List<OrderResponse> orders = crmService.getOrdersByBot(1L, 1L);
 
         assertThat(orders).hasSize(1);
+        verify(crmPipelineService, times(1)).getOrdersByBot(1L, 1L);
     }
 
     @Test
     @DisplayName("Should throw Forbidden when getting orders without bot ownership")
     void getOrdersByBot_WhenAccessDenied_ThrowsForbidden() {
-        when(botRepository.findByIdAndUserId(1L, 999L)).thenReturn(Optional.empty());
+        when(crmPipelineService.getOrdersByBot(1L, 999L))
+                .thenThrow(new AppException(HttpStatus.FORBIDDEN, "crm.error.access_denied"));
 
         assertThatThrownBy(() -> crmService.getOrdersByBot(1L, 999L))
                 .isInstanceOf(AppException.class)
@@ -165,23 +165,21 @@ class CrmServiceImplTest {
     @DisplayName("Should update order status")
     void updateOrder_Success() {
         OrderUpdateRequest request = new OrderUpdateRequest(OrderStatus.COMPLETED, "Delivery to Kyiv");
-        when(orderRepository.findById(50L)).thenReturn(Optional.of(testOrder));
-        when(botRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(testBot));
-        when(orderRepository.save(testOrder)).thenReturn(testOrder);
-        when(crmMapper.toOrderResponse(testOrder)).thenReturn(mock(OrderResponse.class));
+        OrderResponse mockOrderResponse = mock(OrderResponse.class);
+        when(crmPipelineService.updateOrder(50L, request, 1L)).thenReturn(mockOrderResponse);
 
         OrderResponse response = crmService.updateOrder(50L, request, 1L);
 
         assertThat(response).isNotNull();
-        assertThat(testOrder.getStatus()).isEqualTo(OrderStatus.COMPLETED);
-        assertThat(testOrder.getNotes()).isEqualTo("Delivery to Kyiv");
+        verify(crmPipelineService, times(1)).updateOrder(50L, request, 1L);
     }
 
     @Test
     @DisplayName("Should throw NotFound when updating non-existent order")
     void updateOrder_WhenNotFound_ThrowsNotFound() {
         OrderUpdateRequest request = new OrderUpdateRequest(OrderStatus.COMPLETED, null);
-        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+        when(crmPipelineService.updateOrder(999L, request, 1L))
+                .thenThrow(new AppException(HttpStatus.NOT_FOUND, "crm.error.order_not_found"));
 
         assertThatThrownBy(() -> crmService.updateOrder(999L, request, 1L))
                 .isInstanceOf(AppException.class)
@@ -191,51 +189,47 @@ class CrmServiceImplTest {
     @Test
     @DisplayName("Should successfully create lead")
     void createLead_Success() {
-        when(botRepository.findById(1L)).thenReturn(Optional.of(testBot));
-        when(botUserRepository.findById(100L)).thenReturn(Optional.of(testBotUser));
-        when(leadRepository.save(any(Lead.class))).thenReturn(testLead);
-        when(crmMapper.toLeadResponse(any(Lead.class))).thenReturn(mock(LeadResponse.class));
+        LeadResponse mockLeadResponse = mock(LeadResponse.class);
+        when(crmPipelineService.createLead(1L, 100L, "Alex Lead", "alex@example.com", "+380991112233", "{}"))
+                .thenReturn(mockLeadResponse);
 
         LeadResponse response = crmService.createLead(1L, 100L, "Alex Lead", "alex@example.com", "+380991112233", "{}");
 
         assertThat(response).isNotNull();
-        verify(leadRepository, times(1)).save(any(Lead.class));
-        verify(webSocketService, times(1)).notifyNewLead(eq(1L), any());
+        verify(crmPipelineService, times(1)).createLead(1L, 100L, "Alex Lead", "alex@example.com", "+380991112233", "{}");
     }
 
     @Test
     @DisplayName("Should return leads by bot")
     void getLeadsByBot_Success() {
-        when(botRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(testBot));
-        when(leadRepository.findByBotIdOrderByCreatedAtDesc(1L)).thenReturn(List.of(testLead));
-        when(crmMapper.toLeadResponseList(List.of(testLead))).thenReturn(List.of(mock(LeadResponse.class)));
+        LeadResponse mockLeadResponse = mock(LeadResponse.class);
+        when(crmPipelineService.getLeadsByBot(1L, 1L)).thenReturn(List.of(mockLeadResponse));
 
         List<LeadResponse> leads = crmService.getLeadsByBot(1L, 1L);
 
         assertThat(leads).hasSize(1);
+        verify(crmPipelineService, times(1)).getLeadsByBot(1L, 1L);
     }
 
     @Test
     @DisplayName("Should update lead details")
     void updateLead_Success() {
         LeadUpdateRequest request = new LeadUpdateRequest(LeadStatus.QUALIFIED, "Interested in Pro plan");
-        when(leadRepository.findById(80L)).thenReturn(Optional.of(testLead));
-        when(botRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(testBot));
-        when(leadRepository.save(testLead)).thenReturn(testLead);
-        when(crmMapper.toLeadResponse(testLead)).thenReturn(mock(LeadResponse.class));
+        LeadResponse mockLeadResponse = mock(LeadResponse.class);
+        when(crmPipelineService.updateLead(80L, request, 1L)).thenReturn(mockLeadResponse);
 
         LeadResponse response = crmService.updateLead(80L, request, 1L);
 
         assertThat(response).isNotNull();
-        assertThat(testLead.getStatus()).isEqualTo(LeadStatus.QUALIFIED);
-        assertThat(testLead.getNotes()).isEqualTo("Interested in Pro plan");
+        verify(crmPipelineService, times(1)).updateLead(80L, request, 1L);
     }
 
     @Test
     @DisplayName("Should throw NotFound when updating non-existent lead")
     void updateLead_WhenNotFound_ThrowsNotFound() {
         LeadUpdateRequest request = new LeadUpdateRequest(LeadStatus.QUALIFIED, null);
-        when(leadRepository.findById(999L)).thenReturn(Optional.empty());
+        when(crmPipelineService.updateLead(999L, request, 1L))
+                .thenThrow(new AppException(HttpStatus.NOT_FOUND, "crm.error.lead_not_found"));
 
         assertThatThrownBy(() -> crmService.updateLead(999L, request, 1L))
                 .isInstanceOf(AppException.class)

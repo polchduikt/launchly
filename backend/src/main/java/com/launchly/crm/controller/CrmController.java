@@ -6,6 +6,7 @@ import com.launchly.common.exception.ErrorResponse;
 import com.launchly.common.security.CustomUserDetails;
 import com.launchly.crm.dto.request.AddNoteRequest;
 import com.launchly.crm.dto.request.ConversationUpdateRequest;
+import com.launchly.crm.dto.request.CreateLabelRequest;
 import com.launchly.crm.dto.request.LeadUpdateRequest;
 import com.launchly.crm.dto.request.OrderUpdateRequest;
 import com.launchly.crm.dto.request.SendMessageRequest;
@@ -61,9 +62,9 @@ public class CrmController {
     })
     @PostMapping("/labels")
     public ResponseEntity<List<String>> addLabel(
-            @RequestBody java.util.Map<String, String> request,
+            @Valid @RequestBody CreateLabelRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(crmService.addLabel(request.get("name"), userDetails.getId()));
+        return ResponseEntity.ok(crmService.addLabel(request.name(), userDetails.getId()));
     }
 
     @Operation(summary = "Delete CRM label", description = "Remove an existing custom conversation label.")

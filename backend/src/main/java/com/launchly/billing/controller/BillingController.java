@@ -1,6 +1,7 @@
 package com.launchly.billing.controller;
 
 import com.launchly.billing.dto.request.CheckoutRequest;
+import com.launchly.billing.dto.request.ConfirmSessionRequest;
 import com.launchly.billing.dto.response.CheckoutResponse;
 import com.launchly.billing.dto.response.PlanResponse;
 import com.launchly.billing.dto.response.SubscriptionResponse;
@@ -101,10 +102,9 @@ public class BillingController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/subscription/confirm-session")
-    public ResponseEntity<SubscriptionResponse> confirmSession(@RequestBody java.util.Map<String, String> request,
+    public ResponseEntity<SubscriptionResponse> confirmSession(@Valid @RequestBody ConfirmSessionRequest request,
                                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
-        String sessionId = request.get("sessionId");
-        return ResponseEntity.ok(billingService.confirmCheckoutSession(sessionId, userDetails.getId()));
+        return ResponseEntity.ok(billingService.confirmCheckoutSession(request.sessionId(), userDetails.getId()));
     }
 }
 

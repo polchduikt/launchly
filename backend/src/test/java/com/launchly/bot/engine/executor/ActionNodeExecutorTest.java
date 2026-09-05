@@ -15,14 +15,19 @@ import com.launchly.integration.repository.IntegrationRepository;
 import com.launchly.integration.service.GoogleSheetsService;
 import com.launchly.integration.service.MailchimpService;
 import com.launchly.notification.service.NotificationService;
+import com.launchly.bot.engine.action.ActionContactManager;
+import com.launchly.bot.engine.action.ActionPlaceholderResolver;
+import com.launchly.bot.engine.action.handler.TagBotActionHandler;
+import com.launchly.bot.engine.action.handler.UserFieldBotActionHandler;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -62,10 +67,21 @@ class ActionNodeExecutorTest {
     @Mock
     private TelegramClient telegramClient;
 
-    @InjectMocks
     private ActionNodeExecutor executor;
 
     private final Position pos = new Position(0.0, 0.0);
+
+    @BeforeEach
+    void setUp() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ActionPlaceholderResolver placeholderResolver = new ActionPlaceholderResolver(tagRepository, botUserTagRepository, objectMapper);
+        ActionContactManager contactManager = new ActionContactManager(botUserRepository, stateService, objectMapper);
+
+        TagBotActionHandler tagHandler = new TagBotActionHandler(tagRepository, botUserTagRepository);
+        UserFieldBotActionHandler userFieldHandler = new UserFieldBotActionHandler(stateService, placeholderResolver, contactManager);
+
+        executor = new ActionNodeExecutor(stateService, List.of(tagHandler, userFieldHandler));
+    }
 
     @Test
     @DisplayName("Should return ACTION type")

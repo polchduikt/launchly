@@ -140,6 +140,7 @@ public class TemplateServiceImpl implements TemplateService {
                     resolvedFieldCount = selectedFieldsList.size();
                 }
             } catch (Exception e) {
+                log.warn("Failed to filter custom fields data for template: {}", e.getMessage());
                 customFieldsData = bot.getCustomFieldsData();
                 resolvedFieldCount = fieldIds.size();
             }

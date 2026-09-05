@@ -103,6 +103,7 @@ public class FlowDelayScheduler {
                     long targetMs = targetTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                     expired = System.currentTimeMillis() >= targetMs;
                 } catch (Exception e) {
+                    log.warn("Failed to parse flow delay target time '{}': {}", dateTimeStr, e.getMessage());
                     expired = true;
                 }
             }
@@ -142,6 +143,7 @@ public class FlowDelayScheduler {
 
                     expired = elapsed >= durationMs;
                 } catch (NumberFormatException e) {
+                    log.warn("Invalid delay start timestamp '{}', resetting: {}", startStr, e.getMessage());
                     stateService.setSessionData(botId, user.getTelegramId(), delayKey, String.valueOf(System.currentTimeMillis()));
                 }
             }

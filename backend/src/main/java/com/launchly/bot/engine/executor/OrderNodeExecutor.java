@@ -52,6 +52,7 @@ public class OrderNodeExecutor implements NodeExecutor {
         try {
             totalAmount = new BigDecimal(price);
         } catch (NumberFormatException e) {
+            log.warn("Invalid order price '{}', defaulting to zero: {}", price, e.getMessage());
             totalAmount = BigDecimal.ZERO;
         }
         String currency = data != null ? (String) data.getOrDefault("currency", "UAH") : "UAH";
