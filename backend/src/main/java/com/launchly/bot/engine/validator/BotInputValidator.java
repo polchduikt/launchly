@@ -14,45 +14,37 @@ public class BotInputValidator {
 
     private final MessageUtils messageUtils;
 
-    private static final String NUMBER_REGEX = "-?\\d+(\\.\\d+)?";
-    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@(.+)$";
-    private static final String PHONE_REGEX = "^\\+?[0-9\\s\\-\\(\\)]+$";
-
     public boolean validate(String text, String replyType) {
         if (text == null || text.trim().isEmpty()) {
             return false;
         }
-        if ("Number".equalsIgnoreCase(replyType)) {
-            return text.matches(NUMBER_REGEX);
-        }
-        if ("Email".equalsIgnoreCase(replyType)) {
-            return text.matches(EMAIL_REGEX);
-        }
-        if ("Phone".equalsIgnoreCase(replyType)) {
-            return text.matches(PHONE_REGEX);
+        ValidationType validationType = ValidationType.fromString(replyType);
+        if (validationType.getPattern() != null) {
+            return validationType.getPattern().matcher(text).matches();
         }
         return true;
     }
 
     public String getValidationErrorMessage(String replyType) {
-        if ("Email".equalsIgnoreCase(replyType)) {
-            return messageUtils.getMessageWithDefault(
-                    "bot.validation.email",
-                    "Please enter a valid email address (e.g., name@example.com).");
+        ValidationType validationType = ValidationType.fromString(replyType);
+        switch (validationType) {
+            case EMAIL:
+                return messageUtils.getMessageWithDefault(
+                        "bot.validation.email",
+                        "Please enter a valid email address (e.g., name@example.com).");
+            case PHONE:
+                return messageUtils.getMessageWithDefault(
+                        "bot.validation.phone",
+                        "Please enter a valid phone number (e.g., +380123456789).");
+            case NUMBER:
+                return messageUtils.getMessageWithDefault(
+                        "bot.validation.number",
+                        "Please enter a valid number.");
+            default:
+                return messageUtils.getMessageWithDefault(
+                        "bot.validation.invalid_format",
+                        "Invalid format. Please enter valid data.");
         }
-        if ("Phone".equalsIgnoreCase(replyType)) {
-            return messageUtils.getMessageWithDefault(
-                    "bot.validation.phone",
-                    "Please enter a valid phone number (e.g., +380123456789).");
-        }
-        if ("Number".equalsIgnoreCase(replyType)) {
-            return messageUtils.getMessageWithDefault(
-                    "bot.validation.number",
-                    "Please enter a valid number.");
-        }
-        return messageUtils.getMessageWithDefault(
-                "bot.validation.invalid_format",
-                "Invalid format. Please enter valid data.");
     }
 
     public void sendValidationErrorMessage(String chatId, String replyType, TelegramClient client) {

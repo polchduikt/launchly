@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public final class DateTimeUtils {
 
     private DateTimeUtils() {
@@ -20,7 +23,8 @@ public final class DateTimeUtils {
         } catch (Exception e) {
             try {
                 return LocalDate.parse(startDate).atStartOfDay();
-            } catch (Exception ignored) {
+            } catch (Exception ex) {
+                log.warn("Failed to parse start date: {}", ex.getMessage());
                 return null;
             }
         }
@@ -33,7 +37,8 @@ public final class DateTimeUtils {
         } catch (Exception e) {
             try {
                 return LocalDate.parse(endDate).atTime(LocalTime.MAX);
-            } catch (Exception ignored) {
+            } catch (Exception ex) {
+                log.warn("Failed to parse end date: {}", ex.getMessage());
                 return null;
             }
         }
