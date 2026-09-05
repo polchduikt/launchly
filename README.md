@@ -26,6 +26,7 @@
 [![Nginx](https://img.shields.io/badge/Nginx-Reverse_Proxy-009639.svg?logo=nginx&logoColor=white)](https://nginx.org/)
 [![Testcontainers](https://img.shields.io/badge/Testcontainers-Integration_Tests-0B1C28.svg)](https://testcontainers.com/)
 [![Telegram Bot API](https://img.shields.io/badge/Telegram-Bot_API-26A5E4.svg?logo=telegram&logoColor=white)](https://core.telegram.org/bots/api)
+[![Cloudflare Turnstile](https://img.shields.io/badge/Cloudflare-Turnstile-F38020.svg?logo=cloudflare&logoColor=white)](https://www.cloudflare.com/products/turnstile/)
 
 ---
 
@@ -53,6 +54,7 @@ It serves as a full-scale technical showcase of building resilient, high-concurr
 - **Transactional Outbox & DLQ**: Resilient asynchronous event delivery with retry backoff and Dead Letter Queue
 - **Distributed Idempotency Layer**: Redis-backed replay protection on all critical mutation endpoints
 - **Dynamic Tier-Based Rate Limiter**: Token-bucket algorithm with RFC headers and role-based quotas
+- **Cloudflare Turnstile Verify API**: Server-side bot verification and credential stuffing protection on auth endpoints
 - **Enterprise Security Headers**: Strict HSTS, Content-Type Options, Frame Options, Referrer and Permissions policies
 - **GDPR & SOC2 PII Masking**: Automatic redacting of emails, phone numbers, and secrets in runtime logs
 - **JPA Deep Entity Graphs & JDBC Batching**: High-throughput statement batching (size=50) and N+1 query elimination
@@ -71,6 +73,7 @@ It serves as a full-scale technical showcase of building resilient, high-concurr
 - **TanStack Query v5**: Server state caching, background synchronization, and optimistic mutations
 - **Zustand v5**: Client-only synchronous state (auth session, canvas selection, network health)
 - **React Hook Form + Zod v4**: Strict type-safe form validation and DTO transformations
+- **Cloudflare Turnstile Widget**: Non-blocking bot protection with dynamic theme and flexible sizing
 - **React Router v7**: Nested dashboard layouts and role-based route guards
 - **STOMP & SockJS Client**: Real-time live chat subscriptions
 - **TanStack Virtual & Custom Virtualizer**: Scalable windowing for high-volume conversation and contact lists
@@ -90,6 +93,7 @@ It serves as a full-scale technical showcase of building resilient, high-concurr
 
 - **Visual Bot Constructor**: Drag-and-drop conversational graph builder supporting Message, Menu, Action, Condition, and AI nodes.
 - **Omnichannel CRM & Live Inbox**: Two-way Telegram chat with live agent intervention, conversation search, and lead status pipelines.
+- **Cloudflare Turnstile Bot & Spam Protection**: Smart non-interactive challenge verification securing authentication flows (registration and login) with zero friction.
 - **Transactional Outbox & Integrations**: Guaranteed at-least-once delivery for webhooks (Hotmart, e-commerce, CRM leads) with automatic retry backoff and DLQ tracking.
 - **Distributed Idempotency Protection**: Safe concurrent execution prevention for AI generation, campaign dispatches, team invites, and support appeals.
 - **Dynamic Tier Rate Limiting**: Multi-tenant token-bucket rate limiting per plan tier (`ROLE_OWNER`, `ROLE_PRO`, `ROLE_ENTERPRISE`, `ROLE_ADMIN`).
