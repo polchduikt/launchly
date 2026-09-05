@@ -17,6 +17,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
+import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import java.time.Duration;
 import java.util.List;
@@ -32,6 +33,8 @@ public class TelegramBotManager implements TelegramClientProvider {
     private final EncryptionUtil encryptionUtil;
     private final FlowEngineService flowEngineService;
     private final CrmService crmService;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
     @Value("${telegram.mode:polling}")
     private String mode;
@@ -115,18 +118,12 @@ public class TelegramBotManager implements TelegramClientProvider {
                 }
             }
 
-            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-            factory.setConnectTimeout(Duration.ofMillis(1500));
-            factory.setReadTimeout(Duration.ofMillis(1500));
-            org.springframework.web.client.RestTemplate timeoutRestTemplate = new org.springframework.web.client.RestTemplate(factory);
-
             if (bot.getUsername() == null || bot.getUsername().isBlank()) {
                 try {
                     String url = "https://api.telegram.org/bot" + token + "/getMe";
-                    org.springframework.http.ResponseEntity<String> responseEntity = timeoutRestTemplate.getForEntity(url, String.class);
+                    org.springframework.http.ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
                     if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
-                        ObjectMapper mapper = new ObjectMapper();
-                        JsonNode root = mapper.readTree(responseEntity.getBody());
+                        JsonNode root = objectMapper.readTree(responseEntity.getBody());
                         if (root.has("ok") && root.get("ok").asBoolean()) {
                             JsonNode result = root.get("result");
                             if (result.has("username")) {
@@ -145,7 +142,7 @@ public class TelegramBotManager implements TelegramClientProvider {
 
             try {
                 String deleteWebhookUrl = "https://api.telegram.org/bot" + token + "/deleteWebhook?drop_pending_updates=false";
-                timeoutRestTemplate.getForEntity(deleteWebhookUrl, String.class);
+                restTemplate.getForEntity(deleteWebhookUrl, String.class);
             } catch (Exception e) {
                 log.debug("Could not call deleteWebhook before polling for bot {}: {}", bot.getId(), e.getMessage());
             }
@@ -169,7 +166,6 @@ public class TelegramBotManager implements TelegramClientProvider {
         try {
             try {
                 String deleteWebhookUrl = "https://api.telegram.org/bot" + systemBotToken + "/deleteWebhook?drop_pending_updates=false";
-                org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
                 restTemplate.getForEntity(deleteWebhookUrl, String.class);
                 wait(300);
             } catch (InterruptedException ie) {

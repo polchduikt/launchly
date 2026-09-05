@@ -78,6 +78,7 @@ public class BotServiceImpl implements BotService {
     private final BotLifecycleService botLifecycleService;
     private final BotSubscriberService botSubscriberService;
     private final BotResponseFactory botResponseFactory;
+    private final RestTemplate restTemplate;
 
     @Override
     @Transactional
@@ -404,10 +405,6 @@ public class BotServiceImpl implements BotService {
     private void updateBotTelegramInfo(Bot bot, String unencryptedToken) {
         try {
             String url = "https://api.telegram.org/bot" + unencryptedToken + "/getMe";
-            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-            factory.setConnectTimeout(Duration.ofMillis(1500));
-            factory.setReadTimeout(Duration.ofMillis(1500));
-            RestTemplate restTemplate = new RestTemplate(factory);
             org.springframework.http.ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
             if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
                 JsonNode responseNode = objectMapper.readTree(responseEntity.getBody());

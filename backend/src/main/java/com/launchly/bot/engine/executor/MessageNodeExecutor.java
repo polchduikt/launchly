@@ -571,8 +571,7 @@ public class MessageNodeExecutor implements NodeExecutor {
                 if (!found) {
                     try {
                         if (botUser.getMetadata() != null && !botUser.getMetadata().trim().isEmpty()) {
-                            ObjectMapper objectMapper = new ObjectMapper();
-                            Map<String, Object> metaMap = objectMapper.readValue(botUser.getMetadata(), Map.class);
+                            Map<String, Object> metaMap = this.objectMapper.readValue(botUser.getMetadata(), Map.class);
                             Map<String, Object> customFields = (Map<String, Object>) metaMap.get("customFields");
                             if (customFields != null) {
                                 for (Map.Entry<String, Object> entry : customFields.entrySet()) {
