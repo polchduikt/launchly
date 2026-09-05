@@ -4,6 +4,7 @@ import com.launchly.bot.engine.model.FlowEdge;
 import com.launchly.bot.engine.model.FlowNode;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.entity.NodeType;
+import com.launchly.bot.constant.BotConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -199,7 +200,7 @@ public class MessageNodeExecutor implements NodeExecutor {
                     }
 
                 } else if ("delay".equals(type)) {
-                    int delaySeconds = 3;
+                    int delaySeconds = BotConstants.DEFAULT_DELAY_SECONDS;
                     Object delayObj = block.get("delaySeconds");
                     if (delayObj instanceof Number) {
                         delaySeconds = ((Number) delayObj).intValue();

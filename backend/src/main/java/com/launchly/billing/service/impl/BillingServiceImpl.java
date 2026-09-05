@@ -5,6 +5,7 @@ import com.launchly.auth.service.UserQueryService;
 import com.launchly.billing.dto.response.CheckoutResponse;
 import com.launchly.billing.dto.response.PlanResponse;
 import com.launchly.billing.dto.response.SubscriptionResponse;
+import com.launchly.billing.constant.BillingConstants;
 import com.launchly.billing.entity.Plan;
 import com.launchly.billing.entity.Subscription;
 import com.launchly.billing.entity.SubscriptionStatus;
@@ -83,7 +84,7 @@ public class BillingServiceImpl implements BillingService {
 
         User user = userQueryService.getUserOrThrow(userId);
 
-        Plan freePlan = planRepository.findByName("FREE")
+        Plan freePlan = planRepository.findByName(BillingConstants.PLAN_FREE)
                 .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found"));
 
         Subscription subscription = Subscription.builder()
@@ -127,7 +128,7 @@ public class BillingServiceImpl implements BillingService {
         User user = userQueryService.getUserOrThrow(userId);
 
         Plan plan = planLimitService.getPlan(planId);
-        if ("FREE".equalsIgnoreCase(plan.getName())) {
+        if (BillingConstants.PLAN_FREE.equalsIgnoreCase(plan.getName())) {
             throw new AppException(HttpStatus.BAD_REQUEST, "billing.error.cannot_checkout_free");
         }
 
@@ -279,20 +280,8 @@ public class BillingServiceImpl implements BillingService {
                 handleCheckoutCompleted(session);
             }
         } catch (Exception e) {
-            log.error("Error retrieving Stripe Checkout Session {}: {}", sessionId, e.getMessage());
-            if (sessionId.startsWith("cs_test")) {
-                planRepository.findByName("PRO").ifPresent(proPlan -> {
-                    Subscription sub = subscriptionRepository.findByUserId(userId)
-                            .orElseGet(() -> {
-                                createFreeSubscription(userId);
-                                return subscriptionRepository.findByUserId(userId).orElseThrow();
-                            });
-                    sub.setPlan(proPlan);
-                    sub.setStatus(SubscriptionStatus.ACTIVE);
-                    subscriptionRepository.save(sub);
-                    evictSubscriptionCache(userId);
-                });
-            }
+            log.error("Error retrieving Stripe Checkout Session {}: {}", sessionId, e.getMessage(), e);
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.session_retrieval_failed");
         }
 
         evictSubscriptionCache(userId);
@@ -447,7 +436,7 @@ public class BillingServiceImpl implements BillingService {
             return;
         }
 
-        Plan freePlan = planRepository.findByName("FREE")
+        Plan freePlan = planRepository.findByName(BillingConstants.PLAN_FREE)
                 .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found"));
 
         subscription.setPlan(freePlan);
@@ -459,7 +448,7 @@ public class BillingServiceImpl implements BillingService {
 
         subscriptionRepository.save(subscription);
         evictSubscriptionCache(subscription.getUser().getId());
-        log.info("Subscription deleted in Stripe. Downgraded user {} to FREE plan", subscription.getUser().getId());
+        log.info("Subscription deleted in Stripe. Downgraded user {} to {} plan", subscription.getUser().getId(), BillingConstants.PLAN_FREE);
     }
 
     private void handleSubscriptionUpdated(com.stripe.model.Subscription stripeSub) {

@@ -15,6 +15,7 @@ import com.launchly.bot.dto.response.BotStatsResponse;
 import com.launchly.bot.dto.response.BotUserResponse;
 import com.launchly.bot.dto.response.FlowSchemaResponse;
 import com.launchly.bot.constant.BotConstants;
+import com.launchly.bot.constant.TelegramConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotMember;
 import com.launchly.bot.entity.FlowSchema;
@@ -402,7 +403,7 @@ public class BotServiceImpl implements BotService {
 
     private void updateBotTelegramInfo(Bot bot, String unencryptedToken) {
         try {
-            String url = "https://api.telegram.org/bot" + unencryptedToken + "/getMe";
+            String url = TelegramConstants.BOT_API_URL + unencryptedToken + "/getMe";
             org.springframework.http.ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
             if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
                 JsonNode responseNode = objectMapper.readTree(responseEntity.getBody());

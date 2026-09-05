@@ -1,6 +1,7 @@
 package com.launchly.crm.service.impl;
 
 import com.launchly.bot.entity.Bot;
+import com.launchly.bot.constant.TelegramConstants;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotUserRepository;
@@ -91,6 +92,8 @@ public class CrmServiceImpl implements CrmService {
         this.stringRedisTemplate = stringRedisTemplate;
         this.crmPipelineService = crmPipelineService;
     }
+
+    private static final Duration SCHEDULED_MESSAGE_LOCK_TIMEOUT = Duration.ofMinutes(5);
 
     @Override
     @Transactional
@@ -368,7 +371,7 @@ public class CrmServiceImpl implements CrmService {
 
     private ConversationResponse toConversationResponse(Conversation conversation) {
         BotUser botUser = conversation.getBotUser();
-        if (botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith("https://api.telegram.org/")) {
+        if (botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith(TelegramConstants.API_BASE_URL)) {
             userAvatarService.fetchAndSetPhotoUrl(botUser);
         }
         Message last = messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(conversation.getId()).orElse(null);
@@ -476,7 +479,7 @@ public class CrmServiceImpl implements CrmService {
 
         for (Message message : dueMessages) {
             String lockKey = "lock:crm:scheduled:" + message.getId();
-            Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", Duration.ofMinutes(5));
+            Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", SCHEDULED_MESSAGE_LOCK_TIMEOUT);
             if (Boolean.FALSE.equals(acquired)) {
                 continue;
             }

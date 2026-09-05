@@ -376,7 +376,8 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             try {
                 botUserRepository.save(botUser);
             } catch (Exception e) {
-                log.warn("Failed to persist final botUser state for user {}: {}", botUser.getId(), e.getMessage());
+                log.error("Failed to persist final botUser state for user {}: {}", botUser.getId(), e.getMessage());
+                throw e;
             }
 
         } catch (Exception e) {
@@ -640,7 +641,8 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             try {
                 botUserRepository.save(botUser);
             } catch (Exception e) {
-                log.warn("Failed to persist final botUser state for user {}: {}", botUser.getId(), e.getMessage());
+                log.error("Failed to persist final botUser state for user {}: {}", botUser.getId(), e.getMessage());
+                throw e;
             }
         } catch (Exception e) {
             log.error("Error running flow for bot {}: {}", botId, e.getMessage(), e);
