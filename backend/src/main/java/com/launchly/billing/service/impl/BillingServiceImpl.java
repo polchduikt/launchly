@@ -458,9 +458,9 @@ public class BillingServiceImpl implements BillingService {
             return;
         }
 
-        subscription.setStatus(com.launchly.billing.util.StripeUtils.mapStripeStatus(stripeSub.getStatus()));
-        subscription.setCurrentPeriodStart(com.launchly.billing.util.StripeUtils.mapEpoch(stripeSub.getCurrentPeriodStart()));
-        subscription.setCurrentPeriodEnd(com.launchly.billing.util.StripeUtils.mapEpoch(stripeSub.getCurrentPeriodEnd()));
+        subscription.setStatus(StripeUtils.mapStripeStatus(stripeSub.getStatus()));
+        subscription.setCurrentPeriodStart(StripeUtils.mapEpoch(stripeSub.getCurrentPeriodStart()));
+        subscription.setCurrentPeriodEnd(StripeUtils.mapEpoch(stripeSub.getCurrentPeriodEnd()));
         subscription.setCancelAtPeriodEnd(stripeSub.getCancelAtPeriodEnd());
 
         subscriptionRepository.save(subscription);

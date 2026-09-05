@@ -1,5 +1,6 @@
 package com.launchly.blog.service.impl;
 
+import com.launchly.auth.service.UserQueryService;
 import com.launchly.blog.dto.BlogArticleDto;
 import com.launchly.blog.dto.SaveBlogArticleRequest;
 import com.launchly.blog.entity.BlogArticle;
@@ -28,7 +29,7 @@ class AdminBlogServiceImplTest {
     private BlogArticleRepository blogArticleRepository;
 
     @Mock
-    private com.launchly.auth.service.UserQueryService userQueryService;
+    private UserQueryService userQueryService;
 
     @Mock
     private BlogMapper blogMapper;

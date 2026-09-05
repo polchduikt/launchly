@@ -1,5 +1,6 @@
 package com.launchly.bot.service.impl;
 
+import com.launchly.admin.service.UserAuditService;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.service.UserQueryService;
@@ -81,7 +82,7 @@ class BotServiceImplTest {
     private AccountTemplateRepository accountTemplateRepository;
 
     @Mock
-    private com.launchly.admin.service.UserAuditService userAuditService;
+    private UserAuditService userAuditService;
 
     @Mock
     private FlowSchemaValidator flowSchemaValidator;

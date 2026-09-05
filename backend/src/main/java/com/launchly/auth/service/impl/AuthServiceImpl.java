@@ -20,6 +20,12 @@ import com.launchly.common.exception.AppException;
 import com.launchly.auth.entity.AuthSessionStatus;
 import com.launchly.auth.entity.TelegramAuthSession;
 import com.launchly.auth.repository.TelegramAuthSessionRepository;
+import com.launchly.admin.service.UserAuditService;
+import com.launchly.billing.repository.SubscriptionRepository;
+import com.launchly.bot.repository.BotMemberRepository;
+import com.launchly.bot.repository.BotRepository;
+import com.launchly.common.security.turnstile.TurnstileService;
+import com.launchly.common.utils.MessageUtils;
 import com.launchly.auth.dto.response.TelegramSessionResponse;
 import com.launchly.auth.dto.response.TelegramStatusResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,12 +49,12 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final BillingService billingService;
     private final TelegramAuthSessionRepository telegramAuthSessionRepository;
-    private final com.launchly.admin.service.UserAuditService userAuditService;
-    private final com.launchly.bot.repository.BotRepository botRepository;
-    private final com.launchly.bot.repository.BotMemberRepository botMemberRepository;
-    private final com.launchly.billing.repository.SubscriptionRepository subscriptionRepository;
-    private final com.launchly.common.utils.MessageUtils messageUtils;
-    private final com.launchly.common.security.turnstile.TurnstileService turnstileService;
+    private final UserAuditService userAuditService;
+    private final BotRepository botRepository;
+    private final BotMemberRepository botMemberRepository;
+    private final SubscriptionRepository subscriptionRepository;
+    private final MessageUtils messageUtils;
+    private final TurnstileService turnstileService;
 
     @Value("${telegram.system-bot-username:}")
     private String systemBotUsername;

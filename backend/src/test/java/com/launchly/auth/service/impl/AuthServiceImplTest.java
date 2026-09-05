@@ -18,6 +18,7 @@ import com.launchly.billing.service.BillingService;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.common.exception.AppException;
+import com.launchly.common.security.turnstile.TurnstileService;
 import com.launchly.common.utils.MessageUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -76,7 +77,7 @@ class AuthServiceImplTest {
     private MessageUtils messageUtils;
 
     @Mock
-    private com.launchly.common.security.turnstile.TurnstileService turnstileService;
+    private TurnstileService turnstileService;
 
     @InjectMocks
     private AuthServiceImpl authService;

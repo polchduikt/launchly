@@ -2,6 +2,7 @@ package com.launchly.admin.service.impl;
 
 import com.launchly.admin.dto.SupportMessageDto;
 import com.launchly.admin.dto.SupportTicketDto;
+import com.launchly.admin.util.AdminSupportSpecUtils;
 import com.launchly.admin.entity.SupportMessage;
 import com.launchly.admin.entity.SupportTicket;
 import com.launchly.admin.repository.SupportMessageRepository;
@@ -50,7 +51,7 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
     public Page<SupportTicketDto> getSupportTickets(String filter, String period, String search, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
 
-        Specification<SupportTicket> spec = com.launchly.admin.util.AdminSupportSpecUtils.buildTicketSpec(filter, period, search);
+        Specification<SupportTicket> spec = AdminSupportSpecUtils.buildTicketSpec(filter, period, search);
         Page<SupportTicket> ticketsPage = supportTicketRepository.findAll(spec, pageable);
 
         List<SupportTicketDto> dtos = ticketsPage.getContent().stream()

@@ -1,5 +1,6 @@
 package com.launchly.crm.service.impl;
 
+import com.launchly.auth.entity.User;
 import com.launchly.common.exception.AppException;
 import com.launchly.crm.dto.request.AddNoteRequest;
 import com.launchly.crm.dto.request.SendMessageRequest;
@@ -67,7 +68,7 @@ public class CrmMessageServiceImpl implements CrmMessageService {
         webSocketService.notifyNewMessage(botId, response);
 
         try {
-            com.launchly.auth.entity.User botOwner = conversation.getBot().getUser();
+            User botOwner = conversation.getBot().getUser();
             if (botOwner != null) {
                 notificationService.sendNewMessageNotification(botOwner.getId(), conversation.getId(), content);
             }

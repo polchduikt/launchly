@@ -11,6 +11,7 @@ import com.launchly.integration.entity.IntegrationType;
 import com.launchly.integration.repository.IntegrationRepository;
 import com.launchly.integration.service.GoogleSheetsService;
 import com.launchly.integration.service.IntegrationEventService;
+import com.launchly.integration.service.MailchimpService;
 import com.launchly.integration.dto.request.WebhookConfig;
 import com.launchly.integration.service.WebhookService;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class IntegrationEventServiceImpl implements IntegrationEventService {
     private final LeadRepository leadRepository;
     private final GoogleSheetsService googleSheetsService;
     private final WebhookService webhookService;
-    private final com.launchly.integration.service.MailchimpService mailchimpService;
+    private final MailchimpService mailchimpService;
     private final ObjectMapper objectMapper;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

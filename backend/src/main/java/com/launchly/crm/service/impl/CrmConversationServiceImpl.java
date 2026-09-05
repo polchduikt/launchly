@@ -1,5 +1,6 @@
 package com.launchly.crm.service.impl;
 
+import com.launchly.bot.constant.TelegramConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotRepository;
@@ -187,7 +188,7 @@ public class CrmConversationServiceImpl implements CrmConversationService {
 
     private ConversationResponse toConversationResponse(Conversation conversation) {
         BotUser botUser = conversation.getBotUser();
-        if (botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith(com.launchly.bot.constant.TelegramConstants.API_BASE_URL)) {
+        if (botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith(TelegramConstants.API_BASE_URL)) {
             userAvatarService.fetchAndSetPhotoUrl(botUser);
         }
         Message last = messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(conversation.getId()).orElse(null);

@@ -1,12 +1,25 @@
 package com.launchly.admin.mapper;
 
+import com.launchly.admin.dto.AdminAutomationDto;
+import com.launchly.admin.dto.AdminBroadcastDetailDto;
 import com.launchly.admin.dto.AdminBroadcastDto;
+import com.launchly.admin.dto.AdminUserDetailDto;
 import com.launchly.admin.dto.AdminUserDto;
+import com.launchly.admin.dto.UserActivityDto;
+import com.launchly.admin.dto.UserAutomationSummaryDto;
+import com.launchly.admin.dto.UserBroadcastSummaryDto;
+import com.launchly.admin.entity.UserAuditLog;
 import com.launchly.auth.entity.User;
+import com.launchly.bot.entity.Bot;
+import com.launchly.bot.entity.FlowSchema;
 import com.launchly.broadcast.entity.BroadcastCampaign;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
+import org.springframework.data.domain.Page;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AdminMapper {
@@ -44,7 +57,7 @@ public interface AdminMapper {
     @Mapping(target = "blockedAt", source = "campaign.blockedAt")
     @Mapping(target = "createdByEmail", expression = "java(creator != null && creator.getEmail() != null ? creator.getEmail() : defaultAuthor)")
     @Mapping(target = "authorName", expression = "java(creator != null && creator.getName() != null ? creator.getName() : defaultAuthor)")
-    @Mapping(target = "createdAt", expression = "java(campaign.getCreatedAt() != null ? campaign.getCreatedAt() : java.time.LocalDateTime.now())")
+    @Mapping(target = "createdAt", expression = "java(campaign.getCreatedAt() != null ? campaign.getCreatedAt() : LocalDateTime.now())")
     AdminBroadcastDto toBroadcastDto(BroadcastCampaign campaign, User creator, String defaultAuthor);
 
     @Mapping(target = "id", source = "campaign.id")
@@ -55,17 +68,16 @@ public interface AdminMapper {
     @Mapping(target = "sentCount", expression = "java(campaign.getSentCount() != null ? campaign.getSentCount() : 0)")
     @Mapping(target = "failedCount", expression = "java(campaign.getFailedCount() != null ? campaign.getFailedCount() : 0)")
     @Mapping(target = "totalCount", expression = "java(campaign.getTotalCount() != null ? campaign.getTotalCount() : 0)")
-    @Mapping(target = "status", expression = "java(campaign.isBlocked() ? \"BLOCKED\" : (campaign.getStatus() != null ? campaign.getStatus().name() : \"DRAFT\"))")
-    @Mapping(target = "blocked", source = "campaign.blocked")
+    @Mapping(target = "status", expression = "java(campaign.getStatus() != null ? campaign.getStatus().name() : \"DRAFT\")")
     @Mapping(target = "blockReason", source = "campaign.blockReason")
     @Mapping(target = "blockedAt", source = "campaign.blockedAt")
     @Mapping(target = "createdByEmail", expression = "java(creator != null && creator.getEmail() != null ? creator.getEmail() : defaultAuthor)")
     @Mapping(target = "authorName", expression = "java(creator != null && creator.getName() != null ? creator.getName() : defaultAuthor)")
     @Mapping(target = "authorId", expression = "java(creator != null ? creator.getId() : null)")
-    @Mapping(target = "createdAt", expression = "java(campaign.getCreatedAt() != null ? campaign.getCreatedAt() : java.time.LocalDateTime.now())")
+    @Mapping(target = "createdAt", expression = "java(campaign.getCreatedAt() != null ? campaign.getCreatedAt() : LocalDateTime.now())")
     @Mapping(target = "scheduledAt", source = "campaign.scheduledAt")
     @Mapping(target = "activities", source = "activities")
-    com.launchly.admin.dto.AdminBroadcastDetailDto toBroadcastDetailDto(BroadcastCampaign campaign, User creator, String defaultAuthor, org.springframework.data.domain.Page<com.launchly.admin.dto.UserActivityDto> activities);
+    AdminBroadcastDetailDto toBroadcastDetailDto(BroadcastCampaign campaign, User creator, String defaultAuthor, Page<UserActivityDto> activities);
 
     @Mapping(target = "id", source = "flow.id")
     @Mapping(target = "name", expression = "java(bot != null && bot.getName() != null ? bot.getName() : \"Flow #\" + flow.getId())")
@@ -79,8 +91,8 @@ public interface AdminMapper {
     @Mapping(target = "blockedAt", expression = "java(bot != null ? bot.getBlockedAt() : null)")
     @Mapping(target = "triggerCount", source = "runsCount")
     @Mapping(target = "errorCount", constant = "0L")
-    @Mapping(target = "lastExecutedAt", expression = "java(flow.getUpdatedAt() != null ? flow.getUpdatedAt() : java.time.LocalDateTime.now())")
-    com.launchly.admin.dto.AdminAutomationDto toAutomationDto(com.launchly.bot.entity.FlowSchema flow, com.launchly.bot.entity.Bot bot, User owner, String resolvedBotName, boolean isConnected, int runsCount);
+    @Mapping(target = "lastExecutedAt", expression = "java(flow.getUpdatedAt() != null ? flow.getUpdatedAt() : LocalDateTime.now())")
+    AdminAutomationDto toAutomationDto(FlowSchema flow, Bot bot, User owner, String resolvedBotName, boolean isConnected, int runsCount);
 
     @Mapping(target = "id", source = "log.id")
     @Mapping(target = "targetId", source = "log.targetId")
@@ -90,7 +102,7 @@ public interface AdminMapper {
     @Mapping(target = "category", source = "log.category")
     @Mapping(target = "badge", source = "log.badge")
     @Mapping(target = "timestamp", source = "log.createdAt")
-    com.launchly.admin.dto.UserActivityDto toActivityDto(com.launchly.admin.entity.UserAuditLog log);
+    UserActivityDto toActivityDto(UserAuditLog log);
 
     @Mapping(target = "id", source = "flow.id")
     @Mapping(target = "name", expression = "java(flow.getBot() != null ? flow.getBot().getName() : \"Flow #\" + flow.getId())")
@@ -98,7 +110,7 @@ public interface AdminMapper {
     @Mapping(target = "active", expression = "java(flow.getBot() != null && flow.getBot().isActive() && isConnected)")
     @Mapping(target = "triggerCount", source = "runs")
     @Mapping(target = "triggerType", constant = "KEYWORD")
-    com.launchly.admin.dto.UserAutomationSummaryDto toAutomationSummaryDto(com.launchly.bot.entity.FlowSchema flow, String resolvedBotName, boolean isConnected, int runs);
+    UserAutomationSummaryDto toAutomationSummaryDto(FlowSchema flow, String resolvedBotName, boolean isConnected, int runs);
 
     @Mapping(target = "id", source = "campaign.id")
     @Mapping(target = "name", source = "campaign.name")
@@ -106,7 +118,7 @@ public interface AdminMapper {
     @Mapping(target = "status", expression = "java(campaign.getStatus() != null ? campaign.getStatus().name() : \"DRAFT\")")
     @Mapping(target = "sentCount", expression = "java(campaign.getSentCount() != null ? campaign.getSentCount() : 0)")
     @Mapping(target = "createdAt", expression = "java(campaign.getCreatedAt() != null ? campaign.getCreatedAt().toString() : \"\")")
-    com.launchly.admin.dto.UserBroadcastSummaryDto toBroadcastSummaryDto(BroadcastCampaign campaign);
+    UserBroadcastSummaryDto toBroadcastSummaryDto(BroadcastCampaign campaign);
 
     @Mapping(target = "id", source = "user.id")
     @Mapping(target = "email", source = "user.email")
@@ -130,7 +142,5 @@ public interface AdminMapper {
     @Mapping(target = "activities", source = "activities")
     @Mapping(target = "automations", source = "automations")
     @Mapping(target = "broadcasts", source = "broadcasts")
-    com.launchly.admin.dto.AdminUserDetailDto toUserDetailDto(User user, long botsCount, long automationsCount, long broadcastsCount, long contactsCount, String planName, java.time.LocalDateTime lastActivity, org.springframework.data.domain.Page<com.launchly.admin.dto.UserActivityDto> activities, java.util.List<com.launchly.admin.dto.UserAutomationSummaryDto> automations, java.util.List<com.launchly.admin.dto.UserBroadcastSummaryDto> broadcasts);
+    AdminUserDetailDto toUserDetailDto(User user, long botsCount, long automationsCount, long broadcastsCount, long contactsCount, String planName, LocalDateTime lastActivity, Page<UserActivityDto> activities, List<UserAutomationSummaryDto> automations, List<UserBroadcastSummaryDto> broadcasts);
 }
-
-

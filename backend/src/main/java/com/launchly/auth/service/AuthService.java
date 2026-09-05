@@ -2,6 +2,7 @@ package com.launchly.auth.service;
 
 import com.launchly.auth.dto.request.LoginRequest;
 import com.launchly.auth.dto.request.RegisterRequest;
+import com.launchly.auth.dto.request.UpdateProfileRequest;
 import com.launchly.auth.dto.response.AuthResponse;
 import com.launchly.auth.dto.response.TelegramSessionResponse;
 import com.launchly.auth.dto.response.TelegramStatusResponse;
@@ -19,7 +20,7 @@ public interface AuthService {
 
     UserResponse getCurrentUser(String email);
 
-    UserResponse updateProfile(String currentEmail, com.launchly.auth.dto.request.UpdateProfileRequest request);
+    UserResponse updateProfile(String currentEmail, UpdateProfileRequest request);
 
     TelegramSessionResponse createTelegramSession(String currentEmail, boolean isSubscription);
 

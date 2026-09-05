@@ -46,7 +46,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
         List<Bot> userBots = botRepository.findAllByUserId(userId);
         boolean tokenAlreadyExists = false;
         if (newTelegramToken != null && !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(newTelegramToken)) {
-            for (com.launchly.bot.entity.Bot b : userBots) {
+            for (Bot b : userBots) {
                 try {
                     String decrypted = encryptionUtil.decrypt(b.getTelegramToken());
                     if (newTelegramToken.equals(decrypted)) {
