@@ -70,13 +70,14 @@ public class CrmController {
 
     @Operation(summary = "Delete CRM label", description = "Remove an existing custom conversation label.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Updated list of labels")
+            @ApiResponse(responseCode = "204", description = "Updated list of labels")
     })
     @DeleteMapping("/labels/{name}")
-    public ResponseEntity<List<String>> deleteLabel(
+    public ResponseEntity<Void> deleteLabel(
             @Parameter(description = "Label name") @PathVariable String name,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(crmService.deleteLabel(name, userDetails.getId()));
+        crmService.deleteLabel(name, userDetails.getId());
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Get bot orders", description = "Retrieve all e-commerce customer orders generated across bot workflows.")

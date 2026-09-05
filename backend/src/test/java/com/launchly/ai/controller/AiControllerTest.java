@@ -148,7 +148,7 @@ class AiControllerTest {
         mockMvc.perform(post("/api/v1/ai/chat")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.reply").value("Use @BotFather to get token"));
     }
 
@@ -173,6 +173,6 @@ class AiControllerTest {
         mockMvc.perform(post("/api/v1/ai/generate-schema")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 }

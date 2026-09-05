@@ -61,7 +61,7 @@ class CrmIntegrationTest extends BaseIntegrationTest {
 
         mockMvc.perform(delete("/api/v1/crm/labels/Priority Lead")
                         .header("Authorization", getAuthHeader(user)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test

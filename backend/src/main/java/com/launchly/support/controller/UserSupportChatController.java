@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -56,7 +57,7 @@ public class UserSupportChatController {
     public ResponseEntity<SupportTicketDto> createTicket(
             @Valid @RequestBody CreateTicketRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(userSupportChatService.createTicket(request, userDetails.getUsername()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userSupportChatService.createTicket(request, userDetails.getUsername()));
     }
 
     @Operation(summary = "Get ticket details and chat thread", description = "Retrieve single support ticket including all customer and manager messages.")
@@ -82,7 +83,7 @@ public class UserSupportChatController {
             @Parameter(description = "Ticket ID") @PathVariable Long id,
             @Valid @RequestBody CreateMessageRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(userSupportChatService.addMessage(id, request.getText(), userDetails.getUsername()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userSupportChatService.addMessage(id, request.getText(), userDetails.getUsername()));
     }
 
     @Operation(summary = "Update ticket status (e.g. resolve/close)", description = "Mark a support ticket as resolved or closed.")

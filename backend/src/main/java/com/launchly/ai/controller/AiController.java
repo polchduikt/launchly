@@ -126,7 +126,7 @@ public class AiController {
     public ResponseEntity<AiChatResponse> chat(
             @Valid @RequestBody AiChatRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(aiService.chat(request, userDetails.getId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(aiService.chat(request, userDetails.getId()));
     }
 
     @Operation(summary = "Generate chatbot flow schema", description = "Generate interactive chatbot node blocks and connection edges from a natural language text description.")
@@ -142,7 +142,7 @@ public class AiController {
     public ResponseEntity<AiSchemaResponse> generateSchema(
             @Valid @RequestBody AiSchemaRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(aiService.generateSchema(request, userDetails.getId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(aiService.generateSchema(request, userDetails.getId()));
     }
 
     @Operation(summary = "Get current AI token usage", description = "Retrieve token consumption metrics, monthly plan quota, remaining tokens, and quota reset date.")
