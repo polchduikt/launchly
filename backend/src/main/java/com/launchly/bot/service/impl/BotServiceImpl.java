@@ -1,6 +1,5 @@
 package com.launchly.bot.service.impl;
 
-import com.launchly.common.security.CustomUserDetails;
 import org.springframework.web.client.RestTemplate;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -19,16 +18,17 @@ import com.launchly.bot.constant.BotConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotMember;
 import com.launchly.bot.entity.FlowSchema;
-import com.launchly.bot.entity.WorkspaceRole;
-import com.launchly.bot.mapper.BotMapper;
+import java.time.Duration;
+import com.launchly.bot.mapper.BotResponseFactory;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
 import com.launchly.bot.repository.InstalledTemplateRepository;
 import com.launchly.bot.repository.AccountTemplateRepository;
+import com.launchly.bot.service.BotLifecycleService;
 import com.launchly.bot.service.BotService;
-import com.launchly.bot.telegram.TelegramBotManager;
+import com.launchly.bot.service.BotSubscriberService;
 import com.launchly.billing.service.PlanLimitService;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.utils.EncryptionUtil;
@@ -36,10 +36,6 @@ import com.launchly.media.service.MediaService;
 import com.launchly.bot.dto.request.BotUserCreateRequest;
 import com.launchly.bot.dto.request.BotUserUpdateRequest;
 import com.launchly.bot.entity.BotUser;
-import com.launchly.broadcast.repository.BotUserTagRepository;
-import com.launchly.broadcast.repository.TagRepository;
-import com.launchly.broadcast.entity.BotUserTag;
-import com.launchly.broadcast.entity.Tag;
 import com.launchly.bot.validator.BotAccessValidator;
 import com.launchly.bot.validator.FlowSchemaValidator;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +47,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,21 +64,20 @@ public class BotServiceImpl implements BotService {
     private final FlowSchemaRepository flowSchemaRepository;
     private final BotUserRepository botUserRepository;
     private final UserQueryService userQueryService;
-    private final BotMapper botMapper;
     private final EncryptionUtil encryptionUtil;
-    private final TelegramBotManager telegramBotManager;
     private final ObjectMapper objectMapper;
     private final PlanLimitService planLimitService;
     private final MediaService mediaService;
     private final StringRedisTemplate redisTemplate;
-    private final BotUserTagRepository botUserTagRepository;
-    private final TagRepository tagRepository;
     private final BotMemberRepository botMemberRepository;
     private final InstalledTemplateRepository installedTemplateRepository;
     private final AccountTemplateRepository accountTemplateRepository;
     private final UserAuditService userAuditService;
     private final FlowSchemaValidator flowSchemaValidator;
     private final BotAccessValidator botAccessValidator;
+    private final BotLifecycleService botLifecycleService;
+    private final BotSubscriberService botSubscriberService;
+    private final BotResponseFactory botResponseFactory;
 
     @Override
     @Transactional
@@ -118,7 +112,7 @@ public class BotServiceImpl implements BotService {
         bot = botRepository.save(bot);
 
         if (!BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(rawToken)) {
-            releaseTokenFromOtherBots(rawToken, userId, bot.getId());
+            botLifecycleService.releaseTokenFromOtherBots(rawToken, userId, bot.getId());
             updateBotTelegramInfo(bot, rawToken);
             bot = botRepository.save(bot);
         }
@@ -210,7 +204,7 @@ public class BotServiceImpl implements BotService {
             }
 
             if (isNewReal) {
-                releaseTokenFromOtherBots(rawToken, userId, bot.getId());
+                botLifecycleService.releaseTokenFromOtherBots(rawToken, userId, bot.getId());
                 bot.setTemplate(false);
             }
 
@@ -254,7 +248,7 @@ public class BotServiceImpl implements BotService {
         botAccessValidator.validateWriteAccess(bot, userId);
 
         if (bot.isActive()) {
-            telegramBotManager.unregisterBot(bot.getId());
+            botLifecycleService.unregisterBot(bot.getId());
         }
 
         installedTemplateRepository.deleteAllByBotId(bot.getId());
@@ -263,120 +257,18 @@ public class BotServiceImpl implements BotService {
     }
 
     @Override
-    @CacheEvict(value = "bots", key = "#userId")
     public BotResponse startBot(Long id, Long userId) {
-        Bot bot = findBotByIdAndUser(id, userId);
-        botAccessValidator.validateWriteAccess(bot, userId);
-
-        if (bot.isActive()) {
-            throw new AppException(HttpStatus.CONFLICT, "bot.error.already_running");
-        }
-
-        String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
-        if (BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decryptedToken)) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "bot.error.token_required_to_start");
-        }
-
-
-        List<Bot> activeBotsList = botRepository.findAllByActiveTrue();
-        for (Bot activeBot : activeBotsList) {
-            if (!activeBot.getId().equals(bot.getId())) {
-                String activeToken = encryptionUtil.decrypt(activeBot.getTelegramToken());
-                if (decryptedToken.equals(activeToken)) {
-                    telegramBotManager.unregisterBot(activeBot.getId());
-                    activeBot.setActive(false);
-                    botRepository.save(activeBot);
-                    log.info("Automatically deactivated bot id={} ('{}') because its token was assigned to bot id={} ('{}')",
-                            activeBot.getId(), activeBot.getName(), bot.getId(), bot.getName());
-                }
-            }
-        }
-
-        telegramBotManager.registerBot(bot);
-
-        try {
-            bot.setActive(true);
-            bot.setRunsCount(bot.getRunsCount() + 1);
-            bot = botRepository.save(bot);
-        } catch (Exception e) {
-            try {
-                telegramBotManager.unregisterBot(bot.getId());
-            } catch (Exception ex) {
-                log.warn("Failed to unregister bot on start rollback: {}", ex.getMessage());
-            }
-            throw e;
-        }
-
-        return toBotResponseWithStats(bot);
+        return botLifecycleService.startBot(id, userId);
     }
 
     @Override
-    @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "bots", key = "#userId"),
-            @CacheEvict(value = "flow_schemas", key = "#id")
-    })
     public BotResponse publishBot(Long id, Long userId) {
-        Bot bot = findBotByIdAndUser(id, userId);
-        botAccessValidator.validateWriteAccess(bot, userId);
-
-        bot.setRunsCount(bot.getRunsCount() + 1);
-        bot.setUpdatedAt(LocalDateTime.now());
-
-        if (!bot.isActive()) {
-            boolean hasRealToken = false;
-            try {
-                if (bot.getTelegramToken() != null && !bot.getTelegramToken().isBlank()) {
-                    String decrypted = encryptionUtil.decrypt(bot.getTelegramToken());
-                    if (decrypted != null && !decrypted.isBlank() && 
-                        !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decrypted)) {
-                        hasRealToken = true;
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("Failed to decrypt bot token during publish: {}", e.getMessage());
-            }
-
-            if (hasRealToken) {
-                try {
-                    telegramBotManager.registerBot(bot);
-                    bot.setActive(true);
-                } catch (Exception e) {
-                    log.error("Failed to register bot on publish: {}", e.getMessage(), e);
-                }
-            }
-        }
-
-        bot = botRepository.save(bot);
-        return toBotResponseWithStats(bot);
+        return botLifecycleService.publishBot(id, userId);
     }
 
     @Override
-    @CacheEvict(value = "bots", key = "#userId")
     public BotResponse stopBot(Long id, Long userId) {
-        Bot bot = findBotByIdAndUser(id, userId);
-        botAccessValidator.validateWriteAccess(bot, userId);
-
-        if (!bot.isActive()) {
-            throw new AppException(HttpStatus.CONFLICT, "bot.error.not_running");
-        }
-
-        telegramBotManager.unregisterBot(bot.getId());
-
-        try {
-            bot.setActive(false);
-            bot = botRepository.save(bot);
-        } catch (Exception e) {
-            try {
-                telegramBotManager.registerBot(bot);
-            } catch (Exception ex) {
-                log.error("Failed to re-register bot {} after stop failure: {}", bot.getId(), ex.getMessage(), ex);
-            }
-            throw e;
-        }
-
-
-        return toBotResponseWithStats(bot);
+        return botLifecycleService.stopBot(id, userId);
     }
 
     @Override
@@ -426,7 +318,7 @@ public class BotServiceImpl implements BotService {
 
             if (hasRealToken) {
                 try {
-                    telegramBotManager.registerBot(bot);
+                    botLifecycleService.registerBot(bot);
                     bot.setActive(true);
                     bot.setUpdatedAt(LocalDateTime.now());
                     botRepository.save(bot);
@@ -442,186 +334,25 @@ public class BotServiceImpl implements BotService {
     @Override
     @Transactional(readOnly = true)
     public List<BotUserResponse> getBotUsers(Long botId, Long userId) {
-        Bot bot = findBotByIdAndUser(botId, userId);
-        return botUserRepository.findAllByBotId(bot.getId()).stream()
-                .map(bu -> {
-                    List<String> tags = botUserTagRepository.findByBotUserId(bu.getId()).stream()
-                            .map(but -> but.getTag().getName())
-                            .toList();
-                    return new BotUserResponse(
-                            bu.getId(),
-                            bu.getTelegramId(),
-                            bu.getUsername(),
-                            bu.getFirstName(),
-                            bu.getLastName(),
-                            bu.getCurrentNodeId(),
-                            bu.getPhotoUrl(),
-                            bu.getMetadata(),
-                            tags,
-                            bu.getCreatedAt()
-                    );
-                })
-                .toList();
+        return botSubscriberService.getBotUsers(botId, userId);
     }
 
     @Override
-
     @Transactional
     public BotUserResponse updateBotUser(Long botId, Long botUserId, BotUserUpdateRequest request, Long userId) {
-        Bot bot = findBotByIdAndUser(botId, userId);
-        botAccessValidator.validateWriteAccess(bot, userId);
-        BotUser botUser = botUserRepository.findById(botUserId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.contact_not_found"));
-
-        if (!botUser.getBot().getId().equals(bot.getId())) {
-            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.contact_access_denied");
-        }
-
-        if (request.firstName() != null) {
-            botUser.setFirstName(request.firstName());
-        }
-        if (request.lastName() != null) {
-            botUser.setLastName(request.lastName());
-        }
-        if (request.metadata() != null) {
-            botUser.setMetadata(request.metadata());
-        }
-
-        botUser = botUserRepository.save(botUser);
-
-        if (request.tags() != null) {
-            botUserTagRepository.deleteByBotUserId(botUser.getId());
-            botUserTagRepository.flush();
-            for (String tagName : request.tags()) {
-                if (tagName == null || tagName.trim().isEmpty()) continue;
-                String trimmedName = tagName.trim();
-                Tag tag = tagRepository.findByBotIdAndName(bot.getId(), trimmedName)
-                        .orElseGet(() -> tagRepository.save(
-                                Tag.builder()
-                                        .name(trimmedName)
-                                        .bot(bot)
-                                        .build()
-                        ));
-                BotUserTag botUserTag = BotUserTag.builder()
-                        .botUser(botUser)
-                        .tag(tag)
-                        .build();
-                botUserTagRepository.save(botUserTag);
-            }
-        }
-
-        List<String> tags = botUserTagRepository.findByBotUserId(botUser.getId()).stream()
-                .map(but -> but.getTag().getName())
-                .toList();
-        return new BotUserResponse(
-                botUser.getId(),
-                botUser.getTelegramId(),
-                botUser.getUsername(),
-                botUser.getFirstName(),
-                botUser.getLastName(),
-                botUser.getCurrentNodeId(),
-                botUser.getPhotoUrl(),
-                botUser.getMetadata(),
-                tags,
-                botUser.getCreatedAt()
-        );
+        return botSubscriberService.updateBotUser(botId, botUserId, request, userId);
     }
 
     @Override
     @Transactional
     public BotUserResponse createBotUser(Long botId, BotUserCreateRequest request, Long userId) {
-        Bot bot = findBotByIdAndUser(botId, userId);
-        botAccessValidator.validateWriteAccess(bot, userId);
-        planLimitService.checkBotUserLimit(bot.getId());
-
-        Long minTelegramId = botUserRepository.findMinTelegramIdByBotId(bot.getId()).orElse(0L);
-        Long nextTelegramId = minTelegramId <= 0 ? minTelegramId - 1 : -1L;
-
-        String metadataJson = "{}";
-        try {
-            Map<String, Object> metaMap = new HashMap<>();
-            metaMap.put("paused", false);
-            metaMap.put("unsubscribed", false);
-            metaMap.put("phone", request.phone());
-            metaMap.put("email", request.email());
-            metaMap.put("gender", request.gender());
-
-            Map<String, String> customFields = new HashMap<>();
-            if (request.phone() != null && !request.phone().trim().isEmpty()) {
-                customFields.put("Phone", request.phone().trim());
-            }
-            if (request.email() != null && !request.email().trim().isEmpty()) {
-                customFields.put("Email", request.email().trim());
-            }
-            if (request.gender() != null && !request.gender().trim().isEmpty()) {
-                customFields.put("Gender", request.gender().trim());
-            }
-            metaMap.put("customFields", customFields);
-
-            metadataJson = objectMapper.writeValueAsString(metaMap);
-        } catch (Exception e) {
-            log.error("Failed to serialize metadata for contact creation", e);
-        }
-
-        BotUser botUser = BotUser.builder()
-                .telegramId(nextTelegramId)
-                .firstName(request.firstName())
-                .lastName(request.lastName())
-                .metadata(metadataJson)
-                .bot(bot)
-                .build();
-
-        botUser = botUserRepository.save(botUser);
-
-        if (request.tags() != null) {
-            for (String tagName : request.tags()) {
-                if (tagName == null || tagName.trim().isEmpty()) continue;
-                String trimmedName = tagName.trim();
-                Tag tag = tagRepository.findByBotIdAndName(bot.getId(), trimmedName)
-                        .orElseGet(() -> tagRepository.save(
-                                Tag.builder()
-                                        .name(trimmedName)
-                                        .bot(bot)
-                                        .build()
-                        ));
-                BotUserTag botUserTag = BotUserTag.builder()
-                        .botUser(botUser)
-                        .tag(tag)
-                        .build();
-                botUserTagRepository.save(botUserTag);
-            }
-        }
-
-        List<String> tags = botUserTagRepository.findByBotUserId(botUser.getId()).stream()
-                .map(but -> but.getTag().getName())
-                .toList();
-
-        return new BotUserResponse(
-                botUser.getId(),
-                botUser.getTelegramId(),
-                botUser.getUsername(),
-                botUser.getFirstName(),
-                botUser.getLastName(),
-                botUser.getCurrentNodeId(),
-                botUser.getPhotoUrl(),
-                botUser.getMetadata(),
-                tags,
-                botUser.getCreatedAt()
-        );
+        return botSubscriberService.createBotUser(botId, request, userId);
     }
 
     @Override
     @Transactional
     public void deleteBotUser(Long botId, Long botUserId, Long userId) {
-        Bot bot = findBotByIdAndUser(botId, userId);
-        botAccessValidator.validateWriteAccess(bot, userId);
-        BotUser botUser = botUserRepository.findById(botUserId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.contact_not_found"));
-
-        if (!botUser.getBot().getId().equals(bot.getId())) {
-            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.contact_access_denied");
-        }
-        botUserRepository.delete(botUser);
+        botSubscriberService.deleteBotUser(botId, botUserId, userId);
     }
 
     @Override
@@ -695,82 +426,8 @@ public class BotServiceImpl implements BotService {
         }
     }
 
-    private void releaseTokenFromOtherBots(String token, Long userId, Long currentBotId) {
-        if (token == null || BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(token)) {
-            return;
-        }
-
-        List<Bot> userBots = botRepository.findAllByUserId(userId);
-        for (Bot otherBot : userBots) {
-            if (!otherBot.getId().equals(currentBotId)) {
-                try {
-                    String decrypted = encryptionUtil.decrypt(otherBot.getTelegramToken());
-                    if (token.equals(decrypted)) {
-                        if (otherBot.isActive()) {
-                            telegramBotManager.unregisterBot(otherBot.getId());
-                            otherBot.setActive(false);
-                        }
-                        otherBot.setTelegramToken(encryptionUtil.encrypt(BotConstants.DUMMY_TOKEN_PLACEHOLDER));
-                        otherBot.setUsername(null);
-                        botRepository.save(otherBot);
-                        log.info("Reassigned token to bot id={}. Automatically reset bot id={} ('{}') to Without bot (inactive)",
-                                currentBotId, otherBot.getId(), otherBot.getName());
-                    }
-                } catch (Exception e) {
-                    log.error("Failed to release token from other bot id={}: {}", otherBot.getId(), e.getMessage());
-                }
-            }
-        }
-    }
-
     private BotResponse toBotResponseWithStats(Bot bot) {
-        if (bot == null) return null;
-        BotResponse response = botMapper.toBotResponse(bot);
-        
-        boolean hasToken = false;
-        try {
-            String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
-            hasToken = decryptedToken != null && !decryptedToken.isBlank() && !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decryptedToken);
-        } catch (Exception e) {
-            log.error("Failed to decrypt token for bot id={}", bot.getId(), e);
-        }
-
-        long totalUsers = hasToken ? botUserRepository.countByBotId(bot.getId()) : 0;
-
-        String role = WorkspaceRole.OWNER.getValue();
-        try {
-            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.getPrincipal() instanceof CustomUserDetails userDetails) {
-                Long currentUserId = userDetails.getId();
-                if (!bot.getUser().getId().equals(currentUserId)) {
-                    role = botAccessValidator.getWorkspaceMembership(bot, currentUserId)
-                            .map(BotMember::getRole)
-                            .orElse(WorkspaceRole.VIEWER.getValue());
-                }
-            }
-        } catch (Exception e) {
-            log.error("Failed to determine member role in toBotResponseWithStats", e);
-        }
-
-        return new BotResponse(
-                response.id(),
-                response.name(),
-                response.username(),
-                response.description(),
-                response.avatar(),
-                response.avatarPublicId(),
-                bot.isBlocked() ? false : response.active(),
-                bot.isBlocked(),
-                bot.getBlockReason(),
-                response.createdAt(),
-                response.updatedAt(),
-                totalUsers,
-                hasToken,
-                role,
-                bot.isTemplate(),
-                bot.getTemplateName(),
-                bot.getRunsCount()
-        );
+        return botResponseFactory.toBotResponseWithStats(bot);
     }
 
     @Override

@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TelegramBotManager {
+public class TelegramBotManager implements TelegramClientProvider {
 
     private final BotRepository botRepository;
     private final BotUserRepository botUserRepository;
@@ -205,6 +205,7 @@ public class TelegramBotManager {
         }
     }
 
+    @Override
     public TelegramClient getTelegramClient(Long botId) {
         TelegramClient client = telegramClients.get(botId);
         if (client == null && botId != null && botId > 0) {

@@ -7,7 +7,6 @@ import com.launchly.bot.engine.executor.NodeExecutor;
 import com.launchly.bot.engine.model.FlowEdge;
 import com.launchly.bot.engine.model.FlowNode;
 import com.launchly.bot.engine.model.DataCollectionState;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.entity.FlowSchema;
@@ -17,27 +16,25 @@ import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
 import com.launchly.bot.service.BotDialogStateService;
 import com.launchly.bot.service.FlowEngineService;
-import com.launchly.bot.telegram.TelegramBotManager;
+import com.launchly.bot.service.SystemBotAuthService;
+import com.launchly.bot.service.BotUserProvisioningService;
+import com.launchly.bot.telegram.TelegramClientProvider;
 import com.launchly.broadcast.entity.BroadcastCampaign;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
-import com.launchly.billing.service.PlanLimitService;
 import com.launchly.common.utils.EncryptionUtil;
 import com.launchly.crm.service.CrmService;
 import com.launchly.analytics.service.AnalyticsService;
 import com.launchly.bot.constant.BotConstants;
-import com.launchly.bot.service.UserAvatarService;
 import com.launchly.bot.engine.validator.BotInputValidator;
 import com.launchly.bot.engine.callstack.BotCallStackManager;
 import com.launchly.bot.engine.callstack.CallStackFrame;
 import com.launchly.common.utils.MessageUtils;
 import org.springframework.context.annotation.Lazy;
 import lombok.extern.slf4j.Slf4j;
-import com.launchly.auth.service.AuthService;
 import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
-import org.springframework.beans.factory.annotation.Value;
 import java.time.Duration;
 import java.util.*;
 
@@ -45,27 +42,23 @@ import java.util.*;
 @Service
 public class FlowEngineServiceImpl implements FlowEngineService {
 
-    @Value("${telegram.system-bot-token:}")
-    private String systemBotToken;
-
     private final BotRepository botRepository;
     private final BotUserRepository botUserRepository;
     private final FlowSchemaRepository flowSchemaRepository;
     private final BotDialogStateService stateService;
     private final ObjectMapper objectMapper;
     private final Map<NodeType, NodeExecutor> executors;
-    private final PlanLimitService planLimitService;
     private final StringRedisTemplate redisTemplate;
     private final BroadcastCampaignRepository campaignRepository;
-    private final TelegramBotManager botManager;
+    private final TelegramClientProvider telegramClientProvider;
     private final EncryptionUtil encryptionUtil;
     private final CrmService crmService;
-    private final UserAvatarService userAvatarService;
     private final AnalyticsService analyticsService;
-    private final AuthService authService;
     private final BotInputValidator inputValidator;
     private final BotCallStackManager callStackManager;
     private final MessageUtils messageUtils;
+    private final SystemBotAuthService systemBotAuthService;
+    private final BotUserProvisioningService botUserProvisioningService;
     private static final String SCHEMA_KEY = "launchly:bot:schema:%d";
     private static final Duration SCHEMA_TTL = Duration.ofMinutes(30);
 
@@ -75,35 +68,33 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                   BotDialogStateService stateService,
                                   ObjectMapper objectMapper,
                                   List<NodeExecutor> nodeExecutors,
-                                  PlanLimitService planLimitService,
                                   StringRedisTemplate redisTemplate,
                                   BroadcastCampaignRepository campaignRepository,
-                                  @Lazy TelegramBotManager botManager,
+                                  @Lazy TelegramClientProvider telegramClientProvider,
                                   EncryptionUtil encryptionUtil,
-                                  @Lazy CrmService crmService,
-                                  UserAvatarService userAvatarService,
+                                  CrmService crmService,
                                   AnalyticsService analyticsService,
-                                  @Lazy AuthService authService,
                                   BotInputValidator inputValidator,
                                   BotCallStackManager callStackManager,
-                                  MessageUtils messageUtils) {
+                                  MessageUtils messageUtils,
+                                  SystemBotAuthService systemBotAuthService,
+                                  BotUserProvisioningService botUserProvisioningService) {
         this.botRepository = botRepository;
         this.botUserRepository = botUserRepository;
         this.flowSchemaRepository = flowSchemaRepository;
         this.stateService = stateService;
         this.objectMapper = objectMapper;
-        this.planLimitService = planLimitService;
         this.redisTemplate = redisTemplate;
         this.campaignRepository = campaignRepository;
-        this.botManager = botManager;
+        this.telegramClientProvider = telegramClientProvider;
         this.encryptionUtil = encryptionUtil;
         this.crmService = crmService;
-        this.userAvatarService = userAvatarService;
         this.analyticsService = analyticsService;
-        this.authService = authService;
         this.inputValidator = inputValidator;
         this.callStackManager = callStackManager;
         this.messageUtils = messageUtils;
+        this.systemBotAuthService = systemBotAuthService;
+        this.botUserProvisioningService = botUserProvisioningService;
         this.executors = new EnumMap<>(NodeType.class);
         nodeExecutors.forEach(e -> executors.put(e.getType(), e));
     }
@@ -118,7 +109,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
 
             if (botId.equals(-1L)) {
-                handleSystemBotUpdate(update, client);
+                systemBotAuthService.handleSystemBotUpdate(update, client);
                 return;
             }
 
@@ -128,7 +119,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 return;
             }
 
-            BotUser botUser = getOrCreateBotUser(bot, update, telegramUserId, client);
+            BotUser botUser = botUserProvisioningService.getOrCreateBotUser(bot, update, telegramUserId, client);
             if (isAutomationPaused(botUser)) {
                 log.info("Automation is paused for user {}, skipping processUpdate", botUser.getId());
                 return;
@@ -403,43 +394,6 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         return null;
     }
 
-    private BotUser getOrCreateBotUser(Bot bot, Update update, Long telegramUserId, TelegramClient telegramClient) {
-        BotUser botUser = botUserRepository.findByTelegramIdAndBotId(telegramUserId, bot.getId())
-                .orElseGet(() -> {
-                    planLimitService.checkBotUserLimit(bot.getId());
-                    String username = null;
-                    String firstName = null;
-                    String lastName = null;
-
-                    if (update.hasMessage() && update.getMessage().getFrom() != null) {
-                        var from = update.getMessage().getFrom();
-                        username = from.getUserName();
-                        firstName = from.getFirstName();
-                        lastName = from.getLastName();
-                    } else if (update.hasCallbackQuery() && update.getCallbackQuery().getFrom() != null) {
-                        var from = update.getCallbackQuery().getFrom();
-                        username = from.getUserName();
-                        firstName = from.getFirstName();
-                        lastName = from.getLastName();
-                    }
-
-                    BotUser newUser = BotUser.builder()
-                            .telegramId(telegramUserId)
-                            .username(username)
-                            .firstName(firstName)
-                            .lastName(lastName)
-                            .bot(bot)
-                            .build();
-                    return botUserRepository.save(newUser);
-                });
-
-        if ((botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith("https://api.telegram.org/")) && telegramClient != null) {
-            userAvatarService.fetchAndSetPhotoUrl(botUser, bot, telegramClient);
-        }
-
-        return botUser;
-    }
-
     private String resolveCurrentNodeId(Long botId, Long telegramUserId, BotUser botUser, List<FlowNode> nodes) {
         Optional<String> redisNodeId = stateService.getCurrentNodeId(botId, telegramUserId);
         if (redisNodeId.isPresent() && !redisNodeId.get().trim().isEmpty()) {
@@ -511,7 +465,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         }
         try {
             Long telegramUserId = botUser.getTelegramId();
-            TelegramClient client = botManager.getTelegramClient(botId);
+            TelegramClient client = telegramClientProvider.getTelegramClient(botId);
             if (client == null) {
                 log.warn("Telegram client not found for bot {}", botId);
                 return;
@@ -898,104 +852,6 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 .findFirst()
                 .map(FlowEdge::target)
                 .orElse(null);
-    }
-
-    private void handleSystemBotUpdate(Update update, TelegramClient client) {
-        if (!update.hasMessage() || !update.getMessage().hasText()) {
-            return;
-        }
-
-        String text = update.getMessage().getText().trim();
-        Long chatId = update.getMessage().getChatId();
-
-        if (text.startsWith("/start")) {
-            String token = null;
-            if (text.contains(" ")) {
-                token = text.substring(text.indexOf(" ") + 1).trim();
-            }
-
-            if (token == null || token.isBlank()) {
-                String welcomeMsg = messageUtils.getMessageWithDefault(
-                        "bot.system.welcome",
-                        "Welcome to Launchly! Please use the website to log in or link your account.");
-                sendSystemBotMessage(chatId, welcomeMsg, client);
-                return;
-            }
-
-            try {
-                String telegramUsername = update.getMessage().getFrom().getUserName();
-                Long telegramUserId = update.getMessage().getFrom().getId();
-                
-                String telegramName = update.getMessage().getFrom().getFirstName();
-                if (update.getMessage().getFrom().getLastName() != null) {
-                    telegramName += " " + update.getMessage().getFrom().getLastName();
-                }
-
-                String telegramPhotoUrl = null;
-                try {
-                    GetUserProfilePhotos getUserProfilePhotos = GetUserProfilePhotos.builder()
-                            .userId(telegramUserId)
-                            .limit(1)
-                            .build();
-                    UserProfilePhotos photos = client.execute(getUserProfilePhotos);
-                    if (photos != null && photos.getTotalCount() > 0 && photos.getPhotos() != null && !photos.getPhotos().isEmpty()) {
-                        List<PhotoSize> photoSizes = photos.getPhotos().get(0);
-                        PhotoSize largest = photoSizes.stream()
-                                .max(Comparator.comparingInt(size -> size.getWidth() * size.getHeight()))
-                                .orElse(null);
-                        if (largest != null) {
-                            GetFile getFile = GetFile.builder()
-                                    .fileId(largest.getFileId())
-                                    .build();
-                            File file = client.execute(getFile);
-                            if (file != null && file.getFilePath() != null) {
-                                telegramPhotoUrl = "https://api.telegram.org/file/bot" + systemBotToken + "/" + file.getFilePath();
-                            }
-                        }
-                    }
-                } catch (Exception ex) {
-                    log.warn("Failed to fetch profile photo for telegram auth: {}", ex.getMessage());
-                }
-
-                boolean isSubscription = authService.handleTelegramAuth(token, telegramUserId, telegramUsername, telegramName, telegramPhotoUrl);
-
-                if (isSubscription) {
-                    String optinMsg = messageUtils.getMessageWithDefault(
-                            "bot.system.optin_success",
-                            "You are successfully opted-in. Now you are able to receive 'Launchly Official' bot notifications.\nIf you want to stop notifications in Telegram you have to opt-out.\nVisit 'My Telegram for Notifications' section in Settings -> Notifications.");
-                    sendSystemBotMessage(chatId, optinMsg, client);
-                } else {
-                    String authSuccessMsg = messageUtils.getMessageWithDefault(
-                            "bot.system.auth_success",
-                            "Hi! You successfully signed up/logged in with Telegram. Thank you! You can now return to the website.");
-                    sendSystemBotMessage(chatId, authSuccessMsg, client);
-                }
-            } catch (Exception e) {
-                log.error("Failed to process system bot auth: {}", e.getMessage());
-                String authFailedMsg = messageUtils.getMessageWithDefault(
-                        "bot.system.auth_failed",
-                        "Failed to authorize: " + e.getMessage(),
-                        e.getMessage());
-                sendSystemBotMessage(chatId, authFailedMsg, client);
-            }
-        } else {
-            String useWebsiteMsg = messageUtils.getMessageWithDefault(
-                    "bot.system.use_website",
-                    "Please use the website to log in or link your account.");
-            sendSystemBotMessage(chatId, useWebsiteMsg, client);
-        }
-    }
-
-    private void sendSystemBotMessage(Long chatId, String text, TelegramClient client) {
-        try {
-            SendMessage message = SendMessage.builder()
-                    .chatId(chatId.toString())
-                    .text(text)
-                    .build();
-            client.execute(message);
-        } catch (Exception e) {
-            log.error("Failed to send message from system bot: {}", e.getMessage());
-        }
     }
 
     private boolean isAutomationPaused(BotUser botUser) {
