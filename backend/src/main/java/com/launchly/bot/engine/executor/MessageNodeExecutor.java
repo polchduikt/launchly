@@ -31,6 +31,7 @@ public class MessageNodeExecutor implements NodeExecutor {
     private final MessageBlockHelper helper;
     private final Map<String, MessageBlockHandler> handlerMap;
 
+    @org.springframework.beans.factory.annotation.Autowired
     public MessageNodeExecutor(BotDialogStateService stateService,
                                StringRedisTemplate redisTemplate,
                                ObjectMapper objectMapper,

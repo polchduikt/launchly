@@ -207,6 +207,7 @@ public class CrmMessageServiceImpl implements CrmMessageService {
                 webSocketService.notifyNewMessage(conversation.getBot().getId(), response);
             } catch (Exception e) {
                 log.error("Failed to send scheduled message id={}: {}", message.getId(), e.getMessage(), e);
+                stringRedisTemplate.delete(lockKey);
             }
         }
     }

@@ -225,7 +225,7 @@ public class BotServiceImpl implements BotService {
                     try {
                         mediaService.delete(oldPublicId, userId);
                     } catch (Exception e) {
-                        log.error("Failed to delete old avatar publicId {} from Cloudinary: {}", oldPublicId, e.getMessage());
+                        log.warn("Failed to delete old avatar publicId {} from Cloudinary: {}", oldPublicId, e.getMessage(), e);
                     }
                 }
                 bot.setAvatar(request.avatar());
@@ -323,7 +323,10 @@ public class BotServiceImpl implements BotService {
                     bot.setUpdatedAt(LocalDateTime.now());
                     botRepository.save(bot);
                 } catch (Exception e) {
-                    log.error("Failed to register bot: {}", e.getMessage(), e);
+                    bot.setActive(false);
+                    botRepository.save(bot);
+                    log.error("Failed to register bot during flow schema save: {}", e.getMessage(), e);
+                    throw new AppException(HttpStatus.BAD_REQUEST, "bot.error.registration_failed");
                 }
             }
         }
@@ -418,7 +421,7 @@ public class BotServiceImpl implements BotService {
                 }
             }
         } catch (Exception e) {
-            log.debug("Could not fetch Telegram bot info: {}", e.getMessage());
+            log.warn("Could not fetch Telegram bot info: {}", e.getMessage(), e);
         }
     }
 
