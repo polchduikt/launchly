@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -58,13 +59,13 @@ public class CrmController {
 
     @Operation(summary = "Add CRM label", description = "Create a new custom label for conversation filtering.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Updated list of labels")
+            @ApiResponse(responseCode = "201", description = "Label added successfully")
     })
     @PostMapping("/labels")
     public ResponseEntity<List<String>> addLabel(
             @Valid @RequestBody CreateLabelRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(crmService.addLabel(request.name(), userDetails.getId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(crmService.addLabel(request.name(), userDetails.getId()));
     }
 
     @Operation(summary = "Delete CRM label", description = "Remove an existing custom conversation label.")

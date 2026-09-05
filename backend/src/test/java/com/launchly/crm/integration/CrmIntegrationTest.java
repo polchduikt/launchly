@@ -52,7 +52,7 @@ class CrmIntegrationTest extends BaseIntegrationTest {
                         .header("Authorization", getAuthHeader(user))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("name", "Priority Lead"))))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         mockMvc.perform(get("/api/v1/crm/labels")
                         .header("Authorization", getAuthHeader(user)))

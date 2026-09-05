@@ -25,6 +25,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 @Slf4j
 @Service
@@ -73,7 +75,12 @@ public class HotmartServiceImpl implements HotmartService {
         String payloadToken = root.path("hottok").asText(null);
         String providedToken = (tokenHeader != null && !tokenHeader.trim().isEmpty()) ? tokenHeader.trim() : payloadToken;
 
-        if (config.hottok() == null || !config.hottok().trim().equalsIgnoreCase(providedToken != null ? providedToken.trim() : "")) {
+        String expectedToken = config.hottok() != null ? config.hottok().trim().toLowerCase() : "";
+        String actualToken = providedToken != null ? providedToken.trim().toLowerCase() : "";
+
+        if (expectedToken.isEmpty() || !MessageDigest.isEqual(
+                expectedToken.getBytes(StandardCharsets.UTF_8),
+                actualToken.getBytes(StandardCharsets.UTF_8))) {
             log.warn("Unauthorized Hotmart webhook attempt for bot {}. Expected token mismatch.", botId);
             throw new AppException(HttpStatus.UNAUTHORIZED, "integration.error.hotmart_invalid_token");
         }
