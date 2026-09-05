@@ -468,7 +468,6 @@ public class CrmServiceImpl implements CrmService {
     }
 
     @Override
-    @Transactional
     public void sendScheduledMessages() {
         List<Message> dueMessages = messageRepository.findBySentFalseAndScheduledAtBefore(LocalDateTime.now());
         if (dueMessages.isEmpty()) {
