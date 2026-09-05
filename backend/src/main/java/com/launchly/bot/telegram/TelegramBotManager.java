@@ -52,7 +52,11 @@ public class TelegramBotManager implements TelegramClientProvider {
 
     private final ConcurrentHashMap<Long, TelegramBotsLongPollingApplication> activeBots = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, TelegramClient> telegramClients = new ConcurrentHashMap<>();
-    private final ReentrantLock botLock = new ReentrantLock();
+    private final ConcurrentHashMap<Long, ReentrantLock> botLocks = new ConcurrentHashMap<>();
+
+    private ReentrantLock getBotLock(Long botId) {
+        return botLocks.computeIfAbsent(botId, k -> new ReentrantLock());
+    }
 
     @EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
     public void init() {
@@ -99,7 +103,7 @@ public class TelegramBotManager implements TelegramClientProvider {
             return;
         }
 
-        botLock.lock();
+        getBotLock(bot.getId()).lock();
         try {
             if (activeBots.containsKey(bot.getId())) {
                 return;
@@ -169,7 +173,7 @@ public class TelegramBotManager implements TelegramClientProvider {
         } catch (Exception e) {
             log.warn("Could not start external long polling for bot {} (offline/test mode): {}", bot.getId(), e.getMessage());
         } finally {
-            botLock.unlock();
+            getBotLock(bot.getId()).unlock();
         }
     }
 
@@ -178,7 +182,7 @@ public class TelegramBotManager implements TelegramClientProvider {
             return;
         }
 
-        botLock.lock();
+        getBotLock(-1L).lock();
         try {
             if (activeBots.containsKey(-1L)) {
                 return;
@@ -187,10 +191,6 @@ public class TelegramBotManager implements TelegramClientProvider {
             try {
                 String deleteWebhookUrl = "https://api.telegram.org/bot" + systemBotToken + "/deleteWebhook?drop_pending_updates=false";
                 restTemplate.getForEntity(deleteWebhookUrl, String.class);
-                Thread.sleep(300);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                log.warn("System bot wait interrupted: {}", ie.getMessage());
             } catch (Exception e) {
                 log.warn("Failed to call deleteWebhook before polling for system bot: {}", e.getMessage());
             }
@@ -206,12 +206,12 @@ public class TelegramBotManager implements TelegramClientProvider {
         } catch (Exception e) {
             log.error("Failed to register system bot: {}", e.getMessage());
         } finally {
-            botLock.unlock();
+            getBotLock(-1L).unlock();
         }
     }
 
     public void unregisterBot(Long botId) {
-        botLock.lock();
+        getBotLock(botId).lock();
         try {
             TelegramBotsLongPollingApplication app = activeBots.remove(botId);
             telegramClients.remove(botId);
@@ -224,7 +224,7 @@ public class TelegramBotManager implements TelegramClientProvider {
                 }
             }
         } finally {
-            botLock.unlock();
+            getBotLock(botId).unlock();
         }
     }
 
@@ -251,20 +251,18 @@ public class TelegramBotManager implements TelegramClientProvider {
 
     @PreDestroy
     void shutdown() {
-        botLock.lock();
-        try {
-            log.info("Shutting down {} active bots", activeBots.size());
-            activeBots.forEach((id, app) -> {
-                try {
-                    app.close();
-                } catch (Exception e) {
-                    log.error("Error shutting down bot {}: {}", id, e.getMessage());
-                }
-            });
-            activeBots.clear();
-            telegramClients.clear();
-        } finally {
-            botLock.unlock();
-        }
+        log.info("Shutting down {} active bots", activeBots.size());
+        activeBots.forEach((id, app) -> {
+            getBotLock(id).lock();
+            try {
+                app.close();
+            } catch (Exception e) {
+                log.error("Error shutting down bot {}: {}", id, e.getMessage());
+            } finally {
+                getBotLock(id).unlock();
+            }
+        });
+        activeBots.clear();
+        telegramClients.clear();
     }
 }
