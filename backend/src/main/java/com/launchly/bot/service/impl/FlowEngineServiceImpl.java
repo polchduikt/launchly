@@ -870,6 +870,26 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             List<FlowNode> nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
             for (FlowNode node : nodes) {
                 if (node.data() == null) continue;
+
+                Object topBtnsObj = node.data().get("buttons");
+                if (topBtnsObj instanceof List<?> topBtns) {
+                    for (Object btnObj : topBtns) {
+                        if (btnObj instanceof Map<?, ?> btn) {
+                            Object val = btn.get("value");
+                            Object id = btn.get("id");
+                            Object targetNodeId = btn.get("targetNodeId");
+                            if (callbackData.equalsIgnoreCase(String.valueOf(val))
+                                    || callbackData.equalsIgnoreCase(String.valueOf(id))
+                                    || callbackData.equalsIgnoreCase(String.valueOf(targetNodeId))) {
+                                Object label = btn.get("label");
+                                if (label == null) label = btn.get("text");
+                                if (label == null) label = btn.get("name");
+                                if (label != null && !label.toString().isBlank()) return label.toString();
+                            }
+                        }
+                    }
+                }
+
                 Object blocksObj = node.data().get("blocks");
                 if (blocksObj instanceof List<?> blocks) {
                     for (Object blockObj : blocks) {
@@ -878,10 +898,16 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                             if (btnsObj instanceof List<?> buttons) {
                                 for (Object btnObj : buttons) {
                                     if (btnObj instanceof Map<?, ?> btn) {
+                                        Object val = btn.get("value");
+                                        Object id = btn.get("id");
                                         Object targetNodeId = btn.get("targetNodeId");
-                                        if (callbackData.equals(targetNodeId)) {
+                                        if (callbackData.equalsIgnoreCase(String.valueOf(val))
+                                                || callbackData.equalsIgnoreCase(String.valueOf(id))
+                                                || callbackData.equalsIgnoreCase(String.valueOf(targetNodeId))) {
                                             Object label = btn.get("label");
-                                            return label != null ? label.toString() : callbackData;
+                                            if (label == null) label = btn.get("text");
+                                            if (label == null) label = btn.get("name");
+                                            if (label != null && !label.toString().isBlank()) return label.toString();
                                         }
                                     }
                                 }

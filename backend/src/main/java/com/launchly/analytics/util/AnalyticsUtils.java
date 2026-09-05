@@ -47,11 +47,17 @@ public final class AnalyticsUtils {
                         List<?> topLevelButtons = (List<?>) data.get("buttons");
                         if (topLevelButtons != null) {
                             for (Object btnObj : topLevelButtons) {
-                                if (btnObj instanceof Map) {
-                                    Map<String, Object> btn = (Map<String, Object>) btnObj;
-                                    if (callbackData.equals(btn.get("value"))) {
+                                if (btnObj instanceof Map<?, ?> btn) {
+                                    Object val = btn.get("value");
+                                    Object id = btn.get("id");
+                                    Object target = btn.get("targetNodeId");
+                                    if (callbackData.equalsIgnoreCase(String.valueOf(val))
+                                            || callbackData.equalsIgnoreCase(String.valueOf(id))
+                                            || callbackData.equalsIgnoreCase(String.valueOf(target))) {
                                         Object label = btn.get("label");
-                                        if (label != null) return label.toString();
+                                        if (label == null) label = btn.get("text");
+                                        if (label == null) label = btn.get("name");
+                                        if (label != null && !label.toString().isBlank()) return label.toString();
                                     }
                                 }
                             }
@@ -63,11 +69,17 @@ public final class AnalyticsUtils {
                                 List<?> blockButtons = (List<?>) block.get("buttons");
                                 if (blockButtons != null) {
                                     for (Object btnObj : blockButtons) {
-                                        if (btnObj instanceof Map) {
-                                            Map<String, Object> btn = (Map<String, Object>) btnObj;
-                                            if (callbackData.equals(btn.get("value"))) {
+                                        if (btnObj instanceof Map<?, ?> btn) {
+                                            Object val = btn.get("value");
+                                            Object id = btn.get("id");
+                                            Object target = btn.get("targetNodeId");
+                                            if (callbackData.equalsIgnoreCase(String.valueOf(val))
+                                                    || callbackData.equalsIgnoreCase(String.valueOf(id))
+                                                    || callbackData.equalsIgnoreCase(String.valueOf(target))) {
                                                 Object label = btn.get("label");
-                                                if (label != null) return label.toString();
+                                                if (label == null) label = btn.get("text");
+                                                if (label == null) label = btn.get("name");
+                                                if (label != null && !label.toString().isBlank()) return label.toString();
                                             }
                                         }
                                     }

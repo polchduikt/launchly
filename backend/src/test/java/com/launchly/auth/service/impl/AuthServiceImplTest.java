@@ -75,6 +75,9 @@ class AuthServiceImplTest {
     @Mock
     private MessageUtils messageUtils;
 
+    @Mock
+    private com.launchly.common.security.turnstile.TurnstileService turnstileService;
+
     @InjectMocks
     private AuthServiceImpl authService;
 
@@ -83,6 +86,7 @@ class AuthServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(turnstileService.verifyToken(any())).thenReturn(true);
         testUser = User.builder()
                 .email("test@launchly.pro")
                 .password("encoded_pass")
@@ -322,5 +326,27 @@ class AuthServiceImplTest {
         assertThatThrownBy(() -> authService.deleteUserAccount(99L))
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("Should throw BadRequest when Turnstile captcha fails on registration")
+    void register_WhenTurnstileFails_ThrowsBadRequest() {
+        RegisterRequest request = new RegisterRequest("new@launchly.pro", "secret123", "New User", "invalid_token");
+        when(turnstileService.verifyToken("invalid_token")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.register(request))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    @DisplayName("Should throw BadRequest when Turnstile captcha fails on login")
+    void login_WhenTurnstileFails_ThrowsBadRequest() {
+        LoginRequest request = new LoginRequest("test@launchly.pro", "secret123", "invalid_token");
+        when(turnstileService.verifyToken("invalid_token")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
     }
 }

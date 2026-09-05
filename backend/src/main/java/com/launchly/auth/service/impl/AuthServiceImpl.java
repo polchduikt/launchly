@@ -48,6 +48,7 @@ public class AuthServiceImpl implements AuthService {
     private final com.launchly.bot.repository.BotMemberRepository botMemberRepository;
     private final com.launchly.billing.repository.SubscriptionRepository subscriptionRepository;
     private final com.launchly.common.utils.MessageUtils messageUtils;
+    private final com.launchly.common.security.turnstile.TurnstileService turnstileService;
 
     @Value("${telegram.system-bot-username:}")
     private String systemBotUsername;
@@ -58,6 +59,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
+        if (!turnstileService.verifyToken(request.turnstileToken())) {
+            throw new AppException(HttpStatus.BAD_REQUEST, messageUtils.getMessage("auth.error.captcha_invalid"));
+        }
+
         if (userRepository.existsByEmail(request.email())) {
             throw new AppException(HttpStatus.CONFLICT, messageUtils.getMessage("auth.error.email_already_in_use"));
         }
@@ -91,6 +96,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse login(LoginRequest request) {
+        if (!turnstileService.verifyToken(request.turnstileToken())) {
+            throw new AppException(HttpStatus.BAD_REQUEST, messageUtils.getMessage("auth.error.captcha_invalid"));
+        }
+
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, messageUtils.getMessage("auth.error.invalid_credentials")));
 

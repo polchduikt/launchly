@@ -14,6 +14,13 @@ public record LoginRequest(
 
         @Schema(description = "Account password", example = "SecretPass123!", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank(message = "Password is required")
-        String password
-) {}
+        String password,
+
+        @Schema(description = "Cloudflare Turnstile captcha token")
+        String turnstileToken
+) {
+    public LoginRequest(String email, String password) {
+        this(email, password, null);
+    }
+}
 

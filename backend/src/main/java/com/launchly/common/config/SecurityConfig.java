@@ -38,6 +38,9 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.client.registration.google.client-id:}")
     private String googleClientId;
 
+    @Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -105,6 +108,8 @@ public class SecurityConfig {
                     .redirectionEndpoint(endpoint -> endpoint
                             .baseUri("/api/v1/auth/google/callback"))
                     .successHandler(oAuth2SuccessHandler)
+                    .failureHandler((request, response, exception) ->
+                            response.sendRedirect(frontendUrl + "/login?error=oauth_failed"))
             );
         }
 

@@ -20,6 +20,13 @@ public record RegisterRequest(
 
         @Schema(description = "User display name", example = "John Doe", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank(message = "Name is required")
-        String name
-) {}
+        String name,
+
+        @Schema(description = "Cloudflare Turnstile captcha token")
+        String turnstileToken
+) {
+    public RegisterRequest(String email, String password, String name) {
+        this(email, password, name, null);
+    }
+}
 

@@ -182,9 +182,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         List<DashboardStatsResponse.ButtonStatsEntry> topButtons = new ArrayList<>();
         for (Object[] row : rawButtons) {
             String btnName = row[0] != null ? row[0].toString() : "Unknown";
-            if (btnName.startsWith("btn_")) {
-                btnName = AnalyticsUtils.resolveButtonLabel(flowSchemaRepository, botIds, btnName);
-            }
+            btnName = AnalyticsUtils.resolveButtonLabel(flowSchemaRepository, botIds, btnName);
             long clicks = row[1] != null ? ((Number) row[1]).longValue() : 0L;
             topButtons.add(new DashboardStatsResponse.ButtonStatsEntry(btnName, clicks));
         }
