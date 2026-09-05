@@ -17,6 +17,9 @@ import com.launchly.crm.repository.ConversationRepository;
 import com.launchly.crm.repository.LeadRepository;
 import com.launchly.crm.repository.MessageRepository;
 import com.launchly.crm.repository.OrderRepository;
+import com.launchly.crm.service.CrmConversationService;
+import com.launchly.crm.service.CrmLabelService;
+import com.launchly.crm.service.CrmMessageService;
 import com.launchly.crm.service.CrmPipelineService;
 import com.launchly.crm.websocket.CrmWebSocketService;
 import com.launchly.integration.service.IntegrationEventService;
@@ -80,6 +83,15 @@ class CrmServiceImplTest {
 
     @Mock
     private CrmPipelineService crmPipelineService;
+
+    @Mock
+    private CrmConversationService crmConversationService;
+
+    @Mock
+    private CrmMessageService crmMessageService;
+
+    @Mock
+    private CrmLabelService crmLabelService;
 
     @InjectMocks
     private CrmServiceImpl crmService;
@@ -239,7 +251,8 @@ class CrmServiceImplTest {
     @Test
     @DisplayName("Should throw NotFound when getting messages for non-existent conversation")
     void getMessages_WhenNotFound_ThrowsNotFound() {
-        when(conversationRepository.findById(999L)).thenReturn(Optional.empty());
+        when(crmMessageService.getMessages(999L, 1L))
+                .thenThrow(new AppException(HttpStatus.NOT_FOUND, "Conversation not found"));
 
         assertThatThrownBy(() -> crmService.getMessages(999L, 1L))
                 .isInstanceOf(AppException.class)
