@@ -130,6 +130,9 @@ import { useThemeStore } from '../store/useThemeStore';
 
 const PUBLIC_BRAND_ROUTES = new Set<string>([
   ROUTES.LANDING,
+  ROUTES.LOGIN,
+  ROUTES.REGISTER,
+  ROUTES.BLOCKED,
   ROUTES.BLOG,
   ROUTES.TERMS,
   ROUTES.PRIVACY,

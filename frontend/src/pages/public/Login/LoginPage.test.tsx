@@ -24,6 +24,9 @@ vi.mock('../../../hooks/auth/useLoginForm', () => ({
     onSubmit: mockSubmit,
     isPending: false,
     apiError: null,
+    turnstileToken: 'mock-token',
+    setTurnstileToken: vi.fn(),
+    isTurnstileReady: true,
   }),
 }));
 

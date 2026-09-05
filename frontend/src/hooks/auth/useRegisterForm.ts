@@ -14,6 +14,7 @@ export const useRegisterForm = () => {
   const [searchParams] = useSearchParams();
   const { mutateAsync: registerMutate, isPending } = useRegisterMutation();
   const [apiError, setApiError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const form = useForm<RegisterFields>({
     resolver: zodResolver(registerSchema),
@@ -32,6 +33,7 @@ export const useRegisterForm = () => {
         name: [data.firstName, data.lastName].filter(Boolean).join(' '),
         email: data.email,
         password: data.password,
+        turnstileToken: turnstileToken || undefined,
       });
       const redirectUrl = searchParams.get('redirect') || localStorage.getItem('auth_redirect_url');
       if (redirectUrl) {
@@ -48,10 +50,16 @@ export const useRegisterForm = () => {
     }
   };
 
+  const isTurnstileConfigured = Boolean(import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY);
+  const isTurnstileReady = !isTurnstileConfigured || Boolean(turnstileToken);
+
   return {
     form,
     onSubmit: form.handleSubmit(onSubmit),
     isPending,
     apiError,
+    turnstileToken,
+    setTurnstileToken,
+    isTurnstileReady,
   };
 };

@@ -45,8 +45,13 @@ html, body, #root {
 }
 
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: #F2EBDD;
   border-left: 2px solid #0A0A0A;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #F1F5F9 !important;
+  border-left: 2px solid #0A0A0A !important;
 }
 
 [data-theme="dark"] ::-webkit-scrollbar-track {
@@ -56,8 +61,13 @@ html, body, #root {
 
 ::-webkit-scrollbar-thumb {
   background: #0A0A0A;
-  border: 2px solid #F1F5F9;
+  border: 2px solid #F2EBDD;
   border-radius: 4px;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #0A0A0A !important;
+  border: 2px solid #F1F5F9 !important;
 }
 
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
@@ -75,7 +85,17 @@ html {
 
 html, body {
   scrollbar-width: thin;
-  scrollbar-color: #0A0A0A #F1F5F9;
+  scrollbar-color: #0A0A0A #F2EBDD;
+}
+
+[data-theme="light"] html,
+[data-theme="light"] body {
+  scrollbar-color: #0A0A0A #F1F5F9 !important;
+}
+
+[data-theme="dark"] html,
+[data-theme="dark"] body {
+  scrollbar-color: #333333 #121212 !important;
 }
 
 .reveal-on-scroll {

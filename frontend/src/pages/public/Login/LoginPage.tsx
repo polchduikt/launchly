@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useLoginForm } from '../../../hooks/auth/useLoginForm';
@@ -6,6 +6,7 @@ import { AuthPageLayout } from './components/AuthPageLayout';
 import { FormInput } from './components/FormInput';
 import { GoogleLoginButton } from './components/GoogleLoginButton';
 import { TelegramLoginModal } from './components/TelegramLoginModal';
+import { TurnstileWidget, type TurnstileWidgetRef } from '../../../components/common/TurnstileWidget';
 import { GOOGLE_OAUTH_URL } from '../../../const/auth';
 import { t } from '../../../i18n/config';
 import { useSEO } from '../../../hooks/useSEO';
@@ -18,15 +19,23 @@ const LoginPage: React.FC = () => {
     noindex: true,
   });
 
-  const { form, onSubmit, isPending, apiError } = useLoginForm();
+  const { form, onSubmit, isPending, apiError, isTurnstileReady, setTurnstileToken } = useLoginForm();
   const { register, formState: { errors } } = form;
   const [showPassword, setShowPassword] = useState(false);
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
+  const turnstileRef = useRef<TurnstileWidgetRef>(null);
 
   const [searchParams] = useSearchParams();
   const redirectParam = searchParams.get('redirect');
   const isBlockedError = searchParams.get('error') === 'blocked';
   const displayError = apiError || (isBlockedError ? t('auth.account_blocked_error') : null);
+
+  useEffect(() => {
+    if (apiError) {
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
+    }
+  }, [apiError, setTurnstileToken]);
 
   React.useEffect(() => {
     if (redirectParam) {
@@ -85,9 +94,16 @@ const LoginPage: React.FC = () => {
           }
         />
 
+        <TurnstileWidget
+          ref={turnstileRef}
+          onVerify={(token) => setTurnstileToken(token)}
+          onExpire={() => setTurnstileToken(null)}
+          onError={() => setTurnstileToken(null)}
+        />
+
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || !isTurnstileReady}
           className="w-full flex justify-center py-2.5 px-4 border-2 border-[#0A0A0A] rounded-xl bg-[#0A0A0A] text-[#F2EBDD] font-black text-sm hover:bg-[#F2EBDD] hover:text-[#0A0A0A] transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer uppercase tracking-wider"
         >
           {isPending ? (

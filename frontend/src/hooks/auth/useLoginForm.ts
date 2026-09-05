@@ -15,6 +15,7 @@ export const useLoginForm = () => {
   const [searchParams] = useSearchParams();
   const { mutateAsync: loginMutate, isPending } = useLoginMutation();
   const [apiError, setApiError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const form = useForm<LoginFields>({
     resolver: zodResolver(loginSchema),
@@ -27,7 +28,10 @@ export const useLoginForm = () => {
   const onSubmit = async (data: LoginFields) => {
     setApiError(null);
     try {
-      const res = await loginMutate(data);
+      const res = await loginMutate({
+        ...data,
+        turnstileToken: turnstileToken || undefined,
+      });
       const redirectUrl = searchParams.get('redirect') || localStorage.getItem('auth_redirect_url');
       if (redirectUrl) {
         localStorage.removeItem('auth_redirect_url');
@@ -56,10 +60,16 @@ export const useLoginForm = () => {
     }
   };
 
+  const isTurnstileConfigured = Boolean(import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY);
+  const isTurnstileReady = !isTurnstileConfigured || Boolean(turnstileToken);
+
   return {
     form,
     onSubmit: form.handleSubmit(onSubmit),
     isPending,
     apiError,
+    turnstileToken,
+    setTurnstileToken,
+    isTurnstileReady,
   };
 };

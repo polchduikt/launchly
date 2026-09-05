@@ -8,13 +8,14 @@
     <meta name="theme-color" content="#0A0A0A" />
     <meta name="msapplication-TileColor" content="#0A0A0A" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
     <script>
       (function() {
         try {
           var saved = localStorage.getItem('launchly_theme');
           var theme = (saved === 'dark' || saved === 'yellow' || saved === 'light') ? saved : 'light';
           var path = window.location.pathname;
-          var isPublicBrand = path === '/' || path === '/blog' || path.indexOf('/blog/') === 0 || path === '/terms' || path === '/privacy' || path === '/faq' || path === '/acceptable-use' || path === '/ai-terms' || path === '/payment-terms';
+          var isPublicBrand = path === '/' || path === '/login' || path === '/register' || path === '/blocked' || path === '/blog' || path.indexOf('/blog/') === 0 || path === '/terms' || path === '/privacy' || path === '/faq' || path === '/acceptable-use' || path === '/ai-terms' || path === '/payment-terms';
           if (!isPublicBrand) {
             document.documentElement.setAttribute('data-theme', theme);
           }

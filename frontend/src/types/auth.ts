@@ -31,12 +31,14 @@ export interface User {
 export interface LoginRequest {
   email: string;
   password: string;
+  turnstileToken?: string;
 }
 
 export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
+  turnstileToken?: string;
 }
 
 export type UserResponse = User;
