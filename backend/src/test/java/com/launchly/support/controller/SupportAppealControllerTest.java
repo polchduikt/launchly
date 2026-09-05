@@ -3,6 +3,7 @@ package com.launchly.support.controller;
 import com.launchly.common.exception.GlobalExceptionHandler;
 import com.launchly.common.utils.MessageUtils;
 import com.launchly.support.dto.SupportAppealRequest;
+import com.launchly.support.service.SupportAppealService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,9 @@ class SupportAppealControllerTest {
 
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
+
+    @Mock
+    private SupportAppealService supportAppealService;
 
     @Mock
     private MessageUtils messageUtils;

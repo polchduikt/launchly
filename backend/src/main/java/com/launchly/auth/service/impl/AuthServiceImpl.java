@@ -360,4 +360,12 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.delete(user);
     }
+
+    @Override
+    @Transactional
+    public void deleteAccountByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        deleteUserAccount(user.getId());
+    }
 }

@@ -30,4 +30,6 @@ public interface AuthService {
     boolean handleTelegramAuth(String token, Long telegramUserId, String telegramUsername, String telegramName, String telegramPhotoUrl);
 
     void deleteUserAccount(Long userId);
+
+    void deleteAccountByEmail(String email);
 }
