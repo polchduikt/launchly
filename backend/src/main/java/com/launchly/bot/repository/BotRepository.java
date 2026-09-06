@@ -22,7 +22,7 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
     List<Bot> findAllByActiveTrue();
 
     @EntityGraph(attributePaths = {"user"})
-    @Query("SELECT b FROM Bot b WHERE b.id = :id AND (b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.user.id = b.user.id AND bm.user.id = :userId))")
+    @Query("SELECT b FROM Bot b WHERE b.id = :id AND (b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.id = b.id AND bm.user.id = :userId))")
     Optional<Bot> findByIdAndUserId(Long id, Long userId);
 
     @Override
@@ -30,13 +30,13 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
     Optional<Bot> findById(Long id);
 
     @EntityGraph(attributePaths = {"user"})
-    @Query("SELECT DISTINCT b FROM Bot b WHERE b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.user.id = b.user.id AND bm.user.id = :userId)")
+    @Query("SELECT DISTINCT b FROM Bot b WHERE b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.id = b.id AND bm.user.id = :userId)")
     List<Bot> findAllAccessibleByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT COUNT(DISTINCT b) FROM Bot b WHERE b.active = true AND (b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.user.id = b.user.id AND bm.user.id = :userId))")
+    @Query("SELECT COUNT(DISTINCT b) FROM Bot b WHERE b.active = true AND (b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.id = b.id AND bm.user.id = :userId))")
     long countAccessibleByUserIdAndActiveTrue(@Param("userId") Long userId);
 
-    @Query("SELECT COUNT(DISTINCT b) FROM Bot b WHERE b.active = true AND b.createdAt < :date AND (b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.user.id = b.user.id AND bm.user.id = :userId))")
+    @Query("SELECT COUNT(DISTINCT b) FROM Bot b WHERE b.active = true AND b.createdAt < :date AND (b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.id = b.id AND bm.user.id = :userId))")
     long countAccessibleByUserIdAndActiveTrueAndCreatedAtBefore(@Param("userId") Long userId, @Param("date") java.time.LocalDateTime date);
 
     boolean existsByTelegramToken(String telegramToken);

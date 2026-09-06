@@ -1,4 +1,4 @@
-package com.launchly.admin.enums;
+package com.launchly.support.enums;
 
 public enum TicketStatus {
     ACTIVE,

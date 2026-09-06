@@ -1,9 +1,9 @@
 package com.launchly.admin.controller;
 
-import com.launchly.admin.dto.CreateMessageRequest;
-import com.launchly.admin.dto.SupportMessageDto;
-import com.launchly.admin.dto.SupportTicketDto;
-import com.launchly.admin.enums.TicketStatus;
+import com.launchly.support.dto.CreateMessageRequest;
+import com.launchly.support.dto.SupportMessageDto;
+import com.launchly.support.dto.SupportTicketDto;
+import com.launchly.support.enums.TicketStatus;
 import com.launchly.admin.service.AdminSupportChatService;
 import com.launchly.common.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;

@@ -78,7 +78,7 @@ public abstract class OpenAiCompatibleAiClient implements AiProviderClient {
             log.info("Sending chat request to {} model: {}", name(), model());
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HttpStatus.OK.value()) {
                 log.error("{} API error. Status: {}, Body: {}", name(), response.statusCode(), response.body());
                 throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.provider_failed");
             }

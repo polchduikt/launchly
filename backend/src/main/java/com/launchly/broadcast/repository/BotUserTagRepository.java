@@ -12,6 +12,9 @@ public interface BotUserTagRepository extends JpaRepository<BotUserTag, Long> {
     @EntityGraph(attributePaths = {"tag", "botUser"})
     List<BotUserTag> findByBotUserId(Long botUserId);
 
+    @EntityGraph(attributePaths = {"tag", "botUser"})
+    List<BotUserTag> findByBotUserIdIn(List<Long> botUserIds);
+
     boolean existsByBotUserIdAndTagId(Long botUserId, Long tagId);
 
     @Query("SELECT but.botUser.id FROM BotUserTag but WHERE but.tag.name = :tagName AND but.tag.bot.id = :botId")

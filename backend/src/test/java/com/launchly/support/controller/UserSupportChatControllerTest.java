@@ -1,6 +1,6 @@
 package com.launchly.support.controller;
 
-import com.launchly.admin.dto.SupportTicketDto;
+import com.launchly.support.dto.SupportTicketDto;
 import com.launchly.common.exception.GlobalExceptionHandler;
 import com.launchly.common.utils.MessageUtils;
 import com.launchly.support.dto.CreateTicketRequest;

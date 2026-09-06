@@ -30,6 +30,10 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
     private static final ObjectMapper TELEGRAM_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
+    private static final Duration UPDATE_DEDUP_TTL = Duration.ofSeconds(120);
+    private static final int TG_USER_RATE_LIMIT_MAX = 30;
+    private static final Duration TG_USER_RATE_LIMIT_WINDOW = Duration.ofMinutes(1);
+
     @Override
     public void processWebhookUpdate(Long botId, String rawUpdate) {
         TelegramClient client = telegramBotManager.getTelegramClient(botId);
@@ -42,7 +46,7 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
 
             if (update.getUpdateId() != null) {
                 String dedupKey = "telegram:update:" + botId + ":" + update.getUpdateId();
-                Boolean isNew = stringRedisTemplate.opsForValue().setIfAbsent(dedupKey, "1", Duration.ofSeconds(120));
+                Boolean isNew = stringRedisTemplate.opsForValue().setIfAbsent(dedupKey, "1", UPDATE_DEDUP_TTL);
                 if (Boolean.FALSE.equals(isNew)) {
                     log.info("Duplicate Telegram update ignored: botId={}, updateId={}", botId, update.getUpdateId());
                     return;
@@ -52,7 +56,7 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
             Long telegramUserId = extractTelegramUserId(update);
             if (telegramUserId != null) {
                 String rateKey = "rate:tg:user:" + botId + ":" + telegramUserId;
-                if (!rateLimitService.isAllowed(rateKey, 30, Duration.ofMinutes(1))) {
+                if (!rateLimitService.isAllowed(rateKey, TG_USER_RATE_LIMIT_MAX, TG_USER_RATE_LIMIT_WINDOW)) {
                     log.warn("Rate limit exceeded for Telegram user {} in bot {}", telegramUserId, botId);
                     return;
                 }

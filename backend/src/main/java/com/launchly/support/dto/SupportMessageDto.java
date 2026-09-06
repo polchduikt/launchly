@@ -1,4 +1,4 @@
-package com.launchly.admin.dto;
+package com.launchly.support.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -31,4 +31,3 @@ public class SupportMessageDto {
     @Schema(description = "Message sent timestamp")
     private LocalDateTime timestamp;
 }
-

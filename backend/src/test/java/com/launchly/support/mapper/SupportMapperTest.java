@@ -1,9 +1,9 @@
 package com.launchly.support.mapper;
 
-import com.launchly.admin.dto.SupportMessageDto;
-import com.launchly.admin.dto.SupportTicketDto;
-import com.launchly.admin.entity.SupportMessage;
-import com.launchly.admin.entity.SupportTicket;
+import com.launchly.support.dto.SupportMessageDto;
+import com.launchly.support.dto.SupportTicketDto;
+import com.launchly.support.entity.SupportMessage;
+import com.launchly.support.entity.SupportTicket;
 import com.launchly.auth.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

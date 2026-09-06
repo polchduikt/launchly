@@ -19,4 +19,8 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     @Override
     @EntityGraph(attributePaths = {"plan", "user"})
     Optional<Subscription> findById(Long id);
+
+    @EntityGraph(attributePaths = {"plan", "user"})
+    @org.springframework.data.jpa.repository.Query("SELECT s FROM Subscription s")
+    java.util.List<Subscription> findAllWithPlanAndUser();
 }

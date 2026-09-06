@@ -1,8 +1,8 @@
 package com.launchly.support.controller;
 
-import com.launchly.admin.dto.CreateMessageRequest;
-import com.launchly.admin.dto.SupportMessageDto;
-import com.launchly.admin.dto.SupportTicketDto;
+import com.launchly.support.dto.CreateMessageRequest;
+import com.launchly.support.dto.SupportMessageDto;
+import com.launchly.support.dto.SupportTicketDto;
 import com.launchly.common.ratelimit.RateLimit;
 import com.launchly.common.ratelimit.RateLimitType;
 import com.launchly.common.exception.ErrorResponse;

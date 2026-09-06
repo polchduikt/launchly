@@ -26,4 +26,6 @@ public interface BotDialogStateService {
     void clearActiveCampaignId(Long botId, Long telegramUserId);
 
     void clearSession(Long botId, Long telegramUserId);
+
+    boolean isAutomationPaused(com.launchly.bot.entity.BotUser botUser);
 }

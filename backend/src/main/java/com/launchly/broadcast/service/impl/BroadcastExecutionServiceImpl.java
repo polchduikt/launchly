@@ -30,6 +30,7 @@ public class BroadcastExecutionServiceImpl implements BroadcastExecutionService 
 
     private static final int BATCH_SIZE = 25;
     private static final long BATCH_DELAY_MS = 1000;
+    private static final Duration LOCK_TTL = Duration.ofMinutes(10);
 
     private final StringRedisTemplate stringRedisTemplate;
     private final BroadcastCampaignRepository campaignRepository;
@@ -59,7 +60,7 @@ public class BroadcastExecutionServiceImpl implements BroadcastExecutionService 
     @Async("broadcastExecutor")
     public void sendCampaign(Long campaignId) {
         String lockKey = "lock:broadcast:send:" + campaignId;
-        Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", Duration.ofMinutes(10));
+        Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", LOCK_TTL);
         if (Boolean.FALSE.equals(acquired)) {
             log.warn("Broadcast campaign {} is already being dispatched by another process", campaignId);
             return;

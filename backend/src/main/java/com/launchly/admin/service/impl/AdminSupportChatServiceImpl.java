@@ -1,12 +1,13 @@
 package com.launchly.admin.service.impl;
 
-import com.launchly.admin.dto.SupportMessageDto;
-import com.launchly.admin.dto.SupportTicketDto;
+import com.launchly.support.dto.SupportMessageDto;
+import com.launchly.support.dto.SupportTicketDto;
 import com.launchly.admin.util.AdminSupportSpecUtils;
-import com.launchly.admin.entity.SupportMessage;
-import com.launchly.admin.entity.SupportTicket;
-import com.launchly.admin.repository.SupportMessageRepository;
-import com.launchly.admin.repository.SupportTicketRepository;
+import com.launchly.support.entity.SupportMessage;
+import com.launchly.support.entity.SupportTicket;
+import com.launchly.support.enums.TicketStatus;
+import com.launchly.support.repository.SupportMessageRepository;
+import com.launchly.support.repository.SupportTicketRepository;
 import com.launchly.admin.service.AdminSupportChatService;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.service.UserQueryService;
@@ -28,6 +29,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,7 +49,7 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
     private final MessageUtils messageUtils;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<SupportTicketDto> getSupportTickets(String filter, String period, String search, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
 
@@ -55,7 +57,7 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
         Page<SupportTicket> ticketsPage = supportTicketRepository.findAll(spec, pageable);
 
         List<SupportTicketDto> dtos = ticketsPage.getContent().stream()
-                .map(this::mapToDto)
+                .map(t -> mapToDto(t, false))
                 .collect(Collectors.toList());
 
         return new PageImpl<>(dtos, pageable, ticketsPage.getTotalElements());
@@ -71,7 +73,7 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
             supportTicketRepository.save(ticket);
         }
 
-        return mapToDto(ticket);
+        return mapToDto(ticket, true);
     }
 
     @Override
@@ -122,7 +124,7 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
 
     @Override
     @Transactional
-    public SupportTicketDto updateStatus(Long id, com.launchly.admin.enums.TicketStatus targetStatus) {
+    public SupportTicketDto updateStatus(Long id, TicketStatus targetStatus) {
         SupportTicket ticket = findTicketOrThrow(id);
         String statusToSet = (targetStatus != null) ? targetStatus.name() : "RESOLVED";
         ticket.setStatus(statusToSet);
@@ -171,6 +173,10 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
     }
 
     private SupportTicketDto mapToDto(SupportTicket ticket) {
+        return mapToDto(ticket, true);
+    }
+
+    private SupportTicketDto mapToDto(SupportTicket ticket, boolean detailed) {
         User u = ticket.getUser();
 
         String planName = "FREE";
@@ -181,20 +187,26 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
                     .orElse("FREE");
         }
 
-        long botsCount = u != null ? botRepository.countByUserId(u.getId()) : 0;
-        long automationsCount = u != null ? flowSchemaRepository.countByUserId(u.getId()) : 0;
-        long broadcastsCount = u != null ? broadcastCampaignRepository.countByUserId(u.getId()) : 0;
+        long botsCount = 0;
+        long automationsCount = 0;
+        long broadcastsCount = 0;
         long contactsCount = 0;
-        if (u != null) {
-            List<Long> botIds = botRepository.findByUserId(u.getId()).stream()
-                    .map(b -> b.getId())
-                    .collect(Collectors.toList());
-            if (!botIds.isEmpty()) {
-                contactsCount = botUserRepository.countByBotIdIn(botIds);
-            }
-        }
+        List<SupportMessageDto> messageDtos = Collections.emptyList();
 
-        List<SupportMessageDto> messageDtos = supportMapper.toMessageDtoList(ticket.getMessages());
+        if (detailed) {
+            botsCount = u != null ? botRepository.countByUserId(u.getId()) : 0;
+            automationsCount = u != null ? flowSchemaRepository.countByUserId(u.getId()) : 0;
+            broadcastsCount = u != null ? broadcastCampaignRepository.countByUserId(u.getId()) : 0;
+            if (u != null) {
+                List<Long> botIds = botRepository.findByUserId(u.getId()).stream()
+                        .map(b -> b.getId())
+                        .collect(Collectors.toList());
+                if (!botIds.isEmpty()) {
+                    contactsCount = botUserRepository.countByBotIdIn(botIds);
+                }
+            }
+            messageDtos = supportMapper.toMessageDtoList(ticket.getMessages());
+        }
 
         User mgr = ticket.getAssignedManager();
 

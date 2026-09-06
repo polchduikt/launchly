@@ -11,5 +11,6 @@ public final class BotConstants {
     public static final String ROLE_VIEWER = "Viewer";
     public static final String ROLE_ADMIN = "Admin";
     public static final String ROLE_EDITOR = "Editor";
+    public static final Long SYSTEM_BOT_ID = -1L;
     public static final int DEFAULT_DELAY_SECONDS = 3;
 }

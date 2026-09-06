@@ -4,6 +4,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import com.launchly.bot.service.FlowEngineService;
 import com.launchly.bot.constant.BotConstants;
+import com.launchly.bot.constant.TelegramConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotUserRepository;
@@ -137,7 +138,7 @@ public class TelegramBotManager implements TelegramClientProvider {
 
             if (bot.getUsername() == null || bot.getUsername().isBlank()) {
                 try {
-                    String url = "https://api.telegram.org/bot" + token + "/getMe";
+                    String url = String.format(TelegramConstants.GET_ME_URL_TEMPLATE, token);
                     org.springframework.http.ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
                     if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
                         JsonNode root = objectMapper.readTree(responseEntity.getBody());
@@ -158,7 +159,7 @@ public class TelegramBotManager implements TelegramClientProvider {
             }
 
             try {
-                String deleteWebhookUrl = "https://api.telegram.org/bot" + token + "/deleteWebhook?drop_pending_updates=false";
+                String deleteWebhookUrl = String.format(TelegramConstants.DELETE_WEBHOOK_URL_TEMPLATE, token);
                 restTemplate.getForEntity(deleteWebhookUrl, String.class);
             } catch (Exception e) {
                 log.debug("Could not call deleteWebhook before polling for bot {}: {}", bot.getId(), e.getMessage());
@@ -178,18 +179,18 @@ public class TelegramBotManager implements TelegramClientProvider {
     }
 
     private void registerSystemBot() {
-        if (activeBots.containsKey(-1L)) {
+        if (activeBots.containsKey(BotConstants.SYSTEM_BOT_ID)) {
             return;
         }
 
-        getBotLock(-1L).lock();
+        getBotLock(BotConstants.SYSTEM_BOT_ID).lock();
         try {
-            if (activeBots.containsKey(-1L)) {
+            if (activeBots.containsKey(BotConstants.SYSTEM_BOT_ID)) {
                 return;
             }
 
             try {
-                String deleteWebhookUrl = "https://api.telegram.org/bot" + systemBotToken + "/deleteWebhook?drop_pending_updates=false";
+                String deleteWebhookUrl = String.format(TelegramConstants.DELETE_WEBHOOK_URL_TEMPLATE, systemBotToken);
                 restTemplate.getForEntity(deleteWebhookUrl, String.class);
             } catch (Exception e) {
                 log.warn("Failed to call deleteWebhook before polling for system bot: {}", e.getMessage());
@@ -198,15 +199,15 @@ public class TelegramBotManager implements TelegramClientProvider {
             TelegramClient telegramClient = new OkHttpTelegramClient(systemBotToken);
             TelegramBotsLongPollingApplication pollingApp = new TelegramBotsLongPollingApplication();
             BotUpdateHandler handler = new BotUpdateHandler(
-                    -1L, flowEngineService, telegramClient, crmService, botUserRepository);
+                    BotConstants.SYSTEM_BOT_ID, flowEngineService, telegramClient, crmService, botUserRepository);
             pollingApp.registerBot(systemBotToken, handler);
-            activeBots.put(-1L, pollingApp);
-            telegramClients.put(-1L, telegramClient);
+            activeBots.put(BotConstants.SYSTEM_BOT_ID, pollingApp);
+            telegramClients.put(BotConstants.SYSTEM_BOT_ID, telegramClient);
             log.info("Registered system bot for long polling");
         } catch (Exception e) {
             log.error("Failed to register system bot: {}", e.getMessage());
         } finally {
-            getBotLock(-1L).unlock();
+            getBotLock(BotConstants.SYSTEM_BOT_ID).unlock();
         }
     }
 

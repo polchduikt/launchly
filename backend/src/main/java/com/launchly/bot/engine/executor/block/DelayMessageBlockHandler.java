@@ -31,7 +31,7 @@ public class DelayMessageBlockHandler implements MessageBlockHandler {
         }
 
         try {
-            Thread.sleep(delaySeconds * 1000L);
+            java.util.concurrent.TimeUnit.SECONDS.sleep(delaySeconds);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.warn("Delay interrupted in node {}", context.node().id());

@@ -68,6 +68,9 @@ class AiServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private org.springframework.transaction.support.TransactionTemplate transactionTemplate;
+
     @InjectMocks
     private AiServiceImpl aiService;
 
@@ -76,6 +79,11 @@ class AiServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(transactionTemplate.execute(any())).thenAnswer(invocation -> {
+            org.springframework.transaction.support.TransactionCallback<?> callback = invocation.getArgument(0);
+            return callback.doInTransaction(null);
+        });
+
         testPlan = new Plan();
         testPlan.setId(1L);
         testPlan.setName("PRO");

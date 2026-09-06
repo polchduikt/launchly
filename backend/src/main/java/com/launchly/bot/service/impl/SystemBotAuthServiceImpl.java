@@ -1,6 +1,7 @@
 package com.launchly.bot.service.impl;
 
 import com.launchly.auth.service.AuthService;
+import com.launchly.bot.constant.TelegramConstants;
 import com.launchly.bot.service.SystemBotAuthService;
 import com.launchly.common.utils.MessageUtils;
 import lombok.RequiredArgsConstructor;
@@ -86,7 +87,7 @@ public class SystemBotAuthServiceImpl implements SystemBotAuthService {
                                     .build();
                             File file = client.execute(getFile);
                             if (file != null && file.getFilePath() != null) {
-                                telegramPhotoUrl = "https://api.telegram.org/file/bot" + systemBotToken + "/" + file.getFilePath();
+                                telegramPhotoUrl = String.format(TelegramConstants.FILE_DOWNLOAD_URL_TEMPLATE, systemBotToken, file.getFilePath());
                             }
                         }
                     }

@@ -11,18 +11,22 @@ import java.time.Duration;
 @Configuration
 public class HttpClientConfig {
 
+    private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(10);
+    private static final Duration REST_CONNECT_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration REST_READ_TIMEOUT = Duration.ofSeconds(10);
+
     @Bean
     public HttpClient httpClient() {
         return HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(10))
+                .connectTimeout(DEFAULT_CONNECT_TIMEOUT)
                 .build();
     }
 
     @Bean
     public RestTemplate restTemplate() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(Duration.ofSeconds(5));
-        factory.setReadTimeout(Duration.ofSeconds(10));
+        factory.setConnectTimeout(REST_CONNECT_TIMEOUT);
+        factory.setReadTimeout(REST_READ_TIMEOUT);
         return new RestTemplate(factory);
     }
 }

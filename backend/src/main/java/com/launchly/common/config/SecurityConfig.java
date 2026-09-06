@@ -3,7 +3,7 @@ package com.launchly.common.config;
 import com.launchly.common.ratelimit.TierRateLimitFilter;
 import com.launchly.common.security.CorrelationIdFilter;
 import com.launchly.common.security.JwtFilter;
-import com.launchly.common.security.OAuth2SuccessHandler;
+import com.launchly.auth.security.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

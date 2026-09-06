@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -19,6 +20,8 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class TurnstileService {
+
+    private static final Duration HTTP_TIMEOUT = Duration.ofSeconds(5);
 
     private final TurnstileProperties properties;
     private final HttpClient httpClient;
@@ -44,7 +47,7 @@ public class TurnstileService {
         }
 
         if (token == null || token.isBlank()) {
-            log.warn("Turnstile validation failed: missing token");
+            log.warn("Turnstile token is missing while verification is enabled");
             return false;
         }
 
@@ -60,14 +63,14 @@ public class TurnstileService {
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(properties.getVerifyUrl()))
-                    .timeout(Duration.ofSeconds(5))
+                    .timeout(HTTP_TIMEOUT)
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HttpStatus.OK.value()) {
                 log.error("Turnstile API returned non-200 status code: {}", response.statusCode());
                 return false;
             }

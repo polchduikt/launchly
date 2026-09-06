@@ -1,6 +1,7 @@
 package com.launchly.bot.service.impl;
 
 import com.cloudinary.Cloudinary;
+import com.launchly.bot.constant.TelegramConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotRepository;
@@ -10,6 +11,7 @@ import com.launchly.bot.telegram.TelegramBotManager;
 import com.launchly.common.utils.EncryptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
@@ -29,6 +31,8 @@ import java.util.Map;
 @Slf4j
 @Service
 public class UserAvatarServiceImpl implements UserAvatarService {
+
+    private static final String CLOUDINARY_AVATAR_TRANSFORMATION = "c_limit,w_400,h_400,q_auto,f_auto";
 
     private final BotRepository botRepository;
     private final BotUserRepository botUserRepository;
@@ -91,19 +95,19 @@ public class UserAvatarServiceImpl implements UserAvatarService {
                     File file = telegramClient.execute(getFile);
                     if (file != null && file.getFilePath() != null) {
                         String botToken = encryptionUtil.decrypt(bot.getTelegramToken());
-                        String fileUrl = "https://api.telegram.org/file/bot" + botToken + "/" + file.getFilePath();
+                        String fileUrl = String.format(TelegramConstants.FILE_DOWNLOAD_URL_TEMPLATE, botToken, file.getFilePath());
                         try {
                             HttpRequest request = HttpRequest.newBuilder()
                                     .uri(URI.create(fileUrl))
                                     .GET()
                                     .build();
                             HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-                            byte[] fileBytes = response.statusCode() == 200 ? response.body() : null;
+                            byte[] fileBytes = response.statusCode() == HttpStatus.OK.value() ? response.body() : null;
 
                             if (fileBytes != null && fileBytes.length > 0) {
                                 Map<String, Object> params = Map.of(
                                         "folder", "launchly/" + bot.getUser().getId() + "/contacts",
-                                        "transformation", "c_limit,w_400,h_400,q_auto,f_auto"
+                                        "transformation", CLOUDINARY_AVATAR_TRANSFORMATION
                                 );
                                 Map<?, ?> result = cloudinary.uploader().upload(fileBytes, params);
                                 String secureUrl = (String) result.get("secure_url");

@@ -1,14 +1,20 @@
 package com.launchly.bot.service.impl;
 
+import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.service.BotDialogStateService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BotDialogStateServiceImpl implements BotDialogStateService {
@@ -20,6 +26,7 @@ public class BotDialogStateServiceImpl implements BotDialogStateService {
     private static final String CAMPAIGN_PREFIX = "launchly:bot:campaign:";
 
     private final StringRedisTemplate redisTemplate;
+    private final ObjectMapper objectMapper;
 
     @Override
     public void setCurrentNodeId(Long botId, Long telegramUserId, String nodeId) {
@@ -119,5 +126,37 @@ public class BotDialogStateServiceImpl implements BotDialogStateService {
         redisTemplate.delete(inputKey);
         redisTemplate.delete(dataKey);
         redisTemplate.delete(campaignKey);
+    }
+
+    @Override
+    public boolean isAutomationPaused(BotUser botUser) {
+        if (botUser == null) return false;
+        String metadata = botUser.getMetadata();
+        if (metadata == null || metadata.isBlank() || "{}".equals(metadata)) return false;
+        try {
+            Map<String, Object> meta = objectMapper.readValue(metadata, new TypeReference<Map<String, Object>>() {});
+            if (meta != null && Boolean.TRUE.equals(meta.get("paused"))) {
+                Object pausedUntilObj = meta.get("pausedUntil");
+                if (pausedUntilObj instanceof Number) {
+                    long pausedUntil = ((Number) pausedUntilObj).longValue();
+                    if (System.currentTimeMillis() > pausedUntil) {
+                        return false;
+                    }
+                } else if (pausedUntilObj instanceof String) {
+                    try {
+                        long pausedUntil = Long.parseLong((String) pausedUntilObj);
+                        if (System.currentTimeMillis() > pausedUntil) {
+                            return false;
+                        }
+                    } catch (NumberFormatException e) {
+                        log.warn("Failed to parse pausedUntil timestamp: {}", pausedUntilObj);
+                    }
+                }
+                return true;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to check if automation is paused for user {}: {}", botUser.getId(), e.getMessage());
+        }
+        return false;
     }
 }

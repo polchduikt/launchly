@@ -1,6 +1,6 @@
-package com.launchly.admin.repository;
+package com.launchly.support.repository;
 
-import com.launchly.admin.entity.SupportMessage;
+import com.launchly.support.entity.SupportMessage;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

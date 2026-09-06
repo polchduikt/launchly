@@ -59,6 +59,7 @@ public class AiServiceImpl implements AiService {
     private final AiChatSessionRepository aiChatSessionRepository;
     private final AiChatMessageRepository aiChatMessageRepository;
     private final UserRepository userRepository;
+    private final org.springframework.transaction.support.TransactionTemplate transactionTemplate;
 
     @Value("${ai.prompt.chat-path:classpath:prompts/chat-system.txt}")
     private Resource chatPromptResource;
@@ -158,7 +159,6 @@ public class AiServiceImpl implements AiService {
     }
 
     @Override
-    @Transactional
     @CircuitBreaker(name = "aiProvider", fallbackMethod = "chatFallback")
     @Retry(name = "aiProvider")
     public AiChatResponse chat(AiChatRequest request, Long userId) {
@@ -190,41 +190,45 @@ public class AiServiceImpl implements AiService {
         AiUsageResponse usage = aiUsageService.getUsage(userId, plan);
 
         if (session != null) {
-            int userTokens = Math.max(MIN_USER_TOKENS, request.message().length() / AVG_CHARS_PER_TOKEN);
-            int replyTokens = Math.max(MIN_USER_TOKENS, (reply != null ? reply.length() : 0) / AVG_CHARS_PER_TOKEN);
+            final String finalReply = reply;
+            final AiChatSession targetSession = session;
+            List<AiChatMessageResponse> mappedMessages = transactionTemplate.execute(status -> {
+                int userTokens = Math.max(MIN_USER_TOKENS, request.message().length() / AVG_CHARS_PER_TOKEN);
+                int replyTokens = Math.max(MIN_USER_TOKENS, (finalReply != null ? finalReply.length() : 0) / AVG_CHARS_PER_TOKEN);
 
-            AiChatMessage userChatMessage = AiChatMessage.builder()
-                    .session(session)
-                    .role("user")
-                    .content(request.message())
-                    .tokensUsed(userTokens)
-                    .build();
-            session.getMessages().add(userChatMessage);
+                AiChatMessage userChatMessage = AiChatMessage.builder()
+                        .session(targetSession)
+                        .role("user")
+                        .content(request.message())
+                        .tokensUsed(userTokens)
+                        .build();
+                targetSession.getMessages().add(userChatMessage);
 
-            AiChatMessage assistantChatMessage = AiChatMessage.builder()
-                    .session(session)
-                    .role("assistant")
-                    .content(reply)
-                    .tokensUsed(replyTokens)
-                    .build();
-            session.getMessages().add(assistantChatMessage);
+                AiChatMessage assistantChatMessage = AiChatMessage.builder()
+                        .session(targetSession)
+                        .role("assistant")
+                        .content(finalReply)
+                        .tokensUsed(replyTokens)
+                        .build();
+                targetSession.getMessages().add(assistantChatMessage);
 
-            if (session.getTitle() == null || session.getTitle().isBlank()) {
-                String autoTitle = request.message().trim();
-                if (autoTitle.length() > 40) {
-                    autoTitle = autoTitle.substring(0, 40) + "...";
+                if (targetSession.getTitle() == null || targetSession.getTitle().isBlank()) {
+                    String autoTitle = request.message().trim();
+                    if (autoTitle.length() > 40) {
+                        autoTitle = autoTitle.substring(0, 40) + "...";
+                    }
+                    targetSession.setTitle(autoTitle);
                 }
-                session.setTitle(autoTitle);
-            }
 
-            session.setUpdatedAt(LocalDateTime.now());
-            session = aiChatSessionRepository.save(session);
+                targetSession.setUpdatedAt(LocalDateTime.now());
+                AiChatSession saved = aiChatSessionRepository.save(targetSession);
 
-            List<AiChatMessageResponse> mappedMessages = session.getMessages().stream()
-                    .map(m -> new AiChatMessageResponse(m.getId(), m.getRole(), m.getContent(), m.getTokensUsed(), m.getCreatedAt()))
-                    .toList();
+                return saved.getMessages().stream()
+                        .map(m -> new AiChatMessageResponse(m.getId(), m.getRole(), m.getContent(), m.getTokensUsed(), m.getCreatedAt()))
+                        .toList();
+            });
 
-            return new AiChatResponse(session.getId(), session.getTitle(), reply, usage, mappedMessages);
+            return new AiChatResponse(targetSession.getId(), targetSession.getTitle(), reply, usage, mappedMessages);
         }
 
         return new AiChatResponse(reply, usage);

@@ -1,7 +1,7 @@
 package com.launchly.support.service;
 
-import com.launchly.admin.dto.SupportMessageDto;
-import com.launchly.admin.dto.SupportTicketDto;
+import com.launchly.support.dto.SupportMessageDto;
+import com.launchly.support.dto.SupportTicketDto;
 import com.launchly.support.dto.CreateTicketRequest;
 import org.springframework.data.domain.Page;
 

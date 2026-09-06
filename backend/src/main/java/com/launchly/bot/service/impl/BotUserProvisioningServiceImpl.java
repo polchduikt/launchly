@@ -1,6 +1,7 @@
 package com.launchly.bot.service.impl;
 
 import com.launchly.billing.service.PlanLimitService;
+import com.launchly.bot.constant.TelegramConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotUserRepository;
@@ -52,7 +53,7 @@ public class BotUserProvisioningServiceImpl implements BotUserProvisioningServic
                     return botUserRepository.save(newUser);
                 });
 
-        if ((botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith("https://api.telegram.org/")) && telegramClient != null) {
+        if ((botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith(TelegramConstants.API_BASE_URL)) && telegramClient != null) {
             userAvatarService.fetchAndSetPhotoUrl(botUser, bot, telegramClient);
         }
 

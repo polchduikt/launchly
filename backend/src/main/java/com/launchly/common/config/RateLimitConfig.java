@@ -18,6 +18,8 @@ import java.time.Duration;
 @Configuration
 public class RateLimitConfig {
 
+    private static final Duration REFILL_EXPIRATION_STRATEGY_MAX = Duration.ofHours(2);
+
     @Bean
     @ConditionalOnBean(RedisConnectionFactory.class)
     public ProxyManager<byte[]> lettuceBasedProxyManager(@Autowired(required = false) RedisConnectionFactory connectionFactory) {
@@ -27,7 +29,7 @@ public class RateLimitConfig {
                 if (nativeClient instanceof RedisClient redisClient) {
                     StatefulRedisConnection<byte[], byte[]> connection = redisClient.connect(ByteArrayCodec.INSTANCE);
                     return LettuceBasedProxyManager.builderFor(connection)
-                            .withExpirationStrategy(ExpirationAfterWriteStrategy.basedOnTimeForRefillingBucketUpToMax(Duration.ofHours(2)))
+                            .withExpirationStrategy(ExpirationAfterWriteStrategy.basedOnTimeForRefillingBucketUpToMax(REFILL_EXPIRATION_STRATEGY_MAX))
                             .build();
                 }
             } catch (Exception ignored) {

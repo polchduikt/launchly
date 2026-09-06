@@ -99,6 +99,12 @@ class BotServiceImplTest {
     @Mock
     private BotResponseFactory botResponseFactory;
 
+    @Mock
+    private org.springframework.web.client.RestTemplate restTemplate;
+
+    @Mock
+    private org.springframework.transaction.support.TransactionTemplate transactionTemplate;
+
     @InjectMocks
     private BotServiceImpl botService;
 
@@ -108,6 +114,11 @@ class BotServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(transactionTemplate.execute(any())).thenAnswer(invocation -> {
+            org.springframework.transaction.support.TransactionCallback<?> callback = invocation.getArgument(0);
+            return callback.doInTransaction(null);
+        });
+
         testUser = User.builder()
                 .email("user@launchly.pro")
                 .name("Bot Creator")

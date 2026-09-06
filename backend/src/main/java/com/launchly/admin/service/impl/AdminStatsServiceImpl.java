@@ -135,7 +135,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
 
         AdminStatsDto.ServerHealthDto serverHealth = buildServerHealth(activeBots, allBots);
 
-        List<Subscription> allSubscriptions = subscriptionRepository.findAll();
+        List<Subscription> allSubscriptions = subscriptionRepository.findAllWithPlanAndUser();
         double mrrVal = AdminStatsCalculator.calculateMrr(allSubscriptions);
         double ltvVal = AdminStatsCalculator.calculateLtv(allSubscriptions);
 

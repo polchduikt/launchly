@@ -35,6 +35,8 @@ public class TierRateLimitFilter extends OncePerRequestFilter {
     private static final long PRO_RATE_LIMIT = 30_000;
     private static final long FREE_RATE_LIMIT = 12_000;
     private static final long ANONYMOUS_RATE_LIMIT = 60;
+    private static final Duration WINDOW_DURATION = Duration.ofMinutes(1);
+    private static final long DEFAULT_CONSUME_TOKENS = 1L;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -63,8 +65,7 @@ public class TierRateLimitFilter extends OncePerRequestFilter {
             rateKey = "rate:tier:ip:" + extractClientIp(request);
         }
 
-        Duration duration = Duration.ofMinutes(1);
-        var probe = rateLimitService.tryConsume(rateKey, capacity, duration, 1);
+        var probe = rateLimitService.tryConsume(rateKey, capacity, WINDOW_DURATION, DEFAULT_CONSUME_TOKENS);
 
         response.setHeader("X-RateLimit-Limit", String.valueOf(capacity));
         response.setHeader("X-RateLimit-Remaining", String.valueOf(probe.getRemainingTokens()));

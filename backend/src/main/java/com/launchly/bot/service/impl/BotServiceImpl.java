@@ -77,9 +77,33 @@ public class BotServiceImpl implements BotService {
     private final BotSubscriberService botSubscriberService;
     private final BotResponseFactory botResponseFactory;
     private final RestTemplate restTemplate;
+    private final org.springframework.transaction.support.TransactionTemplate transactionTemplate;
+
+    private record TelegramBotInfo(String username, String firstName) {}
+
+    private TelegramBotInfo fetchTelegramBotInfo(String unencryptedToken) {
+        if (unencryptedToken == null || unencryptedToken.isBlank() || BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(unencryptedToken)) {
+            return new TelegramBotInfo(null, null);
+        }
+        try {
+            String url = TelegramConstants.BOT_API_URL + unencryptedToken + "/getMe";
+            org.springframework.http.ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
+            if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
+                JsonNode responseNode = objectMapper.readTree(responseEntity.getBody());
+                if (responseNode.has("ok") && responseNode.get("ok").asBoolean()) {
+                    JsonNode result = responseNode.get("result");
+                    String username = result.has("username") ? result.get("username").asText() : null;
+                    String firstName = result.has("first_name") ? result.get("first_name").asText() : null;
+                    return new TelegramBotInfo(username, firstName);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not fetch Telegram bot info: {}", e.getMessage(), e);
+        }
+        return new TelegramBotInfo(null, null);
+    }
 
     @Override
-    @Transactional
     @CacheEvict(value = CacheConstants.BOTS, key = "#userId")
     public BotResponse createBot(BotCreateRequest request, Long userId) {
         User user = userQueryService.getUserOrThrow(userId);
@@ -99,37 +123,48 @@ public class BotServiceImpl implements BotService {
             rawToken = BotConstants.DUMMY_TOKEN_PLACEHOLDER;
         }
 
-        String encryptedToken = encryptionUtil.encrypt(rawToken);
+        final String finalRawToken = rawToken;
+        final boolean finalIsDummy = isDummy;
+        final TelegramBotInfo tgInfo = !finalIsDummy ? fetchTelegramBotInfo(finalRawToken) : new TelegramBotInfo(null, null);
+        final String encryptedToken = encryptionUtil.encrypt(finalRawToken);
 
-        List<Bot> existingBots = botRepository.findAllByUserId(userId);
-        String inheritedCustomFields = existingBots.stream()
-                .map(Bot::getCustomFieldsData)
-                .filter(data -> data != null && !data.trim().isEmpty() && !data.trim().equals("{}"))
-                .findFirst()
-                .orElse(null);
+        Bot bot = transactionTemplate.execute(status -> {
+            List<Bot> existingBots = botRepository.findAllByUserId(userId);
+            String inheritedCustomFields = existingBots.stream()
+                    .map(Bot::getCustomFieldsData)
+                    .filter(data -> data != null && !data.trim().isEmpty() && !data.trim().equals("{}"))
+                    .findFirst()
+                    .orElse(null);
 
-        Bot bot = Bot.builder()
-                .name(request.name())
-                .description(request.description())
-                .telegramToken(encryptedToken)
-                .customFieldsData(inheritedCustomFields)
-                .user(user)
-                .build();
+            String botName = request.name();
+            if ((botName == null || botName.isBlank()) && tgInfo.firstName() != null) {
+                botName = tgInfo.firstName();
+            }
 
-        bot = botRepository.save(bot);
+            Bot newBot = Bot.builder()
+                    .name(botName)
+                    .username(tgInfo.username())
+                    .description(request.description())
+                    .telegramToken(encryptedToken)
+                    .customFieldsData(inheritedCustomFields)
+                    .user(user)
+                    .build();
 
-        if (!BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(rawToken)) {
-            botLifecycleService.releaseTokenFromOtherBots(rawToken, userId, bot.getId());
-            updateBotTelegramInfo(bot, rawToken);
-            bot = botRepository.save(bot);
-        }
+            newBot = botRepository.save(newBot);
 
-        FlowSchema schema = FlowSchema.builder()
-                .bot(bot)
-                .build();
-        flowSchemaRepository.save(schema);
+            if (!finalIsDummy) {
+                botLifecycleService.releaseTokenFromOtherBots(finalRawToken, userId, newBot.getId());
+            }
 
-        userAuditService.logBotConnected(user, bot.getId(), bot.getName(), bot.getCreatedAt());
+            FlowSchema schema = FlowSchema.builder()
+                    .bot(newBot)
+                    .build();
+            flowSchemaRepository.save(schema);
+
+            userAuditService.logBotConnected(user, newBot.getId(), newBot.getName(), newBot.getCreatedAt());
+
+            return newBot;
+        });
 
         return toBotResponseWithStats(bot);
     }
@@ -185,62 +220,87 @@ public class BotServiceImpl implements BotService {
     }
 
     @Override
-    @Transactional
     @CacheEvict(value = CacheConstants.BOTS, key = "#userId")
     public BotResponse updateBot(Long id, BotUpdateRequest request, Long userId) {
-        Bot bot = findBotByIdAndUser(id, userId);
-        botAccessValidator.validateWriteAccess(bot, userId);
+        Bot existingBot = findBotByIdAndUser(id, userId);
+        botAccessValidator.validateWriteAccess(existingBot, userId);
 
-        if (request.name() != null) {
-            bot.setName(request.name());
-        }
         String rawToken = request.telegramToken();
         if (request.copyTokenFromBotId() != null) {
             Bot sourceBot = findBotByIdAndUser(request.copyTokenFromBotId(), userId);
             rawToken = encryptionUtil.decrypt(sourceBot.getTelegramToken());
         }
 
-        if (rawToken != null) {
-            String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
-            boolean wasDummy = BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decryptedToken);
-            boolean isNewReal = !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(rawToken);
-
-            if (wasDummy && isNewReal) {
-                planLimitService.checkBotLimit(userId, rawToken);
-            }
-
-            if (isNewReal) {
-                botLifecycleService.releaseTokenFromOtherBots(rawToken, userId, bot.getId());
-                bot.setTemplate(false);
-            }
-
-            bot.setTelegramToken(encryptionUtil.encrypt(rawToken));
-            if (!BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(rawToken)) {
-                updateBotTelegramInfo(bot, rawToken);
-            } else {
-                bot.setUsername(null);
-            }
+        TelegramBotInfo tgInfo = null;
+        if (rawToken != null && !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(rawToken)) {
+            tgInfo = fetchTelegramBotInfo(rawToken);
         }
-        if (request.description() != null) {
-            bot.setDescription(request.description());
+
+        final TelegramBotInfo finalTgInfo = tgInfo;
+        final String finalRawToken = rawToken;
+
+        String oldPublicIdToDelete = null;
+        if (request.avatar() != null && !request.avatar().equals(existingBot.getAvatar())) {
+            oldPublicIdToDelete = existingBot.getAvatarPublicId();
         }
-        if (request.avatar() != null) {
-            if (!request.avatar().equals(bot.getAvatar())) {
-                String oldPublicId = bot.getAvatarPublicId();
-                if (oldPublicId != null && !oldPublicId.trim().isEmpty()) {
-                    try {
-                        mediaService.delete(oldPublicId, userId);
-                    } catch (Exception e) {
-                        log.warn("Failed to delete old avatar publicId {} from Cloudinary: {}", oldPublicId, e.getMessage(), e);
-                    }
+
+        Bot updatedBot = transactionTemplate.execute(status -> {
+            Bot bot = findBotByIdAndUser(id, userId);
+            if (request.name() != null) {
+                bot.setName(request.name());
+            }
+
+            if (finalRawToken != null) {
+                String decryptedToken = encryptionUtil.decrypt(bot.getTelegramToken());
+                boolean wasDummy = BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decryptedToken);
+                boolean isNewReal = !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(finalRawToken);
+
+                if (wasDummy && isNewReal) {
+                    planLimitService.checkBotLimit(userId, finalRawToken);
                 }
+
+                if (isNewReal) {
+                    botLifecycleService.releaseTokenFromOtherBots(finalRawToken, userId, bot.getId());
+                    bot.setTemplate(false);
+                }
+
+                bot.setTelegramToken(encryptionUtil.encrypt(finalRawToken));
+                if (isNewReal) {
+                    if (finalTgInfo != null) {
+                        if (finalTgInfo.username() != null) {
+                            bot.setUsername(finalTgInfo.username());
+                        }
+                        if (finalTgInfo.firstName() != null && (bot.getName() == null || bot.getName().isBlank())) {
+                            bot.setName(finalTgInfo.firstName());
+                        }
+                    }
+                } else {
+                    bot.setUsername(null);
+                }
+            }
+
+            if (request.description() != null) {
+                bot.setDescription(request.description());
+            }
+
+            if (request.avatar() != null) {
                 bot.setAvatar(request.avatar());
                 bot.setAvatarPublicId(request.avatarPublicId());
             }
+
+            bot.setUpdatedAt(LocalDateTime.now());
+            return botRepository.save(bot);
+        });
+
+        if (oldPublicIdToDelete != null && !oldPublicIdToDelete.trim().isEmpty()) {
+            try {
+                mediaService.delete(oldPublicIdToDelete, userId);
+            } catch (Exception e) {
+                log.warn("Failed to delete old avatar publicId {} from Cloudinary: {}", oldPublicIdToDelete, e.getMessage(), e);
+            }
         }
 
-        bot = botRepository.save(bot);
-        return toBotResponseWithStats(bot);
+        return toBotResponseWithStats(updatedBot);
     }
 
     @Override
@@ -407,27 +467,6 @@ public class BotServiceImpl implements BotService {
             return objectMapper.writeValueAsString(jsonNode);
         } catch (JacksonException e) {
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "common.error.json_serialize");
-        }
-    }
-
-    private void updateBotTelegramInfo(Bot bot, String unencryptedToken) {
-        try {
-            String url = TelegramConstants.BOT_API_URL + unencryptedToken + "/getMe";
-            org.springframework.http.ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
-            if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
-                JsonNode responseNode = objectMapper.readTree(responseEntity.getBody());
-                if (responseNode.has("ok") && responseNode.get("ok").asBoolean()) {
-                    JsonNode result = responseNode.get("result");
-                    if (result.has("username")) {
-                        bot.setUsername(result.get("username").asText());
-                    }
-                    if (result.has("first_name")) {
-                        bot.setName(result.get("first_name").asText());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Could not fetch Telegram bot info: {}", e.getMessage(), e);
         }
     }
 

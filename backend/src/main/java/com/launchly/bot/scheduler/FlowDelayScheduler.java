@@ -29,6 +29,9 @@ import java.util.Optional;
 @Slf4j
 public class FlowDelayScheduler {
 
+    private static final long DELAY_CHECK_INTERVAL_MS = 15_000L;
+    private static final Duration LOCK_DURATION = Duration.ofSeconds(60);
+
     private final BotUserRepository botUserRepository;
     private final FlowSchemaRepository flowSchemaRepository;
     private final BotDialogStateService stateService;
@@ -36,7 +39,7 @@ public class FlowDelayScheduler {
     private final ObjectMapper objectMapper;
     private final StringRedisTemplate stringRedisTemplate;
 
-    @Scheduled(fixedDelay = 15000)
+    @Scheduled(fixedDelay = DELAY_CHECK_INTERVAL_MS)
     public void processDelays() {
         List<BotUser> pausedUsers = botUserRepository.findByCurrentNodeIdIsNotNull();
         for (BotUser user : pausedUsers) {
@@ -49,12 +52,12 @@ public class FlowDelayScheduler {
     }
 
     private void processUserDelay(BotUser user) throws Exception {
-        if (user == null || user.getBot() == null || user.getCurrentNodeId() == null || isAutomationPaused(user)) {
+        if (user == null || user.getBot() == null || user.getCurrentNodeId() == null || stateService.isAutomationPaused(user)) {
             return;
         }
 
         String lockKey = "lock:flow:delay:" + user.getId() + ":" + user.getCurrentNodeId();
-        Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", Duration.ofSeconds(60));
+        Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", LOCK_DURATION);
         if (Boolean.FALSE.equals(acquired)) {
             return;
         }
@@ -154,36 +157,5 @@ public class FlowDelayScheduler {
             stateService.setSessionData(botId, user.getTelegramId(), delayKey, "");
             flowEngineService.runFlow(botId, user, nextNodeId, null);
         }
-    }
-
-    private boolean isAutomationPaused(BotUser botUser) {
-        if (botUser == null) return false;
-        String metadata = botUser.getMetadata();
-        if (metadata == null || metadata.isBlank() || "{}".equals(metadata)) return false;
-        try {
-            Map<String, Object> meta = objectMapper.readValue(metadata, new TypeReference<Map<String, Object>>() {});
-            if (meta != null && Boolean.TRUE.equals(meta.get("paused"))) {
-                Object pausedUntilObj = meta.get("pausedUntil");
-                if (pausedUntilObj instanceof Number) {
-                    long pausedUntil = ((Number) pausedUntilObj).longValue();
-                    if (System.currentTimeMillis() > pausedUntil) {
-                        return false;
-                    }
-                } else if (pausedUntilObj instanceof String) {
-                    try {
-                        long pausedUntil = Long.parseLong((String) pausedUntilObj);
-                        if (System.currentTimeMillis() > pausedUntil) {
-                            return false;
-                        }
-                    } catch (NumberFormatException e) {
-                        log.warn("Failed to parse pausedUntil timestamp: {}", pausedUntilObj);
-                    }
-                }
-                return true;
-            }
-        } catch (Exception e) {
-            log.warn("Failed to check if automation is paused for user {}: {}", botUser.getId(), e.getMessage());
-        }
-        return false;
     }
 }

@@ -15,10 +15,12 @@ import java.util.List;
 @Slf4j
 public class BroadcastScheduler {
 
+    private static final long SCHEDULED_CAMPAIGN_CHECK_DELAY_MS = 30_000L;
+
     private final BroadcastCampaignRepository campaignRepository;
     private final BroadcastExecutionService broadcastExecutionService;
 
-    @Scheduled(fixedDelay = 30000)
+    @Scheduled(fixedDelay = SCHEDULED_CAMPAIGN_CHECK_DELAY_MS)
     public void processScheduledCampaigns() {
         List<BroadcastCampaign> dueCampaigns = campaignRepository
                 .findScheduledCampaigns(LocalDateTime.now());

@@ -1,6 +1,6 @@
 package com.launchly.admin.util;
 
-import com.launchly.admin.entity.SupportTicket;
+import com.launchly.support.entity.SupportTicket;
 import com.launchly.auth.entity.User;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;

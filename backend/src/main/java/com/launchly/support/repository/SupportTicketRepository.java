@@ -1,6 +1,6 @@
-package com.launchly.admin.repository;
+package com.launchly.support.repository;
 
-import com.launchly.admin.entity.SupportTicket;
+import com.launchly.support.entity.SupportTicket;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;

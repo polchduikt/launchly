@@ -51,6 +51,8 @@ import java.util.Map;
 @Slf4j
 public class BillingServiceImpl implements BillingService {
 
+    private static final Duration WEBHOOK_DEDUP_TTL = Duration.ofDays(3);
+
     private final SubscriptionRepository subscriptionRepository;
     private final PlanRepository planRepository;
     private final UserQueryService userQueryService;
@@ -195,7 +197,6 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    @Transactional
     @org.springframework.cache.annotation.Caching(evict = {
         @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "#userId"),
         @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "'plan:' + #userId")
@@ -217,11 +218,14 @@ public class BillingServiceImpl implements BillingService {
             params.put("cancel_at_period_end", true);
             stripeSub.update(params);
 
-            subscription.setCancelAtPeriodEnd(true);
-            subscription.setStatus(SubscriptionStatus.CANCELLED);
-            subscription = subscriptionRepository.save(subscription);
+            Subscription updatedSubscription = transactionTemplate.execute(status -> {
+                Subscription sub = subscriptionRepository.findByUserId(userId).orElseThrow();
+                sub.setCancelAtPeriodEnd(true);
+                sub.setStatus(SubscriptionStatus.CANCELLED);
+                return subscriptionRepository.save(sub);
+            });
 
-            return billingMapper.toSubscriptionResponse(subscription);
+            return billingMapper.toSubscriptionResponse(updatedSubscription);
         } catch (Exception e) {
             log.error("Stripe cancel error for subscriptionId={}: {}", stripeSubId, e.getMessage(), e);
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.cancel_failed");
@@ -229,7 +233,6 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    @Transactional
     @org.springframework.cache.annotation.Caching(evict = {
         @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "#userId"),
         @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "'plan:' + #userId")
@@ -251,11 +254,14 @@ public class BillingServiceImpl implements BillingService {
             params.put("cancel_at_period_end", false);
             stripeSub.update(params);
 
-            subscription.setCancelAtPeriodEnd(false);
-            subscription.setStatus(SubscriptionStatus.ACTIVE);
-            subscription = subscriptionRepository.save(subscription);
+            Subscription updatedSubscription = transactionTemplate.execute(status -> {
+                Subscription sub = subscriptionRepository.findByUserId(userId).orElseThrow();
+                sub.setCancelAtPeriodEnd(false);
+                sub.setStatus(SubscriptionStatus.ACTIVE);
+                return subscriptionRepository.save(sub);
+            });
 
-            return billingMapper.toSubscriptionResponse(subscription);
+            return billingMapper.toSubscriptionResponse(updatedSubscription);
         } catch (Exception e) {
             log.error("Stripe resume error for subscriptionId={}: {}", stripeSubId, e.getMessage(), e);
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.resume_failed");
@@ -322,7 +328,6 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    @Transactional
     public void handleStripeWebhook(String payload, String sigHeader) {
         Event event;
         try {
@@ -336,7 +341,7 @@ public class BillingServiceImpl implements BillingService {
 
         if (event.getId() != null) {
             String dedupKey = "stripe:event:" + event.getId();
-            Boolean isNew = stringRedisTemplate.opsForValue().setIfAbsent(dedupKey, "1", Duration.ofDays(3));
+            Boolean isNew = stringRedisTemplate.opsForValue().setIfAbsent(dedupKey, "1", WEBHOOK_DEDUP_TTL);
             if (Boolean.FALSE.equals(isNew)) {
                 log.info("Duplicate Stripe webhook event ignored: {}", event.getId());
                 return;

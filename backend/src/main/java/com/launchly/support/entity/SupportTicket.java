@@ -1,4 +1,4 @@
-package com.launchly.admin.entity;
+package com.launchly.support.entity;
 
 import com.launchly.auth.entity.User;
 import com.launchly.common.entity.BaseEntity;
@@ -82,4 +82,3 @@ public class SupportTicket extends BaseEntity {
         this.status = "ACTIVE";
     }
 }
-

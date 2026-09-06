@@ -21,9 +21,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.launchly.bot.constant.BotConstants;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,24 +43,33 @@ public class BotSubscriberServiceImpl implements BotSubscriberService {
     @Transactional(readOnly = true)
     public List<BotUserResponse> getBotUsers(Long botId, Long userId) {
         Bot bot = botAccessValidator.getBotWithAccess(botId, userId);
-        return botUserRepository.findAllByBotId(bot.getId()).stream()
-                .map(bu -> {
-                    List<String> tags = botUserTagRepository.findByBotUserId(bu.getId()).stream()
-                            .map(but -> but.getTag().getName())
-                            .toList();
-                    return new BotUserResponse(
-                            bu.getId(),
-                            bu.getTelegramId(),
-                            bu.getUsername(),
-                            bu.getFirstName(),
-                            bu.getLastName(),
-                            bu.getCurrentNodeId(),
-                            bu.getPhotoUrl(),
-                            bu.getMetadata(),
-                            tags,
-                            bu.getCreatedAt()
-                    );
-                })
+        List<BotUser> botUsers = botUserRepository.findAllByBotId(bot.getId());
+        if (botUsers.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> botUserIds = botUsers.stream().map(BotUser::getId).toList();
+        List<BotUserTag> userTags = botUserTagRepository.findByBotUserIdIn(botUserIds);
+        Map<Long, List<String>> tagsByBotUserId = userTags.stream()
+                .filter(but -> but.getBotUser() != null && but.getTag() != null)
+                .collect(Collectors.groupingBy(
+                        but -> but.getBotUser().getId(),
+                        Collectors.mapping(but -> but.getTag().getName(), Collectors.toList())
+                ));
+
+        return botUsers.stream()
+                .map(bu -> new BotUserResponse(
+                        bu.getId(),
+                        bu.getTelegramId(),
+                        bu.getUsername(),
+                        bu.getFirstName(),
+                        bu.getLastName(),
+                        bu.getCurrentNodeId(),
+                        bu.getPhotoUrl(),
+                        bu.getMetadata(),
+                        tagsByBotUserId.getOrDefault(bu.getId(), List.of()),
+                        bu.getCreatedAt()
+                ))
                 .toList();
     }
 
@@ -132,7 +143,7 @@ public class BotSubscriberServiceImpl implements BotSubscriberService {
         planLimitService.checkBotUserLimit(bot.getId());
 
         Long minTelegramId = botUserRepository.findMinTelegramIdByBotId(bot.getId()).orElse(0L);
-        Long nextTelegramId = minTelegramId <= 0 ? minTelegramId - 1 : -1L;
+        Long nextTelegramId = minTelegramId <= 0 ? minTelegramId - 1 : BotConstants.SYSTEM_BOT_ID;
 
         String metadataJson = "{}";
         try {

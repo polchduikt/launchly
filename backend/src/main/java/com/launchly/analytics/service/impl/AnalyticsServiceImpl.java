@@ -12,6 +12,7 @@ import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
+import com.launchly.bot.engine.router.FlowNodeRouter;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final FlowSchemaRepository flowSchemaRepository;
     private final BotUserTagRepository botUserTagRepository;
     private final ObjectMapper objectMapper;
+    private final FlowNodeRouter flowNodeRouter;
 
     @Override
     @Transactional
@@ -149,7 +151,13 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         List<DashboardStatsResponse.ButtonStatsEntry> topButtons = new ArrayList<>();
         for (Object[] row : rawButtons) {
             String btnName = row[0] != null ? row[0].toString() : "Unknown";
-            btnName = AnalyticsUtils.resolveButtonLabel(flowSchemaRepository, botIds, btnName);
+            for (Long bId : botIds) {
+                String resolved = flowNodeRouter.resolveButtonLabel(bId, btnName);
+                if (resolved != null && !resolved.equals(btnName)) {
+                    btnName = resolved;
+                    break;
+                }
+            }
             long clicks = row[1] != null ? ((Number) row[1]).longValue() : 0L;
             topButtons.add(new DashboardStatsResponse.ButtonStatsEntry(btnName, clicks));
         }

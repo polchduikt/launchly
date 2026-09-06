@@ -33,6 +33,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CrmConversationServiceImpl implements CrmConversationService {
 
+    private static final Long SYSTEM_EVENT_MESSAGE_ID = -1L;
+    private static final String STATUS_UPDATED_EVENT = "status_updated";
+
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
     private final BotRepository botRepository;
@@ -86,9 +89,9 @@ public class CrmConversationServiceImpl implements CrmConversationService {
         conversation = conversationRepository.save(conversation);
         ConversationResponse response = toConversationResponse(conversation);
         MessageResponse wsNotify = new MessageResponse(
-                -1L,
+                SYSTEM_EVENT_MESSAGE_ID,
                 conversation.getId(),
-                "status_updated",
+                STATUS_UPDATED_EVENT,
                 SenderType.OWNER,
                 null,
                 null,

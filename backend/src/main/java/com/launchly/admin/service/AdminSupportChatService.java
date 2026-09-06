@@ -1,7 +1,8 @@
 package com.launchly.admin.service;
 
-import com.launchly.admin.dto.SupportMessageDto;
-import com.launchly.admin.dto.SupportTicketDto;
+import com.launchly.support.dto.SupportMessageDto;
+import com.launchly.support.dto.SupportTicketDto;
+import com.launchly.support.enums.TicketStatus;
 import org.springframework.data.domain.Page;
 
 public interface AdminSupportChatService {
@@ -9,6 +10,6 @@ public interface AdminSupportChatService {
     SupportTicketDto getSupportTicketDetail(Long id);
     SupportMessageDto addMessage(Long ticketId, String text, String managerEmail);
     SupportTicketDto toggleFavorite(Long id);
-    SupportTicketDto updateStatus(Long id, com.launchly.admin.enums.TicketStatus status);
+    SupportTicketDto updateStatus(Long id, TicketStatus status);
     SupportTicketDto claimTicket(Long id, String managerEmail);
 }

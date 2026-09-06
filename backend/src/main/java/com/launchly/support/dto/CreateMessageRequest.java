@@ -1,4 +1,4 @@
-package com.launchly.admin.dto;
+package com.launchly.support.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -16,4 +16,3 @@ public class CreateMessageRequest {
     @Schema(description = "Message body text", example = "Ваше звернення розглянуто, доступ відновлено.", requiredMode = Schema.RequiredMode.REQUIRED)
     private String text;
 }
-

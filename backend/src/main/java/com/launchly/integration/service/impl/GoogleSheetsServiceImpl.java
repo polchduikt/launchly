@@ -35,6 +35,14 @@ import java.util.*;
 @RequiredArgsConstructor
 public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
+    private static final String GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
+    private static final String GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
+    private static final String GOOGLE_SHEETS_API_BASE = "https://sheets.googleapis.com/v4/spreadsheets/";
+    private static final String GOOGLE_DRIVE_API_FILES = "https://www.googleapis.com/drive/v3/files";
+    private static final String GOOGLE_OAUTH_SCOPES = "openid email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/userinfo.email";
+    private static final long AUTH_STATE_EXPIRATION_MS = 300_000L;
+    private static final long DEFAULT_TOKEN_EXPIRES_IN = 3599L;
+
     private final IntegrationRepository integrationRepository;
     private final BotRepository botRepository;
     private final EncryptionUtil encryptionUtil;
@@ -63,22 +71,21 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                 .claim("botId", botId)
                 .claim("userId", userId)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 300000))
+                .expiration(new Date(System.currentTimeMillis() + AUTH_STATE_EXPIRATION_MS))
                 .signWith(getSigningKey())
                 .compact();
 
-        return "https://accounts.google.com/o/oauth2/v2/auth" +
+        return GOOGLE_AUTH_URL +
                 "?client_id=" + URLEncoder.encode(googleClientId, StandardCharsets.UTF_8) +
                 "&redirect_uri=" + URLEncoder.encode(googleRedirectUri, StandardCharsets.UTF_8) +
                 "&response_type=code" +
-                "&scope=" + URLEncoder.encode("openid email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/userinfo.email", StandardCharsets.UTF_8) +
+                "&scope=" + URLEncoder.encode(GOOGLE_OAUTH_SCOPES, StandardCharsets.UTF_8) +
                 "&access_type=offline" +
                 "&prompt=consent" +
                 "&state=" + URLEncoder.encode(stateToken, StandardCharsets.UTF_8);
     }
 
     @Override
-    @Transactional
     public Long authenticate(String stateToken, String code) {
         Long botId;
         Long userId;
@@ -106,14 +113,14 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                     "&grant_type=authorization_code";
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://oauth2.googleapis.com/token"))
+                    .uri(URI.create(GOOGLE_TOKEN_URL))
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HttpStatus.OK.value()) {
                 log.error("Failed Google OAuth token exchange. Status: {}, Body: {}", response.statusCode(), response.body());
                 throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_auth_failed");
             }
@@ -122,7 +129,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             String accessToken = tokenResponse.path("access_token").asText();
             String refreshToken = tokenResponse.path("refresh_token").asText(null);
             String idToken = tokenResponse.path("id_token").asText(null);
-            long expiresIn = tokenResponse.path("expires_in").asLong(3599);
+            long expiresIn = tokenResponse.path("expires_in").asLong(DEFAULT_TOKEN_EXPIRES_IN);
 
             String email = extractEmailFromIdToken(idToken);
             Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
@@ -195,7 +202,6 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     }
 
     @Override
-    @Transactional
     public void refreshTokenIfNeeded(Integration integration) {
         if (integration.getGoogleAccessToken() == null || integration.getGoogleRefreshToken() == null) {
             return;
@@ -214,21 +220,21 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                     "&grant_type=refresh_token";
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://oauth2.googleapis.com/token"))
+                    .uri(URI.create(GOOGLE_TOKEN_URL))
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HttpStatus.OK.value()) {
                 log.error("Failed to refresh Google token. Status: {}, Body: {}", response.statusCode(), response.body());
                 throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_refresh_failed");
             }
 
             JsonNode tokenResponse = objectMapper.readTree(response.body());
             String accessToken = tokenResponse.path("access_token").asText();
-            long expiresIn = tokenResponse.path("expires_in").asLong(3599);
+            long expiresIn = tokenResponse.path("expires_in").asLong(DEFAULT_TOKEN_EXPIRES_IN);
             String newRefreshToken = tokenResponse.path("refresh_token").asText(null);
 
             integration.setGoogleAccessToken(encryptionUtil.encrypt(accessToken));
@@ -293,7 +299,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             String requestBody = objectMapper.writeValueAsString(bodyMap);
             String encodedSheetName = URLEncoder.encode(activeSheetName, StandardCharsets.UTF_8);
 
-            String url = "https://sheets.googleapis.com/v4/spreadsheets/" + activeSpreadsheetId +
+            String url = GOOGLE_SHEETS_API_BASE + activeSpreadsheetId +
                     "/values/" + encodedSheetName + ":append?valueInputOption=USER_ENTERED";
 
             HttpRequest request = HttpRequest.newBuilder()
@@ -305,7 +311,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HttpStatus.OK.value()) {
                 log.error("Failed to append row to Google Sheets. Status: {}, Body: {}", response.statusCode(), response.body());
                 throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_append_failed");
             } else {
@@ -321,7 +327,6 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     }
 
     @Override
-    @Transactional
     @CircuitBreaker(name = "googleSheets", fallbackMethod = "getSpreadsheetsFallback")
     @Retry(name = "googleSheets")
     public List<Map<String, String>> getSpreadsheets(Long botId) {
@@ -331,7 +336,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
         try {
             String decryptedAccessToken = encryptionUtil.decrypt(integration.getGoogleAccessToken());
-            String url = "https://www.googleapis.com/drive/v3/files" +
+            String url = GOOGLE_DRIVE_API_FILES +
                     "?q=mimeType%3D%27application%2Fvnd.google-apps.spreadsheet%27%20and%20trashed%3Dfalse" +
                     "&pageSize=100" +
                     "&fields=files(id%2Cname)";
@@ -342,12 +347,12 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HttpStatus.OK.value()) {
                 log.error("Failed to fetch spreadsheets from Google Drive. Status: {}, Body: {}", response.statusCode(), response.body());
                 if (response.body().contains("\"reason\": \"SERVICE_DISABLED\"")) {
                     throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_drive_enable");
                 }
-                if (response.statusCode() == 401 || response.statusCode() == 403) {
+                if (response.statusCode() == HttpStatus.UNAUTHORIZED.value() || response.statusCode() == HttpStatus.FORBIDDEN.value()) {
                     throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_drive_grant");
                 }
                 throw new AppException(HttpStatus.BAD_REQUEST, "integration.error.google_load_failed");
@@ -379,7 +384,6 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     }
 
     @Override
-    @Transactional
     @CircuitBreaker(name = "googleSheets", fallbackMethod = "getWorksheetsFallback")
     @Retry(name = "googleSheets")
     public List<String> getWorksheets(Long botId, String spreadsheetId) {
@@ -389,7 +393,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
         try {
             String decryptedAccessToken = encryptionUtil.decrypt(integration.getGoogleAccessToken());
-            String url = "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheetId;
+            String url = GOOGLE_SHEETS_API_BASE + spreadsheetId;
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .header("Authorization", "Bearer " + decryptedAccessToken)
@@ -397,7 +401,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HttpStatus.OK.value()) {
                 log.error("Failed to fetch sheets metadata. Status: {}, Body: {}", response.statusCode(), response.body());
                 return List.of();
             }
@@ -436,7 +440,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         try {
             String decryptedAccessToken = encryptionUtil.decrypt(integration.getGoogleAccessToken());
             String encodedSheetName = URLEncoder.encode(worksheetName, StandardCharsets.UTF_8);
-            String url = "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheetId + "/values/" + encodedSheetName + "!1:1";
+            String url = GOOGLE_SHEETS_API_BASE + spreadsheetId + "/values/" + encodedSheetName + "!1:1";
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .header("Authorization", "Bearer " + decryptedAccessToken)
@@ -444,7 +448,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HttpStatus.OK.value()) {
                 log.error("Failed to fetch sheet headers. Status: {}, Body: {}", response.statusCode(), response.body());
                 return List.of();
             }
@@ -455,8 +459,8 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             if (valuesNode.isArray() && valuesNode.size() > 0) {
                 JsonNode firstRow = valuesNode.get(0);
                 if (firstRow.isArray()) {
-                    for (JsonNode cell : firstRow) {
-                        headers.add(cell.asText());
+                    for (JsonNode headerCell : firstRow) {
+                        headers.add(headerCell.asText());
                     }
                 }
             }
@@ -483,7 +487,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         try {
             String decryptedAccessToken = encryptionUtil.decrypt(integration.getGoogleAccessToken());
             String encodedSheetName = URLEncoder.encode(worksheetName, StandardCharsets.UTF_8);
-            String url = "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheetId + "/values/" + encodedSheetName + "!A:Z";
+            String url = GOOGLE_SHEETS_API_BASE + spreadsheetId + "/values/" + encodedSheetName + "!A:Z";
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .header("Authorization", "Bearer " + decryptedAccessToken)
@@ -491,7 +495,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HttpStatus.OK.value()) {
                 log.error("Failed to fetch sheet values. Status: {}, Body: {}", response.statusCode(), response.body());
                 return List.of();
             }
@@ -534,7 +538,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             String decryptedAccessToken = encryptionUtil.decrypt(integration.getGoogleAccessToken());
             String fullRange = worksheetName + "!" + cellReference;
             String encodedRange = URLEncoder.encode(fullRange, StandardCharsets.UTF_8);
-            String url = "https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheetId + 
+            String url = GOOGLE_SHEETS_API_BASE + spreadsheetId + 
                     "/values/" + encodedRange + "?valueInputOption=USER_ENTERED";
 
             Map<String, Object> bodyMap = new HashMap<>();
@@ -552,7 +556,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HttpStatus.OK.value()) {
                 log.error("Failed to update cell {}. Status: {}, Body: {}", fullRange, response.statusCode(), response.body());
             }
         } catch (InterruptedException e) {

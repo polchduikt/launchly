@@ -1,4 +1,4 @@
-package com.launchly.common.security;
+package com.launchly.auth.security;
 
 import com.launchly.auth.entity.Provider;
 import com.launchly.auth.entity.Role;

@@ -1,4 +1,4 @@
-package com.launchly.admin.dto;
+package com.launchly.support.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -98,8 +98,6 @@ public class SupportTicketDto {
     @Schema(description = "Time when ticket was claimed by manager")
     private LocalDateTime claimedAt;
 
-
     @Schema(description = "Reason provided in block appeal if applicable")
     private String appealReason;
 }
-

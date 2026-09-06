@@ -104,7 +104,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 return;
             }
 
-            if (botId.equals(-1L)) {
+            if (BotConstants.SYSTEM_BOT_ID.equals(botId)) {
                 systemBotAuthService.handleSystemBotUpdate(update, client);
                 return;
             }
@@ -116,7 +116,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
 
             BotUser botUser = botUserProvisioningService.getOrCreateBotUser(bot, update, telegramUserId, client);
-            if (isAutomationPaused(botUser)) {
+            if (stateService.isAutomationPaused(botUser)) {
                 log.info("Automation is paused for user {}, skipping processUpdate", botUser.getId());
                 return;
             }
@@ -244,7 +244,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
 
     @Override
     public void runFlow(Long botId, BotUser botUser, String startNodeId, Long campaignId) {
-        if (botUser == null || isAutomationPaused(botUser)) {
+        if (botUser == null || stateService.isAutomationPaused(botUser)) {
             if (botUser != null) {
                 log.info("Automation is paused for user {}, skipping runFlow", botUser.getId());
             }
@@ -486,36 +486,5 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         } catch (Exception e) {
             log.error("Failed to save custom field: {}", e.getMessage(), e);
         }
-    }
-
-    private boolean isAutomationPaused(BotUser botUser) {
-        if (botUser == null) return false;
-        String metadata = botUser.getMetadata();
-        if (metadata == null || metadata.isBlank() || "{}".equals(metadata)) return false;
-        try {
-            Map<String, Object> meta = objectMapper.readValue(metadata, new TypeReference<Map<String, Object>>() {});
-            if (meta != null && Boolean.TRUE.equals(meta.get("paused"))) {
-                Object pausedUntilObj = meta.get("pausedUntil");
-                if (pausedUntilObj instanceof Number) {
-                    long pausedUntil = ((Number) pausedUntilObj).longValue();
-                    if (System.currentTimeMillis() > pausedUntil) {
-                        return false;
-                    }
-                } else if (pausedUntilObj instanceof String) {
-                    try {
-                        long pausedUntil = Long.parseLong((String) pausedUntilObj);
-                        if (System.currentTimeMillis() > pausedUntil) {
-                            return false;
-                        }
-                    } catch (NumberFormatException e) {
-                        log.warn("Failed to parse pausedUntil timestamp: {}", pausedUntilObj);
-                    }
-                }
-                return true;
-            }
-        } catch (Exception e) {
-            log.warn("Failed to check if automation is paused for user {}: {}", botUser.getId(), e.getMessage());
-        }
-        return false;
     }
 }
