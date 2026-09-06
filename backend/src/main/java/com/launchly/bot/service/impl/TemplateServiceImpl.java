@@ -1,5 +1,6 @@
 package com.launchly.bot.service.impl;
 
+import com.launchly.common.constant.CacheConstants;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import com.launchly.auth.entity.User;
@@ -286,8 +287,8 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = "bots", key = "#userId"),
-            @CacheEvict(value = "flow_schemas", allEntries = true)
+            @CacheEvict(value = CacheConstants.BOTS, key = "#userId"),
+            @CacheEvict(value = CacheConstants.FLOW_SCHEMAS, allEntries = true)
     })
     public void installTemplate(String shareCode, Long targetBotId, Long userId) {
         AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode)

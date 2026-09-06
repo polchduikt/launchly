@@ -26,13 +26,15 @@ class TierRateLimitFilterTest {
 
     private RateLimitService rateLimitService;
     private MessageUtils messageUtils;
+    private tools.jackson.databind.ObjectMapper objectMapper;
     private TierRateLimitFilter filter;
 
     @BeforeEach
     void setUp() {
         rateLimitService = mock(RateLimitService.class);
         messageUtils = mock(MessageUtils.class);
-        filter = new TierRateLimitFilter(rateLimitService, messageUtils);
+        objectMapper = new tools.jackson.databind.ObjectMapper();
+        filter = new TierRateLimitFilter(rateLimitService, messageUtils, objectMapper);
         SecurityContextHolder.clearContext();
     }
 

@@ -47,6 +47,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AiServiceImpl implements AiService {
 
+    private static final int AVG_CHARS_PER_TOKEN = 4;
+    private static final int MIN_USER_TOKENS = 10;
+    private static final int MIN_ESTIMATED_TOKENS = 1000;
+    private static final int AVG_CHARS_PER_SCHEMA_TOKEN = 3;
+
     private final AiProviderRouter aiProviderRouter;
     private final AiUsageService aiUsageService;
     private final PlanLimitService planLimitService;
@@ -179,14 +184,14 @@ public class AiServiceImpl implements AiService {
 
         String reply = aiProviderRouter.chat(messages, null);
 
-        int estimatedTokens = Math.max(500, (chatSystemPrompt.length() + request.message().length() + (reply != null ? reply.length() : 0)) / 3);
+        int estimatedTokens = Math.max(500, (chatSystemPrompt.length() + request.message().length() + (reply != null ? reply.length() : 0)) / AVG_CHARS_PER_SCHEMA_TOKEN);
         aiUsageService.recordTokenUsage(userId, plan, estimatedTokens);
 
         AiUsageResponse usage = aiUsageService.getUsage(userId, plan);
 
         if (session != null) {
-            int userTokens = Math.max(10, request.message().length() / 4);
-            int replyTokens = Math.max(10, (reply != null ? reply.length() : 0) / 4);
+            int userTokens = Math.max(MIN_USER_TOKENS, request.message().length() / AVG_CHARS_PER_TOKEN);
+            int replyTokens = Math.max(MIN_USER_TOKENS, (reply != null ? reply.length() : 0) / AVG_CHARS_PER_TOKEN);
 
             AiChatMessage userChatMessage = AiChatMessage.builder()
                     .session(session)
@@ -263,7 +268,7 @@ public class AiServiceImpl implements AiService {
             nodesNode = AiSchemaUtils.normalizeUsernameActions(nodesNode);
         }
 
-        int estimatedTokens = Math.max(1000, (schemaSystemPrompt.length() + request.description().length() + rawResponse.length()) / 3);
+        int estimatedTokens = Math.max(MIN_ESTIMATED_TOKENS, (schemaSystemPrompt.length() + request.description().length() + rawResponse.length()) / AVG_CHARS_PER_SCHEMA_TOKEN);
         aiUsageService.recordTokenUsage(userId, plan, estimatedTokens);
 
         AiUsageResponse usage = aiUsageService.getUsage(userId, plan);

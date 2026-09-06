@@ -1,5 +1,6 @@
 package com.launchly.bot.service.impl;
 
+import com.launchly.common.constant.CacheConstants;
 import com.launchly.bot.constant.BotConstants;
 import com.launchly.bot.dto.response.BotResponse;
 import com.launchly.bot.entity.Bot;
@@ -17,7 +18,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class BotLifecycleServiceImpl implements BotLifecycleService {
     private final BotResponseFactory botResponseFactory;
 
     @Override
-    @CacheEvict(value = "bots", key = "#userId")
+    @CacheEvict(value = CacheConstants.BOTS, key = "#userId")
     public BotResponse startBot(Long id, Long userId) {
         Bot bot = botAccessValidator.getBotWithAccess(id, userId);
         botAccessValidator.validateWriteAccess(bot, userId);
@@ -82,8 +82,8 @@ public class BotLifecycleServiceImpl implements BotLifecycleService {
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = "bots", key = "#userId"),
-            @CacheEvict(value = "flow_schemas", key = "#id")
+            @CacheEvict(value = CacheConstants.BOTS, key = "#userId"),
+            @CacheEvict(value = CacheConstants.FLOW_SCHEMAS, key = "#id")
     })
     public BotResponse publishBot(Long id, Long userId) {
         Bot bot = botAccessValidator.getBotWithAccess(id, userId);
@@ -121,7 +121,7 @@ public class BotLifecycleServiceImpl implements BotLifecycleService {
     }
 
     @Override
-    @CacheEvict(value = "bots", key = "#userId")
+    @CacheEvict(value = CacheConstants.BOTS, key = "#userId")
     public BotResponse stopBot(Long id, Long userId) {
         Bot bot = botAccessValidator.getBotWithAccess(id, userId);
         botAccessValidator.validateWriteAccess(bot, userId);

@@ -24,8 +24,8 @@ import com.launchly.bot.service.BotUserProvisioningService;
 import com.launchly.bot.service.FlowEngineService;
 import com.launchly.bot.service.SystemBotAuthService;
 import com.launchly.bot.telegram.TelegramClientProvider;
-import com.launchly.broadcast.entity.BroadcastCampaign;
-import com.launchly.broadcast.repository.BroadcastCampaignRepository;
+import com.launchly.broadcast.dto.response.CampaignResponse;
+import com.launchly.broadcast.service.BroadcastService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -34,7 +34,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
-
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +49,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
     private final ObjectMapper objectMapper;
     private final Map<NodeType, NodeExecutor> executors;
     private final StringRedisTemplate redisTemplate;
-    private final BroadcastCampaignRepository campaignRepository;
+    private final BroadcastService broadcastService;
     private final TelegramClientProvider telegramClientProvider;
     private final AnalyticsService analyticsService;
     private final BotInputValidator inputValidator;
@@ -67,7 +66,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                   ObjectMapper objectMapper,
                                   List<NodeExecutor> nodeExecutors,
                                   StringRedisTemplate redisTemplate,
-                                  BroadcastCampaignRepository campaignRepository,
+                                  @Lazy BroadcastService broadcastService,
                                   @Lazy TelegramClientProvider telegramClientProvider,
                                   AnalyticsService analyticsService,
                                   BotInputValidator inputValidator,
@@ -82,7 +81,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         this.stateService = stateService;
         this.objectMapper = objectMapper;
         this.redisTemplate = redisTemplate;
-        this.campaignRepository = campaignRepository;
+        this.broadcastService = broadcastService;
         this.telegramClientProvider = telegramClientProvider;
         this.analyticsService = analyticsService;
         this.inputValidator = inputValidator;
@@ -154,10 +153,13 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             } else {
                 Long campaignId = stateService.getActiveCampaignId(botId, telegramUserId).orElse(null);
                 if (campaignId != null) {
-                    BroadcastCampaign campaign = campaignRepository.findById(campaignId).orElse(null);
+                    CampaignResponse campaign = null;
+                    try {
+                        campaign = broadcastService.getCampaign(campaignId);
+                    } catch (Exception e) {}
                     if (campaign != null) {
-                        nodes = objectMapper.readValue(campaign.getNodes(), new TypeReference<>() {});
-                        edges = objectMapper.readValue(campaign.getEdges(), new TypeReference<>() {});
+                        nodes = objectMapper.readValue(campaign.nodes(), new TypeReference<>() {});
+                        edges = objectMapper.readValue(campaign.edges(), new TypeReference<>() {});
                     } else {
                         FlowSchema schema = schemaCache.getSchema(botId);
                         if (schema == null) {
@@ -268,10 +270,13 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             List<FlowNode> nodes;
             List<FlowEdge> edges;
             if (campaignId != null) {
-                BroadcastCampaign campaign = campaignRepository.findById(campaignId).orElse(null);
+                CampaignResponse campaign = null;
+                try {
+                    campaign = broadcastService.getCampaign(campaignId);
+                } catch (Exception e) {}
                 if (campaign != null) {
-                    nodes = objectMapper.readValue(campaign.getNodes(), new TypeReference<>() {});
-                    edges = objectMapper.readValue(campaign.getEdges(), new TypeReference<>() {});
+                    nodes = objectMapper.readValue(campaign.nodes(), new TypeReference<>() {});
+                    edges = objectMapper.readValue(campaign.edges(), new TypeReference<>() {});
                 } else {
                     return;
                 }
@@ -399,10 +404,13 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                         Long campaignId = poppedFrame.getCampaignId();
                         if (campaignId != null) {
                             stateService.setActiveCampaignId(botId, telegramUserId, campaignId);
-                            BroadcastCampaign campaign = campaignRepository.findById(campaignId).orElse(null);
+                            CampaignResponse campaign = null;
+                            try {
+                                campaign = broadcastService.getCampaign(campaignId);
+                            } catch (Exception e) {}
                             if (campaign != null) {
-                                nodes = objectMapper.readValue(campaign.getNodes(), new TypeReference<>() {});
-                                edges = objectMapper.readValue(campaign.getEdges(), new TypeReference<>() {});
+                                nodes = objectMapper.readValue(campaign.nodes(), new TypeReference<>() {});
+                                edges = objectMapper.readValue(campaign.edges(), new TypeReference<>() {});
                             } else {
                                 FlowSchema schema = schemaCache.getSchema(botId);
                                 if (schema != null) {

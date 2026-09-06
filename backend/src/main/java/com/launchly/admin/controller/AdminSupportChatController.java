@@ -3,6 +3,7 @@ package com.launchly.admin.controller;
 import com.launchly.admin.dto.CreateMessageRequest;
 import com.launchly.admin.dto.SupportMessageDto;
 import com.launchly.admin.dto.SupportTicketDto;
+import com.launchly.admin.enums.TicketStatus;
 import com.launchly.admin.service.AdminSupportChatService;
 import com.launchly.common.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -66,7 +68,7 @@ public class AdminSupportChatController {
     @PostMapping("/{id}/messages")
     public ResponseEntity<SupportMessageDto> addMessage(
             @Parameter(description = "Ticket ID") @PathVariable Long id,
-            @RequestBody CreateMessageRequest request,
+            @Valid @RequestBody CreateMessageRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(adminSupportChatService.addMessage(id, request.getText(), userDetails.getUsername()));
     }
@@ -91,7 +93,7 @@ public class AdminSupportChatController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<SupportTicketDto> updateStatus(
             @Parameter(description = "Ticket ID") @PathVariable Long id,
-            @Parameter(description = "New status: OPEN, PENDING, CLOSED") @RequestParam(required = false) String status) {
+            @Parameter(description = "New status: OPEN, PENDING, CLOSED") @RequestParam(required = false) TicketStatus status) {
         return ResponseEntity.ok(adminSupportChatService.updateStatus(id, status));
     }
 

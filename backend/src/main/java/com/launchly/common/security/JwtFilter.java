@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
     private final MessageUtils messageUtils;
+    private final tools.jackson.databind.ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -42,7 +44,8 @@ public class JwtFilter extends OncePerRequestFilter {
                         : messageUtils.getMessage("admin.reason_rules");
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write("{\"error\":\"ACCOUNT_BLOCKED\",\"reason\":\"" + reason.replace("\"", "\\\"") + "\"}");
+                Map<String, String> body = Map.of("error", "ACCOUNT_BLOCKED", "reason", reason);
+                response.getWriter().write(objectMapper.writeValueAsString(body));
                 return;
             }
 

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -82,7 +83,7 @@ public class AdminAutomationController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> blockAutomation(
             @Parameter(description = "Automation ID") @PathVariable Long automationId,
-            @RequestBody(required = false) AdminBlockRequest request) {
+            @Valid @RequestBody(required = false) AdminBlockRequest request) {
         adminAutomationService.blockAutomation(automationId, request);
         return ResponseEntity.ok().build();
     }

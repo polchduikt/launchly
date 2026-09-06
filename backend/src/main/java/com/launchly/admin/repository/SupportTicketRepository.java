@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public interface SupportTicketRepository extends JpaRepository<SupportTicket, Long>, JpaSpecificationExecutor<SupportTicket> {
 
-    @EntityGraph(attributePaths = {"user", "assignedManager"})
+    @EntityGraph(attributePaths = {"user", "assignedManager", "messages"})
     @Query("SELECT t FROM SupportTicket t WHERE t.user.id = :userId ORDER BY t.updatedAt DESC")
     Optional<SupportTicket> findFirstByUserId(@Param("userId") Long userId);
 
@@ -32,7 +32,7 @@ public interface SupportTicketRepository extends JpaRepository<SupportTicket, Lo
     Page<SupportTicket> findByIsFavoriteTrue(Pageable pageable);
 
     @Override
-    @EntityGraph(attributePaths = {"user", "assignedManager"})
+    @EntityGraph(attributePaths = {"user", "assignedManager", "messages"})
     Optional<SupportTicket> findById(Long id);
 
     @Override

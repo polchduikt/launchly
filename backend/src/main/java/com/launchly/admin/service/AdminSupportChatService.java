@@ -9,6 +9,6 @@ public interface AdminSupportChatService {
     SupportTicketDto getSupportTicketDetail(Long id);
     SupportMessageDto addMessage(Long ticketId, String text, String managerEmail);
     SupportTicketDto toggleFavorite(Long id);
-    SupportTicketDto updateStatus(Long id, String status);
+    SupportTicketDto updateStatus(Long id, com.launchly.admin.enums.TicketStatus status);
     SupportTicketDto claimTicket(Long id, String managerEmail);
 }

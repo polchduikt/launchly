@@ -96,15 +96,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             totalSubscribers = botUserRepository.countDistinctTelegramIdByBotIdIn(botIds);
             activeUsers24h = analyticsEventRepository.countActiveUsersByBotIdsAndCreatedAtAfter(botIds, start24h);
             clicksCount30d = analyticsEventRepository.countClicksByBotIdsAndCreatedAtAfter(botIds, startClicks30d);
-            activeAutomations = userBots.stream().filter(Bot::isActive).count();
+            activeAutomations = botRepository.countAccessibleByUserIdAndActiveTrue(userId);
 
             long totalSubscribersLastWeek = botUserRepository.countDistinctTelegramIdByBotIdInAndCreatedAtBefore(botIds, lastWeekDate);
             long activeUsersYesterday = analyticsEventRepository.countActiveUsersByBotIdsAndCreatedAtBetween(botIds, startYesterday, start24h);
             long clicksCountLastMonth = analyticsEventRepository.countClicksByBotIdsAndCreatedAtBetween(botIds, startClicks60d, startClicks30d);
-            long activeAutomationsLastWeek = userBots.stream()
-                    .filter(Bot::isActive)
-                    .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().isBefore(lastWeekDate))
-                    .count();
+            long activeAutomationsLastWeek = botRepository.countAccessibleByUserIdAndActiveTrueAndCreatedAtBefore(userId, lastWeekDate);
 
             subscribersGrowth = AnalyticsUtils.calculateGrowth(totalSubscribersLastWeek, totalSubscribers);
             activeUsersGrowth = AnalyticsUtils.calculateGrowth(activeUsersYesterday, activeUsers24h);
@@ -124,18 +121,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             activeUsers24h = analyticsEventRepository.countActiveUsersByBotIdAndCreatedAtAfter(botId, start24h);
             clicksCount30d = analyticsEventRepository.countClicksByBotIdAndCreatedAtAfter(botId, startClicks30d);
 
-            List<Bot> userBots = botRepository.findAllAccessibleByUserId(userId);
-            activeAutomations = userBots.stream()
-                    .filter(Bot::isActive)
-                    .count();
+            activeAutomations = botRepository.countAccessibleByUserIdAndActiveTrue(userId);
 
             long totalSubscribersLastWeek = botUserRepository.countByBotIdAndCreatedAtBefore(botId, lastWeekDate);
             long activeUsersYesterday = analyticsEventRepository.countActiveUsersByBotIdAndCreatedAtBetween(botId, startYesterday, start24h);
             long clicksCountLastMonth = analyticsEventRepository.countClicksByBotIdAndCreatedAtBetween(botId, startClicks60d, startClicks30d);
-            long activeAutomationsLastWeek = userBots.stream()
-                    .filter(Bot::isActive)
-                    .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().isBefore(lastWeekDate))
-                    .count();
+            long activeAutomationsLastWeek = botRepository.countAccessibleByUserIdAndActiveTrueAndCreatedAtBefore(userId, lastWeekDate);
 
             subscribersGrowth = AnalyticsUtils.calculateGrowth(totalSubscribersLastWeek, totalSubscribers);
             activeUsersGrowth = AnalyticsUtils.calculateGrowth(activeUsersYesterday, activeUsers24h);

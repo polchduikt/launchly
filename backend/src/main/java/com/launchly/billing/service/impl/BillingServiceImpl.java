@@ -1,5 +1,6 @@
 package com.launchly.billing.service.impl;
 
+import com.launchly.common.constant.CacheConstants;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.service.UserQueryService;
 import com.launchly.billing.dto.response.CheckoutResponse;
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.CacheManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -56,6 +58,7 @@ public class BillingServiceImpl implements BillingService {
     private final CacheManager cacheManager;
     private final PlanLimitService planLimitService;
     private final StringRedisTemplate stringRedisTemplate;
+    private final TransactionTemplate transactionTemplate;
 
     @Value("${stripe.api.key:}")
     private String apiKey;
@@ -100,7 +103,7 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "plans", key = "'all'")
+    @Cacheable(value = CacheConstants.PLANS, key = "'all'")
     public List<PlanResponse> getAvailablePlans() {
         return billingMapper.toPlanResponseList(
                 planRepository.findAll().stream().filter(Plan::isActive).toList()
@@ -109,7 +112,7 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     @Transactional
-    @Cacheable(value = "subscription", key = "#userId")
+    @Cacheable(value = CacheConstants.SUBSCRIPTION, key = "#userId")
     public SubscriptionResponse getSubscriptionByUser(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseGet(() -> {
@@ -121,35 +124,52 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    @Transactional
     @CircuitBreaker(name = "stripe", fallbackMethod = "createCheckoutSessionFallback")
     @Retry(name = "stripe")
     public CheckoutResponse createCheckoutSession(Long planId, Long userId) {
-        User user = userQueryService.getUserOrThrow(userId);
+        String[] checkoutInfo = transactionTemplate.execute(status -> {
+            User user = userQueryService.getUserOrThrow(userId);
 
-        Plan plan = planLimitService.getPlan(planId);
-        if (BillingConstants.PLAN_FREE.equalsIgnoreCase(plan.getName())) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "billing.error.cannot_checkout_free");
-        }
+            Plan plan = planLimitService.getPlan(planId);
+            if (BillingConstants.PLAN_FREE.equalsIgnoreCase(plan.getName())) {
+                throw new AppException(HttpStatus.BAD_REQUEST, "billing.error.cannot_checkout_free");
+            }
 
-        Subscription subscription = subscriptionRepository.findByUserId(userId)
-                .orElseGet(() -> {
-                    createFreeSubscription(userId);
-                    return subscriptionRepository.findByUserId(userId)
-                            .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to resolve subscription"));
-                });
+            Subscription subscription = subscriptionRepository.findByUserId(userId)
+                    .orElseGet(() -> {
+                        createFreeSubscription(userId);
+                        return subscriptionRepository.findByUserId(userId)
+                                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to resolve subscription"));
+                    });
+
+            return new String[]{
+                subscription.getStripeCustomerId(),
+                user.getEmail(),
+                user.getName(),
+                plan.getStripePriceId()
+            };
+        });
+
+        String customerId = checkoutInfo[0];
+        String email = checkoutInfo[1];
+        String name = checkoutInfo[2];
+        String priceId = checkoutInfo[3];
 
         try {
-            String customerId = subscription.getStripeCustomerId();
             if (customerId == null || customerId.isEmpty()) {
                 CustomerCreateParams customerParams = CustomerCreateParams.builder()
-                        .setEmail(user.getEmail())
-                        .setName(user.getName())
+                        .setEmail(email)
+                        .setName(name)
                         .build();
                 Customer customer = Customer.create(customerParams);
                 customerId = customer.getId();
-                subscription.setStripeCustomerId(customerId);
-                subscriptionRepository.save(subscription);
+                
+                final String finalCustomerId = customerId;
+                transactionTemplate.executeWithoutResult(status -> {
+                    Subscription subscription = subscriptionRepository.findByUserId(userId).orElseThrow();
+                    subscription.setStripeCustomerId(finalCustomerId);
+                    subscriptionRepository.save(subscription);
+                });
             }
 
             SessionCreateParams.Builder sessionBuilder = SessionCreateParams.builder()
@@ -161,7 +181,7 @@ public class BillingServiceImpl implements BillingService {
                     .putMetadata("planId", String.valueOf(planId))
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
-                                    .setPrice(plan.getStripePriceId())
+                                    .setPrice(priceId)
                                     .setQuantity(1L)
                                     .build()
                     );
@@ -177,8 +197,8 @@ public class BillingServiceImpl implements BillingService {
     @Override
     @Transactional
     @org.springframework.cache.annotation.Caching(evict = {
-        @CacheEvict(value = "subscription", key = "#userId"),
-        @CacheEvict(value = "subscription", key = "'plan:' + #userId")
+        @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "#userId"),
+        @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "'plan:' + #userId")
     })
     @CircuitBreaker(name = "stripe", fallbackMethod = "cancelSubscriptionFallback")
     @Retry(name = "stripe")
@@ -211,8 +231,8 @@ public class BillingServiceImpl implements BillingService {
     @Override
     @Transactional
     @org.springframework.cache.annotation.Caching(evict = {
-        @CacheEvict(value = "subscription", key = "#userId"),
-        @CacheEvict(value = "subscription", key = "'plan:' + #userId")
+        @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "#userId"),
+        @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "'plan:' + #userId")
     })
     @CircuitBreaker(name = "stripe", fallbackMethod = "resumeSubscriptionFallback")
     @Retry(name = "stripe")
@@ -477,5 +497,11 @@ public class BillingServiceImpl implements BillingService {
                 cache.evict("plan:" + userId);
             }
         }
+    }
+
+    @Override
+    @Transactional
+    public void deleteSubscription(Long userId) {
+        subscriptionRepository.findByUserId(userId).ifPresent(subscriptionRepository::delete);
     }
 }

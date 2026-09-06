@@ -13,10 +13,8 @@ import com.launchly.auth.mapper.AuthMapper;
 import com.launchly.auth.repository.TelegramAuthSessionRepository;
 import com.launchly.auth.repository.UserRepository;
 import com.launchly.auth.service.TokenService;
-import com.launchly.billing.repository.SubscriptionRepository;
 import com.launchly.billing.service.BillingService;
-import com.launchly.bot.repository.BotMemberRepository;
-import com.launchly.bot.repository.BotRepository;
+import com.launchly.bot.service.BotService;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.security.turnstile.TurnstileService;
 import com.launchly.common.utils.MessageUtils;
@@ -62,13 +60,7 @@ class AuthServiceImplTest {
     private TelegramAuthSessionRepository telegramAuthSessionRepository;
 
     @Mock
-    private BotRepository botRepository;
-
-    @Mock
-    private BotMemberRepository botMemberRepository;
-
-    @Mock
-    private SubscriptionRepository subscriptionRepository;
+    private BotService botService;
 
     @Mock
     private UserAuditService userAuditService;
@@ -310,12 +302,11 @@ class AuthServiceImplTest {
     @DisplayName("Should cascade delete user and associated entities")
     void deleteUserAccount_Success() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(botRepository.findAllByUserId(1L)).thenReturn(Collections.emptyList());
-        when(botMemberRepository.findByUserId(1L)).thenReturn(Collections.emptyList());
-        when(subscriptionRepository.findByUserId(1L)).thenReturn(Optional.empty());
 
         authService.deleteUserAccount(1L);
 
+        verify(botService, times(1)).deleteAllUserData(1L);
+        verify(billingService, times(1)).deleteSubscription(1L);
         verify(userRepository, times(1)).delete(testUser);
     }
 

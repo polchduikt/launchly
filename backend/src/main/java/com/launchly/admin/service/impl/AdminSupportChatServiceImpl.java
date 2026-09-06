@@ -122,9 +122,9 @@ public class AdminSupportChatServiceImpl implements AdminSupportChatService {
 
     @Override
     @Transactional
-    public SupportTicketDto updateStatus(Long id, String targetStatus) {
+    public SupportTicketDto updateStatus(Long id, com.launchly.admin.enums.TicketStatus targetStatus) {
         SupportTicket ticket = findTicketOrThrow(id);
-        String statusToSet = (targetStatus != null && !targetStatus.isBlank()) ? targetStatus.toUpperCase() : "RESOLVED";
+        String statusToSet = (targetStatus != null) ? targetStatus.name() : "RESOLVED";
         ticket.setStatus(statusToSet);
         ticket.setUpdatedAt(LocalDateTime.now());
         supportTicketRepository.save(ticket);

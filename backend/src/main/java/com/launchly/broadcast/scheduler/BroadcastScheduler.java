@@ -1,9 +1,8 @@
 package com.launchly.broadcast.scheduler;
 
 import com.launchly.broadcast.entity.BroadcastCampaign;
-import com.launchly.broadcast.entity.CampaignStatus;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
-import com.launchly.broadcast.service.BroadcastService;
+import com.launchly.broadcast.service.BroadcastExecutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,7 +16,7 @@ import java.util.List;
 public class BroadcastScheduler {
 
     private final BroadcastCampaignRepository campaignRepository;
-    private final BroadcastService broadcastService;
+    private final BroadcastExecutionService broadcastExecutionService;
 
     @Scheduled(fixedDelay = 30000)
     public void processScheduledCampaigns() {
@@ -32,7 +31,7 @@ public class BroadcastScheduler {
 
         for (BroadcastCampaign campaign : dueCampaigns) {
             try {
-                broadcastService.sendCampaign(campaign.getId());
+                broadcastExecutionService.sendCampaign(campaign.getId());
                 log.info("Dispatched scheduled campaign {} ('{}')", campaign.getId(), campaign.getName());
             } catch (Exception e) {
                 log.error("Failed to dispatch scheduled campaign {}: {}",

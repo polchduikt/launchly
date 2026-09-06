@@ -56,6 +56,7 @@ public class SupportTicket extends BaseEntity {
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("createdAt ASC")
+    @org.hibernate.annotations.BatchSize(size = 50)
     @Builder.Default
     private List<SupportMessage> messages = new ArrayList<>();
 

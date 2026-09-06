@@ -16,10 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 import java.time.Duration;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -29,28 +27,19 @@ public class TierRateLimitFilter extends OncePerRequestFilter {
 
     private final RateLimitService rateLimitService;
     private final MessageUtils messageUtils;
+    private final tools.jackson.databind.ObjectMapper objectMapper;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    private static final List<String> EXCLUDED_PATHS = List.of(
-            "/actuator/**",
-            "/v3/api-docs/**",
-            "/swagger-ui/**",
-            "/swagger-ui.html",
-            "/ws/**",
-            "/api/v1/auth/**",
-            "/api/v1/telegram/webhook/**",
-            "/api/v1/billing/webhook",
-            "/api/v1/integrations/google/callback",
-            "/api/v1/integrations/hotmart/webhook/**",
-            "/api/v1/support/appeal",
-            "/api/i18n/**",
-            "/api/v1/templates/share/**"
-    );
+    private static final long ADMIN_RATE_LIMIT = 120_000;
+    private static final long ENTERPRISE_RATE_LIMIT = 60_000;
+    private static final long PRO_RATE_LIMIT = 30_000;
+    private static final long FREE_RATE_LIMIT = 12_000;
+    private static final long ANONYMOUS_RATE_LIMIT = 60;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        for (String pattern : EXCLUDED_PATHS) {
+        for (String pattern : com.launchly.common.constant.PublicEndpoints.RATE_LIMIT_EXCLUDED) {
             if (pathMatcher.match(pattern, path)) {
                 return true;
             }
@@ -70,7 +59,7 @@ public class TierRateLimitFilter extends OncePerRequestFilter {
             capacity = resolveTierCapacity(auth);
             rateKey = "rate:tier:user:" + userDetails.getId();
         } else {
-            capacity = 60;
+            capacity = ANONYMOUS_RATE_LIMIT;
             rateKey = "rate:tier:ip:" + extractClientIp(request);
         }
 
@@ -95,13 +84,14 @@ public class TierRateLimitFilter extends OncePerRequestFilter {
                     retryAfterSeconds
             );
 
-            String jsonResponse = String.format(
-                    "{\"status\":429,\"error\":\"Too Many Requests\",\"message\":\"%s\",\"path\":\"%s\"}",
-                    errorMessage.replace("\"", "\\\""),
-                    request.getRequestURI()
+            java.util.Map<String, Object> body = java.util.Map.of(
+                    "status", 429,
+                    "error", "Too Many Requests",
+                    "message", errorMessage,
+                    "path", request.getRequestURI()
             );
 
-            response.getWriter().write(jsonResponse);
+            response.getWriter().write(objectMapper.writeValueAsString(body));
             return;
         }
 
@@ -112,16 +102,16 @@ public class TierRateLimitFilter extends OncePerRequestFilter {
         for (GrantedAuthority authority : auth.getAuthorities()) {
             String role = authority.getAuthority();
             if ("ROLE_ADMIN".equals(role) || "ROLE_SUPER_ADMIN".equals(role)) {
-                return 120000;
+                return ADMIN_RATE_LIMIT;
             }
             if ("ROLE_ENTERPRISE".equals(role)) {
-                return 60000;
+                return ENTERPRISE_RATE_LIMIT;
             }
             if ("ROLE_PRO".equals(role)) {
-                return 30000;
+                return PRO_RATE_LIMIT;
             }
         }
-        return 12000;
+        return FREE_RATE_LIMIT;
     }
 
     private String extractClientIp(HttpServletRequest request) {

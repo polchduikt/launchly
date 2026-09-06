@@ -1,5 +1,6 @@
 package com.launchly.bot.controller;
 
+import jakarta.validation.Valid;
 import com.launchly.bot.dto.request.CreateTemplateRequest;
 import com.launchly.bot.dto.request.UpdateTemplateRequest;
 import com.launchly.bot.dto.response.TemplateResponse;
@@ -42,7 +43,7 @@ public class TemplateController {
     @PostMapping
     @Idempotent
     public ResponseEntity<TemplateResponse> createTemplate(
-            @RequestBody CreateTemplateRequest request,
+            @Valid @RequestBody CreateTemplateRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -105,7 +106,7 @@ public class TemplateController {
     @PutMapping("/{shareCode}")
     public ResponseEntity<TemplateResponse> updateTemplate(
             @Parameter(description = "Template unique share code") @PathVariable String shareCode,
-            @RequestBody UpdateTemplateRequest request,
+            @Valid @RequestBody UpdateTemplateRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(templateService.updateTemplate(shareCode, request, userDetails.getId()));

@@ -16,12 +16,13 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.UserProfilePhotos;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import org.springframework.context.annotation.Lazy;
+
 import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class SystemBotAuthServiceImpl implements SystemBotAuthService {
 
     @Value("${telegram.system-bot-token:}")
@@ -29,6 +30,11 @@ public class SystemBotAuthServiceImpl implements SystemBotAuthService {
 
     private final AuthService authService;
     private final MessageUtils messageUtils;
+
+    public SystemBotAuthServiceImpl(@Lazy AuthService authService, MessageUtils messageUtils) {
+        this.authService = authService;
+        this.messageUtils = messageUtils;
+    }
 
     @Override
     public void handleSystemBotUpdate(Update update, TelegramClient client) {

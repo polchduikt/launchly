@@ -162,9 +162,7 @@ public class AdminBlogServiceImpl implements AdminBlogService {
             return;
         }
         BlogArticle article = blogArticleRepository.findById(cleanId)
-                .orElseGet(() -> blogArticleRepository.findAll().stream()
-                        .filter(a -> a.getId() != null && a.getId().trim().equalsIgnoreCase(cleanId))
-                        .findFirst()
+                .orElseGet(() -> blogArticleRepository.findByIdIgnoreCase(cleanId)
                         .orElse(null));
         if (article != null) {
             blogArticleRepository.delete(article);
@@ -174,9 +172,7 @@ public class AdminBlogServiceImpl implements AdminBlogService {
     private BlogArticle findArticleOrThrow(String id) {
         String cleanId = id != null ? id.trim() : "";
         return blogArticleRepository.findById(cleanId)
-                .orElseGet(() -> blogArticleRepository.findAll().stream()
-                        .filter(a -> a.getId() != null && a.getId().equalsIgnoreCase(cleanId))
-                        .findFirst()
+                .orElseGet(() -> blogArticleRepository.findByIdIgnoreCase(cleanId)
                         .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, messageUtils.getMessage("common.error.not_found"))));
     }
 }

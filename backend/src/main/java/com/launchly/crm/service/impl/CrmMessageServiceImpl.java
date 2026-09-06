@@ -1,7 +1,6 @@
 package com.launchly.crm.service.impl;
 
 import com.launchly.auth.entity.User;
-import com.launchly.common.exception.AppException;
 import com.launchly.crm.dto.request.AddNoteRequest;
 import com.launchly.crm.dto.request.SendMessageRequest;
 import com.launchly.crm.dto.response.MessageResponse;
@@ -19,12 +18,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -176,6 +173,7 @@ public class CrmMessageServiceImpl implements CrmMessageService {
     }
 
     @Override
+    @Transactional
     public void sendScheduledMessages() {
         List<Message> dueMessages = messageRepository.findBySentFalseAndScheduledAtBefore(LocalDateTime.now());
         if (dueMessages.isEmpty()) {

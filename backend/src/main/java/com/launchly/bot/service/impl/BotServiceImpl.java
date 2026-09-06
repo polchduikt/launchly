@@ -1,5 +1,6 @@
 package com.launchly.bot.service.impl;
 
+import com.launchly.common.constant.CacheConstants;
 import org.springframework.web.client.RestTemplate;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -19,7 +20,6 @@ import com.launchly.bot.constant.TelegramConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotMember;
 import com.launchly.bot.entity.FlowSchema;
-import java.time.Duration;
 import com.launchly.bot.mapper.BotResponseFactory;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotMemberRepository;
@@ -36,7 +36,6 @@ import com.launchly.common.utils.EncryptionUtil;
 import com.launchly.media.service.MediaService;
 import com.launchly.bot.dto.request.BotUserCreateRequest;
 import com.launchly.bot.dto.request.BotUserUpdateRequest;
-import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.validator.BotAccessValidator;
 import com.launchly.bot.validator.FlowSchemaValidator;
 import lombok.RequiredArgsConstructor;
@@ -50,10 +49,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.stream.Collectors;
 import com.launchly.admin.service.UserAuditService;
 
 @Slf4j
@@ -83,7 +80,7 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "bots", key = "#userId")
+    @CacheEvict(value = CacheConstants.BOTS, key = "#userId")
     public BotResponse createBot(BotCreateRequest request, Long userId) {
         User user = userQueryService.getUserOrThrow(userId);
 
@@ -104,10 +101,18 @@ public class BotServiceImpl implements BotService {
 
         String encryptedToken = encryptionUtil.encrypt(rawToken);
 
+        List<Bot> existingBots = botRepository.findAllByUserId(userId);
+        String inheritedCustomFields = existingBots.stream()
+                .map(Bot::getCustomFieldsData)
+                .filter(data -> data != null && !data.trim().isEmpty() && !data.trim().equals("{}"))
+                .findFirst()
+                .orElse(null);
+
         Bot bot = Bot.builder()
                 .name(request.name())
                 .description(request.description())
                 .telegramToken(encryptedToken)
+                .customFieldsData(inheritedCustomFields)
                 .user(user)
                 .build();
 
@@ -131,7 +136,7 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "bots", key = "#userId")
+    @Cacheable(value = CacheConstants.BOTS, key = "#userId")
     public List<BotResponse> getBotsByUser(Long userId) {
         List<Bot> ownedBots = botRepository.findAllByUserId(userId);
         List<BotMember> memberships = botMemberRepository.findByUserId(userId);
@@ -149,6 +154,7 @@ public class BotServiceImpl implements BotService {
                 allBots.add(b);
             }
         }
+        allBots.sort(Comparator.comparing(Bot::getId));
 
         return botResponseFactory.toBotResponseListWithStats(allBots, userId, memberships);
     }
@@ -180,7 +186,7 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "bots", key = "#userId")
+    @CacheEvict(value = CacheConstants.BOTS, key = "#userId")
     public BotResponse updateBot(Long id, BotUpdateRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
         botAccessValidator.validateWriteAccess(bot, userId);
@@ -240,8 +246,8 @@ public class BotServiceImpl implements BotService {
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = "bots", key = "#userId"),
-            @CacheEvict(value = "flow_schemas", key = "#id")
+            @CacheEvict(value = CacheConstants.BOTS, key = "#userId"),
+            @CacheEvict(value = CacheConstants.FLOW_SCHEMAS, key = "#id")
     })
     public void deleteBot(Long id, Long userId) {
         Bot bot = findBotByIdAndUser(id, userId);
@@ -273,7 +279,7 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional
-    @Cacheable(value = "flow_schemas", key = "#botId")
+    @Cacheable(value = CacheConstants.FLOW_SCHEMAS, key = "#botId")
     public FlowSchemaResponse getFlowSchema(Long botId, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
         FlowSchema schema = flowSchemaRepository.findByBotId(bot.getId())
@@ -283,7 +289,7 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "flow_schemas", key = "#botId")
+    @CacheEvict(value = CacheConstants.FLOW_SCHEMAS, key = "#botId")
     public FlowSchemaResponse saveFlowSchema(Long botId, FlowSchemaRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
         botAccessValidator.validateWriteAccess(bot, userId);
@@ -460,5 +466,19 @@ public class BotServiceImpl implements BotService {
         user.setAutomationFolders(foldersJson);
         userQueryService.save(user);
         return user.getAutomationFolders();
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllUserData(Long userId) {
+        List<Bot> ownedBots = botRepository.findAllByUserId(userId);
+        for (Bot b : ownedBots) {
+            botRepository.delete(b);
+        }
+
+        List<BotMember> memberships = botMemberRepository.findByUserId(userId);
+        for (BotMember bm : memberships) {
+            botMemberRepository.delete(bm);
+        }
     }
 }

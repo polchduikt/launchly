@@ -12,11 +12,13 @@ public interface BroadcastService {
 
     List<CampaignResponse> getCampaigns(Long botId, Long userId);
 
-    void sendCampaign(Long campaignId);
-
     CampaignResponse sendNow(Long campaignId, Long userId);
 
     CampaignResponse cancelSchedule(Long campaignId, Long userId);
 
     void deleteCampaign(Long campaignId, Long userId);
+
+    CampaignResponse getCampaign(Long campaignId);
+
+    boolean isCampaignBlocked(Long campaignId);
 }

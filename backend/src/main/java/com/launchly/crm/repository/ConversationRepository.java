@@ -10,18 +10,18 @@ import java.util.Optional;
 
 public interface ConversationRepository extends JpaRepository<Conversation, Long> {
 
-    @EntityGraph(attributePaths = {"botUser", "bot"})
+    @EntityGraph(attributePaths = {"bot", "botUser"})
     List<Conversation> findByBotIdOrderByUpdatedAtDesc(Long botId);
 
-    @EntityGraph(attributePaths = {"botUser", "bot"})
+    @EntityGraph(attributePaths = {"bot", "botUser"})
     @Query("SELECT c FROM Conversation c WHERE c.bot.user.id = :userId ORDER BY c.updatedAt DESC")
     List<Conversation> findByBotUserIdOrderByUpdatedAtDesc(@Param("userId") Long userId);
 
-    @EntityGraph(attributePaths = {"botUser", "bot"})
+    @EntityGraph(attributePaths = {"bot", "botUser"})
     Optional<Conversation> findByBotIdAndBotUserId(Long botId, Long botUserId);
 
     @Override
-    @EntityGraph(attributePaths = {"botUser", "bot"})
+    @EntityGraph(attributePaths = {"bot", "botUser"})
     Optional<Conversation> findById(Long id);
 
     long countByBotId(Long botId);
