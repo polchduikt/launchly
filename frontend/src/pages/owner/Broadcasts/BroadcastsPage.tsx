@@ -19,6 +19,7 @@ import { useCreateBroadcastForm } from '../../../hooks/broadcast/useCreateBroadc
 import { StatusBadge, CreateBroadcastDialog, EditBroadcastDialog } from './components';
 import type { CampaignResponse } from '../../../types/broadcast';
 import { getFilterText } from '../../../utils/filterText';
+import { translateBlockReason } from '../../../utils/blockReason';
 import {
   Bell,
   Flame,
@@ -156,34 +157,6 @@ export const BroadcastsPage: React.FC = () => {
     }
   };
 
-  const translateBlockReason = (reason?: string | null) => {
-    if (!reason) return '';
-    const lang = getLanguage();
-    const ukMap: Record<string, string> = {
-      'Suspicious activity': 'Підозріла активність',
-      'Violation of platform rules': 'Порушення правил платформи',
-      'Spam or unauthorized bulk messaging': 'Спам або несанкціонована розсилка',
-      'Other reason': 'Інша причина',
-      'Підозріла активність': 'Підозріла активність',
-      'Порушення правил платформи': 'Порушення правил платформи',
-      'Спам або несанкціонована розсилка': 'Спам або несанкціонована розсилка',
-      'Інша причина': 'Інша причина',
-    };
-    const enMap: Record<string, string> = {
-      'Suspicious activity': 'Suspicious activity',
-      'Violation of platform rules': 'Violation of platform rules',
-      'Spam or unauthorized bulk messaging': 'Spam or unauthorized bulk messaging',
-      'Other reason': 'Other reason',
-      'Підозріла активність': 'Suspicious activity',
-      'Порушення правил платформи': 'Violation of platform rules',
-      'Спам або несанкціонована розсилка': 'Spam or unauthorized bulk messaging',
-      'Інша причина': 'Other reason',
-    };
-    if (lang === 'uk') {
-      return ukMap[reason] || t(reason) || reason;
-    }
-    return enMap[reason] || t(reason) || reason;
-  };
 
   const isLoadingTotal = isBotsLoading || isTemplatesLoading || isCampaignsLoading;
   const hasNoBots = !isBotsLoading && !isTemplatesLoading && bots.length === 0 && installedTemplates.length === 0;

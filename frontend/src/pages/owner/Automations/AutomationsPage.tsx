@@ -8,27 +8,24 @@ import {
   MoveAutomationModal,
   CreateFolderModal,
   BlockedDetailsModal,
+  AutomationsSidebar,
+  AutomationContextMenu,
+  AutomationsTableView,
+  AutomationsGridView,
 } from './components';
 import {
   Search,
   FolderPlus,
   Plus,
-  MoreVertical,
   Trash2,
   LayoutGrid,
   List,
-  Folder as FolderIcon,
-  FolderOpen,
-  Pencil,
-  Play,
-  Square,
-  Lock,
   Loader2,
 } from 'lucide-react';
 import { useBotStore } from '../../../store/useBotStore';
 import { getAutomationFoldersApi, saveAutomationFoldersApi } from '../../../api/bot';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
-import { t, getLanguage } from '../../../i18n/config';
+import { t } from '../../../i18n/config';
 import {
   useCreateBotMutation,
   useDeleteBotMutation,
@@ -38,7 +35,6 @@ import {
 } from '../../../hooks/bot/useBotMutations';
 
 import type { Folder, BotResponse } from '../../../types/bot';
-import { formatRelativeTime } from '../../../utils/date';
 import {
   DISPLAY_KEY_AUTO_RUNS,
   DISPLAY_KEY_AUTO_CTR,
@@ -187,34 +183,6 @@ export const AutomationsPage: React.FC = () => {
     onConfirm: () => void;
   } | null>(null);
 
-  const translateBlockReason = (reason?: string | null) => {
-    if (!reason) return '';
-    const lang = getLanguage();
-    const ukMap: Record<string, string> = {
-      'Suspicious activity': 'Підозріла активність',
-      'Violation of platform rules': 'Порушення правил платформи',
-      'Spam or unauthorized bulk messaging': 'Спам або несанкціонована розсилка',
-      'Other reason': 'Інша причина',
-      'Підозріла активність': 'Підозріла активність',
-      'Порушення правил платформи': 'Порушення правил платформи',
-      'Спам або несанкціонована розсилка': 'Спам або несанкціонована розсилка',
-      'Інша причина': 'Інша причина',
-    };
-    const enMap: Record<string, string> = {
-      'Suspicious activity': 'Suspicious activity',
-      'Violation of platform rules': 'Violation of platform rules',
-      'Spam or unauthorized bulk messaging': 'Spam or unauthorized bulk messaging',
-      'Other reason': 'Other reason',
-      'Підозріла активність': 'Suspicious activity',
-      'Порушення правил платформи': 'Violation of platform rules',
-      'Спам або несанкціонована розсилка': 'Spam or unauthorized bulk messaging',
-      'Інша причина': 'Other reason',
-    };
-    if (lang === 'uk') {
-      return ukMap[reason] || t(reason) || reason;
-    }
-    return enMap[reason] || t(reason) || reason;
-  };
 
 
 
@@ -238,7 +206,7 @@ export const AutomationsPage: React.FC = () => {
     return bots.filter((b) => botFolders[b.id] === folderId).length;
   };
 
-  const handleMenuClick = (e: React.MouseEvent<HTMLButtonElement>, botId: number) => {
+  const handleMenuClick = (e: React.MouseEvent, botId: number) => {
     e.stopPropagation();
     if (activeMenuBotId === botId) {
       setActiveMenuBotId(null);
@@ -251,6 +219,34 @@ export const AutomationsPage: React.FC = () => {
       });
       setActiveMenuBotId(botId);
     }
+  };
+
+  const handleBotClick = (bot: BotResponse) => {
+    if (bot.blocked) {
+      setBlockedDetailsBot(bot);
+      return;
+    }
+    setActiveBotId(bot.id);
+    navigate('/builder');
+  };
+
+  const handleMenuEdit = (bot: BotResponse) => {
+    setEditBotId(bot.id);
+    setEditBotName(bot.name);
+    setEditBotDesc(bot.description || '');
+    setEditBotOption(bot.username ? 'current' : 'nobot');
+    setEditBotToken('');
+    setIsEditModalOpen(true);
+    setActiveMenuBotId(null);
+    setMenuCoords(null);
+  };
+
+  const handleMenuMove = (bot: BotResponse) => {
+    setMoveBotId(bot.id);
+    setTempFolderId(String(botFolders[bot.id] || ''));
+    setIsMoveModalOpen(true);
+    setActiveMenuBotId(null);
+    setMenuCoords(null);
   };
 
   const handleStartBot = (id: number) => {
@@ -457,73 +453,13 @@ export const AutomationsPage: React.FC = () => {
         onCancel={() => setConfirmDialog(null)}
       />
       <div className="flex h-full min-h-screen bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
-        <aside className="w-60 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-4 shrink-0 hidden md:block self-stretch">
-          <h2 className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-4 px-2 font-['Anybody',sans-serif]">{t('automations.sidebar.title')}</h2>
-          <nav className="space-y-1">
-            <button
-              onClick={() => setSelectedFolderId(null)}
-              className={`w-full flex items-center px-3 py-2.5 rounded-xl text-xs font-black uppercase text-left transition-all ${
-                selectedFolderId === null
-                  ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A]'
-                  : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
-              }`}
-            >
-              {t('automations.sidebar.my_automations')}
-            </button>
-          </nav>
-
-          <div className="mt-8">
-            <div className="flex items-center justify-between px-2 mb-2 text-xs font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">
-              <span>{t('automations.sidebar.folders')}</span>
-            </div>
-            <nav className="space-y-1">
-              <button
-                onClick={() => setSelectedFolderId(null)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-black uppercase text-left transition-all ${
-                  selectedFolderId === null
-                    ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A]'
-                    : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
-                }`}
-              >
-                <div className="flex items-center">
-                  <FolderOpen size={14} className="mr-2 shrink-0" />
-                  <span>{t('automations.sidebar.all_automations')}</span>
-                </div>
-                <span className="text-[10px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-1.5 py-0.5 rounded-md">
-                  {getFolderBotCount(null)}
-                </span>
-              </button>
-              {folders.map((folder) => (
-                <div
-                  key={folder.id}
-                  className="group flex items-center justify-between w-full rounded-xl transition-all"
-                >
-                  <button
-                    onClick={() => setSelectedFolderId(folder.id)}
-                    className={`flex-1 flex items-center px-3 py-2.5 rounded-xl text-xs font-black uppercase text-left transition-all truncate ${
-                      selectedFolderId === folder.id
-                        ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A]'
-                        : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
-                    }`}
-                  >
-                    <FolderIcon size={14} className="mr-2 shrink-0" />
-                    <span className="truncate mr-1">{folder.name}</span>
-                    <span className="ml-auto text-[10px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-1.5 py-0.5 rounded-md">
-                      {getFolderBotCount(folder.id)}
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => handleDeleteFolder(folder.id)}
-                    className="p-2 text-[#0A0A0A] hover:bg-rose-600 hover:text-white opacity-0 group-hover:opacity-100 transition-all cursor-pointer rounded-lg shrink-0 border border-transparent hover:border-[#0A0A0A]"
-                    title={t('automations.sidebar.delete_folder')}
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-              ))}
-            </nav>
-          </div>
-        </aside>
+        <AutomationsSidebar
+          folders={folders}
+          selectedFolderId={selectedFolderId}
+          onSelectFolder={setSelectedFolderId}
+          onDeleteFolder={handleDeleteFolder}
+          getFolderBotCount={getFolderBotCount}
+        />
 
         <div className="flex-1 p-6 md:p-10 max-w-5xl mx-auto space-y-6 bg-[#F2EBDD]">
           <div className="flex items-center justify-between pb-4 border-b-2 border-[#0A0A0A]">
@@ -610,205 +546,26 @@ export const AutomationsPage: React.FC = () => {
               </div>
             ) : filteredBots.length > 0 ? (
               viewMode === 'list' ? (
-                <div className="overflow-x-auto pt-2">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b-2 border-[#0A0A0A] text-[#0A0A0A] text-[10px] font-black uppercase tracking-wider">
-                        <th className="py-3 px-4 w-12 text-center">
-                          <input
-                            type="checkbox"
-                            checked={filteredBots.length > 0 && filteredBots.every((b) => selectedBotIds.has(b.id))}
-                            onChange={handleToggleSelectAll}
-                            className="rounded border-2 border-[#0A0A0A] text-[#0A0A0A] focus:ring-0"
-                          />
-                        </th>
-                        <th className="py-3 px-2">{t('automations.table.name')}</th>
-                        {showRuns && <th className="py-3 px-2 w-28 text-center">{t('automations.table.runs')}</th>}
-                        {showCtr && <th className="py-3 px-2 w-28 text-center">{t('automations.table.ctr')}</th>}
-                        <th className="py-3 px-2 w-40">{t('automations.table.modified')}</th>
-                        <th className="py-3 px-4 w-12"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredBots.map((bot) => (
-                        <tr
-                          key={bot.id}
-                          onClick={() => {
-                            if (bot.blocked) {
-                              setBlockedDetailsBot(bot);
-                              return;
-                            }
-                            setActiveBotId(bot.id);
-                            navigate('/builder');
-                          }}
-                          className={`border-b-2 border-[#0A0A0A] transition-all group cursor-pointer ${
-                            bot.blocked
-                              ? 'bg-rose-50 hover:bg-rose-100/60'
-                              : 'hover:bg-slate-50'
-                          }`}
-                        >
-                          <td className="py-4 px-4 w-12 text-center" onClick={(e) => e.stopPropagation()}>
-                            {bot.role !== 'Viewer' && (
-                              <input
-                                type="checkbox"
-                                checked={selectedBotIds.has(bot.id)}
-                                onChange={() => handleToggleSelectBot(bot.id)}
-                                className="rounded border-2 border-[#0A0A0A] text-[#0A0A0A] focus:ring-0"
-                              />
-                            )}
-                          </td>
-                          <td className="py-4 px-2">
-                            <div className="flex items-center gap-2.5">
-                              <span
-                                className={`w-3 h-3 rounded-full shrink-0 border border-[#0A0A0A] ${
-                                  bot.blocked
-                                    ? 'bg-rose-500'
-                                    : bot.active
-                                    ? 'bg-emerald-400'
-                                    : 'bg-slate-300'
-                                }`}
-                              />
-                              <div className="flex flex-col min-w-0">
-                                <div className="flex items-center space-x-2">
-                                  <span className="font-bold text-xs text-[#0A0A0A] uppercase hover:underline truncate max-w-xs md:max-w-md">
-                                    {bot.name}
-                                  </span>
-                                  {bot.blocked ? (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-rose-600 text-white border border-[#0A0A0A] uppercase shrink-0">
-                                      <Lock size={10} />
-                                      {t('status.blocked') || t('admin.status_blocked') || 'Blocked'}
-                                    </span>
-                                  ) : showBadge && bot.templateName ? (
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
-                                      [{t('template.badge', 'ШАБЛОН')} {bot.templateName}]
-                                    </span>
-                                  ) : showBadge && bot.isTemplate ? (
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
-                                      [{t('template.badge', 'ШАБЛОН')}]
-                                    </span>
-                                  ) : null}
-                                </div>
-                                {bot.blocked ? (
-                                  <span className="text-[11px] text-slate-700 font-bold truncate max-w-xs md:max-w-md mt-0.5">
-                                    {translateBlockReason(bot.blockReason)}
-                                  </span>
-                                ) : bot.description ? (
-                                  <span className="text-[11px] text-slate-600 font-medium line-clamp-1 max-w-xs md:max-w-md mt-0.5">
-                                    {bot.description}
-                                  </span>
-                                ) : null}
-                              </div>
-                            </div>
-                          </td>
-                          {showRuns && <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">{bot.runs ?? 1}</td>}
-                          {showCtr && (
-                            <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">
-                              {(bot.runs ?? 0) === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
-                            </td>
-                          )}
-                          <td className="py-4 px-2 w-40 text-xs font-bold text-slate-700">{formatRelativeTime(bot.updatedAt || bot.createdAt)}</td>
-                          <td className="py-4 px-4 w-12 text-right" onClick={(e) => e.stopPropagation()}>
-                            {bot.role !== 'Viewer' && (
-                              <button
-                                onClick={(e) => handleMenuClick(e, bot.id)}
-                                className="text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] p-1.5 rounded-lg transition-all cursor-pointer border border-transparent hover:border-[#0A0A0A]"
-                              >
-                                <MoreVertical size={16} />
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <AutomationsTableView
+                  bots={filteredBots}
+                  selectedBotIds={selectedBotIds}
+                  showRuns={showRuns}
+                  showCtr={showCtr}
+                  showBadge={showBadge}
+                  onToggleSelectAll={handleToggleSelectAll}
+                  onToggleSelectBot={handleToggleSelectBot}
+                  onBotClick={handleBotClick}
+                  onMenuClick={handleMenuClick}
+                />
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
-                  {filteredBots.map((bot) => (
-                    <div
-                      key={bot.id}
-                      onClick={() => {
-                        if (bot.blocked) {
-                          setBlockedDetailsBot(bot);
-                          return;
-                        }
-                        setActiveBotId(bot.id);
-                        navigate('/builder');
-                      }}
-                      className={`rounded-2xl p-5 border-2 border-[#0A0A0A] transition-all cursor-pointer flex flex-col justify-between relative group min-h-[160px] shadow-[4px_4px_0px_0px_#0A0A0A] hover:shadow-[6px_6px_0px_0px_#0A0A0A] hover:-translate-y-0.5 ${
-                        bot.blocked
-                          ? 'bg-rose-50'
-                          : 'bg-white'
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span
-                              className={`w-3 h-3 rounded-full shrink-0 border border-[#0A0A0A] ${
-                                bot.blocked
-                                  ? 'bg-rose-500'
-                                  : bot.active
-                                  ? 'bg-emerald-400'
-                                  : 'bg-slate-300'
-                              }`}
-                            />
-                            <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] group-hover:underline text-sm uppercase truncate">
-                              {bot.name}
-                            </h3>
-                            {bot.blocked ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-rose-600 text-white border border-[#0A0A0A] uppercase shrink-0">
-                                <Lock size={10} />
-                                {t('status.blocked') || t('admin.status_blocked') || 'Blocked'}
-                              </span>
-                            ) : showBadge && bot.templateName ? (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
-                                [{t('template.badge', 'ШАБЛОН')} {bot.templateName}]
-                              </span>
-                            ) : showBadge && bot.isTemplate ? (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
-                                [{t('template.badge', 'ШАБЛОН')}]
-                              </span>
-                            ) : null}
-                          </div>
-                          {bot.role !== 'Viewer' && (
-                            <div className="relative inline-block text-left shrink-0" onClick={(e) => e.stopPropagation()}>
-                              <button
-                                onClick={(e) => handleMenuClick(e, bot.id)}
-                                className="text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] p-1.5 rounded-lg transition-all cursor-pointer border border-transparent hover:border-[#0A0A0A]"
-                              >
-                                <MoreVertical size={16} />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-700 font-medium mt-2 line-clamp-2">
-                          {bot.blocked
-                            ? translateBlockReason(bot.blockReason)
-                            : bot.description || t('automations.no_description')}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center justify-between border-t-2 border-[#0A0A0A] pt-3 mt-4 text-[11px] text-[#0A0A0A] font-bold">
-                        <div className="flex items-center gap-3">
-                          {showRuns && (
-                            <span>
-                              {t('automations.table.runs')}: <span className="font-black">{bot.runs ?? 1}</span>
-                            </span>
-                          )}
-                          {showCtr && (
-                            <span>
-                              {t('automations.table.ctr')}: <span className="font-black">
-                                {(bot.runs ?? 0) === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
-                              </span>
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-slate-700">{formatRelativeTime(bot.updatedAt || bot.createdAt)}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <AutomationsGridView
+                  bots={filteredBots}
+                  showRuns={showRuns}
+                  showCtr={showCtr}
+                  showBadge={showBadge}
+                  onBotClick={handleBotClick}
+                  onMenuClick={handleMenuClick}
+                />
               )
             ) : (
               <div className="py-12 text-center text-xs font-bold text-[#0A0A0A] italic">
@@ -820,82 +577,21 @@ export const AutomationsPage: React.FC = () => {
       </div>
 
       {activeMenuBotId !== null && menuCoords !== null && (
-        <div
-          style={{
-            position: 'fixed',
-            top: menuCoords.top,
-            left: menuCoords.left,
-          }}
-          className="w-56 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[6px_6px_0px_0px_#0A0A0A] z-[100] py-1.5 text-left font-['JetBrains_Mono',monospace]"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {(() => {
-            const activeMenuBot = bots.find((b) => b.id === activeMenuBotId);
-            if (!activeMenuBot) return null;
-            return (
-              <>
-                {!activeMenuBot.blocked && (
-                  <>
-                    {activeMenuBot.active ? (
-                      <button
-                        onClick={() => handleStopBot(activeMenuBot.id)}
-                        className="w-full px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] flex items-center gap-2 transition-all cursor-pointer"
-                      >
-                        <Square size={13} className="fill-current" />
-                        <span>{t('automations.menu.stop')}</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleStartBot(activeMenuBot.id)}
-                        className="w-full px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] flex items-center gap-2 transition-all cursor-pointer"
-                      >
-                        <Play size={13} className="fill-current" />
-                        <span>{t('automations.menu.start')}</span>
-                      </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        setEditBotId(activeMenuBot.id);
-                        setEditBotName(activeMenuBot.name);
-                        setEditBotDesc(activeMenuBot.description || '');
-                        setEditBotOption(activeMenuBot.username ? 'current' : 'nobot');
-                        setEditBotToken('');
-                        setIsEditModalOpen(true);
-                        setActiveMenuBotId(null);
-                        setMenuCoords(null);
-                      }}
-                      className="w-full px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] flex items-center gap-2 transition-all cursor-pointer"
-                    >
-                      <Pencil size={13} />
-                      <span>{t('automations.menu.edit')}</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setMoveBotId(activeMenuBot.id);
-                        setTempFolderId(String(botFolders[activeMenuBot.id] || ''));
-                        setIsMoveModalOpen(true);
-                        setActiveMenuBotId(null);
-                        setMenuCoords(null);
-                      }}
-                      className="w-full px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] flex items-center gap-2 transition-all cursor-pointer"
-                    >
-                      <FolderIcon size={13} />
-                      <span>{t('automations.menu.move')}</span>
-                    </button>
-                    <div className="h-0.5 bg-[#0A0A0A] my-1" />
-                  </>
-                )}
-                <button
-                  onClick={() => handleDeleteBot(activeMenuBot.id)}
-                  className="w-full px-4 py-2 text-xs font-black uppercase text-rose-600 hover:bg-rose-600 hover:text-white flex items-center gap-2 transition-all cursor-pointer"
-                >
-                  <Trash2 size={13} />
-                  <span>{t('automations.menu.delete')}</span>
-                </button>
-              </>
-            );
-          })()}
-        </div>
+        (() => {
+          const activeMenuBot = bots.find((b) => b.id === activeMenuBotId);
+          if (!activeMenuBot) return null;
+          return (
+            <AutomationContextMenu
+              bot={activeMenuBot}
+              menuCoords={menuCoords}
+              onStart={handleStartBot}
+              onStop={handleStopBot}
+              onEdit={handleMenuEdit}
+              onMove={handleMenuMove}
+              onDelete={handleDeleteBot}
+            />
+          );
+        })()
       )}
 
       <CreateAutomationModal

@@ -3,3 +3,7 @@ export * from './EditAutomationModal';
 export * from './MoveAutomationModal';
 export * from './CreateFolderModal';
 export * from './BlockedDetailsModal';
+export * from './AutomationsSidebar';
+export * from './AutomationContextMenu';
+export * from './AutomationsTableView';
+export * from './AutomationsGridView';

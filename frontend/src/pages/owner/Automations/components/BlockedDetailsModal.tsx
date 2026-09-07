@@ -2,6 +2,7 @@ import React from 'react';
 import { X, ShieldAlert } from 'lucide-react';
 import { t, getLanguage } from '../../../../i18n/config';
 import type { BotResponse } from '../../../../types/bot';
+import { translateBlockReason } from '../../../../utils/blockReason';
 
 interface BlockedDetailsModalProps {
   bot: BotResponse | null;
@@ -31,34 +32,7 @@ export const BlockedDetailsModal: React.FC<BlockedDetailsModalProps> = ({
     }
   };
 
-  const translateBlockReason = (reason?: string | null) => {
-    if (!reason) return '';
-    const lang = getLanguage();
-    const ukMap: Record<string, string> = {
-      'Suspicious activity': 'Підозріла активність',
-      'Violation of platform rules': 'Порушення правил платформи',
-      'Spam or unauthorized bulk messaging': 'Спам або несанкціоновані розсилки',
-      'Other reason': 'Інша причина',
-      'Підозріла активність': 'Підозріла активність',
-      'Порушення правил платформи': 'Порушення правил платформи',
-      'Спам або несанкціоновані розсилки': 'Спам або несанкціоновані розсилки',
-      'Інша причина': 'Інша причина',
-    };
-    const enMap: Record<string, string> = {
-      'Suspicious activity': 'Suspicious activity',
-      'Violation of platform rules': 'Violation of platform rules',
-      'Spam or unauthorized bulk messaging': 'Spam or unauthorized bulk messaging',
-      'Other reason': 'Other reason',
-      'Підозріла активність': 'Suspicious activity',
-      'Порушення правил платформи': 'Violation of platform rules',
-      'Спам або несанкціоновані розсилки': 'Spam or unauthorized bulk messaging',
-      'Інша причина': 'Other reason',
-    };
-    if (lang === 'uk') {
-      return ukMap[reason] || t(reason) || reason;
-    }
-    return enMap[reason] || t(reason) || reason;
-  };
+
 
   return (
     <div
