@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useClickOutside } from '../../../hooks/useClickOutside';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { fetchAdminStatsApi } from '../../../api/admin';
@@ -26,6 +26,35 @@ import {
 import { getLanguage, useTranslation } from '../../../i18n/config';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
+import { useDebounce } from '../../../hooks/useDebounce';
+
+type PeriodType = 'day' | 'week' | '2weeks' | 'month' | '2months' | '3months' | 'all' | 'custom';
+
+const getPeriodDateRange = (p: PeriodType): { start: Date; end: Date } => {
+  const now = new Date();
+  const currentEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 19, 0, 0);
+  if (currentEnd > now) {
+    currentEnd.setDate(currentEnd.getDate() - 1);
+  }
+  const end = now;
+  const start = new Date(currentEnd);
+  if (p === 'day') {
+    start.setDate(start.getDate() - 1);
+  } else if (p === 'week') {
+    start.setDate(start.getDate() - 7);
+  } else if (p === '2weeks') {
+    start.setDate(start.getDate() - 14);
+  } else if (p === 'month') {
+    start.setMonth(start.getMonth() - 1);
+  } else if (p === '2months') {
+    start.setMonth(start.getMonth() - 2);
+  } else if (p === '3months') {
+    start.setMonth(start.getMonth() - 3);
+  } else if (p === 'all') {
+    start.setFullYear(start.getFullYear() - 1);
+  }
+  return { start, end };
+};
 
 export const AdminStatsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -36,11 +65,11 @@ export const AdminStatsPage: React.FC = () => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [hoveredPerfIdx, setHoveredPerfIdx] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 350);
 
-  const [period, setPeriod] = useState<'day' | 'week' | '2weeks' | 'month' | '2months' | '3months' | 'all' | 'custom'>('week');
-  const [startDate, setStartDate] = useState<Date>(new Date());
-  const [endDate, setEndDate] = useState<Date>(new Date());
+  const [period, setPeriod] = useState<PeriodType>('week');
+  const [startDate, setStartDate] = useState<Date>(() => getPeriodDateRange('week').start);
+  const [endDate, setEndDate] = useState<Date>(() => getPeriodDateRange('week').end);
 
   const [isPeriodOpen, setIsPeriodOpen] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -60,43 +89,19 @@ export const AdminStatsPage: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 350);
-    return () => clearTimeout(handler);
-  }, [searchQuery]);
-
-  useEffect(() => {
-    if (period === 'custom') return;
-
-    queueMicrotask(() => {
-      const now = new Date();
-      const currentEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 19, 0, 0);
-      if (currentEnd > now) {
-        currentEnd.setDate(currentEnd.getDate() - 1);
-      }
-      setEndDate(now);
-
-      const start = new Date(currentEnd);
-      if (period === 'day') {
-        start.setDate(start.getDate() - 1);
-      } else if (period === 'week') {
-        start.setDate(start.getDate() - 7);
-      } else if (period === '2weeks') {
-        start.setDate(start.getDate() - 14);
-      } else if (period === 'month') {
-        start.setMonth(start.getMonth() - 1);
-      } else if (period === '2months') {
-        start.setMonth(start.getMonth() - 2);
-      } else if (period === '3months') {
-        start.setMonth(start.getMonth() - 3);
-      } else if (period === 'all') {
-        start.setFullYear(start.getFullYear() - 1);
-      }
-      setStartDate(start);
-    });
-  }, [period]);
+  const handleSelectPeriod = (opt: PeriodType) => {
+    setIsPeriodOpen(false);
+    if (opt === 'custom') {
+      setTempStart(startDate.toISOString().slice(0, 16));
+      setTempEnd(endDate.toISOString().slice(0, 16));
+      setIsPickerOpen(true);
+    } else {
+      setPeriod(opt);
+      const range = getPeriodDateRange(opt);
+      setStartDate(range.start);
+      setEndDate(range.end);
+    }
+  };
 
   useClickOutside(dropdownRef, () => setIsPeriodOpen(false), isPeriodOpen);
   useClickOutside(pickerRef, () => setIsPickerOpen(false), isPickerOpen);
@@ -772,16 +777,7 @@ export const AdminStatsPage: React.FC = () => {
                       {periodOptions.map((opt) => (
                         <button
                           key={opt}
-                          onClick={() => {
-                            setIsPeriodOpen(false);
-                            if (opt === 'custom') {
-                              setTempStart(startDate.toISOString().slice(0, 16));
-                              setTempEnd(endDate.toISOString().slice(0, 16));
-                              setIsPickerOpen(true);
-                            } else {
-                              setPeriod(opt);
-                            }
-                          }}
+                          onClick={() => handleSelectPeriod(opt)}
                           className={`w-full text-left px-4 py-2 text-xs font-bold uppercase transition-colors cursor-pointer ${period === opt ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A] hover:bg-white'}`}
                         >
                           {getPeriodLabel(opt)}

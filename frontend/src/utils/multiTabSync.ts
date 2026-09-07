@@ -5,6 +5,7 @@ export type SyncEventType =
   | 'SYNC_QUERY_INVALIDATE';
 
 export interface SyncMessage<T = unknown> {
+  id?: string;
   type: SyncEventType;
   payload?: T;
   senderTabId: string;
@@ -35,8 +36,25 @@ const getChannel = (): BroadcastChannel | null => {
   return sharedChannel;
 };
 
+// Set of recently processed message IDs to prevent duplicate handling
+const recentMessageIds = new Set<string>();
+
+const isDuplicateMessage = (msg: SyncMessage): boolean => {
+  const messageKey = msg.id || `${msg.senderTabId}-${msg.timestamp}-${msg.type}`;
+  if (recentMessageIds.has(messageKey)) {
+    return true;
+  }
+  recentMessageIds.add(messageKey);
+  if (recentMessageIds.size > 100) {
+    const oldestKey = recentMessageIds.values().next().value;
+    if (oldestKey) recentMessageIds.delete(oldestKey);
+  }
+  return false;
+};
+
 export const broadcastEvent = <T = unknown>(type: SyncEventType, payload?: T): void => {
   const message: SyncMessage<T> = {
+    id: `${CURRENT_TAB_ID}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
     type,
     payload,
     senderTabId: CURRENT_TAB_ID,
@@ -44,14 +62,18 @@ export const broadcastEvent = <T = unknown>(type: SyncEventType, payload?: T): v
   };
 
   const channel = getChannel();
+  let channelSuccess = false;
   if (channel) {
     try {
       channel.postMessage(message);
+      channelSuccess = true;
     } catch {
+      channelSuccess = false;
     }
   }
 
-  if (typeof localStorage !== 'undefined') {
+  // Only broadcast via localStorage fallback if BroadcastChannel is unavailable or failed
+  if (!channelSuccess && typeof localStorage !== 'undefined') {
     try {
       localStorage.setItem(FALLBACK_STORAGE_KEY, JSON.stringify(message));
     } catch {
@@ -68,6 +90,9 @@ export const subscribeToSyncEvents = (
     if (!event.data || event.data.senderTabId === CURRENT_TAB_ID) {
       return;
     }
+    if (isDuplicateMessage(event.data)) {
+      return;
+    }
     listener(event.data);
   };
 
@@ -78,6 +103,9 @@ export const subscribeToSyncEvents = (
     try {
       const message = JSON.parse(event.newValue) as SyncMessage;
       if (message.senderTabId === CURRENT_TAB_ID) {
+        return;
+      }
+      if (isDuplicateMessage(message)) {
         return;
       }
       listener(message);

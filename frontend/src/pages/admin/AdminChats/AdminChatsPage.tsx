@@ -106,7 +106,7 @@ export const AdminChatsPage: React.FC = () => {
 
   useEffect(() => {
     if (tickets.length > 0 && !selectedTicketId) {
-      queueMicrotask(() => setSelectedTicketId(tickets[0].id));
+      setSelectedTicketId(tickets[0].id);
     }
   }, [tickets, selectedTicketId]);
 

@@ -47,7 +47,7 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
   const [key, setKey] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const timeoutsRef = useRef<any[]>([]);
+  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const nextIndexRef = useRef(1);
 
   const messages = template.phonePreview.messages || [];
