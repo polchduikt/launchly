@@ -2,7 +2,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
-import { CustomSelect } from '../../../components/ui/CustomSelect';
+import {
+  CreateAutomationModal,
+  EditAutomationModal,
+  MoveAutomationModal,
+  CreateFolderModal,
+  BlockedDetailsModal,
+} from './components';
 import {
   Search,
   FolderPlus,
@@ -16,12 +22,8 @@ import {
   Pencil,
   Play,
   Square,
-  X,
-  AlertCircle,
-  Loader2,
-  ChevronDown,
-  ShieldAlert,
   Lock,
+  Loader2,
 } from 'lucide-react';
 import { useBotStore } from '../../../store/useBotStore';
 import { getAutomationFoldersApi, saveAutomationFoldersApi } from '../../../api/bot';
@@ -156,7 +158,6 @@ export const AutomationsPage: React.FC = () => {
   const [activeMenuBotId, setActiveMenuBotId] = useState<number | null>(null);
   const [menuCoords, setMenuCoords] = useState<{ top: number; left: number } | null>(null);
   const [isNewBotModalOpen, setIsNewBotModalOpen] = useState(false);
-  const [isBotSelectOpen, setIsBotSelectOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
@@ -170,7 +171,6 @@ export const AutomationsPage: React.FC = () => {
   const [editBotDesc, setEditBotDesc] = useState('');
   const [editBotOption, setEditBotOption] = useState<string>('keep');
   const [editBotToken, setEditBotToken] = useState('');
-  const [isEditBotSelectOpen, setIsEditBotSelectOpen] = useState(false);
   const [editBotError, setEditBotError] = useState<string | null>(null);
   const [moveBotId, setMoveBotId] = useState<number | null>(null);
   const [tempFolderId, setTempFolderId] = useState('');
@@ -183,23 +183,6 @@ export const AutomationsPage: React.FC = () => {
     confirmLabel?: string;
     onConfirm: () => void;
   } | null>(null);
-
-  const formatDateShort = (dateStr?: string | null) => {
-    if (!dateStr) return '—';
-    try {
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      const lang = getLanguage();
-      return d.toLocaleDateString(lang === 'uk' ? 'uk-UA' : 'en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    } catch (e) {
-      return dateStr;
-    }
-  };
 
   const translateBlockReason = (reason?: string | null) => {
     if (!reason) return '';
@@ -358,7 +341,6 @@ export const AutomationsPage: React.FC = () => {
           setEditBotDesc('');
           setEditBotOption('keep');
           setEditBotToken('');
-          setIsEditBotSelectOpen(false);
         },
         onError: (err: unknown) => {
           const errMsg =
@@ -934,547 +916,64 @@ export const AutomationsPage: React.FC = () => {
         </div>
       )}
 
-      {isNewBotModalOpen && (
-        <div 
-          onClick={() => setIsNewBotModalOpen(false)}
-          className="fixed inset-0 bg-[#0A0A0A]/40 z-50 flex items-center justify-center p-4 cursor-pointer font-['JetBrains_Mono',monospace]"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] rounded-3xl max-w-md w-full border-2 border-[#0A0A0A] shadow-[8px_8px_0px_0px_#0A0A0A] animate-in fade-in duration-200 cursor-default overflow-hidden"
-          >
-            <div className="p-6 pb-4 border-b-2 border-[#0A0A0A] flex items-center justify-between">
-              <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-[#0A0A0A]">{t('automations.modal.new_automation')}</h3>
-              <button
-                onClick={() => setIsNewBotModalOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <div className="p-6 space-y-4 bg-white">
-              <div>
-                <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
-                  {t('automations.modal.name_label')}
-                </label>
-                <input
-                  type="text"
-                  value={newBotName}
-                  onChange={(e) => setNewBotName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
-                  placeholder={t('automations.modal.name_placeholder')}
-                />
-              </div>
-              <div className="relative">
-                <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
-                  {t('automations.modal.conn_label')}
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setIsBotSelectOpen(!isBotSelectOpen)}
-                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-left cursor-pointer transition-colors"
-                >
-                  <span className="text-[#0A0A0A] font-bold truncate">
-                    {(() => {
-                      if (selectedBotOption === 'nobot') return t('automations.modal.conn_without');
-                      if (selectedBotOption === 'new') return t('automations.modal.conn_new');
-                      const selectedBot = bots.find(b => String(b.id) === selectedBotOption);
-                      if (selectedBot) {
-                        return `${selectedBot.name} ${selectedBot.username ? `@${selectedBot.username}` : ''}`;
-                      }
-                      return t('automations.modal.conn_without');
-                    })()}
-                  </span>
-                  <ChevronDown size={16} className={`text-[#0A0A0A] transition-transform ${isBotSelectOpen ? 'rotate-180' : ''}`} />
-                </button>
+      <CreateAutomationModal
+        isOpen={isNewBotModalOpen}
+        onClose={() => setIsNewBotModalOpen(false)}
+        onSubmit={handleCreateBotSubmit}
+        isPending={createBotMutation.isPending}
+        bots={bots}
+        name={newBotName}
+        setName={setNewBotName}
+        selectedBotOption={selectedBotOption}
+        setSelectedBotOption={setSelectedBotOption}
+        botToken={newBotToken}
+        setBotToken={setNewBotToken}
+        desc={newBotDesc}
+        setDesc={setNewBotDesc}
+        error={newBotError}
+        setError={setNewBotError}
+      />
 
-                {isBotSelectOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setIsBotSelectOpen(false)}
-                    />
-                    <div className="absolute left-0 right-0 mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[6px_6px_0px_0px_#0A0A0A] z-20 max-h-60 overflow-y-auto py-1.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedBotOption('nobot');
-                          setNewBotError(null);
-                          setIsBotSelectOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs uppercase transition-colors flex items-center justify-between ${selectedBotOption === 'nobot' ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black' : 'text-[#0A0A0A] hover:bg-white font-bold'}`}
-                      >
-                        <span>{t('automations.modal.conn_without')}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedBotOption('new');
-                          setNewBotError(null);
-                          setIsBotSelectOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs uppercase transition-colors flex items-center justify-between ${selectedBotOption === 'new' ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black' : 'text-[#0A0A0A] hover:bg-white font-bold'}`}
-                      >
-                        <span>{t('automations.modal.conn_new')}</span>
-                      </button>
+      <EditAutomationModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSubmit={handleEditBot}
+        isPending={updateBotMutation.isPending}
+        bots={bots}
+        editBotId={editBotId}
+        name={editBotName}
+        setName={setEditBotName}
+        option={editBotOption}
+        setOption={setEditBotOption}
+        botToken={editBotToken}
+        setBotToken={setEditBotToken}
+        desc={editBotDesc}
+        setDesc={setEditBotDesc}
+        error={editBotError}
+        setError={setEditBotError}
+      />
 
-                      {(() => {
-                        const existingRealBots = bots.filter((b) => b.username && b.username.trim() !== '');
-                        if (existingRealBots.length === 0) return null;
-                        return (
-                          <>
-                            <div className="border-t-2 border-[#0A0A0A] my-1" />
-                            <div className="px-4 py-1.5 text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">
-                              Use existing bot token
-                            </div>
-                            {existingRealBots.map((b) => (
-                              <button
-                                key={b.id}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedBotOption(String(b.id));
-                                  setNewBotError(null);
-                                  setIsBotSelectOpen(false);
-                                }}
-                                className={`w-full text-left px-4 py-2.5 text-xs uppercase transition-colors flex items-center justify-between ${selectedBotOption === String(b.id) ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black' : 'text-[#0A0A0A] hover:bg-white font-bold'}`}
-                              >
-                                <div className="flex flex-col">
-                                  <span className="font-bold">{b.name}</span>
-                                  {b.username && (
-                                    <span className="text-[10px] opacity-80">@{b.username}</span>
-                                  )}
-                                </div>
-                              </button>
-                            ))}
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </>
-                )}
-              </div>
-              {selectedBotOption === 'new' && (
-                <div className="animate-in slide-in-from-top-1 duration-150">
-                  <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
-                    Telegram Bot Token
-                  </label>
-                  <input
-                    type="text"
-                    value={newBotToken}
-                    onChange={(e) => setNewBotToken(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
-                    placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
-                  />
-                </div>
-              )}
-              <div>
-                <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
-                  Description (Optional)
-                </label>
-                <textarea
-                  value={newBotDesc}
-                  onChange={(e) => setNewBotDesc(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A] min-h-[80px] resize-none"
-                  placeholder="What does this automation do?"
-                />
-              </div>
-              {newBotError && (
-                <p className="text-xs font-bold text-rose-600 flex items-center gap-1">
-                  <AlertCircle size={14} />
-                  <span>{newBotError}</span>
-                </p>
-              )}
-            </div>
-            <div className="p-6 pt-4 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] flex items-center justify-end gap-2">
-              <button
-                onClick={() => setIsNewBotModalOpen(false)}
-                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] dark:text-[#E4E4E7] hover:bg-white dark:hover:bg-[#27272A] border-2 border-transparent hover:border-[#0A0A0A] dark:hover:border-[#3F3F46] rounded-xl transition-all cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateBotSubmit}
-                disabled={createBotMutation.isPending}
-                className="px-4 py-2 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-[#2A2A2A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
-              >
-                {createBotMutation.isPending ? (
-                  <>
-                    <Loader2 size={14} className="animate-spin" />
-                    <span>Creating...</span>
-                  </>
-                ) : (
-                  <span>Create</span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <MoveAutomationModal
+        isOpen={isMoveModalOpen}
+        onClose={() => setIsMoveModalOpen(false)}
+        onSubmit={handleMoveBot}
+        folders={folders}
+        tempFolderId={tempFolderId}
+        setTempFolderId={setTempFolderId}
+      />
 
-      {isEditModalOpen && (
-        <div 
-          onClick={() => setIsEditModalOpen(false)}
-          className="fixed inset-0 bg-[#0A0A0A]/40 z-50 flex items-center justify-center p-4 cursor-pointer font-['JetBrains_Mono',monospace]"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] rounded-3xl max-w-md w-full border-2 border-[#0A0A0A] shadow-[8px_8px_0px_0px_#0A0A0A] animate-in fade-in duration-200 cursor-default overflow-hidden"
-          >
-            <div className="p-6 pb-4 border-b-2 border-[#0A0A0A] flex items-center justify-between">
-              <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-[#0A0A0A]">{t('automations.edit_modal.title')}</h3>
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <div className="p-6 space-y-4 bg-white">
-              <div>
-                <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
-                  {t('automations.edit_modal.name_label')}
-                </label>
-                <input
-                  type="text"
-                  value={editBotName}
-                  onChange={(e) => setEditBotName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
-                  placeholder={t('automations.edit_modal.name_placeholder')}
-                />
-              </div>
-              <div className="relative">
-                <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
-                  {t('automations.edit_modal.bot_connection')}
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setIsEditBotSelectOpen(!isEditBotSelectOpen)}
-                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-left cursor-pointer transition-colors"
-                >
-                  <span className="text-[#0A0A0A] font-bold truncate">
-                    {(() => {
-                      if (editBotOption === 'current') {
-                        const currentBot = bots.find(b => b.id === editBotId);
-                        return currentBot ? `${currentBot.name} ${currentBot.username ? `@${currentBot.username}` : ''}` : t('automations.edit_modal.connected_bot');
-                      }
-                      if (editBotOption === 'nobot') return t('automations.edit_modal.without_bot');
-                      if (editBotOption === 'new') return t('automations.edit_modal.connect_new_bot');
-                      const selectedBot = bots.find(b => String(b.id) === editBotOption);
-                      if (selectedBot) {
-                        return `${selectedBot.name} ${selectedBot.username ? `@${selectedBot.username}` : ''}`;
-                      }
-                      return t('automations.edit_modal.without_bot');
-                    })()}
-                  </span>
-                  <ChevronDown size={16} className={`text-[#0A0A0A] transition-transform ${isEditBotSelectOpen ? 'rotate-180' : ''}`} />
-                </button>
+      <CreateFolderModal
+        isOpen={isNewFolderModalOpen}
+        onClose={() => setIsNewFolderModalOpen(false)}
+        onSubmit={handleCreateFolder}
+        folderName={tempFolderName}
+        setFolderName={setTempFolderName}
+      />
 
-                {isEditBotSelectOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setIsEditBotSelectOpen(false)}
-                    />
-                    <div className="absolute left-0 right-0 mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[6px_6px_0px_0px_#0A0A0A] z-20 max-h-60 overflow-y-auto py-1.5">
-                      {(() => {
-                        const currentBot = bots.find((b) => b.id === editBotId);
-                        if (currentBot && currentBot.username) {
-                          return (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setEditBotOption('current');
-                                setEditBotError(null);
-                                setIsEditBotSelectOpen(false);
-                              }}
-                              className={`w-full text-left px-4 py-2.5 text-xs uppercase transition-colors flex items-center justify-between ${editBotOption === 'current' ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black' : 'text-[#0A0A0A] hover:bg-white font-bold'}`}
-                            >
-                              <span>{currentBot.name} @{currentBot.username}</span>
-                            </button>
-                          );
-                        }
-                        return null;
-                      })()}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditBotOption('nobot');
-                          setEditBotError(null);
-                          setIsEditBotSelectOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs uppercase transition-colors flex items-center justify-between ${editBotOption === 'nobot' ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black' : 'text-[#0A0A0A] hover:bg-white font-bold'}`}
-                      >
-                        <span>{t('automations.edit_modal.without_bot')}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditBotOption('new');
-                          setEditBotError(null);
-                          setIsEditBotSelectOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs uppercase transition-colors flex items-center justify-between ${editBotOption === 'new' ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black' : 'text-[#0A0A0A] hover:bg-white font-bold'}`}
-                      >
-                        <span>{t('automations.edit_modal.connect_new_bot')}</span>
-                      </button>
-
-                      {(() => {
-                        const existingRealBots = bots.filter((b) => b.id !== editBotId && b.username);
-                        if (existingRealBots.length === 0) return null;
-                        return (
-                          <>
-                            <div className="border-t-2 border-[#0A0A0A] my-1" />
-                            <div className="px-4 py-1.5 text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">
-                              {t('automations.edit_modal.use_existing_token')}
-                            </div>
-                            {existingRealBots.map((b) => (
-                              <button
-                                key={b.id}
-                                type="button"
-                                onClick={() => {
-                                  setEditBotOption(String(b.id));
-                                  setEditBotError(null);
-                                  setIsEditBotSelectOpen(false);
-                                }}
-                                className={`w-full text-left px-4 py-2.5 text-xs uppercase transition-colors flex items-center justify-between ${editBotOption === String(b.id) ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black' : 'text-[#0A0A0A] hover:bg-white font-bold'}`}
-                              >
-                                <div className="flex flex-col">
-                                  <span className="font-bold">{b.name}</span>
-                                  {b.username && (
-                                    <span className="text-[10px] opacity-80">@{b.username}</span>
-                                  )}
-                                </div>
-                              </button>
-                            ))}
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </>
-                )}
-              </div>
-              {editBotOption === 'new' && (
-                <div className="animate-in slide-in-from-top-1 duration-150">
-                  <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
-                    {t('automations.edit_modal.bot_token')}
-                  </label>
-                  <input
-                    type="text"
-                    value={editBotToken}
-                    onChange={(e) => setEditBotToken(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
-                    placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
-                  />
-                </div>
-              )}
-              <div>
-                <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
-                  {t('automations.edit_modal.desc_label')}
-                </label>
-                <textarea
-                  value={editBotDesc}
-                  onChange={(e) => setEditBotDesc(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A] min-h-[80px] resize-none"
-                  placeholder={t('automations.edit_modal.desc_placeholder')}
-                />
-              </div>
-              {editBotError && (
-                <p className="text-xs font-bold text-rose-600 flex items-center gap-1">
-                  <AlertCircle size={14} />
-                  <span>{editBotError}</span>
-                </p>
-              )}
-            </div>
-            <div className="p-6 pt-4 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] flex items-center justify-end gap-2">
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] dark:text-[#E4E4E7] hover:bg-white dark:hover:bg-[#27272A] border-2 border-transparent hover:border-[#0A0A0A] dark:hover:border-[#3F3F46] rounded-xl transition-all cursor-pointer"
-              >
-                {t('automations.edit_modal.cancel')}
-              </button>
-              <button
-                onClick={handleEditBot}
-                disabled={updateBotMutation.isPending}
-                className="px-4 py-2 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-[#2A2A2A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
-              >
-                {updateBotMutation.isPending ? (
-                  <>
-                    <Loader2 size={14} className="animate-spin" />
-                    <span>{t('automations.edit_modal.saving')}</span>
-                  </>
-                ) : (
-                  <span>{t('automations.edit_modal.save')}</span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isMoveModalOpen && (
-        <div 
-          onClick={() => setIsMoveModalOpen(false)}
-          className="fixed inset-0 bg-[#0A0A0A]/40 z-50 flex items-center justify-center p-4 cursor-pointer font-['JetBrains_Mono',monospace]"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] rounded-3xl max-w-sm w-full border-2 border-[#0A0A0A] shadow-[8px_8px_0px_0px_#0A0A0A] overflow-hidden animate-in fade-in duration-200 cursor-default"
-          >
-            <div className="p-6 pb-4 border-b-2 border-[#0A0A0A] flex items-center justify-between">
-              <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-[#0A0A0A]">{t('automations.move_modal.title')}</h3>
-              <button
-                onClick={() => setIsMoveModalOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <div className="p-6 space-y-4 bg-white">
-              <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider">{t('automations.move_modal.select_folder')}</label>
-              <CustomSelect
-                value={tempFolderId}
-                onChange={(val) => setTempFolderId(val)}
-                options={[
-                  { value: '', label: t('automations.move_modal.no_folder') },
-                  ...folders.map((f) => ({ value: String(f.id), label: f.name })),
-                ]}
-              />
-            </div>
-            <div className="p-6 pt-4 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] flex items-center justify-end gap-2">
-              <button
-                onClick={() => setIsMoveModalOpen(false)}
-                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] dark:text-[#E4E4E7] hover:bg-white dark:hover:bg-[#27272A] border-2 border-transparent hover:border-[#0A0A0A] dark:hover:border-[#3F3F46] rounded-xl transition-all cursor-pointer"
-              >
-                {t('automations.move_modal.cancel')}
-              </button>
-              <button
-                onClick={handleMoveBot}
-                className="px-4 py-2 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-[#2A2A2A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
-              >
-                {t('automations.move_modal.save')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isNewFolderModalOpen && (
-        <div 
-          onClick={() => setIsNewFolderModalOpen(false)}
-          className="fixed inset-0 bg-[#0A0A0A]/40 z-50 flex items-center justify-center p-4 cursor-pointer font-['JetBrains_Mono',monospace]"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] rounded-3xl max-w-sm w-full border-2 border-[#0A0A0A] shadow-[8px_8px_0px_0px_#0A0A0A] overflow-hidden animate-in fade-in duration-200 cursor-default"
-          >
-            <div className="p-6 pb-4 border-b-2 border-[#0A0A0A] flex items-center justify-between">
-              <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-[#0A0A0A]">{t('automations.folder.create_title')}</h3>
-              <button
-                onClick={() => setIsNewFolderModalOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <div className="p-6 space-y-4 bg-white">
-              <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider">{t('automations.folder.name_label')}</label>
-              <input
-                type="text"
-                value={tempFolderName}
-                onChange={(e) => setTempFolderName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
-                placeholder={t('automations.folder.placeholder')}
-              />
-            </div>
-            <div className="p-6 pt-4 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] flex items-center justify-end gap-2">
-              <button
-                onClick={() => setIsNewFolderModalOpen(false)}
-                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] dark:text-[#E4E4E7] hover:bg-white dark:hover:bg-[#27272A] border-2 border-transparent hover:border-[#0A0A0A] dark:hover:border-[#3F3F46] rounded-xl transition-all cursor-pointer"
-              >
-                {t('automations.folder.cancel')}
-              </button>
-              <button
-                onClick={handleCreateFolder}
-                className="px-4 py-2 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-[#2A2A2A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
-              >
-                {t('automations.folder.create')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {blockedDetailsBot && (
-        <div
-          onClick={() => setBlockedDetailsBot(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-150 select-none font-['JetBrains_Mono',monospace]"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-md p-6 space-y-5 animate-in zoom-in-95 duration-200"
-          >
-            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-2xl bg-rose-100 border-2 border-[#0A0A0A] flex items-center justify-center text-rose-600 font-bold shrink-0">
-                  <ShieldAlert size={20} />
-                </div>
-                <div>
-                  <h3 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase leading-snug">
-                    {t('automations.blocked_modal_title') !== 'automations.blocked_modal_title' ? t('automations.blocked_modal_title') : 'Автоматизація заблокована'}
-                  </h3>
-                  <p className="text-xs text-slate-700 font-bold">
-                    {blockedDetailsBot.name}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setBlockedDetailsBot(null)}
-                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <p className="text-xs text-slate-800 font-bold leading-relaxed">
-                {t('automations.blocked_modal_desc') !== 'automations.blocked_modal_desc' ? t('automations.blocked_modal_desc') : 'Ця автоматизація заблокована адміністрацією платформи і недоступна для запуску або редагування.'}
-              </p>
-
-              <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-4 space-y-2.5">
-                <div className="flex items-start justify-between text-xs">
-                  <span className="text-slate-700 font-bold">
-                    {t('broadcast.blocked_modal_reason')}
-                  </span>
-                  <span className="font-black text-[#0A0A0A] text-right max-w-[200px]">
-                    {translateBlockReason(blockedDetailsBot.blockReason)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs border-t-2 border-[#0A0A0A] pt-2">
-                  <span className="text-slate-700 font-bold">
-                    {t('broadcast.blocked_modal_date')}
-                  </span>
-                  <span className="font-black text-[#0A0A0A]">
-                    {formatDateShort(blockedDetailsBot.blockedAt || blockedDetailsBot.updatedAt)}
-                  </span>
-                </div>
-              </div>
-
-              <p className="text-[11px] text-slate-700 font-bold leading-relaxed italic">
-                {t('automations.blocked_modal_support')}
-              </p>
-            </div>
-
-            <div className="pt-2 border-t-2 border-[#0A0A0A] flex justify-end">
-              <button
-                onClick={() => setBlockedDetailsBot(null)}
-                className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] font-black text-xs uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
-              >
-                {t('broadcast.blocked_modal_close')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <BlockedDetailsModal
+        bot={blockedDetailsBot}
+        onClose={() => setBlockedDetailsBot(null)}
+      />
     </DashboardLayout>
   );
 };

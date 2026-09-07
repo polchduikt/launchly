@@ -23,23 +23,58 @@ interface NodeEditorPanelProps {
   onSelectNode?: (nodeId: string | null) => void;
 }
 
-export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({ 
-  node, 
-  onUpdateNodeData, 
-  editorState: passedEditorState,
-  onSelectNode 
-}) => {
-  const localEditorState = useNodeEditor(node, onUpdateNodeData);
-  const editorState = passedEditorState || localEditorState;
-  const { data, handleChange } = editorState;
+type NodeEditorComponent = React.FC<{
+  node: Node;
+  data: Record<string, unknown>;
+  handleChange: (keyOrUpdates: string | Record<string, unknown>, value?: unknown) => void;
+  editorState: ReturnType<typeof useNodeEditor>;
+  onSelectNode?: (nodeId: string | null) => void;
+}>;
 
-  if (!node) {
-    return (
-      <div className="h-full flex items-center justify-center text-slate-400 text-xs font-semibold select-none text-center p-8">
-        {t('flow_builder.empty_canvas')}
-      </div>
-    );
-  }
+const NODE_EDITORS: Record<string, NodeEditorComponent> = {
+  START: () => <StartNodeEditor />,
+  MESSAGE: ({ node, editorState, onSelectNode }) => (
+    <MessageNodeEditor nodeId={node.id} editorState={editorState} onSelectNode={onSelectNode} />
+  ),
+  CONDITION: ({ data, handleChange, editorState }) => (
+    <ConditionNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
+  ),
+  API_CALL: ({ data, handleChange }) => (
+    <ApiCallNodeEditor data={data} handleChange={handleChange} />
+  ),
+  ACTION: ({ data, handleChange, editorState }) => (
+    <ActionNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
+  ),
+  SMART_DELAY: ({ data, handleChange, editorState }) => (
+    <SmartDelayNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
+  ),
+  RANDOMIZER: ({ node, data, handleChange, editorState }) => (
+    <RandomizerNodeEditor nodeId={node.id} data={data} handleChange={handleChange} editorState={editorState} />
+  ),
+  COMMENT: ({ data, handleChange }) => (
+    <CommentNodeEditor data={data} handleChange={handleChange} />
+  ),
+  START_AUTOMATION: ({ node, data, handleChange, editorState }) => (
+    <StartAutomationNodeEditor node={node} data={data} handleChange={handleChange} editorState={editorState} />
+  ),
+  AI: ({ data, handleChange, editorState }) => (
+    <AiNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
+  ),
+  END: () => <EndNodeEditor />,
+};
+
+interface NodeEditorPanelContentProps {
+  node: Node;
+  editorState: ReturnType<typeof useNodeEditor>;
+  onSelectNode?: (nodeId: string | null) => void;
+}
+
+const NodeEditorPanelContent: React.FC<NodeEditorPanelContentProps> = ({
+  node,
+  editorState,
+  onSelectNode,
+}) => {
+  const { data, handleChange } = editorState;
 
   const renderIcon = () => {
     return NODE_ICONS[node.type || ''] || null;
@@ -52,41 +87,7 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
     return NODE_TITLES[node.type || ''] || 'Node Settings';
   };
 
-  const renderEditor = () => {
-    switch (node.type) {
-      case 'START':
-        return <StartNodeEditor />;
-      case 'MESSAGE':
-        return (
-          <MessageNodeEditor
-            nodeId={node.id}
-            editorState={editorState}
-            onSelectNode={onSelectNode}
-          />
-        );
-      case 'CONDITION':
-        return <ConditionNodeEditor data={data} handleChange={handleChange} editorState={editorState} />;
-      case 'API_CALL':
-        return <ApiCallNodeEditor data={data} handleChange={handleChange} />;
-      case 'ACTION':
-        return <ActionNodeEditor data={data} handleChange={handleChange} editorState={editorState} />;
-      case 'SMART_DELAY':
-        return <SmartDelayNodeEditor data={data} handleChange={handleChange} editorState={editorState} />;
-      case 'RANDOMIZER':
-        return <RandomizerNodeEditor nodeId={node.id} data={data} handleChange={handleChange} editorState={editorState} />;
-      case 'COMMENT':
-        return <CommentNodeEditor data={data} handleChange={handleChange} />;
-      case 'START_AUTOMATION':
-        return <StartAutomationNodeEditor node={node} data={data} handleChange={handleChange} editorState={editorState} />;
-      case 'AI':
-        return <AiNodeEditor data={data} handleChange={handleChange} editorState={editorState} />;
-      case 'END':
-        return <EndNodeEditor />;
-      default:
-        return null;
-    }
-  };
-
+  const EditorComponent = node.type ? NODE_EDITORS[node.type] : null;
 
   return (
     <div className="h-full overflow-y-auto p-5 pb-24 font-['JetBrains_Mono',monospace] flex flex-col custom-scrollbar bg-[#F2EBDD] text-[#0A0A0A]">
@@ -108,9 +109,65 @@ export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({
         </div>
 
         <div className="flex-1 flex flex-col min-h-0">
-          {renderEditor()}
+          {EditorComponent ? (
+            <EditorComponent
+              node={node}
+              data={data}
+              handleChange={handleChange}
+              editorState={editorState}
+              onSelectNode={onSelectNode}
+            />
+          ) : null}
         </div>
       </div>
     </div>
+  );
+};
+
+const NodeEditorPanelWithLocalState: React.FC<{
+  node: Node;
+  onUpdateNodeData: (nodeId: string, newData: Record<string, unknown>) => void;
+  onSelectNode?: (nodeId: string | null) => void;
+}> = ({ node, onUpdateNodeData, onSelectNode }) => {
+  const editorState = useNodeEditor(node, onUpdateNodeData);
+  return (
+    <NodeEditorPanelContent
+      node={node}
+      editorState={editorState}
+      onSelectNode={onSelectNode}
+    />
+  );
+};
+
+export const NodeEditorPanel: React.FC<NodeEditorPanelProps> = ({ 
+  node, 
+  onUpdateNodeData, 
+  editorState: passedEditorState,
+  onSelectNode 
+}) => {
+  if (!node) {
+    return (
+      <div className="h-full flex items-center justify-center text-slate-400 text-xs font-semibold select-none text-center p-8">
+        {t('flow_builder.empty_canvas')}
+      </div>
+    );
+  }
+
+  if (passedEditorState) {
+    return (
+      <NodeEditorPanelContent
+        node={node}
+        editorState={passedEditorState}
+        onSelectNode={onSelectNode}
+      />
+    );
+  }
+
+  return (
+    <NodeEditorPanelWithLocalState
+      node={node}
+      onUpdateNodeData={onUpdateNodeData}
+      onSelectNode={onSelectNode}
+    />
   );
 };
