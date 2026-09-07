@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { t } from '../../../i18n/config';
+import { ErrorBoundary } from '../../../components/common/ErrorBoundary';
 import { ReactFlow, Controls, Background, ReactFlowProvider, getBezierPath, getSmoothStepPath, ConnectionLineType } from '@xyflow/react';
 import type { ConnectionLineComponentProps, Edge, Node, OnNodeDrag } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -946,7 +947,13 @@ export const FlowBuilderPage: React.FC = () => {
   return (
     <ReactFlowProvider>
       <ControlsStyles />
-      <FlowBuilderInner />
+      <ErrorBoundary
+        inline
+        fallbackTitle="Flow Builder Canvas Error"
+        fallbackDescription="An unexpected error occurred in the visual builder canvas. Click below to retry rendering."
+      >
+        <FlowBuilderInner />
+      </ErrorBoundary>
     </ReactFlowProvider>
   );
 };

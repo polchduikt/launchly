@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '../../i18n/config';
 import { isValidAvatarUrl, getInitials } from '../../utils/avatar';
+import { ErrorBoundary } from '../common/ErrorBoundary';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -241,7 +242,13 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
         </header>
 
         <main className={`flex-1 overflow-y-auto bg-[#F2EBDD] text-[#0A0A0A] ${noPadding ? 'p-0 flex h-full min-h-0 overflow-hidden' : 'p-8'}`}>
-          {children}
+          <ErrorBoundary
+            inline
+            fallbackTitle="Admin View Error"
+            fallbackDescription="An unexpected error occurred in this view. Click retry to attempt reloading."
+          >
+            {children}
+          </ErrorBoundary>
         </main>
       </div>
     </div>

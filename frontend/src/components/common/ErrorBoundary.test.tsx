@@ -35,4 +35,43 @@ describe('ErrorBoundary Component', () => {
 
     spy.mockRestore();
   });
+
+  it('renders inline fallback card with custom title and retry button', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const onResetMock = vi.fn();
+
+    render(
+      <ErrorBoundary
+        inline
+        fallbackTitle="Custom Panel Error"
+        fallbackDescription="Specific component failed"
+        onReset={onResetMock}
+      >
+        <ProblemChild shouldThrow={true} />
+      </ErrorBoundary>
+    );
+
+    expect(screen.getByText('Custom Panel Error')).toBeInTheDocument();
+    expect(screen.getByText('Specific component failed')).toBeInTheDocument();
+    expect(screen.getByText('Retry')).toBeInTheDocument();
+
+    screen.getByText('Retry').click();
+    expect(onResetMock).toHaveBeenCalledTimes(1);
+
+    spy.mockRestore();
+  });
+
+  it('renders functional fallback if provided', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(
+      <ErrorBoundary fallback={(err) => <div>Custom Function: {err.message}</div>}>
+        <ProblemChild shouldThrow={true} />
+      </ErrorBoundary>
+    );
+
+    expect(screen.getByText('Custom Function: Simulated UI rendering crash')).toBeInTheDocument();
+
+    spy.mockRestore();
+  });
 });
