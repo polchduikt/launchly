@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useClickOutside } from '../../../hooks/useClickOutside';
+import { useDebounce } from '../../../hooks/useDebounce';
 import { formatAuditTitle, formatAuditDescription } from '../../../utils/auditFormatters';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -40,6 +41,7 @@ export const AdminUsersPage: React.FC = () => {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN';
 
   const [search, setSearch] = useState(initialSearch);
+  const debouncedSearch = useDebounce(search, 300);
   const [roleFilter, setRoleFilter] = useState('');
   const [planFilter, setPlanFilter] = useState('');
   const [sortFilter, setSortFilter] = useState<'desc' | 'asc'>('desc');
@@ -62,8 +64,8 @@ export const AdminUsersPage: React.FC = () => {
   useClickOutside(bulkActionDropdownRef, () => setIsBulkActionOpen(false), isBulkActionOpen);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['adminUsers', search, roleFilter, planFilter, sortFilter, page],
-    queryFn: () => fetchAdminUsersApi(search, roleFilter, planFilter, sortFilter, page, 30),
+    queryKey: ['adminUsers', debouncedSearch, roleFilter, planFilter, sortFilter, page],
+    queryFn: () => fetchAdminUsersApi(debouncedSearch, roleFilter, planFilter, sortFilter, page, 30),
   });
 
   const allUserIdsOnPage = data?.content?.map((u: AdminUser) => u.id) || [];

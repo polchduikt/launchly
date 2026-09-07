@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useClickOutside } from '../../../hooks/useClickOutside';
+import { useDebounce } from '../../../hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAdminLogsApi } from '../../../api/admin';
 import { AdminLayout } from '../../../components/layout/AdminLayout';
@@ -13,7 +14,7 @@ import { TableSkeleton } from '../../../components/common/Skeleton';
 
 export const AdminLogsPage: React.FC = () => {
   const { t } = useTranslation();
-  const { user: currentUser } = useAuthStore();
+  const currentUser = useAuthStore((state) => state.user);
 
   const [levelFilter, setLevelFilter] = useState<string>('all');
   const [serviceFilter, setServiceFilter] = useState<string>('all');
@@ -21,7 +22,7 @@ export const AdminLogsPage: React.FC = () => {
   const [endDate, setEndDate] = useState<string>('');
   const [sortFilter, setSortFilter] = useState<'desc' | 'asc'>('desc');
   const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const [page, setPage] = useState(0);
 
   const [isLevelDropdownOpen, setIsLevelDropdownOpen] = useState(false);
@@ -32,12 +33,8 @@ export const AdminLogsPage: React.FC = () => {
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(0);
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [search]);
+    setPage(0);
+  }, [debouncedSearch]);
 
   useClickOutside(levelDropdownRef, () => setIsLevelDropdownOpen(false), isLevelDropdownOpen);
   useClickOutside(serviceDropdownRef, () => setIsServiceDropdownOpen(false), isServiceDropdownOpen);

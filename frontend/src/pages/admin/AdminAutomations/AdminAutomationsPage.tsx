@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useClickOutside } from '../../../hooks/useClickOutside';
+import { useDebounce } from '../../../hooks/useDebounce';
 import { formatAuditTitle, formatAuditDescription } from '../../../utils/auditFormatters';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -22,6 +23,7 @@ export const AdminAutomationsPage: React.FC = () => {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN';
 
   const [search, setSearch] = useState(initialSearch);
+  const debouncedSearch = useDebounce(search, 300);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sortFilter, setSortFilter] = useState<'desc' | 'asc'>('desc');
   const [page, setPage] = useState(0);
@@ -58,8 +60,8 @@ export const AdminAutomationsPage: React.FC = () => {
   useClickOutside(bulkActionDropdownRef, () => setIsBulkActionOpen(false), isBulkActionOpen);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['adminAutomations', search, statusFilter, sortFilter, page],
-    queryFn: () => fetchAdminAutomationsApi(search, statusFilter, sortFilter, page, 30),
+    queryKey: ['adminAutomations', debouncedSearch, statusFilter, sortFilter, page],
+    queryFn: () => fetchAdminAutomationsApi(debouncedSearch, statusFilter, sortFilter, page, 30),
   });
 
   const automations = data?.content || [];

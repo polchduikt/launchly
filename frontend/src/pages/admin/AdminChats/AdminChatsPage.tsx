@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useDebounce } from '../../../hooks/useDebounce';
 import { formatAuditTitle, formatAuditDescription } from '../../../utils/auditFormatters';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AdminLayout } from '../../../components/layout/AdminLayout';
@@ -65,6 +66,7 @@ export const AdminChatsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'unread' | 'favorites' | 'active' | 'completed' | 'resolved'>('all');
   const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'today' | 'yesterday' | 'week' | 'month'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
@@ -78,8 +80,8 @@ export const AdminChatsPage: React.FC = () => {
   const [activityPage, setActivityPage] = useState(0);
 
   const { data: ticketsData, isLoading: isTicketsLoading } = useQuery({
-    queryKey: ['adminSupportTickets', activeTab, selectedPeriod, searchQuery],
-    queryFn: () => fetchAdminSupportTicketsApi(activeTab, selectedPeriod, searchQuery, 0, 50),
+    queryKey: ['adminSupportTickets', activeTab, selectedPeriod, debouncedSearchQuery],
+    queryFn: () => fetchAdminSupportTicketsApi(activeTab, selectedPeriod, debouncedSearchQuery, 0, 50),
     refetchInterval: 5000,
   });
 

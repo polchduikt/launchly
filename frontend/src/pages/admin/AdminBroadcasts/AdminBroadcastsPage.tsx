@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useClickOutside } from '../../../hooks/useClickOutside';
+import { useDebounce } from '../../../hooks/useDebounce';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -42,7 +43,7 @@ export const AdminBroadcastsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [statusFilter, setStatusFilter] = useState<string>(searchParams.get('status') || 'all');
   const [sortFilter, setSortFilter] = useState<'desc' | 'asc'>('desc');
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
@@ -72,12 +73,8 @@ export const AdminBroadcastsPage: React.FC = () => {
   const [customBlockReason, setCustomBlockReason] = useState<string>('');
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-      setPage(0);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+    setPage(0);
+  }, [debouncedSearch]);
 
   useEffect(() => {
     const params: Record<string, string> = {};

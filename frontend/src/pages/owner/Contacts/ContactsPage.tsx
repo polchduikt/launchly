@@ -29,6 +29,7 @@ import { ContactDetailModal } from '../Chat/components/ContactDetailModal';
 import { CreateContactModal } from '../Chat/components/CreateContactModal';
 import { ContactsFilterBuilder } from '../Chat/components/ContactsFilterBuilder';
 import type { BotUserMetadata, FilterCondition } from '../../../types/crm';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 import { useTranslation } from '../../../i18n/config';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
@@ -50,6 +51,7 @@ export const ContactsPage: React.FC = () => {
   const createBotUserMut = useCreateBotUserMutation(botId);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 250);
   const [selectedContactIds, setSelectedContactIds] = useState<Set<number>>(new Set());
   const [selectedContact, setSelectedContact] = useState<BotUserResponse | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -118,7 +120,7 @@ export const ContactsPage: React.FC = () => {
       }
       const fullname = `${c.firstName || ''} ${c.lastName || ''}`.toLowerCase();
       const username = (c.username || '').toLowerCase();
-      const q = searchQuery.toLowerCase().trim();
+      const q = debouncedSearchQuery.toLowerCase().trim();
       const matchesSearch = fullname.includes(q) || username.includes(q) || String(c.telegramId).includes(q);
       if (!matchesSearch) return false;
       if (conditions.length === 0) return true;
@@ -251,7 +253,7 @@ export const ContactsPage: React.FC = () => {
         }
       } else if (actionType === 'clear-field') {
         const fields = { ...(meta.customFields || {}) };
-        delete (fields as Record<string, any>)[actionValue];
+        delete (fields as Record<string, unknown>)[actionValue];
         updatedMeta.customFields = { ...fields };
       }
 
