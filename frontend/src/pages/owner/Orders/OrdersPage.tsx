@@ -50,7 +50,7 @@ export const OrdersPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-4rem)] flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
+      <div className="min-h-full h-full flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
 
         <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
           <div>

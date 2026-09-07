@@ -276,7 +276,7 @@ export const ContactsPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-4rem)] flex bg-[#F2EBDD] font-['Geist',sans-serif]">
+      <div className="min-h-full h-full flex bg-[#F2EBDD] font-['Geist',sans-serif]">
         <main className="flex-1 flex flex-col min-w-0 bg-[#F2EBDD] overflow-hidden">
           
           <ContactsHeader
