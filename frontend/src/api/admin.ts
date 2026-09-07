@@ -6,6 +6,16 @@ export interface PlanDistribution {
   color: string;
 }
 
+export interface UserGrowthPoint {
+  date: string;
+  registeredCount: number;
+  activeCount: number;
+  clientsCount: number;
+  botsCount: number;
+  automationsCount: number;
+  messagesCount: number;
+}
+
 export interface AdminStats {
   totalUsers: number;
   totalOwners: number;
@@ -22,15 +32,7 @@ export interface AdminStats {
   totalMessagesSentChange: string;
   systemUptimeSeconds: number;
   activeManagers: number;
-  userGrowth: {
-    date: string;
-    registeredCount: number;
-    activeCount: number;
-    clientsCount: number;
-    botsCount: number;
-    automationsCount: number;
-    messagesCount: number;
-  }[];
+  userGrowth: UserGrowthPoint[];
   botActivity: { date: string; messagesCount: number }[];
   mrr: number;
   mrrChange: string;
@@ -521,6 +523,7 @@ export interface UserAutomationSummary {
   active: boolean;
   triggerCount: number;
   triggerType: string;
+  updatedAt?: string;
 }
 
 export interface UserBroadcastSummary {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useClickOutside } from '../../../hooks/useClickOutside';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { fetchAdminStatsApi } from '../../../api/admin';
+import type { UserGrowthPoint } from '../../../api/admin';
 import { AdminLayout } from '../../../components/layout/AdminLayout';
 import {
   Users,
@@ -259,7 +260,14 @@ export const AdminStatsPage: React.FC = () => {
     }
   };
 
-  const metricConfigs = [
+  interface MetricConfig {
+    key: string;
+    label: string;
+    color: string;
+    valueKey: keyof Omit<UserGrowthPoint, 'date'>;
+  }
+
+  const metricConfigs: MetricConfig[] = [
     { key: 'owners', label: t('admin.site_owners') || 'Власники', color: '#6366f1', valueKey: 'registeredCount' },
     { key: 'activeOwners', label: t('admin.active_owners') || 'Активні Власники', color: '#10b981', valueKey: 'activeCount' },
     { key: 'clients', label: t('admin.bot_clients') || 'Клієнти', color: '#0ea5e9', valueKey: 'clientsCount' },
@@ -279,7 +287,7 @@ export const AdminStatsPage: React.FC = () => {
     const activeConfigs = metricConfigs.filter(cfg => visibleMetrics[cfg.key]);
 
     const maxVal = Math.max(
-      ...rawGrowth.map((g: any) => {
+      ...rawGrowth.map((g: UserGrowthPoint) => {
         const vals = activeConfigs.map(cfg => g[cfg.valueKey] || 0);
         return vals.length > 0 ? Math.max(...vals, 5) : 5;
       })
@@ -322,7 +330,7 @@ export const AdminStatsPage: React.FC = () => {
 
       if (!visibleMetrics[cfg.key]) return { linePath, fillPath, cfg };
 
-      rawGrowth.forEach((d: any, idx: number) => {
+      rawGrowth.forEach((d: UserGrowthPoint, idx: number) => {
         const x = getX(idx);
         const val = d[cfg.valueKey] ?? 0;
         const y = getY(val);
@@ -334,7 +342,7 @@ export const AdminStatsPage: React.FC = () => {
           const prevX = getX(idx - 1);
           const cpX1 = prevX + (x - prevX) / 2;
           const cpX2 = cpX1;
-          const prevVal = (rawGrowth[idx - 1] as any)[cfg.valueKey] ?? 0;
+          const prevVal = rawGrowth[idx - 1][cfg.valueKey] ?? 0;
           const prevY = getY(prevVal);
 
           linePath += ` C ${cpX1} ${prevY}, ${cpX2} ${y}, ${x} ${y}`;
@@ -427,14 +435,14 @@ export const AdminStatsPage: React.FC = () => {
             />
           )}
 
-          {rawGrowth.map((d: unknown, idx: number) => {
+          {rawGrowth.map((d: UserGrowthPoint, idx: number) => {
             const x = getX(idx);
             const isHovered = idx === hoveredIdx;
 
             return (
               <g key={idx}>
                 {activeConfigs.map(cfg => {
-                  const val = (d as any)[cfg.valueKey] ?? 0;
+                  const val = d[cfg.valueKey] ?? 0;
                   const y = getY(val);
                   return (
                     <circle
@@ -514,7 +522,7 @@ export const AdminStatsPage: React.FC = () => {
                   {cfg.label}
                 </span>
                 <span className="font-extrabold text-white">
-                  {(rawGrowth[hoveredIdx] as any)[cfg.valueKey] ?? 0}
+                  {hoveredIdx !== null && rawGrowth[hoveredIdx] ? rawGrowth[hoveredIdx][cfg.valueKey] ?? 0 : 0}
                 </span>
               </div>
             ))}

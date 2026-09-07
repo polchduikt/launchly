@@ -714,16 +714,18 @@ export const AdminAutomationsPage: React.FC = () => {
                     <Calendar size={13} />
                     {t('admin.period_label')}
                   </span>
-                  {[
-                    { id: 'week', label: t('admin.7_days') },
-                    { id: 'month', label: t('admin.30_days') },
-                    { id: '3months', label: t('admin.90_days') },
-                    { id: 'all', label: t('admin.all_time') }
-                  ].map((p) => (
+                  {(
+                    [
+                      { id: 'week', label: t('admin.7_days') },
+                      { id: 'month', label: t('admin.30_days') },
+                      { id: '3months', label: t('admin.90_days') },
+                      { id: 'all', label: t('admin.all_time') }
+                    ] as const
+                  ).map((p) => (
                     <button
                       key={p.id}
                       onClick={() => {
-                        setDetailPeriod(p.id as any);
+                        setDetailPeriod(p.id);
                         setActivityPage(0);
                       }}
                       className={`px-2.5 py-1 rounded-lg text-xs font-black uppercase transition cursor-pointer ${

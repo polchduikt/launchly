@@ -57,10 +57,10 @@ export const getFlowLogicKey = (nodes: Node[], edges: Edge[]): string => {
   const reachableEdges = edges.filter(e => reachableNodeIds.has(e.source) && reachableNodeIds.has(e.target));
 
   const cleanNodes = reachableNodes.map(({ id, type, data }) => {
-    const cleanData = { ...data };
-    delete (cleanData as any)._collaborator;
-    delete (cleanData as any)._tempSourceHandle;
-    delete (cleanData as any)._selected;
+    const cleanData: Record<string, unknown> = { ...data };
+    delete cleanData._collaborator;
+    delete cleanData._tempSourceHandle;
+    delete cleanData._selected;
     return {
       id,
       type,

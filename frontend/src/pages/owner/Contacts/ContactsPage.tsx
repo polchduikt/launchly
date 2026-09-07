@@ -122,7 +122,7 @@ export const ContactsPage: React.FC = () => {
       const matchesSearch = fullname.includes(q) || username.includes(q) || String(c.telegramId).includes(q);
       if (!matchesSearch) return false;
       if (conditions.length === 0) return true;
-      let meta: Record<string, unknown> = {};
+      let meta: BotUserMetadata = {};
       try {
         meta = c.metadata ? JSON.parse(c.metadata) : {};
       } catch {}
@@ -154,9 +154,9 @@ export const ContactsPage: React.FC = () => {
         } else if (cond.field === 'fullName') {
           fieldVal = `${c.firstName || ''} ${c.lastName || ''}`;
         } else if (cond.field === 'email') {
-          fieldVal = meta.email || (meta as any).customFields?.Email || (meta as any).customFields?.email || '';
+          fieldVal = meta.email || (meta.customFields?.Email ? String(meta.customFields.Email) : '') || (meta.customFields?.email ? String(meta.customFields.email) : '') || '';
         } else if (cond.field === 'phone') {
-          fieldVal = meta.phone || (meta as any).customFields?.Phone || (meta as any).customFields?.phone || '';
+          fieldVal = meta.phone || (meta.customFields?.Phone ? String(meta.customFields.Phone) : '') || (meta.customFields?.phone ? String(meta.customFields.phone) : '') || '';
         } else if (cond.field === 'id') {
           fieldVal = String(c.id);
         } else if (cond.field === 'telegramUserId') {
@@ -167,7 +167,7 @@ export const ContactsPage: React.FC = () => {
           fieldVal = c.createdAt ? c.createdAt.split('T')[0] : '';
         } else if (cond.field.startsWith('custom:')) {
           const customKey = cond.field.substring(7);
-          fieldVal = (meta as any).customFields?.[customKey] || '';
+          fieldVal = meta.customFields?.[customKey] !== undefined ? String(meta.customFields[customKey]) : '';
         }
 
         const condVal = cond.value || '';

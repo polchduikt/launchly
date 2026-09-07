@@ -22,7 +22,7 @@ export const TagsSettingsPanel: React.FC = () => {
 
   const [folders, setFolders] = useState<TagFolder[]>([]);
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
-  const [tagFolderMap, setTagFolderMap] = useState<Record<number, string>>({});
+  const [tagFolderMap, setTagFolderMap] = useState<Record<string | number, string>>({});
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMenuTag, setActiveMenuTag] = useState<number | string | null>(null);
@@ -68,7 +68,7 @@ export const TagsSettingsPanel: React.FC = () => {
     }
   }, [botId]);
 
-  const saveFoldersData = (updatedFolders: TagFolder[], updatedMap: Record<number, string>) => {
+  const saveFoldersData = (updatedFolders: TagFolder[], updatedMap: Record<string | number, string>) => {
     setFolders(updatedFolders);
     setTagFolderMap(updatedMap);
     if (botId > 0) {
@@ -171,7 +171,7 @@ export const TagsSettingsPanel: React.FC = () => {
 
   const filteredTags = tags.filter(t => {
     const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const belongsToActiveFolder = ((tagFolderMap as any)[t.id] || null) === (activeFolderId || null);
+    const belongsToActiveFolder = (tagFolderMap[t.id] || null) === (activeFolderId || null);
     return matchesSearch && belongsToActiveFolder;
   });
 

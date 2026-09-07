@@ -313,7 +313,7 @@ export const DashboardPage: React.FC = () => {
         description: template.shortDesc,
       });
 
-      await saveFlowSchemaApi(newBot.id, template.nodes as any, template.edges as any);
+      await saveFlowSchemaApi(newBot.id, template.nodes, template.edges);
       await queryClient.refetchQueries({ queryKey: ['bots'] });
       const setActiveBotId = useBotStore.getState().setActiveBotId;
       setActiveBotId(newBot.id);

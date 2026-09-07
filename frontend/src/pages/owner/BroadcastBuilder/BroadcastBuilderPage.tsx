@@ -8,7 +8,8 @@ import {
   ConnectionLineType,
   ReactFlowProvider,
 } from '@xyflow/react';
-import type { ConnectionLineComponentProps, Edge } from '@xyflow/react';
+import type { ConnectionLineComponentProps, Edge, Node, OnNodeDrag } from '@xyflow/react';
+import { isAxiosError } from 'axios';
 import '@xyflow/react/dist/style.css';
 import { useBroadcastBuilder } from '../../../hooks/broadcast/useBroadcastBuilder';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
@@ -317,17 +318,17 @@ const BroadcastBuilderInner: React.FC = () => {
     setDragging,
   } = useFlowCollaboration(activeBotId || 0, nodes, edges, setNodesRemote, setEdgesRemote, 'broadcast', isLocalChangeRef);
 
-  const handleNodeDragStart = React.useCallback((_evt: React.MouseEvent, node: { id: string }) => {
+  const handleNodeDragStart: OnNodeDrag<Node> = React.useCallback((_evt, node) => {
     if (onNodeDragStart) onNodeDragStart();
     setDragging(true);
     updateLocalAction(`${currentUser?.name || 'Someone'} is dragging...`, node.id);
   }, [onNodeDragStart, updateLocalAction, currentUser, setDragging]);
 
-  const handleNodeDrag = React.useCallback((_evt: React.MouseEvent, node: { id: string; position: { x: number; y: number } }) => {
+  const handleNodeDrag: OnNodeDrag<Node> = React.useCallback((_evt, node) => {
     publishNodeMove(node.id, node.position);
   }, [publishNodeMove]);
 
-  const handleNodeDragStop = React.useCallback((_evt: React.MouseEvent, node: { id: string; position: { x: number; y: number } }) => {
+  const handleNodeDragStop: OnNodeDrag<Node> = React.useCallback((_evt, node) => {
     if (onNodeDragStop) onNodeDragStop();
     publishNodeMoveForce(node.id, node.position);
     setDragging(false);
@@ -607,8 +608,8 @@ const BroadcastBuilderInner: React.FC = () => {
               ) : updateCampaignMut.isError ? (
                 <div
                   title={
-                    (updateCampaignMut.error as any)?.response?.data?.message ||
-                    (updateCampaignMut.error as any)?.message ||
+                    (isAxiosError(updateCampaignMut.error) && (updateCampaignMut.error.response?.data as { message?: string })?.message) ||
+                    updateCampaignMut.error?.message ||
                     String(updateCampaignMut.error)
                   }
                   className="flex items-center gap-1.5 cursor-help"
@@ -786,9 +787,9 @@ const BroadcastBuilderInner: React.FC = () => {
             onNodeClick={isViewer ? undefined : onNodeClick}
             onPaneClick={isViewer ? undefined : onPaneClick}
             onSelectionChange={onSelectionChange}
-            onNodeDragStart={isViewer ? undefined : (handleNodeDragStart as any)}
-            onNodeDrag={isViewer ? undefined : (handleNodeDrag as any)}
-            onNodeDragStop={isViewer ? undefined : (handleNodeDragStop as any)}
+            onNodeDragStart={isViewer ? undefined : handleNodeDragStart}
+            onNodeDrag={isViewer ? undefined : handleNodeDrag}
+            onNodeDragStop={isViewer ? undefined : handleNodeDragStop}
             nodeTypes={NODE_TYPES}
             edgeTypes={EDGE_TYPES}
             isValidConnection={isValidConnection}

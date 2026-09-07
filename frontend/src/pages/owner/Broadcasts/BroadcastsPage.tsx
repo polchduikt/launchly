@@ -292,8 +292,8 @@ export const BroadcastsPage: React.FC = () => {
                   {campaigns.map((camp) => {
                     const campaignBot = bots.find((b) => b.id === camp.botId);
                     const isBlocked = camp.blocked || camp.status === 'BLOCKED';
-                    const templateNameTag = (camp as any).templateName || campaignBot?.templateName;
-                    const isTemplateBot = !!templateNameTag || (campaignBot?.isTemplate ?? false) || ((camp as any).isTemplate ?? false);
+                    const templateNameTag = camp.templateName || campaignBot?.templateName;
+                    const isTemplateBot = !!templateNameTag || (campaignBot?.isTemplate ?? false) || (camp.isTemplate ?? false);
 
                     return (
                       <tr

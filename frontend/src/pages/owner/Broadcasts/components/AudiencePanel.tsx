@@ -95,18 +95,26 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
     }
   };
 
-  const filteredItems = useMemo(() => {
+interface AudienceFilterItem {
+  type: string;
+  label: string;
+  val?: string;
+  icon?: React.ComponentType<{ size?: number; className?: string }>;
+  count?: number;
+}
+
+  const filteredItems: AudienceFilterItem[] = useMemo(() => {
     const search = dropdownSearch.toLowerCase().trim();
 
     if (selectedCategory === 'general') {
-      const items = [
+      const items: AudienceFilterItem[] = [
         { type: 'tag', label: t('audience.panel.field.tag'), val: '', icon: Tag },
       ];
       return items.filter(i => i.label.toLowerCase().includes(search));
     }
 
     if (selectedCategory === 'system') {
-      const items = [
+      const items: AudienceFilterItem[] = [
         { type: 'system', label: t('crm.contact.first_name'), icon: User },
         { type: 'system', label: t('crm.contact.last_name'), icon: User },
         { type: 'system', label: t('editor.gs.fields.username'), icon: User },
@@ -129,7 +137,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
     return [];
   }, [selectedCategory, dropdownSearch, tags, customFields]);
 
-  const handleAddConditionItem = (item: { type: string; label: string; val?: string }) => {
+  const handleAddConditionItem = (item: AudienceFilterItem) => {
     setIsConditionDropdownOpen(false);
     setDropdownSearch('');
     setIsDirty(true);
@@ -566,9 +574,9 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                   >
                                     <IconComponent size={14} className="text-[#0A0A0A] shrink-0" />
                                     <span className="truncate flex-1">{item.label}</span>
-                                    {(item as any).count !== undefined && (
+                                    {item.count !== undefined && (
                                       <span className="text-[10px] text-slate-700 font-black shrink-0">
-                                        {(item as any).count}
+                                        {item.count}
                                       </span>
                                     )}
                                   </button>

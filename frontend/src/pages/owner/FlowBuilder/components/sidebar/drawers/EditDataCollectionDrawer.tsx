@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Trash2, Database, Zap, AlertCircle } from 'lucide-react';
 import type { FlowBlock } from '../../../../../../types/bot';
+import type { TagResponse } from '../../../../../../types/broadcast';
 import type { Node, Edge } from '@xyflow/react';
 import { NODE_TITLES } from '../../../../../../const/nodeDisplay';
 import { FieldVariableSelector } from '../editors/FieldVariableSelector';
@@ -18,7 +19,7 @@ export interface EditDataCollectionDrawerProps {
   onAddAndConnectNode?: (sourceNodeId: string, type: string, sourceHandle: string) => void;
   onOpenNextStepDrawer?: (sourceHandle: string) => void;
   customFields?: string[];
-  tags?: unknown[];
+  tags?: TagResponse[];
 }
 
 const getTargetNodeDisplayName = (tn: Node, nodes: Node[]) => {
@@ -114,7 +115,7 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
             <div className="absolute right-2.5">
               <FieldVariableSelector
                 mode="variable"
-                tags={(tags as any) || []}
+                tags={tags || []}
                 customFields={customFields}
                 onSelect={(selectedVar) => {
                   setSaveToField(selectedVar);

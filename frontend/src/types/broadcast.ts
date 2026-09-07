@@ -23,6 +23,8 @@ export interface CampaignResponse {
   blocked?: boolean;
   blockReason?: string;
   blockedAt?: string;
+  templateName?: string;
+  isTemplate?: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -926,16 +926,18 @@ export const AdminUsersPage: React.FC = () => {
                     <Calendar size={13} />
                     {t('admin.period_label')}
                   </span>
-                  {[
-                    { id: 'week', label: t('admin.7_days') },
-                    { id: 'month', label: t('admin.30_days') },
-                    { id: '3months', label: t('admin.90_days') },
-                    { id: 'all', label: t('admin.all_time') }
-                  ].map((p) => (
+                  {(
+                    [
+                      { id: 'week', label: t('admin.7_days') },
+                      { id: 'month', label: t('admin.30_days') },
+                      { id: '3months', label: t('admin.90_days') },
+                      { id: 'all', label: t('admin.all_time') }
+                    ] as const
+                  ).map((p) => (
                     <button
                       key={p.id}
                       onClick={() => {
-                        setDetailPeriod(p.id as any);
+                        setDetailPeriod(p.id);
                         setActivityPage(0);
                       }}
                       className={`px-2.5 py-1 rounded-lg text-xs font-black uppercase transition cursor-pointer ${
@@ -954,16 +956,18 @@ export const AdminUsersPage: React.FC = () => {
                     <Filter size={13} />
                     {t('admin.category_label')}
                   </span>
-                  {[
-                    { id: 'all', label: t('admin.cat_all') },
-                    { id: 'automations', label: t('admin.cat_automations') },
-                    { id: 'broadcasts', label: t('admin.cat_broadcasts') },
-                    { id: 'system', label: t('admin.cat_system') }
-                  ].map((c) => (
+                  {(
+                    [
+                      { id: 'all', label: t('admin.cat_all') },
+                      { id: 'automations', label: t('admin.cat_automations') },
+                      { id: 'broadcasts', label: t('admin.cat_broadcasts') },
+                      { id: 'system', label: t('admin.cat_system') }
+                    ] as const
+                  ).map((c) => (
                     <button
                       key={c.id}
                       onClick={() => {
-                        setActivityCategoryFilter(c.id as any);
+                        setActivityCategoryFilter(c.id);
                         setActivityPage(0);
                       }}
                       className={`px-2.5 py-1 rounded-lg text-xs font-black uppercase transition cursor-pointer ${

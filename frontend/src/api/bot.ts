@@ -1,10 +1,12 @@
 import apiClient from './axios';
+import type { Node, Edge } from '@xyflow/react';
 import type {
   BotCreateRequest,
   BotResponse,
   BotUserCreateRequest,
   BotUserResponse,
 } from '../types';
+import type { FlowSchemaResponse, BotUserUpdateRequest } from '../types/bot';
 
 export const getBotsApi = async (): Promise<BotResponse[]> => {
   const response = await apiClient.get<BotResponse[]>('/bots');
@@ -30,14 +32,18 @@ export const deleteBotApi = async (id: number): Promise<void> => {
   await apiClient.delete(`/bots/${id}`);
 };
 
-export const getBotSchemaApi = async (id: number): Promise<any> => {
-  const response = await apiClient.get<any>(`/bots/${id}/schema`);
+export const getBotSchemaApi = async (id: number): Promise<FlowSchemaResponse> => {
+  const response = await apiClient.get<FlowSchemaResponse>(`/bots/${id}/schema`);
   return response.data;
 };
 
-export const saveBotSchemaApi = async (id: number, schemaOrNodes: any, edges?: any): Promise<any> => {
+export const saveBotSchemaApi = async (
+  id: number,
+  schemaOrNodes: { nodes: Node[]; edges: Edge[] } | Node[] | Record<string, unknown>[],
+  edges?: Edge[] | Record<string, unknown>[]
+): Promise<FlowSchemaResponse> => {
   const payload = edges !== undefined ? { nodes: schemaOrNodes, edges } : schemaOrNodes;
-  const response = await apiClient.put<any>(`/bots/${id}/schema`, payload);
+  const response = await apiClient.put<FlowSchemaResponse>(`/bots/${id}/schema`, payload);
   return response.data;
 };
 
@@ -75,7 +81,7 @@ export const saveFlowSchemaApi = saveBotSchemaApi;
 export const updateBotUserApi = async (
   botId: number,
   userId: number,
-  data: any
+  data: Partial<BotUserUpdateRequest> | Record<string, unknown>
 ): Promise<BotUserResponse> => {
   const response = await apiClient.put<BotUserResponse>(`/bots/${botId}/users/${userId}`, data);
   return response.data;

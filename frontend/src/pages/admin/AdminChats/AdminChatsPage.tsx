@@ -298,20 +298,22 @@ export const AdminChatsPage: React.FC = () => {
                 {t('admin.categories_label')}
               </label>
               <div className="space-y-1">
-                {[
-                  { id: 'all', label: t('admin.tab_all'), icon: Layers },
-                  { id: 'unread', label: t('admin.tab_unread'), icon: Clock },
-                  { id: 'favorites', label: t('admin.tab_favorites'), icon: Star },
-                  { id: 'active', label: t('admin.tab_active'), icon: Sparkles },
-                  { id: 'completed', label: t('admin.tab_completed'), icon: XCircle },
-                  { id: 'resolved', label: t('admin.tab_resolved'), icon: CheckCircle2 }
-                ].map(tab => {
+                {(
+                  [
+                    { id: 'all', label: t('admin.tab_all'), icon: Layers },
+                    { id: 'unread', label: t('admin.tab_unread'), icon: Clock },
+                    { id: 'favorites', label: t('admin.tab_favorites'), icon: Star },
+                    { id: 'active', label: t('admin.tab_active'), icon: Sparkles },
+                    { id: 'completed', label: t('admin.tab_completed'), icon: XCircle },
+                    { id: 'resolved', label: t('admin.tab_resolved'), icon: CheckCircle2 }
+                  ] as const
+                ).map(tab => {
                   const IconComponent = tab.icon;
                   const isActive = activeTab === tab.id;
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id as any)}
+                      onClick={() => setActiveTab(tab.id)}
                       className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-black uppercase transition cursor-pointer border-2 border-[#0A0A0A] ${
                         isActive
                           ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[2px_2px_0px_#0A0A0A]'
@@ -333,19 +335,21 @@ export const AdminChatsPage: React.FC = () => {
                 {t('admin.period_label')}
               </label>
               <div className="space-y-1">
-                {[
-                  { id: 'all', label: t('admin.period_all'), icon: InfinityIcon },
-                  { id: 'today', label: t('admin.period_today'), icon: Calendar },
-                  { id: 'yesterday', label: t('admin.period_yesterday'), icon: History },
-                  { id: 'week', label: t('admin.period_week'), icon: CalendarDays },
-                  { id: 'month', label: t('admin.period_month'), icon: CalendarRange }
-                ].map(p => {
+                {(
+                  [
+                    { id: 'all', label: t('admin.period_all'), icon: InfinityIcon },
+                    { id: 'today', label: t('admin.period_today'), icon: Calendar },
+                    { id: 'yesterday', label: t('admin.period_yesterday'), icon: History },
+                    { id: 'week', label: t('admin.period_week'), icon: CalendarDays },
+                    { id: 'month', label: t('admin.period_month'), icon: CalendarRange }
+                  ] as const
+                ).map(p => {
                   const IconComponent = p.icon;
                   const isActive = selectedPeriod === p.id;
                   return (
                     <button
                       key={p.id}
-                      onClick={() => setSelectedPeriod(p.id as any)}
+                      onClick={() => setSelectedPeriod(p.id)}
                       className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-black uppercase transition cursor-pointer border-2 border-[#0A0A0A] ${
                         isActive
                           ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[2px_2px_0px_#0A0A0A]'
@@ -367,16 +371,18 @@ export const AdminChatsPage: React.FC = () => {
                 {t('admin.sort_by')}
               </label>
               <div className="space-y-1">
-                {[
-                  { id: 'desc', label: t('admin.sort_newest'), icon: ArrowDownWideNarrow },
-                  { id: 'asc', label: t('admin.sort_oldest'), icon: ArrowUpNarrowWide }
-                ].map(s => {
+                {(
+                  [
+                    { id: 'desc', label: t('admin.sort_newest'), icon: ArrowDownWideNarrow },
+                    { id: 'asc', label: t('admin.sort_oldest'), icon: ArrowUpNarrowWide }
+                  ] as const
+                ).map(s => {
                   const IconComponent = s.icon;
                   const isActive = sortOrder === s.id;
                   return (
                     <button
                       key={s.id}
-                      onClick={() => setSortOrder(s.id as any)}
+                      onClick={() => setSortOrder(s.id)}
                       className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-black uppercase transition cursor-pointer border-2 border-[#0A0A0A] ${
                         isActive
                           ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[2px_2px_0px_#0A0A0A]'
@@ -851,16 +857,18 @@ export const AdminChatsPage: React.FC = () => {
                     <Calendar size={13} />
                     {t('admin.period_label')}
                   </span>
-                  {[
-                    { id: 'week', label: t('admin.7_days') },
-                    { id: 'month', label: t('admin.30_days') },
-                    { id: '3months', label: t('admin.90_days') },
-                    { id: 'all', label: t('admin.all_time') }
-                  ].map((p) => (
+                  {(
+                    [
+                      { id: 'week', label: t('admin.7_days') },
+                      { id: 'month', label: t('admin.30_days') },
+                      { id: '3months', label: t('admin.90_days') },
+                      { id: 'all', label: t('admin.all_time') }
+                    ] as const
+                  ).map((p) => (
                     <button
                       key={p.id}
                       onClick={() => {
-                        setDetailPeriod(p.id as any);
+                        setDetailPeriod(p.id);
                         setActivityPage(0);
                       }}
                       className={`px-2.5 py-1 rounded-xl text-xs font-black uppercase transition cursor-pointer ${
@@ -879,16 +887,18 @@ export const AdminChatsPage: React.FC = () => {
                     <Filter size={13} />
                     {t('admin.category_label')}
                   </span>
-                  {[
-                    { id: 'all', label: t('admin.cat_all') },
-                    { id: 'automations', label: t('admin.cat_automations') },
-                    { id: 'broadcasts', label: t('admin.cat_broadcasts') },
-                    { id: 'system', label: t('admin.cat_system') }
-                  ].map((c) => (
+                  {(
+                    [
+                      { id: 'all', label: t('admin.cat_all') },
+                      { id: 'automations', label: t('admin.cat_automations') },
+                      { id: 'broadcasts', label: t('admin.cat_broadcasts') },
+                      { id: 'system', label: t('admin.cat_system') }
+                    ] as const
+                  ).map((c) => (
                     <button
                       key={c.id}
                       onClick={() => {
-                        setActivityCategoryFilter(c.id as any);
+                        setActivityCategoryFilter(c.id);
                         setActivityPage(0);
                       }}
                       className={`px-2.5 py-1 rounded-xl text-xs font-black uppercase transition cursor-pointer ${
@@ -1000,7 +1010,7 @@ export const AdminChatsPage: React.FC = () => {
                               </div>
                             </div>
                             <div className="text-[10px] text-slate-700 font-mono font-bold mt-1">
-                              {auto.botName ? `Bot: ${auto.botName}` : `Updated: ${formatEuroDateTime((auto as any).updatedAt)}`}
+                              {auto.botName ? `Bot: ${auto.botName}` : `Updated: ${formatEuroDateTime(auto.updatedAt)}`}
                             </div>
                           </div>
                         ))

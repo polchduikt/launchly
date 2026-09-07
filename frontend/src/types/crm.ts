@@ -68,6 +68,11 @@ export interface BotUserMetadata {
   totalLeads?: number;
   tags?: string[];
   notes?: string;
+  email?: string;
+  phone?: string;
+  unsubscribed?: boolean;
+  paused?: boolean;
+  customFields?: Record<string, string | number | boolean | null | undefined>;
   [key: string]: unknown;
 }
 

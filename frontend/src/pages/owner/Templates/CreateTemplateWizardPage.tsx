@@ -333,7 +333,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
         <div className="w-full h-16 min-h-[64px] max-h-[64px] bg-white border-b-2 border-[#0A0A0A] px-6 flex items-center justify-between gap-4 sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => (step > 1 ? setStep((step - 1) as any) : navigate('/templates'))}
+              onClick={() => (step === 3 ? setStep(2) : step === 2 ? setStep(1) : navigate('/templates'))}
               className="px-3 py-1.5 bg-white hover:bg-[#0A0A0A] hover:text-white border border-[#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1 shrink-0"
             >
               <ChevronLeft size={15} />

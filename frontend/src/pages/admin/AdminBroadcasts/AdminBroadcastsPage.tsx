@@ -752,16 +752,18 @@ export const AdminBroadcastsPage: React.FC = () => {
                     <span className="font-black uppercase text-[#0A0A0A] text-[10px] tracking-wider">{t('admin.period_label')}</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    {[
-                      { key: '7d', label: t('admin.period_7d') },
-                      { key: '30d', label: t('admin.period_30d') },
-                      { key: '90d', label: t('admin.period_90d') },
-                      { key: 'all', label: t('admin.period_all') },
-                    ].map((p) => (
+                    {(
+                      [
+                        { key: '7d', label: t('admin.period_7d') },
+                        { key: '30d', label: t('admin.period_30d') },
+                        { key: '90d', label: t('admin.period_90d') },
+                        { key: 'all', label: t('admin.period_all') },
+                      ] as const
+                    ).map((p) => (
                       <button
                         key={p.key}
                         onClick={() => {
-                          setSelectedPeriod(p.key as any);
+                          setSelectedPeriod(p.key);
                           setDetailsPage(0);
                         }}
                         className={`px-3 py-1 rounded-xl text-xs font-black uppercase transition cursor-pointer ${
