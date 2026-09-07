@@ -162,10 +162,10 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
           style={dropdownStyle}
           onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
           onClick={(e) => e.stopPropagation()}
-          className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-2xl flex overflow-hidden font-['JetBrains_Mono',monospace] text-[#0A0A0A]"
+          className="bg-canvas border-2 border-ink rounded-3xl shadow-2xl flex overflow-hidden font-['JetBrains_Mono',monospace] text-ink"
         >
           {/* Left Category Navigation */}
-          <div className="w-[145px] bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-2.5 flex flex-col gap-1 select-none shrink-0">
+          <div className="w-[145px] bg-canvas border-r-2 border-ink p-2.5 flex flex-col gap-1 select-none shrink-0">
             <button
               type="button"
               onClick={() => {
@@ -173,7 +173,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                 setSearchQuery('');
               }}
               className={`w-full px-2.5 py-1.5 text-left text-[11px] font-bold rounded-xl transition-all cursor-pointer border-2 ${
-                selectedCategory === 'system' ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' : 'border-transparent text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
+                selectedCategory === 'system' ? 'bg-ink text-canvas border-ink' : 'border-transparent text-ink hover:bg-ink/10'
               }`}
             >
               {t('editor.gs.system_fields')}
@@ -185,7 +185,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                 setSearchQuery('');
               }}
               className={`w-full px-2.5 py-1.5 text-left text-[11px] font-bold rounded-xl transition-all cursor-pointer border-2 ${
-                selectedCategory === 'custom' ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' : 'border-transparent text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
+                selectedCategory === 'custom' ? 'bg-ink text-canvas border-ink' : 'border-transparent text-ink hover:bg-ink/10'
               }`}
             >
               {t('editor.gs.custom_fields')}
@@ -198,7 +198,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                   setSearchQuery('');
                 }}
                 className={`w-full px-2.5 py-1.5 text-left text-[11px] font-bold rounded-xl transition-all cursor-pointer border-2 ${
-                  selectedCategory === 'tags' ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' : 'border-transparent text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
+                  selectedCategory === 'tags' ? 'bg-ink text-canvas border-ink' : 'border-transparent text-ink hover:bg-ink/10'
                 }`}
               >
                 {t('editor.gs.tags')}
@@ -207,16 +207,16 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
           </div>
 
           {/* Right Field List */}
-          <div className="flex-1 p-3 flex flex-col h-[264px] bg-[#F2EBDD]">
+          <div className="flex-1 p-3 flex flex-col h-[264px] bg-canvas">
             {/* Search Input */}
             <div className="relative mb-2 shrink-0">
-              <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]/40 pointer-events-none" />
+              <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink/40 pointer-events-none" />
               <input
                 type="text"
                 placeholder={t('common.search_placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-7 pr-3 py-1.5 border-2 border-[#0A0A0A] rounded-xl text-[10px] focus:outline-none bg-white text-[#0A0A0A] font-bold placeholder:text-[#0A0A0A]/40"
+                className="w-full pl-7 pr-3 py-1.5 border-2 border-ink rounded-xl text-[10px] focus:outline-none bg-white text-ink font-bold placeholder:text-ink/40"
               />
             </div>
 
@@ -230,14 +230,14 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                       key={field.key}
                       type="button"
                       onClick={() => handleItemSelect(field.name, 'system')}
-                      className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
+                      className="w-full px-2.5 py-1.5 hover:bg-ink hover:text-canvas rounded-xl text-left text-[11px] font-bold text-ink flex items-center gap-2 cursor-pointer transition-colors group"
                     >
                       {field.icon}
                       <span className="truncate">{field.name}</span>
                     </button>
                   ))}
                   {filteredSystemFields.length === 0 && (
-                    <span className="text-[10px] text-[#0A0A0A]/60 italic text-center py-6 font-bold">
+                    <span className="text-[10px] text-ink/60 italic text-center py-6 font-bold">
                       {t('editor.action.no_actions_title')}
                     </span>
                   )}
@@ -254,7 +254,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                         <button
                           type="button"
                           onClick={() => setShowCreateFieldInput(true)}
-                          className="w-full px-2.5 py-1.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-dashed border-[#0A0A0A] text-[#0A0A0A] rounded-xl text-left text-[10px] font-black flex items-center gap-1.5 cursor-pointer transition-all uppercase font-['Anybody',sans-serif]"
+                          className="w-full px-2.5 py-1.5 bg-white hover:bg-ink hover:text-canvas border-2 border-dashed border-ink text-ink rounded-xl text-left text-[10px] font-black flex items-center gap-1.5 cursor-pointer transition-all uppercase font-['Anybody',sans-serif]"
                         >
                           <Plus size={12} />
                           <span>{t('settings.fields.create_field_title')}</span>
@@ -268,11 +268,11 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                             autoFocus
                             value={newFieldName}
                             onChange={(e) => setNewFieldName(e.target.value)}
-                            className="flex-1 px-2.5 py-1.5 border-2 border-[#0A0A0A] rounded-xl text-[10px] focus:outline-none bg-white text-[#0A0A0A] font-bold"
+                            className="flex-1 px-2.5 py-1.5 border-2 border-ink rounded-xl text-[10px] focus:outline-none bg-white text-ink font-bold"
                           />
                           <button
                             type="submit"
-                            className="px-2.5 py-1.5 bg-[#0A0A0A] text-[#F2EBDD] font-black rounded-xl text-[10px] cursor-pointer border-2 border-[#0A0A0A]"
+                            className="px-2.5 py-1.5 bg-ink text-canvas font-black rounded-xl text-[10px] cursor-pointer border-2 border-ink"
                           >
                             <Check size={12} />
                           </button>
@@ -288,7 +288,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                         key={(field as { id?: string }).id || fname || idx}
                         type="button"
                         onClick={() => handleItemSelect(fname, 'custom')}
-                        className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
+                        className="w-full px-2.5 py-1.5 hover:bg-ink hover:text-canvas rounded-xl text-left text-[11px] font-bold text-ink flex items-center gap-2 cursor-pointer transition-colors group"
                       >
                         <Sparkles size={12} className="text-amber-500 shrink-0" />
                         <span className="truncate">{fname}</span>
@@ -296,7 +296,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                     );
                   })}
                   {filteredCustomFields.length === 0 && !showCreateFieldInput && (
-                    <span className="text-[10px] text-[#0A0A0A]/60 italic text-center py-6 font-bold">
+                    <span className="text-[10px] text-ink/60 italic text-center py-6 font-bold">
                       {t('crm.panel.fields.no_fields')}
                     </span>
                   )}
@@ -311,14 +311,14 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                       key={tag.id}
                       type="button"
                       onClick={() => handleItemSelect(tag.name, 'tag')}
-                      className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
+                      className="w-full px-2.5 py-1.5 hover:bg-ink hover:text-canvas rounded-xl text-left text-[11px] font-bold text-ink flex items-center gap-2 cursor-pointer transition-colors group"
                     >
                       <TagIcon size={12} className="text-amber-600 shrink-0" />
                       <span className="truncate">{tag.name}</span>
                     </button>
                   ))}
                   {filteredTags.length === 0 && (
-                    <span className="text-[10px] text-[#0A0A0A]/60 italic text-center py-6 font-bold">
+                    <span className="text-[10px] text-ink/60 italic text-center py-6 font-bold">
                       {t('crm.panel.tags.no_tags')}
                     </span>
                   )}

@@ -314,23 +314,23 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
     <section
       id="use-cases"
       ref={containerRef}
-      className="relative bg-[#F2EBDD] border-y-4 border-[#0A0A0A] z-10 py-6 lg:py-0 h-auto lg:h-[240vh]"
+      className="relative bg-canvas border-y-4 border-ink z-10 py-6 lg:py-0 h-auto lg:h-[240vh]"
     >
       <div className="relative lg:sticky top-0 lg:top-14 py-4 lg:py-8 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto flex flex-col justify-center min-h-0 lg:min-h-[calc(100vh-3.5rem)]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
           <div className="lg:col-span-8 flex flex-col justify-between space-y-4 sm:space-y-5">
-            <div className="text-left border-l-8 border-[#0A0A0A] pl-5">
-              <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-4xl lg:text-5xl font-black text-[#0A0A0A] mb-1 uppercase leading-none">
+            <div className="text-left border-l-8 border-ink pl-5">
+              <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-4xl lg:text-5xl font-black text-ink mb-1 uppercase leading-none">
                 {t('landing.use_cases.title', 'Solutions for Every Industry')}
               </h2>
-              <p className="text-xs sm:text-base text-[#0A0A0A] font-bold">
+              <p className="text-xs sm:text-base text-ink font-bold">
                 {t('landing.use_cases.subtitle', 'Automate communications and sales tailored to your specific business needs')}
               </p>
             </div>
 
-            <div className="hidden lg:block w-full bg-[#0A0A0A]/10 h-2.5 rounded-full overflow-hidden border border-[#0A0A0A]/20">
+            <div className="hidden lg:block w-full bg-ink/10 h-2.5 rounded-full overflow-hidden border border-ink/20">
               <div
-                className="bg-[#0A0A0A] h-full w-full origin-left transition-transform duration-100 ease-out will-change-transform"
+                className="bg-ink h-full w-full origin-left transition-transform duration-100 ease-out will-change-transform"
                 style={{ transform: `scaleX(${scrollProgress})` }}
               />
             </div>
@@ -342,10 +342,10 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
                   <button
                     key={key}
                     onClick={() => handleTabClick(key, idx)}
-                    className={`py-3 px-1 sm:px-2 border-3 border-[#0A0A0A] font-['JetBrains_Mono',monospace] font-black uppercase transition-all flex items-center justify-center cursor-pointer ${
+                    className={`py-3 px-1 sm:px-2 border-3 border-ink font-['JetBrains_Mono',monospace] font-black uppercase transition-all flex items-center justify-center cursor-pointer ${
                       isActive
-                        ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[4px_4px_0px_#0A0A0A] -translate-y-0.5'
-                        : 'bg-white text-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#0A0A0A]/5'
+                        ? 'bg-ink text-canvas shadow-brutal -translate-y-0.5'
+                        : 'bg-white text-ink shadow-brutal-md hover:bg-ink/5'
                     }`}
                   >
                     <span className="text-[9px] sm:text-[10px] xl:text-xs tracking-tighter sm:tracking-tight whitespace-nowrap text-center">
@@ -356,45 +356,45 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
               })}
             </div>
 
-            <div className="bg-white border-4 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] p-5 sm:p-7 rounded-2xl flex flex-col justify-between space-y-4 transition-all duration-300 flex-1">
+            <div className="bg-white border-4 border-ink shadow-brutal-xl p-5 sm:p-7 rounded-2xl flex flex-col justify-between space-y-4 transition-all duration-300 flex-1">
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg shadow-[2px_2px_0px_#0A0A0A]">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-ink text-canvas font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg shadow-brutal-sm">
                   {getTabIcon(activeTab, 14)}
                   <span>{t(`landing.use_cases.${activeTab}_title`)}</span>
                 </div>
 
-                <h3 className="font-['Anybody',sans-serif] text-2xl sm:text-3xl font-black text-[#0A0A0A] uppercase leading-tight">
+                <h3 className="font-['Anybody',sans-serif] text-2xl sm:text-3xl font-black text-ink uppercase leading-tight">
                   {t(`landing.use_cases.${activeTab}_title`)}
                 </h3>
 
-                <p className="text-xs sm:text-base text-[#0A0A0A]/85 font-semibold leading-relaxed">
+                <p className="text-xs sm:text-base text-ink/85 font-semibold leading-relaxed">
                   {t(`landing.use_cases.${activeTab}_desc`)}
                 </p>
 
                 <div className="space-y-2.5 pt-1">
                   <div className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-emerald-400 border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 mt-0.5 shadow-[2px_2px_0px_#0A0A0A]">
-                      <Check size={12} className="text-[#0A0A0A] stroke-[3]" />
+                    <div className="w-5 h-5 rounded-full bg-emerald-400 border-2 border-ink flex items-center justify-center shrink-0 mt-0.5 shadow-brutal-sm">
+                      <Check size={12} className="text-ink stroke-[3]" />
                     </div>
-                    <span className="text-xs sm:text-sm font-bold text-[#0A0A0A]">
+                    <span className="text-xs sm:text-sm font-bold text-ink">
                       {t(`landing.use_cases.${activeTab}_f1`)}
                     </span>
                   </div>
 
                   <div className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-emerald-400 border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 mt-0.5 shadow-[2px_2px_0px_#0A0A0A]">
-                      <Check size={12} className="text-[#0A0A0A] stroke-[3]" />
+                    <div className="w-5 h-5 rounded-full bg-emerald-400 border-2 border-ink flex items-center justify-center shrink-0 mt-0.5 shadow-brutal-sm">
+                      <Check size={12} className="text-ink stroke-[3]" />
                     </div>
-                    <span className="text-xs sm:text-sm font-bold text-[#0A0A0A]">
+                    <span className="text-xs sm:text-sm font-bold text-ink">
                       {t(`landing.use_cases.${activeTab}_f2`)}
                     </span>
                   </div>
 
                   <div className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-emerald-400 border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 mt-0.5 shadow-[2px_2px_0px_#0A0A0A]">
-                      <Check size={12} className="text-[#0A0A0A] stroke-[3]" />
+                    <div className="w-5 h-5 rounded-full bg-emerald-400 border-2 border-ink flex items-center justify-center shrink-0 mt-0.5 shadow-brutal-sm">
+                      <Check size={12} className="text-ink stroke-[3]" />
                     </div>
-                    <span className="text-xs sm:text-sm font-bold text-[#0A0A0A]">
+                    <span className="text-xs sm:text-sm font-bold text-ink">
                       {t(`landing.use_cases.${activeTab}_f3`)}
                     </span>
                   </div>
@@ -404,7 +404,7 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
               <div className="pt-2">
                 <button
                   onClick={onCtaClick}
-                  className="w-full sm:w-auto bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-7 py-3.5 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto bg-ink text-canvas font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-7 py-3.5 border-2 border-ink shadow-brutal hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>{t('landing.hero.cta_start', 'Start Building Free')}</span>
                   <ArrowRight size={16} />
@@ -414,8 +414,8 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
           </div>
 
           <div className="hidden lg:flex lg:col-span-4 justify-center items-stretch">
-            <div className="w-full max-w-[340px] h-full min-h-[500px] bg-[#0A0A0A] p-2 sm:p-2.5 rounded-[36px] sm:rounded-[40px] border-4 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] sm:shadow-[10px_10px_0px_#0A0A0A] flex flex-col justify-between">
-              <div className="w-24 h-4 bg-[#0A0A0A] rounded-full mx-auto mb-1.5 flex items-center justify-center gap-1.5 shrink-0 z-20">
+            <div className="w-full max-w-[340px] h-full min-h-[500px] bg-ink p-2 sm:p-2.5 rounded-[36px] sm:rounded-[40px] border-4 border-ink shadow-brutal-lg sm:shadow-brutal-2xl flex flex-col justify-between">
+              <div className="w-24 h-4 bg-ink rounded-full mx-auto mb-1.5 flex items-center justify-center gap-1.5 shrink-0 z-20">
                 <div className="w-2.5 h-2.5 rounded-full bg-[#1C1C1E]" />
                 <div className="w-1.5 h-1.5 rounded-full bg-[#0D1F2D]" />
               </div>

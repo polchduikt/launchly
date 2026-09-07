@@ -1,4 +1,4 @@
-﻿type CleanupFn = () => void;
+type CleanupFn = () => void;
 
 const cleanupCallbacks = new Set<CleanupFn>();
 

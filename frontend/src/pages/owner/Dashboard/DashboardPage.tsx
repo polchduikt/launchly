@@ -391,19 +391,19 @@ export const DashboardPage: React.FC = () => {
   }, [filteredTemplates]);
 
   if (isLoadingBots) {
-    return <div className="min-h-screen bg-[#F2EBDD]" />;
+    return <div className="min-h-screen bg-canvas" />;
   }
 
   return (
     <DashboardLayout>
       <div className="p-6 md:p-10 max-w-[1300px] mx-auto space-y-12 relative z-10">
         
-        <div className="space-y-2 border-b-4 border-[#0A0A0A] pb-6">
-          <h1 className="font-['Anybody',sans-serif] text-3xl md:text-5xl font-black text-[#0A0A0A] uppercase tracking-tight">
+        <div className="space-y-2 border-b-4 border-ink pb-6">
+          <h1 className="font-['Anybody',sans-serif] text-3xl md:text-5xl font-black text-ink uppercase tracking-tight">
             {t('dashboard.hello_user', { name: displayName })}
           </h1>
-          <div className="flex items-center gap-2 font-['JetBrains_Mono',monospace] text-xs font-bold text-[#0A0A0A]">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-[#0A0A0A]"></span>
+          <div className="flex items-center gap-2 font-['JetBrains_Mono',monospace] text-xs font-bold text-ink">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-ink"></span>
             <span>
               {totalContacts} {t('dashboard.contacts_count')}
             </span>
@@ -412,13 +412,13 @@ export const DashboardPage: React.FC = () => {
 
         {showHomeTemplates && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between border-l-4 border-[#0A0A0A] pl-4">
-            <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black text-[#0A0A0A] uppercase tracking-tight">
+          <div className="flex items-center justify-between border-l-4 border-ink pl-4">
+            <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black text-ink uppercase tracking-tight">
               {t('dashboard.start_here')}
             </h2>
             <button
               onClick={() => setIsTemplatesModalOpen(true)}
-              className="font-['JetBrains_Mono',monospace] text-xs font-extrabold text-[#0A0A0A] hover:underline underline-offset-4 uppercase tracking-wider cursor-pointer"
+              className="font-['JetBrains_Mono',monospace] text-xs font-extrabold text-ink hover:underline underline-offset-4 uppercase tracking-wider cursor-pointer"
             >
               <span>{t('dashboard.explore_templates')}</span>
             </button>
@@ -433,14 +433,14 @@ export const DashboardPage: React.FC = () => {
                     setSelectedTemplate(tmpl);
                     setIsOpenedFromList(false);
                   }}
-                  className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all duration-200 rounded-3xl p-6 flex flex-col justify-between group cursor-pointer min-h-[190px]"
+                  className="bg-canvas border-2 border-ink shadow-brutal hover:bg-ink hover:text-canvas transition-all duration-200 rounded-3xl p-6 flex flex-col justify-between group cursor-pointer min-h-[190px]"
                 >
                   <div className="space-y-3">
-                    <h3 className="font-['Geist',sans-serif] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-sm md:text-base leading-snug transition-colors">
+                    <h3 className="font-['Geist',sans-serif] font-bold text-ink group-hover:text-canvas text-sm md:text-base leading-snug transition-colors">
                       {getTemplateTitle(tmpl)}
                     </h3>
                   </div>
-                  <div className="mt-5 pt-5 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold uppercase tracking-wider text-[#0A0A0A] group-hover:text-[#F2EBDD]">
+                  <div className="mt-5 pt-5 border-t border-ink/20 group-hover:border-canvas/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold uppercase tracking-wider text-ink group-hover:text-canvas">
                     <Workflow size={12} />
                     <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                   </div>
@@ -453,13 +453,13 @@ export const DashboardPage: React.FC = () => {
 
         {showHomeBlog && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between border-l-4 border-[#0A0A0A] pl-4">
-            <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black text-[#0A0A0A] uppercase tracking-tight">
+          <div className="flex items-center justify-between border-l-4 border-ink pl-4">
+            <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black text-ink uppercase tracking-tight">
               {t('dashboard.blog.latest')}
             </h2>
             <button 
               onClick={() => navigate('/blog')}
-              className="font-['JetBrains_Mono',monospace] text-xs font-extrabold text-[#0A0A0A] hover:underline underline-offset-4 uppercase tracking-wider cursor-pointer"
+              className="font-['JetBrains_Mono',monospace] text-xs font-extrabold text-ink hover:underline underline-offset-4 uppercase tracking-wider cursor-pointer"
             >
               <span>{t('dashboard.blog.view_all')}</span>
             </button>
@@ -471,9 +471,9 @@ export const DashboardPage: React.FC = () => {
                 <div
                   key={article.id}
                   onClick={() => navigate(`/blog/${article.id}`)}
-                  className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:shadow-[8px_8px_0px_#0A0A0A] hover:-translate-y-1 transition-all rounded-[24px] overflow-hidden flex flex-col group cursor-pointer"
+                  className="bg-canvas border-2 border-ink shadow-brutal hover:shadow-brutal-xl hover:-translate-y-1 transition-all rounded-[24px] overflow-hidden flex flex-col group cursor-pointer"
                 >
-                  <div className="aspect-[16/10] w-full overflow-hidden bg-slate-200 border-b-2 border-[#0A0A0A] relative">
+                  <div className="aspect-[16/10] w-full overflow-hidden bg-slate-200 border-b-2 border-ink relative">
                     <img
                       src={article.coverImage}
                       alt={article.title}
@@ -481,18 +481,18 @@ export const DashboardPage: React.FC = () => {
                     />
                   </div>
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-3 font-['JetBrains_Mono',monospace]">
-                    <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-sm md:text-base leading-snug line-clamp-2 uppercase break-words [overflow-wrap:anywhere]">
+                    <h3 className="font-['Anybody',sans-serif] font-black text-ink text-sm md:text-base leading-snug line-clamp-2 uppercase break-words [overflow-wrap:anywhere]">
                       {article.title}
                     </h3>
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold text-slate-700 pt-2 border-t border-[#0A0A0A]/15">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold text-slate-700 pt-2 border-t border-ink/15">
                       <div className="flex items-center gap-1.5 truncate max-w-[130px]">
-                        <User size={12} className="shrink-0 text-[#0A0A0A]" />
+                        <User size={12} className="shrink-0 text-ink" />
                         <span className="truncate">{article.author || 'Launchly Team'}</span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {article.date && (
                           <div className="flex items-center gap-1">
-                            <Calendar size={12} className="shrink-0 text-[#0A0A0A]" />
+                            <Calendar size={12} className="shrink-0 text-ink" />
                             <span>{article.date}</span>
                           </div>
                         )}
@@ -500,7 +500,7 @@ export const DashboardPage: React.FC = () => {
                           <>
                             <span>•</span>
                             <div className="flex items-center gap-1">
-                              <Clock size={12} className="shrink-0 text-[#0A0A0A]" />
+                              <Clock size={12} className="shrink-0 text-ink" />
                               <span>{article.readTime}</span>
                             </div>
                           </>
@@ -522,15 +522,15 @@ export const DashboardPage: React.FC = () => {
                 handleCloseAll();
               }
             }}
-            className="fixed inset-0 bg-[#0A0A0A]/50 z-[9998] flex items-center justify-center p-4 transition-all duration-200"
+            className="fixed inset-0 bg-ink/50 z-[9998] flex items-center justify-center p-4 transition-all duration-200"
           >
-            <div className={`bg-[#F2EBDD] rounded-3xl w-full border-2 border-[#0A0A0A] shadow-2xl flex overflow-hidden relative transition-all duration-300 ${
+            <div className={`bg-canvas rounded-3xl w-full border-2 border-ink shadow-2xl flex overflow-hidden relative transition-all duration-300 ${
               selectedTemplate ? 'max-w-5xl h-[85vh]' : 'max-w-[1240px] h-[88vh]'
             }`}>
               
               <button
                 onClick={handleCloseAll}
-                className="absolute top-5 right-5 z-[10000] w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer shadow-md"
+                className="absolute top-5 right-5 z-[10000] w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-canvas transition-all cursor-pointer shadow-md"
                 title="Close"
               >
                 <X size={16} />
@@ -540,12 +540,12 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex flex-col md:flex-row w-full h-full min-h-0">
                   <div className="flex-1 p-8 md:p-12 overflow-y-auto custom-scrollbar flex flex-col justify-between space-y-8 min-h-0">
                     <div className="space-y-6">
-                      <div className="flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-xs font-extrabold text-[#0A0A0A] uppercase tracking-widest border-b border-[#0A0A0A]/20 pb-2">
-                        <BookOpen size={14} className="text-[#0A0A0A]" />
+                      <div className="flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-xs font-extrabold text-ink uppercase tracking-widest border-b border-ink/20 pb-2">
+                        <BookOpen size={14} className="text-ink" />
                         <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                       </div>
 
-                      <h1 className="font-['Anybody',sans-serif] text-2xl md:text-4xl font-black text-[#0A0A0A] uppercase leading-tight">
+                      <h1 className="font-['Anybody',sans-serif] text-2xl md:text-4xl font-black text-ink uppercase leading-tight">
                         {getTemplateTitle(selectedTemplate)}
                       </h1>
 
@@ -555,14 +555,14 @@ export const DashboardPage: React.FC = () => {
 
                       <div className="space-y-4">
                         <div className="space-y-1.5">
-                          <h4 className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">{t('dashboard.templates.biz_value_label')}</h4>
+                          <h4 className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-ink uppercase tracking-wider">{t('dashboard.templates.biz_value_label')}</h4>
                           <p className="font-['Geist',sans-serif] text-xs text-slate-800 leading-relaxed font-medium">
                             {getTemplateBusinessValue(selectedTemplate)}
                           </p>
                         </div>
 
                         <div className="space-y-1.5">
-                          <h4 className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">{t('dashboard.templates.how_works_label')}</h4>
+                          <h4 className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-ink uppercase tracking-wider">{t('dashboard.templates.how_works_label')}</h4>
                           <p className="font-['Geist',sans-serif] text-xs text-slate-800 leading-relaxed font-medium">
                             {getTemplateHowItWorks(selectedTemplate)}
                           </p>
@@ -570,13 +570,13 @@ export const DashboardPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="pt-6 border-t-2 border-[#0A0A0A] flex items-center justify-between gap-4 shrink-0 font-['JetBrains_Mono',monospace]">
+                    <div className="pt-6 border-t-2 border-ink flex items-center justify-between gap-4 shrink-0 font-['JetBrains_Mono',monospace]">
                       <button
                         onClick={() => {
                           setSelectedTemplate(null);
                           setIsTemplatesModalOpen(true);
                         }}
-                        className="flex items-center gap-1.5 text-xs font-bold text-[#0A0A0A] hover:underline cursor-pointer uppercase"
+                        className="flex items-center gap-1.5 text-xs font-bold text-ink hover:underline cursor-pointer uppercase"
                       >
                         <ArrowLeft size={14} />
                         <span>{t('dashboard.templates.back_btn')}</span>
@@ -585,7 +585,7 @@ export const DashboardPage: React.FC = () => {
                       <button
                         onClick={() => handleSetUpTemplate(selectedTemplate)}
                         disabled={isCreating}
-                        className="px-6 py-3 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] text-xs font-extrabold uppercase border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                        className="px-6 py-3 bg-ink hover:bg-white hover:text-ink text-canvas text-xs font-extrabold uppercase border-2 border-ink shadow-brutal hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                       >
                         {isCreating && <Loader2 size={13} className="animate-spin" />}
                         <span>{t('dashboard.templates.setup_btn')}</span>
@@ -593,21 +593,21 @@ export const DashboardPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="w-full md:w-[360px] bg-slate-900 border-l-2 border-[#0A0A0A] flex items-center justify-center p-8 shrink-0 relative">
+                  <div className="w-full md:w-[360px] bg-slate-900 border-l-2 border-ink flex items-center justify-center p-8 shrink-0 relative">
                     <PhonePreview template={selectedTemplate} />
                   </div>
                 </div>
               ) : (
                 <div className="flex flex-col w-full h-full min-h-0">
-                  <div className="p-6 border-b-2 border-[#0A0A0A] flex items-center justify-between shrink-0 font-['JetBrains_Mono',monospace]">
+                  <div className="p-6 border-b-2 border-ink flex items-center justify-between shrink-0 font-['JetBrains_Mono',monospace]">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-[#0A0A0A]">{t('dashboard.templates.modal_title')}</h3>
+                      <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-ink">{t('dashboard.templates.modal_title')}</h3>
                     </div>
                     <div className="flex items-center gap-4 pr-16 md:pr-20">
                       <button
                         onClick={handleStartFromScratch}
                         disabled={isCreating}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] text-xs font-bold uppercase transition-all disabled:opacity-50 cursor-pointer shadow-[3px_3px_0px_#0A0A0A]"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-ink hover:bg-white hover:text-ink text-canvas border-2 border-ink text-xs font-bold uppercase transition-all disabled:opacity-50 cursor-pointer shadow-brutal-md"
                       >
                         {isCreating ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
                         <span>{t('dashboard.templates.start_from_scratch')}</span>
@@ -616,15 +616,15 @@ export const DashboardPage: React.FC = () => {
                   </div>
 
                   <div className="flex flex-1 overflow-hidden min-h-0">
-                    <div className="w-56 border-r-2 border-[#0A0A0A] p-6 flex flex-col gap-6 shrink-0 bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
+                    <div className="w-56 border-r-2 border-ink p-6 flex flex-col gap-6 shrink-0 bg-canvas font-['JetBrains_Mono',monospace]">
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#0A0A0A]" size={14} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ink" size={14} />
                         <input
                           type="text"
                           placeholder={t('dashboard.templates.search_placeholder')}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2 bg-white border-2 border-[#0A0A0A] text-xs font-bold text-[#0A0A0A] placeholder-[#0A0A0A]/50 focus:outline-none uppercase"
+                          className="w-full pl-9 pr-4 py-2 bg-white border-2 border-ink text-xs font-bold text-ink placeholder-ink/50 focus:outline-none uppercase"
                         />
                       </div>
 
@@ -634,8 +634,8 @@ export const DashboardPage: React.FC = () => {
                             onClick={() => setActiveCategory('all')}
                             className={`w-full text-left px-3 py-2 text-xs font-bold border-2 transition-all cursor-pointer uppercase ${
                               activeCategory === 'all' 
-                                ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' 
-                                : 'border-transparent text-[#0A0A0A] hover:bg-white hover:border-[#0A0A0A]'
+                                ? 'bg-ink text-canvas border-ink' 
+                                : 'border-transparent text-ink hover:bg-white hover:border-ink'
                             }`}
                           >
                             {t('dashboard.templates.all')}
@@ -648,8 +648,8 @@ export const DashboardPage: React.FC = () => {
                             onClick={() => setActiveCategory('engage')}
                             className={`w-full text-left px-3 py-2 text-xs font-bold border-2 transition-all cursor-pointer uppercase ${
                               activeCategory === 'engage' 
-                                ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' 
-                                : 'border-transparent text-[#0A0A0A] hover:bg-white hover:border-[#0A0A0A]'
+                                ? 'bg-ink text-canvas border-ink' 
+                                : 'border-transparent text-ink hover:bg-white hover:border-ink'
                             }`}
                           >
                             {t('dashboard.templates.engage')}
@@ -658,8 +658,8 @@ export const DashboardPage: React.FC = () => {
                             onClick={() => setActiveCategory('traffic')}
                             className={`w-full text-left px-3 py-2 text-xs font-bold border-2 transition-all cursor-pointer uppercase ${
                               activeCategory === 'traffic' 
-                                ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' 
-                                : 'border-transparent text-[#0A0A0A] hover:bg-white hover:border-[#0A0A0A]'
+                                ? 'bg-ink text-canvas border-ink' 
+                                : 'border-transparent text-ink hover:bg-white hover:border-ink'
                             }`}
                           >
                             {t('dashboard.templates.traffic')}
@@ -672,8 +672,8 @@ export const DashboardPage: React.FC = () => {
                             onClick={() => setActiveCategory('dm')}
                             className={`w-full text-left px-3 py-2 text-xs font-bold border-2 transition-all cursor-pointer uppercase ${
                               activeCategory === 'dm' 
-                                ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' 
-                                : 'border-transparent text-[#0A0A0A] hover:bg-white hover:border-[#0A0A0A]'
+                                ? 'bg-ink text-canvas border-ink' 
+                                : 'border-transparent text-ink hover:bg-white hover:border-ink'
                             }`}
                           >
                             {t('dashboard.templates.dm')}
@@ -684,14 +684,14 @@ export const DashboardPage: React.FC = () => {
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
                       {filteredTemplates.length === 0 ? (
-                        <div className="text-center py-12 text-[#0A0A0A] text-xs font-bold font-['JetBrains_Mono',monospace]">
+                        <div className="text-center py-12 text-ink text-xs font-bold font-['JetBrains_Mono',monospace]">
                           {t('dashboard.templates.no_results')}
                         </div>
                       ) : activeCategory === 'all' ? (
                         <>
                           {recommendedTemplates.length > 0 && (
                             <div className="space-y-4">
-                              <h4 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase tracking-tight">{t('dashboard.recommended')}</h4>
+                              <h4 className="font-['Anybody',sans-serif] text-base font-black text-ink uppercase tracking-tight">{t('dashboard.recommended')}</h4>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {recommendedTemplates.map((tmpl) => (
                                   <div
@@ -700,17 +700,17 @@ export const DashboardPage: React.FC = () => {
                                       setSelectedTemplate(tmpl);
                                       setIsOpenedFromList(true);
                                     }}
-                                    className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
+                                    className="bg-canvas border-2 border-ink shadow-brutal hover:bg-ink hover:text-canvas transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
                                   >
                                     <div className="space-y-1.5">
-                                      <h3 className="font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-[15px] leading-snug transition-colors">
+                                      <h3 className="font-bold text-ink group-hover:text-canvas text-[15px] leading-snug transition-colors">
                                         {getTemplateTitle(tmpl)}
                                       </h3>
                                       <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2">
                                         {getTemplateDesc(tmpl)}
                                       </p>
                                     </div>
-                                    <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
+                                    <div className="mt-3 pt-3 border-t border-ink/20 group-hover:border-canvas/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-ink group-hover:text-canvas">
                                       <Workflow size={13} />
                                       <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                                     </div>
@@ -722,7 +722,7 @@ export const DashboardPage: React.FC = () => {
 
                           {discoverTemplates.length > 0 && (
                             <div className="space-y-4">
-                              <h4 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase tracking-tight">{t('dashboard.discover_more_templates')}</h4>
+                              <h4 className="font-['Anybody',sans-serif] text-base font-black text-ink uppercase tracking-tight">{t('dashboard.discover_more_templates')}</h4>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {discoverTemplates.map((tmpl) => (
                                   <div
@@ -731,17 +731,17 @@ export const DashboardPage: React.FC = () => {
                                       setSelectedTemplate(tmpl);
                                       setIsOpenedFromList(true);
                                     }}
-                                    className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
+                                    className="bg-canvas border-2 border-ink shadow-brutal hover:bg-ink hover:text-canvas transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
                                   >
                                     <div className="space-y-1.5">
-                                      <h3 className="font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-[15px] leading-snug transition-colors">
+                                      <h3 className="font-bold text-ink group-hover:text-canvas text-[15px] leading-snug transition-colors">
                                         {getTemplateTitle(tmpl)}
                                       </h3>
                                       <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2">
                                         {getTemplateDesc(tmpl)}
                                       </p>
                                     </div>
-                                    <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
+                                    <div className="mt-3 pt-3 border-t border-ink/20 group-hover:border-canvas/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-ink group-hover:text-canvas">
                                       <Workflow size={13} />
                                       <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                                     </div>
@@ -753,7 +753,7 @@ export const DashboardPage: React.FC = () => {
                         </>
                       ) : (
                         <div className="space-y-4">
-                          <h4 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase tracking-tight">{getCategoryTitle()}</h4>
+                          <h4 className="font-['Anybody',sans-serif] text-base font-black text-ink uppercase tracking-tight">{getCategoryTitle()}</h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {filteredTemplates.map((tmpl) => (
                               <div
@@ -762,17 +762,17 @@ export const DashboardPage: React.FC = () => {
                                   setSelectedTemplate(tmpl);
                                   setIsOpenedFromList(true);
                                 }}
-                                className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
+                                className="bg-canvas border-2 border-ink shadow-brutal hover:bg-ink hover:text-canvas transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
                               >
                                 <div className="space-y-1.5">
-                                  <h3 className="font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-[15px] leading-snug transition-colors">
+                                  <h3 className="font-bold text-ink group-hover:text-canvas text-[15px] leading-snug transition-colors">
                                     {getTemplateTitle(tmpl)}
                                   </h3>
                                   <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2">
                                     {getTemplateDesc(tmpl)}
                                   </p>
                                 </div>
-                                <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
+                                <div className="mt-3 pt-3 border-t border-ink/20 group-hover:border-canvas/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-ink group-hover:text-canvas">
                                   <Workflow size={13} />
                                   <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                                 </div>

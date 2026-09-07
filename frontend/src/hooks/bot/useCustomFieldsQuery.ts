@@ -1,4 +1,4 @@
-﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCustomFieldsApi, saveCustomFieldsApi } from '../../api/bot';
 
 export interface CustomFieldsResponse {

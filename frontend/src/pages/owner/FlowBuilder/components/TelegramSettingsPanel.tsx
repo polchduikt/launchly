@@ -41,24 +41,24 @@ export const TelegramSettingsPanel: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-12">
-        <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
+        <Loader2 className="animate-spin text-ink" size={32} />
       </div>
     );
   }
 
   if (bots.length === 0) {
     return (
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-10 text-center max-w-lg mx-auto shadow-[4px_4px_0px_0px_#0A0A0A] space-y-4 font-['JetBrains_Mono',monospace]">
-        <div className="w-16 h-16 bg-white border-2 border-[#0A0A0A] rounded-full flex items-center justify-center mx-auto text-[#0A0A0A]">
+      <div className="bg-canvas border-2 border-ink rounded-2xl p-10 text-center max-w-lg mx-auto shadow-brutal space-y-4 font-['JetBrains_Mono',monospace]">
+        <div className="w-16 h-16 bg-white border-2 border-ink rounded-full flex items-center justify-center mx-auto text-ink">
           <Send size={32} />
         </div>
-        <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-lg uppercase">{t('settings.telegram.no_bots_title')}</h3>
+        <h3 className="font-['Anybody',sans-serif] font-black text-ink text-lg uppercase">{t('settings.telegram.no_bots_title')}</h3>
         <p className="text-xs text-slate-700 font-bold max-w-sm mx-auto leading-relaxed">
           {t('settings.telegram.no_bots_desc')}
         </p>
         <button
           onClick={() => navigate('/connect-bot')}
-          className="px-6 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+          className="px-6 py-2.5 bg-ink hover:bg-[#2A2A2A] text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
         >
           {t('settings.telegram.btn_connect')}
         </button>
@@ -69,35 +69,35 @@ export const TelegramSettingsPanel: React.FC = () => {
   return (
     <div className="space-y-6 w-full max-w-full pb-20 font-['JetBrains_Mono',monospace]">
       {showSuccessBanner && (
-        <div className="bg-emerald-200 border-2 border-[#0A0A0A] text-[#0A0A0A] p-4 rounded-2xl flex items-center justify-between shadow-[4px_4px_0px_0px_#0A0A0A] animate-in fade-in duration-200">
+        <div className="bg-emerald-200 border-2 border-ink text-ink p-4 rounded-2xl flex items-center justify-between shadow-brutal animate-in fade-in duration-200">
           <div className="flex items-center gap-2">
-            <CheckCircle2 size={16} className="text-[#0A0A0A] shrink-0" />
+            <CheckCircle2 size={16} className="text-ink shrink-0" />
             <span className="text-xs font-bold">{showSuccessBanner}</span>
           </div>
           <button
             onClick={() => setShowSuccessBanner(null)}
-            className="text-[#0A0A0A] p-1 hover:bg-white rounded-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
+            className="text-ink p-1 hover:bg-white rounded-lg transition-all cursor-pointer border-2 border-transparent hover:border-ink"
           >
             <X size={14} />
           </button>
         </div>
       )}
 
-      <div className="flex items-center justify-between bg-[#F2EBDD] border-2 border-[#0A0A0A] p-6 rounded-2xl">
+      <div className="flex items-center justify-between bg-canvas border-2 border-ink p-6 rounded-2xl">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-white border-2 border-[#0A0A0A] rounded-2xl flex items-center justify-center text-[#0A0A0A]">
+          <div className="w-12 h-12 bg-white border-2 border-ink rounded-2xl flex items-center justify-center text-ink">
             <Send size={24} />
           </div>
           <div>
-            <h1 className="font-['Anybody',sans-serif] text-lg font-black text-[#0A0A0A] uppercase tracking-tight">{t('settings.telegram.header')}</h1>
+            <h1 className="font-['Anybody',sans-serif] text-lg font-black text-ink uppercase tracking-tight">{t('settings.telegram.header')}</h1>
             <p className="text-xs text-slate-700 font-bold mt-0.5">
               {t('settings.telegram.subheader')}
             </p>
           </div>
         </div>
-        <div className="bg-white px-4 py-2 rounded-xl border-2 border-[#0A0A0A] flex items-center gap-3">
-          <span className="text-xs font-black text-[#0A0A0A] uppercase">{t('settings.telegram.status_label')}</span>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-200 text-[#0A0A0A] border-2 border-[#0A0A0A]">
+        <div className="bg-white px-4 py-2 rounded-xl border-2 border-ink flex items-center gap-3">
+          <span className="text-xs font-black text-ink uppercase">{t('settings.telegram.status_label')}</span>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-200 text-ink border-2 border-ink">
             {t('settings.telegram.enabled')}
           </span>
         </div>
@@ -111,18 +111,18 @@ export const TelegramSettingsPanel: React.FC = () => {
           return (
             <div
               key={bot.id}
-              className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-6 space-y-6"
+              className="bg-canvas border-2 border-ink rounded-2xl p-6 space-y-6"
             >
-              <div className="flex items-center justify-between pb-4 border-b-2 border-[#0A0A0A]">
+              <div className="flex items-center justify-between pb-4 border-b-2 border-ink">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] flex items-center justify-center font-black text-sm">
+                  <div className="w-10 h-10 rounded-full bg-ink text-canvas border-2 border-ink flex items-center justify-center font-black text-sm">
                     {bot.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <h2 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase flex items-center gap-2">
+                    <h2 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase flex items-center gap-2">
                       {bot.name}
                       {isMultiple && (
-                        <span className="text-[10px] font-black text-[#0A0A0A] bg-white border-2 border-[#0A0A0A] px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-black text-ink bg-white border-2 border-ink px-2 py-0.5 rounded-full">
                           {t('settings.telegram.bot_tag', { index: index + 1 })}
                         </span>
                       )}
@@ -133,19 +133,19 @@ export const TelegramSettingsPanel: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-xl border-2 border-[#0A0A0A]">
-                  <span className="text-xs font-black text-[#0A0A0A] uppercase">{t('settings.telegram.enabled')}</span>
+                <div className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-xl border-2 border-ink">
+                  <span className="text-xs font-black text-ink uppercase">{t('settings.telegram.enabled')}</span>
                   <button
                     type="button"
                     role="switch"
                     aria-checked={bot.active}
                     onClick={() => handleToggleBot(bot)}
-                    className={`w-11 h-6 rounded-full transition-all relative outline-none cursor-pointer border-2 border-[#0A0A0A] p-0.5 inline-flex items-center shrink-0 ${
-                      bot.active ? 'bg-[#0A0A0A]' : 'bg-slate-300'
+                    className={`w-11 h-6 rounded-full transition-all relative outline-none cursor-pointer border-2 border-ink p-0.5 inline-flex items-center shrink-0 ${
+                      bot.active ? 'bg-ink' : 'bg-slate-300'
                     }`}
                   >
                     <span
-                      className={`w-4 h-4 bg-white rounded-full transition-transform border border-[#0A0A0A] shrink-0 ${
+                      className={`w-4 h-4 bg-white rounded-full transition-transform border border-ink shrink-0 ${
                         bot.active ? 'translate-x-5' : 'translate-x-0'
                       }`}
                     />
@@ -155,22 +155,22 @@ export const TelegramSettingsPanel: React.FC = () => {
 
               <div className="space-y-4 pt-2">
 
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b-2 border-[#0A0A0A]/15 items-center">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b-2 border-ink/15 items-center">
                   <div className="md:col-span-3">
-                    <h4 className="font-black text-xs text-[#0A0A0A] uppercase tracking-wider">{t('settings.telegram.bot_info_title')}</h4>
+                    <h4 className="font-black text-xs text-ink uppercase tracking-wider">{t('settings.telegram.bot_info_title')}</h4>
                   </div>
                   <div className="md:col-span-5 space-y-3">
                     <div>
-                      <div className="text-[11px] font-black text-[#0A0A0A] uppercase">{t('settings.telegram.bot_name_label')}</div>
+                      <div className="text-[11px] font-black text-ink uppercase">{t('settings.telegram.bot_name_label')}</div>
                       <div className="text-xs text-slate-800 font-bold mt-0.5">{bot.name}</div>
                     </div>
                     <div>
-                      <div className="text-[11px] font-black text-[#0A0A0A] uppercase">{t('settings.telegram.bot_username_label')}</div>
+                      <div className="text-[11px] font-black text-ink uppercase">{t('settings.telegram.bot_username_label')}</div>
                       <a
                         href={`https://t.me/${username.startsWith('@') ? username.substring(1) : username}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-[#0A0A0A] font-bold underline mt-0.5 inline-block"
+                        className="text-xs text-ink font-bold underline mt-0.5 inline-block"
                       >
                         {username}
                       </a>
@@ -183,14 +183,14 @@ export const TelegramSettingsPanel: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b-2 border-[#0A0A0A]/15 items-center">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b-2 border-ink/15 items-center">
                   <div className="md:col-span-3">
-                    <h4 className="font-black text-xs text-[#0A0A0A] uppercase tracking-wider">{t('settings.telegram.opt_in_title')}</h4>
+                    <h4 className="font-black text-xs text-ink uppercase tracking-wider">{t('settings.telegram.opt_in_title')}</h4>
                   </div>
                   <div className="md:col-span-5">
                     <button
                       onClick={() => setActiveEditAutomation({ botId: bot.id, type: 'opt-in' })}
-                      className="bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] px-6 py-2 rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
+                      className="bg-white hover:bg-ink hover:text-canvas border-2 border-ink px-6 py-2 rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
                     >
                       {t('settings.telegram.btn_edit')}
                     </button>
@@ -202,14 +202,14 @@ export const TelegramSettingsPanel: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b-2 border-[#0A0A0A]/15 items-center">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b-2 border-ink/15 items-center">
                   <div className="md:col-span-3">
-                    <h4 className="font-black text-xs text-[#0A0A0A] uppercase tracking-wider">{t('settings.telegram.opt_out_title')}</h4>
+                    <h4 className="font-black text-xs text-ink uppercase tracking-wider">{t('settings.telegram.opt_out_title')}</h4>
                   </div>
                   <div className="md:col-span-5">
                     <button
                       onClick={() => setActiveEditAutomation({ botId: bot.id, type: 'opt-out' })}
-                      className="bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] px-6 py-2 rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
+                      className="bg-white hover:bg-ink hover:text-canvas border-2 border-ink px-6 py-2 rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
                     >
                       {t('settings.telegram.btn_edit')}
                     </button>
@@ -221,9 +221,9 @@ export const TelegramSettingsPanel: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b-2 border-[#0A0A0A]/15 items-center">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b-2 border-ink/15 items-center">
                   <div className="md:col-span-3">
-                    <h4 className="font-black text-xs text-[#0A0A0A] uppercase tracking-wider">{t('settings.telegram.revoke_title')}</h4>
+                    <h4 className="font-black text-xs text-ink uppercase tracking-wider">{t('settings.telegram.revoke_title')}</h4>
                   </div>
                   <div className="md:col-span-5">
                     <button
@@ -232,7 +232,7 @@ export const TelegramSettingsPanel: React.FC = () => {
                         setNewTokenValue('');
                         setTokenError(null);
                       }}
-                      className="bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] px-6 py-2.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
+                      className="bg-ink hover:bg-[#2A2A2A] text-canvas border-2 border-ink px-6 py-2.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
                     >
                       {t('settings.telegram.btn_refresh')}
                     </button>
@@ -254,7 +254,7 @@ export const TelegramSettingsPanel: React.FC = () => {
                         setActiveDeleteBot(bot);
                         setDeleteConfirmationName('');
                       }}
-                      className="bg-rose-200 hover:bg-rose-600 hover:text-white border-2 border-[#0A0A0A] text-[#0A0A0A] px-6 py-2 rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
+                      className="bg-rose-200 hover:bg-rose-600 hover:text-white border-2 border-ink text-ink px-6 py-2 rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
                     >
                       {t('settings.telegram.btn_remove')}
                     </button>
@@ -275,26 +275,26 @@ export const TelegramSettingsPanel: React.FC = () => {
       {activeTokenBot && (
         <div 
           onClick={() => setActiveTokenBot(null)}
-          className="fixed inset-0 bg-[#0A0A0A]/40 z-50 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 bg-ink/40 z-50 flex items-center justify-center p-4 cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] w-full max-w-md rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] relative space-y-4 cursor-default text-left"
+            className="bg-canvas border-2 border-ink w-full max-w-md rounded-3xl p-6 shadow-brutal-xl relative space-y-4 cursor-default text-left"
           >
             <button
               onClick={() => setActiveTokenBot(null)}
-              className="absolute top-4 right-4 text-[#0A0A0A] hover:bg-white p-1 rounded-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
+              className="absolute top-4 right-4 text-ink hover:bg-white p-1 rounded-lg transition-all cursor-pointer border-2 border-transparent hover:border-ink"
             >
               <X size={16} />
             </button>
             <div className="space-y-1">
-              <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-base uppercase">{t('settings.telegram.modal.refresh_title')}</h3>
+              <h3 className="font-['Anybody',sans-serif] font-black text-ink text-base uppercase">{t('settings.telegram.modal.refresh_title')}</h3>
               <p className="text-xs text-slate-700 font-bold">
                 {t('settings.telegram.modal.refresh_desc', { name: activeTokenBot.name })}
               </p>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black text-[#0A0A0A] uppercase">{t('settings.telegram.modal.token_label')}</label>
+              <label className="text-[10px] font-black text-ink uppercase">{t('settings.telegram.modal.token_label')}</label>
               <input
                 type="text"
                 placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
@@ -303,7 +303,7 @@ export const TelegramSettingsPanel: React.FC = () => {
                   setNewTokenValue(e.target.value);
                   if (tokenError) setTokenError(null);
                 }}
-                className="w-full px-4 py-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs focus:outline-none font-bold text-[#0A0A0A]"
+                className="w-full px-4 py-2.5 bg-white border-2 border-ink rounded-xl text-xs focus:outline-none font-bold text-ink"
               />
               {tokenError && (
                 <div className="text-xs text-rose-600 font-black flex items-center gap-1">
@@ -315,14 +315,14 @@ export const TelegramSettingsPanel: React.FC = () => {
             <div className="flex gap-3 justify-end pt-2">
               <button
                 onClick={() => setActiveTokenBot(null)}
-                className="px-4 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
+                className="px-4 py-2 bg-white hover:bg-ink hover:text-canvas border-2 border-ink rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
               >
                 {t('settings.telegram.modal.btn_cancel')}
               </button>
               <button
                 onClick={handleRefreshBotToken}
                 disabled={updateBotMutation.isPending}
-                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-75"
+                className="px-4 py-2 bg-ink hover:bg-[#2A2A2A] text-canvas border-2 border-ink rounded-xl text-xs font-black uppercase transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-75"
               >
                 {updateBotMutation.isPending ? (
                   <Loader2 className="animate-spin" size={12} />
@@ -338,15 +338,15 @@ export const TelegramSettingsPanel: React.FC = () => {
       {activeDeleteBot && (
         <div 
           onClick={() => setActiveDeleteBot(null)}
-          className="fixed inset-0 bg-[#0A0A0A]/40 z-50 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 bg-ink/40 z-50 flex items-center justify-center p-4 cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] w-full max-w-md rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] relative space-y-4 cursor-default text-left"
+            className="bg-canvas border-2 border-ink w-full max-w-md rounded-3xl p-6 shadow-brutal-xl relative space-y-4 cursor-default text-left"
           >
             <button
               onClick={() => setActiveDeleteBot(null)}
-              className="absolute top-4 right-4 text-[#0A0A0A] hover:bg-white p-1 rounded-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
+              className="absolute top-4 right-4 text-ink hover:bg-white p-1 rounded-lg transition-all cursor-pointer border-2 border-transparent hover:border-ink"
             >
               <X size={16} />
             </button>
@@ -357,7 +357,7 @@ export const TelegramSettingsPanel: React.FC = () => {
               </p>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black text-[#0A0A0A] uppercase">
+              <label className="text-[10px] font-black text-ink uppercase">
                 {t('settings.telegram.modal.remove_confirm', { name: activeDeleteBot.name })}
               </label>
               <input
@@ -365,13 +365,13 @@ export const TelegramSettingsPanel: React.FC = () => {
                 placeholder={activeDeleteBot.name}
                 value={deleteConfirmationName}
                 onChange={(e) => setDeleteConfirmationName(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs focus:outline-none font-bold text-[#0A0A0A]"
+                className="w-full px-4 py-2.5 bg-white border-2 border-ink rounded-xl text-xs focus:outline-none font-bold text-ink"
               />
             </div>
             <div className="flex gap-3 justify-end pt-2">
               <button
                 onClick={() => setActiveDeleteBot(null)}
-                className="px-4 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
+                className="px-4 py-2 bg-white hover:bg-ink hover:text-canvas border-2 border-ink rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
               >
                 {t('settings.telegram.modal.btn_cancel')}
               </button>
@@ -381,7 +381,7 @@ export const TelegramSettingsPanel: React.FC = () => {
                   deleteBotMutation.isPending ||
                   deleteConfirmationName.trim().toLowerCase() !== activeDeleteBot.name.toLowerCase()
                 }
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 border-2 border-[#0A0A0A] disabled:opacity-50 text-white rounded-xl text-xs font-black uppercase transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 border-2 border-ink disabled:opacity-50 text-white rounded-xl text-xs font-black uppercase transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed"
               >
                 {deleteBotMutation.isPending ? (
                   <Loader2 className="animate-spin" size={12} />
@@ -397,20 +397,20 @@ export const TelegramSettingsPanel: React.FC = () => {
       {activeEditAutomation && (
         <div 
           onClick={() => setActiveEditAutomation(null)}
-          className="fixed inset-0 bg-[#0A0A0A]/40 z-50 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 bg-ink/40 z-50 flex items-center justify-center p-4 cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] w-full max-w-md rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] relative space-y-4 cursor-default text-left"
+            className="bg-canvas border-2 border-ink w-full max-w-md rounded-3xl p-6 shadow-brutal-xl relative space-y-4 cursor-default text-left"
           >
             <button
               onClick={() => setActiveEditAutomation(null)}
-              className="absolute top-4 right-4 text-[#0A0A0A] hover:bg-white p-1 rounded-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
+              className="absolute top-4 right-4 text-ink hover:bg-white p-1 rounded-lg transition-all cursor-pointer border-2 border-transparent hover:border-ink"
             >
               <X size={16} />
             </button>
             <div className="space-y-1">
-              <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-base uppercase">
+              <h3 className="font-['Anybody',sans-serif] font-black text-ink text-base uppercase">
                 {t('settings.telegram.modal.edit_opt_title', {
                   type: activeEditAutomation.type === 'opt-in' ? 'Opt-in' : 'Opt-out'
                 })}
@@ -425,13 +425,13 @@ export const TelegramSettingsPanel: React.FC = () => {
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-[10px] font-black text-[#0A0A0A] uppercase">{t('settings.telegram.modal.keywords_label')}</label>
+                <label className="text-[10px] font-black text-ink uppercase">{t('settings.telegram.modal.keywords_label')}</label>
                 <div className="flex gap-2 mt-1.5">
                   {(activeEditAutomation.type === 'opt-in' ? ['Start', 'Subscribe'] : ['Stop', 'Unsubscribe']).map(
                     (kw) => (
                       <span
                         key={kw}
-                        className="bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs px-2.5 py-0.5 rounded-lg font-bold"
+                        className="bg-white border-2 border-ink text-ink text-xs px-2.5 py-0.5 rounded-lg font-bold"
                       >
                         {kw}
                       </span>
@@ -443,8 +443,8 @@ export const TelegramSettingsPanel: React.FC = () => {
                 </p>
               </div>
 
-              <div className="flex items-center justify-between py-2 border-t-2 border-[#0A0A0A]/15">
-                <span className="text-xs font-black text-[#0A0A0A] uppercase">{t('settings.telegram.modal.trigger_toggle')}</span>
+              <div className="flex items-center justify-between py-2 border-t-2 border-ink/15">
+                <span className="text-xs font-black text-ink uppercase">{t('settings.telegram.modal.trigger_toggle')}</span>
                 <button
                   type="button"
                   role="switch"
@@ -457,16 +457,16 @@ export const TelegramSettingsPanel: React.FC = () => {
                     const cur = getBotSettings(activeEditAutomation.botId);
                     updateBotSetting(activeEditAutomation.botId, key, !cur[key]);
                   }}
-                  className={`w-11 h-6 rounded-full transition-all relative outline-none cursor-pointer border-2 border-[#0A0A0A] p-0.5 inline-flex items-center shrink-0 ${
+                  className={`w-11 h-6 rounded-full transition-all relative outline-none cursor-pointer border-2 border-ink p-0.5 inline-flex items-center shrink-0 ${
                     getBotSettings(activeEditAutomation.botId)[
                       activeEditAutomation.type === 'opt-in' ? 'optInEnabled' : 'optOutEnabled'
                     ]
-                      ? 'bg-[#0A0A0A]'
+                      ? 'bg-ink'
                       : 'bg-slate-300'
                   }`}
                 >
                   <span
-                    className={`w-4 h-4 bg-white rounded-full transition-transform border border-[#0A0A0A] shrink-0 ${
+                    className={`w-4 h-4 bg-white rounded-full transition-transform border border-ink shrink-0 ${
                       getBotSettings(activeEditAutomation.botId)[
                         activeEditAutomation.type === 'opt-in' ? 'optInEnabled' : 'optOutEnabled'
                       ]
@@ -477,7 +477,7 @@ export const TelegramSettingsPanel: React.FC = () => {
                 </button>
               </div>
             </div>
-            <div className="flex gap-3 justify-end pt-2 border-t-2 border-[#0A0A0A]/15">
+            <div className="flex gap-3 justify-end pt-2 border-t-2 border-ink/15">
               <button
                 onClick={() => {
                   setShowSuccessBanner(
@@ -487,7 +487,7 @@ export const TelegramSettingsPanel: React.FC = () => {
                   );
                   setActiveEditAutomation(null);
                 }}
-                className="px-6 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
+                className="px-6 py-2 bg-ink hover:bg-[#2A2A2A] text-canvas border-2 border-ink rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
               >
                 {t('settings.telegram.modal.btn_close')}
               </button>

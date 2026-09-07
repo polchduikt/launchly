@@ -308,9 +308,9 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
               left: `${popoverState.coords.left}px`,
               zIndex: 99999,
             }}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-2xl flex overflow-hidden w-[400px] h-[260px] font-['JetBrains_Mono',monospace] text-[#0A0A0A]"
+            className="bg-canvas border-2 border-ink rounded-3xl shadow-2xl flex overflow-hidden w-[400px] h-[260px] font-['JetBrains_Mono',monospace] text-ink"
           >
-            <div className="w-[145px] bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-2.5 flex flex-col gap-1 select-none overflow-y-auto custom-scrollbar">
+            <div className="w-[145px] bg-canvas border-r-2 border-ink p-2.5 flex flex-col gap-1 select-none overflow-y-auto custom-scrollbar">
               {CONDITION_OPERATORS.map((opt) => (
                 <button
                   key={opt.value}
@@ -320,8 +320,8 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                   }}
                   className={`w-full px-2.5 py-1.5 text-left text-[11px] font-bold rounded-xl transition-all cursor-pointer border-2 ${
                     currentEditingCond.operator === opt.value
-                      ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
-                      : 'border-transparent text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
+                      ? 'bg-ink text-canvas border-ink'
+                      : 'border-transparent text-ink hover:bg-ink/10'
                   }`}
                 >
                   {opt.label}
@@ -329,13 +329,13 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
               ))}
             </div>
 
-            <div className="flex-1 p-4 flex flex-col justify-between bg-[#F2EBDD]">
+            <div className="flex-1 p-4 flex flex-col justify-between bg-canvas">
               {currentEditingCond.operator !== 'has_any_value' &&
                currentEditingCond.operator !== 'not_empty' &&
                currentEditingCond.operator !== 'is_unknown' &&
                currentEditingCond.operator !== 'empty' ? (
                 <div className="space-y-3">
-                  <label htmlFor="popoverValue" className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">
+                  <label htmlFor="popoverValue" className="block text-[10px] font-black text-ink uppercase tracking-wider font-['Anybody',sans-serif]">
                     {t('editor.condition.value_to_compare')}
                   </label>
                   <div className="relative">
@@ -345,7 +345,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                       value={currentEditingCond.value || ''}
                       onChange={(e) => updateConditionField(popoverState.branchId, popoverState.condId, 'value', e.target.value)}
                       placeholder="e.g. 1"
-                      className="w-full pl-3 pr-10 py-2 border-2 border-[#0A0A0A] focus:outline-none text-xs font-bold rounded-xl bg-white text-[#0A0A0A]"
+                      className="w-full pl-3 pr-10 py-2 border-2 border-ink focus:outline-none text-xs font-bold rounded-xl bg-white text-ink"
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center">
                       <FieldVariableSelector
@@ -360,27 +360,27 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                     </div>
                   </div>
 
-                  <label className="flex items-center gap-2 select-none cursor-pointer text-[11px] font-bold text-[#0A0A0A] mt-2.5">
+                  <label className="flex items-center gap-2 select-none cursor-pointer text-[11px] font-bold text-ink mt-2.5">
                     <input
                       type="checkbox"
                       checked={!!currentEditingCond.caseSensitive}
                       onChange={(e) => updateConditionField(popoverState.branchId, popoverState.condId, 'caseSensitive', e.target.checked)}
-                      className="rounded border-2 border-[#0A0A0A] text-[#0A0A0A] focus:ring-0 w-3.5 h-3.5"
+                      className="rounded border-2 border-ink text-ink focus:ring-0 w-3.5 h-3.5"
                     />
                     <span>{t('editor.condition.case_sensitivity')}</span>
                   </label>
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-[#0A0A0A]/60 text-xs italic font-bold">
+                <div className="h-full flex items-center justify-center text-ink/60 text-xs italic font-bold">
                   {t('editor.condition.no_value_required')}
                 </div>
               )}
 
-              <div className="flex justify-end pt-2 border-t-2 border-[#0A0A0A]/20 mt-2">
+              <div className="flex justify-end pt-2 border-t-2 border-ink/20 mt-2">
                 <button
                   type="button"
                   onClick={() => setPopoverState(null)}
-                  className="px-4 py-1.5 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 text-[#F2EBDD] rounded-xl text-xs font-black cursor-pointer transition-all border-2 border-[#0A0A0A] uppercase font-['Anybody',sans-serif]"
+                  className="px-4 py-1.5 bg-ink hover:bg-ink/90 text-canvas rounded-xl text-xs font-black cursor-pointer transition-all border-2 border-ink uppercase font-['Anybody',sans-serif]"
                 >
                   {t('editor.condition.apply')}
                 </button>

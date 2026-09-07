@@ -116,10 +116,10 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
 
 
   return (
-    <div className="h-full flex flex-col justify-between bg-[#F2EBDD] font-['JetBrains_Mono',monospace] w-full">
-      <div className="px-5 py-4 border-b-2 border-[#0A0A0A] flex justify-between items-center bg-[#F2EBDD] select-none shrink-0">
-        <h3 className="font-['Anybody',sans-serif] font-black text-xs text-[#0A0A0A] uppercase tracking-wider">{t('editor.edit_button.title')}</h3>
-        <button onClick={onClose} className="text-[#0A0A0A]/55 hover:text-[#0A0A0A] hover:bg-white p-1.5 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-[#0A0A0A]">
+    <div className="h-full flex flex-col justify-between bg-canvas font-['JetBrains_Mono',monospace] w-full">
+      <div className="px-5 py-4 border-b-2 border-ink flex justify-between items-center bg-canvas select-none shrink-0">
+        <h3 className="font-['Anybody',sans-serif] font-black text-xs text-ink uppercase tracking-wider">{t('editor.edit_button.title')}</h3>
+        <button onClick={onClose} className="text-ink/55 hover:text-ink hover:bg-white p-1.5 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-ink">
           <X size={16} />
         </button>
       </div>
@@ -127,7 +127,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 pb-24 space-y-5 custom-scrollbar flex flex-col justify-between">
         <div className="space-y-5">
           <div>
-            <label htmlFor="btnLabel" className="block text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mb-1.5">
+            <label htmlFor="btnLabel" className="block text-[10px] font-black text-ink/60 uppercase tracking-wider mb-1.5">
               {t('editor.edit_button.button_title')}
             </label>
             <div className="relative">
@@ -138,17 +138,17 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                 onChange={(e) => setLabel(e.target.value)}
                 placeholder={t('editor.edit_button.title_placeholder')}
                 maxLength={25}
-                className="w-full px-4 py-2.5 pr-12 rounded-xl border-2 border-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/15 text-xs font-bold transition-all bg-white text-[#0A0A0A]"
+                className="w-full px-4 py-2.5 pr-12 rounded-xl border-2 border-ink focus:outline-none focus:ring-2 focus:ring-ink/15 text-xs font-bold transition-all bg-white text-ink"
                 autoFocus
               />
-              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] text-[#0A0A0A]/45 font-bold">
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] text-ink/45 font-bold">
                 {label.length}/25
               </span>
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mb-2">
+            <label className="block text-[10px] font-black text-ink/60 uppercase tracking-wider mb-2">
               {t('editor.edit_button.when_pressed')}
             </label>
             {targetNode ? (() => {
@@ -158,16 +158,16 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
               const optLabel = matchedOpt?.label || t('step_option.MESSAGE.label');
               const targetNodeTitle = getTargetNodeDisplayName(targetNode);
               return (
-                <div className="flex items-center justify-between p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl animate-fade-in select-none">
+                <div className="flex items-center justify-between p-4 bg-white border-2 border-ink rounded-2xl animate-fade-in select-none">
                   <div className="flex items-center gap-3">
                     <span className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${optColorClass}`}>
                       <IconComponent size={14} />
                     </span>
                     <div>
-                      <p className="text-[10px] font-black text-[#0A0A0A]/50 uppercase tracking-wider leading-none">
+                      <p className="text-[10px] font-black text-ink/50 uppercase tracking-wider leading-none">
                         {optLabel}
                       </p>
-                      <p className="text-xs font-bold text-[#0A0A0A] mt-1">
+                      <p className="text-xs font-bold text-ink mt-1">
                         {targetNodeTitle}
                       </p>
                     </div>
@@ -180,14 +180,14 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                       }
                       setActionType('');
                     }}
-                    className="p-1.5 hover:bg-[#0A0A0A] text-[#0A0A0A]/55 hover:text-[#F2EBDD] rounded-xl transition-all cursor-pointer border border-transparent hover:border-[#0A0A0A]"
+                    className="p-1.5 hover:bg-ink text-ink/55 hover:text-canvas rounded-xl transition-all cursor-pointer border border-transparent hover:border-ink"
                   >
                     <X size={15} />
                   </button>
                 </div>
               );
             })() : (
-              <div className="space-y-1 bg-white border-2 border-[#0A0A0A] rounded-2xl p-1.5">
+              <div className="space-y-1 bg-white border-2 border-ink rounded-2xl p-1.5">
                 {actionOptions.map((opt) => {
                   const IconComponent = opt.icon;
                   const isSelected = actionType === opt.type;
@@ -198,21 +198,21 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                       onClick={() => setActionType(opt.type)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-all border cursor-pointer select-none group ${
                         isSelected
-                          ? 'border-[#0A0A0A] bg-amber-100 text-[#0A0A0A] font-black'
-                          : 'border-transparent hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] hover:border-[#0A0A0A]'
+                          ? 'border-ink bg-amber-100 text-ink font-black'
+                          : 'border-transparent hover:bg-ink hover:text-canvas text-ink hover:border-ink'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <span
                           data-block-type={opt.blockType}
-                          className={`node-icon-badge w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${opt.color}`}
+                          className={`node-icon-badge w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-ink ${opt.color}`}
                         >
                           <IconComponent size={13} />
                         </span>
                         <span className="text-[11px] font-bold">{opt.label}</span>
                       </div>
                       {opt.pro && (
-                        <span className="text-[8px] font-black bg-indigo-100 text-indigo-700 border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                        <span className="text-[8px] font-black bg-indigo-100 text-indigo-700 border border-ink px-1.5 py-0.5 rounded uppercase tracking-wider">
                           PRO
                         </span>
                       )}
@@ -225,7 +225,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
 
           {actionType === 'URL' && (
             <div className="animate-fade-in">
-              <label htmlFor="btnUrl" className="block text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mb-1.5">
+              <label htmlFor="btnUrl" className="block text-[10px] font-black text-ink/60 uppercase tracking-wider mb-1.5">
                 {t('editor.edit_button.url_link')}
               </label>
               <input
@@ -234,15 +234,15 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                 value={actionTarget}
                 onChange={(e) => setActionTarget(e.target.value)}
                 placeholder={t('editor.edit_button.url_placeholder')}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/15 text-xs font-bold transition-all bg-white text-[#0A0A0A]"
+                className="w-full px-4 py-2.5 rounded-xl border-2 border-ink focus:outline-none focus:ring-2 focus:ring-ink/15 text-xs font-bold transition-all bg-white text-ink"
               />
             </div>
           )}
 
           {actionType === 'BUY' && (
             !isPaymentConnected ? (
-              <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-5 text-center space-y-4 animate-fade-in select-none">
-                <p className="text-xs text-[#0A0A0A]/70 leading-relaxed font-bold">
+              <div className="bg-white border-2 border-ink rounded-2xl p-5 text-center space-y-4 animate-fade-in select-none">
+                <p className="text-xs text-ink/70 leading-relaxed font-bold">
                   {t('editor.edit_button.stripe_paypal_error')}
                 </p>
                 <button
@@ -250,7 +250,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                   onClick={() => {
                     window.location.href = '/settings?tab=payments';
                   }}
-                  className="w-full py-2.5 bg-[#0A0A0A] hover:bg-[#F2EBDD] text-[#F2EBDD] hover:text-[#0A0A0A] text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center border-2 border-[#0A0A0A]"
+                  className="w-full py-2.5 bg-ink hover:bg-canvas text-canvas hover:text-ink text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center border-2 border-ink"
                 >
                   {t('editor.ai.go_to_settings')}
                 </button>
@@ -258,7 +258,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
             ) : (
               <div className="animate-fade-in space-y-4">
                 <div>
-                  <label htmlFor="prodName" className="block text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mb-1.5">
+                  <label htmlFor="prodName" className="block text-[10px] font-black text-ink/60 uppercase tracking-wider mb-1.5">
                     {t('editor.edit_button.product_name')}
                   </label>
                   <input
@@ -267,12 +267,12 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                     value={productName}
                     onChange={(e) => setProductName(e.target.value)}
                     placeholder={t('editor.edit_button.product_placeholder')}
-                    className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/15 text-xs font-bold transition-all bg-white text-[#0A0A0A]"
+                    className="w-full px-4 py-2.5 rounded-xl border-2 border-ink focus:outline-none focus:ring-2 focus:ring-ink/15 text-xs font-bold transition-all bg-white text-ink"
                   />
                 </div>
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label htmlFor="prodPrice" className="block text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mb-1.5">
+                    <label htmlFor="prodPrice" className="block text-[10px] font-black text-ink/60 uppercase tracking-wider mb-1.5">
                       {t('editor.edit_button.price')}
                     </label>
                     <input
@@ -281,18 +281,18 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
                       placeholder={t('editor.edit_button.price_placeholder')}
-                      className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/15 text-xs font-bold transition-all bg-white text-[#0A0A0A]"
+                      className="w-full px-4 py-2.5 rounded-xl border-2 border-ink focus:outline-none focus:ring-2 focus:ring-ink/15 text-xs font-bold transition-all bg-white text-ink"
                     />
                   </div>
                   <div className="w-24">
-                    <label htmlFor="prodCurrency" className="block text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mb-1.5">
+                    <label htmlFor="prodCurrency" className="block text-[10px] font-black text-ink/60 uppercase tracking-wider mb-1.5">
                       {t('editor.edit_button.currency')}
                     </label>
                     <select
                       id="prodCurrency"
                       value={currency}
                       onChange={(e) => setCurrency(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl border-2 border-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/15 text-xs font-bold transition-all bg-white text-[#0A0A0A] cursor-pointer"
+                      className="w-full px-3 py-2.5 rounded-xl border-2 border-ink focus:outline-none focus:ring-2 focus:ring-ink/15 text-xs font-bold transition-all bg-white text-ink cursor-pointer"
                     >
                       <option value="UAH">UAH</option>
                       <option value="USD">USD</option>
@@ -306,7 +306,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
         </div>
 
         {actionType === 'BUY' && !isPaymentConnected ? (
-          <div className="flex items-center justify-center pt-4 border-t-2 border-[#0A0A0A]/15 select-none shrink-0 mt-6">
+          <div className="flex items-center justify-center pt-4 border-t-2 border-ink/15 select-none shrink-0 mt-6">
             <button
               type="button"
               onClick={() => {
@@ -320,7 +320,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
             </button>
           </div>
         ) : (
-          <div className="flex items-center justify-between pt-4 border-t-2 border-[#0A0A0A]/15 select-none shrink-0 mt-6">
+          <div className="flex items-center justify-between pt-4 border-t-2 border-ink/15 select-none shrink-0 mt-6">
             <button
               type="button"
               onClick={() => {
@@ -337,7 +337,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3.5 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-[#0A0A0A] text-[11px] font-black rounded-xl transition-all cursor-pointer"
+                className="px-3.5 py-2 bg-white hover:bg-ink hover:text-canvas border-2 border-ink text-ink text-[11px] font-black rounded-xl transition-all cursor-pointer"
               >
                 {t('editor.edit_button.cancel')}
               </button>
@@ -348,7 +348,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                    (actionType === 'URL' && !actionTarget.trim()) ||
                    (actionType === 'BUY' && (!productName.trim() || !price.trim()))
                  }
-                 className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 disabled:opacity-50 text-[#F2EBDD] text-[11px] font-black rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed border-2 border-[#0A0A0A]"
+                 className="px-4 py-2 bg-ink hover:bg-ink/90 disabled:opacity-50 text-canvas text-[11px] font-black rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed border-2 border-ink"
                 >
                   {t('editor.edit_button.done')}
                 </button>

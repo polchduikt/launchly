@@ -145,10 +145,10 @@ export const ProfilePanel: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden font-['JetBrains_Mono',monospace] shadow-[4px_4px_0px_#0A0A0A]">
+    <div className="bg-canvas border-2 border-ink rounded-3xl divide-y-2 divide-ink/15 overflow-hidden font-['JetBrains_Mono',monospace] shadow-brutal">
       <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
-        <div className="border-b-2 border-[#0A0A0A]/15 pb-6">
-          <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black uppercase text-[#0A0A0A] tracking-tight">
+        <div className="border-b-2 border-ink/15 pb-6">
+          <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black uppercase text-ink tracking-tight">
             {t('settings.profile.title', 'Edit Profile')}
           </h2>
           <p className="text-xs text-slate-600 font-bold mt-1">
@@ -157,22 +157,22 @@ export const ProfilePanel: React.FC = () => {
         </div>
 
         {errorMsg && (
-          <div className="p-4 bg-rose-100 border-2 border-rose-500 rounded-2xl flex items-center gap-3 text-xs font-bold text-rose-800 shadow-[2px_2px_0px_#0A0A0A]">
+          <div className="p-4 bg-rose-100 border-2 border-rose-500 rounded-2xl flex items-center gap-3 text-xs font-bold text-rose-800 shadow-brutal-sm">
             <AlertCircle size={18} className="shrink-0 text-rose-600" />
             <span className="flex-1">{errorMsg}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="p-4 bg-emerald-100 border-2 border-emerald-500 rounded-2xl flex items-center gap-3 text-xs font-bold text-emerald-800 shadow-[2px_2px_0px_#0A0A0A]">
+          <div className="p-4 bg-emerald-100 border-2 border-emerald-500 rounded-2xl flex items-center gap-3 text-xs font-bold text-emerald-800 shadow-brutal-sm">
             <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
             <span className="flex-1">{successMsg}</span>
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between pb-6 border-b-2 border-[#0A0A0A]/15">
+        <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between pb-6 border-b-2 border-ink/15">
           <div className="w-full md:w-1/3">
-            <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.profile.avatar_title', 'Profile Avatar')}</h3>
+            <h3 className="font-bold text-sm text-ink uppercase">{t('settings.profile.avatar_title', 'Profile Avatar')}</h3>
             <p className="text-xs text-slate-600 font-bold mt-1">
               {t('settings.profile.avatar_desc', 'Formats: PNG, JPG, WEBP (up to 5 MB)')}
             </p>
@@ -183,8 +183,8 @@ export const ProfilePanel: React.FC = () => {
               <SafeAvatar
                 src={avatar}
                 name={name || user?.name}
-                className="w-20 h-20 rounded-2xl object-cover border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A]"
-                fallbackClassName="w-20 h-20 rounded-2xl bg-white text-[#0A0A0A] font-black text-2xl flex items-center justify-center border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A]"
+                className="w-20 h-20 rounded-2xl object-cover border-2 border-ink shadow-brutal-md"
+                fallbackClassName="w-20 h-20 rounded-2xl bg-white text-ink font-black text-2xl flex items-center justify-center border-2 border-ink shadow-brutal-md"
               />
               {avatarUploadMutation.isPending && (
                 <div className="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center text-white">
@@ -205,7 +205,7 @@ export const ProfilePanel: React.FC = () => {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={avatarUploadMutation.isPending}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-100 text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-100 text-ink text-xs font-bold border-2 border-ink rounded-xl transition-all cursor-pointer shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
               >
                 <Camera size={14} />
                 <span>{t('settings.profile.btn_upload_avatar', 'Upload new photo')}</span>
@@ -216,7 +216,7 @@ export const ProfilePanel: React.FC = () => {
                   type="button"
                   onClick={handleRemoveAvatar}
                   disabled={avatarUploadMutation.isPending}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold border-2 border-ink rounded-xl transition-all cursor-pointer shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                 >
                   <Trash2 size={14} />
                   <span>{t('settings.profile.btn_delete_avatar', 'Remove')}</span>
@@ -226,9 +226,9 @@ export const ProfilePanel: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6 md:items-start justify-between pb-6 border-b-2 border-[#0A0A0A]/15">
+        <div className="flex flex-col md:flex-row gap-6 md:items-start justify-between pb-6 border-b-2 border-ink/15">
           <div className="w-full md:w-1/3">
-            <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.profile.details_title', 'Personal Details')}</h3>
+            <h3 className="font-bold text-sm text-ink uppercase">{t('settings.profile.details_title', 'Personal Details')}</h3>
             <p className="text-xs text-slate-600 font-bold mt-1">
               {t('settings.profile.details_desc', 'Your public name and sign-in email address')}
             </p>
@@ -236,7 +236,7 @@ export const ProfilePanel: React.FC = () => {
 
           <div className="w-full md:w-2/3 space-y-4">
             <div>
-              <label className="block text-xs font-bold text-[#0A0A0A] uppercase mb-1.5 flex items-center gap-1.5">
+              <label className="block text-xs font-bold text-ink uppercase mb-1.5 flex items-center gap-1.5">
                 <UserIcon size={13} />
                 {t('settings.profile.name_label', 'Name')}
               </label>
@@ -246,14 +246,14 @@ export const ProfilePanel: React.FC = () => {
                 onChange={(e) => setName(e.target.value)}
                 maxLength={100}
                 required
-                className="w-full max-w-md px-4 py-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]"
+                className="w-full max-w-md px-4 py-2.5 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-ink shadow-brutal-sm"
                 placeholder={t('settings.profile.placeholder_name', 'Your name')}
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between max-w-md mb-1.5">
-                <label className="block text-xs font-bold text-[#0A0A0A] uppercase flex items-center gap-1.5">
+                <label className="block text-xs font-bold text-ink uppercase flex items-center gap-1.5">
                   <Mail size={13} />
                   {t('settings.profile.email_label', 'Email')}
                 </label>
@@ -270,10 +270,10 @@ export const ProfilePanel: React.FC = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isGoogle}
                 required
-                className={`w-full max-w-md px-4 py-2.5 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold shadow-[2px_2px_0px_#0A0A0A] ${
+                className={`w-full max-w-md px-4 py-2.5 border-2 border-ink rounded-xl text-xs font-bold shadow-brutal-sm ${
                   isGoogle
                     ? 'bg-slate-100 text-slate-500 cursor-not-allowed select-none'
-                    : 'bg-white text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]'
+                    : 'bg-white text-ink focus:outline-none focus:ring-2 focus:ring-ink'
                 }`}
                 placeholder={t('settings.profile.placeholder_email', 'youremail@example.com')}
               />
@@ -287,9 +287,9 @@ export const ProfilePanel: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6 md:items-start justify-between pb-6 border-b-2 border-[#0A0A0A]/15">
+        <div className="flex flex-col md:flex-row gap-6 md:items-start justify-between pb-6 border-b-2 border-ink/15">
           <div className="w-full md:w-1/3">
-            <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">
+            <h3 className="font-bold text-sm text-ink uppercase">
               {hasPassword
                 ? t('settings.profile.password_title', 'Change Password')
                 : t('settings.profile.password_set_title', 'Set Password')}
@@ -304,7 +304,7 @@ export const ProfilePanel: React.FC = () => {
           <div className="w-full md:w-2/3 space-y-4">
             {hasPassword && (
               <div>
-                <label className="block text-xs font-bold text-[#0A0A0A] uppercase mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs font-bold text-ink uppercase mb-1.5 flex items-center gap-1.5">
                   <Lock size={13} />
                   {t('settings.profile.current_password_label', 'Current Password')}
                 </label>
@@ -313,13 +313,13 @@ export const ProfilePanel: React.FC = () => {
                     type={showCurrentPass ? 'text' : 'password'}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] pr-10"
+                    className="w-full px-4 py-2.5 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-ink shadow-brutal-sm pr-10"
                     placeholder={t('settings.profile.placeholder_current_password', 'Enter current password')}
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrentPass(!showCurrentPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#0A0A0A] cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-ink cursor-pointer"
                   >
                     {showCurrentPass ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -329,7 +329,7 @@ export const ProfilePanel: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
               <div>
-                <label className="block text-xs font-bold text-[#0A0A0A] uppercase mb-1.5">
+                <label className="block text-xs font-bold text-ink uppercase mb-1.5">
                   {t('settings.profile.new_password_label', 'New Password')}
                 </label>
                 <div className="relative">
@@ -338,13 +338,13 @@ export const ProfilePanel: React.FC = () => {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     minLength={6}
-                    className="w-full px-4 py-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] pr-10"
+                    className="w-full px-4 py-2.5 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-ink shadow-brutal-sm pr-10"
                     placeholder={t('settings.profile.placeholder_new_password', 'Min 6 characters')}
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPass(!showNewPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#0A0A0A] cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-ink cursor-pointer"
                   >
                     {showNewPass ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -352,7 +352,7 @@ export const ProfilePanel: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#0A0A0A] uppercase mb-1.5">
+                <label className="block text-xs font-bold text-ink uppercase mb-1.5">
                   {t('settings.profile.confirm_password_label', 'Confirm Password')}
                 </label>
                 <div className="relative">
@@ -360,13 +360,13 @@ export const ProfilePanel: React.FC = () => {
                     type={showConfirmPass ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] pr-10"
+                    className="w-full px-4 py-2.5 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none focus:ring-2 focus:ring-ink shadow-brutal-sm pr-10"
                     placeholder={t('settings.profile.placeholder_confirm_password', 'Repeat new password')}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPass(!showConfirmPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#0A0A0A] cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-ink cursor-pointer"
                   >
                     {showConfirmPass ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -379,7 +379,7 @@ export const ProfilePanel: React.FC = () => {
         <div className="flex items-center justify-between pt-4">
           <div className="text-xs text-slate-600 font-bold">
             {isSaving && (
-              <span className="flex items-center gap-2 text-[#0A0A0A]">
+              <span className="flex items-center gap-2 text-ink">
                 <Loader2 size={14} className="animate-spin" /> {t('settings.profile.saving', 'Saving changes...')}
               </span>
             )}
@@ -388,7 +388,7 @@ export const ProfilePanel: React.FC = () => {
           <button
             type="submit"
             disabled={!hasChanges || isSaving || avatarUploadMutation.isPending}
-            className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-[#0A0A0A] text-[#F2EBDD] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] rounded-xl transition-all shadow-[4px_4px_0px_#0A0A0A] enabled:cursor-pointer enabled:hover:translate-x-0.5 enabled:hover:translate-y-0.5 enabled:hover:shadow-[2px_2px_0px_#0A0A0A] enabled:active:translate-x-1 enabled:active:translate-y-1 enabled:active:shadow-none disabled:opacity-40 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-ink text-canvas text-xs font-black uppercase tracking-wider border-2 border-ink rounded-xl transition-all shadow-brutal enabled:cursor-pointer enabled:hover:translate-x-0.5 enabled:hover:translate-y-0.5 enabled:hover:shadow-brutal-sm enabled:active:translate-x-1 enabled:active:translate-y-1 enabled:active:shadow-none disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {isSaving ? (
               <>

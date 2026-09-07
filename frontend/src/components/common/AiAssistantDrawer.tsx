@@ -45,54 +45,54 @@ export const AiAssistantDrawer: React.FC = () => {
   return (
     <>
       <div
-        className="fixed inset-0 bg-[#0A0A0A]/40 z-50 transition-opacity duration-300 animate-fadeIn"
+        className="fixed inset-0 bg-ink/40 z-50 transition-opacity duration-300 animate-fadeIn"
         onClick={() => setIsOpen(false)}
       />
 
-      <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-[#F2EBDD] border-l-2 border-[#0A0A0A] shadow-2xl flex flex-col z-50 transition-transform duration-300 ease-out animate-slideIn font-['JetBrains_Mono',monospace] text-[#0A0A0A]">
-        <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-6 py-4 flex flex-col gap-3.5 shrink-0">
+      <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-canvas border-l-2 border-ink shadow-2xl flex flex-col z-50 transition-transform duration-300 ease-out animate-slideIn font-['JetBrains_Mono',monospace] text-ink">
+        <header className="bg-canvas border-b-2 border-ink px-6 py-4 flex flex-col gap-3.5 shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-purple-200 border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A]">
+              <div className="w-9 h-9 rounded-xl bg-purple-200 border-2 border-ink flex items-center justify-center text-ink">
                 <AiIcon size={18} />
               </div>
               <div>
-                <h3 className="text-sm font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">
+                <h3 className="text-sm font-black text-ink uppercase tracking-wider font-['Anybody',sans-serif]">
                   {onGenerate ? t('ai.drawer.title.generator') : t('ai.drawer.title.copilot')}
                 </h3>
-                <p className="text-[10px] text-[#0A0A0A]/70 font-bold uppercase">{t('ai.drawer.online_status')}</p>
+                <p className="text-[10px] text-ink/70 font-bold uppercase">{t('ai.drawer.online_status')}</p>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
+              className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm"
             >
               <X size={16} />
             </button>
           </div>
 
-          <div className="bg-white border-2 border-[#0A0A0A] p-3 rounded-2xl text-xs">
+          <div className="bg-white border-2 border-ink p-3 rounded-2xl text-xs">
             {isUsageLoading ? (
-              <div className="flex items-center justify-center gap-1.5 py-1 text-[#0A0A0A]/60">
+              <div className="flex items-center justify-center gap-1.5 py-1 text-ink/60">
                 <Loader2 size={12} className="animate-spin" />
                 <span className="font-bold text-[10px] uppercase">{t('ai.drawer.usage.loading')}</span>
               </div>
             ) : usage ? (
               <div className="space-y-1.5">
-                <div className="flex justify-between items-center font-black text-[10px] text-[#0A0A0A] uppercase tracking-wider">
+                <div className="flex justify-between items-center font-black text-[10px] text-ink uppercase tracking-wider">
                   <span>{t('ai.drawer.usage.tokens_remaining')}</span>
                   <span className="font-mono font-black text-xs">
                     {usage.remainingPercentage}%
                   </span>
                 </div>
-                <div className="h-2.5 w-full bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-full overflow-hidden">
+                <div className="h-2.5 w-full bg-canvas border-2 border-ink rounded-full overflow-hidden">
                   <div
                     className={`h-full transition-all duration-500 ${
                       usage.remainingPercentage <= 10
                         ? 'bg-rose-500'
                         : usage.remainingPercentage <= 30
                         ? 'bg-amber-500'
-                        : 'bg-[#0A0A0A]'
+                        : 'bg-ink'
                     }`}
                     style={{
                       width: `${Math.max(0, Math.min(100, usage.remainingPercentage))}%`,
@@ -100,12 +100,12 @@ export const AiAssistantDrawer: React.FC = () => {
                   />
                 </div>
                 {!isLimitReached && (
-                  <p className="text-[10px] text-[#0A0A0A]/70 font-bold leading-normal mt-1">
+                  <p className="text-[10px] text-ink/70 font-bold leading-normal mt-1">
                     {t('ai.drawer.usage.limit_desc')}
                   </p>
                 )}
                 {isLimitReached && (
-                  <div className="flex items-start gap-1.5 text-rose-800 bg-rose-200 border-2 border-[#0A0A0A] p-2 rounded-xl mt-1">
+                  <div className="flex items-start gap-1.5 text-rose-800 bg-rose-200 border-2 border-ink p-2 rounded-xl mt-1">
                     <AlertCircle size={14} className="shrink-0 mt-0.5" />
                     <span className="text-[10px] font-black uppercase">
                       {t('ai.drawer.usage.limit_reached')}
@@ -114,11 +114,11 @@ export const AiAssistantDrawer: React.FC = () => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center justify-between text-[#0A0A0A]/60 font-bold">
+              <div className="flex items-center justify-between text-ink/60 font-bold">
                 <span>{t('ai.drawer.usage.failed_load')}</span>
                 <button
                   onClick={() => refetchUsage()}
-                  className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border border-[#0A0A0A] rounded cursor-pointer"
+                  className="p-1 hover:bg-ink hover:text-canvas border border-ink rounded cursor-pointer"
                 >
                   <RefreshCw size={10} />
                 </button>
@@ -138,20 +138,20 @@ export const AiAssistantDrawer: React.FC = () => {
                     className={`flex gap-3 max-w-[88%] ${isAI ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center border-2 border-[#0A0A0A] text-xs font-bold ${
+                      className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center border-2 border-ink text-xs font-bold ${
                         isAI
-                          ? 'bg-purple-200 text-[#0A0A0A]'
-                          : 'bg-[#0A0A0A] text-[#F2EBDD]'
+                          ? 'bg-purple-200 text-ink'
+                          : 'bg-ink text-canvas'
                       }`}
                     >
                       {isAI ? <AiIcon size={15} /> : <User size={15} />}
                     </div>
 
                     <div
-                      className={`p-3.5 rounded-2xl text-xs leading-relaxed break-words border-2 border-[#0A0A0A] ${
+                      className={`p-3.5 rounded-2xl text-xs leading-relaxed break-words border-2 border-ink ${
                         isAI
-                          ? 'bg-white text-[#0A0A0A] rounded-tl-none font-medium'
-                          : 'bg-[#0A0A0A] text-[#F2EBDD] rounded-tr-none font-bold'
+                          ? 'bg-white text-ink rounded-tl-none font-medium'
+                          : 'bg-ink text-canvas rounded-tr-none font-bold'
                       }`}
                     >
                       <span className="break-all">{msg.content}</span>
@@ -162,20 +162,20 @@ export const AiAssistantDrawer: React.FC = () => {
 
               {chatMutation.isPending && (
                 <div className="flex gap-3 max-w-[85%] mr-auto">
-                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center border-2 border-[#0A0A0A] bg-purple-200 text-[#0A0A0A]">
+                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center border-2 border-ink bg-purple-200 text-ink">
                     <AiIcon size={15} />
                   </div>
-                  <div className="bg-white border-2 border-[#0A0A0A] p-3 rounded-2xl rounded-tl-none flex items-center gap-1.5">
-                    <span className="w-2 h-2 bg-[#0A0A0A] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                    <span className="w-2 h-2 bg-[#0A0A0A] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                    <span className="w-2 h-2 bg-[#0A0A0A] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  <div className="bg-white border-2 border-ink p-3 rounded-2xl rounded-tl-none flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-ink rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="w-2 h-2 bg-ink rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-2 h-2 bg-ink rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                   </div>
                 </div>
               )}
 
               {messages.length <= 2 && !chatMutation.isPending && (
                 <div className="pt-4 space-y-2 select-none">
-                  <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">
+                  <span className="text-[10px] font-black text-ink uppercase tracking-wider font-['Anybody',sans-serif]">
                     {t('ai.drawer.quick_prompts')}
                   </span>
                   <div className="grid grid-cols-1 gap-2">
@@ -184,7 +184,7 @@ export const AiAssistantDrawer: React.FC = () => {
                         key={q}
                         disabled={isLimitReached}
                         onClick={() => handleQuickQuestion(t(q))}
-                        className="w-full text-left p-3 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+                        className="w-full text-left p-3 bg-white hover:bg-ink hover:text-canvas border-2 border-ink rounded-2xl text-xs font-bold text-ink transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
                       >
                         {t(q)}
                       </button>
@@ -199,25 +199,25 @@ export const AiAssistantDrawer: React.FC = () => {
             <>
               {confirmOverwrite && !schemaMutation.isPending && (
                 <div className="space-y-4 py-6 flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-rose-200 border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A]">
+                  <div className="w-12 h-12 rounded-2xl bg-rose-200 border-2 border-ink flex items-center justify-center text-ink">
                     <AlertTriangle size={24} className="animate-pulse" />
                   </div>
                   <div className="space-y-1.5 max-w-[300px]">
-                    <h4 className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">{t('ai.drawer.overwrite.title')}</h4>
-                    <p className="text-[11px] text-[#0A0A0A]/80 leading-relaxed font-bold">
+                    <h4 className="text-xs font-black text-ink uppercase tracking-wider font-['Anybody',sans-serif]">{t('ai.drawer.overwrite.title')}</h4>
+                    <p className="text-[11px] text-ink/80 leading-relaxed font-bold">
                       {t('ai.drawer.overwrite.desc')}
                     </p>
                   </div>
                   <div className="flex gap-2.5 w-full max-w-[300px] pt-2">
                     <button
                       onClick={() => setConfirmOverwrite(false)}
-                      className="px-4 py-2.5 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black rounded-xl transition-all cursor-pointer flex-1 uppercase"
+                      className="px-4 py-2.5 bg-canvas hover:bg-ink hover:text-canvas border-2 border-ink text-ink text-xs font-black rounded-xl transition-all cursor-pointer flex-1 uppercase"
                     >
                       {t('ai.drawer.overwrite.back')}
                     </button>
                     <button
                       onClick={handleGenerate}
-                      className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 border-2 border-[#0A0A0A] text-[#F2EBDD] text-xs font-black rounded-xl transition-all cursor-pointer flex-1 uppercase"
+                      className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 border-2 border-ink text-canvas text-xs font-black rounded-xl transition-all cursor-pointer flex-1 uppercase"
                     >
                       {t('ai.drawer.overwrite.confirm')}
                     </button>
@@ -227,10 +227,10 @@ export const AiAssistantDrawer: React.FC = () => {
 
               {schemaMutation.isPending && (
                 <div className="space-y-4 py-16 flex flex-col items-center justify-center">
-                  <Loader2 className="animate-spin text-[#0A0A0A]" size={36} />
+                  <Loader2 className="animate-spin text-ink" size={36} />
                   <div className="space-y-1 text-center">
-                    <h4 className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider animate-pulse font-['Anybody',sans-serif]">{t('ai.drawer.loading.title')}</h4>
-                    <p className="text-[11px] text-[#0A0A0A]/70 font-bold">
+                    <h4 className="text-xs font-black text-ink uppercase tracking-wider animate-pulse font-['Anybody',sans-serif]">{t('ai.drawer.loading.title')}</h4>
+                    <p className="text-[11px] text-ink/70 font-bold">
                       {t('ai.drawer.loading.desc')}
                     </p>
                   </div>
@@ -239,12 +239,12 @@ export const AiAssistantDrawer: React.FC = () => {
 
               {!confirmOverwrite && !schemaMutation.isPending && (
                 <div className="space-y-5">
-                  <div className="text-xs text-[#0A0A0A]/80 leading-relaxed font-bold">
+                  <div className="text-xs text-ink/80 leading-relaxed font-bold">
                     {t('ai.drawer.prompt_desc')}
                   </div>
 
                   {schemaMutation.isError && (
-                    <div className="flex items-start gap-2 text-[#0A0A0A] bg-rose-200 border-2 border-[#0A0A0A] p-3 rounded-2xl text-xs font-bold leading-normal animate-in fade-in slide-in-from-top-1">
+                    <div className="flex items-start gap-2 text-ink bg-rose-200 border-2 border-ink p-3 rounded-2xl text-xs font-bold leading-normal animate-in fade-in slide-in-from-top-1">
                       <AlertCircle size={16} className="shrink-0 mt-0.5 text-rose-800" />
                       <div>
                         {schemaMutation.error instanceof Error
@@ -255,7 +255,7 @@ export const AiAssistantDrawer: React.FC = () => {
                   )}
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">
+                    <label className="text-[10px] font-black text-ink uppercase tracking-wider font-['Anybody',sans-serif]">
                       {t('ai.drawer.prompt_label')}
                     </label>
                     <textarea
@@ -264,12 +264,12 @@ export const AiAssistantDrawer: React.FC = () => {
                       disabled={isLimitReached}
                       rows={5}
                       placeholder={t('ai.drawer.prompt_placeholder')}
-                      className="w-full bg-white border-2 border-[#0A0A0A] rounded-2xl p-4 text-xs font-bold text-[#0A0A0A] focus:outline-none transition-colors placeholder:text-[#0A0A0A]/40 font-['JetBrains_Mono',monospace]"
+                      className="w-full bg-white border-2 border-ink rounded-2xl p-4 text-xs font-bold text-ink focus:outline-none transition-colors placeholder:text-ink/40 font-['JetBrains_Mono',monospace]"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider block font-['Anybody',sans-serif]">
+                    <span className="text-[10px] font-black text-ink uppercase tracking-wider block font-['Anybody',sans-serif]">
                       {t('ai.drawer.quick_start')}
                     </span>
                     <div className="grid grid-cols-1 gap-2.5 select-none">
@@ -278,12 +278,12 @@ export const AiAssistantDrawer: React.FC = () => {
                           key={tpl.titleKey}
                           disabled={isLimitReached}
                           onClick={() => setDescription(t(tpl.textKey))}
-                          className="w-full text-left p-3.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl transition-all cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full text-left p-3.5 bg-white hover:bg-ink hover:text-canvas border-2 border-ink rounded-2xl transition-all cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <span className="text-xs font-black text-[#0A0A0A] group-hover:text-[#F2EBDD] block mb-1 font-['Anybody',sans-serif] uppercase tracking-wider">
+                          <span className="text-xs font-black text-ink group-hover:text-canvas block mb-1 font-['Anybody',sans-serif] uppercase tracking-wider">
                             {t(tpl.titleKey)}
                           </span>
-                          <span className="text-[10px] text-[#0A0A0A]/70 font-bold line-clamp-1 group-hover:text-[#F2EBDD]/80">
+                          <span className="text-[10px] text-ink/70 font-bold line-clamp-1 group-hover:text-canvas/80">
                             {t(tpl.textKey)}
                           </span>
                         </button>
@@ -297,8 +297,8 @@ export const AiAssistantDrawer: React.FC = () => {
         </div>
 
         {activeTab === 'chat' ? (
-          <footer className="bg-[#F2EBDD] border-t-2 border-[#0A0A0A] p-4 shrink-0">
-            <div className="flex gap-2 items-end bg-white border-2 border-[#0A0A0A] rounded-2xl p-2 w-full">
+          <footer className="bg-canvas border-t-2 border-ink p-4 shrink-0">
+            <div className="flex gap-2 items-end bg-white border-2 border-ink rounded-2xl p-2 w-full">
               <textarea
                 ref={textareaRef}
                 rows={1}
@@ -311,12 +311,12 @@ export const AiAssistantDrawer: React.FC = () => {
                     ? t('ai.drawer.chat_limit_reached')
                     : t('ai.drawer.chat_placeholder')
                 }
-                className="flex-1 bg-transparent pl-2 py-1.5 text-xs font-bold text-[#0A0A0A] focus:outline-none resize-none max-h-32 overflow-y-auto leading-relaxed placeholder:text-[#0A0A0A]/40 disabled:opacity-55 disabled:cursor-not-allowed font-['JetBrains_Mono',monospace]"
+                className="flex-1 bg-transparent pl-2 py-1.5 text-xs font-bold text-ink focus:outline-none resize-none max-h-32 overflow-y-auto leading-relaxed placeholder:text-ink/40 disabled:opacity-55 disabled:cursor-not-allowed font-['JetBrains_Mono',monospace]"
               />
               <button
                 onClick={() => handleSend()}
                 disabled={isLimitReached || chatMutation.isPending || !inputValue.trim()}
-                className="p-2.5 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 disabled:bg-[#0A0A0A]/20 text-[#F2EBDD] disabled:text-[#0A0A0A]/40 rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center shrink-0 mb-0.5 border-2 border-[#0A0A0A]"
+                className="p-2.5 bg-ink hover:bg-ink/90 disabled:bg-ink/20 text-canvas disabled:text-ink/40 rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center shrink-0 mb-0.5 border-2 border-ink"
               >
                 <Send size={14} />
               </button>
@@ -324,17 +324,17 @@ export const AiAssistantDrawer: React.FC = () => {
           </footer>
         ) : (
           !confirmOverwrite && !schemaMutation.isPending && (
-            <footer className="bg-[#F2EBDD] border-t-2 border-[#0A0A0A] p-4 shrink-0 flex gap-3 justify-end">
+            <footer className="bg-canvas border-t-2 border-ink p-4 shrink-0 flex gap-3 justify-end">
               <button
                 onClick={() => setDescription('')}
-                className="px-4 py-2.5 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black rounded-xl transition-all cursor-pointer uppercase font-['Anybody',sans-serif]"
+                className="px-4 py-2.5 bg-canvas hover:bg-ink hover:text-canvas border-2 border-ink text-ink text-xs font-black rounded-xl transition-all cursor-pointer uppercase font-['Anybody',sans-serif]"
               >
                 {t('ai.drawer.clear')}
               </button>
               <button
                 disabled={!description.trim() || isLimitReached}
                 onClick={handleGenerate}
-                className="flex items-center gap-1.5 px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 disabled:bg-[#0A0A0A]/20 disabled:text-[#0A0A0A]/40 text-[#F2EBDD] text-xs font-black rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer disabled:cursor-not-allowed uppercase tracking-wider font-['Anybody',sans-serif]"
+                className="flex items-center gap-1.5 px-5 py-2.5 bg-ink hover:bg-ink/90 disabled:bg-ink/20 disabled:text-ink/40 text-canvas text-xs font-black rounded-xl border-2 border-ink transition-all cursor-pointer disabled:cursor-not-allowed uppercase tracking-wider font-['Anybody',sans-serif]"
               >
                 <AiIcon size={14} />
                 <span>{t('ai.drawer.generate_btn')}</span>

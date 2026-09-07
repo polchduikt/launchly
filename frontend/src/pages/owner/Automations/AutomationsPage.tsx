@@ -476,16 +476,16 @@ export const AutomationsPage: React.FC = () => {
         onConfirm={() => confirmDialog?.onConfirm()}
         onCancel={() => setConfirmDialog(null)}
       />
-      <div className="flex h-full min-h-screen bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
-        <aside className="w-60 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-4 shrink-0 hidden md:block self-stretch">
-          <h2 className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-4 px-2 font-['Anybody',sans-serif]">{t('automations.sidebar.title')}</h2>
+      <div className="flex h-full min-h-screen bg-canvas font-['JetBrains_Mono',monospace]">
+        <aside className="w-60 bg-canvas border-r-2 border-ink p-4 shrink-0 hidden md:block self-stretch">
+          <h2 className="text-xs font-black text-ink uppercase tracking-wider mb-4 px-2 font-['Anybody',sans-serif]">{t('automations.sidebar.title')}</h2>
           <nav className="space-y-1">
             <button
               onClick={() => setSelectedFolderId(null)}
               className={`w-full flex items-center px-3 py-2.5 rounded-xl text-xs font-black uppercase text-left transition-all ${
                 selectedFolderId === null
-                  ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A]'
-                  : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
+                  ? 'bg-ink text-canvas border-2 border-ink'
+                  : 'text-ink hover:bg-white border-2 border-transparent'
               }`}
             >
               {t('automations.sidebar.my_automations')}
@@ -493,7 +493,7 @@ export const AutomationsPage: React.FC = () => {
           </nav>
 
           <div className="mt-8">
-            <div className="flex items-center justify-between px-2 mb-2 text-xs font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">
+            <div className="flex items-center justify-between px-2 mb-2 text-xs font-black text-ink uppercase tracking-wider font-['Anybody',sans-serif]">
               <span>{t('automations.sidebar.folders')}</span>
             </div>
             <nav className="space-y-1">
@@ -501,15 +501,15 @@ export const AutomationsPage: React.FC = () => {
                 onClick={() => setSelectedFolderId(null)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-black uppercase text-left transition-all ${
                   selectedFolderId === null
-                    ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A]'
-                    : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
+                    ? 'bg-ink text-canvas border-2 border-ink'
+                    : 'text-ink hover:bg-white border-2 border-transparent'
                 }`}
               >
                 <div className="flex items-center">
                   <FolderOpen size={14} className="mr-2 shrink-0" />
                   <span>{t('automations.sidebar.all_automations')}</span>
                 </div>
-                <span className="text-[10px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-1.5 py-0.5 rounded-md">
+                <span className="text-[10px] font-black text-ink bg-white border border-ink px-1.5 py-0.5 rounded-md">
                   {getFolderBotCount(null)}
                 </span>
               </button>
@@ -522,19 +522,19 @@ export const AutomationsPage: React.FC = () => {
                     onClick={() => setSelectedFolderId(folder.id)}
                     className={`flex-1 flex items-center px-3 py-2.5 rounded-xl text-xs font-black uppercase text-left transition-all truncate ${
                       selectedFolderId === folder.id
-                        ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A]'
-                        : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
+                        ? 'bg-ink text-canvas border-2 border-ink'
+                        : 'text-ink hover:bg-white border-2 border-transparent'
                     }`}
                   >
                     <FolderIcon size={14} className="mr-2 shrink-0" />
                     <span className="truncate mr-1">{folder.name}</span>
-                    <span className="ml-auto text-[10px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-1.5 py-0.5 rounded-md">
+                    <span className="ml-auto text-[10px] font-black text-ink bg-white border border-ink px-1.5 py-0.5 rounded-md">
                       {getFolderBotCount(folder.id)}
                     </span>
                   </button>
                   <button
                     onClick={() => handleDeleteFolder(folder.id)}
-                    className="p-2 text-[#0A0A0A] hover:bg-rose-600 hover:text-white opacity-0 group-hover:opacity-100 transition-all cursor-pointer rounded-lg shrink-0 border border-transparent hover:border-[#0A0A0A]"
+                    className="p-2 text-ink hover:bg-rose-600 hover:text-white opacity-0 group-hover:opacity-100 transition-all cursor-pointer rounded-lg shrink-0 border border-transparent hover:border-ink"
                     title={t('automations.sidebar.delete_folder')}
                   >
                     <Trash2 size={12} />
@@ -545,15 +545,15 @@ export const AutomationsPage: React.FC = () => {
           </div>
         </aside>
 
-        <div className="flex-1 p-6 md:p-10 max-w-5xl mx-auto space-y-6 bg-[#F2EBDD]">
-          <div className="flex items-center justify-between pb-4 border-b-2 border-[#0A0A0A]">
-            <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight">{t('automations.title')}</h1>
+        <div className="flex-1 p-6 md:p-10 max-w-5xl mx-auto space-y-6 bg-canvas">
+          <div className="flex items-center justify-between pb-4 border-b-2 border-ink">
+            <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-ink uppercase tracking-tight">{t('automations.title')}</h1>
           </div>
 
-          <div className="space-y-6 bg-white border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[4px_4px_0px_0px_#0A0A0A]">
+          <div className="space-y-6 bg-white border-2 border-ink rounded-3xl p-6 shadow-brutal">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h2 className="font-['Anybody',sans-serif] text-lg font-black text-[#0A0A0A] uppercase tracking-tight">
+                <h2 className="font-['Anybody',sans-serif] text-lg font-black text-ink uppercase tracking-tight">
                   {selectedFolderId
                     ? folders.find((f) => f.id === selectedFolderId)?.name || t('automations.sidebar.folders')
                     : t('automations.sidebar.my_automations')}
@@ -562,14 +562,14 @@ export const AutomationsPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsNewFolderModalOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] bg-white hover:bg-slate-100 border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
+                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-ink bg-white hover:bg-slate-100 border-2 border-ink rounded-xl transition-all cursor-pointer shadow-brutal-sm"
                 >
                   <FolderPlus size={14} />
                   <span>{t('automations.btn.new_folder')}</span>
                 </button>
                 <button
                   onClick={() => setIsNewBotModalOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-white bg-[#0A0A0A] hover:bg-[#2A2A2A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
+                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-white bg-ink hover:bg-[#2A2A2A] border-2 border-ink rounded-xl transition-all cursor-pointer shadow-brutal-sm"
                 >
                   <Plus size={14} />
                   <span>{t('automations.btn.new_automation')}</span>
@@ -579,34 +579,34 @@ export const AutomationsPage: React.FC = () => {
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
               <div className="relative max-w-sm w-full">
-                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]" />
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink" />
                 <input
                   type="text"
                   placeholder={t('automations.search_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold focus:outline-none bg-white text-ink"
                 />
               </div>
 
-              <div className="flex items-center justify-between md:justify-end gap-6 text-xs text-[#0A0A0A] font-black uppercase select-none">
+              <div className="flex items-center justify-between md:justify-end gap-6 text-xs text-ink font-black uppercase select-none">
                 <button
                   onClick={handleBulkDelete}
                   className={`flex items-center gap-1.5 transition-all cursor-pointer ${
                     selectedBotIds.size > 0 
                       ? 'text-rose-600 font-black' 
-                      : 'text-[#0A0A0A] hover:underline'
+                      : 'text-ink hover:underline'
                   }`}
                 >
                   <Trash2 size={14} className={selectedBotIds.size > 0 ? 'text-rose-600' : ''} />
                   <span>{t('automations.btn.trash')}</span>
                 </button>
-                <div className="h-4 w-0.5 bg-[#0A0A0A] hidden md:block" />
-                <div className="flex items-center border-2 border-[#0A0A0A] rounded-xl p-0.5 bg-[#F2EBDD]">
+                <div className="h-4 w-0.5 bg-ink hidden md:block" />
+                <div className="flex items-center border-2 border-ink rounded-xl p-0.5 bg-canvas">
                   <button
                     onClick={() => setViewMode('list')}
                     className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                      viewMode === 'list' ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A] hover:bg-white'
+                      viewMode === 'list' ? 'bg-ink text-canvas' : 'text-ink hover:bg-white'
                     }`}
                   >
                     <List size={14} />
@@ -614,7 +614,7 @@ export const AutomationsPage: React.FC = () => {
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                      viewMode === 'grid' ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A] hover:bg-white'
+                      viewMode === 'grid' ? 'bg-ink text-canvas' : 'text-ink hover:bg-white'
                     }`}
                   >
                     <LayoutGrid size={14} />
@@ -624,8 +624,8 @@ export const AutomationsPage: React.FC = () => {
             </div>
 
             {isLoading ? (
-              <div className="py-12 flex flex-col items-center justify-center gap-2 text-xs font-bold text-[#0A0A0A]">
-                <Loader2 size={24} className="animate-spin text-[#0A0A0A]" />
+              <div className="py-12 flex flex-col items-center justify-center gap-2 text-xs font-bold text-ink">
+                <Loader2 size={24} className="animate-spin text-ink" />
                 <span>{t('automations.loading')}</span>
               </div>
             ) : filteredBots.length > 0 ? (
@@ -633,13 +633,13 @@ export const AutomationsPage: React.FC = () => {
                 <div className="overflow-x-auto pt-2">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b-2 border-[#0A0A0A] text-[#0A0A0A] text-[10px] font-black uppercase tracking-wider">
+                      <tr className="border-b-2 border-ink text-ink text-[10px] font-black uppercase tracking-wider">
                         <th className="py-3 px-4 w-12 text-center">
                           <input
                             type="checkbox"
                             checked={filteredBots.length > 0 && filteredBots.every((b) => selectedBotIds.has(b.id))}
                             onChange={handleToggleSelectAll}
-                            className="rounded border-2 border-[#0A0A0A] text-[#0A0A0A] focus:ring-0"
+                            className="rounded border-2 border-ink text-ink focus:ring-0"
                           />
                         </th>
                         <th className="py-3 px-2">{t('automations.table.name')}</th>
@@ -661,7 +661,7 @@ export const AutomationsPage: React.FC = () => {
                             setActiveBotId(bot.id);
                             navigate('/builder');
                           }}
-                          className={`border-b-2 border-[#0A0A0A] transition-all group cursor-pointer ${
+                          className={`border-b-2 border-ink transition-all group cursor-pointer ${
                             bot.blocked
                               ? 'bg-rose-50 hover:bg-rose-100/60'
                               : 'hover:bg-slate-50'
@@ -673,14 +673,14 @@ export const AutomationsPage: React.FC = () => {
                                 type="checkbox"
                                 checked={selectedBotIds.has(bot.id)}
                                 onChange={() => handleToggleSelectBot(bot.id)}
-                                className="rounded border-2 border-[#0A0A0A] text-[#0A0A0A] focus:ring-0"
+                                className="rounded border-2 border-ink text-ink focus:ring-0"
                               />
                             )}
                           </td>
                           <td className="py-4 px-2">
                             <div className="flex items-center gap-2.5">
                               <span
-                                className={`w-3 h-3 rounded-full shrink-0 border border-[#0A0A0A] ${
+                                className={`w-3 h-3 rounded-full shrink-0 border border-ink ${
                                   bot.blocked
                                     ? 'bg-rose-500'
                                     : bot.active
@@ -690,20 +690,20 @@ export const AutomationsPage: React.FC = () => {
                               />
                               <div className="flex flex-col min-w-0">
                                 <div className="flex items-center space-x-2">
-                                  <span className="font-bold text-xs text-[#0A0A0A] uppercase hover:underline truncate max-w-xs md:max-w-md">
+                                  <span className="font-bold text-xs text-ink uppercase hover:underline truncate max-w-xs md:max-w-md">
                                     {bot.name}
                                   </span>
                                   {bot.blocked ? (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-rose-600 text-white border border-[#0A0A0A] uppercase shrink-0">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-rose-600 text-white border border-ink uppercase shrink-0">
                                       <Lock size={10} />
                                       {t('status.blocked') || t('admin.status_blocked') || 'Blocked'}
                                     </span>
                                   ) : showBadge && bot.templateName ? (
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-ink uppercase shrink-0">
                                       [{t('template.badge', 'ШАБЛОН')} {bot.templateName}]
                                     </span>
                                   ) : showBadge && bot.isTemplate ? (
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-ink uppercase shrink-0">
                                       [{t('template.badge', 'ШАБЛОН')}]
                                     </span>
                                   ) : null}
@@ -720,9 +720,9 @@ export const AutomationsPage: React.FC = () => {
                               </div>
                             </div>
                           </td>
-                          {showRuns && <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">{bot.runs ?? 1}</td>}
+                          {showRuns && <td className="py-4 px-2 w-28 text-xs font-bold text-ink text-center">{bot.runs ?? 1}</td>}
                           {showCtr && (
-                            <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">
+                            <td className="py-4 px-2 w-28 text-xs font-bold text-ink text-center">
                               {(bot.runs ?? 0) === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
                             </td>
                           )}
@@ -731,7 +731,7 @@ export const AutomationsPage: React.FC = () => {
                             {bot.role !== 'Viewer' && (
                               <button
                                 onClick={(e) => handleMenuClick(e, bot.id)}
-                                className="text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] p-1.5 rounded-lg transition-all cursor-pointer border border-transparent hover:border-[#0A0A0A]"
+                                className="text-ink hover:bg-ink hover:text-canvas p-1.5 rounded-lg transition-all cursor-pointer border border-transparent hover:border-ink"
                               >
                                 <MoreVertical size={16} />
                               </button>
@@ -755,7 +755,7 @@ export const AutomationsPage: React.FC = () => {
                         setActiveBotId(bot.id);
                         navigate('/builder');
                       }}
-                      className={`rounded-2xl p-5 border-2 border-[#0A0A0A] transition-all cursor-pointer flex flex-col justify-between relative group min-h-[160px] shadow-[4px_4px_0px_0px_#0A0A0A] hover:shadow-[6px_6px_0px_0px_#0A0A0A] hover:-translate-y-0.5 ${
+                      className={`rounded-2xl p-5 border-2 border-ink transition-all cursor-pointer flex flex-col justify-between relative group min-h-[160px] shadow-brutal hover:shadow-brutal-lg hover:-translate-y-0.5 ${
                         bot.blocked
                           ? 'bg-rose-50'
                           : 'bg-white'
@@ -765,7 +765,7 @@ export const AutomationsPage: React.FC = () => {
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-center gap-2 min-w-0">
                             <span
-                              className={`w-3 h-3 rounded-full shrink-0 border border-[#0A0A0A] ${
+                              className={`w-3 h-3 rounded-full shrink-0 border border-ink ${
                                 bot.blocked
                                   ? 'bg-rose-500'
                                   : bot.active
@@ -773,20 +773,20 @@ export const AutomationsPage: React.FC = () => {
                                   : 'bg-slate-300'
                               }`}
                             />
-                            <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] group-hover:underline text-sm uppercase truncate">
+                            <h3 className="font-['Anybody',sans-serif] font-black text-ink group-hover:underline text-sm uppercase truncate">
                               {bot.name}
                             </h3>
                             {bot.blocked ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-rose-600 text-white border border-[#0A0A0A] uppercase shrink-0">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-rose-600 text-white border border-ink uppercase shrink-0">
                                 <Lock size={10} />
                                 {t('status.blocked') || t('admin.status_blocked') || 'Blocked'}
                               </span>
                             ) : showBadge && bot.templateName ? (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-ink uppercase shrink-0">
                                 [{t('template.badge', 'ШАБЛОН')} {bot.templateName}]
                               </span>
                             ) : showBadge && bot.isTemplate ? (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-ink uppercase shrink-0">
                                 [{t('template.badge', 'ШАБЛОН')}]
                               </span>
                             ) : null}
@@ -795,7 +795,7 @@ export const AutomationsPage: React.FC = () => {
                             <div className="relative inline-block text-left shrink-0" onClick={(e) => e.stopPropagation()}>
                               <button
                                 onClick={(e) => handleMenuClick(e, bot.id)}
-                                className="text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] p-1.5 rounded-lg transition-all cursor-pointer border border-transparent hover:border-[#0A0A0A]"
+                                className="text-ink hover:bg-ink hover:text-canvas p-1.5 rounded-lg transition-all cursor-pointer border border-transparent hover:border-ink"
                               >
                                 <MoreVertical size={16} />
                               </button>
@@ -809,7 +809,7 @@ export const AutomationsPage: React.FC = () => {
                         </p>
                       </div>
 
-                      <div className="flex items-center justify-between border-t-2 border-[#0A0A0A] pt-3 mt-4 text-[11px] text-[#0A0A0A] font-bold">
+                      <div className="flex items-center justify-between border-t-2 border-ink pt-3 mt-4 text-[11px] text-ink font-bold">
                         <div className="flex items-center gap-3">
                           {showRuns && (
                             <span>
@@ -831,7 +831,7 @@ export const AutomationsPage: React.FC = () => {
                 </div>
               )
             ) : (
-              <div className="py-12 text-center text-xs font-bold text-[#0A0A0A] italic">
+              <div className="py-12 text-center text-xs font-bold text-ink italic">
                 {t('automations.no_automations')}
               </div>
             )}
@@ -846,7 +846,7 @@ export const AutomationsPage: React.FC = () => {
             top: menuCoords.top,
             left: menuCoords.left,
           }}
-          className="w-56 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[6px_6px_0px_0px_#0A0A0A] z-[100] py-1.5 text-left font-['JetBrains_Mono',monospace]"
+          className="w-56 bg-canvas border-2 border-ink rounded-2xl shadow-brutal-lg z-[100] py-1.5 text-left font-['JetBrains_Mono',monospace]"
           onClick={(e) => e.stopPropagation()}
         >
           {(() => {
@@ -859,7 +859,7 @@ export const AutomationsPage: React.FC = () => {
                     {activeMenuBot.active ? (
                       <button
                         onClick={() => handleStopBot(activeMenuBot.id)}
-                        className="w-full px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] flex items-center gap-2 transition-all cursor-pointer"
+                        className="w-full px-4 py-2 text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas flex items-center gap-2 transition-all cursor-pointer"
                       >
                         <Square size={13} className="fill-current" />
                         <span>{t('automations.menu.stop')}</span>
@@ -867,7 +867,7 @@ export const AutomationsPage: React.FC = () => {
                     ) : (
                       <button
                         onClick={() => handleStartBot(activeMenuBot.id)}
-                        className="w-full px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] flex items-center gap-2 transition-all cursor-pointer"
+                        className="w-full px-4 py-2 text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas flex items-center gap-2 transition-all cursor-pointer"
                       >
                         <Play size={13} className="fill-current" />
                         <span>{t('automations.menu.start')}</span>
@@ -884,7 +884,7 @@ export const AutomationsPage: React.FC = () => {
                         setActiveMenuBotId(null);
                         setMenuCoords(null);
                       }}
-                      className="w-full px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] flex items-center gap-2 transition-all cursor-pointer"
+                      className="w-full px-4 py-2 text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas flex items-center gap-2 transition-all cursor-pointer"
                     >
                       <Pencil size={13} />
                       <span>{t('automations.menu.edit')}</span>
@@ -897,12 +897,12 @@ export const AutomationsPage: React.FC = () => {
                         setActiveMenuBotId(null);
                         setMenuCoords(null);
                       }}
-                      className="w-full px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] flex items-center gap-2 transition-all cursor-pointer"
+                      className="w-full px-4 py-2 text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas flex items-center gap-2 transition-all cursor-pointer"
                     >
                       <FolderIcon size={13} />
                       <span>{t('automations.menu.move')}</span>
                     </button>
-                    <div className="h-0.5 bg-[#0A0A0A] my-1" />
+                    <div className="h-0.5 bg-ink my-1" />
                   </>
                 )}
                 <button

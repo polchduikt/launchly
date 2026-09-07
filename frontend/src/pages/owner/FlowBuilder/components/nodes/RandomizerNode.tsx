@@ -47,9 +47,9 @@ const RandomizerNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-ink rounded-3xl transition-all relative overflow-visible isolate ${
         selected
-          ? 'shadow-lg ring-2 ring-[#0A0A0A]'
+          ? 'shadow-lg ring-2 ring-ink'
           : 'shadow-md'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >

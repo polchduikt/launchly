@@ -48,13 +48,13 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
           onClose();
         }
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/40 animate-fade-in font-['JetBrains_Mono',monospace]"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 animate-fade-in font-['JetBrains_Mono',monospace]"
     >
-      <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] rounded-3xl max-w-lg w-full overflow-hidden text-[#0A0A0A] relative">
+      <div className="bg-canvas border-4 border-ink shadow-brutal-2xl rounded-3xl max-w-lg w-full overflow-hidden text-ink relative">
         
-        <div className="p-6 border-b-2 border-[#0A0A0A] flex items-center justify-between bg-rose-100">
+        <div className="p-6 border-b-2 border-ink flex items-center justify-between bg-rose-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-rose-600 text-white border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
+            <div className="w-10 h-10 rounded-2xl bg-rose-600 text-white border-2 border-ink flex items-center justify-center shrink-0 shadow-brutal-sm">
               <AlertOctagon size={22} />
             </div>
             <div>
@@ -69,7 +69,7 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
           <button
             onClick={onClose}
             disabled={submitting}
-            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
+            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm"
           >
             <X size={16} />
           </button>
@@ -96,9 +96,9 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
           )}
 
           <div className="pt-2 space-y-2">
-            <label className="block text-[11px] font-extrabold uppercase text-[#0A0A0A] leading-tight">
+            <label className="block text-[11px] font-extrabold uppercase text-ink leading-tight">
               {t('settings.delete_modal.confirm_label', 'Для підтвердження видалення введіть слово')}{' '}
-              <span className="bg-rose-200 px-2 py-0.5 rounded-md border border-[#0A0A0A] font-black text-rose-900 select-all">
+              <span className="bg-rose-200 px-2 py-0.5 rounded-md border border-ink font-black text-rose-900 select-all">
                 {confirmDeleteWord}
               </span>:
             </label>
@@ -107,16 +107,16 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               placeholder={t('settings.delete_modal.confirm_placeholder', { word: confirmDeleteWord })}
-              className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] bg-white text-xs font-black uppercase text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-rose-500 placeholder:text-slate-400 placeholder:font-bold tracking-wider"
+              className="w-full px-3.5 py-2.5 rounded-xl border-2 border-ink bg-white text-xs font-black uppercase text-ink focus:outline-none focus:ring-2 focus:ring-rose-500 placeholder:text-slate-400 placeholder:font-bold tracking-wider"
             />
           </div>
         </div>
 
-        <div className="p-5 border-t-2 border-[#0A0A0A] bg-white flex items-center justify-end gap-3">
+        <div className="p-5 border-t-2 border-ink bg-white flex items-center justify-end gap-3">
           <button
             onClick={onClose}
             disabled={submitting}
-            className="px-5 py-2.5 bg-white hover:bg-slate-100 text-[#0A0A0A] border-2 border-[#0A0A0A] text-xs font-extrabold rounded-xl transition-all cursor-pointer"
+            className="px-5 py-2.5 bg-white hover:bg-slate-100 text-ink border-2 border-ink text-xs font-extrabold rounded-xl transition-all cursor-pointer"
           >
             {t('common.cancel', 'Скасувати')}
           </button>
@@ -124,7 +124,7 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
           <button
             onClick={handleDeleteAccount}
             disabled={submitting || !isConfirmed}
-            className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white border-2 border-ink shadow-brutal-md hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? (
               <>

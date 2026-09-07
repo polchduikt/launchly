@@ -147,16 +147,16 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedu
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 select-none"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-xl w-96 p-6 animate-in fade-in zoom-in-95 duration-150 font-['JetBrains_Mono',monospace]"
+        className="bg-canvas border-2 border-ink rounded-2xl shadow-xl w-96 p-6 animate-in fade-in zoom-in-95 duration-150 font-['JetBrains_Mono',monospace]"
       >
-        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-wider mb-2">
+        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-ink uppercase tracking-wider mb-2">
           {t('broadcast.schedule.title')}
         </h3>
-        <p className="text-xs text-[#0A0A0A]/65 font-bold mb-4 leading-relaxed">
+        <p className="text-xs text-ink/65 font-bold mb-4 leading-relaxed">
           {t('broadcast.schedule.description')}
         </p>
 
@@ -165,21 +165,21 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedu
           value={dateTime}
           min={minDateTime}
           onChange={(e) => setDateTime(e.target.value)}
-          className="w-full px-4 py-3 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/20 transition-all text-[#0A0A0A] mb-6 cursor-pointer"
+          className="w-full px-4 py-3 bg-white border-2 border-ink rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-ink/20 transition-all text-ink mb-6 cursor-pointer"
         />
 
         <div className="flex gap-3">
           <button
             onClick={onClose}
             disabled={isSubmitting}
-            className="flex-1 py-2.5 border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50"
+            className="flex-1 py-2.5 border-2 border-ink hover:bg-ink hover:text-canvas text-ink font-black text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50"
           >
             {t('broadcast.schedule.cancel')}
           </button>
           <button
             onClick={handleScheduleSubmit}
             disabled={!dateTime || !isDateTimeInFuture || isSubmitting}
-            className="flex-1 py-2.5 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 text-[#F2EBDD] font-black text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 border-2 border-[#0A0A0A]"
+            className="flex-1 py-2.5 bg-ink hover:bg-ink/90 text-canvas font-black text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 border-2 border-ink"
           >
             {isSubmitting && <Loader2 size={12} className="animate-spin" />}
             <span>{t('broadcast.schedule.submit')}</span>
@@ -487,12 +487,12 @@ const BroadcastBuilderInner: React.FC = () => {
 
   if (!activeBotId) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#F2EBDD] p-8 text-center space-y-4 font-['JetBrains_Mono',monospace]">
-        <AlertTriangle className="text-[#0A0A0A]" size={48} />
-        <h1 className="text-lg font-black text-[#0A0A0A] font-['Anybody',sans-serif] uppercase">{t('broadcast.builder.no_active_bot')}</h1>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-canvas p-8 text-center space-y-4 font-['JetBrains_Mono',monospace]">
+        <AlertTriangle className="text-ink" size={48} />
+        <h1 className="text-lg font-black text-ink font-['Anybody',sans-serif] uppercase">{t('broadcast.builder.no_active_bot')}</h1>
         <button
           onClick={() => window.location.assign(ROUTES.HOME)}
-          className="px-5 py-2 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-sm font-black hover:bg-[#F2EBDD] hover:text-[#0A0A0A] transition-all cursor-pointer"
+          className="px-5 py-2 bg-ink text-canvas border-2 border-ink rounded-xl text-sm font-black hover:bg-canvas hover:text-ink transition-all cursor-pointer"
         >
           {t('broadcast.builder.select_bot')}
         </button>
@@ -502,25 +502,25 @@ const BroadcastBuilderInner: React.FC = () => {
 
   if (isCampaignsLoading || !campaign) {
     return (
-      <div className="min-h-screen bg-[#F2EBDD] flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
+      <div className="min-h-screen bg-canvas flex items-center justify-center">
+        <Loader2 className="animate-spin text-ink" size={32} />
       </div>
     );
   }
 
   return (
     <DashboardLayout>
-      <div className="h-screen w-full flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace] overflow-hidden relative">
-        <header className="h-16 border-b-2 border-[#0A0A0A] bg-[#F2EBDD] px-6 flex items-center justify-between z-10 shrink-0 select-none">
+      <div className="h-screen w-full flex flex-col bg-canvas font-['JetBrains_Mono',monospace] overflow-hidden relative">
+        <header className="h-16 border-b-2 border-ink bg-canvas px-6 flex items-center justify-between z-10 shrink-0 select-none">
         <div className="flex items-center gap-4">
           <button
             onClick={() => window.location.assign(ROUTES.BROADCASTS)}
-            className="w-9 h-9 rounded-xl border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] hover:text-[#F2EBDD] hover:bg-[#0A0A0A] transition-all cursor-pointer shadow-sm"
+            className="w-9 h-9 rounded-xl border-2 border-ink flex items-center justify-center text-ink hover:text-canvas hover:bg-ink transition-all cursor-pointer shadow-sm"
           >
             <ArrowLeft size={16} />
           </button>
 
-          <div className="flex items-center gap-1.5 text-[#0A0A0A]/60 text-xs font-bold">
+          <div className="flex items-center gap-1.5 text-ink/60 text-xs font-bold">
             <span>{t('broadcast.builder.breadcrumbs.broadcasts')}</span>
             <span>&gt;</span>
             <span>{t('broadcast.builder.breadcrumbs.drafts')}</span>
@@ -539,21 +539,21 @@ const BroadcastBuilderInner: React.FC = () => {
                     if (e.key === 'Enter') setIsEditingName(false);
                   }}
                   autoFocus
-                  className="px-2 py-1 border-2 border-[#0A0A0A] rounded-lg text-sm font-black focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/20 text-[#0A0A0A] bg-white"
+                  className="px-2 py-1 border-2 border-ink rounded-lg text-sm font-black focus:outline-none focus:ring-2 focus:ring-ink/20 text-ink bg-white"
                 />
                 <button
                   onClick={() => setIsEditingName(false)}
-                  className="p-1 rounded-lg bg-[#0A0A0A] text-[#F2EBDD] hover:bg-[#0A0A0A]/90 transition-all cursor-pointer border border-[#0A0A0A]"
+                  className="p-1 rounded-lg bg-ink text-canvas hover:bg-ink/90 transition-all cursor-pointer border border-ink"
                 >
                   <Check size={14} />
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2 group">
-                <span className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-wider">{campaignName}</span>
+                <span className="font-['Anybody',sans-serif] font-black text-sm text-ink uppercase tracking-wider">{campaignName}</span>
                 <button
                   onClick={() => setIsEditingName(true)}
-                  className="opacity-0 group-hover:opacity-100 text-[#0A0A0A]/60 hover:text-[#0A0A0A] transition-all p-1"
+                  className="opacity-0 group-hover:opacity-100 text-ink/60 hover:text-ink transition-all p-1"
                 >
                   <Edit2 size={12} />
                 </button>
@@ -564,8 +564,8 @@ const BroadcastBuilderInner: React.FC = () => {
 
         <div className="flex items-center gap-4">
           {activeAction && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-200 border-2 border-[#0A0A0A] rounded-xl text-[10px] text-[#0A0A0A] font-extrabold shadow-sm animate-in slide-in-from-right-2 duration-300 max-w-[240px] truncate select-none">
-              <span className="w-2 h-2 bg-[#0A0A0A] rounded-full animate-ping" />
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-200 border-2 border-ink rounded-xl text-[10px] text-ink font-extrabold shadow-sm animate-in slide-in-from-right-2 duration-300 max-w-[240px] truncate select-none">
+              <span className="w-2 h-2 bg-ink rounded-full animate-ping" />
               <span className="truncate">{activeAction}</span>
             </div>
           )}
@@ -577,7 +577,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 src={currentUser?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80"}
                 alt={currentUser?.name || "Me"}
                 title={`${currentUser?.name || "Me"} (You)`}
-                className="w-7 h-7 rounded-full border-2 border-[#0A0A0A] object-cover shadow-sm"
+                className="w-7 h-7 rounded-full border-2 border-ink object-cover shadow-sm"
               />
               {collaborators.map((c) => (
                 <div key={c.userId} className="relative">
@@ -585,12 +585,12 @@ const BroadcastBuilderInner: React.FC = () => {
                     src={c.avatar || "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&h=80"}
                     alt={c.name}
                     title={`${c.name} (Online)`}
-                    className={`w-7 h-7 rounded-full border-2 border-[#0A0A0A] object-cover shadow-sm transition-all ${
-                      c.action ? 'ring-2 ring-[#0A0A0A] scale-105' : ''
+                    className={`w-7 h-7 rounded-full border-2 border-ink object-cover shadow-sm transition-all ${
+                      c.action ? 'ring-2 ring-ink scale-105' : ''
                     }`}
                   />
                   {c.action && (
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0A0A0A] animate-ping" />
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-ink animate-ping" />
                   )}
                 </div>
               ))}
@@ -598,12 +598,12 @@ const BroadcastBuilderInner: React.FC = () => {
           )}
 
 
-          <div className="flex items-center gap-3 bg-[#F2EBDD] border-2 border-[#0A0A0A] px-3.5 py-1.5 rounded-xl shadow-sm">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[#0A0A0A] min-w-[85px] justify-start select-none">
+          <div className="flex items-center gap-3 bg-canvas border-2 border-ink px-3.5 py-1.5 rounded-xl shadow-sm">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-ink min-w-[85px] justify-start select-none">
               {isDirty || updateCampaignMut.isPending ? (
                 <>
-                  <Loader2 className="animate-spin text-[#0A0A0A] shrink-0" size={14} />
-                  <span className="text-[#0A0A0A]/70">{t('broadcast.builder.saving')}</span>
+                  <Loader2 className="animate-spin text-ink shrink-0" size={14} />
+                  <span className="text-ink/70">{t('broadcast.builder.saving')}</span>
                 </>
               ) : updateCampaignMut.isError ? (
                 <div
@@ -620,19 +620,19 @@ const BroadcastBuilderInner: React.FC = () => {
               ) : (
                 <>
                   <span className="text-emerald-500 shrink-0 font-bold">✓</span>
-                  <span className="text-[#0A0A0A]">{t('broadcast.builder.saved')}</span>
+                  <span className="text-ink">{t('broadcast.builder.saved')}</span>
                 </>
               )}
             </div>
 
-            <div className="w-[2px] h-4 bg-[#0A0A0A]/30" />
+            <div className="w-[2px] h-4 bg-ink/30" />
 
             <div className="flex items-center gap-1.5">
               <button
                 onClick={undo}
                 disabled={isViewer || !canUndo}
                 title="Undo (Ctrl+Z)"
-                className="p-1 text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-30 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center border border-[#0A0A0A]/20"
+                className="p-1 text-ink hover:bg-ink hover:text-canvas disabled:opacity-30 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center border border-ink/20"
               >
                 <Undo2 size={15} />
               </button>
@@ -640,21 +640,21 @@ const BroadcastBuilderInner: React.FC = () => {
                 onClick={redo}
                 disabled={isViewer || !canRedo}
                 title="Redo (Ctrl+Y)"
-                className="p-1 text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-30 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center border border-[#0A0A0A]/20"
+                className="p-1 text-ink hover:bg-ink hover:text-canvas disabled:opacity-30 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center border border-ink/20"
               >
                 <Redo2 size={15} />
               </button>
             </div>
           </div>
 
-          <div className="w-[2px] h-6 bg-[#0A0A0A]/30 hidden sm:block" />
+          <div className="w-[2px] h-6 bg-ink/30 hidden sm:block" />
 
           <button
             onClick={() => setIsPreviewOpen((v) => !v)}
-            className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer shadow-sm ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-2 border-ink cursor-pointer shadow-sm ${
               isPreviewOpen
-                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                : 'bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A]'
+                ? 'bg-ink text-canvas'
+                : 'bg-canvas hover:bg-ink hover:text-canvas text-ink'
             }`}
           >
             <Eye size={14} />
@@ -667,7 +667,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 useAiStore.getState().setIsOpen(true);
                 useAiStore.getState().setActiveTab('generator');
               }}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer shadow-sm"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-canvas hover:bg-ink hover:text-canvas text-ink text-xs font-bold rounded-xl transition-all border-2 border-ink cursor-pointer shadow-sm"
               title="Generate flow with AI"
             >
               <AiIcon size={14} />
@@ -680,7 +680,7 @@ const BroadcastBuilderInner: React.FC = () => {
               <button
                 onClick={() => setIsSendConfirmOpen(true)}
                 disabled={sendCampaignMut.isPending || updateCampaignMut.isPending}
-                className="flex items-center gap-1.5 px-5 py-2 text-xs font-black text-[#F2EBDD] bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 rounded-xl transition-all shadow-sm cursor-pointer border-2 border-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]"
+                className="flex items-center gap-1.5 px-5 py-2 text-xs font-black text-canvas bg-ink hover:bg-ink/90 rounded-xl transition-all shadow-sm cursor-pointer border-2 border-ink uppercase tracking-wider font-['Anybody',sans-serif]"
               >
                 {sendCampaignMut.isPending ? (
                   <Loader2 size={12} className="animate-spin" />
@@ -694,7 +694,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 onClick={() => setIsScheduleModalOpen(true)}
                 disabled={sendCampaignMut.isPending || updateCampaignMut.isPending}
                 title={t('broadcast.builder.schedule_tooltip')}
-                className="p-2 border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] text-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl transition-all cursor-pointer flex items-center justify-center animate-pulse animate-duration-1000"
+                className="p-2 border-2 border-ink hover:bg-ink text-ink hover:text-canvas rounded-xl transition-all cursor-pointer flex items-center justify-center animate-pulse animate-duration-1000"
               >
                 <Clock size={14} />
               </button>
@@ -735,7 +735,7 @@ const BroadcastBuilderInner: React.FC = () => {
             <div className="absolute top-4 right-4 z-10 select-none">
               <button
                 onClick={() => setIsAddDropdownOpen(!isAddDropdownOpen)}
-                className="w-12 h-12 rounded-full bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 active:scale-95 text-[#F2EBDD] flex items-center justify-center shadow-md transition-all border-2 border-[#0A0A0A] cursor-pointer"
+                className="w-12 h-12 rounded-full bg-ink hover:bg-ink/90 active:scale-95 text-canvas flex items-center justify-center shadow-md transition-all border-2 border-ink cursor-pointer"
               >
                 <Plus size={24} className={`transition-transform duration-200 ${isAddDropdownOpen ? 'rotate-45' : ''}`} />
               </button>
@@ -745,8 +745,8 @@ const BroadcastBuilderInner: React.FC = () => {
                     className="fixed inset-0 z-10"
                     onClick={() => setIsAddDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 mt-2.5 w-56 bg-[#F2EBDD] border-2 border-[#0A0A0A] p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
-                    <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-1 font-['Anybody',sans-serif]">
+                  <div className="absolute right-0 mt-2.5 w-56 bg-canvas border-2 border-ink p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
+                    <span className="text-[10px] font-black text-ink uppercase tracking-wider mb-1 px-1 font-['Anybody',sans-serif]">
                       {t('broadcast.builder.add_standalone_node')}
                     </span>
                     {BROADCAST_BLOCKS.map((item) => {
@@ -758,11 +758,11 @@ const BroadcastBuilderInner: React.FC = () => {
                             handleAddNode(item.type);
                             setIsAddDropdownOpen(false);
                           }}
-                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A]/10 hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group"
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-ink hover:text-canvas border-2 border-ink/10 hover:border-ink rounded-xl text-left text-xs font-bold text-ink transition-all cursor-pointer group"
                         >
                           <span
                             data-block-type={item.type}
-                            className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${item.color}`}
+                            className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-ink ${item.color}`}
                           >
                             <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
                           </span>
@@ -806,7 +806,7 @@ const BroadcastBuilderInner: React.FC = () => {
             deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
             fitView
             fitViewOptions={{ padding: 0.6 }}
-            className="bg-[#F2EBDD]"
+            className="bg-canvas"
             zoomOnDoubleClick={false}
             proOptions={{ hideAttribution: true }}
           >
@@ -821,7 +821,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 transform: 'translateY(-50%)',
                 margin: 0,
               }}
-              className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-md flex flex-col bg-[#F2EBDD] custom-controls-panel"
+              className="border-2 border-ink rounded-2xl overflow-hidden shadow-md flex flex-col bg-canvas custom-controls-panel"
             >
               <button
                 onClick={() => setEdgeType((t) => (t === 'default' ? 'smoothstep' : 'default'))}
@@ -830,8 +830,8 @@ const BroadcastBuilderInner: React.FC = () => {
                 style={{ order: -3 }}
               >
                 {edgeType === 'default'
-                  ? <Route size={18} className="text-[#0A0A0A]" />
-                  : <GitCommit size={18} className="text-[#0A0A0A]" />
+                  ? <Route size={18} className="text-ink" />
+                  : <GitCommit size={18} className="text-ink" />
                 }
               </button>
               <button
@@ -840,7 +840,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 className="react-flow__controls-button flex items-center justify-center"
                 style={{ order: -2 }}
               >
-                <GitFork size={18} className="rotate-90 text-[#0A0A0A]" />
+                <GitFork size={18} className="rotate-90 text-ink" />
               </button>
               <button
                 onClick={() => handleAutoLayout('TB')}
@@ -848,7 +848,7 @@ const BroadcastBuilderInner: React.FC = () => {
                 className="react-flow__controls-button flex items-center justify-center"
                 style={{ order: -1 }}
               >
-                <GitFork size={18} className="text-[#0A0A0A]" />
+                <GitFork size={18} className="text-ink" />
               </button>
             </Controls>
           </ReactFlow>
@@ -859,14 +859,14 @@ const BroadcastBuilderInner: React.FC = () => {
               onClick={() => setContextMenu(null)}
             >
               <div
-                className="absolute bg-[#F2EBDD] border-2 border-[#0A0A0A] p-2.5 rounded-2xl shadow-xl w-60 flex flex-col gap-1 select-none pointer-events-auto animate-in fade-in zoom-in-95 duration-150 z-50"
+                className="absolute bg-canvas border-2 border-ink p-2.5 rounded-2xl shadow-xl w-60 flex flex-col gap-1 select-none pointer-events-auto animate-in fade-in zoom-in-95 duration-150 z-50"
                 style={{
                   left: Math.min(contextMenu.x, window.innerWidth - 250),
                   top: Math.min(contextMenu.y, window.innerHeight - 380),
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-3 pt-1 select-none font-['Anybody',sans-serif]">
+                <span className="text-[10px] font-black text-ink uppercase tracking-wider mb-1 px-3 pt-1 select-none font-['Anybody',sans-serif]">
                   {t('flow_builder.connect_to')}
                 </span>
                 {filteredContextMenuOptions.map((opt, idx) => {
@@ -877,12 +877,12 @@ const BroadcastBuilderInner: React.FC = () => {
                     <button
                       key={idx}
                       onClick={() => handleCreateAndConnectNode(opt.type)}
-                      className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-transparent hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group select-none"
+                      className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-ink hover:text-canvas border-2 border-transparent hover:border-ink rounded-xl text-left text-xs font-bold text-ink transition-all cursor-pointer group select-none"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           data-block-type={opt.type}
-                          className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${colorClass}`}
+                          className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-ink ${colorClass}`}
                         >
                           <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
                         </span>
@@ -890,12 +890,12 @@ const BroadcastBuilderInner: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         {opt.isPro && (
-                          <span className="text-[8px] font-black bg-amber-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                          <span className="text-[8px] font-black bg-amber-400 text-ink border border-ink px-1.5 py-0.5 rounded uppercase tracking-wider">
                             PRO
                           </span>
                         )}
                         {opt.isAi && (
-                          <span className="text-[8px] font-black bg-purple-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                          <span className="text-[8px] font-black bg-purple-400 text-ink border border-ink px-1.5 py-0.5 rounded uppercase tracking-wider">
                             AI
                           </span>
                         )}
@@ -905,35 +905,35 @@ const BroadcastBuilderInner: React.FC = () => {
                 })}
                 <button
                   onClick={() => setContextMenu(null)}
-                  className="w-full text-center py-2 text-xs font-black text-[#0A0A0A]/60 hover:text-[#0A0A0A] hover:bg-[#0A0A0A]/10 rounded-xl transition-all border-t-2 border-[#0A0A0A]/20 mt-1 cursor-pointer select-none uppercase tracking-wider font-['JetBrains_Mono',monospace]"
+                  className="w-full text-center py-2 text-xs font-black text-ink/60 hover:text-ink hover:bg-ink/10 rounded-xl transition-all border-t-2 border-ink/20 mt-1 cursor-pointer select-none uppercase tracking-wider font-['JetBrains_Mono',monospace]"
                 >
                   {t('flow_builder.cancel')}
                 </button>
               </div>
             </div>
           )}
-          <aside className={`absolute left-0 top-0 h-full w-80 border-r-2 border-[#0A0A0A] bg-[#F2EBDD] z-20 flex flex-col justify-between overflow-visible shadow-xl transition-all duration-300 ease-in-out ${
+          <aside className={`absolute left-0 top-0 h-full w-80 border-r-2 border-ink bg-canvas z-20 flex flex-col justify-between overflow-visible shadow-xl transition-all duration-300 ease-in-out ${
             selectedNodeId ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'
           }`}>
             {activeNode && (
               activeNode.type === 'START_BROADCAST' ? (
                 <div className="p-6 space-y-6">
-                  <div className="flex items-center gap-3 border-b-2 border-[#0A0A0A] pb-4">
-                    <span className="w-10 h-10 rounded-xl bg-white text-[#0A0A0A] flex items-center justify-center shrink-0 border-2 border-[#0A0A0A] shadow-sm">
+                  <div className="flex items-center gap-3 border-b-2 border-ink pb-4">
+                    <span className="w-10 h-10 rounded-xl bg-white text-ink flex items-center justify-center shrink-0 border-2 border-ink shadow-sm">
                       <Send size={18} />
                     </span>
                     <div>
-                      <span className="text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-widest leading-none mb-1 block">
+                      <span className="text-[10px] font-black text-ink/60 uppercase tracking-widest leading-none mb-1 block">
                         {t('broadcast.builder.node.editing')}
                       </span>
-                      <h2 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-wider block">
+                      <h2 className="font-['Anybody',sans-serif] font-black text-sm text-ink uppercase tracking-wider block">
                         {t('broadcast.builder.node.trigger_settings')}
                       </h2>
                     </div>
                   </div>
 
-                  <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-4">
-                    <p className="text-xs text-[#0A0A0A]/70 leading-relaxed font-bold">
+                  <div className="bg-white border-2 border-ink rounded-2xl p-4">
+                    <p className="text-xs text-ink/70 leading-relaxed font-bold">
                       {t('broadcast.builder.node.trigger_description')}
                     </p>
                   </div>
@@ -948,7 +948,7 @@ const BroadcastBuilderInner: React.FC = () => {
               )
             )}
 
-            <div className={`absolute left-0 top-0 h-full w-80 border-r-2 border-[#0A0A0A] bg-[#F2EBDD] -z-10 flex flex-col justify-between overflow-hidden shadow-xl transition-all duration-300 ease-in-out ${
+            <div className={`absolute left-0 top-0 h-full w-80 border-r-2 border-ink bg-canvas -z-10 flex flex-col justify-between overflow-hidden shadow-xl transition-all duration-300 ease-in-out ${
               (editorState.isBtnDialogOpen || editorState.isNextStepDrawerOpen || editorState.isDataCollectionDrawerOpen) ? 'translate-x-full opacity-100' : 'translate-x-0 opacity-0 pointer-events-none'
             }`}>
               {activeNode && editorState.isNextStepDrawerOpen ? (

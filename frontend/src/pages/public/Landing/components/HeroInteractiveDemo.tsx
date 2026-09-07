@@ -117,7 +117,7 @@ export const HeroInteractiveDemo: React.FC = () => {
   };
 
   return (
-    <div className="w-full bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] rounded-3xl overflow-hidden font-['JetBrains_Mono',monospace] select-none">
+    <div className="w-full bg-canvas border-2 border-ink shadow-brutal-xl rounded-3xl overflow-hidden font-['JetBrains_Mono',monospace] select-none">
       <style>{`
         @keyframes tgMsgIn {
           0%   { opacity: 0; transform: translateY(10px) scale(0.97); }
@@ -134,7 +134,7 @@ export const HeroInteractiveDemo: React.FC = () => {
           animation: viewFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
       `}</style>
-      <div className="bg-[#0A0A0A] text-[#F2EBDD] px-4 py-2.5 flex items-center gap-2 border-b-2 border-[#0A0A0A]">
+      <div className="bg-ink text-canvas px-4 py-2.5 flex items-center gap-2 border-b-2 border-ink">
         <span className="w-3 h-3 rounded-full bg-rose-500 border border-black/20" />
         <span className="w-3 h-3 rounded-full bg-amber-500 border border-black/20" />
         <span className="w-3 h-3 rounded-full bg-emerald-500 border border-black/20" />
@@ -145,16 +145,16 @@ export const HeroInteractiveDemo: React.FC = () => {
 
       <div className="relative h-[410px] sm:h-[435px] overflow-hidden">
         {activeView === 'builder' && (
-          <div className="absolute inset-0 flex flex-col bg-[#F2EBDD] view-fade-in">
+          <div className="absolute inset-0 flex flex-col bg-canvas view-fade-in">
             <div className="absolute inset-0 opacity-[0.15] pointer-events-none"
               style={{ backgroundImage: 'radial-gradient(#0A0A0A 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }} />
-            <div className="relative z-20 w-full bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-4 py-2 flex items-center justify-between shrink-0">
+            <div className="relative z-20 w-full bg-canvas border-b-2 border-ink px-4 py-2 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase text-[#0A0A0A]/50 font-['Anybody',sans-serif]">{t('landing.demo.flow_label')}</span>
-                <span className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">{t('landing.demo.flow_title')}</span>
+                <span className="text-[10px] font-black uppercase text-ink/50 font-['Anybody',sans-serif]">{t('landing.demo.flow_label')}</span>
+                <span className="text-xs font-black text-ink uppercase tracking-wider font-['Anybody',sans-serif]">{t('landing.demo.flow_title')}</span>
               </div>
               <button type="button"
-                className="flex items-center gap-1.5 px-3 py-1 bg-[#0A0A0A] text-[#F2EBDD] text-[10px] font-black uppercase rounded-xl border-2 border-[#0A0A0A]">
+                className="flex items-center gap-1.5 px-3 py-1 bg-ink text-canvas text-[10px] font-black uppercase rounded-xl border-2 border-ink">
                 <span className={`w-2 h-2 rounded-full border border-black/30 transition-colors duration-700 ${step >= 5 ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
                 <span>{step >= 5 ? t('landing.demo.live_status') : t('landing.demo.update_status')}</span>
               </button>
@@ -212,30 +212,30 @@ export const HeroInteractiveDemo: React.FC = () => {
                     style={{ transition: 'fill 0.6s ease' }} />
                 )}
               </svg>
-              <div className={`absolute left-3 top-3 w-40 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-md z-10 transition-all duration-700 ease-out ${step >= 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100/70 rounded-t-[14px] border-b border-[#0A0A0A]/10">
+              <div className={`absolute left-3 top-3 w-40 bg-white border-2 border-ink rounded-2xl shadow-md z-10 transition-all duration-700 ease-out ${step >= 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100/70 rounded-t-[14px] border-b border-ink/10">
                   <Zap size={12} className="text-emerald-700 fill-current shrink-0" />
-                  <span className="font-black text-[9px] text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">{t('landing.demo.when')}</span>
+                  <span className="font-black text-[9px] text-ink uppercase tracking-wider font-['Anybody',sans-serif]">{t('landing.demo.when')}</span>
                 </div>
                 <div className="p-2">
-                  <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl p-1.5 flex gap-1.5 items-center">
-                    <span className="w-4 h-4 rounded-full bg-[#0A0A0A] text-[#F2EBDD] flex items-center justify-center shrink-0 text-[8px] font-black">tg</span>
+                  <div className="bg-canvas border-2 border-ink rounded-xl p-1.5 flex gap-1.5 items-center">
+                    <span className="w-4 h-4 rounded-full bg-ink text-canvas flex items-center justify-center shrink-0 text-[8px] font-black">tg</span>
                     <div className="min-w-0">
-                      <p className="text-[8.5px] font-bold text-[#0A0A0A] leading-tight">{t('landing.demo.user_subscribes')}</p>
-                      <p className="text-[7px] text-[#0A0A0A]/60 font-black uppercase tracking-wider mt-0.5">{t('landing.demo.welcome_trigger')}</p>
+                      <p className="text-[8.5px] font-bold text-ink leading-tight">{t('landing.demo.user_subscribes')}</p>
+                      <p className="text-[7px] text-ink/60 font-black uppercase tracking-wider mt-0.5">{t('landing.demo.welcome_trigger')}</p>
                     </div>
                   </div>
                 </div>
-                <div className="relative flex justify-end items-center px-2.5 py-1 bg-[#F2EBDD] rounded-b-[14px] border-t border-[#0A0A0A]/10">
-                  <span className="text-[7.5px] font-black text-[#0A0A0A] uppercase tracking-wider mr-2 font-['Anybody',sans-serif]">{t('landing.demo.then')}</span>
+                <div className="relative flex justify-end items-center px-2.5 py-1 bg-canvas rounded-b-[14px] border-t border-ink/10">
+                  <span className="text-[7.5px] font-black text-ink uppercase tracking-wider mr-2 font-['Anybody',sans-serif]">{t('landing.demo.then')}</span>
                   <span ref={handle1Ref} className="absolute -right-[5px] top-1/2 -translate-y-1/2 w-[9px] h-[9px] rounded-full opacity-0" />
                 </div>
               </div>
               {step >= 1 && (
-                <div className="absolute left-[228px] top-3 w-44 sm:w-48 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-md z-10"
+                <div className="absolute left-[228px] top-3 w-44 sm:w-48 bg-white border-2 border-ink rounded-2xl shadow-md z-10"
                   style={{ animation: 'tgMsgIn 0.8s cubic-bezier(0.16,1,0.3,1) both' }}>
                   <span ref={handle2TargetRef} className="absolute -left-[5px] top-[22px] w-[9px] h-[9px] rounded-full opacity-0" />
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-100/80 rounded-t-[14px] border-b border-[#0A0A0A]/10">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-100/80 rounded-t-[14px] border-b border-ink/10">
                     <Send size={11} className="text-sky-600 shrink-0" />
                     <div className="flex flex-col leading-none">
                       <span className="text-[7px] font-black text-sky-700/80 uppercase">{t('landing.demo.telegram_header')}</span>
@@ -243,36 +243,36 @@ export const HeroInteractiveDemo: React.FC = () => {
                     </div>
                   </div>
                   <div className="p-2 space-y-1.5">
-                    <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl p-1.5 text-[8.5px] font-bold text-[#0A0A0A] leading-tight">
+                    <div className="bg-canvas border-2 border-ink rounded-xl p-1.5 text-[8.5px] font-bold text-ink leading-tight">
                       {t('landing.demo.msg1_content')}
                     </div>
-                    <div className="relative bg-white border-2 border-[#0A0A0A] rounded-xl p-1 text-center font-bold text-[8px] text-[#0A0A0A]">
+                    <div className="relative bg-white border-2 border-ink rounded-xl p-1 text-center font-bold text-[8px] text-ink">
                       {t('landing.demo.get_offer_btn')}
                       <span ref={handle2BtnRef} className="absolute -right-[5px] top-1/2 -translate-y-1/2 w-[9px] h-[9px] rounded-full opacity-0" />
                     </div>
                   </div>
-                  <div className="relative flex justify-end items-center px-2.5 py-1 bg-[#F2EBDD] rounded-b-[14px] border-t border-[#0A0A0A]/10">
-                    <span className="text-[7px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mr-2 font-['Anybody',sans-serif]">{t('landing.demo.next_step')}</span>
+                  <div className="relative flex justify-end items-center px-2.5 py-1 bg-canvas rounded-b-[14px] border-t border-ink/10">
+                    <span className="text-[7px] font-black text-ink/60 uppercase tracking-wider mr-2 font-['Anybody',sans-serif]">{t('landing.demo.next_step')}</span>
                     <span className="absolute -right-[5px] top-1/2 -translate-y-1/2 w-[9px] h-[9px] rounded-full bg-white border border-slate-400" />
                   </div>
                 </div>
               )}
               {step >= 3 && (
-                <div className="absolute left-[228px] top-[235px] w-44 sm:w-48 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-md z-10"
+                <div className="absolute left-[228px] top-[235px] w-44 sm:w-48 bg-white border-2 border-ink rounded-2xl shadow-md z-10"
                   style={{ animation: 'tgMsgIn 0.8s cubic-bezier(0.16,1,0.3,1) both' }}>
                   <span ref={handle3TargetRef} className="absolute -left-[5px] top-[18px] w-[9px] h-[9px] rounded-full opacity-0" />
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-100/80 rounded-t-[14px] border-b border-[#0A0A0A]/10">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-100/80 rounded-t-[14px] border-b border-ink/10">
                     <Sparkles size={11} className="text-amber-700 shrink-0" />
                     <span className="font-bold text-[9px] text-amber-900 font-['Anybody',sans-serif]">{t('landing.demo.perform_actions')}</span>
                   </div>
                   <div className="p-2">
-                    <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl p-1.5 space-y-0.5">
+                    <div className="bg-canvas border-2 border-ink rounded-xl p-1.5 space-y-0.5">
                       <span className="block text-[7px] text-slate-500 uppercase font-black">{t('landing.demo.set_field_label')}</span>
                       <span className="block text-[8px] font-black text-amber-900">{t('landing.demo.set_field_value')}</span>
                     </div>
                   </div>
-                  <div className="relative flex justify-end items-center px-2.5 py-1 bg-[#F2EBDD] rounded-b-[14px] border-t border-[#0A0A0A]/10">
-                    <span className="text-[7px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mr-2 font-['Anybody',sans-serif]">{t('landing.demo.next_step')}</span>
+                  <div className="relative flex justify-end items-center px-2.5 py-1 bg-canvas rounded-b-[14px] border-t border-ink/10">
+                    <span className="text-[7px] font-black text-ink/60 uppercase tracking-wider mr-2 font-['Anybody',sans-serif]">{t('landing.demo.next_step')}</span>
                     <span className="absolute -right-[5px] top-1/2 -translate-y-1/2 w-[9px] h-[9px] rounded-full bg-white border border-slate-400" />
                   </div>
                 </div>

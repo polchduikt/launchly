@@ -204,12 +204,12 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="px-6 py-4 bg-[#F2EBDD] border-b-2 border-[#0A0A0A] font-['JetBrains_Mono',monospace] select-none animation-slide-in flex items-center justify-between gap-3 shrink-0 flex-wrap">
+    <div className="px-6 py-4 bg-canvas border-b-2 border-ink font-['JetBrains_Mono',monospace] select-none animation-slide-in flex items-center justify-between gap-3 shrink-0 flex-wrap">
       <div className="flex flex-wrap items-center gap-2">
         {conditions.length > 0 && (
-          <div className="text-[11px] font-bold text-[#0A0A0A] mr-2 flex items-center gap-1 uppercase">
+          <div className="text-[11px] font-bold text-ink mr-2 flex items-center gap-1 uppercase">
             <span>{t('crm.contacts.filter_only_matching')}</span>
-            <span className="underline font-black text-[#0A0A0A]">
+            <span className="underline font-black text-ink">
               {t('crm.contacts.filter_all_conditions')}
             </span>
           </div>
@@ -229,9 +229,9 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
           return (
             <div
               key={cond.id}
-              className="bg-white border-2 border-[#0A0A0A] px-3 py-2 rounded-xl flex items-center gap-2 relative animate-in zoom-in-95 duration-100 select-none text-xs font-bold text-[#0A0A0A]"
+              className="bg-white border-2 border-ink px-3 py-2 rounded-xl flex items-center gap-2 relative animate-in zoom-in-95 duration-100 select-none text-xs font-bold text-ink"
             >
-              <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">
+              <span className="text-[10px] font-black text-ink uppercase tracking-wider">
                 {cond.label}
               </span>
 
@@ -247,7 +247,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                     {getOperatorLabel(cond.operator)}
                   </span>
                   {cond.operator !== 'has any value' && cond.operator !== 'is unknown' && (
-                    <span className="text-[#0A0A0A] font-black border-b-2 border-dashed border-[#0A0A0A]/30 pb-0.5 truncate max-w-28 uppercase">
+                    <span className="text-ink font-black border-b-2 border-dashed border-ink/30 pb-0.5 truncate max-w-28 uppercase">
                       {isPaused
                         ? cond.value === 'true'
                           ? t('editor.fields.type_boolean_true')
@@ -263,8 +263,8 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                       className="fixed inset-0 z-30 bg-transparent cursor-default"
                       onClick={() => setActivePopoverId(null)}
                     />
-                    <div className="absolute top-full left-0 mt-1.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl flex z-50 overflow-hidden animate-in fade-in duration-100">
-                      <div className="w-[140px] bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-2 flex flex-col gap-1 shrink-0">
+                    <div className="absolute top-full left-0 mt-1.5 bg-canvas border-2 border-ink rounded-2xl flex z-50 overflow-hidden animate-in fade-in duration-100">
+                      <div className="w-[140px] bg-canvas border-r-2 border-ink p-2 flex flex-col gap-1 shrink-0">
                         {operatorsList.map((op) => (
                           <button
                             key={op}
@@ -282,8 +282,8 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                             }}
                             className={`w-full text-left px-2.5 py-1.5 text-xs font-black uppercase transition-all rounded-lg cursor-pointer ${
                               cond.operator === op
-                                ? 'text-[#F2EBDD] bg-[#0A0A0A] border-2 border-[#0A0A0A]'
-                                : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
+                                ? 'text-canvas bg-ink border-2 border-ink'
+                                : 'text-ink hover:bg-white border-2 border-transparent'
                             }`}
                           >
                             {getOperatorLabel(op)}
@@ -305,8 +305,8 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                                 }}
                                 className={`w-full text-left px-2.5 py-1.5 text-xs font-black uppercase rounded-lg cursor-pointer ${
                                   cond.value === 'true'
-                                    ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                                    : 'hover:bg-[#F2EBDD] text-[#0A0A0A]'
+                                    ? 'bg-ink text-canvas'
+                                    : 'hover:bg-canvas text-ink'
                                 }`}
                               >
                                 {t('editor.fields.type_boolean_true')}
@@ -321,8 +321,8 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                                 }}
                                 className={`w-full text-left px-2.5 py-1.5 text-xs font-black uppercase rounded-lg cursor-pointer ${
                                   cond.value === 'false'
-                                    ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                                    : 'hover:bg-[#F2EBDD] text-[#0A0A0A]'
+                                    ? 'bg-ink text-canvas'
+                                    : 'hover:bg-canvas text-ink'
                                 }`}
                               >
                                 {t('editor.fields.type_boolean_false')}
@@ -341,7 +341,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                                     setActivePopoverId(null);
                                   }}
                                   className={`w-full text-left px-2 py-1 text-xs font-bold rounded-lg cursor-pointer truncate ${
-                                    cond.value === tItem.name ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'hover:bg-[#F2EBDD] text-[#0A0A0A]'
+                                    cond.value === tItem.name ? 'bg-ink text-canvas' : 'hover:bg-canvas text-ink'
                                   }`}
                                 >
                                   {tItem.name}
@@ -357,7 +357,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                                   prev.map((c) => (c.id === cond.id ? { ...c, value: e.target.value } : c))
                                 );
                               }}
-                              className="w-full px-2 py-1 border-2 border-[#0A0A0A] rounded-lg text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
+                              className="w-full px-2 py-1 border-2 border-ink rounded-lg text-xs font-bold focus:outline-none bg-white text-ink"
                             />
                           ) : (
                             <>
@@ -370,7 +370,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                                     prev.map((c) => (c.id === cond.id ? { ...c, value: e.target.value } : c))
                                   );
                                 }}
-                                className="w-full px-2.5 py-1.5 border-2 border-[#0A0A0A] rounded-lg text-xs focus:outline-none bg-white font-bold text-[#0A0A0A]"
+                                className="w-full px-2.5 py-1.5 border-2 border-ink rounded-lg text-xs focus:outline-none bg-white font-bold text-ink"
                               />
                               <div className="flex flex-col gap-0.5 max-h-24 overflow-y-auto custom-scrollbar">
                                 {getSuggestionsForField(cond.field, cond.value).map((s) => (
@@ -383,7 +383,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                                       );
                                       setActivePopoverId(null);
                                     }}
-                                    className="w-full text-left px-2 py-1 hover:bg-[#F2EBDD] text-xs font-bold text-[#0A0A0A] rounded-lg cursor-pointer truncate"
+                                    className="w-full text-left px-2 py-1 hover:bg-canvas text-xs font-bold text-ink rounded-lg cursor-pointer truncate"
                                   >
                                     {s}
                                   </button>
@@ -401,7 +401,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
               <button
                 type="button"
                 onClick={() => handleRemoveCondition(cond.id)}
-                className="text-[#0A0A0A] hover:bg-rose-600 hover:text-white p-0.5 rounded transition-all cursor-pointer shrink-0"
+                className="text-ink hover:bg-rose-600 hover:text-white p-0.5 rounded transition-all cursor-pointer shrink-0"
               >
                 <X size={13} />
               </button>
@@ -413,22 +413,22 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
           <button
             type="button"
             onClick={() => setIsAddDropdownOpen(!isAddDropdownOpen)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] border-dashed rounded-xl text-xs font-black uppercase text-[#0A0A0A] transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-ink hover:text-canvas border-2 border-ink border-dashed rounded-xl text-xs font-black uppercase text-ink transition-all cursor-pointer"
           >
-            <Plus size={14} className="text-[#0A0A0A]" />
+            <Plus size={14} className="text-ink" />
             <span>{t('audience.panel.add_condition')}</span>
           </button>
 
           {isAddDropdownOpen && (
-            <div className="absolute left-0 mt-2 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl flex z-50 overflow-hidden w-96 h-[285px] select-none animation-slide-in">
-              <div className="w-[140px] bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-2 flex flex-col gap-1 shrink-0">
+            <div className="absolute left-0 mt-2 bg-canvas border-2 border-ink rounded-2xl flex z-50 overflow-hidden w-96 h-[285px] select-none animation-slide-in">
+              <div className="w-[140px] bg-canvas border-r-2 border-ink p-2 flex flex-col gap-1 shrink-0">
                 <button
                   type="button"
                   onClick={() => setSelectedCategory('system')}
                   className={`w-full text-left px-2.5 py-2 text-xs font-black uppercase transition-all rounded-xl cursor-pointer ${
                     selectedCategory === 'system'
-                      ? 'text-[#F2EBDD] bg-[#0A0A0A] border-2 border-[#0A0A0A]'
-                      : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
+                      ? 'text-canvas bg-ink border-2 border-ink'
+                      : 'text-ink hover:bg-white border-2 border-transparent'
                   }`}
                 >
                   {t('audience.panel.system_fields')}
@@ -438,8 +438,8 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                   onClick={() => setSelectedCategory('custom')}
                   className={`w-full text-left px-2.5 py-2 text-xs font-black uppercase transition-all rounded-xl cursor-pointer ${
                     selectedCategory === 'custom'
-                      ? 'text-[#F2EBDD] bg-[#0A0A0A] border-2 border-[#0A0A0A]'
-                      : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
+                      ? 'text-canvas bg-ink border-2 border-ink'
+                      : 'text-ink hover:bg-white border-2 border-transparent'
                   }`}
                 >
                   {t('audience.panel.custom_fields')}
@@ -449,8 +449,8 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                   onClick={() => setSelectedCategory('general')}
                   className={`w-full text-left px-2.5 py-2 text-xs font-black uppercase transition-all rounded-xl cursor-pointer ${
                     selectedCategory === 'general'
-                      ? 'text-[#F2EBDD] bg-[#0A0A0A] border-2 border-[#0A0A0A]'
-                      : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
+                      ? 'text-canvas bg-ink border-2 border-ink'
+                      : 'text-ink hover:bg-white border-2 border-transparent'
                   }`}
                 >
                   {t('audience.panel.general_filters')}
@@ -458,14 +458,14 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
               </div>
 
               <div className="flex-1 flex flex-col min-w-0 bg-white">
-                <div className="p-2 border-b-2 border-[#0A0A0A] flex items-center gap-1.5 bg-white shrink-0">
-                  <Search size={12} className="text-[#0A0A0A]" />
+                <div className="p-2 border-b-2 border-ink flex items-center gap-1.5 bg-white shrink-0">
+                  <Search size={12} className="text-ink" />
                   <input
                     type="text"
                     placeholder={t('common.search_placeholder')}
                     value={dropdownSearch}
                     onChange={(e) => setDropdownSearch(e.target.value)}
-                    className="w-full text-xs font-bold text-[#0A0A0A] focus:outline-none"
+                    className="w-full text-xs font-bold text-ink focus:outline-none"
                   />
                 </div>
 
@@ -477,15 +477,15 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
                         key={idx}
                         type="button"
                         onClick={() => handleAddCondition(item)}
-                        className="w-full text-left px-2.5 py-2 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-xs font-bold text-[#0A0A0A] rounded-xl flex items-center gap-2 cursor-pointer transition-colors uppercase"
+                        className="w-full text-left px-2.5 py-2 hover:bg-ink hover:text-canvas text-xs font-bold text-ink rounded-xl flex items-center gap-2 cursor-pointer transition-colors uppercase"
                       >
-                        <Icon size={12} className="text-[#0A0A0A] shrink-0" />
+                        <Icon size={12} className="text-ink shrink-0" />
                         <span className="truncate">{item.label}</span>
                       </button>
                     );
                   })}
                   {filteredItems.length === 0 && (
-                    <div className="text-center py-6 text-[#0A0A0A] text-xs font-bold italic">
+                    <div className="text-center py-6 text-ink text-xs font-bold italic">
                       {t('editor.action.no_actions_title')}
                     </div>
                   )}

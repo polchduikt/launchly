@@ -46,25 +46,25 @@ export const PendingInvitationsBanner: React.FC = () => {
   if (!invitations || invitations.length === 0) return null;
 
   return (
-    <div className="bg-amber-300 border-b-4 border-[#0A0A0A] p-4 text-[#0A0A0A] font-['JetBrains_Mono',monospace] relative z-40 animate-fade-in">
+    <div className="bg-amber-300 border-b-4 border-ink p-4 text-ink font-['JetBrains_Mono',monospace] relative z-40 animate-fade-in">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         {invitations.map((invite) => {
           const isProcessing = processingId === invite.id;
           return (
             <div key={invite.id} className="flex flex-col sm:flex-row items-center justify-between w-full gap-4">
               <div className="flex items-center gap-3 text-left">
-                <div className="w-10 h-10 rounded-2xl bg-white border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
-                  <Users size={20} className="text-[#0A0A0A]" />
+                <div className="w-10 h-10 rounded-2xl bg-white border-2 border-ink flex items-center justify-center shrink-0 shadow-brutal-sm">
+                  <Users size={20} className="text-ink" />
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-xs uppercase tracking-tight text-[#0A0A0A]">
+                  <h4 className="font-extrabold text-xs uppercase tracking-tight text-ink">
                     {t('invitations.banner.title', 'Запрошення до команди')}
                   </h4>
                   <p className="text-[11.5px] font-bold text-slate-800 leading-snug">
                     {t('invitations.banner.user_invited', 'Користувач')}{' '}
-                    <strong className="text-[#0A0A0A] underline">{invite.name || invite.email || 'Користувач'}</strong>{' '}
+                    <strong className="text-ink underline">{invite.name || invite.email || 'Користувач'}</strong>{' '}
                     {t('invitations.banner.invited_you', 'запросив вас приєднатися до команди у ролі')}{' '}
-                    <span className="bg-white px-1.5 py-0.5 rounded border border-[#0A0A0A] font-extrabold text-xs">
+                    <span className="bg-white px-1.5 py-0.5 rounded border border-ink font-extrabold text-xs">
                       {invite.role}
                     </span>
                   </p>
@@ -78,7 +78,7 @@ export const PendingInvitationsBanner: React.FC = () => {
                     setProcessingId(invite.id);
                     acceptMutation.mutate({ invitationId: invite.id, botId: invite.botId });
                   }}
-                  className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
+                  className="px-4 py-2 bg-ink hover:bg-[#2A2A2A] text-canvas border-2 border-ink shadow-brutal-sm text-xs font-black uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
                 >
                   {isProcessing ? (
                     <Loader2 size={14} className="animate-spin" />
@@ -94,7 +94,7 @@ export const PendingInvitationsBanner: React.FC = () => {
                     setProcessingId(invite.id);
                     declineMutation.mutate(invite.id);
                   }}
-                  className="px-4 py-2 bg-white hover:bg-rose-100 text-rose-700 border-2 border-[#0A0A0A] text-xs font-bold uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
+                  className="px-4 py-2 bg-white hover:bg-rose-100 text-rose-700 border-2 border-ink text-xs font-bold uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
                 >
                   <X size={14} />
                   <span>{t('common.decline', 'Відхилити')}</span>

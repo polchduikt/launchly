@@ -239,39 +239,39 @@ export const PaymentsPanel: React.FC = () => {
   return (
     <div className="space-y-6 pb-10 font-['JetBrains_Mono',monospace]">
       {notification && (
-        <div className={`fixed top-4 right-4 z-[9999] flex items-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-[#0A0A0A] shadow-[4px_4px_0px_0px_#0A0A0A] animate-in fade-in duration-200 ${
+        <div className={`fixed top-4 right-4 z-[9999] flex items-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-ink shadow-brutal animate-in fade-in duration-200 ${
           notification.type === 'success' 
-            ? 'bg-emerald-200 text-[#0A0A0A]' 
-            : 'bg-rose-200 text-[#0A0A0A]'
+            ? 'bg-emerald-200 text-ink' 
+            : 'bg-rose-200 text-ink'
         }`}>
           {notification.type === 'success' ? (
-            <CheckCircle2 size={16} className="text-[#0A0A0A] shrink-0" />
+            <CheckCircle2 size={16} className="text-ink shrink-0" />
           ) : (
-            <AlertCircle size={16} className="text-[#0A0A0A] shrink-0" />
+            <AlertCircle size={16} className="text-ink shrink-0" />
           )}
           <span className="text-xs font-bold">{notification.message}</span>
         </div>
       )}
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden">
+      <div className="bg-canvas border-2 border-ink rounded-2xl divide-y-2 divide-ink/15 overflow-hidden">
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
           <div className="w-full md:w-1/4">
-            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">{t('settings.payments.stripe.title')}</h3>
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase">{t('settings.payments.stripe.title')}</h3>
           </div>
           <div className="w-full md:w-5/12 flex flex-col gap-3">
             {isStripeConnected ? (
-              <div className="p-4 rounded-2xl bg-white border-2 border-[#0A0A0A] flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-white border-2 border-ink flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-[#0A0A0A] text-[#F2EBDD] flex items-center justify-center border-2 border-[#0A0A0A]">
+                  <div className="w-9 h-9 rounded-xl bg-ink text-canvas flex items-center justify-center border-2 border-ink">
                     <CreditCard size={18} />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-[#0A0A0A]">{t('settings.payments.stripe.connected')}</div>
+                    <div className="text-xs font-bold text-ink">{t('settings.payments.stripe.connected')}</div>
                     <div className="text-[10px] text-slate-700 font-bold mt-0.5">{t('settings.payments.stripe.mode')}</div>
                   </div>
                 </div>
                 <button
                   onClick={handleConnectStripe}
-                  className="px-3 py-1.5 bg-rose-200 hover:bg-rose-600 hover:text-white border-2 border-[#0A0A0A] text-[#0A0A0A] text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer"
+                  className="px-3 py-1.5 bg-rose-200 hover:bg-rose-600 hover:text-white border-2 border-ink text-ink text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer"
                 >
                   {t('settings.payments.stripe.btn_disconnect')}
                 </button>
@@ -280,7 +280,7 @@ export const PaymentsPanel: React.FC = () => {
               <button
                 onClick={handleConnectStripe}
                 disabled={isStripeConnecting}
-                className="w-fit px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] disabled:opacity-50 text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer flex items-center gap-2"
+                className="w-fit px-4 py-2.5 bg-ink hover:bg-[#2A2A2A] disabled:opacity-50 text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer flex items-center gap-2"
               >
                 {isStripeConnecting ? (
                   <>
@@ -300,32 +300,32 @@ export const PaymentsPanel: React.FC = () => {
 
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
           <div className="w-full md:w-1/4">
-            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">{t('settings.payments.paypal.title')}</h3>
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase">{t('settings.payments.paypal.title')}</h3>
           </div>
           <div className="w-full md:w-5/12 flex flex-col gap-3.5">
             <a 
               href="https://developer.paypal.com" 
               target="_blank" 
               rel="noreferrer" 
-              className="text-xs font-bold text-[#0A0A0A] underline uppercase flex items-center gap-1 w-fit"
+              className="text-xs font-bold text-ink underline uppercase flex items-center gap-1 w-fit"
             >
               {t('settings.payments.paypal.faq_link')}
             </a>
 
             {isPaypalConnected ? (
-              <div className="p-4 rounded-2xl bg-white border-2 border-[#0A0A0A] flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-white border-2 border-ink flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-[#0A0A0A] text-[#F2EBDD] flex items-center justify-center font-black text-xs border-2 border-[#0A0A0A]">
+                  <div className="w-9 h-9 rounded-xl bg-ink text-canvas flex items-center justify-center font-black text-xs border-2 border-ink">
                     PP
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-[#0A0A0A]">{t('settings.payments.paypal.connected')}</div>
+                    <div className="text-xs font-bold text-ink">{t('settings.payments.paypal.connected')}</div>
                     <div className="text-[10px] text-slate-700 font-bold mt-0.5">{t('settings.payments.paypal.mode')}</div>
                   </div>
                 </div>
                 <button
                   onClick={handleConnectPaypal}
-                  className="px-3 py-1.5 bg-rose-200 hover:bg-rose-600 hover:text-white border-2 border-[#0A0A0A] text-[#0A0A0A] text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer"
+                  className="px-3 py-1.5 bg-rose-200 hover:bg-rose-600 hover:text-white border-2 border-ink text-ink text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer"
                 >
                   {t('settings.payments.stripe.btn_disconnect')}
                 </button>
@@ -338,7 +338,7 @@ export const PaymentsPanel: React.FC = () => {
                   placeholder={t('settings.payments.paypal.placeholder_client')}
                   value={paypalClientId}
                   onChange={(e) => setPaypalClientId(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
                 />
                 <input
                   type="text"
@@ -346,7 +346,7 @@ export const PaymentsPanel: React.FC = () => {
                   placeholder={t('settings.payments.paypal.placeholder_wh')}
                   value={paypalWebhookId}
                   onChange={(e) => setPaypalWebhookId(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
                 />
                 <input
                   type="text"
@@ -354,7 +354,7 @@ export const PaymentsPanel: React.FC = () => {
                   placeholder={t('settings.payments.paypal.placeholder_live_client')}
                   value={paypalLiveClientId}
                   onChange={(e) => setPaypalLiveClientId(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
                 />
                 <input
                   type="text"
@@ -362,13 +362,13 @@ export const PaymentsPanel: React.FC = () => {
                   placeholder={t('settings.payments.paypal.placeholder_live_wh')}
                   value={paypalLiveWebhookId}
                   onChange={(e) => setPaypalLiveWebhookId(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
                 />
 
                 <button
                   type="submit"
                   disabled={isPaypalConnecting}
-                  className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] disabled:opacity-50 text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer flex items-center gap-2 mt-1"
+                  className="px-4 py-2.5 bg-ink hover:bg-[#2A2A2A] disabled:opacity-50 text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer flex items-center gap-2 mt-1"
                 >
                   {isPaypalConnecting ? (
                     <>
@@ -389,13 +389,13 @@ export const PaymentsPanel: React.FC = () => {
 
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
           <div className="w-full md:w-1/4">
-            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">{t('settings.payments.currency.title')}</h3>
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase">{t('settings.payments.currency.title')}</h3>
           </div>
           <div className="w-full md:w-5/12 relative" ref={currencyDropdownRef}>
             <button
               type="button"
               onClick={() => setIsCurrencyOpen(!isCurrencyOpen)}
-              className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] flex items-center justify-between cursor-pointer focus:outline-none select-none"
+              className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink flex items-center justify-between cursor-pointer focus:outline-none select-none"
             >
               <span>
                 {currency === 'USD' ? t('settings.payments.currency.usd', 'Долар США') :
@@ -403,11 +403,11 @@ export const PaymentsPanel: React.FC = () => {
                  currency === 'UAH' ? t('settings.payments.currency.uah', 'Українська гривня') :
                  currency === 'GBP' ? t('settings.payments.currency.gbp', 'Британський фунт') : currency}
               </span>
-              <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform ${isCurrencyOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={14} className={`text-ink transition-transform ${isCurrencyOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isCurrencyOpen && (
-              <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl overflow-hidden py-1 text-left animate-in fade-in duration-100">
+              <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-canvas border-2 border-ink shadow-brutal rounded-xl overflow-hidden py-1 text-left animate-in fade-in duration-100">
                 {[
                   { code: 'USD', key: 'settings.payments.currency.usd', fallback: 'Долар США' },
                   { code: 'EUR', key: 'settings.payments.currency.eur', fallback: 'Євро' },
@@ -424,8 +424,8 @@ export const PaymentsPanel: React.FC = () => {
                     }}
                     className={`w-full px-4 py-2 text-xs font-bold text-left cursor-pointer transition-colors ${
                       currency === item.code
-                        ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                        : 'text-[#0A0A0A] hover:bg-white'
+                        ? 'bg-ink text-canvas'
+                        : 'text-ink hover:bg-white'
                     }`}
                   >
                     {t(item.key, item.fallback)}
@@ -441,10 +441,10 @@ export const PaymentsPanel: React.FC = () => {
 
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
           <div className="w-full md:w-1/4">
-            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">{t('settings.payments.notify.title')}</h3>
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase">{t('settings.payments.notify.title')}</h3>
           </div>
           <div className="w-full md:w-5/12 flex flex-col gap-2.5 pt-1">
-            <label className="flex items-center gap-2 text-xs font-bold text-[#0A0A0A] cursor-pointer">
+            <label className="flex items-center gap-2 text-xs font-bold text-ink cursor-pointer">
               <input
                 type="checkbox"
                 checked={notifyMessenger}
@@ -453,16 +453,16 @@ export const PaymentsPanel: React.FC = () => {
                   setNotifyMessenger(val);
                   handleSaveSettings({ notifyMessenger: val });
                 }}
-                className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
+                className="w-4 h-4 accent-ink cursor-pointer"
               />
               <span className="flex items-center gap-1">
                 {t('settings.payments.notify.messenger')}
                 <span title={t('settings.payments.notify.messenger_tooltip')}>
-                  <HelpCircle size={13} className="text-[#0A0A0A]" />
+                  <HelpCircle size={13} className="text-ink" />
                 </span>
               </span>
             </label>
-            <label className="flex items-center gap-2 text-xs font-bold text-[#0A0A0A] cursor-pointer">
+            <label className="flex items-center gap-2 text-xs font-bold text-ink cursor-pointer">
               <input
                 type="checkbox"
                 checked={notifyEmail}
@@ -471,7 +471,7 @@ export const PaymentsPanel: React.FC = () => {
                   setNotifyEmail(val);
                   handleSaveSettings({ notifyEmail: val });
                 }}
-                className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
+                className="w-4 h-4 accent-ink cursor-pointer"
               />
               <span>{t('settings.payments.notify.email')}</span>
             </label>
@@ -483,10 +483,10 @@ export const PaymentsPanel: React.FC = () => {
 
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
           <div className="w-full md:w-1/4">
-            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">{t('settings.payments.receipt.title')}</h3>
+            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase">{t('settings.payments.receipt.title')}</h3>
           </div>
           <div className="w-full md:w-5/12 pt-1">
-            <label className="flex items-center gap-2 text-xs font-bold text-[#0A0A0A] cursor-pointer">
+            <label className="flex items-center gap-2 text-xs font-bold text-ink cursor-pointer">
               <input
                 type="checkbox"
                 checked={sendReceiptEmail}
@@ -495,7 +495,7 @@ export const PaymentsPanel: React.FC = () => {
                   setSendReceiptEmail(val);
                   handleSaveSettings({ sendReceiptEmail: val });
                 }}
-                className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
+                className="w-4 h-4 accent-ink cursor-pointer"
               />
               <span>{t('settings.payments.receipt.email')}</span>
             </label>
@@ -508,18 +508,18 @@ export const PaymentsPanel: React.FC = () => {
 
       <div className="space-y-4">
         <div className="space-y-2 select-none">
-          <span className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider">{t('settings.payments.history.total_orders')}</span>
-          <div className="w-fit px-10 py-3.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-center">
-            <span className="text-3xl font-black text-[#0A0A0A] leading-none">
+          <span className="text-xs font-black text-ink uppercase tracking-wider">{t('settings.payments.history.total_orders')}</span>
+          <div className="w-fit px-10 py-3.5 bg-canvas border-2 border-ink rounded-2xl text-center">
+            <span className="text-3xl font-black text-ink leading-none">
               {orders.length}
             </span>
           </div>
         </div>
 
-        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-6 md:p-8 space-y-4">
+        <div className="bg-canvas border-2 border-ink rounded-2xl p-6 md:p-8 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-['Anybody',sans-serif] text-md font-black text-[#0A0A0A] uppercase tracking-tight">{t('settings.payments.history.title')}</h2>
+              <h2 className="font-['Anybody',sans-serif] text-md font-black text-ink uppercase tracking-tight">{t('settings.payments.history.title')}</h2>
               <p className="text-xs text-slate-700 font-bold mt-0.5">{t('settings.payments.history.subtitle')}</p>
             </div>
             
@@ -528,14 +528,14 @@ export const PaymentsPanel: React.FC = () => {
                 {orders.length > 0 && (
                   <button 
                     onClick={handleClearOrders}
-                    className="px-3 py-1.5 bg-white hover:bg-rose-600 hover:text-white border-2 border-[#0A0A0A] text-[#0A0A0A] text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer"
+                    className="px-3 py-1.5 bg-white hover:bg-rose-600 hover:text-white border-2 border-ink text-ink text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer"
                   >
                     {t('settings.payments.history.btn_clear')}
                   </button>
                 )}
                 <button
                   onClick={handleGenerateTestOrder}
-                  className="px-3.5 py-1.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                  className="px-3.5 py-1.5 bg-ink hover:bg-[#2A2A2A] text-canvas border-2 border-ink text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer flex items-center gap-1"
                 >
                   <Plus size={11} />
                   <span>{t('settings.payments.history.btn_simulate')}</span>
@@ -544,10 +544,10 @@ export const PaymentsPanel: React.FC = () => {
             )}
           </div>
 
-          <div className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
+          <div className="border-2 border-ink rounded-2xl overflow-hidden">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-black uppercase tracking-wider">
+                <tr className="bg-canvas border-b-2 border-ink text-ink font-black uppercase tracking-wider">
                   <th className="px-5 py-3 select-none">{t('settings.payments.history.col.avatar')}</th>
                   <th className="px-5 py-3 select-none">{t('settings.payments.history.col.name')}</th>
                   <th className="px-5 py-3 select-none">{t('settings.payments.history.col.date')}</th>
@@ -558,21 +558,21 @@ export const PaymentsPanel: React.FC = () => {
                   <th className="px-5 py-3 select-none">{t('settings.payments.history.col.info')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y-2 divide-[#0A0A0A]/15 bg-white">
+              <tbody className="divide-y-2 divide-ink/15 bg-white">
                 {orders.map((order) => (
-                  <tr key={order.orderId} className="hover:bg-[#F2EBDD]/50 transition-colors">
+                  <tr key={order.orderId} className="hover:bg-canvas/50 transition-colors">
                     <td className="px-5 py-3">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[#F2EBDD] text-[10px] font-black border-2 border-[#0A0A0A] bg-[#0A0A0A]`}>
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-canvas text-[10px] font-black border-2 border-ink bg-ink`}>
                         {order.avatarText}
                       </div>
                     </td>
-                    <td className="px-5 py-3 font-bold text-[#0A0A0A]">{order.name}</td>
+                    <td className="px-5 py-3 font-bold text-ink">{order.name}</td>
                     <td className="px-5 py-3 text-slate-700 font-bold">{order.date}</td>
-                    <td className="px-5 py-3 font-mono text-[10px] text-[#0A0A0A] font-bold">{order.orderId}</td>
-                    <td className="px-5 py-3 font-bold text-[#0A0A0A]">{order.itemPrice}</td>
+                    <td className="px-5 py-3 font-mono text-[10px] text-ink font-bold">{order.orderId}</td>
+                    <td className="px-5 py-3 font-bold text-ink">{order.itemPrice}</td>
                     <td className="px-5 py-3">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-200 border-2 border-[#0A0A0A] text-[#0A0A0A]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#0A0A0A]" />
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-200 border-2 border-ink text-ink">
+                        <span className="w-1.5 h-1.5 rounded-full bg-ink" />
                         {order.status}
                       </span>
                     </td>

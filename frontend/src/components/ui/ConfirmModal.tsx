@@ -28,10 +28,10 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
   const confirmBtnClass =
     variant === 'danger'
-      ? 'bg-[#FCE7E7] hover:bg-rose-200 text-[#0A0A0A] border border-rose-200'
+      ? 'bg-[#FCE7E7] hover:bg-rose-200 text-ink border border-rose-200'
       : variant === 'warning'
-      ? 'bg-amber-100 hover:bg-amber-200 text-[#0A0A0A] border border-amber-200'
-      : 'bg-[#0A0A0A] hover:bg-zinc-800 text-[#F2EBDD] border border-[#0A0A0A]';
+      ? 'bg-amber-100 hover:bg-amber-200 text-ink border border-amber-200'
+      : 'bg-ink hover:bg-zinc-800 text-canvas border border-ink';
 
   return (
     <div
@@ -44,10 +44,10 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       >
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-2xl border border-slate-200 dark:border-[#27272A] bg-white dark:bg-[#121214] flex items-center justify-center shrink-0">
-            <AlertTriangle size={22} className="text-[#0A0A0A] dark:text-rose-400" strokeWidth={1.8} />
+            <AlertTriangle size={22} className="text-ink dark:text-rose-400" strokeWidth={1.8} />
           </div>
           <div className="flex-1 min-w-0 pt-0.5">
-            <h3 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] dark:text-[#E4E4E7] uppercase tracking-wide leading-snug">{title}</h3>
+            <h3 className="font-['Anybody',sans-serif] text-base font-black text-ink dark:text-[#E4E4E7] uppercase tracking-wide leading-snug">{title}</h3>
             <p className="text-xs text-slate-600 dark:text-[#A1A1AA] font-bold mt-1.5 leading-relaxed">{message}</p>
           </div>
         </div>
@@ -55,7 +55,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
         <div className="flex items-center justify-end gap-3">
           <button
             onClick={onCancel}
-            className="px-5 py-2.5 text-xs font-bold text-[#0A0A0A] dark:text-[#E4E4E7] bg-white dark:bg-[#18181B] hover:bg-slate-50 dark:hover:bg-[#27272A] border border-slate-200 dark:border-[#27272A] rounded-2xl transition-all cursor-pointer shadow-sm"
+            className="px-5 py-2.5 text-xs font-bold text-ink dark:text-[#E4E4E7] bg-white dark:bg-[#18181B] hover:bg-slate-50 dark:hover:bg-[#27272A] border border-slate-200 dark:border-[#27272A] rounded-2xl transition-all cursor-pointer shadow-sm"
           >
             {cancelLabel || t('common.cancel', 'Скасувати')}
           </button>

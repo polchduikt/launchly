@@ -68,9 +68,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         return botId ? (
           <IntegrationsPanel botId={botId} onOpenPricing={() => setShowPricing(true)} />
         ) : (
-          <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-8 text-center max-w-md mx-auto space-y-4 select-none">
-            <AlertCircle size={40} className="text-[#0A0A0A] mx-auto" />
-            <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-sm uppercase">No active bot found</h3>
+          <div className="bg-white border-2 border-ink rounded-2xl p-8 text-center max-w-md mx-auto space-y-4 select-none">
+            <AlertCircle size={40} className="text-ink mx-auto" />
+            <h3 className="font-['Anybody',sans-serif] font-black text-ink text-sm uppercase">No active bot found</h3>
             <p className="text-xs text-slate-500">Please connect a Telegram bot first to access integrations.</p>
           </div>
         );
@@ -80,7 +80,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         return <PaymentsPanel />;
       default:
         return (
-          <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-12 text-center text-sm text-slate-500">
+          <div className="bg-white border-2 border-ink rounded-2xl p-12 text-center text-sm text-slate-500">
             This section is currently under development.
           </div>
         );
@@ -89,7 +89,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 font-['JetBrains_Mono',monospace]"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 font-['JetBrains_Mono',monospace]"
       onClick={onClose}
     >
       <style>{`
@@ -109,27 +109,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         }
       `}</style>
       <div
-        className="relative w-full max-w-6xl h-[85vh] bg-[#F2EBDD] rounded-3xl border-2 border-[#0A0A0A] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-6xl h-[85vh] bg-canvas rounded-3xl border-2 border-ink flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-6 py-4 border-b-2 border-[#0A0A0A] bg-[#F2EBDD] flex items-center justify-center relative">
-          <h2 className="font-['Anybody',sans-serif] text-lg font-black text-[#0A0A0A] uppercase tracking-tight">
+        <div className="px-6 py-4 border-b-2 border-ink bg-canvas flex items-center justify-center relative">
+          <h2 className="font-['Anybody',sans-serif] text-lg font-black text-ink uppercase tracking-tight">
             {t('settings.settings')}
           </h2>
           <button
             onClick={onClose}
-            className="absolute right-6 w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
+            className="absolute right-6 w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm"
           >
             <X size={16} />
           </button>
         </div>
 
         <div className="flex-1 flex overflow-hidden">
-          <aside className="w-52 shrink-0 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-4 overflow-y-auto settings-scrollbar">
+          <aside className="w-52 shrink-0 bg-canvas border-r-2 border-ink p-4 overflow-y-auto settings-scrollbar">
             <div className="space-y-6">
               {SETTINGS_SECTIONS.map((section) => (
                 <div key={section.title}>
-                  <h3 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-2 px-2 select-none">
+                  <h3 className="font-['Anybody',sans-serif] text-xs font-black text-ink uppercase tracking-wider mb-2 px-2 select-none">
                     {t('settings.section.' + section.title.toLowerCase())}
                   </h3>
                   <nav className="space-y-1">
@@ -139,8 +139,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         onClick={() => handleTabClick(item.id)}
                         className={`w-full flex items-center px-3 py-2 rounded-xl text-xs font-black uppercase text-left transition-all cursor-pointer ${
                           activeTab === item.id
-                            ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A]'
-                            : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
+                            ? 'bg-ink text-canvas border-2 border-ink'
+                            : 'text-ink hover:bg-white border-2 border-transparent'
                         }`}
                       >
                         {t('settings.section.' + item.id)}
@@ -152,7 +152,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </aside>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 settings-scrollbar bg-[#F2EBDD]">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 settings-scrollbar bg-canvas">
             {renderContent()}
           </div>
         </div>

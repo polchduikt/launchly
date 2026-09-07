@@ -102,13 +102,13 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
   };
 
   return (
-    <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between transition-all font-['JetBrains_Mono',monospace]">
+    <div className="bg-canvas border-2 border-ink rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between transition-all font-['JetBrains_Mono',monospace]">
       <div className="w-full md:w-1/4 shrink-0">
-        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">
+        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-ink uppercase tracking-tight leading-snug">
           {title}
         </h3>
         {isConnected && (
-          <div className="mt-2.5 flex items-center gap-1.5 text-[#0A0A0A] font-black text-xs">
+          <div className="mt-2.5 flex items-center gap-1.5 text-ink font-black text-xs">
             <CheckCircle size={14} className="shrink-0 text-emerald-700" />
             <span>{t('settings.integrations.premium.connected')}</span>
           </div>
@@ -121,7 +121,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
         </div>
 
         <div className="flex-1 flex flex-col gap-0.5">
-          <span className="font-black text-[#0A0A0A] text-sm uppercase">{name}</span>
+          <span className="font-black text-ink text-sm uppercase">{name}</span>
 
           {hasApiSecret ? (
             <div className="mt-2.5 space-y-2.5 w-full">
@@ -130,14 +130,14 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
                   <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider leading-none">
                     {t('settings.integrations.premium.step1')}
                   </span>
-                  <span className="text-xs font-bold text-[#0A0A0A] mt-0.5">{stepText}</span>
+                  <span className="text-xs font-bold text-ink mt-0.5">{stepText}</span>
                 </div>
               )}
 
               <div className="space-y-1">
-                <label className="flex items-center gap-1 text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider select-none">
+                <label className="flex items-center gap-1 text-[9px] font-black text-ink uppercase tracking-wider select-none">
                   <span>{t('settings.integrations.premium.api_secret')}</span>
-                  <HelpCircle size={10} className="text-[#0A0A0A] cursor-help" />
+                  <HelpCircle size={10} className="text-ink cursor-help" />
                 </label>
                 <input
                   type="password"
@@ -148,8 +148,8 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
                   }}
                   disabled={isConnected}
                   placeholder={placeholder || t('settings.integrations.premium.api_secret')}
-                  className={`w-full px-3.5 py-2 border-2 rounded-xl text-xs focus:outline-none disabled:bg-slate-100 disabled:text-slate-500 font-bold bg-white text-[#0A0A0A] transition-colors ${
-                    hasError ? 'border-rose-600 focus:ring-2 focus:ring-rose-500' : 'border-[#0A0A0A]'
+                  className={`w-full px-3.5 py-2 border-2 rounded-xl text-xs focus:outline-none disabled:bg-slate-100 disabled:text-slate-500 font-bold bg-white text-ink transition-colors ${
+                    hasError ? 'border-rose-600 focus:ring-2 focus:ring-rose-500' : 'border-ink'
                   }`}
                 />
                 {hasError && (
@@ -163,7 +163,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
                 <button
                   type="button"
                   onClick={handleDisconnect}
-                  className="w-full px-4 py-2 border-2 border-[#0A0A0A] bg-rose-200 hover:bg-rose-300 text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center"
+                  className="w-full px-4 py-2 border-2 border-ink bg-rose-200 hover:bg-rose-300 text-ink text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center"
                 >
                   {t('settings.integrations.premium.disconnect')}
                 </button>
@@ -171,7 +171,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
                 <button
                   type="button"
                   onClick={handleConnect}
-                  className="w-full px-4 py-2 border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center"
+                  className="w-full px-4 py-2 border-2 border-ink bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center"
                 >
                   {t('settings.integrations.premium.connect', { name })}
                 </button>
@@ -184,14 +184,14 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
                   <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider leading-none">
                     {t('settings.integrations.premium.step1')}
                   </span>
-                  <span className="text-xs font-bold text-[#0A0A0A] mt-0.5">{stepText}</span>
+                  <span className="text-xs font-bold text-ink mt-0.5">{stepText}</span>
                 </div>
               )}
               {isConnected ? (
                 <button
                   type="button"
                   onClick={handleDisconnect}
-                  className="w-full px-4 py-2 border-2 border-[#0A0A0A] bg-rose-200 hover:bg-rose-300 text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center"
+                  className="w-full px-4 py-2 border-2 border-ink bg-rose-200 hover:bg-rose-300 text-ink text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center"
                 >
                   {t('settings.integrations.premium.disconnect')}
                 </button>
@@ -199,7 +199,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
                 <button
                   type="button"
                   onClick={handleConnect}
-                  className="w-full px-4 py-2 border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center"
+                  className="w-full px-4 py-2 border-2 border-ink bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center"
                 >
                   {t('settings.integrations.premium.connect', { name })}
                 </button>

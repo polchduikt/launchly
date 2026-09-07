@@ -39,15 +39,15 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
     <>
       <div 
         onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/50 font-['JetBrains_Mono',monospace] select-none transition-all duration-300 cursor-pointer p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 font-['JetBrains_Mono',monospace] select-none transition-all duration-300 cursor-pointer p-4"
       >
         <div 
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-xl p-6 md:p-8 bg-[#F2EBDD] rounded-3xl border-2 border-[#0A0A0A] shadow-[8px_8px_0px_0px_#0A0A0A] transform transition-all animate-in fade-in zoom-in-95 duration-200 cursor-default"
+          className="relative w-full max-w-xl p-6 md:p-8 bg-canvas rounded-3xl border-2 border-ink shadow-brutal-xl transform transition-all animate-in fade-in zoom-in-95 duration-200 cursor-default"
         >
-          <div className="flex items-center justify-between pb-4 border-b-2 border-[#0A0A0A] mb-6">
+          <div className="flex items-center justify-between pb-4 border-b-2 border-ink mb-6">
             <div>
-              <h2 className="font-['Anybody',sans-serif] text-lg font-black text-[#0A0A0A] uppercase tracking-tight">
+              <h2 className="font-['Anybody',sans-serif] text-lg font-black text-ink uppercase tracking-tight">
                 {t('auth.signin.manage_title')}
               </h2>
               <p className="text-xs text-slate-700 font-bold mt-1">
@@ -56,16 +56,16 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shrink-0 ml-4 shadow-sm"
+              className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shrink-0 ml-4 shadow-sm"
             >
               <X size={16} />
             </button>
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl">
+            <div className="flex items-center justify-between p-4 bg-white border-2 border-ink rounded-2xl">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#F2EBDD] border-2 border-[#0A0A0A] shrink-0">
+                <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-canvas border-2 border-ink shrink-0">
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -74,7 +74,7 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
                   </svg>
                 </div>
                 <div>
-                  <h4 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase">Google</h4>
+                  <h4 className="font-['Anybody',sans-serif] text-xs font-black text-ink uppercase">Google</h4>
                   {isGoogleConnected ? (
                     <span className="text-[10px] font-bold text-slate-700 block mt-0.5">
                       {user?.email}
@@ -86,28 +86,28 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
               </div>
 
               {isGoogleConnected ? (
-                <div className="px-4 py-1.5 border-2 border-[#0A0A0A] bg-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl flex items-center gap-1.5">
+                <div className="px-4 py-1.5 border-2 border-ink bg-canvas text-ink text-xs font-black uppercase rounded-xl flex items-center gap-1.5">
                   <Check size={14} className="text-emerald-700" />
                   <span>{t('auth.signin.connected')}</span>
                 </div>
               ) : (
                 <button
                   onClick={handleConnectGoogle}
-                  className="px-5 py-1.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
+                  className="px-5 py-1.5 bg-ink hover:bg-[#2A2A2A] text-canvas border-2 border-ink text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
                 >
                   {t('auth.signin.connect')}
                 </button>
               )}
             </div>
-            <div className="flex items-center justify-between p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl">
+            <div className="flex items-center justify-between p-4 bg-white border-2 border-ink rounded-2xl">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-sky-100 border-2 border-[#0A0A0A] text-sky-600 shrink-0">
+                <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-sky-100 border-2 border-ink text-sky-600 shrink-0">
                   <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.18-.08-.04-.19-.01-.27.01-.12.02-2.03 1.28-5.73 3.77-.54.37-1.03.55-1.47.54-.48-.01-1.4-.27-2.08-.49-.83-.27-1.5-.42-1.44-.89.03-.24.37-.49 1.03-.74 4.05-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.64-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.16-.03.22z" />
                   </svg>
                 </div>
                 <div>
-                  <h4 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase">Telegram</h4>
+                  <h4 className="font-['Anybody',sans-serif] text-xs font-black text-ink uppercase">Telegram</h4>
                   {isTelegramConnected ? (
                     <span className="text-[10px] font-bold text-slate-700 block mt-0.5">
                       {user?.telegramUsername ? `@${user.telegramUsername}` : `ID: ${user?.telegramUserId}`}
@@ -120,7 +120,7 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
 
               {isTelegramConnected ? (
                 <div className="flex items-center gap-2">
-                  <div className="px-4 py-1.5 border-2 border-[#0A0A0A] bg-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl flex items-center gap-1.5">
+                  <div className="px-4 py-1.5 border-2 border-ink bg-canvas text-ink text-xs font-black uppercase rounded-xl flex items-center gap-1.5">
                     <Check size={14} className="text-emerald-700" />
                     <span>{t('auth.signin.connected')}</span>
                   </div>
@@ -134,7 +134,7 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
               ) : (
                 <button
                   onClick={() => setIsTelegramOpen(true)}
-                  className="px-5 py-1.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
+                  className="px-5 py-1.5 bg-ink hover:bg-[#2A2A2A] text-canvas border-2 border-ink text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
                 >
                   {t('auth.signin.connect')}
                 </button>

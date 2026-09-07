@@ -46,20 +46,20 @@ export const FooterCTA: React.FC = () => {
         </svg>
       </div>
 
-      <div className="bg-[#0A0A0A] text-[#F2EBDD] w-full pt-2 sm:pt-4 pb-16 sm:pb-24 px-6 lg:px-16 text-center">
+      <div className="bg-ink text-canvas w-full pt-2 sm:pt-4 pb-16 sm:pb-24 px-6 lg:px-16 text-center">
         <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6">
           <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl lg:text-6xl font-black uppercase text-white tracking-tight leading-[0.95]">
             {t('landing.cta.title', 'Створіть свою першу автоматизацію безкоштовно вже сьогодні')}
           </h2>
 
-          <p className="font-['JetBrains_Mono',monospace] text-xs sm:text-base text-[#F2EBDD]/70 font-bold max-w-2xl mx-auto leading-relaxed">
+          <p className="font-['JetBrains_Mono',monospace] text-xs sm:text-base text-canvas/70 font-bold max-w-2xl mx-auto leading-relaxed">
             {t('landing.cta.subtitle', "Без прив'язки банківської картки. Налаштування займе 3 хвилини.")}
           </p>
 
           <div className="pt-2 flex justify-center">
             <button
               onClick={handleCta}
-              className="bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-sm sm:text-base font-black uppercase tracking-wider px-8 sm:px-12 py-3.5 sm:py-4 border-4 border-[#F2EBDD] shadow-[6px_6px_0px_rgba(255,255,255,0.25)] hover:bg-white hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center gap-3"
+              className="bg-canvas text-ink font-['JetBrains_Mono',monospace] text-sm sm:text-base font-black uppercase tracking-wider px-8 sm:px-12 py-3.5 sm:py-4 border-4 border-canvas shadow-[6px_6px_0px_rgba(255,255,255,0.25)] hover:bg-white hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center gap-3"
             >
               <span>{t('landing.cta.button', 'Розпочати безкоштовно →')}</span>
             </button>

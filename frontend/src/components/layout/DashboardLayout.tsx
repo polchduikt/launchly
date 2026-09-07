@@ -60,11 +60,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   };
 
   return (
-    <div data-theme={theme} className="dashboard-themed flex h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased overflow-hidden selection:bg-[#0A0A0A] selection:text-[#F2EBDD] relative">
+    <div data-theme={theme} className="dashboard-themed flex h-screen bg-canvas text-ink font-['Geist',sans-serif] antialiased overflow-hidden selection:bg-ink selection:text-canvas relative">
       
-      <aside className="w-16 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] flex flex-col justify-between h-full z-30 shrink-0 relative select-none">
+      <aside className="w-16 bg-canvas border-r-2 border-ink flex flex-col justify-between h-full z-30 shrink-0 relative select-none">
         <div className="flex flex-col overflow-y-auto flex-1">
-          <div className="h-16 flex items-center justify-center border-b-2 border-[#0A0A0A]">
+          <div className="h-16 flex items-center justify-center border-b-2 border-ink">
             <Link to={ROUTES.HOME} className="flex items-center">
               <img src={logoL} alt="Launchly Logo" className="h-8 w-auto object-contain" />
             </Link>
@@ -94,8 +94,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   title={localizedLabel}
                   className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]'
-                      : 'text-[#0A0A0A] hover:bg-[#0A0A0A]/10 border-2 border-transparent'
+                      ? 'bg-ink text-canvas border-2 border-ink shadow-brutal-sm'
+                      : 'text-ink hover:bg-ink/10 border-2 border-transparent'
                   }`}
                 >
                   <Icon size={18} />
@@ -105,7 +105,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </nav>
         </div>
 
-        <div className="p-3 border-t-2 border-[#0A0A0A] flex flex-col items-center gap-3.5 bg-[#F2EBDD] shrink-0 h-[190px]">
+        <div className="p-3 border-t-2 border-ink flex flex-col items-center gap-3.5 bg-canvas shrink-0 h-[190px]">
           
           <div ref={profileMenuRef} className="relative">
             <div
@@ -115,30 +115,30 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               <SafeAvatar
                 src={user?.avatar}
                 name={user?.name}
-                className="w-9 h-9 rounded-full object-cover border-2 border-[#0A0A0A]"
-                fallbackClassName="w-9 h-9 rounded-full bg-white text-[#0A0A0A] font-bold text-sm flex items-center justify-center border-2 border-[#0A0A0A] shrink-0"
+                className="w-9 h-9 rounded-full object-cover border-2 border-ink"
+                fallbackClassName="w-9 h-9 rounded-full bg-white text-ink font-bold text-sm flex items-center justify-center border-2 border-ink shrink-0"
               />
             </div>
 
             {showProfileMenu && (
-              <div className="absolute left-14 bottom-[-10px] w-72 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] z-50 p-4 space-y-4 font-['JetBrains_Mono',monospace] text-left">
+              <div className="absolute left-14 bottom-[-10px] w-72 bg-canvas border-2 border-ink shadow-brutal-lg z-50 p-4 space-y-4 font-['JetBrains_Mono',monospace] text-left">
                 
                 <div 
                   onClick={() => {
                     setShowProfileMenu(false);
                     navigate('/settings?tab=profile');
                   }}
-                  className="flex items-center gap-3.5 pb-1 cursor-pointer group p-1.5 -m-1.5 rounded-xl transition-all hover:bg-[#0A0A0A]/5 border border-transparent hover:border-[#0A0A0A]/20"
+                  className="flex items-center gap-3.5 pb-1 cursor-pointer group p-1.5 -m-1.5 rounded-xl transition-all hover:bg-ink/5 border border-transparent hover:border-ink/20"
                   title={t('common.edit_profile', 'Edit profile')}
                 >
                   <SafeAvatar
                     src={user?.avatar}
                     name={user?.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-[#0A0A0A] shrink-0 group-hover:scale-105 transition-transform"
-                    fallbackClassName="w-12 h-12 rounded-full bg-white text-[#0A0A0A] font-bold text-base flex items-center justify-center border-2 border-[#0A0A0A] shrink-0 group-hover:scale-105 transition-transform"
+                    className="w-12 h-12 rounded-full object-cover border-2 border-ink shrink-0 group-hover:scale-105 transition-transform"
+                    fallbackClassName="w-12 h-12 rounded-full bg-white text-ink font-bold text-base flex items-center justify-center border-2 border-ink shrink-0 group-hover:scale-105 transition-transform"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-black text-[#0A0A0A] truncate leading-snug group-hover:underline">{user.name}</p>
+                    <p className="text-sm font-black text-ink truncate leading-snug group-hover:underline">{user.name}</p>
                     <p className="text-[10px] text-slate-600 font-bold truncate max-w-[150px]">{user.email || 'Account email'}</p>
                   </div>
                 </div>
@@ -147,20 +147,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   {(user.role === 'ROLE_ADMIN' || user.role === 'ROLE_MANAGER') && (
                     <button
                       onClick={() => navigate(ROUTES.ADMIN_HOME)}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold text-[#F2EBDD] bg-[#0A0A0A] border-2 border-[#0A0A0A] transition-all text-left cursor-pointer uppercase tracking-wider mb-2"
+                      className="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold text-canvas bg-ink border-2 border-ink transition-all text-left cursor-pointer uppercase tracking-wider mb-2"
                     >
-                      <HelpCircle size={16} className="text-[#F2EBDD] shrink-0" />
+                      <HelpCircle size={16} className="text-canvas shrink-0" />
                       <span>Admin Panel</span>
                     </button>
                   )}
 
-                  <div className="pt-3 border-t-2 border-[#0A0A0A] flex items-center justify-between px-1">
+                  <div className="pt-3 border-t-2 border-ink flex items-center justify-between px-1">
                     <span 
                       onClick={() => {
                         setShowProfileMenu(false);
                         navigate('/templates');
                       }}
-                      className="text-xs font-bold text-[#0A0A0A] hover:underline cursor-pointer uppercase tracking-wider"
+                      className="text-xs font-bold text-ink hover:underline cursor-pointer uppercase tracking-wider"
                     >
                       {t('common.my_templates', 'My Templates')}
                     </span>
@@ -169,23 +169,23 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                         setShowProfileMenu(false);
                         navigate('/templates');
                       }}
-                      className="w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-white flex items-center justify-center text-[#0A0A0A] shrink-0 shadow-[1px_1px_0px_#0A0A0A] cursor-pointer transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                      className="w-6 h-6 rounded-full border-2 border-ink bg-white flex items-center justify-center text-ink shrink-0 shadow-brutal-xs cursor-pointer transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                     >
                       <Layers size={12} />
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t-2 border-[#0A0A0A] flex items-center justify-between px-1">
+                  <div className="pt-3 border-t-2 border-ink flex items-center justify-between px-1">
                     <span 
                       onClick={() => setShowSignInOptions(true)}
-                      className="text-xs font-bold text-[#0A0A0A] hover:underline cursor-pointer uppercase tracking-wider"
+                      className="text-xs font-bold text-ink hover:underline cursor-pointer uppercase tracking-wider"
                     >
                       {t('common.add_signin_options', 'Add sign-in options')}
                     </span>
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => setShowSignInOptions(true)}
-                        className="w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-white flex items-center justify-center cursor-pointer transition-all shadow-[1px_1px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                        className="w-6 h-6 rounded-full border-2 border-ink bg-white flex items-center justify-center cursor-pointer transition-all shadow-brutal-xs hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                         title="Google"
                       >
                         <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
@@ -197,7 +197,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                       </button>
                       <button
                         onClick={() => setShowSignInOptions(true)}
-                        className="w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-white flex items-center justify-center cursor-pointer transition-all shadow-[1px_1px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                        className="w-6 h-6 rounded-full border-2 border-ink bg-white flex items-center justify-center cursor-pointer transition-all shadow-brutal-xs hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                         title="Telegram"
                       >
                         <svg className="w-3.5 h-3.5 text-[#229ED9]" fill="currentColor" viewBox="0 0 24 24">
@@ -207,30 +207,30 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t-2 border-[#0A0A0A] flex items-center justify-between px-1">
-                    <span className="text-xs font-bold text-[#0A0A0A] uppercase">{t('common.theme', 'Theme:')}</span>
+                  <div className="pt-3 border-t-2 border-ink flex items-center justify-between px-1">
+                    <span className="text-xs font-bold text-ink uppercase">{t('common.theme', 'Theme:')}</span>
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => setTheme('light')}
-                        className={`w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-white flex items-center justify-center cursor-pointer transition-all shadow-[1px_1px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
-                          theme === 'light' ? 'ring-2 ring-[#0A0A0A] ring-offset-1 scale-105' : ''
+                        className={`w-6 h-6 rounded-full border-2 border-ink bg-white flex items-center justify-center cursor-pointer transition-all shadow-brutal-xs hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
+                          theme === 'light' ? 'ring-2 ring-ink ring-offset-1 scale-105' : ''
                         }`}
                         title={t('common.theme_light', 'Light')}
                       >
-                        <span className="w-2.5 h-2.5 rounded-full bg-slate-200 border border-[#0A0A0A]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-slate-200 border border-ink" />
                       </button>
                       <button
                         onClick={() => setTheme('yellow')}
-                        className={`w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-[#F2EBDD] flex items-center justify-center cursor-pointer transition-all shadow-[1px_1px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
-                          theme === 'yellow' ? 'ring-2 ring-[#0A0A0A] ring-offset-1 scale-105' : ''
+                        className={`w-6 h-6 rounded-full border-2 border-ink bg-canvas flex items-center justify-center cursor-pointer transition-all shadow-brutal-xs hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
+                          theme === 'yellow' ? 'ring-2 ring-ink ring-offset-1 scale-105' : ''
                         }`}
                         title={t('common.theme_yellow', 'Yellow')}
                       >
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-[#0A0A0A]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-ink" />
                       </button>
                       <button
                         onClick={() => setTheme('dark')}
-                        className={`w-6 h-6 rounded-full border-2 border-[#0A0A0A] bg-[#0A0A0A] flex items-center justify-center cursor-pointer transition-all shadow-[1px_1px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
+                        className={`w-6 h-6 rounded-full border-2 border-ink bg-ink flex items-center justify-center cursor-pointer transition-all shadow-brutal-xs hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
                           theme === 'dark' ? 'ring-2 ring-amber-400 ring-offset-1 scale-105' : ''
                         }`}
                         title={t('common.theme_dark', 'Dark')}
@@ -240,26 +240,26 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t-2 border-[#0A0A0A] flex items-center justify-between px-1">
-                    <span className="text-xs font-bold text-[#0A0A0A] uppercase">{t('common.language', 'Language')}</span>
+                  <div className="pt-3 border-t-2 border-ink flex items-center justify-between px-1">
+                    <span className="text-xs font-bold text-ink uppercase">{t('common.language', 'Language')}</span>
                     <div className="relative">
                       <button
                         onClick={() => setShowLangMenu(!showLangMenu)}
-                        className="text-xs font-black uppercase text-[#0A0A0A] border-2 border-[#0A0A0A] px-2.5 py-1 bg-white shadow-[1px_1px_0px_#0A0A0A] cursor-pointer flex items-center gap-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors"
+                        className="text-xs font-black uppercase text-ink border-2 border-ink px-2.5 py-1 bg-white shadow-brutal-xs cursor-pointer flex items-center gap-1.5 hover:bg-ink hover:text-canvas transition-colors"
                       >
                         <span>{language.toUpperCase()}</span>
                         <ChevronDown size={12} className={`transition-transform ${showLangMenu ? 'rotate-180' : ''}`} />
                       </button>
 
                       {showLangMenu && (
-                        <div className="absolute right-0 top-full mt-1.5 w-20 bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] z-50 overflow-hidden divide-y-2 divide-[#0A0A0A]">
+                        <div className="absolute right-0 top-full mt-1.5 w-20 bg-white border-2 border-ink shadow-brutal z-50 overflow-hidden divide-y-2 divide-ink">
                           <button
                             onClick={() => {
                               changeLanguage('en');
                               setShowLangMenu(false);
                             }}
                             className={`w-full text-left px-3 py-1.5 text-xs font-black uppercase transition-colors cursor-pointer ${
-                              language === 'en' ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A]'
+                              language === 'en' ? 'bg-ink text-canvas' : 'bg-white hover:bg-ink hover:text-canvas text-ink'
                             }`}
                           >
                             EN
@@ -270,7 +270,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                               setShowLangMenu(false);
                             }}
                             className={`w-full text-left px-3 py-1.5 text-xs font-black uppercase transition-colors cursor-pointer ${
-                              language === 'uk' ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A]'
+                              language === 'uk' ? 'bg-ink text-canvas' : 'bg-white hover:bg-ink hover:text-canvas text-ink'
                             }`}
                           >
                             UK
@@ -297,7 +297,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           <div ref={helpMenuRef} className="relative">
             <button
               onClick={() => setShowHelpMenu(!showHelpMenu)}
-              className="relative w-8 h-8 rounded-full border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] font-bold text-xs hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors cursor-pointer"
+              className="relative w-8 h-8 rounded-full border-2 border-ink flex items-center justify-center text-ink font-bold text-xs hover:bg-ink hover:text-canvas transition-colors cursor-pointer"
               title="Help & Legal"
             >
               ?
@@ -310,11 +310,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             </button>
 
             {showHelpMenu && (
-              <div className="absolute left-14 bottom-0 w-60 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] z-50 p-3 space-y-1.5 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider">
+              <div className="absolute left-14 bottom-0 w-60 bg-canvas border-2 border-ink shadow-brutal-lg z-50 p-3 space-y-1.5 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider">
                 <Link
                   to={ROUTES.SUPPORT}
                   onClick={() => setShowHelpMenu(false)}
-                  className="flex items-center justify-between px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all text-[#0A0A0A]"
+                  className="flex items-center justify-between px-3 py-2 border-2 border-transparent hover:border-ink hover:bg-ink hover:text-canvas transition-all text-ink"
                 >
                   <span>{t('common.contact_support', 'Contact Support')}</span>
                   {hasUnreadSupport && (
@@ -324,32 +324,32 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     </span>
                   )}
                 </Link>
-                <div className="border-t-2 border-[#0A0A0A] my-1" />
+                <div className="border-t-2 border-ink my-1" />
                 <Link
                   to={ROUTES.TERMS}
                   onClick={() => setShowHelpMenu(false)}
-                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all text-[#0A0A0A]"
+                  className="block px-3 py-2 border-2 border-transparent hover:border-ink hover:bg-ink hover:text-canvas transition-all text-ink"
                 >
                   {t('common.terms_of_service', 'Terms of Service')}
                 </Link>
                 <Link
                   to={ROUTES.PRIVACY}
                   onClick={() => setShowHelpMenu(false)}
-                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all text-[#0A0A0A]"
+                  className="block px-3 py-2 border-2 border-transparent hover:border-ink hover:bg-ink hover:text-canvas transition-all text-ink"
                 >
                   {t('common.privacy_policy', 'Privacy Policy')}
                 </Link>
                 <Link
                   to={ROUTES.BLOG}
                   onClick={() => setShowHelpMenu(false)}
-                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all text-[#0A0A0A]"
+                  className="block px-3 py-2 border-2 border-transparent hover:border-ink hover:bg-ink hover:text-canvas transition-all text-ink"
                 >
                   {t('common.blog', 'Blog')}
                 </Link>
                 <Link
                   to={ROUTES.FAQ}
                   onClick={() => setShowHelpMenu(false)}
-                  className="block px-3 py-2 border-2 border-transparent hover:border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all text-[#0A0A0A]"
+                  className="block px-3 py-2 border-2 border-transparent hover:border-ink hover:bg-ink hover:text-canvas transition-all text-ink"
                 >
                   {t('common.faq_guides', 'FAQ & Guides')}
                 </Link>
@@ -380,11 +380,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               />
             </svg>
 
-            <div className="absolute left-14 bottom-1/2 translate-y-1/2 hidden group-hover:flex flex-col bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] p-3 z-50 min-w-[160px] pointer-events-none select-none font-['JetBrains_Mono',monospace]">
-              <div className="text-[#0A0A0A]/70 text-[11px] font-bold uppercase leading-none">
+            <div className="absolute left-14 bottom-1/2 translate-y-1/2 hidden group-hover:flex flex-col bg-canvas border-2 border-ink shadow-brutal p-3 z-50 min-w-[160px] pointer-events-none select-none font-['JetBrains_Mono',monospace]">
+              <div className="text-ink/70 text-[11px] font-bold uppercase leading-none">
                 {planName} contacts limit
               </div>
-              <div className="text-[#0A0A0A] text-lg font-black mt-1.5 leading-none">
+              <div className="text-ink text-lg font-black mt-1.5 leading-none">
                 {contactsCount}/{maxBotUsers}
               </div>
             </div>
@@ -392,7 +392,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
           <button
             onClick={handlePlanClick}
-            className="px-2 py-0.5 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest border border-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] transition-colors cursor-pointer"
+            className="px-2 py-0.5 bg-ink text-canvas font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest border border-ink hover:bg-white hover:text-ink transition-colors cursor-pointer"
           >
             {planName}
           </button>

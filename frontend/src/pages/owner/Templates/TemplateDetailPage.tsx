@@ -100,8 +100,8 @@ export const TemplateDetailPage: React.FC = () => {
     return (
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-          <Loader2 className="animate-spin text-[#0A0A0A]" size={36} />
-          <span className="text-xs font-black uppercase text-[#0A0A0A] tracking-wider">
+          <Loader2 className="animate-spin text-ink" size={36} />
+          <span className="text-xs font-black uppercase text-ink tracking-wider">
             {t('common.loading', 'Завантаження...')}
           </span>
         </div>
@@ -179,12 +179,12 @@ export const TemplateDetailPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col min-h-full font-['JetBrains_Mono',monospace] text-[#0A0A0A] bg-[#F2EBDD]">
-        <div className="w-full h-16 min-h-[64px] max-h-[64px] bg-white border-b-2 border-[#0A0A0A] px-6 flex items-center justify-between gap-4 sticky top-0 z-20">
+      <div className="flex flex-col min-h-full font-['JetBrains_Mono',monospace] text-ink bg-canvas">
+        <div className="w-full h-16 min-h-[64px] max-h-[64px] bg-white border-b-2 border-ink px-6 flex items-center justify-between gap-4 sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/templates')}
-              className="px-3 py-1.5 bg-white hover:bg-[#0A0A0A] hover:text-white border border-[#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1 shrink-0"
+              className="px-3 py-1.5 bg-white hover:bg-ink hover:text-white border border-ink text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1 shrink-0"
             >
               <ChevronLeft size={15} />
               <span>{t('common.back', 'Назад')}</span>
@@ -193,7 +193,7 @@ export const TemplateDetailPage: React.FC = () => {
             <div className="flex items-center gap-2 text-xs font-black uppercase">
               <span className="text-slate-400">{t('template.breadcrumb_templates', 'Шаблони')}</span>
               <span className="text-slate-400">&gt;</span>
-              <span className="text-[#0A0A0A] truncate max-w-xs font-['Anybody',sans-serif]">{template.name}</span>
+              <span className="text-ink truncate max-w-xs font-['Anybody',sans-serif]">{template.name}</span>
             </div>
           </div>
 
@@ -201,7 +201,7 @@ export const TemplateDetailPage: React.FC = () => {
             {isCreator && (
               <button
                 onClick={() => navigate(`/templates/edit/${template.shareCode}`)}
-                className="px-3.5 py-1.5 bg-white hover:bg-slate-100 border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase cursor-pointer flex items-center gap-1.5 transition-all"
+                className="px-3.5 py-1.5 bg-white hover:bg-slate-100 border-2 border-ink shadow-brutal-sm text-xs font-black uppercase cursor-pointer flex items-center gap-1.5 transition-all"
               >
                 <Edit size={14} />
                 <span>{t('template.detail.edit_btn', 'Редагувати шаблон')}</span>
@@ -210,33 +210,33 @@ export const TemplateDetailPage: React.FC = () => {
 
             <button
               onClick={() => setIsDeleteModalOpen(true)}
-              className="px-3.5 py-1.5 bg-rose-100 hover:bg-rose-600 hover:text-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-1.5 bg-rose-100 hover:bg-rose-600 hover:text-white border-2 border-ink shadow-brutal-sm text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5"
             >
               <Trash2 size={14} />
               <span>{isCreator ? t('template.delete_template', 'Видалити шаблон') : t('template.delete_installed', 'Видалити зі встановлених')}</span>
             </button>
           </div>
         </div>
-        <div className="w-full bg-white border-b-2 border-[#0A0A0A] px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm">
+        <div className="w-full bg-white border-b-2 border-ink px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm">
           <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-2 text-xs font-bold text-slate-700 min-w-0">
-            <span className="shrink-0 text-[#0A0A0A] font-black uppercase">
+            <span className="shrink-0 text-ink font-black uppercase">
               {t('template.share_permanent_link', 'Поділіться цим шаблоном за постійним посиланням:')}
             </span>
-            <div className="flex-1 flex items-center gap-2 min-w-0 bg-slate-50 border-2 border-[#0A0A0A] px-3 py-1.5 rounded-lg">
+            <div className="flex-1 flex items-center gap-2 min-w-0 bg-slate-50 border-2 border-ink px-3 py-1.5 rounded-lg">
               <ExternalLink size={14} className="text-indigo-600 shrink-0" />
               <input
                 type="text"
                 readOnly
                 value={template.shareUrl}
                 onClick={(e) => (e.target as HTMLInputElement).select()}
-                className="w-full bg-transparent font-mono text-xs font-extrabold text-[#0A0A0A] focus:outline-none select-all"
+                className="w-full bg-transparent font-mono text-xs font-extrabold text-ink focus:outline-none select-all"
               />
             </div>
           </div>
 
           <button
             onClick={handleCopyLink}
-            className="px-5 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+            className="px-5 py-2 bg-ink hover:bg-[#2A2A2A] text-white border-2 border-ink shadow-brutal-sm text-xs font-black uppercase transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
           >
             {copied ? (
               <>
@@ -254,8 +254,8 @@ export const TemplateDetailPage: React.FC = () => {
         <div className="p-6 space-y-6 flex-1 max-w-6xl w-full mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[4px_4px_0px_0px_#0A0A0A] space-y-4 rounded-xl">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase pb-2 border-b-2 border-[#0A0A0A]">
+              <div className="bg-white border-2 border-ink p-6 shadow-brutal space-y-4 rounded-xl">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase pb-2 border-b-2 border-ink">
                   <span>
                     {t('template.author', 'Автор')}: <strong className="text-indigo-600 font-black">{template.creatorName || 'Launchly Creator'}</strong>
                   </span>
@@ -266,15 +266,15 @@ export const TemplateDetailPage: React.FC = () => {
                     <img
                       src={template.avatarUrl}
                       alt={template.name}
-                      className="w-14 h-14 object-cover border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] shrink-0 rounded-xl"
+                      className="w-14 h-14 object-cover border-2 border-ink shadow-brutal-sm shrink-0 rounded-xl"
                     />
                   ) : (
-                    <div className="w-14 h-14 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] flex items-center justify-center shrink-0 rounded-xl text-lg font-black font-['Anybody',sans-serif]">
+                    <div className="w-14 h-14 bg-ink text-canvas border-2 border-ink shadow-brutal-sm flex items-center justify-center shrink-0 rounded-xl text-lg font-black font-['Anybody',sans-serif]">
                       {getInitials(template.creatorName || template.name)}
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <h2 className="font-['Anybody',sans-serif] text-xl font-black uppercase text-[#0A0A0A] truncate">
+                    <h2 className="font-['Anybody',sans-serif] text-xl font-black uppercase text-ink truncate">
                       {template.name}
                     </h2>
                     <p className="text-xs text-slate-600 font-medium mt-0.5">
@@ -284,24 +284,24 @@ export const TemplateDetailPage: React.FC = () => {
                 </div>
               </div>
               <div className="space-y-4">
-                <div className="border-2 border-[#0A0A0A] bg-white shadow-[3px_3px_0px_0px_#0A0A0A] overflow-hidden rounded-xl">
+                <div className="border-2 border-ink bg-white shadow-brutal-md overflow-hidden rounded-xl">
                   <button
                     onClick={() => setCollapsedAutomations(!collapsedAutomations)}
-                    className="w-full p-3.5 flex items-center justify-between bg-slate-50 border-b-2 border-[#0A0A0A] cursor-pointer"
+                    className="w-full p-3.5 flex items-center justify-between bg-slate-50 border-b-2 border-ink cursor-pointer"
                   >
-                    <span className="font-black text-xs uppercase text-[#0A0A0A] flex items-center gap-2">
-                      <Workflow size={15} className="text-[#0A0A0A]" />
+                    <span className="font-black text-xs uppercase text-ink flex items-center gap-2">
+                      <Workflow size={15} className="text-ink" />
                       <span>{`${t('common.nav.automation', 'Автоматизація')}: ${template.flowCount || 1}`}</span>
                     </span>
-                    <ChevronDown size={16} className={`transition-transform duration-200 text-[#0A0A0A] ${collapsedAutomations ? '-rotate-90' : ''}`} />
+                    <ChevronDown size={16} className={`transition-transform duration-200 text-ink ${collapsedAutomations ? '-rotate-90' : ''}`} />
                   </button>
 
                   {!collapsedAutomations && (
                     <div className="p-4 bg-white text-xs font-bold text-slate-800 space-y-2">
-                      <div className="py-2 px-3 bg-slate-50 border border-[#0A0A0A] rounded-lg flex items-center justify-between">
+                      <div className="py-2 px-3 bg-slate-50 border border-ink rounded-lg flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
                           <Check size={15} className="text-emerald-600 shrink-0 stroke-[3]" />
-                          <span className="text-[#0A0A0A] font-extrabold uppercase">{automationName}</span>
+                          <span className="text-ink font-extrabold uppercase">{automationName}</span>
                         </div>
                         {(template.nodeCount !== undefined && template.nodeCount > 0) && (
                           <span className="text-[10px] text-slate-500 font-bold">
@@ -313,25 +313,25 @@ export const TemplateDetailPage: React.FC = () => {
                   )}
                 </div>
                 {broadcastItems.length > 0 && (
-                  <div className="border-2 border-[#0A0A0A] bg-white shadow-[3px_3px_0px_0px_#0A0A0A] overflow-hidden rounded-xl">
+                  <div className="border-2 border-ink bg-white shadow-brutal-md overflow-hidden rounded-xl">
                     <button
                       onClick={() => setCollapsedBroadcasts(!collapsedBroadcasts)}
-                      className="w-full p-3.5 flex items-center justify-between bg-slate-50 border-b-2 border-[#0A0A0A] cursor-pointer"
+                      className="w-full p-3.5 flex items-center justify-between bg-slate-50 border-b-2 border-ink cursor-pointer"
                     >
-                      <span className="font-black text-xs uppercase text-[#0A0A0A] flex items-center gap-2">
-                        <Radio size={15} className="text-[#0A0A0A]" />
+                      <span className="font-black text-xs uppercase text-ink flex items-center gap-2">
+                        <Radio size={15} className="text-ink" />
                         <span>{`${t('common.nav.broadcasts', 'Розсилки')}: ${broadcastItems.length}`}</span>
                       </span>
-                      <ChevronDown size={16} className={`transition-transform duration-200 text-[#0A0A0A] ${collapsedBroadcasts ? '-rotate-90' : ''}`} />
+                      <ChevronDown size={16} className={`transition-transform duration-200 text-ink ${collapsedBroadcasts ? '-rotate-90' : ''}`} />
                     </button>
 
                     {!collapsedBroadcasts && (
                       <div className="p-4 bg-white text-xs font-bold text-slate-800 space-y-2">
                         {broadcastItems.map((item, i) => (
-                          <div key={i} className="py-2 px-3 bg-slate-50 border border-[#0A0A0A] rounded-lg flex items-center justify-between">
+                          <div key={i} className="py-2 px-3 bg-slate-50 border border-ink rounded-lg flex items-center justify-between">
                             <div className="flex items-center gap-2.5">
                               <Check size={15} className="text-emerald-600 shrink-0 stroke-[3]" />
-                              <span className="text-[#0A0A0A] font-extrabold uppercase">{item.name}</span>
+                              <span className="text-ink font-extrabold uppercase">{item.name}</span>
                             </div>
                             {item.nodeCount !== undefined && item.nodeCount > 0 && (
                               <span className="text-[10px] text-slate-500 font-bold">
@@ -345,24 +345,24 @@ export const TemplateDetailPage: React.FC = () => {
                   </div>
                 )}
                 {fieldNames.length > 0 && (
-                  <div className="border-2 border-[#0A0A0A] bg-white shadow-[3px_3px_0px_0px_#0A0A0A] overflow-hidden rounded-xl">
+                  <div className="border-2 border-ink bg-white shadow-brutal-md overflow-hidden rounded-xl">
                     <button
                       onClick={() => setCollapsedFields(!collapsedFields)}
-                      className="w-full p-3.5 flex items-center justify-between bg-slate-50 border-b-2 border-[#0A0A0A] cursor-pointer"
+                      className="w-full p-3.5 flex items-center justify-between bg-slate-50 border-b-2 border-ink cursor-pointer"
                     >
-                      <span className="font-black text-xs uppercase text-[#0A0A0A] flex items-center gap-2">
-                        <Sliders size={15} className="text-[#0A0A0A]" />
+                      <span className="font-black text-xs uppercase text-ink flex items-center gap-2">
+                        <Sliders size={15} className="text-ink" />
                         <span>{`${t('template.custom_fields', 'Користувацькі поля')}: ${fieldNames.length}`}</span>
                       </span>
-                      <ChevronDown size={16} className={`transition-transform duration-200 text-[#0A0A0A] ${collapsedFields ? '-rotate-90' : ''}`} />
+                      <ChevronDown size={16} className={`transition-transform duration-200 text-ink ${collapsedFields ? '-rotate-90' : ''}`} />
                     </button>
 
                     {!collapsedFields && (
                       <div className="p-4 bg-white text-xs font-bold text-slate-800 space-y-2">
                         {fieldNames.map((name, i) => (
-                          <div key={i} className="py-2 px-3 bg-slate-50 border border-[#0A0A0A] rounded-lg flex items-center gap-2.5">
+                          <div key={i} className="py-2 px-3 bg-slate-50 border border-ink rounded-lg flex items-center gap-2.5">
                             <Check size={15} className="text-emerald-600 shrink-0 stroke-[3]" />
-                            <span className="text-[#0A0A0A] font-extrabold">{name}</span>
+                            <span className="text-ink font-extrabold">{name}</span>
                           </div>
                         ))}
                       </div>
@@ -370,24 +370,24 @@ export const TemplateDetailPage: React.FC = () => {
                   </div>
                 )}
                 {tagNames.length > 0 && (
-                  <div className="border-2 border-[#0A0A0A] bg-white shadow-[3px_3px_0px_0px_#0A0A0A] overflow-hidden rounded-xl">
+                  <div className="border-2 border-ink bg-white shadow-brutal-md overflow-hidden rounded-xl">
                     <button
                       onClick={() => setCollapsedTags(!collapsedTags)}
-                      className="w-full p-3.5 flex items-center justify-between bg-slate-50 border-b-2 border-[#0A0A0A] cursor-pointer"
+                      className="w-full p-3.5 flex items-center justify-between bg-slate-50 border-b-2 border-ink cursor-pointer"
                     >
-                      <span className="font-black text-xs uppercase text-[#0A0A0A] flex items-center gap-2">
-                        <TagIcon size={15} className="text-[#0A0A0A]" />
+                      <span className="font-black text-xs uppercase text-ink flex items-center gap-2">
+                        <TagIcon size={15} className="text-ink" />
                         <span>{`${t('template.tags', 'Теги')}: ${tagNames.length}`}</span>
                       </span>
-                      <ChevronDown size={16} className={`transition-transform duration-200 text-[#0A0A0A] ${collapsedTags ? '-rotate-90' : ''}`} />
+                      <ChevronDown size={16} className={`transition-transform duration-200 text-ink ${collapsedTags ? '-rotate-90' : ''}`} />
                     </button>
 
                     {!collapsedTags && (
                       <div className="p-4 bg-white text-xs font-bold text-slate-800 space-y-2">
                         {tagNames.map((name, i) => (
-                          <div key={i} className="py-2 px-3 bg-slate-50 border border-[#0A0A0A] rounded-lg flex items-center gap-2.5">
+                          <div key={i} className="py-2 px-3 bg-slate-50 border border-ink rounded-lg flex items-center gap-2.5">
                             <Check size={15} className="text-emerald-600 shrink-0 stroke-[3]" />
-                            <span className="text-[#0A0A0A] font-extrabold uppercase">{name}</span>
+                            <span className="text-ink font-extrabold uppercase">{name}</span>
                           </div>
                         ))}
                       </div>
@@ -398,24 +398,24 @@ export const TemplateDetailPage: React.FC = () => {
               </div>
             </div>
             <div className="space-y-6">
-              <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[4px_4px_0px_0px_#0A0A0A] space-y-4 rounded-xl">
-                <h3 className="font-black text-xs uppercase text-[#0A0A0A] border-b-2 border-[#0A0A0A] pb-3 flex items-center gap-2">
+              <div className="bg-white border-2 border-ink p-6 shadow-brutal space-y-4 rounded-xl">
+                <h3 className="font-black text-xs uppercase text-ink border-b-2 border-ink pb-3 flex items-center gap-2">
                   <Eye size={15} className="text-indigo-600" />
                   <span>{t('template.stats.views', 'Статистика шаблону')}</span>
                 </h3>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-slate-50 border-2 border-[#0A0A0A] rounded-lg text-center space-y-1">
+                  <div className="p-3 bg-slate-50 border-2 border-ink rounded-lg text-center space-y-1">
                     <div className="flex items-center justify-center gap-1.5 text-xs text-slate-600 font-bold uppercase">
                       <Eye size={13} className="text-slate-500" />
                       <span>{t('template.stats.views', 'Перегляди')}</span>
                     </div>
-                    <div className="text-xl font-black font-['Anybody',sans-serif] text-[#0A0A0A]">
+                    <div className="text-xl font-black font-['Anybody',sans-serif] text-ink">
                       {template.viewsCount ?? 0}
                     </div>
                   </div>
 
-                  <div className="p-3 bg-emerald-50 border-2 border-[#0A0A0A] rounded-lg text-center space-y-1">
+                  <div className="p-3 bg-emerald-50 border-2 border-ink rounded-lg text-center space-y-1">
                     <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-700 font-bold uppercase">
                       <Download size={13} className="text-emerald-600" />
                       <span>{t('template.stats.installs', 'Встановлення')}</span>
@@ -444,7 +444,7 @@ export const TemplateDetailPage: React.FC = () => {
                   </div>
 
                   {template.broadcastCount > 0 && (
-                    <div className="p-2.5 bg-slate-50 border border-[#0A0A0A] rounded-lg space-y-1">
+                    <div className="p-2.5 bg-slate-50 border border-ink rounded-lg space-y-1">
                       <div className="flex items-center justify-between text-slate-900 font-black">
                         <span className="flex items-center gap-1.5">
                           <Radio size={13} className="text-indigo-600" />
@@ -467,7 +467,7 @@ export const TemplateDetailPage: React.FC = () => {
                         <Sliders size={13} />
                         <span>{t('template.custom_fields', 'Користувацькі поля')}</span>
                       </span>
-                      <span className="font-black text-[#0A0A0A]">{template.fieldCount}</span>
+                      <span className="font-black text-ink">{template.fieldCount}</span>
                     </div>
                   )}
 
@@ -477,24 +477,24 @@ export const TemplateDetailPage: React.FC = () => {
                         <TagIcon size={13} />
                         <span>{t('template.tags', 'Теги')}</span>
                       </span>
-                      <span className="font-black text-[#0A0A0A]">{template.tagCount}</span>
+                      <span className="font-black text-ink">{template.tagCount}</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[4px_4px_0px_0px_#0A0A0A] space-y-4 rounded-xl">
-                <h3 className="font-black text-xs uppercase text-[#0A0A0A] border-b-2 border-[#0A0A0A] pb-3">
+              <div className="bg-white border-2 border-ink p-6 shadow-brutal space-y-4 rounded-xl">
+                <h3 className="font-black text-xs uppercase text-ink border-b-2 border-ink pb-3">
                   {t('template.about_title', 'Про шаблон')}
                 </h3>
 
                 <div className="space-y-4">
-                  <div className="bg-slate-50 border-2 border-[#0A0A0A] p-4 text-xs font-medium leading-relaxed text-slate-800 rounded-lg">
+                  <div className="bg-slate-50 border-2 border-ink p-4 text-xs font-medium leading-relaxed text-slate-800 rounded-lg">
                     {template.description ? template.description : t('template.no_description', 'Опис відсутній.')}
                   </div>
 
                   {(template.guideUrl || template.videoUrl) && (
-                    <div className="pt-2 border-t-2 border-[#0A0A0A]/10 space-y-2.5 text-xs font-black">
+                    <div className="pt-2 border-t-2 border-ink/10 space-y-2.5 text-xs font-black">
                       {template.guideUrl && (
                         <a
                           href={template.guideUrl.startsWith('http') ? template.guideUrl : `https://${template.guideUrl}`}

@@ -332,12 +332,12 @@ export const AdminBlogPage: React.FC = () => {
     return (
       <AdminLayout>
         <div className="space-y-6 max-w-7xl mx-auto pb-12 font-['JetBrains_Mono',monospace]">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border-2 border-ink shadow-brutal-lg">
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
-                className="px-3.5 py-2 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
+                className="px-3.5 py-2 bg-slate-50 border-2 border-ink rounded-xl text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas transition cursor-pointer flex items-center gap-1.5 shadow-brutal-sm"
               >
                 <ArrowLeft size={14} />
                 <span>{t('admin.blog.btn_back_to_list', 'Назад до списку статей')}</span>
@@ -345,7 +345,7 @@ export const AdminBlogPage: React.FC = () => {
 
               <div className="h-6 w-[2px] bg-slate-200 hidden sm:block" />
 
-              <h2 className="font-['Anybody',sans-serif] text-base md:text-lg font-black text-[#0A0A0A] uppercase tracking-tight">
+              <h2 className="font-['Anybody',sans-serif] text-base md:text-lg font-black text-ink uppercase tracking-tight">
                 {editingArticleId
                   ? t('admin.blog.modal_edit_title', 'Редагувати статтю блогу')
                   : t('admin.blog.modal_create_title', 'Створити нову статтю')}
@@ -353,14 +353,14 @@ export const AdminBlogPage: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex bg-slate-100 border-2 border-[#0A0A0A] rounded-xl p-0.5 shadow-[2px_2px_0px_#0A0A0A]">
+              <div className="flex bg-slate-100 border-2 border-ink rounded-xl p-0.5 shadow-brutal-sm">
                 <button
                   type="button"
                   onClick={() => setActiveTab('builder')}
                   className={`px-3 py-1 rounded-lg text-xs font-black uppercase transition-all cursor-pointer ${
                     activeTab === 'builder'
-                      ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                      : 'text-slate-600 hover:text-[#0A0A0A]'
+                      ? 'bg-ink text-canvas'
+                      : 'text-slate-600 hover:text-ink'
                   }`}
                 >
                   {t('admin.blog.tab_builder', 'Конструктор')}
@@ -370,8 +370,8 @@ export const AdminBlogPage: React.FC = () => {
                   onClick={() => setActiveTab('preview')}
                   className={`px-3 py-1 rounded-lg text-xs font-black uppercase transition-all cursor-pointer ${
                     activeTab === 'preview'
-                      ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                      : 'text-slate-600 hover:text-[#0A0A0A]'
+                      ? 'bg-ink text-canvas'
+                      : 'text-slate-600 hover:text-ink'
                   }`}
                 >
                   {t('admin.blog.tab_preview', 'Попередній перегляд')}
@@ -382,7 +382,7 @@ export const AdminBlogPage: React.FC = () => {
                 type="button"
                 onClick={handleSaveArticle}
                 disabled={createMutation.isPending || updateMutation.isPending}
-                className="px-5 py-2 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase flex items-center gap-2 hover:bg-[#2A2A2A] disabled:opacity-50 transition cursor-pointer shadow-[3px_3px_0px_#0A0A0A]"
+                className="px-5 py-2 bg-ink text-canvas border-2 border-ink rounded-xl text-xs font-black uppercase flex items-center gap-2 hover:bg-[#2A2A2A] disabled:opacity-50 transition cursor-pointer shadow-brutal-md"
               >
                 {createMutation.isPending || updateMutation.isPending ? (
                   <Loader2 size={15} className="animate-spin" />
@@ -399,7 +399,7 @@ export const AdminBlogPage: React.FC = () => {
           </div>
 
           {formError && (
-            <div className="p-4 bg-rose-100 border-2 border-rose-600 rounded-2xl text-xs font-bold text-rose-800 flex items-center gap-2 shadow-[4px_4px_0px_#0A0A0A]">
+            <div className="p-4 bg-rose-100 border-2 border-rose-600 rounded-2xl text-xs font-bold text-rose-800 flex items-center gap-2 shadow-brutal">
               <AlertTriangle size={16} className="shrink-0" />
               <span>{formError}</span>
             </div>
@@ -407,14 +407,14 @@ export const AdminBlogPage: React.FC = () => {
 
           {activeTab === 'builder' ? (
             <div className="space-y-6">
-              <div className="bg-white p-6 rounded-3xl border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] space-y-5">
-                <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wider pb-3 border-b-2 border-slate-100">
+              <div className="bg-white p-6 rounded-3xl border-2 border-ink shadow-brutal-lg space-y-5">
+                <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase tracking-wider pb-3 border-b-2 border-slate-100">
                   {t('admin.blog.sec_general', '1. Основна інформація')}
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black uppercase text-[#0A0A0A] block">
+                    <label className="text-xs font-black uppercase text-ink block">
                       {t('admin.blog.label_language', 'Мова статті / Аудиторія *')}
                     </label>
                     <div className="flex gap-2">
@@ -423,8 +423,8 @@ export const AdminBlogPage: React.FC = () => {
                         onClick={() => setFormLanguage('uk')}
                         className={`flex-1 py-2.5 px-3 rounded-xl border-2 font-black text-xs uppercase flex items-center justify-center cursor-pointer transition ${
                           formLanguage === 'uk'
-                            ? 'bg-blue-600 text-white border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]'
-                            : 'bg-white text-[#0A0A0A] border-slate-300 hover:border-[#0A0A0A]'
+                            ? 'bg-blue-600 text-white border-ink shadow-brutal-sm'
+                            : 'bg-white text-ink border-slate-300 hover:border-ink'
                         }`}
                       >
                         {t('admin.blog.lang_uk', 'Українська')}
@@ -434,8 +434,8 @@ export const AdminBlogPage: React.FC = () => {
                         onClick={() => setFormLanguage('en')}
                         className={`flex-1 py-2.5 px-3 rounded-xl border-2 font-black text-xs uppercase flex items-center justify-center cursor-pointer transition ${
                           formLanguage === 'en'
-                            ? 'bg-amber-400 text-[#0A0A0A] border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]'
-                            : 'bg-white text-[#0A0A0A] border-slate-300 hover:border-[#0A0A0A]'
+                            ? 'bg-amber-400 text-ink border-ink shadow-brutal-sm'
+                            : 'bg-white text-ink border-slate-300 hover:border-ink'
                         }`}
                       >
                         {t('admin.blog.lang_en', 'English')}
@@ -444,7 +444,7 @@ export const AdminBlogPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black uppercase text-[#0A0A0A] block">
+                    <label className="text-xs font-black uppercase text-ink block">
                       {t('admin.blog.label_slug', 'URL Slug (ідентифікатор)')}
                     </label>
                     <input
@@ -452,12 +452,12 @@ export const AdminBlogPage: React.FC = () => {
                       placeholder={t('admin.blog.placeholder_slug', 'автоматично з заголовка, напр. how-to-create-telegram-bot')}
                       value={formId}
                       onChange={(e) => setFormId(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none placeholder:text-slate-400"
+                      className="w-full px-4 py-2.5 bg-slate-50 border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none placeholder:text-slate-400"
                     />
                   </div>
 
                   <div className="md:col-span-2 space-y-1.5">
-                    <label className="text-xs font-black uppercase text-[#0A0A0A] block">
+                    <label className="text-xs font-black uppercase text-ink block">
                       {t('admin.blog.label_title', 'Заголовок статті *')}
                     </label>
                     <input
@@ -466,12 +466,12 @@ export const AdminBlogPage: React.FC = () => {
                       placeholder={t('admin.blog.placeholder_title', 'напр. Як створити Telegram бота для бізнесу за 10 хвилин')}
                       value={formTitle}
                       onChange={(e) => setFormTitle(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none"
                     />
                   </div>
 
                   <div className="md:col-span-2 space-y-1.5">
-                    <label className="text-xs font-black uppercase text-[#0A0A0A] block">
+                    <label className="text-xs font-black uppercase text-ink block">
                       {t('admin.blog.label_category', 'Категорія *')}
                     </label>
                     <div className="flex gap-1.5 flex-wrap pb-1">
@@ -482,8 +482,8 @@ export const AdminBlogPage: React.FC = () => {
                           onClick={() => setFormCategory(cat.value)}
                           className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border cursor-pointer transition ${
                             formCategory === cat.value
-                              ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
-                              : 'bg-white text-[#0A0A0A] border-slate-300 hover:border-[#0A0A0A]'
+                              ? 'bg-ink text-canvas border-ink'
+                              : 'bg-white text-ink border-slate-300 hover:border-ink'
                           }`}
                         >
                           {cat.label}
@@ -496,12 +496,12 @@ export const AdminBlogPage: React.FC = () => {
                       placeholder="Гайди"
                       value={formCategory}
                       onChange={(e) => setFormCategory(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none"
                     />
                   </div>
 
                   <div className="md:col-span-2 space-y-2">
-                    <label className="text-xs font-black uppercase text-[#0A0A0A] block">
+                    <label className="text-xs font-black uppercase text-ink block">
                       {t('admin.blog.label_cover', 'Обкладинка статті')}
                     </label>
 
@@ -517,20 +517,20 @@ export const AdminBlogPage: React.FC = () => {
                     />
 
                     {formCoverImage ? (
-                      <div className="relative rounded-2xl border-2 border-[#0A0A0A] overflow-hidden max-w-lg aspect-[16/9] shadow-[4px_4px_0px_#0A0A0A] bg-slate-100 group">
+                      <div className="relative rounded-2xl border-2 border-ink overflow-hidden max-w-lg aspect-[16/9] shadow-brutal bg-slate-100 group">
                         <img src={formCoverImage} alt="Cover preview" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                           <button
                             type="button"
                             onClick={() => coverFileInputRef.current?.click()}
-                            className="px-3 py-1.5 bg-white text-[#0A0A0A] rounded-xl text-xs font-black uppercase border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] hover:bg-slate-100 cursor-pointer"
+                            className="px-3 py-1.5 bg-white text-ink rounded-xl text-xs font-black uppercase border-2 border-ink shadow-brutal-sm hover:bg-slate-100 cursor-pointer"
                           >
                             {t('admin.blog.change_image', 'Змінити фото')}
                           </button>
                           <button
                             type="button"
                             onClick={() => setFormCoverImage('')}
-                            className="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-black uppercase border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] hover:bg-rose-700 cursor-pointer"
+                            className="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-black uppercase border-2 border-ink shadow-brutal-sm hover:bg-rose-700 cursor-pointer"
                           >
                             {t('admin.blog.remove_image', 'Видалити фото')}
                           </button>
@@ -545,21 +545,21 @@ export const AdminBlogPage: React.FC = () => {
                           const file = e.dataTransfer.files?.[0];
                           if (file) handleCoverFileUpload(file);
                         }}
-                        className="border-2 border-dashed border-[#0A0A0A] rounded-2xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition cursor-pointer flex flex-col items-center justify-center gap-2"
+                        className="border-2 border-dashed border-ink rounded-2xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition cursor-pointer flex flex-col items-center justify-center gap-2"
                       >
                         {coverUploadMutation.isPending ? (
                           <div className="flex flex-col items-center gap-2">
-                            <Loader2 className="animate-spin text-[#0A0A0A]" size={28} />
+                            <Loader2 className="animate-spin text-ink" size={28} />
                             <span className="text-xs font-bold text-slate-600">
                               {t('admin.blog.dropzone_uploading', 'Завантаження фото...')}
                             </span>
                           </div>
                         ) : (
                           <>
-                            <div className="w-12 h-12 rounded-2xl bg-amber-200 border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
+                            <div className="w-12 h-12 rounded-2xl bg-amber-200 border-2 border-ink flex items-center justify-center text-ink shadow-brutal-sm">
                               <UploadCloud size={24} />
                             </div>
-                            <div className="text-xs font-black uppercase text-[#0A0A0A]">
+                            <div className="text-xs font-black uppercase text-ink">
                               {t('admin.blog.dropzone_title', 'Перетягніть фото сюди або натисніть для вибору')}
                             </div>
                             <div className="text-[11px] text-slate-500 font-medium">
@@ -572,7 +572,7 @@ export const AdminBlogPage: React.FC = () => {
                   </div>
 
                   <div className="md:col-span-2 space-y-1.5">
-                    <label className="text-xs font-black uppercase text-[#0A0A0A] block">
+                    <label className="text-xs font-black uppercase text-ink block">
                       {t('admin.blog.label_summary', 'Короткий опис (Summary)')}
                     </label>
                     <textarea
@@ -580,12 +580,12 @@ export const AdminBlogPage: React.FC = () => {
                       placeholder={t('admin.blog.placeholder_summary', 'Короткий зміст або лід статті для карток та пошукових систем...')}
                       value={formSummary}
                       onChange={(e) => setFormSummary(e.target.value)}
-                      className="w-full p-3.5 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none resize-none font-['Geist',sans-serif]"
+                      className="w-full p-3.5 bg-slate-50 border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none resize-none font-['Geist',sans-serif]"
                     />
                   </div>
 
                   <div className="md:col-span-2 space-y-1.5">
-                    <label className="text-xs font-black uppercase text-[#0A0A0A] block">
+                    <label className="text-xs font-black uppercase text-ink block">
                       {t('admin.blog.label_tags', 'Теги (через кому)')}
                     </label>
                     <input
@@ -593,15 +593,15 @@ export const AdminBlogPage: React.FC = () => {
                       placeholder={t('admin.blog.placeholder_tags', 'telegram, bots, marketing, automation')}
                       value={formTags}
                       onChange={(e) => setFormTags(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] space-y-5">
+              <div className="bg-white p-6 rounded-3xl border-2 border-ink shadow-brutal-lg space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b-2 border-slate-100">
-                  <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wider">
+                  <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase tracking-wider">
                     {t('admin.blog.sec_blocks', '2. Блоки статті')} ({formBlocks.length})
                   </h3>
 
@@ -609,7 +609,7 @@ export const AdminBlogPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleAddBlock('paragraph')}
-                      className="px-3 py-1.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
+                      className="px-3 py-1.5 bg-slate-100 border-2 border-ink rounded-xl text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas transition cursor-pointer flex items-center gap-1.5 shadow-brutal-sm"
                     >
                       <Type size={13} />
                       <span>{t('admin.blog.btn_add_paragraph', '+ Абзац')}</span>
@@ -617,7 +617,7 @@ export const AdminBlogPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleAddBlock('h2')}
-                      className="px-3 py-1.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
+                      className="px-3 py-1.5 bg-slate-100 border-2 border-ink rounded-xl text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas transition cursor-pointer flex items-center gap-1.5 shadow-brutal-sm"
                     >
                       <Heading2 size={13} />
                       <span>{t('admin.blog.btn_add_h2', '+ Заголовок H2')}</span>
@@ -625,7 +625,7 @@ export const AdminBlogPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleAddBlock('h3')}
-                      className="px-3 py-1.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
+                      className="px-3 py-1.5 bg-slate-100 border-2 border-ink rounded-xl text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas transition cursor-pointer flex items-center gap-1.5 shadow-brutal-sm"
                     >
                       <Heading3 size={13} />
                       <span>{t('admin.blog.btn_add_h3', '+ H3')}</span>
@@ -633,7 +633,7 @@ export const AdminBlogPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleAddBlock('quote')}
-                      className="px-3 py-1.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
+                      className="px-3 py-1.5 bg-slate-100 border-2 border-ink rounded-xl text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas transition cursor-pointer flex items-center gap-1.5 shadow-brutal-sm"
                     >
                       <Quote size={13} />
                       <span>{t('admin.blog.btn_add_quote', '+ Цитата')}</span>
@@ -641,7 +641,7 @@ export const AdminBlogPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleAddBlock('list')}
-                      className="px-3 py-1.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
+                      className="px-3 py-1.5 bg-slate-100 border-2 border-ink rounded-xl text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas transition cursor-pointer flex items-center gap-1.5 shadow-brutal-sm"
                     >
                       <ListIcon size={13} />
                       <span>{t('admin.blog.btn_add_list', '+ Список')}</span>
@@ -649,7 +649,7 @@ export const AdminBlogPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleAddBlock('image')}
-                      className="px-3 py-1.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
+                      className="px-3 py-1.5 bg-slate-100 border-2 border-ink rounded-xl text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas transition cursor-pointer flex items-center gap-1.5 shadow-brutal-sm"
                     >
                       <ImageIcon size={13} />
                       <span>{t('admin.blog.btn_add_image', '+ Зображення')}</span>
@@ -661,14 +661,14 @@ export const AdminBlogPage: React.FC = () => {
                   {formBlocks.map((block, idx) => (
                     <div
                       key={idx}
-                      className="p-5 bg-slate-50 border-2 border-[#0A0A0A] rounded-2xl space-y-3 relative shadow-[3px_3px_0px_#0A0A0A]"
+                      className="p-5 bg-slate-50 border-2 border-ink rounded-2xl space-y-3 relative shadow-brutal-md"
                     >
                       <div className="flex items-center justify-between gap-2 pb-2 border-b-2 border-slate-200">
                         <span className="text-xs font-black uppercase text-slate-500 flex items-center gap-1.5">
-                          <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-md text-[#0A0A0A]">
+                          <span className="px-2 py-0.5 bg-white border border-ink rounded-md text-ink">
                             #{idx + 1}
                           </span>
-                          <span className="text-[#0A0A0A] font-black">
+                          <span className="text-ink font-black">
                             {block.type === 'paragraph' && t('admin.blog.block_paragraph', 'Абзац тексту')}
                             {block.type === 'heading' && t('admin.blog.block_heading', { level: block.level || 2 })}
                             {block.type === 'quote' && t('admin.blog.block_quote', 'Цитата')}
@@ -682,7 +682,7 @@ export const AdminBlogPage: React.FC = () => {
                             type="button"
                             disabled={idx === 0}
                             onClick={() => handleMoveBlock(idx, 'up')}
-                            className="w-7 h-7 rounded-xl border-2 border-[#0A0A0A] bg-white flex items-center justify-center text-[#0A0A0A] disabled:opacity-30 cursor-pointer shadow-[1px_1px_0px_#0A0A0A]"
+                            className="w-7 h-7 rounded-xl border-2 border-ink bg-white flex items-center justify-center text-ink disabled:opacity-30 cursor-pointer shadow-brutal-xs"
                           >
                             <ArrowUp size={13} />
                           </button>
@@ -690,14 +690,14 @@ export const AdminBlogPage: React.FC = () => {
                             type="button"
                             disabled={idx === formBlocks.length - 1}
                             onClick={() => handleMoveBlock(idx, 'down')}
-                            className="w-7 h-7 rounded-xl border-2 border-[#0A0A0A] bg-white flex items-center justify-center text-[#0A0A0A] disabled:opacity-30 cursor-pointer shadow-[1px_1px_0px_#0A0A0A]"
+                            className="w-7 h-7 rounded-xl border-2 border-ink bg-white flex items-center justify-center text-ink disabled:opacity-30 cursor-pointer shadow-brutal-xs"
                           >
                             <ArrowDown size={13} />
                           </button>
                           <button
                             type="button"
                             onClick={() => handleRemoveBlock(idx)}
-                            className="w-7 h-7 rounded-xl border-2 border-rose-600 bg-rose-50 text-rose-700 flex items-center justify-center cursor-pointer hover:bg-rose-100 shadow-[1px_1px_0px_#0A0A0A]"
+                            className="w-7 h-7 rounded-xl border-2 border-rose-600 bg-rose-50 text-rose-700 flex items-center justify-center cursor-pointer hover:bg-rose-100 shadow-brutal-xs"
                           >
                             <X size={13} />
                           </button>
@@ -710,7 +710,7 @@ export const AdminBlogPage: React.FC = () => {
                           placeholder={t('admin.blog.placeholder_paragraph', 'Введіть текст абзацу...')}
                           value={block.text}
                           onChange={(e) => handleUpdateBlock(idx, { ...block, text: e.target.value })}
-                          className="w-full p-3 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-medium text-[#0A0A0A] focus:outline-none font-['Geist',sans-serif] leading-relaxed"
+                          className="w-full p-3 bg-white border-2 border-ink rounded-xl text-xs font-medium text-ink focus:outline-none font-['Geist',sans-serif] leading-relaxed"
                         />
                       )}
 
@@ -721,7 +721,7 @@ export const AdminBlogPage: React.FC = () => {
                             onChange={(e) =>
                               handleUpdateBlock(idx, { ...block, level: Number(e.target.value) })
                             }
-                            className="px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] focus:outline-none shrink-0"
+                            className="px-3 py-2 bg-white border-2 border-ink rounded-xl text-xs font-black uppercase text-ink focus:outline-none shrink-0"
                           >
                             <option value={2}>H2</option>
                             <option value={3}>H3</option>
@@ -731,7 +731,7 @@ export const AdminBlogPage: React.FC = () => {
                             placeholder={t('admin.blog.placeholder_heading', 'Текст заголовка...')}
                             value={block.text}
                             onChange={(e) => handleUpdateBlock(idx, { ...block, text: e.target.value })}
-                            className="flex-1 px-3.5 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none"
+                            className="flex-1 px-3.5 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none"
                           />
                         </div>
                       )}
@@ -743,14 +743,14 @@ export const AdminBlogPage: React.FC = () => {
                             placeholder={t('admin.blog.placeholder_quote', 'Текст цитати...')}
                             value={block.text}
                             onChange={(e) => handleUpdateBlock(idx, { ...block, text: e.target.value })}
-                            className="w-full p-3 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-medium italic text-[#0A0A0A] focus:outline-none font-['Geist',sans-serif]"
+                            className="w-full p-3 bg-white border-2 border-ink rounded-xl text-xs font-medium italic text-ink focus:outline-none font-['Geist',sans-serif]"
                           />
                           <input
                             type="text"
                             placeholder={t('admin.blog.placeholder_quote_author', 'Автор цитати (напр. Стів Джобс або Експерт Launchly)...')}
                             value={block.author || ''}
                             onChange={(e) => handleUpdateBlock(idx, { ...block, author: e.target.value })}
-                            className="w-full px-3.5 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none"
+                            className="w-full px-3.5 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none"
                           />
                         </div>
                       )}
@@ -769,7 +769,7 @@ export const AdminBlogPage: React.FC = () => {
                                   newItems[itemIdx] = e.target.value;
                                   handleUpdateBlock(idx, { ...block, items: newItems });
                                 }}
-                                className="flex-1 px-3.5 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-medium text-[#0A0A0A] focus:outline-none font-['Geist',sans-serif]"
+                                className="flex-1 px-3.5 py-2 bg-white border-2 border-ink rounded-xl text-xs font-medium text-ink focus:outline-none font-['Geist',sans-serif]"
                               />
                               <button
                                 type="button"
@@ -788,7 +788,7 @@ export const AdminBlogPage: React.FC = () => {
                             onClick={() => {
                               handleUpdateBlock(idx, { ...block, items: [...block.items, ''] });
                             }}
-                            className="px-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-slate-800 hover:bg-slate-100 cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
+                            className="px-3 py-1.5 bg-white border-2 border-ink rounded-xl text-xs font-black uppercase text-slate-800 hover:bg-slate-100 cursor-pointer shadow-brutal-sm"
                           >
                             {t('admin.blog.btn_add_list_item', '+ Додати пункт списку')}
                           </button>
@@ -798,10 +798,10 @@ export const AdminBlogPage: React.FC = () => {
                       {block.type === 'image' && (
                         <div className="space-y-3">
                           {block.url ? (
-                            <div className="relative rounded-2xl border-2 border-[#0A0A0A] overflow-hidden max-w-md aspect-[16/9] shadow-[3px_3px_0px_#0A0A0A] bg-slate-100 group">
+                            <div className="relative rounded-2xl border-2 border-ink overflow-hidden max-w-md aspect-[16/9] shadow-brutal-md bg-slate-100 group">
                               <img src={block.url} alt={block.caption || 'Block'} className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                <label className="px-3 py-1.5 bg-white text-[#0A0A0A] rounded-xl text-xs font-black uppercase border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] hover:bg-slate-100 cursor-pointer">
+                                <label className="px-3 py-1.5 bg-white text-ink rounded-xl text-xs font-black uppercase border-2 border-ink shadow-brutal-sm hover:bg-slate-100 cursor-pointer">
                                   {t('admin.blog.change_image', 'Змінити фото')}
                                   <input
                                     type="file"
@@ -816,14 +816,14 @@ export const AdminBlogPage: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleUpdateBlock(idx, { ...block, url: '' })}
-                                  className="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-black uppercase border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] hover:bg-rose-700 cursor-pointer"
+                                  className="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-black uppercase border-2 border-ink shadow-brutal-sm hover:bg-rose-700 cursor-pointer"
                                 >
                                   {t('admin.blog.remove_image', 'Видалити фото')}
                                 </button>
                               </div>
                             </div>
                           ) : (
-                            <label className="border-2 border-dashed border-[#0A0A0A] rounded-2xl p-6 text-center bg-white hover:bg-slate-100 transition cursor-pointer flex flex-col items-center justify-center gap-2 block">
+                            <label className="border-2 border-dashed border-ink rounded-2xl p-6 text-center bg-white hover:bg-slate-100 transition cursor-pointer flex flex-col items-center justify-center gap-2 block">
                               <input
                                 type="file"
                                 accept="image/*"
@@ -835,17 +835,17 @@ export const AdminBlogPage: React.FC = () => {
                               />
                               {uploadingBlockIndex === idx ? (
                                 <div className="flex flex-col items-center gap-2">
-                                  <Loader2 className="animate-spin text-[#0A0A0A]" size={24} />
+                                  <Loader2 className="animate-spin text-ink" size={24} />
                                   <span className="text-xs font-bold text-slate-600">
                                     {t('admin.blog.dropzone_uploading', 'Завантаження фото...')}
                                   </span>
                                 </div>
                               ) : (
                                 <>
-                                  <div className="w-10 h-10 rounded-xl bg-purple-100 border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A]">
+                                  <div className="w-10 h-10 rounded-xl bg-purple-100 border-2 border-ink flex items-center justify-center text-ink">
                                     <UploadCloud size={20} />
                                   </div>
-                                  <div className="text-xs font-black uppercase text-[#0A0A0A]">
+                                  <div className="text-xs font-black uppercase text-ink">
                                     {t('admin.blog.dropzone_title', 'Перетягніть фото сюди або натисніть для вибору')}
                                   </div>
                                   <div className="text-[10px] text-slate-500 font-medium">
@@ -861,7 +861,7 @@ export const AdminBlogPage: React.FC = () => {
                             placeholder={t('admin.blog.placeholder_image_caption', 'Підпис до зображення (необов\'язково)...')}
                             value={block.caption || ''}
                             onChange={(e) => handleUpdateBlock(idx, { ...block, caption: e.target.value })}
-                            className="w-full px-3.5 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-medium text-[#0A0A0A] focus:outline-none"
+                            className="w-full px-3.5 py-2 bg-white border-2 border-ink rounded-xl text-xs font-medium text-ink focus:outline-none"
                           />
                         </div>
                       )}
@@ -871,19 +871,19 @@ export const AdminBlogPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="bg-white p-8 rounded-3xl border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] space-y-6 overflow-hidden">
+            <div className="bg-white p-8 rounded-3xl border-2 border-ink shadow-brutal-lg space-y-6 overflow-hidden">
               <div className="space-y-3 pb-6 border-b-2 border-slate-100">
                 <div className="flex items-center gap-2">
-                  <div className="inline-block px-3 py-1 bg-[#0A0A0A] text-[#F2EBDD] rounded-lg text-[10px] font-black uppercase">
+                  <div className="inline-block px-3 py-1 bg-ink text-canvas rounded-lg text-[10px] font-black uppercase">
                     {formCategory || 'Category'}
                   </div>
-                  <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase border border-[#0A0A0A] ${
-                    formLanguage === 'en' ? 'bg-amber-400 text-[#0A0A0A]' : 'bg-blue-600 text-white'
+                  <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase border border-ink ${
+                    formLanguage === 'en' ? 'bg-amber-400 text-ink' : 'bg-blue-600 text-white'
                   }`}>
                     {formLanguage === 'en' ? 'EN' : 'UK'}
                   </div>
                 </div>
-                <h1 className="font-['Anybody',sans-serif] text-2xl md:text-4xl font-black text-[#0A0A0A] uppercase leading-snug break-words [overflow-wrap:anywhere]">
+                <h1 className="font-['Anybody',sans-serif] text-2xl md:text-4xl font-black text-ink uppercase leading-snug break-words [overflow-wrap:anywhere]">
                   {formTitle || 'Article Title'}
                 </h1>
                 <div className="flex items-center gap-3 text-xs text-slate-500 font-bold">
@@ -896,7 +896,7 @@ export const AdminBlogPage: React.FC = () => {
               </div>
 
               {formCoverImage && (
-                <div className="rounded-3xl border-2 border-[#0A0A0A] overflow-hidden aspect-[16/9] shadow-[6px_6px_0px_#0A0A0A]">
+                <div className="rounded-3xl border-2 border-ink overflow-hidden aspect-[16/9] shadow-brutal-lg">
                   <img src={formCoverImage} alt={formTitle} className="w-full h-full object-cover" />
                 </div>
               )}
@@ -918,18 +918,18 @@ export const AdminBlogPage: React.FC = () => {
                   }
                   if (block.type === 'heading') {
                     return block.level === 3 ? (
-                      <h3 key={idx} className="font-['Anybody',sans-serif] text-xl font-black text-[#0A0A0A] uppercase pt-4 break-words [overflow-wrap:anywhere]">
+                      <h3 key={idx} className="font-['Anybody',sans-serif] text-xl font-black text-ink uppercase pt-4 break-words [overflow-wrap:anywhere]">
                         {block.text}
                       </h3>
                     ) : (
-                      <h2 key={idx} className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase pt-6 pb-2 border-b-2 border-slate-200 break-words [overflow-wrap:anywhere]">
+                      <h2 key={idx} className="font-['Anybody',sans-serif] text-2xl font-black text-ink uppercase pt-6 pb-2 border-b-2 border-slate-200 break-words [overflow-wrap:anywhere]">
                         {block.text}
                       </h2>
                     );
                   }
                   if (block.type === 'quote') {
                     return (
-                      <blockquote key={idx} className="p-5 my-3 border-l-4 border-[#0A0A0A] bg-slate-50 rounded-r-2xl italic text-slate-800 break-words [overflow-wrap:anywhere]">
+                      <blockquote key={idx} className="p-5 my-3 border-l-4 border-ink bg-slate-50 rounded-r-2xl italic text-slate-800 break-words [overflow-wrap:anywhere]">
                         <p className="text-base font-medium">"{block.text}"</p>
                         {block.author && <cite className="block text-xs font-bold text-slate-500 mt-2 not-italic font-['JetBrains_Mono',monospace]">— {block.author}</cite>}
                       </blockquote>
@@ -947,7 +947,7 @@ export const AdminBlogPage: React.FC = () => {
                   if (block.type === 'image') {
                     return (
                       <figure key={idx} className="my-6 space-y-2">
-                        <img src={block.url} alt={block.caption || ''} className="w-full rounded-2xl border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] object-cover max-h-[500px]" />
+                        <img src={block.url} alt={block.caption || ''} className="w-full rounded-2xl border-2 border-ink shadow-brutal object-cover max-h-[500px]" />
                         {block.caption && (
                           <figcaption className="text-center text-xs text-slate-500 font-bold font-['JetBrains_Mono',monospace] break-words [overflow-wrap:anywhere]">
                             {block.caption}
@@ -969,13 +969,13 @@ export const AdminBlogPage: React.FC = () => {
   return (
     <AdminLayout>
       <div className="space-y-6 max-w-7xl mx-auto pb-12 font-['JetBrains_Mono',monospace]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border-2 border-ink shadow-brutal-lg">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-200 border-2 border-[#0A0A0A] rounded-xl text-[10px] font-black uppercase shadow-[2px_2px_0px_#0A0A0A]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-200 border-2 border-ink rounded-xl text-[10px] font-black uppercase shadow-brutal-sm">
               <BookOpen size={13} />
               <span>{t('admin.blog.badge', 'LAUNCHLY BLOG ENGINE')}</span>
             </div>
-            <h1 className="font-['Anybody',sans-serif] text-xl sm:text-2xl font-black text-[#0A0A0A] uppercase tracking-tight">
+            <h1 className="font-['Anybody',sans-serif] text-xl sm:text-2xl font-black text-ink uppercase tracking-tight">
               {t('admin.blog.title', 'Керування статтями блогу')}
             </h1>
             <p className="text-xs text-slate-600 font-medium">
@@ -985,7 +985,7 @@ export const AdminBlogPage: React.FC = () => {
 
           <button
             onClick={handleOpenCreateView}
-            className="px-5 py-3 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 hover:bg-[#2A2A2A] transition-all cursor-pointer shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+            className="px-5 py-3 bg-ink text-canvas border-2 border-ink rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 hover:bg-[#2A2A2A] transition-all cursor-pointer shadow-brutal hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
           >
             <Plus size={16} />
             <span>{t('admin.blog.btn_create', 'Створити публікацію')}</span>
@@ -993,46 +993,46 @@ export const AdminBlogPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_#0A0A0A] flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 border-2 border-[#0A0A0A] flex items-center justify-center text-blue-900 font-black">
+          <div className="p-4 bg-white border-2 border-ink rounded-2xl shadow-brutal flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 border-2 border-ink flex items-center justify-center text-blue-900 font-black">
               <FileText size={18} />
             </div>
             <div>
               <div className="text-[10px] uppercase font-black text-slate-500">
                 {t('admin.blog.total_articles', 'Всього статей')}
               </div>
-              <div className="font-['Anybody',sans-serif] text-xl font-black text-[#0A0A0A]">{articles.length}</div>
+              <div className="font-['Anybody',sans-serif] text-xl font-black text-ink">{articles.length}</div>
             </div>
           </div>
 
-          <div className="p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_#0A0A0A] flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 border-2 border-[#0A0A0A] flex items-center justify-center text-emerald-900 font-black">
+          <div className="p-4 bg-white border-2 border-ink rounded-2xl shadow-brutal flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 border-2 border-ink flex items-center justify-center text-emerald-900 font-black">
               <Layers size={18} />
             </div>
             <div>
               <div className="text-[10px] uppercase font-black text-slate-500">
                 {t('admin.blog.categories_count', 'Категорій')}
               </div>
-              <div className="font-['Anybody',sans-serif] text-xl font-black text-[#0A0A0A]">{categories.length}</div>
+              <div className="font-['Anybody',sans-serif] text-xl font-black text-ink">{categories.length}</div>
             </div>
           </div>
 
-          <div className="p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_#0A0A0A] flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-100 border-2 border-[#0A0A0A] flex items-center justify-center text-purple-900 font-black">
+          <div className="p-4 bg-white border-2 border-ink rounded-2xl shadow-brutal flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-100 border-2 border-ink flex items-center justify-center text-purple-900 font-black">
               <Calendar size={18} />
             </div>
             <div className="truncate">
               <div className="text-[10px] uppercase font-black text-slate-500">
                 {t('admin.blog.latest_article', 'Остання стаття')}
               </div>
-              <div className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] truncate">
+              <div className="font-['Anybody',sans-serif] text-xs font-black text-ink truncate">
                 {articles.length > 0 ? articles[0].title : t('admin.blog.no_articles', 'Немає статей')}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="bg-white p-4 rounded-2xl border-2 border-ink shadow-brutal flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -1040,19 +1040,19 @@ export const AdminBlogPage: React.FC = () => {
               placeholder={t('admin.blog.search_placeholder', 'Пошук статей за назвою, категорією або тегами...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none placeholder:text-slate-400"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none placeholder:text-slate-400"
             />
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center bg-slate-100 border-2 border-[#0A0A0A] rounded-xl p-0.5 shadow-[2px_2px_0px_#0A0A0A]">
+            <div className="flex items-center bg-slate-100 border-2 border-ink rounded-xl p-0.5 shadow-brutal-sm">
               <button
                 type="button"
                 onClick={() => setSelectedLangFilter('all')}
                 className={`px-3 py-1 rounded-lg text-xs font-black uppercase transition-all cursor-pointer ${
                   selectedLangFilter === 'all'
-                    ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                    : 'text-slate-600 hover:text-[#0A0A0A]'
+                    ? 'bg-ink text-canvas'
+                    : 'text-slate-600 hover:text-ink'
                 }`}
               >
                 {t('admin.blog.filter_lang_all', 'Всі мови')}
@@ -1063,7 +1063,7 @@ export const AdminBlogPage: React.FC = () => {
                 className={`px-3 py-1 rounded-lg text-xs font-black uppercase transition-all cursor-pointer ${
                   selectedLangFilter === 'uk'
                     ? 'bg-blue-600 text-white'
-                    : 'text-slate-600 hover:text-[#0A0A0A]'
+                    : 'text-slate-600 hover:text-ink'
                 }`}
               >
                 UK
@@ -1073,8 +1073,8 @@ export const AdminBlogPage: React.FC = () => {
                 onClick={() => setSelectedLangFilter('en')}
                 className={`px-3 py-1 rounded-lg text-xs font-black uppercase transition-all cursor-pointer ${
                   selectedLangFilter === 'en'
-                    ? 'bg-amber-400 text-[#0A0A0A]'
-                    : 'text-slate-600 hover:text-[#0A0A0A]'
+                    ? 'bg-amber-400 text-ink'
+                    : 'text-slate-600 hover:text-ink'
                 }`}
               >
                 EN
@@ -1086,8 +1086,8 @@ export const AdminBlogPage: React.FC = () => {
                 onClick={() => setSelectedCategory('all')}
                 className={`px-3 py-1.5 text-xs font-black uppercase rounded-xl border-2 transition-all cursor-pointer ${
                   selectedCategory === 'all'
-                    ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]'
-                    : 'bg-white text-[#0A0A0A] border-[#0A0A0A] hover:bg-slate-100'
+                    ? 'bg-ink text-canvas border-ink shadow-brutal-sm'
+                    : 'bg-white text-ink border-ink hover:bg-slate-100'
                 }`}
               >
                 {t('admin.blog.filter_all', 'Всі')} ({articles.length})
@@ -1098,8 +1098,8 @@ export const AdminBlogPage: React.FC = () => {
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-3 py-1.5 text-xs font-black uppercase rounded-xl border-2 transition-all cursor-pointer ${
                     selectedCategory === cat
-                      ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]'
-                      : 'bg-white text-[#0A0A0A] border-[#0A0A0A] hover:bg-slate-100'
+                      ? 'bg-ink text-canvas border-ink shadow-brutal-sm'
+                      : 'bg-white text-ink border-ink hover:bg-slate-100'
                   }`}
                 >
                   {cat}
@@ -1110,18 +1110,18 @@ export const AdminBlogPage: React.FC = () => {
         </div>
 
         {isLoading ? (
-          <div className="p-16 flex flex-col items-center justify-center gap-3 bg-white border-2 border-[#0A0A0A] rounded-3xl shadow-[6px_6px_0px_#0A0A0A]">
-            <Loader2 className="animate-spin text-[#0A0A0A]" size={36} />
+          <div className="p-16 flex flex-col items-center justify-center gap-3 bg-white border-2 border-ink rounded-3xl shadow-brutal-lg">
+            <Loader2 className="animate-spin text-ink" size={36} />
             <span className="text-xs font-black uppercase text-slate-600">
               {t('admin.blog.loading', 'Завантаження публікацій...')}
             </span>
           </div>
         ) : filteredArticles.length === 0 ? (
-          <div className="p-16 text-center space-y-4 bg-white border-2 border-[#0A0A0A] rounded-3xl shadow-[6px_6px_0px_#0A0A0A]">
-            <div className="w-16 h-16 rounded-3xl bg-amber-100 border-2 border-[#0A0A0A] flex items-center justify-center mx-auto shadow-[3px_3px_0px_#0A0A0A]">
-              <BookOpen size={28} className="text-[#0A0A0A]" />
+          <div className="p-16 text-center space-y-4 bg-white border-2 border-ink rounded-3xl shadow-brutal-lg">
+            <div className="w-16 h-16 rounded-3xl bg-amber-100 border-2 border-ink flex items-center justify-center mx-auto shadow-brutal-md">
+              <BookOpen size={28} className="text-ink" />
             </div>
-            <h3 className="font-['Anybody',sans-serif] text-lg font-black text-[#0A0A0A] uppercase">
+            <h3 className="font-['Anybody',sans-serif] text-lg font-black text-ink uppercase">
               {t('admin.blog.empty_title', 'Статей не знайдено')}
             </h3>
             <p className="text-xs text-slate-500 font-bold max-w-md mx-auto leading-relaxed">
@@ -1131,7 +1131,7 @@ export const AdminBlogPage: React.FC = () => {
             </p>
             <button
               onClick={handleOpenCreateView}
-              className="px-5 py-2.5 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase shadow-[3px_3px_0px_#0A0A0A] cursor-pointer"
+              className="px-5 py-2.5 bg-ink text-canvas border-2 border-ink rounded-xl text-xs font-black uppercase shadow-brutal-md cursor-pointer"
             >
               {t('admin.blog.btn_create_short', '+ Створити статтю')}
             </button>
@@ -1141,9 +1141,9 @@ export const AdminBlogPage: React.FC = () => {
             {filteredArticles.map((article) => (
               <div
                 key={article.id}
-                className="bg-white border-2 border-[#0A0A0A] rounded-3xl shadow-[6px_6px_0px_#0A0A0A] overflow-hidden flex flex-col group hover:-translate-y-1 transition-all"
+                className="bg-white border-2 border-ink rounded-3xl shadow-brutal-lg overflow-hidden flex flex-col group hover:-translate-y-1 transition-all"
               >
-                <div className="aspect-[16/9] w-full border-b-2 border-[#0A0A0A] relative bg-slate-100 overflow-hidden shrink-0">
+                <div className="aspect-[16/9] w-full border-b-2 border-ink relative bg-slate-100 overflow-hidden shrink-0">
                   {article.coverImage ? (
                     <img
                       src={article.coverImage}
@@ -1155,12 +1155,12 @@ export const AdminBlogPage: React.FC = () => {
                       <ImageIcon size={36} />
                     </div>
                   )}
-                  <div className="absolute top-3 left-3 px-2.5 py-1 bg-[#0A0A0A] text-[#F2EBDD] border border-white rounded-lg text-[10px] font-black uppercase tracking-wider shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="absolute top-3 left-3 px-2.5 py-1 bg-ink text-canvas border border-white rounded-lg text-[10px] font-black uppercase tracking-wider shadow-brutal-sm">
                     {article.category}
                   </div>
 
-                  <div className={`absolute top-3 right-3 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase border border-white tracking-wider shadow-[2px_2px_0px_#0A0A0A] ${
-                    (article.language || 'uk').toLowerCase() === 'en' ? 'bg-amber-400 text-[#0A0A0A]' : 'bg-blue-600 text-white'
+                  <div className={`absolute top-3 right-3 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase border border-white tracking-wider shadow-brutal-sm ${
+                    (article.language || 'uk').toLowerCase() === 'en' ? 'bg-amber-400 text-ink' : 'bg-blue-600 text-white'
                   }`}>
                     {(article.language || 'uk').toUpperCase()}
                   </div>
@@ -1168,7 +1168,7 @@ export const AdminBlogPage: React.FC = () => {
 
                 <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                   <div className="space-y-2">
-                    <h3 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase line-clamp-2 leading-snug break-words [overflow-wrap:anywhere]">
+                    <h3 className="font-['Anybody',sans-serif] text-base font-black text-ink uppercase line-clamp-2 leading-snug break-words [overflow-wrap:anywhere]">
                       {article.title}
                     </h3>
                     <p className="text-xs text-slate-600 font-medium line-clamp-2 leading-relaxed font-['Geist',sans-serif] break-words [overflow-wrap:anywhere]">
@@ -1215,21 +1215,21 @@ export const AdminBlogPage: React.FC = () => {
                         href={`/blog/${encodeURIComponent(article.id)}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex-1 py-1.5 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-[11px] font-black uppercase text-center flex items-center justify-center gap-1 text-[#0A0A0A] hover:bg-slate-100 transition shadow-[2px_2px_0px_#0A0A0A]"
+                        className="flex-1 py-1.5 bg-slate-50 border-2 border-ink rounded-xl text-[11px] font-black uppercase text-center flex items-center justify-center gap-1 text-ink hover:bg-slate-100 transition shadow-brutal-sm"
                       >
                         <ExternalLink size={12} />
                         <span>{t('admin.blog.btn_preview', 'Перегляд')}</span>
                       </a>
                       <button
                         onClick={() => handleOpenEditView(article)}
-                        className="flex-1 py-1.5 bg-amber-200 border-2 border-[#0A0A0A] rounded-xl text-[11px] font-black uppercase text-center flex items-center justify-center gap-1 text-amber-950 hover:bg-amber-300 transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
+                        className="flex-1 py-1.5 bg-amber-200 border-2 border-ink rounded-xl text-[11px] font-black uppercase text-center flex items-center justify-center gap-1 text-amber-950 hover:bg-amber-300 transition shadow-brutal-sm cursor-pointer"
                       >
                         <Edit2 size={12} />
                         <span>{t('admin.blog.btn_edit', 'Редагувати')}</span>
                       </button>
                       <button
                         onClick={() => setArticleToDelete(article)}
-                        className="w-8 h-8 bg-rose-100 border-2 border-[#0A0A0A] rounded-xl text-rose-800 hover:bg-rose-200 flex items-center justify-center transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer shrink-0"
+                        className="w-8 h-8 bg-rose-100 border-2 border-ink rounded-xl text-rose-800 hover:bg-rose-200 flex items-center justify-center transition shadow-brutal-sm cursor-pointer shrink-0"
                         title={t('admin.blog.delete_tooltip', 'Видалити статтю')}
                       >
                         <Trash2 size={13} />
@@ -1248,18 +1248,18 @@ export const AdminBlogPage: React.FC = () => {
           onClick={(e) => {
             if (e.target === e.currentTarget) setArticleToDelete(null);
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/50 animate-fade-in font-['JetBrains_Mono',monospace] cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50 animate-fade-in font-['JetBrains_Mono',monospace] cursor-pointer"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] rounded-3xl border-2 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] w-full max-w-md p-6 space-y-4 animate-zoom-in cursor-default"
+            className="bg-canvas rounded-3xl border-2 border-ink shadow-brutal-xl w-full max-w-md p-6 space-y-4 animate-zoom-in cursor-default"
           >
-            <div className="w-12 h-12 rounded-2xl bg-rose-100 border-2 border-[#0A0A0A] text-rose-700 flex items-center justify-center mx-auto shadow-[3px_3px_0px_#0A0A0A]">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 border-2 border-ink text-rose-700 flex items-center justify-center mx-auto shadow-brutal-md">
               <Trash2 size={24} />
             </div>
 
             <div className="text-center space-y-1.5">
-              <h3 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase">
+              <h3 className="font-['Anybody',sans-serif] text-base font-black text-ink uppercase">
                 {t('admin.blog.delete_modal_title', 'Видалити публікацію?')}
               </h3>
               <p className="text-xs text-slate-600 font-bold leading-relaxed">
@@ -1271,7 +1271,7 @@ export const AdminBlogPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setArticleToDelete(null)}
-                className="flex-1 py-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-slate-100 transition cursor-pointer"
+                className="flex-1 py-2.5 bg-white border-2 border-ink rounded-xl text-xs font-black uppercase text-ink hover:bg-slate-100 transition cursor-pointer"
               >
                 {t('admin.blog.btn_cancel', 'Скасувати')}
               </button>
@@ -1279,7 +1279,7 @@ export const AdminBlogPage: React.FC = () => {
                 type="button"
                 disabled={deleteMutation.isPending}
                 onClick={handleDeleteConfirm}
-                className="flex-1 py-2.5 bg-rose-600 text-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase flex items-center justify-center gap-2 hover:bg-rose-700 transition cursor-pointer shadow-[3px_3px_0px_#0A0A0A] disabled:opacity-50"
+                className="flex-1 py-2.5 bg-rose-600 text-white border-2 border-ink rounded-xl text-xs font-black uppercase flex items-center justify-center gap-2 hover:bg-rose-700 transition cursor-pointer shadow-brutal-md disabled:opacity-50"
               >
                 {deleteMutation.isPending ? (
                   <Loader2 size={14} className="animate-spin" />

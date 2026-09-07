@@ -108,7 +108,7 @@ export const FaqPage: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased flex flex-col justify-between relative z-0 selection:bg-[#0A0A0A] selection:text-[#F2EBDD]">
+    <div className="min-h-screen bg-canvas text-ink font-['Geist',sans-serif] antialiased flex flex-col justify-between relative z-0 selection:bg-ink selection:text-canvas">
       <div
         className="fixed inset-0 z-[-1] pointer-events-none opacity-5"
         style={{
@@ -125,28 +125,28 @@ export const FaqPage: React.FC = () => {
       <div>
         <PublicHeader />
         <section className="py-12 md:py-16 px-6 lg:px-16 max-w-5xl mx-auto text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A]">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-ink text-canvas font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg border-2 border-ink shadow-brutal-md">
             <HelpCircle size={14} className="text-amber-400" />
             <span>FAQ &amp; HELP CENTER</span>
           </div>
 
-          <h1 className="font-['Anybody',sans-serif] text-4xl sm:text-6xl font-black uppercase text-[#0A0A0A] tracking-tight leading-none">
+          <h1 className="font-['Anybody',sans-serif] text-4xl sm:text-6xl font-black uppercase text-ink tracking-tight leading-none">
             {t('faq.hero_title', 'Часті запитання')}
           </h1>
 
-          <p className="text-base sm:text-lg font-bold text-[#0A0A0A]/80 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg font-bold text-ink/80 max-w-2xl mx-auto">
             {t('faq.hero_subtitle', 'Інструкція до кожної ноди у Конструкторі, налаштування воронок та відповіді на поширені питання.')}
           </p>
 
           <div className="pt-4 max-w-xl mx-auto">
             <div className="relative flex items-center">
-              <Search size={20} className="absolute left-4 text-[#0A0A0A]/60" />
+              <Search size={20} className="absolute left-4 text-ink/60" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('faq.search_placeholder', 'Шукати запитання чи назву ноди (напр. Message, Condition, AI)...')}
-                className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] font-['JetBrains_Mono',monospace] text-sm font-bold text-[#0A0A0A] outline-none focus:ring-2 focus:ring-[#0A0A0A]"
+                className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-ink shadow-brutal font-['JetBrains_Mono',monospace] text-sm font-bold text-ink outline-none focus:ring-2 focus:ring-ink"
               />
             </div>
           </div>
@@ -162,10 +162,10 @@ export const FaqPage: React.FC = () => {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex items-center gap-2 px-4 py-2 border-2 border-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase transition-all cursor-pointer shrink-0 whitespace-nowrap ${
+                  className={`flex items-center gap-2 px-4 py-2 border-2 border-ink font-['JetBrains_Mono',monospace] text-xs font-bold uppercase transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                     isActive
-                      ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[3px_3px_0px_#0A0A0A]'
-                      : 'bg-white text-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#F2EBDD]'
+                      ? 'bg-ink text-canvas shadow-brutal-md'
+                      : 'bg-white text-ink shadow-brutal-md hover:bg-canvas'
                   }`}
                 >
                   <Icon size={14} />
@@ -176,14 +176,14 @@ export const FaqPage: React.FC = () => {
           </div>
 
           {filteredFaqs.length === 0 ? (
-            <div className="bg-white border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-8 text-center space-y-3 font-['JetBrains_Mono',monospace]">
+            <div className="bg-white border-2 border-ink shadow-brutal-lg p-8 text-center space-y-3 font-['JetBrains_Mono',monospace]">
               <HelpCircle size={36} className="mx-auto text-slate-400" />
-              <p className="text-base font-bold text-[#0A0A0A]">
+              <p className="text-base font-bold text-ink">
                 {t('faq.no_results', 'Запитань або нод за вашим запитом не знайдено')}
               </p>
               <button
                 onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-                className="text-xs font-black underline uppercase cursor-pointer text-[#0A0A0A]"
+                className="text-xs font-black underline uppercase cursor-pointer text-ink"
               >
                 {t('faq.reset_filters', 'Скинути фільтри')}
               </button>
@@ -197,26 +197,26 @@ export const FaqPage: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] transition-all overflow-hidden"
+                    className="bg-white border-2 border-ink shadow-brutal transition-all overflow-hidden"
                   >
                     <button
                       onClick={() => toggleItem(item.id)}
-                      className="w-full px-6 py-4 flex items-center justify-between gap-4 text-left font-['Anybody',sans-serif] text-base sm:text-lg font-black text-[#0A0A0A] cursor-pointer hover:bg-amber-50/50 transition-colors select-none"
+                      className="w-full px-6 py-4 flex items-center justify-between gap-4 text-left font-['Anybody',sans-serif] text-base sm:text-lg font-black text-ink cursor-pointer hover:bg-amber-50/50 transition-colors select-none"
                     >
                       <span className="flex items-center gap-3 min-w-0">
-                        <span className="w-8 h-8 rounded-lg bg-[#0A0A0A] text-[#F2EBDD] flex items-center justify-center shrink-0 border border-black/20">
+                        <span className="w-8 h-8 rounded-lg bg-ink text-canvas flex items-center justify-center shrink-0 border border-black/20">
                           <ItemIcon size={16} />
                         </span>
                         <span className="truncate">{item.question}</span>
                       </span>
                       <ChevronDown
                         size={20}
-                        className={`text-[#0A0A0A] shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+                        className={`text-ink shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
                       />
                     </button>
 
                     {isOpen && (
-                      <div className="px-6 pb-5 pt-3 text-sm font-medium text-[#0A0A0A]/90 border-t border-[#0A0A0A]/10 whitespace-pre-line leading-relaxed font-['JetBrains_Mono',monospace] bg-[#F2EBDD]/40">
+                      <div className="px-6 pb-5 pt-3 text-sm font-medium text-ink/90 border-t border-ink/10 whitespace-pre-line leading-relaxed font-['JetBrains_Mono',monospace] bg-canvas/40">
                         {item.answer}
                       </div>
                     )}
@@ -226,7 +226,7 @@ export const FaqPage: React.FC = () => {
             </div>
           )}
 
-          <div className="mt-16 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] p-8 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 font-['JetBrains_Mono',monospace]">
+          <div className="mt-16 bg-ink text-canvas border-2 border-ink shadow-brutal-xl p-8 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 font-['JetBrains_Mono',monospace]">
             <div className="space-y-1 text-center sm:text-left">
               <h3 className="font-['Anybody',sans-serif] text-2xl font-black uppercase text-white">
                 {t('faq.need_help_title', 'Потрібна допомога з нодами?')}
@@ -237,7 +237,7 @@ export const FaqPage: React.FC = () => {
             </div>
             <a
               href="mailto:support@launchly.app"
-              className="bg-[#F2EBDD] text-[#0A0A0A] px-6 py-3 border-2 border-white text-xs font-black uppercase tracking-wider hover:bg-white transition-all shrink-0 flex items-center gap-2"
+              className="bg-canvas text-ink px-6 py-3 border-2 border-white text-xs font-black uppercase tracking-wider hover:bg-white transition-all shrink-0 flex items-center gap-2"
             >
               <MessageSquare size={16} />
               <span>{t('faq.contact_support', 'Написати в підтримку')}</span>

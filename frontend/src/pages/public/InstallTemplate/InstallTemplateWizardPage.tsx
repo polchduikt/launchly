@@ -79,18 +79,18 @@ export const InstallTemplateWizardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2EBDD] font-['JetBrains_Mono',monospace] text-[#0A0A0A] flex flex-col">
+    <div className="min-h-screen bg-canvas font-['JetBrains_Mono',monospace] text-ink flex flex-col">
       <PublicHeader simple redirectUrl={shareCode ? `/templates/install/${shareCode}` : undefined} />
-      <div className="w-full bg-[#F2EBDD] py-6 px-4 text-center">
+      <div className="w-full bg-canvas py-6 px-4 text-center">
         <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest block mb-1">
           {t('template.install.top_header', 'Встановлення шаблону')}
         </span>
-        <h1 className="font-['Anybody',sans-serif] text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#0A0A0A]">
+        <h1 className="font-['Anybody',sans-serif] text-2xl sm:text-3xl font-black uppercase tracking-tight text-ink">
           {template?.name || t('template.install.title_default', 'Встановлення шаблону')}
         </h1>
         {template?.creatorName && (
           <p className="text-xs font-bold text-slate-600 mt-1 flex items-center justify-center gap-1.5">
-            <span className="w-4 h-4 bg-[#0A0A0A] text-[#F2EBDD] text-[9px] font-black rounded-full flex items-center justify-center">
+            <span className="w-4 h-4 bg-ink text-canvas text-[9px] font-black rounded-full flex items-center justify-center">
               {getInitials(template.creatorName)}
             </span>
             <span>{t('template.by_author', { author: template.creatorName })}</span>
@@ -98,18 +98,18 @@ export const InstallTemplateWizardPage: React.FC = () => {
         )}
       </div>
       <main className="max-w-4xl w-full mx-auto p-6 space-y-6 flex-1">
-        <div className="flex items-center justify-center gap-8 bg-white border-2 border-[#0A0A0A] p-4 shadow-[2px_2px_0px_#0A0A0A]">
+        <div className="flex items-center justify-center gap-8 bg-white border-2 border-ink p-4 shadow-brutal-sm">
           <div className="flex items-center gap-2.5">
-            <div className={`w-7 h-7 border border-[#0A0A0A] flex items-center justify-center text-xs font-black ${installStep >= 1 ? 'bg-emerald-400 text-[#0A0A0A]' : 'bg-slate-100 text-slate-400'}`}>
+            <div className={`w-7 h-7 border border-ink flex items-center justify-center text-xs font-black ${installStep >= 1 ? 'bg-emerald-400 text-ink' : 'bg-slate-100 text-slate-400'}`}>
               1
             </div>
             <span className="text-xs font-black uppercase tracking-wide">{t('template.install.step_overview', 'Огляд')}</span>
           </div>
 
-          <div className="w-16 h-0.5 bg-[#0A0A0A]/20" />
+          <div className="w-16 h-0.5 bg-ink/20" />
 
           <div className="flex items-center gap-2.5">
-            <div className={`w-7 h-7 border border-[#0A0A0A] flex items-center justify-center text-xs font-black ${installStep >= 2 ? 'bg-emerald-400 text-[#0A0A0A]' : 'bg-slate-100 text-slate-400'}`}>
+            <div className={`w-7 h-7 border border-ink flex items-center justify-center text-xs font-black ${installStep >= 2 ? 'bg-emerald-400 text-ink' : 'bg-slate-100 text-slate-400'}`}>
               2
             </div>
             <span className="text-xs font-black uppercase tracking-wide">{t('template.install.step_complete', 'Завершення')}</span>
@@ -117,12 +117,12 @@ export const InstallTemplateWizardPage: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="py-16 text-center space-y-3 bg-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
-            <Loader2 className="animate-spin mx-auto text-[#0A0A0A]" size={36} />
+          <div className="py-16 text-center space-y-3 bg-white border-2 border-ink shadow-brutal-sm">
+            <Loader2 className="animate-spin mx-auto text-ink" size={36} />
             <span className="text-xs font-bold uppercase">{t('template.install.loading', 'Завантаження шаблону...')}</span>
           </div>
         ) : errorMsg && !template ? (
-          <div className="bg-rose-100 border-2 border-[#0A0A0A] text-rose-900 p-6 space-y-3 shadow-[2px_2px_0px_#0A0A0A]">
+          <div className="bg-rose-100 border-2 border-ink text-rose-900 p-6 space-y-3 shadow-brutal-sm">
             <div className="flex items-center gap-2 font-black text-sm uppercase">
               <AlertCircle size={20} />
               <span>{t('template.install.error_title', 'Помилка завантаження')}</span>
@@ -130,8 +130,8 @@ export const InstallTemplateWizardPage: React.FC = () => {
             <p className="text-xs font-bold">{errorMsg}</p>
           </div>
         ) : installStep === 2 ? (
-          <div className="bg-white border-2 border-[#0A0A0A] p-8 shadow-[2px_2px_0px_#0A0A0A] text-center space-y-4">
-            <div className="w-14 h-14 bg-emerald-400 border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] flex items-center justify-center mx-auto text-emerald-950">
+          <div className="bg-white border-2 border-ink p-8 shadow-brutal-sm text-center space-y-4">
+            <div className="w-14 h-14 bg-emerald-400 border-2 border-ink shadow-brutal-sm flex items-center justify-center mx-auto text-emerald-950">
               <CheckCircle2 size={32} strokeWidth={2.5} />
             </div>
             <h2 className="font-['Anybody',sans-serif] text-xl font-black uppercase">
@@ -143,7 +143,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
             <div className="flex items-center justify-center pt-3">
               <button
                 onClick={() => navigate('/templates?tab=installed')}
-                className="px-8 py-3.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer inline-flex items-center gap-2"
+                className="px-8 py-3.5 bg-ink hover:bg-[#2A2A2A] text-canvas border-2 border-ink shadow-brutal-md text-xs font-black uppercase transition-all cursor-pointer inline-flex items-center gap-2"
               >
                 <span>{t('template.tab_installed_templates', 'Завантажені темплейти')}</span>
                 <ArrowRight size={15} />
@@ -153,20 +153,20 @@ export const InstallTemplateWizardPage: React.FC = () => {
         ) : template && (
           <div className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-              <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[2px_2px_0px_#0A0A0A] space-y-4">
-                <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3">
-                  <h3 className="font-black text-xs uppercase text-[#0A0A0A]">
+              <div className="bg-white border-2 border-ink p-6 shadow-brutal-sm space-y-4">
+                <div className="flex items-center justify-between border-b-2 border-ink pb-3">
+                  <h3 className="font-black text-xs uppercase text-ink">
                     {t('template.install.content_title', 'Вміст шаблону')}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-emerald-300 border border-[#0A0A0A] font-black text-[10px] uppercase">
+                    <span className="px-2 py-0.5 bg-emerald-300 border border-ink font-black text-[10px] uppercase">
                       {t('template.badge_free', 'FREE')}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 bg-slate-50 border-2 border-[#0A0A0A]">
-                  <div className="w-12 h-12 bg-[#0A0A0A] border border-[#0A0A0A] flex items-center justify-center shrink-0 overflow-hidden text-[#F2EBDD]">
+                <div className="flex items-center gap-3 p-3 bg-slate-50 border-2 border-ink">
+                  <div className="w-12 h-12 bg-ink border border-ink flex items-center justify-center shrink-0 overflow-hidden text-canvas">
                     {template.avatarUrl ? (
                       <img src={template.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
@@ -176,7 +176,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-black text-xs uppercase text-[#0A0A0A] truncate">
+                    <h4 className="font-black text-xs uppercase text-ink truncate">
                       {template.name}
                     </h4>
                     <span className="text-[11px] font-bold text-slate-500 block truncate">
@@ -197,9 +197,9 @@ export const InstallTemplateWizardPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2 text-xs font-bold">
-                  <div className="p-3 bg-slate-50 border border-[#0A0A0A] flex items-center justify-between">
+                  <div className="p-3 bg-slate-50 border border-ink flex items-center justify-between">
                     <span className="flex items-center gap-2 text-slate-800">
-                      <Workflow size={15} className="text-[#0A0A0A]" />
+                      <Workflow size={15} className="text-ink" />
                       <span>{t('template.install.automations_label', 'Автоматизації / Воронки')}</span>
                     </span>
                     <div className="flex items-center gap-2">
@@ -208,16 +208,16 @@ export const InstallTemplateWizardPage: React.FC = () => {
                           {`${template.nodeCount} ${t('template.count_nodes', 'нодів')}, ${template.edgeCount ?? 0} ${t('template.count_edges', 'зв\'язків')}`}
                         </span>
                       )}
-                      <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] font-black text-[11px]">
+                      <span className="px-2 py-0.5 bg-white border border-ink font-black text-[11px]">
                         {template.flowCount || 1}
                       </span>
                     </div>
                   </div>
 
                   {template.broadcastCount > 0 && (
-                    <div className="p-3 bg-slate-50 border border-[#0A0A0A] flex items-center justify-between">
+                    <div className="p-3 bg-slate-50 border border-ink flex items-center justify-between">
                       <span className="flex items-center gap-2 text-slate-800">
-                        <Radio size={15} className="text-[#0A0A0A]" />
+                        <Radio size={15} className="text-ink" />
                         <span>{t('template.install.broadcasts_label', 'Розсилки')}</span>
                       </span>
                       <div className="flex items-center gap-2">
@@ -226,7 +226,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                             {`${template.broadcastNodeCount} ${t('template.count_nodes', 'нодів')}, ${template.broadcastEdgeCount ?? 0} ${t('template.count_edges', 'зв\'язків')}`}
                           </span>
                         )}
-                        <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] font-black text-[11px]">
+                        <span className="px-2 py-0.5 bg-white border border-ink font-black text-[11px]">
                           {template.broadcastCount}
                         </span>
                       </div>
@@ -234,24 +234,24 @@ export const InstallTemplateWizardPage: React.FC = () => {
                   )}
 
                   {template.fieldCount > 0 && (
-                    <div className="p-3 bg-slate-50 border border-[#0A0A0A] flex items-center justify-between">
+                    <div className="p-3 bg-slate-50 border border-ink flex items-center justify-between">
                       <span className="flex items-center gap-2 text-slate-800">
-                        <Sliders size={15} className="text-[#0A0A0A]" />
+                        <Sliders size={15} className="text-ink" />
                         <span>{t('template.custom_fields', 'Користувацькі поля')}</span>
                       </span>
-                      <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] font-black text-[11px]">
+                      <span className="px-2 py-0.5 bg-white border border-ink font-black text-[11px]">
                         {template.fieldCount}
                       </span>
                     </div>
                   )}
 
                   {template.tagCount > 0 && (
-                    <div className="p-3 bg-slate-50 border border-[#0A0A0A] flex items-center justify-between">
+                    <div className="p-3 bg-slate-50 border border-ink flex items-center justify-between">
                       <span className="flex items-center gap-2 text-slate-800">
-                        <TagIcon size={15} className="text-[#0A0A0A]" />
+                        <TagIcon size={15} className="text-ink" />
                         <span>{t('template.tags', 'Теги')}</span>
                       </span>
-                      <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] font-black text-[11px]">
+                      <span className="px-2 py-0.5 bg-white border border-ink font-black text-[11px]">
                         {template.tagCount}
                       </span>
                     </div>
@@ -260,30 +260,30 @@ export const InstallTemplateWizardPage: React.FC = () => {
 
                 {template.description && (
                   <div className="pt-2 text-xs font-bold text-slate-700 leading-relaxed">
-                    <p className="font-black text-[#0A0A0A] uppercase mb-1">{t('template.about_title', 'Про шаблон')}:</p>
-                    <p className="bg-[#F2EBDD]/40 border border-[#0A0A0A] p-3 text-[11.5px] leading-relaxed">
+                    <p className="font-black text-ink uppercase mb-1">{t('template.about_title', 'Про шаблон')}:</p>
+                    <p className="bg-canvas/40 border border-ink p-3 text-[11.5px] leading-relaxed">
                       {template.description}
                     </p>
                   </div>
                 )}
               </div>
-              <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[2px_2px_0px_#0A0A0A] space-y-5">
-                <h3 className="font-black text-xs uppercase text-[#0A0A0A] border-b-2 border-[#0A0A0A] pb-3">
+              <div className="bg-white border-2 border-ink p-6 shadow-brutal-sm space-y-5">
+                <h3 className="font-black text-xs uppercase text-ink border-b-2 border-ink pb-3">
                   {t('template.install.info_title', 'Інформація про встановлення')}
                 </h3>
 
                 <div className="space-y-4 text-xs font-bold text-slate-700">
                   <div className="space-y-1">
-                    <div className="text-[#0A0A0A] font-black uppercase text-xs flex items-center gap-2">
-                      <span className="w-5 h-5 bg-[#0A0A0A] text-white text-[10px] flex items-center justify-center font-black">1</span>
+                    <div className="text-ink font-black uppercase text-xs flex items-center gap-2">
+                      <span className="w-5 h-5 bg-ink text-white text-[10px] flex items-center justify-center font-black">1</span>
                       <span>{t('template.install.step1_title', 'Перевірте вміст шаблону:')}</span>
                     </div>
                     <p className="text-[11px] text-slate-600 font-medium pl-7">{t('template.install.step1_desc', 'Усі елементи будуть автоматично додані до вашого акаунту.')}</p>
                   </div>
 
                   <div className="space-y-1">
-                    <div className="text-[#0A0A0A] font-black uppercase text-xs flex items-center gap-2">
-                      <span className="w-5 h-5 bg-[#0A0A0A] text-white text-[10px] flex items-center justify-center font-black">2</span>
+                    <div className="text-ink font-black uppercase text-xs flex items-center gap-2">
+                      <span className="w-5 h-5 bg-ink text-white text-[10px] flex items-center justify-center font-black">2</span>
                       <span>{t('template.install.step2_title', 'Завершення в один клік:')}</span>
                     </div>
                     <p className="text-[11px] text-slate-600 font-medium pl-7">{t('template.install.step2_desc', 'Натисніть кнопку нижче, щоб зберегти шаблон у розділ Завантажені темплейти.')}</p>
@@ -291,7 +291,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                 </div>
 
                 {(template.guideUrl || template.videoUrl) && (
-                  <div className="pt-3 border-t-2 border-[#0A0A0A]/10 space-y-2 text-xs font-black">
+                  <div className="pt-3 border-t-2 border-ink/10 space-y-2 text-xs font-black">
                     {template.guideUrl && (
                       <a
                         href={template.guideUrl.startsWith('http') ? template.guideUrl : `https://${template.guideUrl}`}
@@ -320,7 +320,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
 
             </div>
             {isAuthenticated ? (
-              <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[2px_2px_0px_#0A0A0A] text-center space-y-4">
+              <div className="bg-white border-2 border-ink p-6 shadow-brutal-sm text-center space-y-4">
                 {errorMsg && (
                   <div className="max-w-md mx-auto bg-rose-100 border border-rose-600 text-rose-900 p-2.5 text-xs font-bold text-center">
                     {errorMsg}
@@ -331,7 +331,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                   <button
                     onClick={handleInstall}
                     disabled={submitting}
-                    className="px-10 py-3.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase tracking-wider transition-all cursor-pointer inline-flex items-center gap-2 disabled:opacity-50"
+                    className="px-10 py-3.5 bg-ink hover:bg-[#2A2A2A] text-canvas border border-ink shadow-brutal-sm text-xs font-black uppercase tracking-wider transition-all cursor-pointer inline-flex items-center gap-2 disabled:opacity-50"
                   >
                     {submitting ? (
                       <>
@@ -348,7 +348,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-slate-100 border-2 border-[#0A0A0A] p-8 text-center space-y-4 shadow-[2px_2px_0px_#0A0A0A]">
+              <div className="bg-slate-100 border-2 border-ink p-8 text-center space-y-4 shadow-brutal-sm">
                 <p className="text-xs font-black text-slate-800">
                   {t('template.install.login_prompt', 'Увійдіть у свій акаунт Launchly, щоб встановити цей шаблон.')}
                 </p>
@@ -359,7 +359,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                       localStorage.setItem('auth_redirect_url', `/templates/install/${shareCode}`);
                     }
                   }}
-                  className="inline-flex items-center justify-center py-3.5 px-8 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all gap-2 cursor-pointer"
+                  className="inline-flex items-center justify-center py-3.5 px-8 bg-ink hover:bg-[#2A2A2A] text-canvas border border-ink shadow-brutal-sm text-xs font-black uppercase transition-all gap-2 cursor-pointer"
                 >
                   <span>{t('template.install.login_btn', 'Увійти для встановлення')}</span>
                   <ArrowRight size={15} />

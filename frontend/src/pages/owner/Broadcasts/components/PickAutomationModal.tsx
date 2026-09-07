@@ -87,7 +87,7 @@ export const PickAutomationModal: React.FC<PickAutomationModalProps> = ({
 
         <button
           onClick={() => setIsPickOpen(false)}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm"
         >
           <X size={16} />
         </button>

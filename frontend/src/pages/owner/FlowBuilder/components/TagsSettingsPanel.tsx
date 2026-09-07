@@ -195,45 +195,45 @@ export const TagsSettingsPanel: React.FC = () => {
             placeholder={t('settings.tags.search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border-2 border-[#0A0A0A] focus:outline-none rounded-xl text-xs font-bold bg-white text-[#0A0A0A]"
+            className="w-full pl-9 pr-4 py-2 border-2 border-ink focus:outline-none rounded-xl text-xs font-bold bg-white text-ink"
           />
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]" />
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink" />
         </div>
       </div>
 
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-left overflow-visible">
-        <div className="p-5 flex justify-between items-center border-b-2 border-[#0A0A0A]">
+      <div className="bg-canvas border-2 border-ink rounded-2xl text-left overflow-visible">
+        <div className="p-5 flex justify-between items-center border-b-2 border-ink">
           <div className="flex items-center gap-1.5 text-xs font-bold select-none">
             {activeFolderId && activeFolder ? (
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setActiveFolderId(null)}
-                  className="text-slate-600 hover:text-[#0A0A0A] transition-colors cursor-pointer uppercase"
+                  className="text-slate-600 hover:text-ink transition-colors cursor-pointer uppercase"
                 >
                   {t('settings.tags.title')}
                 </button>
-                <ChevronRight size={14} className="text-[#0A0A0A]" />
+                <ChevronRight size={14} className="text-ink" />
                 <div className="flex items-center gap-1">
-                  <span className="text-[#0A0A0A] font-black">{activeFolder.name}</span>
+                  <span className="text-ink font-black">{activeFolder.name}</span>
                   <button
                     onClick={() => {
                       setRenameFolderName(activeFolder.name);
                       setIsRenameFolderOpen(true);
                     }}
-                    className="p-1 hover:bg-white text-[#0A0A0A] rounded-lg cursor-pointer transition-all border-2 border-transparent hover:border-[#0A0A0A]"
+                    className="p-1 hover:bg-white text-ink rounded-lg cursor-pointer transition-all border-2 border-transparent hover:border-ink"
                   >
                     <Edit2 size={11} />
                   </button>
                 </div>
               </div>
             ) : (
-              <span className="font-['Anybody',sans-serif] text-[#0A0A0A] font-black text-sm uppercase">{t('settings.tags.title')}</span>
+              <span className="font-['Anybody',sans-serif] text-ink font-black text-sm uppercase">{t('settings.tags.title')}</span>
             )}
           </div>
 
           <button
             onClick={() => setIsTagModalOpen(true)}
-            className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all flex items-center gap-1.5 cursor-pointer select-none"
+            className="px-4 py-2 bg-ink hover:bg-[#2A2A2A] text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all flex items-center gap-1.5 cursor-pointer select-none"
           >
             <Plus size={14} />
             <span>{t('settings.tags.new_tag_btn', 'Новий тег')}</span>
@@ -246,24 +246,24 @@ export const TagsSettingsPanel: React.FC = () => {
               {folders.map((folder) => (
                 <div
                   key={folder.id}
-                  className="flex items-center justify-between border-2 border-[#0A0A0A] rounded-xl px-4 py-2.5 bg-white w-48 hover:bg-[#F2EBDD] transition-all relative"
+                  className="flex items-center justify-between border-2 border-ink rounded-xl px-4 py-2.5 bg-white w-48 hover:bg-canvas transition-all relative"
                 >
                   <button
                     onClick={() => setActiveFolderId(folder.id)}
                     className="flex items-center gap-2 text-left flex-1 cursor-pointer"
                   >
-                    <Folder size={16} className="text-[#0A0A0A] shrink-0" />
-                    <span className="text-xs font-bold text-[#0A0A0A] truncate w-28">{folder.name}</span>
+                    <Folder size={16} className="text-ink shrink-0" />
+                    <span className="text-xs font-bold text-ink truncate w-28">{folder.name}</span>
                   </button>
                   <button
                     onClick={() => setActiveMenuFolder(activeMenuFolder === folder.id ? null : folder.id)}
-                    className="p-0.5 hover:bg-[#0A0A0A] rounded text-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer"
+                    className="p-0.5 hover:bg-ink rounded text-ink hover:text-canvas cursor-pointer"
                   >
                     <MoreVertical size={14} />
                   </button>
 
                   {activeMenuFolder === folder.id && (
-                    <div className="absolute right-3 top-11 z-[100] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 w-28 text-left animate-in fade-in duration-100">
+                    <div className="absolute right-3 top-11 z-[100] bg-canvas border-2 border-ink rounded-xl shadow-xl py-1 w-28 text-left animate-in fade-in duration-100">
                       <button
                         onClick={() => {
                           setActiveFolderId(folder.id);
@@ -271,13 +271,13 @@ export const TagsSettingsPanel: React.FC = () => {
                           setIsRenameFolderOpen(true);
                           setActiveMenuFolder(null);
                         }}
-                        className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase"
+                        className="w-full px-3 py-1.5 hover:bg-ink hover:text-canvas text-ink text-xs font-bold text-left cursor-pointer uppercase"
                       >
                         {t('settings.tags.action_rename', 'Перейменувати')}
                       </button>
                       <button
                         onClick={() => handleDeleteFolder(folder.id)}
-                        className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/15 uppercase"
+                        className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-ink/15 uppercase"
                       >
                         {t('settings.tags.action_delete', 'Видалити')}
                       </button>
@@ -288,7 +288,7 @@ export const TagsSettingsPanel: React.FC = () => {
 
               <button
                 onClick={() => setIsFolderModalOpen(true)}
-                className="px-4 py-2.5 border-2 border-dashed border-[#0A0A0A] text-[#0A0A0A] hover:bg-white text-xs font-black uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer select-none"
+                className="px-4 py-2.5 border-2 border-dashed border-ink text-ink hover:bg-white text-xs font-black uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer select-none"
               >
                 <Plus size={14} />
                 <span>{t('settings.tags.new_folder_btn', 'Нова папка')}</span>
@@ -296,31 +296,31 @@ export const TagsSettingsPanel: React.FC = () => {
             </div>
           )}
 
-          <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-hidden shadow-sm">
+          <div className="border-2 border-ink rounded-2xl bg-white overflow-hidden shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-white border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
+                <tr className="bg-white border-b-2 border-ink text-xs font-black text-ink uppercase tracking-wider select-none">
                   <th className="px-5 py-3 w-10">
                     <input
                       type="checkbox"
                       disabled
-                      className="w-4 h-4 accent-[#0A0A0A] cursor-not-allowed"
+                      className="w-4 h-4 accent-ink cursor-not-allowed"
                     />
                   </th>
                   <th className="px-5 py-3">{t('settings.tags.table_name')}</th>
                   <th className="px-5 py-3 w-12 text-right"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#0A0A0A]/10 text-xs font-bold text-[#0A0A0A]">
+              <tbody className="divide-y divide-ink/10 text-xs font-bold text-ink">
                 {filteredTags.map((tag) => (
                   <tr key={tag.id} className="hover:bg-slate-50 bg-white transition-colors">
                     <td className="px-5 py-3.5">
                       <input
                         type="checkbox"
-                        className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
+                        className="w-4 h-4 accent-ink cursor-pointer"
                       />
                     </td>
-                    <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">
+                    <td className="px-5 py-3.5 font-bold text-ink">
                       {tag.name}
                     </td>
                     <td className="px-5 py-3.5 text-right">
@@ -331,7 +331,7 @@ export const TagsSettingsPanel: React.FC = () => {
                           setMenuCoords({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
                           setActiveMenuTag(activeMenuTag === tag.id ? null : tag.id);
                         }}
-                        className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
+                        className="p-1 hover:bg-ink hover:text-canvas rounded-lg text-ink cursor-pointer transition-all"
                       >
                         <MoreVertical size={15} />
                       </button>
@@ -354,7 +354,7 @@ export const TagsSettingsPanel: React.FC = () => {
       {activeMenuTag && menuCoords && createPortal(
         <div
           style={{ top: menuCoords.top, right: menuCoords.right }}
-          className="fixed z-[9999] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 w-28 text-left animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]"
+          className="fixed z-[9999] bg-canvas border-2 border-ink rounded-xl shadow-xl py-1 w-28 text-left animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]"
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -367,7 +367,7 @@ export const TagsSettingsPanel: React.FC = () => {
               }
               setActiveMenuTag(null);
             }}
-            className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
+            className="w-full px-3 py-1.5 hover:bg-ink hover:text-canvas text-ink text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
           >
             {t('settings.tags.action_edit', 'Редагувати')}
           </button>
@@ -377,7 +377,7 @@ export const TagsSettingsPanel: React.FC = () => {
               if (tag) handleDeleteTag(tag);
               setActiveMenuTag(null);
             }}
-            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
+            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-ink/10 uppercase select-none transition-colors"
           >
             {t('settings.tags.action_delete')}
           </button>
@@ -388,28 +388,28 @@ export const TagsSettingsPanel: React.FC = () => {
       {isEditTagModalOpen && (
         <div 
           onClick={() => setIsEditTagModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 p-4 animate-in fade-in duration-200 cursor-pointer"
         >
           <form 
             onSubmit={handleEditTag}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+            className="bg-canvas border-2 border-ink rounded-3xl p-6 shadow-xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
           >
-            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
+            <div className="flex items-center justify-between border-b-2 border-ink pb-3 select-none">
+              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase tracking-wide">
                 {t('settings.tags.edit_tag_title', 'Редагувати тег')}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsEditTagModalOpen(false)}
-                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
+                className="p-1 hover:bg-white rounded-lg text-ink transition-all cursor-pointer border-2 border-transparent hover:border-ink"
               >
                 <X size={16} />
               </button>
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
                 {t('settings.tags.table_name')}
               </label>
               <input
@@ -418,22 +418,22 @@ export const TagsSettingsPanel: React.FC = () => {
                 value={editTagName}
                 onChange={(e) => setEditTagName(e.target.value)}
                 placeholder={t('settings.tags.placeholder_tag_name')}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
+                className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
               />
             </div>
 
-            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
+            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-ink/15 select-none">
               <button
                 type="button"
                 onClick={() => setIsEditTagModalOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
               >
                 {t('settings.tags.btn_cancel')}
               </button>
               <button
                 type="submit"
                 disabled={!editTagName.trim() || updateTagMutation.isPending}
-                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer disabled:opacity-50"
+                className="px-4 py-2.5 bg-ink hover:bg-[#2A2A2A] text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer disabled:opacity-50"
               >
                 {updateTagMutation.isPending ? 'Saving...' : t('settings.tags.btn_save')}
               </button>
@@ -445,28 +445,28 @@ export const TagsSettingsPanel: React.FC = () => {
       {isTagModalOpen && (
         <div 
           onClick={() => setIsTagModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 p-4 animate-in fade-in duration-200 cursor-pointer"
         >
           <form 
             onSubmit={handleCreateTag}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+            className="bg-canvas border-2 border-ink rounded-3xl p-6 shadow-xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
           >
-            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
+            <div className="flex items-center justify-between border-b-2 border-ink pb-3 select-none">
+              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase tracking-wide">
                 {t('settings.tags.create_tag_title')}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsTagModalOpen(false)}
-                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
+                className="p-1 hover:bg-white rounded-lg text-ink transition-all cursor-pointer border-2 border-transparent hover:border-ink"
               >
                 <X size={16} />
               </button>
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
                 {t('settings.tags.table_name')}
               </label>
               <input
@@ -475,22 +475,22 @@ export const TagsSettingsPanel: React.FC = () => {
                 value={newTagName}
                 onChange={(e) => setNewTagName(e.target.value)}
                 placeholder={t('settings.tags.placeholder_tag_name')}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
+                className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
               />
             </div>
 
-            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
+            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-ink/15 select-none">
               <button
                 type="button"
                 onClick={() => setIsTagModalOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
               >
                 {t('settings.tags.btn_cancel')}
               </button>
               <button
                 type="submit"
                 disabled={!newTagName.trim() || createTagMutation.isPending}
-                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer disabled:opacity-50"
+                className="px-4 py-2.5 bg-ink hover:bg-[#2A2A2A] text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer disabled:opacity-50"
               >
                 {createTagMutation.isPending ? 'Creating...' : t('settings.tags.btn_create')}
               </button>
@@ -502,28 +502,28 @@ export const TagsSettingsPanel: React.FC = () => {
       {isFolderModalOpen && (
         <div 
           onClick={() => setIsFolderModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 p-4 animate-in fade-in duration-200 cursor-pointer"
         >
           <form 
             onSubmit={handleCreateFolder}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+            className="bg-canvas border-2 border-ink rounded-3xl p-6 shadow-xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
           >
-            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
+            <div className="flex items-center justify-between border-b-2 border-ink pb-3 select-none">
+              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase tracking-wide">
                 {t('settings.tags.create_folder_title')}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsFolderModalOpen(false)}
-                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
+                className="p-1 hover:bg-white rounded-lg text-ink transition-all cursor-pointer border-2 border-transparent hover:border-ink"
               >
                 <X size={16} />
               </button>
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
                 {t('settings.tags.new_folder_btn')}
               </label>
               <input
@@ -532,21 +532,21 @@ export const TagsSettingsPanel: React.FC = () => {
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
                 placeholder={t('settings.tags.placeholder_folder_name')}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
+                className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
               />
             </div>
 
-            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
+            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-ink/15 select-none">
               <button
                 type="button"
                 onClick={() => setIsFolderModalOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
               >
                 {t('settings.tags.btn_cancel')}
               </button>
               <button
                 type="submit"
-                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-ink hover:bg-[#2A2A2A] text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
               >
                 {t('settings.tags.btn_create_folder')}
               </button>
@@ -558,28 +558,28 @@ export const TagsSettingsPanel: React.FC = () => {
       {isRenameFolderOpen && (
         <div 
           onClick={() => setIsRenameFolderOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 p-4 animate-in fade-in duration-200 cursor-pointer"
         >
           <form 
             onSubmit={handleRenameFolder}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+            className="bg-canvas border-2 border-ink rounded-3xl p-6 shadow-xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
           >
-            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
+            <div className="flex items-center justify-between border-b-2 border-ink pb-3 select-none">
+              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase tracking-wide">
                 {t('settings.tags.rename_folder_title')}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsRenameFolderOpen(false)}
-                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
+                className="p-1 hover:bg-white rounded-lg text-ink transition-all cursor-pointer border-2 border-transparent hover:border-ink"
               >
                 <X size={16} />
               </button>
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
                 {t('settings.tags.new_folder_btn')}
               </label>
               <input
@@ -588,21 +588,21 @@ export const TagsSettingsPanel: React.FC = () => {
                 value={renameFolderName}
                 onChange={(e) => setRenameFolderName(e.target.value)}
                 placeholder={t('settings.tags.placeholder_folder_name')}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
+                className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
               />
             </div>
 
-            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
+            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-ink/15 select-none">
               <button
                 type="button"
                 onClick={() => setIsRenameFolderOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
               >
                 {t('settings.tags.btn_cancel')}
               </button>
               <button
                 type="submit"
-                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-ink hover:bg-[#2A2A2A] text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
               >
                 {t('settings.tags.btn_save')}
               </button>

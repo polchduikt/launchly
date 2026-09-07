@@ -63,7 +63,7 @@ export const BotsConnectPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased flex flex-col md:flex-row relative z-0 selection:bg-[#0A0A0A] selection:text-[#F2EBDD]">
+    <div className="min-h-screen bg-canvas text-ink font-['Geist',sans-serif] antialiased flex flex-col md:flex-row relative z-0 selection:bg-ink selection:text-canvas">
       <div
         className="fixed inset-0 z-[-1] pointer-events-none opacity-5"
         style={{
@@ -76,7 +76,7 @@ export const BotsConnectPage: React.FC = () => {
           backgroundPosition: '-1px -1px'
         }}
       />
-      <div className="w-full md:w-5/12 bg-[#F2EBDD] border-b-4 md:border-b-0 md:border-r-4 border-[#0A0A0A] p-8 md:p-16 flex flex-col justify-between relative overflow-hidden">
+      <div className="w-full md:w-5/12 bg-canvas border-b-4 md:border-b-0 md:border-r-4 border-ink p-8 md:p-16 flex flex-col justify-between relative overflow-hidden">
         
         <div
           onClick={() => navigate('/home')}
@@ -89,13 +89,13 @@ export const BotsConnectPage: React.FC = () => {
         <div className="my-auto space-y-6 relative z-10">
           {step === 1 && (
             <>
-              <div className="w-24 h-24 rounded-none bg-amber-400 border-4 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] mb-8 shadow-[6px_6px_0px_#0A0A0A]">
+              <div className="w-24 h-24 rounded-none bg-amber-400 border-4 border-ink flex items-center justify-center text-ink mb-8 shadow-brutal-lg">
                 <Sparkles size={40} />
               </div>
-              <h1 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-black text-[#0A0A0A] uppercase leading-none mb-4">
+              <h1 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-black text-ink uppercase leading-none mb-4">
                 {t('connect_bot.step1_title', 'Where would you like to start?')}
               </h1>
-              <p className="text-base sm:text-lg text-[#0A0A0A]/80 font-bold max-w-sm leading-relaxed">
+              <p className="text-base sm:text-lg text-ink/80 font-bold max-w-sm leading-relaxed">
                 {t('connect_bot.step1_subtitle', "Don't worry, you can connect other communication channels later.")}
               </p>
             </>
@@ -103,13 +103,13 @@ export const BotsConnectPage: React.FC = () => {
 
           {step === 2 && (
             <>
-              <div className="w-24 h-24 rounded-none bg-amber-400 border-4 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] mb-8 shadow-[6px_6px_0px_#0A0A0A]">
+              <div className="w-24 h-24 rounded-none bg-amber-400 border-4 border-ink flex items-center justify-center text-ink mb-8 shadow-brutal-lg">
                 <Send size={40} />
               </div>
-              <h1 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-black text-[#0A0A0A] uppercase leading-none mb-4">
+              <h1 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-black text-ink uppercase leading-none mb-4">
                 {t('connect_bot.step2_title', "Let's connect Telegram bot to Launchly")}
               </h1>
-              <p className="text-base sm:text-lg text-[#0A0A0A]/80 font-bold max-w-sm leading-relaxed">
+              <p className="text-base sm:text-lg text-ink/80 font-bold max-w-sm leading-relaxed">
                 {t('connect_bot.step2_subtitle', 'You can create a brand new bot using BotFather or connect your existing one.')}
               </p>
             </>
@@ -117,13 +117,13 @@ export const BotsConnectPage: React.FC = () => {
 
           {step === 3 && (
             <>
-              <div className="w-24 h-24 rounded-none bg-amber-400 border-4 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] mb-8 shadow-[6px_6px_0px_#0A0A0A]">
+              <div className="w-24 h-24 rounded-none bg-amber-400 border-4 border-ink flex items-center justify-center text-ink mb-8 shadow-brutal-lg">
                 <Check size={40} />
               </div>
-              <h1 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-black text-[#0A0A0A] uppercase leading-none mb-4">
+              <h1 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-black text-ink uppercase leading-none mb-4">
                 {t('connect_bot.step3_title', 'Choose your favourite bot and rock it!')}
               </h1>
-              <p className="text-base sm:text-lg text-[#0A0A0A]/80 font-bold max-w-sm leading-relaxed">
+              <p className="text-base sm:text-lg text-ink/80 font-bold max-w-sm leading-relaxed">
                 {t('connect_bot.step3_subtitle', 'Just follow the quick step-by-step instructions to connect an existing Telegram bot.')}
               </p>
             </>
@@ -133,7 +133,7 @@ export const BotsConnectPage: React.FC = () => {
         <div className="mt-12 md:mt-0 flex items-center justify-between gap-4">
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:underline underline-offset-4 cursor-pointer text-[#0A0A0A] group"
+            className="flex items-center gap-2 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:underline underline-offset-4 cursor-pointer text-ink group"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
             {step === 1 ? t('connect_bot.back', 'Back') : step === 2 ? t('connect_bot.choose_another_channel', 'Choose Another Channel') : t('connect_bot.back', 'Back')}
@@ -141,7 +141,7 @@ export const BotsConnectPage: React.FC = () => {
 
           <button
             onClick={() => navigate('/home')}
-            className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:underline underline-offset-4 cursor-pointer text-[#0A0A0A]"
+            className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:underline underline-offset-4 cursor-pointer text-ink"
           >
             {t('connect_bot.skip_for_now', 'Skip for now')} &rarr;
           </button>
@@ -154,14 +154,14 @@ export const BotsConnectPage: React.FC = () => {
             <div className="space-y-4">
               <button
                 onClick={() => setStep(2)}
-                className="w-full bg-white border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all duration-200 group cursor-pointer text-left flex items-center gap-4"
+                className="w-full bg-white border-2 border-ink shadow-brutal-lg p-5 hover:bg-ink hover:text-canvas transition-all duration-200 group cursor-pointer text-left flex items-center gap-4"
               >
-                <span className="w-12 h-12 rounded-none bg-emerald-300 border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] shrink-0 group-hover:bg-[#F2EBDD]">
+                <span className="w-12 h-12 rounded-none bg-emerald-300 border-2 border-ink flex items-center justify-center text-ink shrink-0 group-hover:bg-canvas">
                   <Send size={24} />
                 </span>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-['Anybody',sans-serif] text-lg font-black text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors uppercase leading-tight">{t('connect_bot.tg_title', 'Telegram')}</h3>
-                  <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-[#0A0A0A]/70 group-hover:text-[#F2EBDD]/70 transition-colors leading-relaxed">{t('connect_bot.tg_desc', 'Power up your business with Telegram automation.')}</p>
+                  <h3 className="font-['Anybody',sans-serif] text-lg font-black text-ink group-hover:text-canvas transition-colors uppercase leading-tight">{t('connect_bot.tg_title', 'Telegram')}</h3>
+                  <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-ink/70 group-hover:text-canvas/70 transition-colors leading-relaxed">{t('connect_bot.tg_desc', 'Power up your business with Telegram automation.')}</p>
                 </div>
               </button>
 
@@ -172,16 +172,16 @@ export const BotsConnectPage: React.FC = () => {
               ].map((c) => (
                 <div
                   key={c.key}
-                  className="w-full bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] p-5 flex items-center gap-4 select-none opacity-40 relative group"
+                  className="w-full bg-white border-2 border-ink shadow-brutal p-5 flex items-center gap-4 select-none opacity-40 relative group"
                 >
-                  <span className={`w-12 h-12 rounded-none ${c.color} border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 text-[#0A0A0A]`}>
+                  <span className={`w-12 h-12 rounded-none ${c.color} border-2 border-ink flex items-center justify-center shrink-0 text-ink`}>
                     <c.icon size={24} />
                   </span>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-['Anybody',sans-serif] text-lg font-black text-[#0A0A0A]/70 uppercase leading-tight">{c.name}</h3>
-                    <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-[#0A0A0A]/50 leading-relaxed">{c.desc}</p>
+                    <h3 className="font-['Anybody',sans-serif] text-lg font-black text-ink/70 uppercase leading-tight">{c.name}</h3>
+                    <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-ink/50 leading-relaxed">{c.desc}</p>
                   </div>
-                  <span className="absolute right-4 top-4 text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-sm bg-[#0A0A0A] text-[#F2EBDD]">
+                  <span className="absolute right-4 top-4 text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-sm bg-ink text-canvas">
                     {t('connect_bot.coming_soon', 'Coming Soon')}
                   </span>
                 </div>
@@ -190,16 +190,16 @@ export const BotsConnectPage: React.FC = () => {
           )}
 
           {step === 2 && (
-            <div className="bg-white border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] p-8 sm:p-12 transition-all rounded-none">
-              <h2 className="font-['Anybody',sans-serif] text-2xl sm:text-3xl font-black text-[#0A0A0A] uppercase leading-tight mb-4">{t('connect_bot.step2_heading', 'How do you want to start?')}</h2>
-              <p className="text-base text-[#0A0A0A]/80 font-bold mb-8 leading-relaxed">
+            <div className="bg-white border-4 border-ink shadow-brutal-2xl p-8 sm:p-12 transition-all rounded-none">
+              <h2 className="font-['Anybody',sans-serif] text-2xl sm:text-3xl font-black text-ink uppercase leading-tight mb-4">{t('connect_bot.step2_heading', 'How do you want to start?')}</h2>
+              <p className="text-base text-ink/80 font-bold mb-8 leading-relaxed">
                 {t('connect_bot.step2_subheading', 'In each scenario, we will guide you through easy step-by-step instructions.')}
               </p>
               
               <div className="space-y-3">
                 <button
                   onClick={() => setStep(3)}
-                  className="w-full bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-8 py-4 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full bg-ink text-canvas font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-8 py-4 border-2 border-ink shadow-brutal hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>{t('connect_bot.btn_connect_existing', 'Connect Existing Bot')}</span>
                 </button>
@@ -207,7 +207,7 @@ export const BotsConnectPage: React.FC = () => {
                   href="https://t.me/BotFather"
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full block bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-8 py-4 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full block bg-canvas text-ink font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-8 py-4 border-2 border-ink shadow-brutal hover:bg-ink hover:text-canvas hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>{t('connect_bot.btn_create_new', '+ Create New Bot')}</span>
                 </a>
@@ -216,21 +216,21 @@ export const BotsConnectPage: React.FC = () => {
           )}
 
           {step === 3 && (
-            <div className="bg-white border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] p-8 sm:p-12 transition-all rounded-none">
-              <h2 className="font-['Anybody',sans-serif] text-2xl sm:text-3xl font-black text-[#0A0A0A] uppercase leading-tight mb-6">{t('connect_bot.step3_heading', 'Connect existing Telegram bot')}</h2>
+            <div className="bg-white border-4 border-ink shadow-brutal-2xl p-8 sm:p-12 transition-all rounded-none">
+              <h2 className="font-['Anybody',sans-serif] text-2xl sm:text-3xl font-black text-ink uppercase leading-tight mb-6">{t('connect_bot.step3_heading', 'Connect existing Telegram bot')}</h2>
               
-              <div className="bg-amber-300 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] p-4 flex gap-3 text-[#0A0A0A] text-xs mb-6 leading-relaxed font-['JetBrains_Mono',monospace] font-bold">
-                <AlertCircle size={16} className="shrink-0 text-[#0A0A0A]" />
+              <div className="bg-amber-300 border-2 border-ink shadow-brutal p-4 flex gap-3 text-ink text-xs mb-6 leading-relaxed font-['JetBrains_Mono',monospace] font-bold">
+                <AlertCircle size={16} className="shrink-0 text-ink" />
                 <span>
                   {t('connect_bot.token_warning', 'We highly recommend you not to use the same token for different services, otherwise the bot will work incorrectly.')}
                 </span>
               </div>
 
               <div className="space-y-4 mb-6">
-                <h4 className="font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-widest text-[#0A0A0A]/50 mb-1">{t('connect_bot.instructions_title', 'Instructions:')}</h4>
-                <ol className="space-y-3 font-['JetBrains_Mono',monospace] text-sm font-bold text-[#0A0A0A]">
+                <h4 className="font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-widest text-ink/50 mb-1">{t('connect_bot.instructions_title', 'Instructions:')}</h4>
+                <ol className="space-y-3 font-['JetBrains_Mono',monospace] text-sm font-bold text-ink">
                   <li className="flex gap-2">
-                    <span className="w-6 h-6 rounded-none bg-amber-400 border-2 border-[#0A0A0A] text-[#0A0A0A] text-sm font-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#0A0A0A]">1</span>
+                    <span className="w-6 h-6 rounded-none bg-amber-400 border-2 border-ink text-ink text-sm font-black flex items-center justify-center shrink-0 shadow-brutal-sm">1</span>
                     <span>
                       {t('connect_bot.step1_inst_prefix', 'Open')}{' '}
                       <a
@@ -242,15 +242,15 @@ export const BotsConnectPage: React.FC = () => {
                         @BotFather
                       </a>{' '}
                       {t('connect_bot.step1_inst_suffix', 'in Telegram and click')}{' '}
-                      <code className="bg-[#0A0A0A] text-[#F2EBDD] px-1.5 py-0.5 rounded-sm text-xs font-['JetBrains_Mono',monospace] border border-[#F2EBDD]">/start</code>
+                      <code className="bg-ink text-canvas px-1.5 py-0.5 rounded-sm text-xs font-['JetBrains_Mono',monospace] border border-canvas">/start</code>
                     </span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="w-6 h-6 rounded-none bg-amber-400 border-2 border-[#0A0A0A] text-[#0A0A0A] text-sm font-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#0A0A0A]">2</span>
+                    <span className="w-6 h-6 rounded-none bg-amber-400 border-2 border-ink text-ink text-sm font-black flex items-center justify-center shrink-0 shadow-brutal-sm">2</span>
                     <span>{t('connect_bot.step2_inst', 'Send /mybots and choose the bot you want to connect')}</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="w-6 h-6 rounded-none bg-amber-400 border-2 border-[#0A0A0A] text-[#0A0A0A] text-sm font-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#0A0A0A]">3</span>
+                    <span className="w-6 h-6 rounded-none bg-amber-400 border-2 border-ink text-ink text-sm font-black flex items-center justify-center shrink-0 shadow-brutal-sm">3</span>
                     <span>{t('connect_bot.step3_inst', 'Copy its API token and paste it below')}</span>
                   </li>
                 </ol>
@@ -259,7 +259,7 @@ export const BotsConnectPage: React.FC = () => {
               <form onSubmit={handleSubmit(handleConnect)} className="space-y-4">
 
                 <div>
-                  <label htmlFor="botToken" className="block font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-widest text-[#0A0A0A]/50 mb-1">
+                  <label htmlFor="botToken" className="block font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-widest text-ink/50 mb-1">
                     {t('connect_bot.token_label', 'Telegram bot token')}
                   </label>
                   <input
@@ -267,7 +267,7 @@ export const BotsConnectPage: React.FC = () => {
                     type="text"
                     {...register('botToken')}
                     placeholder={t('connect_bot.token_placeholder', 'Enter token (e.g. 123456:ABC-DEF...)')}
-                    className={`w-full px-4 py-3 border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] font-['JetBrains_Mono',monospace] text-sm font-bold text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A] transition-all ${errors.botToken ? 'border-rose-600 ring-rose-600' : ''}`}
+                    className={`w-full px-4 py-3 border-2 border-ink shadow-brutal-sm font-['JetBrains_Mono',monospace] text-sm font-bold text-ink focus:outline-none focus:ring-2 focus:ring-ink transition-all ${errors.botToken ? 'border-rose-600 ring-rose-600' : ''}`}
                     disabled={createBotMutation.isPending}
                   />
                   {errors.botToken && (
@@ -276,7 +276,7 @@ export const BotsConnectPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="botDesc" className="block font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-widest text-[#0A0A0A]/50 mb-1">
+                  <label htmlFor="botDesc" className="block font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-widest text-ink/50 mb-1">
                     {t('connect_bot.desc_label', 'Bot Description (Optional)')}
                   </label>
                   <textarea
@@ -284,14 +284,14 @@ export const BotsConnectPage: React.FC = () => {
                     {...register('botDesc')}
                     placeholder={t('connect_bot.desc_placeholder', 'Enter a brief description')}
                     rows={2}
-                    className="w-full px-4 py-3 border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] font-['JetBrains_Mono',monospace] text-sm font-bold text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A] transition-all resize-none"
+                    className="w-full px-4 py-3 border-2 border-ink shadow-brutal-sm font-['JetBrains_Mono',monospace] text-sm font-bold text-ink focus:outline-none focus:ring-2 focus:ring-ink transition-all resize-none"
                     disabled={createBotMutation.isPending}
                   />
                 </div>
 
                 {validationError && (
-                  <div className="text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs flex gap-1.5 items-center font-bold bg-amber-300 p-3 rounded-none border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A]">
-                    <AlertCircle size={14} className="shrink-0 text-[#0A0A0A]" />
+                  <div className="text-ink font-['JetBrains_Mono',monospace] text-xs flex gap-1.5 items-center font-bold bg-amber-300 p-3 rounded-none border-2 border-ink shadow-brutal">
+                    <AlertCircle size={14} className="shrink-0 text-ink" />
                     <span>{validationError}</span>
                   </div>
                 )}
@@ -299,12 +299,12 @@ export const BotsConnectPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={createBotMutation.isPending}
-                  className="w-full bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-8 py-4 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full bg-ink text-canvas font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-extrabold uppercase tracking-wider px-8 py-4 border-2 border-ink shadow-brutal hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {createBotMutation.isPending ? (
                     <>
-                      <Loader2 className="animate-spin text-[#F2EBDD]" size={16} />
-                      <span className="text-[#F2EBDD]">{t('connect_bot.btn_connecting', 'Connecting...')}</span>
+                      <Loader2 className="animate-spin text-canvas" size={16} />
+                      <span className="text-canvas">{t('connect_bot.btn_connecting', 'Connecting...')}</span>
                     </>
                   ) : (
                     <span>{t('connect_bot.btn_connect', 'Connect')}</span>
