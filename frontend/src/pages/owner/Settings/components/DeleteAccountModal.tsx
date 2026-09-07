@@ -34,7 +34,7 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
     try {
       await deleteAccountApi();
       logoutMutation.mutate();
-    } catch (err: any) {
+    } catch {
       logoutMutation.mutate();
     } finally {
       setSubmitting(false);

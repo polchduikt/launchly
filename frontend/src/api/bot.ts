@@ -91,7 +91,19 @@ export const deleteBotUserApi = async (botId: number, userId: number): Promise<v
   await apiClient.delete(`/bots/${botId}/users/${userId}`);
 };
 
-const parseJsonIfNeeded = (data: any): any => {
+import type { CustomFieldsResponse } from '../types/customFields';
+
+export interface AutomationFolder {
+  id: string | number;
+  name: string;
+}
+
+export interface AutomationFoldersResponse {
+  folders?: AutomationFolder[];
+  [key: string]: unknown;
+}
+
+const parseJsonIfNeeded = <T>(data: unknown): T => {
   let res = data;
   while (typeof res === 'string') {
     try {
@@ -100,31 +112,31 @@ const parseJsonIfNeeded = (data: any): any => {
       break;
     }
   }
-  return res;
+  return res as T;
 };
 
-export const getCustomFieldsApi = async (botId: number): Promise<any> => {
-  const response = await apiClient.get<any>(`/bots/${botId}/custom-fields`);
-  return parseJsonIfNeeded(response.data);
+export const getCustomFieldsApi = async (botId: number): Promise<CustomFieldsResponse> => {
+  const response = await apiClient.get<unknown>(`/bots/${botId}/custom-fields`);
+  return parseJsonIfNeeded<CustomFieldsResponse>(response.data);
 };
 
-export const saveCustomFieldsApi = async (botId: number, data: any): Promise<any> => {
+export const saveCustomFieldsApi = async (botId: number, data: CustomFieldsResponse | unknown): Promise<CustomFieldsResponse> => {
   const payload = typeof data === 'string' ? data : JSON.stringify(data);
-  const response = await apiClient.put<any>(`/bots/${botId}/custom-fields`, payload, {
+  const response = await apiClient.put<unknown>(`/bots/${botId}/custom-fields`, payload, {
     headers: { 'Content-Type': 'application/json' },
   });
-  return parseJsonIfNeeded(response.data);
+  return parseJsonIfNeeded<CustomFieldsResponse>(response.data);
 };
 
-export const getAutomationFoldersApi = async (): Promise<any> => {
-  const response = await apiClient.get<any>('/bots/automation-folders');
-  return parseJsonIfNeeded(response.data);
+export const getAutomationFoldersApi = async (): Promise<AutomationFoldersResponse> => {
+  const response = await apiClient.get<unknown>('/bots/automation-folders');
+  return parseJsonIfNeeded<AutomationFoldersResponse>(response.data);
 };
 
-export const saveAutomationFoldersApi = async (data: any): Promise<any> => {
+export const saveAutomationFoldersApi = async (data: AutomationFoldersResponse | unknown): Promise<AutomationFoldersResponse> => {
   const payload = typeof data === 'string' ? data : JSON.stringify(data);
-  const response = await apiClient.put<any>('/bots/automation-folders', payload, {
+  const response = await apiClient.put<unknown>('/bots/automation-folders', payload, {
     headers: { 'Content-Type': 'application/json' },
   });
-  return parseJsonIfNeeded(response.data);
+  return parseJsonIfNeeded<AutomationFoldersResponse>(response.data);
 };

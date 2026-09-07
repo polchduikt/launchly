@@ -84,6 +84,7 @@ export const ChatPage: React.FC = () => {
     favorites: ls.favorites,
     unreadConvIds: ls.unreadConvIds,
     botUsers,
+    bots,
   });
 
   const currentBotUser = botUsers.find(u => u.telegramId === selectedConversation?.botUserTelegramId);
@@ -245,6 +246,12 @@ export const ChatPage: React.FC = () => {
               showSortDrop={filters.showSortDrop}
               onShowSortDrop={filters.setShowSortDrop}
               sortRef={filters.sortRef}
+              selectedAutomation={filters.selectedAutomation}
+              onSelectedAutomationChange={filters.setSelectedAutomation}
+              automations={filters.automations}
+              showAutomationDrop={filters.showAutomationDrop}
+              onShowAutomationDrop={filters.setShowAutomationDrop}
+              automationRef={filters.automationRef}
               onResetFilters={filters.resetFilters}
             />
 

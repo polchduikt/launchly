@@ -3,14 +3,15 @@ import {
   ReactFlow,
   Controls,
   Background,
-  getBezierPath,
-  getSmoothStepPath,
   ConnectionLineType,
   ReactFlowProvider,
 } from '@xyflow/react';
-import type { ConnectionLineComponentProps, Edge, Node, OnNodeDrag } from '@xyflow/react';
+import type { Edge, Node, OnNodeDrag } from '@xyflow/react';
 import { isAxiosError } from 'axios';
 import '@xyflow/react/dist/style.css';
+import { CustomConnectionLine } from '../../../components/common/CustomConnectionLine';
+import { FlowControlsStyles } from '../../../components/common/FlowControlsStyles';
+import { ErrorBoundary } from '../../../components/common/ErrorBoundary';
 import { useBroadcastBuilder } from '../../../hooks/broadcast/useBroadcastBuilder';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
 import { AudiencePanel } from '../Broadcasts/components/AudiencePanel';
@@ -25,11 +26,12 @@ import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { NODE_TYPES } from '../../../const/nodeTypes';
 import { FLOW_EDGE_DEFAULTS, EDGE_TYPES } from '../../../const/flowEdges';
-import { getCustomFieldsApi } from '../../../api/bot';
+import { useCustomFieldsQuery } from '../../../hooks/bot/useCustomFieldsQuery';
 import { BROADCAST_BLOCKS, BROADCAST_CONTEXT_MENU_OPTIONS } from '../../../const/broadcastBlocks';
 import { FLOW_BLOCK_COLORS } from '../../../const/flowBlocks';
 import { NODE_ICON_COMPONENTS } from '../../../const/nodeDisplay';
 import { ROUTES } from '../../../routes/paths';
+import { DEFAULT_CUSTOM_FIELDS } from '../../../const/constants';
 import { useFlowCollaboration } from '../../../hooks/bot/useFlowCollaboration';
 import type { FlowBlock } from '../../../types/bot';
 import type { CustomNode } from '../../../types/broadcast';
@@ -57,49 +59,7 @@ import { useAiStore } from '../../../store/useAiStore';
 import { AiAssistantDrawer } from '../../../components/common/AiAssistantDrawer';
 
 
-const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
-  fromX,
-  fromY,
-  toX,
-  toY,
-  fromPosition,
-  toPosition,
-  connectionLineStyle,
-  connectionLineType,
-}) => {
-  const edgePath = connectionLineType === 'smoothstep'
-    ? getSmoothStepPath({
-        sourceX: fromX,
-        sourceY: fromY,
-        sourcePosition: fromPosition,
-        targetX: toX,
-        targetY: toY,
-        targetPosition: toPosition,
-      })[0]
-    : getBezierPath({
-        sourceX: fromX,
-        sourceY: fromY,
-        sourcePosition: fromPosition,
-        targetX: toX,
-        targetY: toY,
-        targetPosition: toPosition,
-      })[0];
 
-  return (
-    <g>
-      <path
-        fill="none"
-        stroke="#0A0A0A"
-        strokeWidth={2.5}
-        d={edgePath}
-        style={{
-          ...connectionLineStyle,
-          markerEnd: 'url(#arrow-grey)',
-        }}
-      />
-    </g>
-  );
-};
 
 interface ScheduleModalProps {
   isOpen: boolean;
@@ -190,28 +150,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedu
   );
 };
 
-const ControlsStyles: React.FC = React.memo(() => (
-  <style>{`
-    .react-flow__controls.custom-controls-panel {
-      display: flex;
-      flex-direction: column;
-      background: white;
-    }
-    .custom-controls-panel .react-flow__controls-button {
-      width: 38px !important;
-      height: 38px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-    }
-    .custom-controls-panel .react-flow__controls-button svg {
-      width: 18px !important;
-      height: 18px !important;
-      max-width: 18px !important;
-      max-height: 18px !important;
-    }
-  `}</style>
-));
+
 
 const BroadcastBuilderInner: React.FC = () => {
   const isLocalChangeRef = React.useRef(false);
@@ -365,26 +304,17 @@ const BroadcastBuilderInner: React.FC = () => {
     });
   }, [displayNodes, collaborators]);
 
-  const [apiCustomFields, setApiCustomFields] = React.useState<string[]>([]);
-
-  React.useEffect(() => {
-    if (activeBotId) {
-      getCustomFieldsApi(activeBotId)
-        .then((data) => {
-          if (data && typeof data === 'object') {
-            const list = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
-            const names = list.map((f: any) => typeof f === 'string' ? f : f?.name).filter(Boolean);
-            setApiCustomFields(names);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [activeBotId]);
-
+  const { data: customFieldsData } = useCustomFieldsQuery(activeBotId);
   const customFields = React.useMemo(() => {
-    if (apiCustomFields.length > 0) return apiCustomFields;
-    return ['last_order_product', 'last_order_price', 'phone', 'email'];
-  }, [apiCustomFields]);
+    if (!customFieldsData) return [...DEFAULT_CUSTOM_FIELDS];
+    const list = Array.isArray(customFieldsData.fields)
+      ? customFieldsData.fields
+      : Array.isArray(customFieldsData)
+        ? (customFieldsData as unknown[])
+        : [];
+    const names = list.map((f: any) => (typeof f === 'string' ? f : f?.name)).filter(Boolean);
+    return names.length > 0 ? names : [...DEFAULT_CUSTOM_FIELDS];
+  }, [customFieldsData]);
 
   const filteredContextMenuOptions = React.useMemo(() => {
     if (!contextMenu) return BROADCAST_CONTEXT_MENU_OPTIONS;
@@ -776,82 +706,84 @@ const BroadcastBuilderInner: React.FC = () => {
             </div>
           )}
 
-          <ReactFlow
-            nodes={nodesWithCollaborators}
-            edges={displayEdges}
-            onNodesChange={isViewer ? undefined : handleNodesChange}
-            onEdgesChange={isViewer ? undefined : handleEdgesChange}
-            onConnect={isViewer ? undefined : onConnect}
-            onConnectStart={isViewer ? undefined : onConnectStart}
-            onConnectEnd={isViewer ? undefined : onConnectEnd}
-            onNodeClick={isViewer ? undefined : onNodeClick}
-            onPaneClick={isViewer ? undefined : onPaneClick}
-            onSelectionChange={onSelectionChange}
-            onNodeDragStart={isViewer ? undefined : handleNodeDragStart}
-            onNodeDrag={isViewer ? undefined : handleNodeDrag}
-            onNodeDragStop={isViewer ? undefined : handleNodeDragStop}
-            nodeTypes={NODE_TYPES}
-            edgeTypes={EDGE_TYPES}
-            isValidConnection={isValidConnection}
-            defaultEdgeOptions={FLOW_EDGE_DEFAULTS}
-            connectionLineComponent={CustomConnectionLine}
-            connectionLineType={edgeType === 'default' ? ConnectionLineType.Bezier : ConnectionLineType.SmoothStep}
-            connectionLineStyle={{
-              strokeWidth: 2.5,
-              stroke: '#0A0A0A',
-            }}
-            nodesDraggable={!isViewer}
-            nodesConnectable={!isViewer}
-            elementsSelectable={!isViewer}
-            deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
-            fitView
-            fitViewOptions={{ padding: 0.6 }}
-            className="bg-[#F2EBDD]"
-            zoomOnDoubleClick={false}
-            proOptions={{ hideAttribution: true }}
-          >
-            <Background color="#0A0A0A" gap={20} size={1.2} />
-            <Controls
-              position="bottom-right"
-              style={{
-                position: 'absolute',
-                right: '16px',
-                top: '50%',
-                bottom: 'auto',
-                transform: 'translateY(-50%)',
-                margin: 0,
+          <ErrorBoundary inline fallbackTitle="Broadcast Canvas Error">
+            <ReactFlow
+              nodes={nodesWithCollaborators}
+              edges={displayEdges}
+              onNodesChange={isViewer ? undefined : handleNodesChange}
+              onEdgesChange={isViewer ? undefined : handleEdgesChange}
+              onConnect={isViewer ? undefined : onConnect}
+              onConnectStart={isViewer ? undefined : onConnectStart}
+              onConnectEnd={isViewer ? undefined : onConnectEnd}
+              onNodeClick={isViewer ? undefined : onNodeClick}
+              onPaneClick={isViewer ? undefined : onPaneClick}
+              onSelectionChange={onSelectionChange}
+              onNodeDragStart={isViewer ? undefined : handleNodeDragStart}
+              onNodeDrag={isViewer ? undefined : handleNodeDrag}
+              onNodeDragStop={isViewer ? undefined : handleNodeDragStop}
+              nodeTypes={NODE_TYPES}
+              edgeTypes={EDGE_TYPES}
+              isValidConnection={isValidConnection}
+              defaultEdgeOptions={FLOW_EDGE_DEFAULTS}
+              connectionLineComponent={CustomConnectionLine}
+              connectionLineType={edgeType === 'default' ? ConnectionLineType.Bezier : ConnectionLineType.SmoothStep}
+              connectionLineStyle={{
+                strokeWidth: 2.5,
+                stroke: '#0A0A0A',
               }}
-              className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-md flex flex-col bg-[#F2EBDD] custom-controls-panel"
+              nodesDraggable={!isViewer}
+              nodesConnectable={!isViewer}
+              elementsSelectable={!isViewer}
+              deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
+              fitView
+              fitViewOptions={{ padding: 0.6 }}
+              className="bg-[#F2EBDD]"
+              zoomOnDoubleClick={false}
+              proOptions={{ hideAttribution: true }}
             >
-              <button
-                onClick={() => setEdgeType((t) => (t === 'default' ? 'smoothstep' : 'default'))}
-                title={edgeType === 'default' ? 'Switch to Step Lines' : 'Switch to Curved Lines'}
-                className="react-flow__controls-button flex items-center justify-center animate-in duration-75"
-                style={{ order: -3 }}
+              <Background color="#0A0A0A" gap={20} size={1.2} />
+              <Controls
+                position="bottom-right"
+                style={{
+                  position: 'absolute',
+                  right: '16px',
+                  top: '50%',
+                  bottom: 'auto',
+                  transform: 'translateY(-50%)',
+                  margin: 0,
+                }}
+                className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-md flex flex-col bg-[#F2EBDD] custom-controls-panel"
               >
-                {edgeType === 'default'
-                  ? <Route size={18} className="text-[#0A0A0A]" />
-                  : <GitCommit size={18} className="text-[#0A0A0A]" />
-                }
-              </button>
-              <button
-                onClick={() => handleAutoLayout('LR')}
-                title="Horizontal Layout"
-                className="react-flow__controls-button flex items-center justify-center"
-                style={{ order: -2 }}
-              >
-                <GitFork size={18} className="rotate-90 text-[#0A0A0A]" />
-              </button>
-              <button
-                onClick={() => handleAutoLayout('TB')}
-                title="Vertical Layout"
-                className="react-flow__controls-button flex items-center justify-center"
-                style={{ order: -1 }}
-              >
-                <GitFork size={18} className="text-[#0A0A0A]" />
-              </button>
-            </Controls>
-          </ReactFlow>
+                <button
+                  onClick={() => setEdgeType((t) => (t === 'default' ? 'smoothstep' : 'default'))}
+                  title={edgeType === 'default' ? 'Switch to Step Lines' : 'Switch to Curved Lines'}
+                  className="react-flow__controls-button flex items-center justify-center animate-in duration-75"
+                  style={{ order: -3 }}
+                >
+                  {edgeType === 'default'
+                    ? <Route size={18} className="text-[#0A0A0A]" />
+                    : <GitCommit size={18} className="text-[#0A0A0A]" />
+                  }
+                </button>
+                <button
+                  onClick={() => handleAutoLayout('LR')}
+                  title="Horizontal Layout"
+                  className="react-flow__controls-button flex items-center justify-center"
+                  style={{ order: -2 }}
+                >
+                  <GitFork size={18} className="rotate-90 text-[#0A0A0A]" />
+                </button>
+                <button
+                  onClick={() => handleAutoLayout('TB')}
+                  title="Vertical Layout"
+                  className="react-flow__controls-button flex items-center justify-center"
+                  style={{ order: -1 }}
+                >
+                  <GitFork size={18} className="text-[#0A0A0A]" />
+                </button>
+              </Controls>
+            </ReactFlow>
+          </ErrorBoundary>
 
           {contextMenu && (
             <div
@@ -1081,7 +1013,7 @@ const BroadcastBuilderInner: React.FC = () => {
 export const BroadcastBuilderPage: React.FC = () => {
   return (
     <ReactFlowProvider>
-      <ControlsStyles />
+      <FlowControlsStyles />
       <BroadcastBuilderInner />
     </ReactFlowProvider>
   );

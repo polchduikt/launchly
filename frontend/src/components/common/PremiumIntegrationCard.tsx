@@ -44,7 +44,7 @@ export const PremiumIntegrationCard: React.FC<PremiumIntegrationCardProps> = ({
     if (integration) {
       setIsConnected(integration.active);
       if (integration.config && 'apiKey' in integration.config && integration.config.apiKey) {
-        setApiKey(integration.config.apiKey);
+        setApiKey(String(integration.config.apiKey));
       }
     } else {
       setIsConnected(false);

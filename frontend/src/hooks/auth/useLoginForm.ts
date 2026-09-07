@@ -3,10 +3,12 @@ import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { isAdminOrManager } from '../../utils/auth';
 import { useLoginMutation } from './useLoginMutation';
 import { ROUTES } from '../../routes/paths';
 import { getLoginSchema, type LoginSchemaType } from '../../schemas/auth.schema';
 import { useTranslation } from '../../i18n/config';
+import { STORAGE_KEYS } from '../../const/constants';
 
 export type LoginFields = LoginSchemaType;
 
@@ -33,16 +35,15 @@ export const useLoginForm = () => {
         ...data,
         turnstileToken: turnstileToken || undefined,
       });
-      const redirectUrl = searchParams.get('redirect') || localStorage.getItem('auth_redirect_url');
+      const redirectUrl = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
       if (redirectUrl) {
-        localStorage.removeItem('auth_redirect_url');
+        localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
         navigate(redirectUrl, { replace: true });
         return;
       }
       const role = res?.user?.role;
-      const isAdminOrManager = role === 'ROLE_ADMIN' || role === 'ROLE_MANAGER';
 
-      if (isAdminOrManager) {
+      if (isAdminOrManager(role)) {
         navigate(ROUTES.ADMIN_HOME, { replace: true });
       } else {
         navigate(ROUTES.HOME, { replace: true });
@@ -50,7 +51,7 @@ export const useLoginForm = () => {
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && (error.response?.status === 403 || error.response?.data?.error === 'ACCOUNT_BLOCKED')) {
         const reason = error.response?.data?.reason || error.response?.data?.message || 'Violation of platform rules';
-        localStorage.setItem('launchly_block_reason', reason);
+        localStorage.setItem(STORAGE_KEYS.BLOCK_REASON, reason);
         navigate(ROUTES.BLOCKED, { replace: true });
         return;
       }

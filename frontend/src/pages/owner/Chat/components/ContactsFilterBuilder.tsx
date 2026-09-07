@@ -4,7 +4,7 @@ import { useTranslation } from '../../../../i18n/config';
 import type { FilterCondition, BotUserMetadata } from '../../../../types/crm';
 import type { TagResponse } from '../../../../types';
 import type { BotUserResponse } from '../../../../types/bot';
-import { getCustomFieldsApi } from '../../../../api/bot';
+import { useCustomFieldsQuery } from '../../../../hooks/bot/useCustomFieldsQuery';
 import { generateId } from '../../../../utils/id';
 
 interface ContactsFilterBuilderProps {
@@ -47,24 +47,18 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
   }, [isAddDropdownOpen]);
 
 
-  const [apiCustomFields, setApiCustomFields] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (botId) {
-      getCustomFieldsApi(botId)
-        .then((data) => {
-          if (data && typeof data === 'object') {
-            const list = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
-            const names = list.map((f: any) => typeof f === 'string' ? f : f?.name).filter(Boolean);
-            setApiCustomFields(names);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [botId]);
+  const { data: customFieldsData } = useCustomFieldsQuery(botId);
 
   const allCustomFields = useMemo(() => {
-    const fieldsSet = new Set<string>(apiCustomFields);
+    const list = customFieldsData && typeof customFieldsData === 'object'
+      ? Array.isArray(customFieldsData.fields)
+        ? customFieldsData.fields
+        : Array.isArray(customFieldsData)
+          ? (customFieldsData as unknown[])
+          : []
+      : [];
+    const names = list.map((f: any) => typeof f === 'string' ? f : f?.name).filter(Boolean);
+    const fieldsSet = new Set<string>(names);
 
     contacts.forEach((c: any) => {
       try {

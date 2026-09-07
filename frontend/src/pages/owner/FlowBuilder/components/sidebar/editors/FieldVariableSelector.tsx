@@ -164,7 +164,6 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
           onClick={(e) => e.stopPropagation()}
           className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-2xl flex overflow-hidden font-['JetBrains_Mono',monospace] text-[#0A0A0A]"
         >
-          {/* Left Category Navigation */}
           <div className="w-[145px] bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-2.5 flex flex-col gap-1 select-none shrink-0">
             <button
               type="button"
@@ -206,9 +205,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
             )}
           </div>
 
-          {/* Right Field List */}
           <div className="flex-1 p-3 flex flex-col h-[264px] bg-[#F2EBDD]">
-            {/* Search Input */}
             <div className="relative mb-2 shrink-0">
               <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]/40 pointer-events-none" />
               <input
@@ -220,9 +217,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
               />
             </div>
 
-            {/* Field List Items */}
             <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-0.5">
-              {/* System Fields */}
               {selectedCategory === 'system' && (
                 <>
                   {filteredSystemFields.map((field) => (
@@ -244,10 +239,8 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                 </>
               )}
 
-              {/* Custom Fields */}
               {selectedCategory === 'custom' && (
                 <>
-                  {/* Create New Custom Field Option */}
                   {onCreateCustomField && (
                     <div className="mb-1">
                       {!showCreateFieldInput ? (
@@ -303,7 +296,6 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                 </>
               )}
 
-              {/* Tags */}
               {selectedCategory === 'tags' && mode === 'variable' && (
                 <>
                   {filteredTags.map((tag) => (

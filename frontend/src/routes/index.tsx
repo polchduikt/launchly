@@ -1,7 +1,11 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { ROUTES } from './paths';
+import { STORAGE_KEYS } from '../const/constants';
 import { useAuthStore } from '../store/useAuthStore';
+import { useThemeStore } from '../store/useThemeStore';
+import { useShallow } from 'zustand/react/shallow';
+import { isAdminOrManager } from '../utils/auth';
 import { getCurrentUserApi } from '../api/auth';
 import { AuthLayout } from '../components/layout';
 
@@ -54,14 +58,13 @@ const PublicOnlyRoute = () => {
 
   if (accessToken) {
     const searchParams = new URLSearchParams(location.search);
-    const redirectUrl = searchParams.get('redirect') || localStorage.getItem('auth_redirect_url');
+    const redirectUrl = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
     if (redirectUrl) {
-      localStorage.removeItem('auth_redirect_url');
+      localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
       return <Navigate to={redirectUrl} replace />;
     }
     const role = user?.role;
-    const isAdminOrManager = role === 'ROLE_ADMIN' || role === 'ROLE_MANAGER';
-    return <Navigate to={isAdminOrManager ? ROUTES.ADMIN_HOME : ROUTES.DASHBOARD} replace />;
+    return <Navigate to={isAdminOrManager(role) ? ROUTES.ADMIN_HOME : ROUTES.DASHBOARD} replace />;
   }
 
   return <Outlet />;
@@ -69,9 +72,13 @@ const PublicOnlyRoute = () => {
 
 const PrivateRoute = () => {
   const location = useLocation();
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.setUser);
+  const { accessToken, user, setUser } = useAuthStore(
+    useShallow((state) => ({
+      accessToken: state.accessToken,
+      user: state.user,
+      setUser: state.setUser,
+    }))
+  );
   const [isSyncing, setIsSyncing] = useState(!user);
 
   useEffect(() => {
@@ -101,8 +108,7 @@ const PrivateRoute = () => {
   }
 
   const role = user?.role;
-  const isAdminOrManager = role === 'ROLE_ADMIN' || role === 'ROLE_MANAGER';
-  if (isAdminOrManager && !location.pathname.startsWith('/admin')) {
+  if (isAdminOrManager(role) && !location.pathname.startsWith('/admin')) {
     return <Navigate to={ROUTES.ADMIN_HOME} replace />;
   }
 
@@ -110,23 +116,24 @@ const PrivateRoute = () => {
 };
 
 const AdminRoute = () => {
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const user = useAuthStore((state) => state.user);
+  const { accessToken, user } = useAuthStore(
+    useShallow((state) => ({
+      accessToken: state.accessToken,
+      user: state.user,
+    }))
+  );
 
   if (!accessToken) {
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
   const role = user?.role;
-  const isAdminOrManager = role === 'ROLE_ADMIN' || role === 'ROLE_MANAGER';
-  if (!isAdminOrManager) {
+  if (!isAdminOrManager(role)) {
     return <Navigate to={ROUTES.DASHBOARD} replace />;
   }
 
   return <Outlet />;
 };
-
-import { useThemeStore } from '../store/useThemeStore';
 
 const PUBLIC_BRAND_ROUTES = new Set<string>([
   ROUTES.LANDING,
@@ -192,7 +199,7 @@ export const AppRouter: React.FC = () => {
           <Route path={ROUTES.AI_TERMS} element={<AiTermsPage />} />
           <Route path={ROUTES.PAYMENT_TERMS} element={<PaymentTermsPage />} />
           <Route path={ROUTES.BLOCKED} element={<BlockedPage />} />
-          <Route path="/templates/install/:shareCode" element={<InstallTemplateWizardPage />} />
+          <Route path={ROUTES.TEMPLATES_INSTALL} element={<InstallTemplateWizardPage />} />
           <Route path={ROUTES.OAUTH_CALLBACK} element={<OAuth2Callback />} />
 
           <Route element={<PublicOnlyRoute />}>
@@ -208,10 +215,10 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
             <Route path={ROUTES.INTEGRATIONS} element={<SettingsPage />} />
             <Route path={ROUTES.FLOW_BUILDER} element={<FlowBuilderPage />} />
-            <Route path="/templates/create" element={<CreateTemplateWizardPage />} />
-            <Route path="/templates/edit/:shareCode" element={<CreateTemplateWizardPage />} />
-            <Route path="/templates" element={<MyTemplatesPage />} />
-            <Route path="/templates/detail/:shareCode" element={<TemplateDetailPage />} />
+            <Route path={ROUTES.TEMPLATES_CREATE} element={<CreateTemplateWizardPage />} />
+            <Route path={ROUTES.TEMPLATES_EDIT} element={<CreateTemplateWizardPage />} />
+            <Route path={ROUTES.TEMPLATES} element={<MyTemplatesPage />} />
+            <Route path={ROUTES.TEMPLATES_DETAIL} element={<TemplateDetailPage />} />
             <Route path={ROUTES.CHAT} element={<ChatPage />} />
             <Route path={ROUTES.CONTACTS} element={<ContactsPage />} />
             <Route path={ROUTES.AI} element={<AiPage />} />

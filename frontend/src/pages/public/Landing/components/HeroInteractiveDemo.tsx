@@ -70,8 +70,12 @@ export const HeroInteractiveDemo: React.FC = () => {
       setPts({ h1x: h1.x, h1y: h1.y, h2tx: h2t.x, h2ty: h2t.y, h2bx: h2b.x, h2by: h2b.y, h3tx: h3t.x, h3ty: h3t.y });
     };
     const raf = requestAnimationFrame(measure);
-    return () => cancelAnimationFrame(raf);
-  });
+    window.addEventListener('resize', measure);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
   useEffect(() => {
     const timer = setInterval(() => {
       setStep((prev) => {

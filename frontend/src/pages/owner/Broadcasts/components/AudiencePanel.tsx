@@ -4,6 +4,7 @@ import type { AudienceCondition, TagResponse } from '../../../../types';
 import { useBotsQuery } from '../../../../hooks/bot/useBotsQuery';
 import { useBotStore } from '../../../../store/useBotStore';
 import { useTranslation } from '../../../../i18n/config';
+import { DEFAULT_CUSTOM_FIELDS } from '../../../../const/constants';
 
 interface AudiencePanelProps {
   isAudienceOpen: boolean;
@@ -38,7 +39,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
   handleAddTagCondition: _handleAddTagCondition,
   setConditions,
   setIsDirty,
-  customFields = ['last_order_product', 'last_order_price', 'phone', 'email'],
+  customFields = [...DEFAULT_CUSTOM_FIELDS],
   leads = [],
   orders = [],
 }) => {

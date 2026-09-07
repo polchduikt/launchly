@@ -6,6 +6,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useRegisterMutation } from './useRegisterMutation';
 import { getRegisterSchema, type RegisterSchemaType } from '../../schemas/auth.schema';
 import { useTranslation } from '../../i18n/config';
+import { STORAGE_KEYS } from '../../const/constants';
+import { ROUTES } from '../../routes/paths';
 
 export type RegisterFields = RegisterSchemaType;
 
@@ -36,13 +38,13 @@ export const useRegisterForm = () => {
         password: data.password,
         turnstileToken: turnstileToken || undefined,
       });
-      const redirectUrl = searchParams.get('redirect') || localStorage.getItem('auth_redirect_url');
+      const redirectUrl = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
       if (redirectUrl) {
-        localStorage.removeItem('auth_redirect_url');
+        localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
         navigate(redirectUrl, { replace: true });
         return;
       }
-      navigate('/home', { replace: true });
+      navigate(ROUTES.HOME, { replace: true });
     } catch (error: unknown) {
       const msg = axios.isAxiosError(error)
         ? (error.response?.data?.message ?? 'Email already in use. Please try another one.')

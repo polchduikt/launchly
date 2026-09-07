@@ -1,16 +1,25 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useClickOutside } from '../../../hooks/useClickOutside';
-import { useDebounce } from '../../../hooks/useDebounce';
+import React, { useState, useEffect } from 'react';
 import { formatAuditTitle, formatAuditDescription } from '../../../utils/auditFormatters';
+import { formatEuroDateTime } from '../../../utils/date';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchAdminAutomationsApi, fetchAdminAutomationDetailsApi, toggleAutomationApi, blockAutomationApi, unblockAutomationApi } from '../../../api/admin';
 import type { AdminAutomationItem } from '../../../api/admin';
+import { queryKeys } from '../../../api/queryKeys';
 import { AdminLayout } from '../../../components/layout/AdminLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { Play, Pause, Loader2, Search, ChevronDown, ChevronLeft, ChevronRight, X, Workflow, Layers, Zap, AlertTriangle, Calendar, Clock, ShieldAlert, Lock, Unlock, Filter } from 'lucide-react';
+import { Play, Pause, Loader2, Workflow, Layers, Zap, AlertTriangle, Calendar, Clock, ShieldAlert, Lock, Unlock, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from '../../../i18n/config';
 import { ROUTES } from '../../../routes/paths';
+import {
+  AdminSearchBar,
+  AdminPagination,
+  AdminFilterDropdown,
+  AdminBulkActions,
+  AdminBlockModal,
+} from '../../../components/admin';
+import { useAdminSearch } from '../../../hooks/admin/useAdminSearch';
+import { useAdminSelection } from '../../../hooks/admin/useAdminSelection';
 
 export const AdminAutomationsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -22,45 +31,29 @@ export const AdminAutomationsPage: React.FC = () => {
   const currentUser = useAuthStore((state) => state.user);
   const isAdmin = currentUser?.role === 'ROLE_ADMIN';
 
-  const [search, setSearch] = useState(initialSearch);
-  const debouncedSearch = useDebounce(search, 300);
+  const { search, setSearch, debouncedSearch, page, setPage } = useAdminSearch({ initialSearch });
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sortFilter, setSortFilter] = useState<'desc' | 'asc'>('desc');
-  const [page, setPage] = useState(0);
-
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [isBulkActionOpen, setIsBulkActionOpen] = useState(false);
-  const bulkActionDropdownRef = useRef<HTMLDivElement>(null);
-
-  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
-  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
-  const statusDropdownRef = useRef<HTMLDivElement>(null);
-  const sortDropdownRef = useRef<HTMLDivElement>(null);
 
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [selectedBlockAutomation, setSelectedBlockAutomation] = useState<AdminAutomationItem | null>(null);
-  const [blockReasonOption, setBlockReasonOption] = useState('SUSPICIOUS');
-  const [customBlockReason, setCustomBlockReason] = useState('');
 
   useEffect(() => {
     const param = searchParams.get('search');
     if (param !== null) {
       setSearch(param);
-      setPage(0);
     }
-  }, [searchParams]);
+  }, [searchParams, setSearch]);
 
   const [selectedDetailAutomation, setSelectedDetailAutomation] = useState<AdminAutomationItem | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [detailPeriod, setDetailPeriod] = useState<'week' | 'month' | '3months' | 'all'>('all');
   const [activityPage, setActivityPage] = useState(0);
 
-  useClickOutside(statusDropdownRef, () => setIsStatusDropdownOpen(false), isStatusDropdownOpen);
-  useClickOutside(sortDropdownRef, () => setIsSortDropdownOpen(false), isSortDropdownOpen);
-  useClickOutside(bulkActionDropdownRef, () => setIsBulkActionOpen(false), isBulkActionOpen);
+  const automationsQueryKey = [...queryKeys.admin.automations, debouncedSearch, statusFilter, sortFilter, page] as const;
 
   const { data, isLoading } = useQuery({
-    queryKey: ['adminAutomations', debouncedSearch, statusFilter, sortFilter, page],
+    queryKey: automationsQueryKey,
     queryFn: () => fetchAdminAutomationsApi(debouncedSearch, statusFilter, sortFilter, page, 30),
   });
 
@@ -68,55 +61,40 @@ export const AdminAutomationsPage: React.FC = () => {
   const totalElements = data?.totalElements || 0;
   const totalPages = data?.totalPages || 1;
 
-  const allIdsOnPage = automations.map((a: AdminAutomationItem) => a.id);
-  const isAllSelected = allIdsOnPage.length > 0 && allIdsOnPage.every((id: number) => selectedIds.includes(id));
-
-  const handleToggleSelectAll = () => {
-    if (isAllSelected) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(allIdsOnPage);
-    }
-  };
-
-  const handleToggleSelectRow = (id: number) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((item) => item !== id));
-    } else {
-      setSelectedIds([...selectedIds, id]);
-    }
-  };
+  const {
+    selectedIds,
+    isAllSelected,
+    toggleSelectAll: handleToggleSelectAll,
+    toggleSelect: handleToggleSelectRow,
+    clearSelection,
+  } = useAdminSelection(automations);
 
   const handleBulkPause = () => {
     const targets = automations.filter((a: AdminAutomationItem) => selectedIds.includes(a.id) && !a.blocked && a.active);
     targets.forEach((a: AdminAutomationItem) => toggleMutation.mutate(a.id));
-    setSelectedIds([]);
-    setIsBulkActionOpen(false);
+    clearSelection();
   };
 
   const handleBulkResume = () => {
     const targets = automations.filter((a: AdminAutomationItem) => selectedIds.includes(a.id) && !a.blocked && !a.active);
     targets.forEach((a: AdminAutomationItem) => toggleMutation.mutate(a.id));
-    setSelectedIds([]);
-    setIsBulkActionOpen(false);
+    clearSelection();
   };
 
   const handleBulkBlock = () => {
     const targets = automations.filter((a: AdminAutomationItem) => selectedIds.includes(a.id) && !a.blocked);
     targets.forEach((a: AdminAutomationItem) => blockMutation.mutate({ id: a.id, reason: 'Bulk admin action' }));
-    setSelectedIds([]);
-    setIsBulkActionOpen(false);
+    clearSelection();
   };
 
   const handleBulkUnblock = () => {
     const targets = automations.filter((a: AdminAutomationItem) => selectedIds.includes(a.id) && a.blocked);
     targets.forEach((a: AdminAutomationItem) => unblockMutation.mutate(a.id));
-    setSelectedIds([]);
-    setIsBulkActionOpen(false);
+    clearSelection();
   };
 
   const { data: automationDetailData, isLoading: isDetailLoading } = useQuery({
-    queryKey: ['adminAutomationDetails', selectedDetailAutomation?.id, detailPeriod, activityPage],
+    queryKey: [...queryKeys.admin.automationDetails(selectedDetailAutomation?.id), detailPeriod, activityPage],
     queryFn: () => fetchAdminAutomationDetailsApi(selectedDetailAutomation!.id, detailPeriod, activityPage, 20),
     enabled: !!selectedDetailAutomation && showDetailModal
   });
@@ -129,16 +107,35 @@ export const AdminAutomationsPage: React.FC = () => {
 
   const toggleMutation = useMutation({
     mutationFn: (id: number) => toggleAutomationApi(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminAutomations'] });
+    onMutate: async (id: number) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.admin.automations });
+      const previousData = queryClient.getQueryData<{ content?: AdminAutomationItem[] }>(automationsQueryKey);
+      queryClient.setQueryData<{ content?: AdminAutomationItem[] }>(automationsQueryKey, (old) => {
+        if (!old?.content) return old;
+        return {
+          ...old,
+          content: old.content.map((item: AdminAutomationItem) =>
+            item.id === id ? { ...item, active: !item.active } : item
+          ),
+        };
+      });
+      return { previousData };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(automationsQueryKey, context.previousData);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.automations });
     },
   });
 
   const blockMutation = useMutation({
     mutationFn: ({ id, reason }: { id: number; reason: string }) => blockAutomationApi(id, reason),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminAutomations'] });
-      queryClient.invalidateQueries({ queryKey: ['adminAutomationDetails'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.automations });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.automationDetails() });
       setShowBlockModal(false);
       setSelectedBlockAutomation(null);
     },
@@ -147,37 +144,10 @@ export const AdminAutomationsPage: React.FC = () => {
   const unblockMutation = useMutation({
     mutationFn: (id: number) => unblockAutomationApi(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminAutomations'] });
-      queryClient.invalidateQueries({ queryKey: ['adminAutomationDetails'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.automations });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.automationDetails() });
     },
   });
-
-  const handleConfirmBlockAutomation = () => {
-    if (!selectedBlockAutomation) return;
-    let finalReason = '';
-    if (blockReasonOption === 'SUSPICIOUS') {
-      finalReason = 'Suspicious activity';
-    } else if (blockReasonOption === 'RULES') {
-      finalReason = 'Violation of platform rules';
-    } else if (blockReasonOption === 'SPAM') {
-      finalReason = 'Spam or unauthorized bulk messaging';
-    } else {
-      finalReason = customBlockReason.trim() || 'Other reason';
-    }
-    blockMutation.mutate({ id: selectedBlockAutomation.id, reason: finalReason });
-  };
-
-  const formatEuroDateTime = (dateStr?: string) => {
-    if (!dateStr) return '—';
-    const d = new Date(dateStr);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    const seconds = String(d.getSeconds()).padStart(2, '0');
-    return `${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
-  };
 
   const translateAuditTitle = (title: string, targetName?: string) => formatAuditTitle(title, targetName, t);
   const translateAuditDescription = (desc: string) => formatAuditDescription(desc, t);
@@ -187,18 +157,6 @@ export const AdminAutomationsPage: React.FC = () => {
     { value: 'active', label: t('admin.status_active') !== 'admin.status_active' ? t('admin.status_active') : 'Активні' },
     { value: 'paused', label: t('admin.status_paused') !== 'admin.status_paused' ? t('admin.status_paused') : 'На паузі' },
     { value: 'blocked', label: t('admin.status_blocked') !== 'admin.status_blocked' ? t('admin.status_blocked') : 'Заблоковані' },
-  ];
-
-  const getStatusLabel = (val: string) => {
-    const found = statusOptions.find((o) => o.value === val);
-    return found ? found.label : (t('admin.all_statuses') !== 'admin.all_statuses' ? t('admin.all_statuses') : 'Всі статуси');
-  };
-
-  const blockReasonsList = [
-    { code: 'SUSPICIOUS', key: 'admin.reason_suspicious' },
-    { code: 'RULES', key: 'admin.reason_rules' },
-    { code: 'SPAM', key: 'admin.reason_spam' },
-    { code: 'OTHER', key: 'admin.reason_other' },
   ];
 
   return (
@@ -226,80 +184,28 @@ export const AdminAutomationsPage: React.FC = () => {
               )}
             </div>
 
-            <div className="space-y-1" ref={statusDropdownRef}>
-              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.status_filter_label')}</label>
-              <div className="relative w-full">
-                <button
-                  type="button"
-                  onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
-                >
-                  <span>{getStatusLabel(statusFilter)}</span>
-                  <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
+            <AdminFilterDropdown
+              label={t('admin.status_filter_label')}
+              value={statusFilter}
+              options={statusOptions}
+              onChange={(val) => {
+                setStatusFilter(val);
+                setPage(0);
+              }}
+            />
 
-                {isStatusDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace]">
-                    {statusOptions.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => {
-                          setStatusFilter(opt.value as "all" | "active" | "inactive" | "blocked");
-                          setPage(0);
-                          setIsStatusDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-1.5 text-xs font-bold uppercase flex items-center justify-between transition-colors ${
-                          statusFilter === opt.value
-                            ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                            : 'text-[#0A0A0A] hover:bg-white'
-                        }`}
-                      >
-                        <span>{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-1" ref={sortDropdownRef}>
-              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.sorting_label')}</label>
-              <div className="relative w-full">
-                <button
-                  type="button"
-                  onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
-                >
-                  <span>{sortFilter === 'asc' ? t('admin.sort_oldest') : t('admin.sort_newest')}</span>
-                  <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {isSortDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace]">
-                    {[
-                      { value: 'desc', label: t('admin.sort_newest') },
-                      { value: 'asc', label: t('admin.sort_oldest') },
-                    ].map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => {
-                          setSortFilter(opt.value as 'desc' | 'asc');
-                          setPage(0);
-                          setIsSortDropdownOpen(false);
-                        }}
-                        className={`w-full px-3 py-1.5 text-left text-xs font-bold uppercase flex items-center justify-between hover:bg-white transition cursor-pointer ${
-                          sortFilter === opt.value ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A]'
-                        }`}
-                      >
-                        <span>{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            <AdminFilterDropdown
+              label={t('admin.sorting_label')}
+              value={sortFilter}
+              options={[
+                { value: 'desc', label: t('admin.sort_newest') },
+                { value: 'asc', label: t('admin.sort_oldest') },
+              ]}
+              onChange={(val) => {
+                setSortFilter(val as 'desc' | 'asc');
+                setPage(0);
+              }}
+            />
           </div>
         </aside>
 
@@ -307,19 +213,11 @@ export const AdminAutomationsPage: React.FC = () => {
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-3 flex-1 max-w-md">
-              <div className="relative w-full">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]" size={15} />
-                <input
-                  type="text"
-                  placeholder={t('admin.search_automations_placeholder') !== 'admin.search_automations_placeholder' ? t('admin.search_automations_placeholder') : 'Пошук назви, власника або бота...'}
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(0);
-                  }}
-                  className="w-full pl-9 pr-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder-slate-500 focus:outline-none transition-all shadow-[2px_2px_0px_#0A0A0A]"
-                />
-              </div>
+              <AdminSearchBar
+                placeholder={t('admin.search_automations_placeholder') !== 'admin.search_automations_placeholder' ? t('admin.search_automations_placeholder') : 'Пошук назви, власника або бота...'}
+                value={search}
+                onChange={setSearch}
+              />
               {selectedIds.length > 0 && (
                 <span className="px-3.5 py-1.5 rounded-xl bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] font-black text-xs shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
                   {t('admin.selected_count', { count: selectedIds.length })}
@@ -327,59 +225,17 @@ export const AdminAutomationsPage: React.FC = () => {
               )}
             </div>
 
-            <div className="relative shrink-0" ref={bulkActionDropdownRef}>
-              <button
-                type="button"
-                disabled={selectedIds.length === 0}
-                onClick={() => setIsBulkActionOpen(!isBulkActionOpen)}
-                className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
-              >
-                <span>{t('admin.bulk_actions')}</span>
-                <ChevronDown size={14} className={`transition-transform duration-200 ${isBulkActionOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isBulkActionOpen && selectedIds.length > 0 && (
-                <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1.5 font-['JetBrains_Mono',monospace]">
-                  <button
-                    type="button"
-                    onClick={handleBulkPause}
-                    className="w-full text-left px-4 py-2 text-xs font-bold text-[#0A0A0A] hover:bg-white flex items-center space-x-2.5 transition cursor-pointer"
-                  >
-                    <Pause size={14} className="text-[#0A0A0A]" />
-                    <span>{t('admin.bulk_pause')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleBulkResume}
-                    className="w-full text-left px-4 py-2 text-xs font-bold text-[#0A0A0A] hover:bg-white flex items-center space-x-2.5 transition cursor-pointer"
-                  >
-                    <Play size={14} className="text-[#0A0A0A]" />
-                    <span>{t('admin.bulk_resume')}</span>
-                  </button>
-                  {isAdmin && (
-                    <>
-                      <div className="my-1 border-t-2 border-[#0A0A0A]" />
-                      <button
-                        type="button"
-                        onClick={handleBulkBlock}
-                        className="w-full text-left px-4 py-2 text-xs font-black uppercase text-rose-700 hover:bg-rose-100 flex items-center space-x-2.5 transition cursor-pointer"
-                      >
-                        <Lock size={14} />
-                        <span>{t('admin.bulk_block')}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleBulkUnblock}
-                        className="w-full text-left px-4 py-2 text-xs font-black uppercase text-emerald-800 hover:bg-emerald-100 flex items-center space-x-2.5 transition cursor-pointer"
-                      >
-                        <Unlock size={14} />
-                        <span>{t('admin.bulk_unblock')}</span>
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
+            <AdminBulkActions
+              selectedCount={selectedIds.length}
+              actions={[
+                { label: t('admin.bulk_pause'), onClick: handleBulkPause, icon: <Pause size={14} className="text-[#0A0A0A]" /> },
+                { label: t('admin.bulk_resume'), onClick: handleBulkResume, icon: <Play size={14} className="text-[#0A0A0A]" /> },
+                ...(isAdmin ? [
+                  { label: t('admin.bulk_block'), onClick: handleBulkBlock, icon: <Lock size={14} />, variant: 'danger' as const },
+                  { label: t('admin.bulk_unblock'), onClick: handleBulkUnblock, icon: <Unlock size={14} /> },
+                ] : []),
+              ]}
+            />
           </div>
 
         {isLoading ? (
@@ -499,38 +355,14 @@ export const AdminAutomationsPage: React.FC = () => {
                   </table>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] text-xs text-[#0A0A0A] font-bold">
-                  <div>
-                    {t('admin.showing') !== 'admin.showing' ? t('admin.showing') : 'Показано'}{' '}
-                    <span className="font-black text-[#0A0A0A]">{automations.length}</span>{' '}
-                    {t('admin.of') !== 'admin.of' ? t('admin.of') : 'з'}{' '}
-                    <span className="font-black text-[#0A0A0A]">{totalElements}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                      disabled={page === 0}
-                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
-                    >
-                      <ChevronLeft size={14} />
-                      <span>{t('admin.prev') !== 'admin.prev' ? t('admin.prev') : 'Назад'}</span>
-                    </button>
-
-                    <div className="flex items-center space-x-1 px-2.5 py-1 rounded-xl bg-white border-2 border-[#0A0A0A] text-xs font-black font-mono text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
-                      <span>{page + 1}</span>
-                      <span>/</span>
-                      <span>{totalPages}</span>
-                    </div>
-
-                    <button
-                      onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
-                      disabled={page >= totalPages - 1}
-                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
-                    >
-                      <span>{t('admin.next') !== 'admin.next' ? t('admin.next') : 'Далі'}</span>
-                      <ChevronRight size={14} />
-                    </button>
-                  </div>
+                <div className="px-5 py-3.5 bg-[#F2EBDD] border-t-2 border-[#0A0A0A]">
+                  <AdminPagination
+                    page={page}
+                    totalPages={totalPages}
+                    totalElements={totalElements}
+                    currentCount={automations.length}
+                    onPageChange={setPage}
+                  />
                 </div>
               </div>
             </>
@@ -629,8 +461,6 @@ export const AdminAutomationsPage: React.FC = () => {
                         <button
                           onClick={() => {
                             setSelectedBlockAutomation(selectedDetailAutomation);
-                            setBlockReasonOption('SUSPICIOUS');
-                            setCustomBlockReason('');
                             setShowBlockModal(true);
                           }}
                           className="px-3 py-1.5 rounded-xl border-2 border-[#0A0A0A] bg-rose-200 text-rose-950 hover:bg-rose-300 text-xs font-black uppercase transition cursor-pointer flex items-center space-x-1.5 shadow-[2px_2px_0px_#0A0A0A]"
@@ -822,92 +652,35 @@ export const AdminAutomationsPage: React.FC = () => {
             </div>
           </div>
         )}
-        {showBlockModal && selectedBlockAutomation && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-            <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] rounded-3xl w-full max-w-md p-6 shadow-[10px_10px_0px_#0A0A0A] space-y-5 text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
-              <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-2xl bg-rose-200 border-2 border-[#0A0A0A] flex items-center justify-center text-rose-950 font-bold shadow-[2px_2px_0px_#0A0A0A]">
-                    <ShieldAlert size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] leading-snug">
-                      {t('admin.block_automation_title') !== 'admin.block_automation_title' ? t('admin.block_automation_title') : 'Блокування автоматизації'}
-                    </h3>
-                    <p className="text-xs text-slate-700 font-mono font-bold">
-                      {selectedBlockAutomation.name} (#{selectedBlockAutomation.id})
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowBlockModal(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-xs font-black uppercase text-[#0A0A0A] block">
-                  {t('admin.select_block_reason')}
-                </label>
-
-                <div className="space-y-2">
-                  {blockReasonsList.map((r) => (
-                    <label
-                      key={r.code}
-                      onClick={() => setBlockReasonOption(r.code)}
-                      className={`flex items-center space-x-3 p-3.5 rounded-2xl border-2 border-[#0A0A0A] cursor-pointer transition ${
-                        blockReasonOption === r.code
-                          ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black shadow-[2px_2px_0px_#0A0A0A]'
-                          : 'bg-white text-[#0A0A0A] hover:bg-amber-50'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="blockReason"
-                        checked={blockReasonOption === r.code}
-                        onChange={() => setBlockReasonOption(r.code)}
-                        className="accent-[#0A0A0A]"
-                      />
-                      <span className="text-xs uppercase font-bold">{t(r.key)}</span>
-                    </label>
-                  ))}
-                </div>
-
-                {blockReasonOption === 'OTHER' && (
-                  <div className="space-y-1.5 pt-1">
-                    <label className="text-xs font-black uppercase text-[#0A0A0A] block">{t('admin.specify_block_reason')}</label>
-                    <textarea
-                      value={customBlockReason}
-                      onChange={(e) => setCustomBlockReason(e.target.value)}
-                      placeholder="..."
-                      rows={3}
-                      className="w-full p-3 bg-white border-2 border-[#0A0A0A] rounded-2xl text-xs font-bold text-[#0A0A0A] focus:outline-none transition shadow-[2px_2px_0px_#0A0A0A]"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-[#0A0A0A]">
-                <button
-                  onClick={() => setShowBlockModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#0A0A0A] border-2 border-transparent hover:border-[#0A0A0A] bg-white transition cursor-pointer"
-                >
-                  {t('admin.cancel')}
-                </button>
-                <button
-                  onClick={handleConfirmBlockAutomation}
-                  disabled={blockMutation.isPending}
-                  className="px-4 py-2 rounded-xl text-xs font-black uppercase text-white bg-rose-700 border-2 border-[#0A0A0A] hover:bg-rose-800 transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
-                >
-                  {blockMutation.isPending && <Loader2 size={14} className="animate-spin" />}
-                  <span>{t('admin.confirm_block_automation') !== 'admin.confirm_block_automation' ? t('admin.confirm_block_automation') : 'Заблокувати автоматизацію'}</span>
-                </button>
-              </div>
+        <AdminBlockModal
+          isOpen={showBlockModal && Boolean(selectedBlockAutomation)}
+          onClose={() => setShowBlockModal(false)}
+          onConfirm={(reasonCode, details) => {
+            if (!selectedBlockAutomation) return;
+            const reasonMap: Record<string, string> = {
+              SUSPICIOUS: 'Suspicious activity',
+              RULES: 'Violation of platform rules',
+              SPAM: 'Spam or unauthorized bulk messaging',
+              OTHER: details?.trim() || 'Other reason',
+            };
+            const finalReason = reasonMap[reasonCode] || details || reasonCode;
+            blockMutation.mutate({ id: selectedBlockAutomation.id, reason: finalReason });
+          }}
+          title={t('admin.block_automation_title') !== 'admin.block_automation_title' ? t('admin.block_automation_title') : 'Блокування автоматизації'}
+          entityInfo={selectedBlockAutomation && (
+            <div className="bg-white p-3.5 rounded-2xl border-2 border-[#0A0A0A] text-xs text-[#0A0A0A] space-y-1">
+              <div>Name: <strong className="text-[#0A0A0A] font-black">{selectedBlockAutomation.name}</strong></div>
+              <div className="text-slate-700 font-bold">ID: #{selectedBlockAutomation.id}</div>
             </div>
-          </div>
-        )}
+          )}
+          reasons={[
+            { code: 'SUSPICIOUS', label: t('admin.reason_suspicious') !== 'admin.reason_suspicious' ? t('admin.reason_suspicious') : 'Підозріла активність' },
+            { code: 'RULES', label: t('admin.reason_rules') !== 'admin.reason_rules' ? t('admin.reason_rules') : 'Порушення правил' },
+            { code: 'SPAM', label: t('admin.reason_spam') !== 'admin.reason_spam' ? t('admin.reason_spam') : 'Спам / зловживання' },
+            { code: 'OTHER', label: t('admin.reason_other') !== 'admin.reason_other' ? t('admin.reason_other') : 'Інше' },
+          ]}
+          isPending={blockMutation.isPending}
+        />
       </div>
     </AdminLayout>
   );

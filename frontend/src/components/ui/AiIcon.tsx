@@ -5,14 +5,6 @@ export interface AiIconProps extends React.SVGProps<SVGSVGElement> {
   strokeWidth?: number | string;
   className?: string;
 }
-
-/**
- * Custom AI Icon crafted specifically for Launchly's Lucide outline aesthetic:
- * 24x24 viewBox, stroke-based, strokeWidth=2, round stroke joins & caps.
- * Combines an intelligent neural processor core with clear synaptic connections
- * and an internal pulse center. Instantly reads as AI/intelligent automation,
- * blending harmoniously with Home, BarChart2, Zap, MessageSquare, Users, Send, Settings.
- */
 export const AiIcon: React.FC<AiIconProps> = ({
   size = 24,
   strokeWidth = 2,

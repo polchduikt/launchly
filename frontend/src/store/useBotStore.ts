@@ -2,9 +2,11 @@ import { create } from 'zustand';
 import type { BotState } from '../types/bot';
 import { broadcastEvent } from '../utils/multiTabSync';
 import { registerAuthCleanup } from './authCleanup';
+import { STORAGE_KEYS } from '../const/constants';
+import { safeStorage } from '../utils/storage';
 
 export const useBotStore = create<BotState>((set) => {
-  const savedActiveBotIdStr = localStorage.getItem('activeBotId');
+  const savedActiveBotIdStr = safeStorage.getItem(STORAGE_KEYS.ACTIVE_BOT_ID);
   let savedActiveBotId: number | null = null;
 
   if (savedActiveBotIdStr) {
@@ -12,7 +14,7 @@ export const useBotStore = create<BotState>((set) => {
     if (!isNaN(parsed)) {
       savedActiveBotId = parsed;
     } else {
-      localStorage.removeItem('activeBotId');
+      safeStorage.removeItem(STORAGE_KEYS.ACTIVE_BOT_ID);
     }
   }
 
@@ -21,16 +23,16 @@ export const useBotStore = create<BotState>((set) => {
 
     setActiveBotId: (id) => {
       if (id !== null) {
-        localStorage.setItem('activeBotId', String(id));
+        safeStorage.setItem(STORAGE_KEYS.ACTIVE_BOT_ID, String(id));
       } else {
-        localStorage.removeItem('activeBotId');
+        safeStorage.removeItem(STORAGE_KEYS.ACTIVE_BOT_ID);
       }
       broadcastEvent('BOT_CHANGED', { botId: id });
       set({ activeBotId: id });
     },
 
     clearBots: () => {
-      localStorage.removeItem('activeBotId');
+      safeStorage.removeItem(STORAGE_KEYS.ACTIVE_BOT_ID);
       set({ activeBotId: null });
     },
   };

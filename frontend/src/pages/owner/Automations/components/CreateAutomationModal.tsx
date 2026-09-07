@@ -70,7 +70,10 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (error) setError(null);
+              }}
               className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
               placeholder={t('automations.modal.name_placeholder')}
             />
@@ -143,7 +146,7 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
                       <>
                         <div className="border-t-2 border-[#0A0A0A] my-1" />
                         <div className="px-4 py-1.5 text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">
-                          Use existing bot token
+                          {t('automations.edit_modal.use_existing_token', 'Використовувати існуючий токен бота')}
                         </div>
                         {existingRealBots.map((b) => (
                           <button
@@ -176,12 +179,15 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
           {selectedBotOption === 'new' && (
             <div className="animate-in slide-in-from-top-1 duration-150">
               <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
-                Telegram Bot Token
+                {t('automations.edit_modal.bot_token', 'Токен Telegram-бота')}
               </label>
               <input
                 type="text"
                 value={botToken}
-                onChange={(e) => setBotToken(e.target.value)}
+                onChange={(e) => {
+                  setBotToken(e.target.value);
+                  if (error) setError(null);
+                }}
                 className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
                 placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
               />
@@ -189,13 +195,13 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
           )}
           <div>
             <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
-              Description (Optional)
+              {t('automations.edit_modal.desc_label', "Опис (необов'язково)")}
             </label>
             <textarea
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A] min-h-[80px] resize-none"
-              placeholder="What does this automation do?"
+              placeholder={t('automations.edit_modal.desc_placeholder', 'Що робить ця автоматизація?')}
             />
           </div>
           {error && (
@@ -210,7 +216,7 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] dark:text-[#E4E4E7] hover:bg-white dark:hover:bg-[#27272A] border-2 border-transparent hover:border-[#0A0A0A] dark:hover:border-[#3F3F46] rounded-xl transition-all cursor-pointer"
           >
-            Cancel
+            {t('common.cancel', 'Скасувати')}
           </button>
           <button
             onClick={onSubmit}
@@ -220,10 +226,10 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
             {isPending ? (
               <>
                 <Loader2 size={14} className="animate-spin" />
-                <span>Creating...</span>
+                <span>{t('automations.edit_modal.saving', 'Збереження...')}</span>
               </>
             ) : (
-              <span>Create</span>
+              <span>{t('automations.folder.create', 'Створити')}</span>
             )}
           </button>
         </div>

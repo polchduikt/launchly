@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../../../../store/useAuthStore';
 import { updateProfileApi } from '../../../../api/auth';
 import { useMediaUpload } from '../../../../hooks/bot/useMediaUpload';
+import { isAxiosError } from 'axios';
 import { SafeAvatar } from '../../../../components/common/SafeAvatar';
 import { t } from '../../../../i18n/config';
 import { 
@@ -137,8 +138,9 @@ export const ProfilePanel: React.FC = () => {
       setConfirmPassword('');
       setSuccessMsg(t('settings.profile.save_success', 'Profile successfully updated!'));
       setTimeout(() => setSuccessMsg(null), 4000);
-    } catch (err: any) {
-      setErrorMsg(err?.response?.data?.message || t('settings.profile.save_error', 'Failed to update profile'));
+    } catch (err: unknown) {
+      const message = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+      setErrorMsg(message || t('settings.profile.save_error', 'Failed to update profile'));
     } finally {
       setIsSaving(false);
     }

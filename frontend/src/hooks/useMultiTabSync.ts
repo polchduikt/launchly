@@ -3,6 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { subscribeToSyncEvents, type SyncMessage } from '../utils/multiTabSync';
 import { useAuthStore } from '../store/useAuthStore';
 import { useBotStore } from '../store/useBotStore';
+import { STORAGE_KEYS } from '../const/constants';
+import { ROUTES, isPublicRoute } from '../routes/paths';
 
 export const useMultiTabSync = (): void => {
   const queryClient = useQueryClient();
@@ -11,9 +13,9 @@ export const useMultiTabSync = (): void => {
     const unsubscribe = subscribeToSyncEvents((message: SyncMessage) => {
       switch (message.type) {
         case 'AUTH_LOGOUT': {
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
+          localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.USER);
           useAuthStore.setState({
             accessToken: null,
             refreshToken: null,
@@ -23,11 +25,9 @@ export const useMultiTabSync = (): void => {
           queryClient.clear();
           if (
             typeof window !== 'undefined' &&
-            !window.location.pathname.startsWith('/login') &&
-            !window.location.pathname.startsWith('/register') &&
-            window.location.pathname !== '/'
+            !isPublicRoute(window.location.pathname)
           ) {
-            window.location.href = '/login';
+            window.location.href = ROUTES.LOGIN;
           }
           break;
         }

@@ -29,6 +29,7 @@ import ukSettings    from './locales/uk/settings.json';
 import ukLanding    from './locales/uk/landing.json';
 import ukLegal      from './locales/uk/legal.json';
 import ukBlog       from './locales/uk/blog.json';
+import { STORAGE_KEYS } from '../const/constants';
 
 const fallbacks: Record<'en' | 'uk', Record<string, string>> = {
   en: {
@@ -59,7 +60,7 @@ function notifyListeners() {
 function loadInitialTranslations(lang: 'en' | 'uk'): Record<string, string> {
   const fallback = fallbacks[lang] || fallbacks.en;
   try {
-    const cached = localStorage.getItem(`launchly_translations_cache_${lang}`);
+    const cached = localStorage.getItem(`${STORAGE_KEYS.TRANSLATIONS_CACHE_PREFIX}${lang}`);
     if (cached) {
       return { ...fallback, ...JSON.parse(cached) };
     }
@@ -68,12 +69,12 @@ function loadInitialTranslations(lang: 'en' | 'uk'): Record<string, string> {
   return { ...fallback };
 }
 
-const savedLang = typeof localStorage !== 'undefined' ? localStorage.getItem('launchly_language') : null;
+const savedLang = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.LANGUAGE) : null;
 currentLanguage = (savedLang === 'uk' || savedLang === 'en') ? savedLang : 'uk';
 translations = loadInitialTranslations(currentLanguage);
 
 export async function initTranslations() {
-  const saved = localStorage.getItem('launchly_language');
+  const saved = localStorage.getItem(STORAGE_KEYS.LANGUAGE);
   const lang = (saved === 'uk' || saved === 'en') ? saved : 'uk';
   currentLanguage = lang;
   translations = loadInitialTranslations(lang);
@@ -84,7 +85,7 @@ export async function initTranslations() {
     if (response.ok) {
       const data = await response.json();
       translations = { ...fallbacks[lang], ...data };
-      localStorage.setItem(`launchly_translations_cache_${lang}`, JSON.stringify(data));
+      localStorage.setItem(`${STORAGE_KEYS.TRANSLATIONS_CACHE_PREFIX}${lang}`, JSON.stringify(data));
       notifyListeners();
     }
   } catch (error) {
@@ -97,7 +98,7 @@ export function getLanguage(): 'en' | 'uk' {
 
 export async function changeLanguage(lang: 'en' | 'uk') {
   if (currentLanguage === lang) return;
-  localStorage.setItem('launchly_language', lang);
+  localStorage.setItem(STORAGE_KEYS.LANGUAGE, lang);
   currentLanguage = lang;
   translations = loadInitialTranslations(lang);
   notifyListeners();
@@ -107,7 +108,7 @@ export async function changeLanguage(lang: 'en' | 'uk') {
     if (response.ok) {
       const data = await response.json();
       translations = { ...fallbacks[lang], ...data };
-      localStorage.setItem(`launchly_translations_cache_${lang}`, JSON.stringify(data));
+      localStorage.setItem(`${STORAGE_KEYS.TRANSLATIONS_CACHE_PREFIX}${lang}`, JSON.stringify(data));
       notifyListeners();
     }
   } catch (error) {
@@ -137,7 +138,7 @@ export function t(
 
   if (params) {
     Object.entries(params).forEach(([k, v]) => {
-      val = val.replace(new RegExp(`\\{${k}\\}|\\{\\{${k}\\}\\}`, 'g'), String(v));
+      val = val.replace(new RegExp(`(\\{\\{${k}\\}\\}|\\{${k}\\})`, 'g'), String(v));
     });
   }
   return val;

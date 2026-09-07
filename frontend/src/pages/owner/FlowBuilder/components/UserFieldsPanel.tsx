@@ -67,7 +67,18 @@ export const UserFieldsPanel: React.FC = () => {
           results.forEach((data) => {
             if (!data || typeof data !== 'object') return;
             const fieldList = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
-            fieldList.forEach((f: UserField) => {
+            fieldList.forEach((rawField: any) => {
+              const f: UserField = typeof rawField === 'string'
+                ? { name: rawField, type: 'Text' }
+                : {
+                    id: rawField?.id,
+                    name: rawField?.name || '',
+                    type: rawField?.type || 'Text',
+                    value: rawField?.value,
+                    description: rawField?.description,
+                    folderId: rawField?.folderId,
+                    folder: rawField?.folder,
+                  };
               if (f && f.name) {
                 const key = f.name.trim().toLowerCase();
                 if (!mergedFieldsMap.has(key)) {
@@ -77,7 +88,18 @@ export const UserFieldsPanel: React.FC = () => {
             });
 
             if (Array.isArray(data.archivedFields)) {
-              data.archivedFields.forEach((af: UserField) => {
+              data.archivedFields.forEach((rawAf: any) => {
+                const af: UserField = typeof rawAf === 'string'
+                  ? { name: rawAf, type: 'Text' }
+                  : {
+                      id: rawAf?.id,
+                      name: rawAf?.name || '',
+                      type: rawAf?.type || 'Text',
+                      value: rawAf?.value,
+                      description: rawAf?.description,
+                      folderId: rawAf?.folderId,
+                      folder: rawAf?.folder,
+                    };
                 if (af && af.name) {
                   const key = af.name.trim().toLowerCase();
                   if (!mergedArchivedMap.has(key)) {
@@ -88,7 +110,12 @@ export const UserFieldsPanel: React.FC = () => {
             }
 
             if (Array.isArray(data.folders)) {
-              data.folders.forEach((fld: UserFieldFolder) => {
+              data.folders.forEach((rawFld: any) => {
+                const fld: UserFieldFolder = {
+                  id: String(rawFld?.id ?? ''),
+                  name: rawFld?.name || '',
+                  fieldsCount: rawFld?.fieldsCount,
+                };
                 if (fld && fld.name) {
                   const key = fld.name.trim().toLowerCase();
                   if (!mergedFoldersMap.has(key)) {
@@ -110,11 +137,28 @@ export const UserFieldsPanel: React.FC = () => {
       getCustomFieldsApi(botId)
         .then((data) => {
           if (data && typeof data === 'object') {
-            if (Array.isArray(data.fields)) setFields(data.fields);
-            else if (Array.isArray(data)) setFields(data);
-            else setFields([]);
-            if (Array.isArray(data.archivedFields)) setArchivedFields(data.archivedFields);
-            if (Array.isArray(data.folders)) setFolders(data.folders);
+            const rawFields = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
+            setFields(
+              rawFields.map((f: any) =>
+                typeof f === 'string' ? { name: f, type: 'Text' } : (f as UserField)
+              )
+            );
+            if (Array.isArray(data.archivedFields)) {
+              setArchivedFields(
+                data.archivedFields.map((af: any) =>
+                  typeof af === 'string' ? { name: af, type: 'Text' } : (af as UserField)
+                )
+              );
+            }
+            if (Array.isArray(data.folders)) {
+              setFolders(
+                data.folders.map((fld: any) => ({
+                  id: String(fld?.id ?? ''),
+                  name: fld?.name || '',
+                  fieldsCount: fld?.fieldsCount,
+                }))
+              );
+            }
           } else {
             setFields([]);
           }

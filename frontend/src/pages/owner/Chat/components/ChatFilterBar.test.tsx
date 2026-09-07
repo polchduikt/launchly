@@ -33,6 +33,12 @@ describe('ChatFilterBar', () => {
         showSortDrop={false}
         onShowSortDrop={vi.fn()}
         sortRef={{ current: null }}
+        selectedAutomation="all"
+        onSelectedAutomationChange={vi.fn()}
+        automations={['Tech Bot']}
+        showAutomationDrop={false}
+        onShowAutomationDrop={vi.fn()}
+        automationRef={{ current: null }}
       />
     );
     expect(container).toBeTruthy();

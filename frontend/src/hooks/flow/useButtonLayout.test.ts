@@ -38,7 +38,7 @@ describe('useButtonLayout helpers', () => {
   it('reorders buttons when dropping a button over another', () => {
     const reordered = reorderButtons(sampleButtons, 'btn_3', 'btn_1');
     expect(reordered[0].value).toBe('btn_3');
-    expect(reordered[0].row).toBe('0'); // Adopted target button's row
+    expect(reordered[0].row).toBe('0');
     expect(reordered[1].value).toBe('btn_1');
   });
 

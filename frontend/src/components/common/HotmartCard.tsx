@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { isAxiosError } from 'axios';
 import { Copy, Check, CheckCircle, Loader2, HelpCircle } from 'lucide-react';
 import { t } from '../../i18n/config';
 import {
@@ -31,7 +32,7 @@ export const HotmartCard: React.FC<HotmartCardProps> = ({
     if (integration) {
       setIsConnected(integration.active);
       if (integration.config && integration.config.hottok) {
-        setHottok(integration.config.hottok);
+        setHottok(String(integration.config.hottok));
       }
     } else {
       setIsConnected(false);
@@ -66,9 +67,10 @@ export const HotmartCard: React.FC<HotmartCardProps> = ({
         },
       });
       setIsConnected(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setErrorMsg(err?.response?.data?.message || 'Failed to connect Hotmart');
+      const message = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+      setErrorMsg(message || 'Failed to connect Hotmart');
     }
   };
 

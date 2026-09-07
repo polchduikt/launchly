@@ -41,6 +41,8 @@ export interface CreateCampaignRequest {
   targetAllBots?: boolean;
 }
 
+export type UpdateCampaignRequest = CreateCampaignRequest;
+
 export interface TagResponse {
   id: number | string;
   name: string;

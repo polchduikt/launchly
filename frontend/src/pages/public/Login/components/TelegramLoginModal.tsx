@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../../store/useAuthStore';
 import { createTelegramSessionApi, checkTelegramSessionStatusApi } from '../../../../api/auth';
 import { useTranslation } from '../../../../i18n/config';
+import { STORAGE_KEYS } from '../../../../const/constants';
+import { ROUTES } from '../../../../routes/paths';
 
 interface TelegramLoginModalProps {
   isOpen: boolean;
@@ -88,12 +90,12 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({
             if (onSuccess) {
               onSuccess();
             } else {
-              const redirectUrl = localStorage.getItem('auth_redirect_url');
+              const redirectUrl = localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
               if (redirectUrl) {
-                localStorage.removeItem('auth_redirect_url');
+                localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
                 navigate(redirectUrl, { replace: true });
               } else {
-                navigate('/dashboard');
+                navigate(ROUTES.DASHBOARD);
               }
             }
             onClose();

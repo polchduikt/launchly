@@ -11,6 +11,8 @@ import {
   removePendingRequest,
   isRequestCanceled,
 } from '../utils/requestCancellation';
+import { STORAGE_KEYS } from '../const/constants';
+import { ROUTES, isPublicRoute } from '../routes/paths';
 
 const apiClient = axios.create({
   baseURL: '/api/v1',
@@ -78,8 +80,8 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
     if (error.response?.status === 403 || error.response?.data?.error === 'ACCOUNT_BLOCKED') {
       const reason = error.response?.data?.reason || 'Violation of platform rules';
-      localStorage.setItem('launchly_block_reason', reason);
-      window.location.href = '/blocked';
+      localStorage.setItem(STORAGE_KEYS.BLOCK_REASON, reason);
+      window.location.href = ROUTES.BLOCKED;
       return Promise.reject(error);
     }
     if (
@@ -104,17 +106,11 @@ apiClient.interceptors.response.use(
       if (!refreshToken) {
         useAuthStore.getState().logout();
         const pathname = window.location.pathname;
-        const isPublicPage =
-          pathname.startsWith('/templates/install') ||
-          pathname.startsWith('/templates/detail') ||
-          pathname.startsWith('/blog') ||
-          pathname.startsWith('/login') ||
-          pathname.startsWith('/register') ||
-          pathname === '/';
+        const isPublicPage = isPublicRoute(pathname);
 
         if (!isPublicPage) {
           const currentUrl = pathname + window.location.search;
-          window.location.href = `/login?redirect=${encodeURIComponent(currentUrl)}`;
+          window.location.href = `${ROUTES.LOGIN}?redirect=${encodeURIComponent(currentUrl)}`;
         }
         return Promise.reject(error);
       }
@@ -131,7 +127,7 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         useAuthStore.getState().logout();
-        window.location.href = '/login';
+        window.location.href = ROUTES.LOGIN;
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

@@ -1,15 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { isAxiosError } from 'axios';
 import { t } from '../../../i18n/config';
 import { ErrorBoundary } from '../../../components/common/ErrorBoundary';
-import { ReactFlow, Controls, Background, ReactFlowProvider, getBezierPath, getSmoothStepPath, ConnectionLineType } from '@xyflow/react';
-import type { ConnectionLineComponentProps, Edge, Node, OnNodeDrag } from '@xyflow/react';
+import { ReactFlow, Controls, Background, ReactFlowProvider, ConnectionLineType } from '@xyflow/react';
+import type { Edge, Node, OnNodeDrag } from '@xyflow/react';
+import { CustomConnectionLine } from '../../../components/common/CustomConnectionLine';
+import { FlowControlsStyles } from '../../../components/common/FlowControlsStyles';
 import '@xyflow/react/dist/style.css';
 import { useBotStore } from '../../../store/useBotStore';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
 import { useStartBotMutation, usePublishBotMutation, useUpdateBotMutation } from '../../../hooks/bot/useBotMutations';
 import { getFlowLogicKey } from '../../../utils/flowHelpers';
-import { getCustomFieldsApi } from '../../../api/bot';
+import { useCustomFieldsQuery } from '../../../hooks/bot/useCustomFieldsQuery';
 import { NodeEditorPanel } from './components/sidebar/NodeEditorPanel';
 import { FLOW_BLOCKS, FLOW_BLOCK_COLORS } from '../../../const/flowBlocks';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
@@ -25,6 +28,7 @@ import { useState } from 'react';
 import { FlowPreviewPanel } from '../../../components/common/FlowPreviewPanel';
 import { useAiStore } from '../../../store/useAiStore';
 import { useAuthStore } from '../../../store/useAuthStore';
+import { DEFAULT_CUSTOM_FIELDS } from '../../../const/constants';
 import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNodeEditor } from '../../../hooks/bot/useNodeEditor';
 import { EditButtonDrawer } from './components/sidebar/drawers/EditButtonDrawer';
@@ -35,49 +39,8 @@ import { useTagsQuery } from '../../../hooks/broadcast/useBroadcastQueries';
 import type { FlowBlock } from "../../../types/bot";
 import { useFlowCollaboration } from '../../../hooks/bot/useFlowCollaboration';
 
-const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
-  fromX,
-  fromY,
-  toX,
-  toY,
-  fromPosition,
-  toPosition,
-  connectionLineStyle,
-  connectionLineType,
-}) => {
-  const edgePath = connectionLineType === 'smoothstep'
-    ? getSmoothStepPath({
-        sourceX: fromX,
-        sourceY: fromY,
-        sourcePosition: fromPosition,
-        targetX: toX,
-        targetY: toY,
-        targetPosition: toPosition,
-      })[0]
-    : getBezierPath({
-        sourceX: fromX,
-        sourceY: fromY,
-        sourcePosition: fromPosition,
-        targetX: toX,
-        targetY: toY,
-        targetPosition: toPosition,
-      })[0];
 
-  return (
-    <g>
-      <path
-        fill="none"
-        stroke="#64748b"
-        strokeWidth={2.4}
-        d={edgePath}
-        style={{
-          ...connectionLineStyle,
-          markerEnd: 'url(#arrow-grey)',
-        }}
-      />
-    </g>
-  );
-};
+
 
 const FlowBuilderInner: React.FC = () => {
   const navigate = useNavigate();
@@ -90,21 +53,17 @@ const FlowBuilderInner: React.FC = () => {
   const [tokenError, setTokenError] = useState<string | null>(null);
 
   const { data: tags = [] } = useTagsQuery(activeBotId || 0);
-  const [customFields, setCustomFields] = useState<string[]>(['last_order_product', 'last_order_price', 'phone', 'email']);
-
-  useEffect(() => {
-    if (activeBotId) {
-      getCustomFieldsApi(activeBotId)
-        .then((data) => {
-          if (data && typeof data === 'object') {
-            const list = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
-            const names = list.map((f: any) => typeof f === 'string' ? f : f?.name).filter(Boolean);
-            if (names.length > 0) setCustomFields(names);
-          }
-        })
-        .catch((err) => console.error('Failed to load custom fields:', err));
-    }
-  }, [activeBotId]);
+  const { data: customFieldsData } = useCustomFieldsQuery(activeBotId);
+  const customFields = useMemo(() => {
+    if (!customFieldsData) return [...DEFAULT_CUSTOM_FIELDS];
+    const list = Array.isArray(customFieldsData.fields)
+      ? customFieldsData.fields
+      : Array.isArray(customFieldsData)
+        ? (customFieldsData as unknown[])
+        : [];
+    const names = list.map((f: any) => (typeof f === 'string' ? f : f?.name)).filter(Boolean);
+    return names.length > 0 ? names : [...DEFAULT_CUSTOM_FIELDS];
+  }, [customFieldsData]);
 
   const isLocalChangeRef = useRef(false);
 
@@ -316,8 +275,8 @@ const FlowBuilderInner: React.FC = () => {
   }, [isBotLive, hasUnpublishedChanges]);
 
   const handleLaunchOrUpdate = () => {
-    handleSaveFlow();
-    if (activeBotId && !isBotLive) {
+    const saved = handleSaveFlow();
+    if (saved && activeBotId) {
       publishBotMutation.mutate(activeBotId, {
         onSuccess: () => {
           setPublishedKey(getFlowLogicKey(nodes, edges));
@@ -523,10 +482,10 @@ const FlowBuilderInner: React.FC = () => {
             {!isViewer && (
               <button
                 onClick={handleLaunchOrUpdate}
-                disabled={saveMutation.isPending || startBotMutation.isPending}
+                disabled={saveMutation.isPending || startBotMutation.isPending || publishBotMutation.isPending}
                 className="flex items-center gap-2 px-4 py-2 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 active:translate-x-[1px] active:translate-y-[1px] disabled:opacity-70 disabled:cursor-not-allowed text-[#F2EBDD] text-xs font-black rounded-xl transition-all border-2 border-[#0A0A0A] shadow-sm cursor-pointer uppercase tracking-wider font-['Anybody',sans-serif]"
               >
-                {saveMutation.isPending || startBotMutation.isPending ? (
+                {saveMutation.isPending || startBotMutation.isPending || publishBotMutation.isPending ? (
                   <>
                     <Loader2 className="animate-spin text-[#F2EBDD]" size={14} />
                     <span>{t('flow_builder.saving')}</span>
@@ -544,86 +503,88 @@ const FlowBuilderInner: React.FC = () => {
 
         <div className="flex-1 flex overflow-hidden relative">
           <div className="flex-1 relative h-full">
-            <ReactFlow
-              nodes={nodesWithCollaborators}
-              edges={displayEdges}
-              onNodesChange={isViewer ? undefined : onNodesChange}
-              onEdgesChange={isViewer ? undefined : onEdgesChange}
-              onConnect={isViewer ? undefined : onConnect}
-              onSelectionChange={onSelectionChange}
-              onConnectStart={isViewer ? undefined : onConnectStart}
-              onConnectEnd={isViewer ? undefined : onConnectEnd}
-              onNodeDragStart={isViewer ? undefined : handleNodeDragStart}
-              onNodeDrag={isViewer ? undefined : handleNodeDrag}
-              onNodeDragStop={isViewer ? undefined : handleNodeDragStop}
-              nodeTypes={NODE_TYPES}
-              edgeTypes={EDGE_TYPES}
-              onNodeClick={isViewer ? undefined : (_, node) => setSelectedNodeId(node.id)}
-              onPaneClick={isViewer ? undefined : onPaneClick}
-              isValidConnection={isValidConnection}
-              defaultEdgeOptions={FLOW_EDGE_DEFAULTS}
-              connectionLineStyle={{
-                strokeWidth: 2.5,
-                stroke: '#0A0A0A',
-              }}
-              connectionLineComponent={CustomConnectionLine}
-              connectionLineType={edgeType === 'default' ? ConnectionLineType.Bezier : ConnectionLineType.SmoothStep}
-              nodesDraggable={!isViewer}
-              nodesConnectable={!isViewer}
-              elementsSelectable={!isViewer}
-              deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
-              fitView
-              fitViewOptions={{ maxZoom: 1, padding: 0.2 }}
-              proOptions={{ hideAttribution: true }}
-              className="bg-[#F2EBDD]"
-              zoomOnDoubleClick={false}
-              multiSelectionKeyCode="Control"
-              selectionKeyCode="Control"
-              onlyRenderVisibleElements={nodes.length > 100}
-            >
-              <Controls
-                position="bottom-right"
-                style={{
-                  position: 'absolute',
-                  right: '16px',
-                  top: '50%',
-                  bottom: 'auto',
-                  transform: 'translateY(-50%)',
-                  margin: 0,
+            <ErrorBoundary inline fallbackTitle={t('flow_builder.error_fallback', 'Flow Builder Error')}>
+              <ReactFlow
+                nodes={nodesWithCollaborators}
+                edges={displayEdges}
+                onNodesChange={isViewer ? undefined : onNodesChange}
+                onEdgesChange={isViewer ? undefined : onEdgesChange}
+                onConnect={isViewer ? undefined : onConnect}
+                onSelectionChange={onSelectionChange}
+                onConnectStart={isViewer ? undefined : onConnectStart}
+                onConnectEnd={isViewer ? undefined : onConnectEnd}
+                onNodeDragStart={isViewer ? undefined : handleNodeDragStart}
+                onNodeDrag={isViewer ? undefined : handleNodeDrag}
+                onNodeDragStop={isViewer ? undefined : handleNodeDragStop}
+                nodeTypes={NODE_TYPES}
+                edgeTypes={EDGE_TYPES}
+                onNodeClick={isViewer ? undefined : (_, node) => setSelectedNodeId(node.id)}
+                onPaneClick={isViewer ? undefined : onPaneClick}
+                isValidConnection={isValidConnection}
+                defaultEdgeOptions={FLOW_EDGE_DEFAULTS}
+                connectionLineStyle={{
+                  strokeWidth: 2.5,
+                  stroke: '#0A0A0A',
                 }}
-                className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-md flex flex-col bg-[#F2EBDD] custom-controls-panel"
+                connectionLineComponent={CustomConnectionLine}
+                connectionLineType={edgeType === 'default' ? ConnectionLineType.Bezier : ConnectionLineType.SmoothStep}
+                nodesDraggable={!isViewer}
+                nodesConnectable={!isViewer}
+                elementsSelectable={!isViewer}
+                deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
+                fitView
+                fitViewOptions={{ maxZoom: 1, padding: 0.2 }}
+                proOptions={{ hideAttribution: true }}
+                className="bg-[#F2EBDD]"
+                zoomOnDoubleClick={false}
+                multiSelectionKeyCode="Control"
+                selectionKeyCode="Control"
+                onlyRenderVisibleElements={nodes.length > 100}
               >
-                <button
-                  onClick={() => setEdgeType((t) => (t === 'default' ? 'smoothstep' : 'default'))}
-                  title="Toggle Edge Style (Bezier / Straight)"
-                  className="react-flow__controls-button"
-                  style={{ order: -3 }}
+                <Controls
+                  position="bottom-right"
+                  style={{
+                    position: 'absolute',
+                    right: '16px',
+                    top: '50%',
+                    bottom: 'auto',
+                    transform: 'translateY(-50%)',
+                    margin: 0,
+                  }}
+                  className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-md flex flex-col bg-[#F2EBDD] custom-controls-panel"
                 >
-                  {edgeType === 'default' ? (
-                    <Route size={18} className="text-[#0A0A0A]" />
-                  ) : (
-                    <GitCommit size={18} className="text-[#0A0A0A]" />
-                  )}
-                </button>
-                <button
-                  onClick={() => handleAutoLayout('LR')}
-                  title="Horizontal Layout"
-                  className="react-flow__controls-button"
-                  style={{ order: -2 }}
-                >
-                  <GitFork size={18} className="rotate-90 text-[#0A0A0A]" />
-                </button>
-                <button
-                  onClick={() => handleAutoLayout('TB')}
-                  title="Vertical Layout"
-                  className="react-flow__controls-button"
-                  style={{ order: -1 }}
-                >
-                  <GitFork size={18} className="text-[#0A0A0A]" />
-                </button>
-              </Controls>
-              <Background color="#0A0A0A" gap={20} size={1.2} />
-            </ReactFlow>
+                  <button
+                    onClick={() => setEdgeType((t) => (t === 'default' ? 'smoothstep' : 'default'))}
+                    title="Toggle Edge Style (Bezier / Straight)"
+                    className="react-flow__controls-button"
+                    style={{ order: -3 }}
+                  >
+                    {edgeType === 'default' ? (
+                      <Route size={18} className="text-[#0A0A0A]" />
+                    ) : (
+                      <GitCommit size={18} className="text-[#0A0A0A]" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleAutoLayout('LR')}
+                    title="Horizontal Layout"
+                    className="react-flow__controls-button"
+                    style={{ order: -2 }}
+                  >
+                    <GitFork size={18} className="rotate-90 text-[#0A0A0A]" />
+                  </button>
+                  <button
+                    onClick={() => handleAutoLayout('TB')}
+                    title="Vertical Layout"
+                    className="react-flow__controls-button"
+                    style={{ order: -1 }}
+                  >
+                    <GitFork size={18} className="text-[#0A0A0A]" />
+                  </button>
+                </Controls>
+                <Background color="#0A0A0A" gap={20} size={1.2} />
+              </ReactFlow>
+            </ErrorBoundary>
 
             <aside className={`absolute left-0 top-0 h-full w-80 border-r-2 border-[#0A0A0A] bg-[#F2EBDD] z-20 flex flex-col justify-between overflow-visible shadow-xl transition-all duration-300 ease-in-out ${
               selectedNodeId ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'
@@ -884,8 +845,9 @@ const FlowBuilderInner: React.FC = () => {
                       },
                     });
                     setIsConnectModalOpen(false);
-                  } catch (err: any) {
-                    setTokenError(err?.response?.data?.message || 'Не вдалося підключити бота. Перевірте токен.');
+                  } catch (err: unknown) {
+                    const message = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+                    setTokenError(message || 'Не вдалося підключити бота. Перевірте токен.');
                   }
                 }}
                 className="px-6 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] transition-all cursor-pointer disabled:opacity-50"
@@ -907,29 +869,6 @@ const FlowBuilderInner: React.FC = () => {
   );
 };
 
-const ControlsStyles: React.FC = React.memo(() => (
-  <style>{`
-    .react-flow__controls.custom-controls-panel {
-      display: flex;
-      flex-direction: column;
-      background: white;
-    }
-    .custom-controls-panel .react-flow__controls-button {
-      width: 38px !important;
-      height: 38px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-    }
-    .custom-controls-panel .react-flow__controls-button svg {
-      width: 18px !important;
-      height: 18px !important;
-      max-width: 18px !important;
-      max-height: 18px !important;
-    }
-  `}</style>
-));
-
 export const FlowBuilderPage: React.FC = () => {
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
@@ -946,7 +885,7 @@ export const FlowBuilderPage: React.FC = () => {
 
   return (
     <ReactFlowProvider>
-      <ControlsStyles />
+      <FlowControlsStyles />
       <ErrorBoundary
         inline
         fallbackTitle="Flow Builder Canvas Error"

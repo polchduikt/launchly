@@ -156,4 +156,50 @@ describe('useChatFilters', () => {
     expect(result.current.filteredConversations.length).toBe(1);
     expect(result.current.filteredConversations[0].id).toBe(1);
   });
+
+  it('filters conversations by automation', () => {
+    const multiBotConversations: ConversationResponse[] = [
+      {
+        ...mockConversations[0],
+        id: 1,
+        botName: 'TECH',
+        status: 'OPEN',
+      },
+      {
+        ...mockConversations[0],
+        id: 2,
+        botName: 'TEST APP',
+        status: 'OPEN',
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useChatFilters({
+        conversations: multiBotConversations,
+        favorites: [],
+        unreadConvIds: [],
+        botUsers: mockBotUsers,
+      })
+    );
+
+    expect(result.current.automations).toEqual(['TECH', 'TEST APP']);
+    expect(result.current.filteredConversations.length).toBe(2);
+
+    act(() => {
+      result.current.setSelectedAutomation('TECH');
+    });
+    expect(result.current.filteredConversations.length).toBe(1);
+    expect(result.current.filteredConversations[0].botName).toBe('TECH');
+
+    act(() => {
+      result.current.setSelectedAutomation('TEST APP');
+    });
+    expect(result.current.filteredConversations.length).toBe(1);
+    expect(result.current.filteredConversations[0].botName).toBe('TEST APP');
+
+    act(() => {
+      result.current.setSelectedAutomation('all');
+    });
+    expect(result.current.filteredConversations.length).toBe(2);
+  });
 });

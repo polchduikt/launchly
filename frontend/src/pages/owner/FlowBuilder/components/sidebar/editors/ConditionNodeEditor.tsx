@@ -14,26 +14,32 @@ interface EditorStateLocal {
 }
 
 import { useEffect } from 'react';
-import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../../../api/bot';
+import { useCustomFieldsQuery, useSaveCustomFieldsMutation } from '../../../../../../hooks/bot/useCustomFieldsQuery';
 
 export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, handleChange, editorState }) => {
   const activeBotId = useBotStore((state) => state.activeBotId);
   const { data: tags = [] } = useTagsQuery(activeBotId || 0);
 
+  const { data: customFieldsData } = useCustomFieldsQuery(activeBotId);
+  const saveCustomFieldsMutation = useSaveCustomFieldsMutation(activeBotId);
   const [userFields, setUserFields] = useState<Array<{ name: string; type: string; description: string }>>([]);
 
   useEffect(() => {
-    if (activeBotId) {
-      getCustomFieldsApi(activeBotId)
-        .then((data) => {
-          if (data && typeof data === 'object') {
-            if (Array.isArray(data.fields)) setUserFields(data.fields);
-            else if (Array.isArray(data)) setUserFields(data);
-          }
-        })
-        .catch((err) => console.error('Failed to load custom fields:', err));
+    if (customFieldsData && typeof customFieldsData === 'object') {
+      const list = Array.isArray(customFieldsData.fields)
+        ? customFieldsData.fields
+        : Array.isArray(customFieldsData)
+          ? customFieldsData
+          : [];
+      setUserFields(
+        list.map((f: any) => ({
+          name: typeof f === 'string' ? f : f?.name || '',
+          type: typeof f === 'string' ? 'Text' : f?.type || 'Text',
+          description: typeof f === 'string' ? '' : f?.description || '',
+        })).filter((f: { name: string }) => Boolean(f.name))
+      );
     }
-  }, [activeBotId]);
+  }, [customFieldsData]);
 
   const customFields = useMemo(() => {
     return userFields.map(f => f.name);
@@ -44,9 +50,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
     const updated = [...userFields, newField];
     setUserFields(updated);
     if (activeBotId) {
-      saveCustomFieldsApi(activeBotId, { fields: updated }).catch((err) =>
-        console.error('Failed to save custom field:', err)
-      );
+      saveCustomFieldsMutation.mutate({ fields: updated });
     }
   };
 

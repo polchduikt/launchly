@@ -1,14 +1,32 @@
 import { t } from '../i18n/config';
 
-/**
- * Formats a date into a human-readable relative time string (e.g. 'just now', '5 mins ago').
- * Falls back to locale date string for dates older than 30 days or invalid dates.
- */
 export const formatRelativeTime = (dateInput?: string | number | Date | null): string => {
   if (!dateInput) return t('common.not_applicable', 'N/A');
 
   try {
-    const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    let date: Date;
+    if (dateInput instanceof Date) {
+      date = dateInput;
+    } else if (typeof dateInput === 'number') {
+      date = new Date(dateInput);
+    } else {
+      const trimmed = dateInput.trim();
+      const hasTimezone = /[Zz]$|[+-]\d{2}(:?\d{2})?$/.test(trimmed);
+      if (hasTimezone) {
+        date = new Date(trimmed);
+      } else {
+        const dLocal = new Date(trimmed);
+        const dUtc = new Date(`${trimmed}Z`);
+        if (!isNaN(dLocal.getTime()) && !isNaN(dUtc.getTime())) {
+          const nowMs = Date.now();
+          const diffLocal = Math.abs(nowMs - dLocal.getTime());
+          const diffUtc = Math.abs(nowMs - dUtc.getTime());
+          date = diffLocal <= diffUtc ? dLocal : dUtc;
+        } else {
+          date = isNaN(dLocal.getTime()) ? dUtc : dLocal;
+        }
+      }
+    }
     if (isNaN(date.getTime())) return t('common.not_applicable', 'N/A');
 
     const now = new Date();
@@ -30,4 +48,17 @@ export const formatRelativeTime = (dateInput?: string | number | Date | null): s
   } catch {
     return t('common.not_applicable', 'N/A');
   }
+};
+
+export const formatEuroDateTime = (dateStr?: string | null): string => {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '—';
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const seconds = String(d.getSeconds()).padStart(2, '0');
+  return `${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
 };

@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { getCurrentUserApi } from '../../../api/auth';
 import { ROUTES } from '../../../routes/paths';
+import { STORAGE_KEYS } from '../../../const/constants';
+import { isAdminOrManager } from '../../../utils/auth';
 import { Loader2 } from 'lucide-react';
 
 const OAuth2Callback: React.FC = () => {
@@ -16,7 +18,7 @@ const OAuth2Callback: React.FC = () => {
       const refreshToken = searchParams.get('refreshToken');
 
       if (!accessToken || !refreshToken) {
-        navigate('/login', { replace: true });
+        navigate(ROUTES.LOGIN, { replace: true });
         return;
       }
 
@@ -25,22 +27,21 @@ const OAuth2Callback: React.FC = () => {
         const user = await getCurrentUserApi();
         login(accessToken, refreshToken, user);
 
-        const redirectUrl = searchParams.get('redirect') || localStorage.getItem('auth_redirect_url');
+        const redirectUrl = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
         if (redirectUrl) {
-          localStorage.removeItem('auth_redirect_url');
+          localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
           navigate(redirectUrl, { replace: true });
           return;
         }
 
-        const isAdminOrManager = user.role === 'ROLE_ADMIN' || user.role === 'ROLE_MANAGER';
-        if (isAdminOrManager) {
+        if (isAdminOrManager(user.role)) {
           navigate(ROUTES.ADMIN_HOME, { replace: true });
         } else {
           navigate(ROUTES.HOME, { replace: true });
         }
       } catch (error) {
         useAuthStore.getState().logout();
-        navigate('/login', { replace: true });
+        navigate(ROUTES.LOGIN, { replace: true });
       }
     };
 

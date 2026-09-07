@@ -63,6 +63,10 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
   };
 
   useEffect(() => {
+    return () => clearTimeouts();
+  }, []);
+
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
@@ -268,7 +272,6 @@ export const DashboardPage: React.FC = () => {
     () => localStorage.getItem(DISPLAY_KEY_HOME_BLOG) !== 'false'
   );
 
-  // React to storage changes (e.g. from settings page)
   useEffect(() => {
     const handler = () => {
       setShowHomeTemplates(localStorage.getItem(DISPLAY_KEY_HOME_TEMPLATES) !== 'false');

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useClickOutside } from '../../../hooks/useClickOutside';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
+import { ErrorBoundary } from '../../../components/common/ErrorBoundary';
 import { useDashboardStatsQuery } from '../../../hooks/dashboard/useDashboardStatsQuery';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
 import { useTranslation } from '../../../i18n/config';
@@ -592,7 +593,6 @@ export const DashboardStatsPage: React.FC = () => {
     <DashboardLayout>
       <div className="flex flex-col bg-[#F2EBDD] font-['Geist',sans-serif] min-h-full pb-6">
         
-        {/* Top Header */}
         <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-6 py-4 flex flex-row justify-between items-center gap-4 shrink-0 z-20">
           <div>
             <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight flex items-center gap-2.5 select-none">
@@ -690,10 +690,8 @@ export const DashboardStatsPage: React.FC = () => {
           ) : (
             <div className="space-y-6 w-full">
 
-              {/* 4 Top Stat Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-                {/* Stat 1: Total Subscribers */}
                 <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
                   <div className="flex justify-between items-start">
                     <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A]/70 uppercase tracking-widest block">{t('dashboard.stats.total_subscribers')}</span>
@@ -719,7 +717,6 @@ export const DashboardStatsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Stat 2: Active Users */}
                 <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
                   <div className="flex justify-between items-start">
                     <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A]/70 uppercase tracking-widest block">{t('dashboard.stats.active_users')}</span>
@@ -745,7 +742,6 @@ export const DashboardStatsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Stat 3: Total Clicks */}
                 <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
                   <div className="flex justify-between items-start">
                     <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A]/70 uppercase tracking-widest block">{t('dashboard.stats.total_clicks')}</span>
@@ -771,7 +767,6 @@ export const DashboardStatsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Stat 4: Active Automations */}
                 <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
                   <div className="flex justify-between items-start">
                     <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A]/70 uppercase tracking-widest block">{t('dashboard.stats.active_automations')}</span>
@@ -799,10 +794,9 @@ export const DashboardStatsPage: React.FC = () => {
 
               </div>
 
-              {/* Middle Row: Interaction History Chart & Top Buttons */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <ErrorBoundary inline fallbackTitle="Analytics Charts Error" fallbackDescription="Unable to render analytics charts. Please try refreshing.">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                {/* Line Chart */}
                 <div className="lg:col-span-2 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between lg:h-[310px] overflow-hidden">
                   <div className="flex flex-row justify-between items-center mb-4 select-none font-['JetBrains_Mono',monospace]">
                     <div className="space-y-1">
@@ -842,7 +836,6 @@ export const DashboardStatsPage: React.FC = () => {
                   {renderActivityChart()}
                 </div>
 
-                {/* Top Buttons Progress List */}
                 <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col lg:h-[310px]">
                   <div className="mb-4">
                     <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest">{t('dashboard.stats.top_clicked_buttons')}</h2>
@@ -888,10 +881,8 @@ export const DashboardStatsPage: React.FC = () => {
 
               </div>
 
-              {/* Bottom Row: AI Insights, Tags Breakdown, Activity Heatmap */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
                 
-                {/* AI Insights */}
                 <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between lg:col-span-3 lg:h-[275px]">
                   <div>
                     <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest block mb-1">{t('dashboard.stats.ai_insights_title')}</h2>
@@ -927,7 +918,6 @@ export const DashboardStatsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Tags Breakdown */}
                 <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between lg:col-span-3 lg:h-[275px]">
                   <div>
                     <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest block mb-1 select-none">{t('dashboard.stats.tags_breakdown_title')}</h2>
@@ -962,7 +952,6 @@ export const DashboardStatsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Activity Heatmap */}
                 <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between h-full lg:col-span-6 lg:h-[275px]">
                   <div>
                     <div className="mb-3">
@@ -974,6 +963,7 @@ export const DashboardStatsPage: React.FC = () => {
                 </div>
 
               </div>
+              </ErrorBoundary>
 
             </div>
           )}

@@ -8,6 +8,7 @@ import { GoogleLoginButton } from '../Login/components/GoogleLoginButton';
 import { TelegramLoginModal } from '../Login/components/TelegramLoginModal';
 import { TurnstileWidget, type TurnstileWidgetRef } from '../../../components/common/TurnstileWidget';
 import { GOOGLE_OAUTH_URL } from '../../../const/auth';
+import { STORAGE_KEYS } from '../../../const/constants';
 import { t } from '../../../i18n/config';
 import { useSEO } from '../../../hooks/useSEO';
 
@@ -36,14 +37,14 @@ const RegisterPage: React.FC = () => {
 
   React.useEffect(() => {
     if (redirectParam) {
-      localStorage.setItem('auth_redirect_url', redirectParam);
+      localStorage.setItem(STORAGE_KEYS.AUTH_REDIRECT_URL, redirectParam);
     }
   }, [redirectParam]);
 
   const handleGoogleLogin = () => {
-    const redirectUrl = redirectParam || localStorage.getItem('auth_redirect_url');
+    const redirectUrl = redirectParam || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
     if (redirectUrl) {
-      localStorage.setItem('auth_redirect_url', redirectUrl);
+      localStorage.setItem(STORAGE_KEYS.AUTH_REDIRECT_URL, redirectUrl);
     }
     window.location.href = GOOGLE_OAUTH_URL;
   };

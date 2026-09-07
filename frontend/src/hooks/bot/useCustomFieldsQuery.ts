@@ -1,12 +1,8 @@
-﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCustomFieldsApi, saveCustomFieldsApi } from '../../api/bot';
+import type { CustomFieldsResponse } from '../../types/customFields';
 
-export interface CustomFieldsResponse {
-  fields?: Array<{ name: string; type?: string; description?: string }>;
-  archivedFields?: Array<{ name: string; type?: string; description?: string }>;
-  folders?: Array<{ id: string | number; name: string }>;
-  [key: string]: unknown;
-}
+export type { CustomFieldsResponse };
 
 export const useCustomFieldsQuery = (botId: number | null | undefined, enabled: boolean = true) => {
   return useQuery<CustomFieldsResponse>({

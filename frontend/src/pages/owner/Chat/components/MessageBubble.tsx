@@ -13,7 +13,7 @@ interface MessageBubbleProps {
   onImageLoad?: () => void;
 }
 
-export const MessageBubble: React.FC<MessageBubbleProps> = ({
+const MessageBubbleInner: React.FC<MessageBubbleProps> = ({
   message: m,
   isOwner: _isOwner,
   ownerAvatar,
@@ -194,3 +194,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     </div>
   );
 };
+
+MessageBubbleInner.displayName = 'MessageBubble';
+export const MessageBubble = React.memo(MessageBubbleInner);

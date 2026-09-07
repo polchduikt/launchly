@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useClickOutside } from '../../../../hooks/useClickOutside';
 import { useTranslation } from '../../../../i18n/config';
 import {
@@ -19,7 +19,7 @@ import { UserAvatar } from './UserAvatar';
 import { useTagsQuery } from '../../../../hooks/broadcast/useBroadcastQueries';
 import { useUpdateBotUserMutation, useDeleteBotUserMutation } from '../../../../hooks/crm/useCrmQueries';
 import { createTagApi } from '../../../../api/broadcast';
-import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../api/bot';
+import { useCustomFieldsQuery, useSaveCustomFieldsMutation } from '../../../../hooks/bot/useCustomFieldsQuery';
 import { TagSearchSelect } from '../../FlowBuilder/components/sidebar/editors/TagSearchSelect';
 import { ChatHistoryModal } from './ChatHistoryModal';
 import { ConfirmActionModal } from './ConfirmActionModal';
@@ -102,7 +102,16 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
   const [showAddCustomField, setShowAddCustomField] = useState(false);
   const [customFieldName, setCustomFieldName] = useState('');
   const [customFieldValue, setCustomFieldValue] = useState('');
-  const [availableFields, setAvailableFields] = useState<any[]>([]);
+  const { data: customFieldsData } = useCustomFieldsQuery(conversation.botId);
+  const saveCustomFieldsMutation = useSaveCustomFieldsMutation(conversation.botId);
+
+  const availableFields = useMemo(() => {
+    if (!customFieldsData || typeof customFieldsData !== 'object') return [];
+    if (Array.isArray(customFieldsData.fields)) return customFieldsData.fields;
+    if (Array.isArray(customFieldsData)) return customFieldsData as any[];
+    return [];
+  }, [customFieldsData]);
+
   const [isFieldDropdownOpen, setIsFieldDropdownOpen] = useState(false);
   const fieldDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -119,17 +128,6 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
       document.removeEventListener('mousedown', handleOutsideClick);
     };
   }, [isFieldDropdownOpen]);
-
-  useEffect(() => {
-    if (conversation.botId) {
-      getCustomFieldsApi(conversation.botId)
-        .then((res) => {
-          const list = res && Array.isArray(res.fields) ? res.fields : Array.isArray(res) ? res : [];
-          setAvailableFields(list);
-        })
-        .catch(() => {});
-    }
-  }, [conversation.botId]);
 
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showPauseMenu, setShowPauseMenu] = useState(false);
@@ -228,15 +226,11 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
     });
 
     if (conversation.botId) {
-      getCustomFieldsApi(conversation.botId)
-        .then((existing) => {
-          const list = existing && Array.isArray(existing.fields) ? existing.fields : Array.isArray(existing) ? existing : [];
-          if (!list.some((f: any) => f.name === nameTrimmed)) {
-            const updated = [...list, { name: nameTrimmed, type: 'Text', description: '', folder: null }];
-            saveCustomFieldsApi(conversation.botId, { fields: updated }).catch(() => {});
-          }
-        })
-        .catch(() => {});
+      const list = availableFields;
+      if (!list.some((f: any) => f?.name === nameTrimmed)) {
+        const updated = [...list, { name: nameTrimmed, type: 'Text', description: '', folder: null }];
+        saveCustomFieldsMutation.mutate({ fields: updated });
+      }
     }
 
     setCustomFieldName('');

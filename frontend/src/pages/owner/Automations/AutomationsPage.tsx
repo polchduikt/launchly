@@ -137,7 +137,7 @@ export const AutomationsPage: React.FC = () => {
       .then((data) => {
         if (data && typeof data === 'object') {
           if (Array.isArray(data.folders)) setFolders(data.folders);
-          if (data.botFolders && typeof data.botFolders === 'object') setBotFolders(data.botFolders);
+          if (data.botFolders && typeof data.botFolders === 'object') setBotFolders(data.botFolders as Record<number, string | number>);
         }
       })
       .catch((err) => console.error('Failed to fetch automation folders:', err));
@@ -322,7 +322,7 @@ export const AutomationsPage: React.FC = () => {
         },
         onError: (err: unknown) => {
           const errMsg =
-            err instanceof Error ? err.message : 'Failed to update automation. Please verify your token.';
+            err instanceof Error ? err.message : t('automations.create.error_failed_update', 'Не вдалося оновити автоматизацію. Перевірте ваш токен.');
           setEditBotError(errMsg);
         },
       }
@@ -380,11 +380,11 @@ export const AutomationsPage: React.FC = () => {
 
   const handleCreateBotSubmit = () => {
     if (!newBotName.trim()) {
-      setNewBotError('Automation name is required');
+      setNewBotError(t('automations.create.error_name', "Назва бота є обов'язковою"));
       return;
     }
     if (selectedBotOption === 'new' && !newBotToken.trim()) {
-      setNewBotError('Telegram Bot Token is required');
+      setNewBotError(t('automations.create.error_token', "Токен Telegram-бота є обов'язковим"));
       return;
     }
     setNewBotError(null);
@@ -416,7 +416,7 @@ export const AutomationsPage: React.FC = () => {
         },
         onError: (err: unknown) => {
           const errMsg =
-            err instanceof Error ? err.message : 'Failed to create automation. Please verify your token.';
+            err instanceof Error ? err.message : t('automations.create.error_failed', 'Не вдалося створити автоматизацію. Перевірте ваш токен.');
           setNewBotError(errMsg);
         },
       }

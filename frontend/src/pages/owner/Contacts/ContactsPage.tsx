@@ -111,7 +111,6 @@ export const ContactsPage: React.FC = () => {
 
   const filteredContacts = useMemo(() => {
     return contacts.filter((c) => {
-      // Hide unsubscribed if toggle is on
       if (hideUnsub) {
         try {
           const meta = c.metadata ? JSON.parse(c.metadata) : {};

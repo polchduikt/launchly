@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import type { BotUserResponse } from '../../types/bot';
+import type { BotResponse, BotUserResponse } from '../../types/bot';
 import type { ConversationResponse } from '../../types/crm';
 import type { ChatFilter, SortOrder, SidebarTab } from '../../types/chat';
 import { CHAT_FILTER_LABELS } from '../../const/chat';
@@ -9,38 +9,61 @@ interface UseChatFiltersParams {
   favorites: number[];
   unreadConvIds: number[];
   botUsers: BotUserResponse[];
+  bots?: BotResponse[];
 }
 
 export const useChatFilters = ({
   conversations,
   favorites,
   botUsers,
+  bots,
 }: UseChatFiltersParams) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [chatFilter, setChatFilter] = useState<ChatFilter>('open');
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('all');
+  const [selectedAutomation, setSelectedAutomation] = useState<string>('all');
   const [showSortDrop, setShowSortDrop] = useState(false);
   const [showChatFilterDrop, setShowChatFilterDrop] = useState(false);
+  const [showAutomationDrop, setShowAutomationDrop] = useState(false);
 
   const filterRef = useRef<HTMLDivElement | null>(null);
   const sortRef = useRef<HTMLDivElement | null>(null);
+  const automationRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (filterRef.current && !filterRef.current.contains(e.target as Node)) setShowChatFilterDrop(false);
       if (sortRef.current && !sortRef.current.contains(e.target as Node)) setShowSortDrop(false);
+      if (automationRef.current && !automationRef.current.contains(e.target as Node)) setShowAutomationDrop(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  const automations = useMemo(() => {
+    if (bots && bots.length > 0) {
+      const connected = bots
+        .filter(b => b.hasTelegramToken || conversations.some(c => c.botId === b.id))
+        .map(b => b.name)
+        .filter(Boolean);
+      if (connected.length > 0) {
+        return Array.from(new Set(connected));
+      }
+    }
+    return Array.from(new Set(conversations.map(c => c.botName).filter(Boolean)));
+  }, [bots, conversations]);
 
   const filteredConversations = useMemo(() => {
     let list = [...conversations];
 
     if (chatFilter === 'open') list = list.filter(c => c.status === 'OPEN');
     if (chatFilter === 'closed') list = list.filter(c => c.status === 'CLOSED');
+
+    if (selectedAutomation !== 'all') {
+      list = list.filter(c => c.botName === selectedAutomation);
+    }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -85,7 +108,7 @@ export const useChatFilters = ({
     });
 
     return list;
-  }, [conversations, chatFilter, searchQuery, showUnreadOnly, sortOrder, sidebarTab, favorites, botUsers]);
+  }, [conversations, chatFilter, selectedAutomation, searchQuery, showUnreadOnly, sortOrder, sidebarTab, favorites, botUsers]);
 
   const chatFilterLabel = CHAT_FILTER_LABELS[chatFilter] || 'All Chats';
 
@@ -94,6 +117,7 @@ export const useChatFilters = ({
     setShowUnreadOnly(false);
     setSortOrder('newest');
     setChatFilter('open');
+    setSelectedAutomation('all');
   };
 
   return {
@@ -107,12 +131,18 @@ export const useChatFilters = ({
     setShowUnreadOnly,
     sidebarTab,
     setSidebarTab,
+    selectedAutomation,
+    setSelectedAutomation,
+    automations,
     showSortDrop,
     setShowSortDrop,
     showChatFilterDrop,
     setShowChatFilterDrop,
+    showAutomationDrop,
+    setShowAutomationDrop,
     filterRef,
     sortRef,
+    automationRef,
     filteredConversations,
     chatFilterLabel,
     resetFilters,

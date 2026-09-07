@@ -77,9 +77,9 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     };
   }, [messages.length, conversation?.id, scrollToBottom]);
 
-  const handleImageLoad = () => {
+  const handleImageLoad = useCallback(() => {
     scrollToBottom('auto');
-  };
+  }, [scrollToBottom]);
 
   const groupedMessages = useMemo(() => {
     const groups: { date: string; msgs: MessageResponse[] }[] = [];
@@ -96,6 +96,12 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     });
     return groups;
   }, [messages]);
+
+  const ownerAvatar = useMemo(() => <OwnerAvatar size={28} />, []);
+  const userAvatar = useMemo(
+    () => <UserAvatar name={conversation?.botUserName || ''} photoUrl={conversation?.botUserPhotoUrl} size={28} />,
+    [conversation?.botUserName, conversation?.botUserPhotoUrl]
+  );
 
   if (!conversation) {
     return (
@@ -164,8 +170,8 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
                   key={m.id}
                   message={m}
                   isOwner={m.senderType === 'OWNER'}
-                  ownerAvatar={<OwnerAvatar size={28} />}
-                  userAvatar={<UserAvatar name={conversation.botUserName} photoUrl={conversation.botUserPhotoUrl} size={28} />}
+                  ownerAvatar={ownerAvatar}
+                  userAvatar={userAvatar}
                   allMessages={messages}
                   onButtonClick={onButtonClick}
                   onImageLoad={handleImageLoad}

@@ -27,7 +27,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
     try {
       const res = await createTemplateApi({ botId, name: 'Шаблон бота' });
       setTemplate(res);
-    } catch (err: any) {
+    } catch {
       setErrorMsg(t('settings.template.error', 'Не вдалося створити шаблон. Спробуйте пізніше.'));
     } finally {
       setLoading(false);

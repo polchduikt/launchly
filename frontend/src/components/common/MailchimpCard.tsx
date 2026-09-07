@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { isAxiosError } from 'axios';
 import { HelpCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { SiMailchimp } from '@icons-pack/react-simple-icons';
 import { t } from '../../i18n/config';
@@ -31,8 +32,8 @@ export const MailchimpCard: React.FC<MailchimpCardProps> = ({
     if (integration) {
       setIsConnected(integration.active);
       if (integration.config) {
-        setApiKey(integration.config.apiKey || '');
-        setListId(integration.config.listId || '');
+        setApiKey(String(integration.config.apiKey || ''));
+        setListId(String(integration.config.listId || ''));
         if (Array.isArray(integration.config.tags) && integration.config.tags.length > 0) {
           setTag(integration.config.tags.join(', '));
         }
@@ -75,9 +76,10 @@ export const MailchimpCard: React.FC<MailchimpCardProps> = ({
         },
       });
       setIsConnected(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setErrorMsg(err?.response?.data?.message || 'Failed to connect Mailchimp');
+      const message = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+      setErrorMsg(message || 'Failed to connect Mailchimp');
     }
   };
 

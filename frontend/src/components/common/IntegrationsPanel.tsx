@@ -45,11 +45,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId, onO
   );
 
   const handleUpgradeClick = () => {
-    if (onOpenPricing) {
-      onOpenPricing();
-    } else {
-      console.log('Open pricing modal');
-    }
+    onOpenPricing?.();
   };
 
   if (isLoading) {

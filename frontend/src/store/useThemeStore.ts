@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { STORAGE_KEYS } from '../const/constants';
+import { safeStorage } from '../utils/storage';
 
 export type AppTheme = 'light' | 'yellow' | 'dark';
 
@@ -8,7 +10,7 @@ interface ThemeState {
 }
 
 export const useThemeStore = create<ThemeState>((set) => {
-  const savedTheme = localStorage.getItem('launchly_theme') as AppTheme | null;
+  const savedTheme = safeStorage.getItem(STORAGE_KEYS.THEME) as AppTheme | null;
   const initialTheme: AppTheme = savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'yellow'
     ? savedTheme
     : 'light';
@@ -16,7 +18,7 @@ export const useThemeStore = create<ThemeState>((set) => {
   return {
     theme: initialTheme,
     setTheme: (newTheme: AppTheme) => {
-      localStorage.setItem('launchly_theme', newTheme);
+      safeStorage.setItem(STORAGE_KEYS.THEME, newTheme);
       set({ theme: newTheme });
     },
   };

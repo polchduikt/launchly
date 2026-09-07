@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useClickOutside } from '../../../hooks/useClickOutside';
-import { useDebounce } from '../../../hooks/useDebounce';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -11,56 +9,51 @@ import {
   unblockAdminBroadcastApi,
 } from '../../../api/admin';
 import type { AdminBroadcast, AdminBroadcastItem } from '../../../api/admin';
+import { queryKeys } from '../../../api/queryKeys';
 import { AdminLayout } from '../../../components/layout/AdminLayout';
 import {
-  Search,
   Users,
   CheckCircle2,
   Loader2,
   X,
-  ChevronLeft,
   ChevronRight,
-  ChevronDown,
+  ChevronLeft,
   Clock,
   Send,
   AlertCircle,
   Lock,
   Unlock,
   Ban,
-  ShieldAlert,
   Filter
 } from 'lucide-react';
 import { useTranslation } from '../../../i18n/config';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../routes/paths';
+import {
+  AdminSearchBar,
+  AdminPagination,
+  AdminFilterDropdown,
+  AdminBulkActions,
+  AdminBlockModal,
+} from '../../../components/admin';
+import { useAdminSearch } from '../../../hooks/admin/useAdminSearch';
+import { useAdminSelection } from '../../../hooks/admin/useAdminSelection';
+import { formatEuroDateTime } from '../../../utils/date';
 
 export const AdminBroadcastsPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user: currentUser } = useAuthStore();
+  const currentUser = useAuthStore((state) => state.user);
   const isAdmin = currentUser?.role === 'ROLE_ADMIN';
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const debouncedSearch = useDebounce(searchQuery, 300);
+  const { search: searchQuery, setSearch: setSearchQuery, debouncedSearch, page, setPage } = useAdminSearch({
+    initialSearch: searchParams.get('search') || '',
+  });
   const [statusFilter, setStatusFilter] = useState<string>(searchParams.get('status') || 'all');
   const [sortFilter, setSortFilter] = useState<'desc' | 'asc'>('desc');
-  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
-  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
-  const statusDropdownRef = useRef<HTMLDivElement>(null);
-  const sortDropdownRef = useRef<HTMLDivElement>(null);
-
-  const [page, setPage] = useState(0);
   const size = 30;
-
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [isBulkActionOpen, setIsBulkActionOpen] = useState(false);
-  const bulkActionDropdownRef = useRef<HTMLDivElement>(null);
-
-  useClickOutside(statusDropdownRef, () => setIsStatusDropdownOpen(false), isStatusDropdownOpen);
-  useClickOutside(sortDropdownRef, () => setIsSortDropdownOpen(false), isSortDropdownOpen);
-  useClickOutside(bulkActionDropdownRef, () => setIsBulkActionOpen(false), isBulkActionOpen);
 
   const [selectedBroadcast, setSelectedBroadcast] = useState<AdminBroadcast | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -69,12 +62,6 @@ export const AdminBroadcastsPage: React.FC = () => {
 
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [selectedBlockBroadcast, setSelectedBlockBroadcast] = useState<AdminBroadcast | null>(null);
-  const [blockReasonOption, setBlockReasonOption] = useState<string>('PLATFORM_VIOLATION');
-  const [customBlockReason, setCustomBlockReason] = useState<string>('');
-
-  useEffect(() => {
-    setPage(0);
-  }, [debouncedSearch]);
 
   useEffect(() => {
     const params: Record<string, string> = {};
@@ -83,11 +70,13 @@ export const AdminBroadcastsPage: React.FC = () => {
     setSearchParams(params, { replace: true });
   }, [debouncedSearch, statusFilter, setSearchParams]);
 
+  const broadcastsQueryKey = [...queryKeys.admin.broadcasts, debouncedSearch, statusFilter, sortFilter, page, size] as const;
+
   const { data, isLoading } = useQuery({
-    queryKey: ['adminBroadcasts', debouncedSearch, statusFilter, sortFilter, page, size],
+    queryKey: broadcastsQueryKey,
     queryFn: () => fetchAdminBroadcastsApi(debouncedSearch, statusFilter, sortFilter, page, size),
-    refetchInterval: (query: any) => {
-      const content = query.state.data?.content;
+    refetchInterval: (query) => {
+      const content = (query.state.data as { content?: AdminBroadcastItem[] } | undefined)?.content;
       if (!content) return false;
       const hasActive = content.some(
         (b: AdminBroadcastItem) => b.status === 'IN_PROGRESS' || b.status === 'SCHEDULED'
@@ -100,59 +89,64 @@ export const AdminBroadcastsPage: React.FC = () => {
   const totalElements = data?.totalElements || 0;
   const totalPages = Math.max(data?.totalPages || 1, 1);
 
-  const allIdsOnPage = broadcasts.map((b: AdminBroadcastItem) => b.id);
-  const isAllSelected = allIdsOnPage.length > 0 && allIdsOnPage.every((id: number) => selectedIds.includes(id));
-
-  const handleToggleSelectAll = () => {
-    if (isAllSelected) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(allIdsOnPage);
-    }
-  };
-
-  const handleToggleSelectRow = (id: number) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((item) => item !== id));
-    } else {
-      setSelectedIds([...selectedIds, id]);
-    }
-  };
+  const {
+    selectedIds,
+    isAllSelected,
+    toggleSelectAll: handleToggleSelectAll,
+    toggleSelect: handleToggleSelectRow,
+    clearSelection,
+  } = useAdminSelection(broadcasts);
 
   const handleBulkCancel = () => {
     const targets = broadcasts.filter(
       (b: AdminBroadcastItem) => selectedIds.includes(b.id) && !b.isBlocked && b.status !== 'BLOCKED' && b.status !== 'COMPLETED' && b.status !== 'CANCELLED'
     );
     targets.forEach((b: AdminBroadcastItem) => cancelMutation.mutate(b.id));
-    setSelectedIds([]);
-    setIsBulkActionOpen(false);
+    clearSelection();
   };
 
   const handleBulkBlock = () => {
     const targets = broadcasts.filter((b: AdminBroadcastItem) => selectedIds.includes(b.id) && !b.isBlocked && b.status !== 'BLOCKED');
     targets.forEach((b: AdminBroadcastItem) => blockMutation.mutate({ broadcastId: b.id, reason: 'Bulk admin action' }));
-    setSelectedIds([]);
-    setIsBulkActionOpen(false);
+    clearSelection();
   };
 
   const handleBulkUnblock = () => {
     const targets = broadcasts.filter((b: AdminBroadcastItem) => selectedIds.includes(b.id) && (b.isBlocked || b.status === 'BLOCKED'));
     targets.forEach((b: AdminBroadcastItem) => unblockMutation.mutate(b.id));
-    setSelectedIds([]);
-    setIsBulkActionOpen(false);
+    clearSelection();
   };
 
   const { data: detailsData, isLoading: isDetailsLoading } = useQuery({
-    queryKey: ['adminBroadcastDetails', selectedBroadcast?.id, selectedPeriod, detailsPage],
+    queryKey: [...queryKeys.admin.broadcastDetails(selectedBroadcast?.id), selectedPeriod, detailsPage],
     queryFn: () => fetchAdminBroadcastDetailsApi(selectedBroadcast!.id, selectedPeriod, detailsPage, 10),
     enabled: !!selectedBroadcast && showDetailModal,
   });
 
   const cancelMutation = useMutation({
     mutationFn: (broadcastId: number) => cancelAdminBroadcastApi(broadcastId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminBroadcasts'] });
-      queryClient.invalidateQueries({ queryKey: ['adminBroadcastDetails'] });
+    onMutate: async (broadcastId: number) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.admin.broadcasts });
+      const previousData = queryClient.getQueryData<{ content?: AdminBroadcastItem[] }>(broadcastsQueryKey);
+      queryClient.setQueryData<{ content?: AdminBroadcastItem[] }>(broadcastsQueryKey, (old) => {
+        if (!old?.content) return old;
+        return {
+          ...old,
+          content: old.content.map((b: AdminBroadcastItem) =>
+            b.id === broadcastId ? { ...b, status: 'CANCELLED' } : b
+          ),
+        };
+      });
+      return { previousData };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(broadcastsQueryKey, context.previousData);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.broadcasts });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.broadcastDetails() });
     },
   });
 
@@ -160,8 +154,8 @@ export const AdminBroadcastsPage: React.FC = () => {
     mutationFn: ({ broadcastId, reason }: { broadcastId: number; reason: string }) =>
       blockAdminBroadcastApi(broadcastId, reason),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminBroadcasts'] });
-      queryClient.invalidateQueries({ queryKey: ['adminBroadcastDetails'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.broadcasts });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.broadcastDetails() });
       setShowBlockModal(false);
     },
   });
@@ -169,8 +163,8 @@ export const AdminBroadcastsPage: React.FC = () => {
   const unblockMutation = useMutation({
     mutationFn: (broadcastId: number) => unblockAdminBroadcastApi(broadcastId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminBroadcasts'] });
-      queryClient.invalidateQueries({ queryKey: ['adminBroadcastDetails'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.broadcasts });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.broadcastDetails() });
     },
   });
 
@@ -183,41 +177,7 @@ export const AdminBroadcastsPage: React.FC = () => {
 
   const handleOpenBlockModal = (broadcast: AdminBroadcast) => {
     setSelectedBlockBroadcast(broadcast);
-    setBlockReasonOption('PLATFORM_VIOLATION');
-    setCustomBlockReason('');
     setShowBlockModal(true);
-  };
-
-  const handleConfirmBlockBroadcast = () => {
-    if (!selectedBlockBroadcast) return;
-    let reason = '';
-    if (blockReasonOption === 'SUSPICIOUS_ACTIVITY') {
-      reason = 'Suspicious activity';
-    } else if (blockReasonOption === 'PLATFORM_VIOLATION') {
-      reason = 'Violation of platform rules';
-    } else if (blockReasonOption === 'SPAM') {
-      reason = 'Spam or unauthorized bulk messaging';
-    } else {
-      reason = customBlockReason.trim() || 'Violation of platform rules';
-    }
-    blockMutation.mutate({ broadcastId: selectedBlockBroadcast.id, reason });
-  };
-
-  const formatDate = (dateStr?: string | null) => {
-    if (!dateStr) return '—';
-    try {
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      const hours = String(d.getHours()).padStart(2, '0');
-      const mins = String(d.getMinutes()).padStart(2, '0');
-      const secs = String(d.getSeconds()).padStart(2, '0');
-      return `${day}.${month}.${year}, ${hours}:${mins}:${secs}`;
-    } catch (e) {
-      return dateStr;
-    }
   };
 
   const formatDateShort = (dateStr?: string | null) => {
@@ -295,18 +255,6 @@ export const AdminBroadcastsPage: React.FC = () => {
     { value: 'DRAFT', label: t('admin.status_draft') },
   ];
 
-  const getStatusLabel = (val: string) => {
-    const opt = statusOptions.find((o) => o.value === val);
-    return opt ? opt.label : val;
-  };
-
-  const blockReasonsList = [
-    { code: 'SUSPICIOUS_ACTIVITY', label: t('admin.block_reason_suspicious') },
-    { code: 'PLATFORM_VIOLATION', label: t('admin.block_reason_rules') },
-    { code: 'SPAM', label: t('admin.block_reason_spam') },
-    { code: 'OTHER', label: t('admin.block_reason_other') },
-  ];
-
   return (
     <AdminLayout noPadding={true}>
       <div className="flex h-full w-full overflow-hidden bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
@@ -332,149 +280,50 @@ export const AdminBroadcastsPage: React.FC = () => {
               )}
             </div>
 
-            <div className="space-y-1" ref={statusDropdownRef}>
-              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.status_filter_label')}</label>
-              <div className="relative w-full">
-                <button
-                  type="button"
-                  onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
-                >
-                  <span>{getStatusLabel(statusFilter)}</span>
-                  <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
+            <AdminFilterDropdown
+              label={t('admin.status_filter_label')}
+              value={statusFilter}
+              options={statusOptions}
+              onChange={(val) => {
+                setStatusFilter(val);
+                setPage(0);
+              }}
+            />
 
-                {isStatusDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace]">
-                    {statusOptions.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => {
-                          setStatusFilter(opt.value as "all" | "in_progress" | "scheduled" | "completed" | "failed" | "blocked");
-                          setPage(0);
-                          setIsStatusDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-1.5 text-xs font-bold uppercase flex items-center justify-between transition-colors ${
-                          statusFilter === opt.value
-                            ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                            : 'text-[#0A0A0A] hover:bg-white'
-                        }`}
-                      >
-                        <span>{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-1" ref={sortDropdownRef}>
-              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.sorting_label')}</label>
-              <div className="relative w-full">
-                <button
-                  type="button"
-                  onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
-                >
-                  <span>{sortFilter === 'asc' ? t('admin.sort_oldest') : t('admin.sort_newest')}</span>
-                  <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {isSortDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace]">
-                    {[
-                      { value: 'desc', label: t('admin.sort_newest') },
-                      { value: 'asc', label: t('admin.sort_oldest') },
-                    ].map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => {
-                          setSortFilter(opt.value as 'desc' | 'asc');
-                          setPage(0);
-                          setIsSortDropdownOpen(false);
-                        }}
-                        className={`w-full px-3 py-1.5 text-left text-xs font-bold uppercase flex items-center justify-between hover:bg-white transition cursor-pointer ${
-                          sortFilter === opt.value ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A]'
-                        }`}
-                      >
-                        <span>{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            <AdminFilterDropdown
+              label={t('admin.sorting_label')}
+              value={sortFilter}
+              options={[
+                { value: 'desc', label: t('admin.sort_newest') },
+                { value: 'asc', label: t('admin.sort_oldest') },
+              ]}
+              onChange={(val) => {
+                setSortFilter(val as 'desc' | 'asc');
+                setPage(0);
+              }}
+            />
           </div>
         </aside>
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-[#F2EBDD] space-y-4">
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex items-center space-x-3 flex-1 max-w-md">
-              <div className="relative w-full">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]" size={15} />
-                <input
-                  type="text"
-                  placeholder={t('admin.search_broadcasts_placeholder')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder-slate-500 focus:outline-none transition-all shadow-[2px_2px_0px_#0A0A0A]"
-                />
-              </div>
-              {selectedIds.length > 0 && (
-                <span className="px-3.5 py-1.5 rounded-xl bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] font-black text-xs shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
-                  {t('admin.selected_count', { count: selectedIds.length })}
-                </span>
-              )}
-            </div>
+            <AdminSearchBar
+              placeholder={t('admin.search_broadcasts_placeholder')}
+              value={searchQuery}
+              onChange={setSearchQuery}
+            />
 
-            <div className="relative shrink-0" ref={bulkActionDropdownRef}>
-              <button
-                type="button"
-                disabled={selectedIds.length === 0}
-                onClick={() => setIsBulkActionOpen(!isBulkActionOpen)}
-                className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
-              >
-                <span>{t('admin.bulk_actions')}</span>
-                <ChevronDown size={14} className={`transition-transform duration-200 ${isBulkActionOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isBulkActionOpen && selectedIds.length > 0 && (
-                <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1.5 font-['JetBrains_Mono',monospace]">
-                  <button
-                    type="button"
-                    onClick={handleBulkCancel}
-                    className="w-full text-left px-4 py-2 text-xs font-bold text-[#0A0A0A] hover:bg-white flex items-center space-x-2.5 transition cursor-pointer"
-                  >
-                    <Ban size={14} className="text-[#0A0A0A]" />
-                    <span>{t('admin.bulk_cancel')}</span>
-                  </button>
-                  {isAdmin && (
-                    <>
-                      <div className="my-1 border-t-2 border-[#0A0A0A]" />
-                      <button
-                        type="button"
-                        onClick={handleBulkBlock}
-                        className="w-full text-left px-4 py-2 text-xs font-black uppercase text-rose-700 hover:bg-rose-100 flex items-center space-x-2.5 transition cursor-pointer"
-                      >
-                        <Lock size={14} />
-                        <span>{t('admin.bulk_block')}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleBulkUnblock}
-                        className="w-full text-left px-4 py-2 text-xs font-black uppercase text-emerald-800 hover:bg-emerald-100 flex items-center space-x-2.5 transition cursor-pointer"
-                      >
-                        <Unlock size={14} />
-                        <span>{t('admin.bulk_unblock')}</span>
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
+            <AdminBulkActions
+              selectedCount={selectedIds.length}
+              actions={[
+                { label: t('admin.bulk_cancel'), onClick: handleBulkCancel, icon: <Ban size={14} className="text-[#0A0A0A]" /> },
+                ...(isAdmin ? [
+                  { label: t('admin.bulk_block'), onClick: handleBulkBlock, icon: <Lock size={14} />, variant: 'danger' as const },
+                  { label: t('admin.bulk_unblock'), onClick: handleBulkUnblock, icon: <Unlock size={14} /> },
+                ] : []),
+              ]}
+            />
           </div>
 
           {isLoading ? (
@@ -587,38 +436,14 @@ export const AdminBroadcastsPage: React.FC = () => {
                   </table>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] text-xs text-[#0A0A0A] font-bold">
-                  <div>
-                    {t('admin.showing')}{' '}
-                    <span className="font-black text-[#0A0A0A]">{broadcasts.length}</span>{' '}
-                    {t('admin.of')}{' '}
-                    <span className="font-black text-[#0A0A0A]">{totalElements}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                      disabled={page === 0}
-                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
-                    >
-                      <ChevronLeft size={14} />
-                      <span>{t('admin.prev')}</span>
-                    </button>
-
-                    <div className="flex items-center space-x-1 px-2.5 py-1 rounded-xl bg-white border-2 border-[#0A0A0A] text-xs font-black font-mono text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
-                      <span>{page + 1}</span>
-                      <span>/</span>
-                      <span>{totalPages}</span>
-                    </div>
-
-                    <button
-                      onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
-                      disabled={page >= totalPages - 1}
-                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
-                    >
-                      <span>{t('admin.next')}</span>
-                      <ChevronRight size={14} />
-                    </button>
-                  </div>
+                <div className="px-5 py-3.5 bg-[#F2EBDD] border-t-2 border-[#0A0A0A]">
+                  <AdminPagination
+                    page={page}
+                    totalPages={totalPages}
+                    totalElements={totalElements}
+                    currentCount={broadcasts.length}
+                    onPageChange={setPage}
+                  />
                 </div>
               </div>
             </>
@@ -815,7 +640,7 @@ export const AdminBroadcastsPage: React.FC = () => {
                             )}
                           </div>
                           <span className="text-[11px] font-mono text-slate-700 font-bold shrink-0">
-                            {formatDate(act.timestamp || act.timestamp)}
+                            {formatEuroDateTime(act.timestamp)}
                           </span>
                         </div>
                       ))
@@ -860,92 +685,35 @@ export const AdminBroadcastsPage: React.FC = () => {
           </div>
         )}
 
-        {showBlockModal && selectedBlockBroadcast && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-            <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] rounded-3xl w-full max-w-md p-6 shadow-[10px_10px_0px_#0A0A0A] space-y-5 text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
-              <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-2xl bg-rose-200 border-2 border-[#0A0A0A] flex items-center justify-center text-rose-950 font-bold shadow-[2px_2px_0px_#0A0A0A]">
-                    <ShieldAlert size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] leading-snug">
-                      {t('admin.block_broadcast_title')}
-                    </h3>
-                    <p className="text-xs text-slate-700 font-mono font-bold">
-                      {selectedBlockBroadcast.title} (#{selectedBlockBroadcast.id})
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowBlockModal(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-xs font-black uppercase text-[#0A0A0A] block">
-                  {t('admin.select_block_reason')}
-                </label>
-
-                <div className="space-y-2">
-                  {blockReasonsList.map((r) => (
-                    <label
-                      key={r.code}
-                      onClick={() => setBlockReasonOption(r.code)}
-                      className={`flex items-center space-x-3 p-3.5 rounded-2xl border-2 border-[#0A0A0A] cursor-pointer transition ${
-                        blockReasonOption === r.code
-                          ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black shadow-[2px_2px_0px_#0A0A0A]'
-                          : 'bg-white text-[#0A0A0A] hover:bg-amber-50'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="blockReason"
-                        checked={blockReasonOption === r.code}
-                        onChange={() => setBlockReasonOption(r.code)}
-                        className="accent-[#0A0A0A]"
-                      />
-                      <span className="text-xs uppercase font-bold">{r.label}</span>
-                    </label>
-                  ))}
-                </div>
-
-                {blockReasonOption === 'OTHER' && (
-                  <div className="space-y-1.5 pt-1">
-                    <label className="text-xs font-black uppercase text-[#0A0A0A] block">{t('admin.specify_block_reason')}</label>
-                    <textarea
-                      value={customBlockReason}
-                      onChange={(e) => setCustomBlockReason(e.target.value)}
-                      placeholder="..."
-                      rows={3}
-                      className="w-full p-3 bg-white border-2 border-[#0A0A0A] rounded-2xl text-xs font-bold text-[#0A0A0A] focus:outline-none transition shadow-[2px_2px_0px_#0A0A0A]"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-[#0A0A0A]">
-                <button
-                  onClick={() => setShowBlockModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#0A0A0A] border-2 border-transparent hover:border-[#0A0A0A] bg-white transition cursor-pointer"
-                >
-                  {t('admin.cancel')}
-                </button>
-                <button
-                  onClick={handleConfirmBlockBroadcast}
-                  disabled={blockMutation.isPending}
-                  className="px-4 py-2 rounded-xl text-xs font-black uppercase text-white bg-rose-700 border-2 border-[#0A0A0A] hover:bg-rose-800 transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
-                >
-                  {blockMutation.isPending && <Loader2 size={14} className="animate-spin" />}
-                  <span>{t('admin.block')}</span>
-                </button>
-              </div>
+        <AdminBlockModal
+          isOpen={showBlockModal && Boolean(selectedBlockBroadcast)}
+          onClose={() => setShowBlockModal(false)}
+          onConfirm={(reasonCode, details) => {
+            if (!selectedBlockBroadcast) return;
+            const reasonMap: Record<string, string> = {
+              SUSPICIOUS_ACTIVITY: 'Suspicious activity',
+              PLATFORM_VIOLATION: 'Violation of platform rules',
+              SPAM: 'Spam or unauthorized bulk messaging',
+              OTHER: details?.trim() || 'Violation of platform rules',
+            };
+            const finalReason = reasonMap[reasonCode] || details || reasonCode;
+            blockMutation.mutate({ broadcastId: selectedBlockBroadcast.id, reason: finalReason });
+          }}
+          title={t('admin.block_broadcast_title')}
+          entityInfo={selectedBlockBroadcast && (
+            <div className="bg-white p-3.5 rounded-2xl border-2 border-[#0A0A0A] text-xs text-[#0A0A0A] space-y-1">
+              <div>Title: <strong className="text-[#0A0A0A] font-black">{selectedBlockBroadcast.title}</strong></div>
+              <div className="text-slate-700 font-bold">ID: #{selectedBlockBroadcast.id}</div>
             </div>
-          </div>
-        )}
+          )}
+          reasons={[
+            { code: 'SUSPICIOUS_ACTIVITY', label: t('admin.block_reason_suspicious') },
+            { code: 'PLATFORM_VIOLATION', label: t('admin.block_reason_rules') },
+            { code: 'SPAM', label: t('admin.block_reason_spam') },
+            { code: 'OTHER', label: t('admin.block_reason_other') },
+          ]}
+          isPending={blockMutation.isPending}
+        />
       </div>
     </AdminLayout>
   );

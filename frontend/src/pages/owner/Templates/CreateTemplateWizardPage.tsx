@@ -113,7 +113,8 @@ export const CreateTemplateWizardPage: React.FC = () => {
             } else {
               Object.keys(fRes).forEach((k) => {
                 if (k !== 'folders' && k !== 'archivedFields') {
-                  list.push({ name: k, label: typeof fRes[k] === 'string' ? fRes[k] : k });
+                  const val = (fRes as Record<string, unknown>)[k];
+                  list.push({ name: k, label: typeof val === 'string' ? val : k });
                 }
               });
             }

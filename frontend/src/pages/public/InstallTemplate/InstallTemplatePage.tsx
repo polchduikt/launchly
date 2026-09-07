@@ -51,7 +51,7 @@ export const InstallTemplatePage: React.FC = () => {
     try {
       await installTemplateApi(shareCode, selectedBotId);
       setInstalledSuccess(true);
-    } catch (err: any) {
+    } catch {
       setErrorMsg(t('template.install.error', 'Не вдалося встановити шаблон. Спробуйте пізніше.'));
     } finally {
       setSubmitting(false);

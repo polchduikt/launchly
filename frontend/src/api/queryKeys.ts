@@ -1,8 +1,3 @@
-﻿/**
- * Query Key Factory
- * Centralized, strongly-typed query keys for TanStack Query cache management.
- */
-
 export const queryKeys = {
   bots: {
     all: ['bots'] as const,

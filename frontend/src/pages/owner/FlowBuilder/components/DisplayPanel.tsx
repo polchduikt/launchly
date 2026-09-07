@@ -1,14 +1,8 @@
 import React, { useState } from 'react';
 import { t } from '../../../../i18n/config';
-
-// Home keys
 export const DISPLAY_KEY_HOME_TEMPLATES = 'launchly_display_home_templates';
 export const DISPLAY_KEY_HOME_BLOG = 'launchly_display_home_blog';
-
-// Contacts keys
 export const DISPLAY_KEY_CONTACTS_HIDE_UNSUB = 'launchly_display_contacts_hide_unsub';
-
-// Automations keys
 export const DISPLAY_KEY_AUTO_RUNS = 'launchly_display_auto_runs';
 export const DISPLAY_KEY_AUTO_CTR = 'launchly_display_auto_ctr';
 export const DISPLAY_KEY_AUTO_BADGE = 'launchly_display_auto_badge';
@@ -75,7 +69,6 @@ export const DisplayPanel: React.FC = () => {
     <div className="space-y-6 font-['JetBrains_Mono',monospace]">
       <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden text-left">
 
-        {/* ── Головна сторінка ── */}
         <SectionHeader label={t('settings.display.section_home')} />
 
         <ToggleRow
@@ -93,7 +86,6 @@ export const DisplayPanel: React.FC = () => {
           onChange={setShowHomeBlog}
         />
 
-        {/* ── Автоматизації ── */}
         <SectionHeader label={t('settings.display.section_automations')} />
 
         <ToggleRow
@@ -118,7 +110,6 @@ export const DisplayPanel: React.FC = () => {
           onChange={setShowAutoBadge}
         />
 
-        {/* ── Контакти ── */}
         <SectionHeader label={t('settings.display.section_contacts')} />
 
         <ToggleRow

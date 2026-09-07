@@ -10,38 +10,33 @@ import {
   useSendCampaignMutation,
 } from './useBroadcastQueries';
 import { getCampaignsApi } from '../../api/broadcast';
+import { queryKeys } from '../../api/queryKeys';
 import { useLeadsQuery, useOrdersQuery } from '../crm/useCrmQueries';
 import { useBotsQuery } from '../bot/useBotsQuery';
-import type { AudienceCondition, CampaignResponse, FilterType } from '../../types';
+import type { CampaignResponse } from '../../types';
 import type { CustomNode } from '../../types/broadcast';
 import { useFlowHistory } from '../bot/useFlowHistory';
 import { getFlowKey, getNodesAfterRemovingEdges } from '../../utils/flowHelpers';
 import { getBlocks } from '../bot/useNodeEditor';
 import { FLOW_EDGE_DEFAULTS } from '../../const/flowEdges';
-import { ROUTES } from '../../routes/paths';
 import type { ButtonData } from '../../types/bot';
 import { createDefaultNodeData } from '../../const/flowBlocks';
 import { generateId } from '../../utils/id';
-import { TIMING } from '../../const/constants';
+import { TIMING, STORAGE_KEYS } from '../../const/constants';
+import { useBroadcastAudience, resolveFilter } from './useBroadcastAudience';
+import { useBroadcastScheduler } from './useBroadcastScheduler';
 
-const resolveFilter = (conditions: AudienceCondition[]) => {
-  let filterType: FilterType = 'ALL';
-  let filterValue: string | undefined = undefined;
-
-  const tagCond = conditions.find((c) => c.field === 'tag');
-  const orderCond = conditions.find((c) => c.field === 'order');
-  const leadCond = conditions.find((c) => c.field === 'lead');
-
-  if (tagCond) {
-    filterType = 'BY_TAG';
-    filterValue = tagCond.value;
-  } else if (orderCond) {
-    filterType = 'HAS_ORDERS';
-  } else if (leadCond) {
-    filterType = 'HAS_LEADS';
+const getBroadcastDefaultNodeData = (type: string): Record<string, unknown> => {
+  switch (type) {
+    case 'INPUT':
+      return { text: 'Please enter a value:', variableName: 'input_var' };
+    case 'ORDER':
+      return { productName: 'Product Name', price: '100', currency: 'UAH' };
+    case 'LEAD':
+      return { name: 'user_name', email: 'user_email', phone: 'user_phone' };
+    default:
+      return createDefaultNodeData(type);
   }
-
-  return { filterType, filterValue };
 };
 
 export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => {
@@ -51,48 +46,51 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
   const activeBotId = useBotStore((state) => state.activeBotId);
   const botId = activeBotId || 0;
   const { screenToFlowPosition, fitView } = useReactFlow();
+
   const [nodes, setNodesRaw, onNodesChangeState] = useNodesState<CustomNode>([]);
   const [edges, setEdgesRaw, onEdgesChangeState] = useEdgesState<Edge>([]);
 
-  const setNodes = useCallback((update: SetStateAction<CustomNode[]>) => {
-    if (isLocalChangeRef) {
-      isLocalChangeRef.current = true;
-    }
-    setNodesRaw(update);
-  }, [setNodesRaw, isLocalChangeRef]);
+  const setNodes = useCallback(
+    (update: SetStateAction<CustomNode[]>) => {
+      if (isLocalChangeRef) {
+        isLocalChangeRef.current = true;
+      }
+      setNodesRaw(update);
+    },
+    [setNodesRaw, isLocalChangeRef]
+  );
 
-  const setEdges = useCallback((update: SetStateAction<Edge[]>) => {
-    if (isLocalChangeRef) {
-      isLocalChangeRef.current = true;
-    }
-    setEdgesRaw(update);
-  }, [setEdgesRaw, isLocalChangeRef]);
+  const setEdges = useCallback(
+    (update: SetStateAction<Edge[]>) => {
+      if (isLocalChangeRef) {
+        isLocalChangeRef.current = true;
+      }
+      setEdgesRaw(update);
+    },
+    [setEdgesRaw, isLocalChangeRef]
+  );
+
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const [campaignName, setCampaignName] = useState('');
   const [isEditingName, setIsEditingName] = useState(false);
   const [messageText, setMessageText] = useState('');
   const [isDirty, setIsDirty] = useState(false);
-  const [isAudienceOpen, setIsAudienceOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isPickOpen, setIsPickOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [conditions, setConditions] = useState<AudienceCondition[]>([]);
-  const [isConditionDropdownOpen, setIsConditionDropdownOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<'general' | 'system' | 'custom'>('general');
+
   const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
 
   const campaignQueries = useQueries({
     queries: bots.map((bot) => ({
-      queryKey: ['campaigns', bot.id],
+      queryKey: queryKeys.broadcasts.campaigns(bot.id),
       queryFn: () => getCampaignsApi(bot.id),
       enabled: bots.length > 0,
       refetchInterval: (query: { state: { data?: CampaignResponse[] } }) => {
         const data = query.state.data;
         if (!data) return false;
-        const hasActive = data.some(
-          (c) => c.status === 'IN_PROGRESS' || c.status === 'SCHEDULED'
-        );
+        const hasActive = data.some((c) => c.status === 'IN_PROGRESS' || c.status === 'SCHEDULED');
         return hasActive ? TIMING.POLL_INTERVAL_MS : false;
       },
     })),
@@ -102,11 +100,50 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
   const allCampaigns = campaignQueries.flatMap((q) => q.data || []);
   const campaign = allCampaigns.find((c) => c.id === campaignId);
   const campaignBotId = campaign?.botId || botId;
+
   const { data: tags = [] } = useTagsQuery(campaignBotId);
   const { data: leads = [] } = useLeadsQuery(campaignBotId);
   const { data: orders = [] } = useOrdersQuery(campaignBotId);
   const updateCampaignMut = useUpdateCampaignMutation(campaignBotId);
   const sendCampaignMut = useSendCampaignMutation(campaignBotId);
+
+  const {
+    isAudienceOpen,
+    setIsAudienceOpen,
+    conditions,
+    setConditions,
+    isConditionDropdownOpen,
+    setIsConditionDropdownOpen,
+    selectedCategory,
+    setSelectedCategory,
+    handleAddTagCondition,
+    handleRemoveCondition,
+    getAudienceCount,
+  } = useBroadcastAudience({
+    bots,
+    botId,
+    orders,
+    leads,
+    setIsDirty,
+  });
+
+  const {
+    handleSaveDraft,
+    handleSendCampaign,
+    handleScheduleCampaign,
+  } = useBroadcastScheduler({
+    campaign,
+    campaignId,
+    campaignName,
+    conditions,
+    nodes,
+    edges,
+    messageText,
+    updateCampaignMut,
+    sendCampaignMut,
+    setIsDirty,
+    navigate,
+  });
 
   const {
     past,
@@ -116,7 +153,14 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     undo,
     redo,
     takeSnapshot,
-  } = useFlowHistory(nodes, edges, setNodes, setEdges, setSelectedNodeId);
+  } = useFlowHistory(
+    nodes as unknown as Node[],
+    edges,
+    setNodes as unknown as React.Dispatch<React.SetStateAction<Node[]>>,
+    setEdges as unknown as React.Dispatch<React.SetStateAction<Edge[]>>,
+    setSelectedNodeId
+  );
+
   const copySelectedNodes = useCallback(() => {
     const selectedNodes = nodes.filter((n) => n.selected);
     if (selectedNodes.length === 0) return;
@@ -128,13 +172,13 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
 
     const clipboardData = {
       nodes: selectedNodes,
-      edges: internalEdges
+      edges: internalEdges,
     };
-    localStorage.setItem('launchly_flow_clipboard', JSON.stringify(clipboardData));
+    localStorage.setItem(STORAGE_KEYS.FLOW_CLIPBOARD, JSON.stringify(clipboardData));
   }, [nodes, edges]);
 
   const pasteCopiedNodes = useCallback(() => {
-    const clipboardStr = localStorage.getItem('launchly_flow_clipboard');
+    const clipboardStr = localStorage.getItem(STORAGE_KEYS.FLOW_CLIPBOARD);
     if (!clipboardStr) return;
 
     let copiedNodes: CustomNode[] = [];
@@ -155,7 +199,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     const centerY = window.innerHeight / 2;
     const flowCenter = screenToFlowPosition({ x: centerX, y: centerY });
 
-    const validNodes = copiedNodes.filter(n => n.type !== 'START');
+    const validNodes = copiedNodes.filter((n) => n.type !== 'START');
     let minX = Infinity;
     let maxX = -Infinity;
     let minY = Infinity;
@@ -173,95 +217,93 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     const groupCenterX = minX !== Infinity ? (minX + maxX) / 2 : 0;
     const groupCenterY = minY !== Infinity ? (minY + maxY) / 2 : 0;
 
-    const offsetX = minX !== Infinity ? (flowCenter.x - groupCenterX) : 24;
-    const offsetY = minY !== Infinity ? (flowCenter.y - groupCenterY) : 24;
+    const offsetX = minX !== Infinity ? flowCenter.x - groupCenterX : 24;
+    const offsetY = minY !== Infinity ? flowCenter.y - groupCenterY : 24;
 
     const nodeIdMap: Record<string, string> = {};
     const buttonValueMap: Record<string, string> = {};
 
-    const newNodes = copiedNodes.map((node) => {
-      if (node.type === 'START') return null;
+    const newNodes = copiedNodes
+      .map((node) => {
+        if (node.type === 'START') return null;
 
-      const newId = generateId(`node_${node.type?.toLowerCase() || 'msg'}`);
-      nodeIdMap[node.id] = newId;
+        const newId = generateId(`node_${node.type?.toLowerCase() || 'msg'}`);
+        nodeIdMap[node.id] = newId;
 
-      const updatedData = { ...node.data };
-      const blocksList = getBlocks(updatedData);
-      const updatedBlocks = blocksList.map((block) => {
-        const blockClone = { ...block };
-        if (Array.isArray(blockClone.buttons)) {
-          blockClone.buttons = blockClone.buttons.map((btn: ButtonData) => {
-            const newValue = generateId('btn');
-            if (btn.value) {
-              buttonValueMap[btn.value] = newValue;
-            }
-            return { ...btn, value: newValue };
-          });
+        const updatedData = { ...node.data };
+        const blocksList = getBlocks(updatedData);
+        const updatedBlocks = blocksList.map((block) => {
+          const blockClone = { ...block };
+          if (Array.isArray(blockClone.buttons)) {
+            blockClone.buttons = blockClone.buttons.map((btn: ButtonData) => {
+              const newValue = generateId('btn');
+              if (btn.value) {
+                buttonValueMap[btn.value] = newValue;
+              }
+              return { ...btn, value: newValue };
+            });
+          }
+          return blockClone;
+        });
+
+        if (updatedData.blocks || blocksList.length > 1 || (blocksList[0] && blocksList[0].id !== 'default_text')) {
+          updatedData.blocks = updatedBlocks;
         }
-        return blockClone;
-      });
 
-      if (updatedData.blocks || blocksList.length > 1 || (blocksList[0] && blocksList[0].id !== 'default_text')) {
-        updatedData.blocks = updatedBlocks;
-      }
+        const firstText = updatedBlocks.find((b) => b.type === 'text');
+        const firstImage = updatedBlocks.find((b) => b.type === 'image');
+        const allButtons: ButtonData[] = [];
+        updatedBlocks.forEach((b) => {
+          if (Array.isArray(b.buttons)) {
+            allButtons.push(...(b.buttons as ButtonData[]));
+          }
+        });
+        updatedData.text = firstText ? firstText.text : updatedData.text || '';
+        updatedData.imageUrl = firstImage ? firstImage.imageUrl : updatedData.imageUrl || '';
+        updatedData.buttons = allButtons;
 
-      const firstText = updatedBlocks.find((b) => b.type === 'text');
-      const firstImage = updatedBlocks.find((b) => b.type === 'image');
-      const allButtons: ButtonData[] = [];
-      updatedBlocks.forEach((b) => {
-        if (Array.isArray(b.buttons)) {
-          allButtons.push(...(b.buttons as ButtonData[]));
-        }
-      });
-      updatedData.text = firstText ? firstText.text : (updatedData.text || '');
-      updatedData.imageUrl = firstImage ? firstImage.imageUrl : (updatedData.imageUrl || '');
-      updatedData.buttons = allButtons;
-
-      return {
-        ...node,
-        id: newId,
-        position: {
-          x: node.position.x + offsetX,
-          y: node.position.y + offsetY,
-        },
-        selected: true,
-        data: updatedData,
-      } as CustomNode;
-    }).filter(Boolean) as CustomNode[];
+        return {
+          ...node,
+          id: newId,
+          position: {
+            x: node.position.x + offsetX,
+            y: node.position.y + offsetY,
+          },
+          selected: true,
+          data: updatedData,
+        } as CustomNode;
+      })
+      .filter(Boolean) as CustomNode[];
 
     if (newNodes.length === 0) return;
 
-    const newEdges = copiedEdges.map((edge) => {
-      const source = nodeIdMap[edge.source];
-      const target = nodeIdMap[edge.target];
-      if (!source || !target) return null;
+    const newEdges = copiedEdges
+      .map((edge) => {
+        const source = nodeIdMap[edge.source];
+        const target = nodeIdMap[edge.target];
+        if (!source || !target) return null;
 
-      const newEdgeId = generateId('edge');
-      const sourceHandle = edge.sourceHandle && buttonValueMap[edge.sourceHandle]
-        ? (buttonValueMap[edge.sourceHandle] as string)
-        : edge.sourceHandle;
+        const newEdgeId = generateId('edge');
+        const sourceHandle =
+          edge.sourceHandle && buttonValueMap[edge.sourceHandle]
+            ? (buttonValueMap[edge.sourceHandle] as string)
+            : edge.sourceHandle;
 
-      return {
-        ...edge,
-        id: newEdgeId,
-        source,
-        target,
-        sourceHandle,
-      };
-    }).filter(Boolean) as Edge[];
+        return {
+          ...edge,
+          id: newEdgeId,
+          source,
+          target,
+          sourceHandle,
+        };
+      })
+      .filter(Boolean) as Edge[];
 
-    setNodes((nds) => [
-      ...nds.map((n) => ({ ...n, selected: false }) as CustomNode),
-      ...newNodes,
-    ]);
-
-    setEdges((eds) => [
-      ...eds,
-      ...newEdges,
-    ]);
-
+    setNodes((nds) => [...nds.map((n) => ({ ...n, selected: false }) as CustomNode), ...newNodes]);
+    setEdges((eds) => [...eds, ...newEdges]);
     setSelectedNodeId(newNodes[newNodes.length - 1].id);
-  }, [takeSnapshot, setNodes, setEdges, setSelectedNodeId]);
+  }, [takeSnapshot, setNodes, setEdges, setSelectedNodeId, screenToFlowPosition]);
+
   const connectionStartRef = useRef<{ nodeId: string; handleId: string | null; handleType: string } | null>(null);
   const didConnectRef = useRef<boolean>(false);
   const justEndedDragRef = useRef<boolean>(false);
@@ -318,19 +360,22 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     }
   }, [setEdges]);
 
-  const setContextMenu = useCallback((val: typeof contextMenuState) => {
-    setContextMenuState(val);
-    if (val === null) {
-      restoreTempRemovedEdge();
-    }
-  }, [restoreTempRemovedEdge]);
+  const setContextMenu = useCallback(
+    (val: typeof contextMenuState) => {
+      setContextMenuState(val);
+      if (val === null) {
+        restoreTempRemovedEdge();
+      }
+    },
+    [restoreTempRemovedEdge]
+  );
 
   const [edgeType, setEdgeType] = useState<'default' | 'smoothstep'>(
-    (localStorage.getItem('launchly_flow_edge_type') as 'default' | 'smoothstep') || 'smoothstep'
+    (localStorage.getItem(STORAGE_KEYS.FLOW_EDGE_TYPE) as 'default' | 'smoothstep') || 'smoothstep'
   );
 
   useEffect(() => {
-    localStorage.setItem('launchly_flow_edge_type', edgeType);
+    localStorage.setItem(STORAGE_KEYS.FLOW_EDGE_TYPE, edgeType);
     setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
@@ -419,7 +464,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
         fitView({ padding: 0.6 });
       }, 50);
     }
-  }, [campaign, setNodes, setEdges, fitView, edgeType]);
+  }, [campaign, setNodes, setEdges, fitView, edgeType, setConditions]);
 
   useEffect(() => {
     setNodes((nds) =>
@@ -485,21 +530,24 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
       const mainMsgNode = nodes.find((n) => n.type === 'MESSAGE');
       const finalMessage = (mainMsgNode?.data?.text as string) || messageText || 'Hello!';
 
-      updateCampaignMut.mutate({
-        campaignId,
-        req: {
-          name: campaignName,
-          message: finalMessage,
-          filterType,
-          filterValue,
-          nodes: JSON.stringify(nodes),
-          edges: JSON.stringify(edges),
+      updateCampaignMut.mutate(
+        {
+          campaignId,
+          req: {
+            name: campaignName,
+            message: finalMessage,
+            filterType,
+            filterValue,
+            nodes: JSON.stringify(nodes),
+            edges: JSON.stringify(edges),
+          },
         },
-      }, {
-        onError: (err) => {
-          console.error('Auto-save failed:', err);
+        {
+          onError: (err) => {
+            console.error('Auto-save failed:', err);
+          },
         }
-      });
+      );
       lastSavedKeyRef.current = currentKey;
       setIsDirty(false);
       if (isLocalChangeRef) {
@@ -508,7 +556,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [nodes, edges, campaignName, messageText, conditions, campaignId, isCampaignsLoading, campaign?.status]);
+  }, [nodes, edges, campaignName, messageText, conditions, campaignId, isCampaignsLoading, campaign?.status, updateCampaignMut, isLocalChangeRef]);
 
   useEffect(() => {
     const handleHover = (e: Event) => {
@@ -571,10 +619,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
         data: updatedData,
       };
 
-      setNodes((nds) => [
-        ...nds.map((n) => ({ ...n, selected: false }) as CustomNode),
-        newNode,
-      ]);
+      setNodes((nds) => [...nds.map((n) => ({ ...n, selected: false }) as CustomNode), newNode]);
       setSelectedNodeId(newId);
     };
 
@@ -679,9 +724,6 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     [edges, nodes, setNodes, onEdgesChangeState, takeSnapshot]
   );
 
-  const handleNodesChange = onNodesChange;
-  const handleEdgesChange = onEdgesChange;
-
   const onNodeClick = useCallback(
     (_: unknown, node: Node) => {
       setSelectedNodeId(node.id);
@@ -714,28 +756,31 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     [setEdges, nodes, edgeType, takeSnapshot]
   );
 
-  const onConnectStart = useCallback((_event: unknown, { nodeId, handleId, handleType }: { nodeId: string | null; handleId: string | null; handleType: 'source' | 'target' | null }) => {
-    if (!nodeId || !handleType) return;
-    connectionStartRef.current = { nodeId, handleId, handleType };
-    didConnectRef.current = false;
+  const onConnectStart = useCallback(
+    (_event: unknown, { nodeId, handleId, handleType }: { nodeId: string | null; handleId: string | null; handleType: 'source' | 'target' | null }) => {
+      if (!nodeId || !handleType) return;
+      connectionStartRef.current = { nodeId, handleId, handleType };
+      didConnectRef.current = false;
 
-    if (tempRemovedEdgeRef.current) {
-      restoreTempRemovedEdge();
-    }
+      if (tempRemovedEdgeRef.current) {
+        restoreTempRemovedEdge();
+      }
 
-    if (handleType === 'source') {
-      let sourceHandle = handleId;
-      if (!sourceHandle) {
-        const sourceNode = nodes.find((n) => n.id === nodeId);
-        sourceHandle = sourceNode?.type === 'START_BROADCAST' ? 'then' : 'next';
+      if (handleType === 'source') {
+        let sourceHandle = handleId;
+        if (!sourceHandle) {
+          const sourceNode = nodes.find((n) => n.id === nodeId);
+          sourceHandle = sourceNode?.type === 'START_BROADCAST' ? 'then' : 'next';
+        }
+        const existingEdge = edges.find((e) => e.source === nodeId && e.sourceHandle === sourceHandle);
+        if (existingEdge) {
+          tempRemovedEdgeRef.current = existingEdge;
+          setEdges((eds) => eds.filter((e) => e.id !== existingEdge.id));
+        }
       }
-      const existingEdge = edges.find((e) => e.source === nodeId && e.sourceHandle === sourceHandle);
-      if (existingEdge) {
-        tempRemovedEdgeRef.current = existingEdge;
-        setEdges((eds) => eds.filter((e) => e.id !== existingEdge.id));
-      }
-    }
-  }, [nodes, edges, setEdges, restoreTempRemovedEdge]);
+    },
+    [nodes, edges, setEdges, restoreTempRemovedEdge]
+  );
 
   const onConnectEnd = useCallback(
     (event: MouseEvent | TouchEvent) => {
@@ -762,9 +807,8 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
         return;
       }
 
-      const elementsUnderPoint = typeof document.elementsFromPoint === 'function'
-        ? document.elementsFromPoint(clientX, clientY)
-        : [];
+      const elementsUnderPoint =
+        typeof document.elementsFromPoint === 'function' ? document.elementsFromPoint(clientX, clientY) : [];
 
       let nodeElement: Element | null = null;
       let isHandle = false;
@@ -867,10 +911,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
       type: edgeType,
     };
 
-    setNodes((nds) => [
-      ...nds.map((n) => ({ ...n, selected: false }) as CustomNode),
-      newNode,
-    ]);
+    setNodes((nds) => [...nds.map((n) => ({ ...n, selected: false }) as CustomNode), newNode]);
 
     setEdges((eds) => {
       const filtered = eds.filter((e) => !(e.source === source.nodeId && e.sourceHandle === sourceHandle));
@@ -885,7 +926,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     const tempNode: CustomNode = {
       id: 'temp_menu_node',
       type: 'TEMP',
-      position: contextMenu ? contextMenu.flowPosition : (nodes[0]?.position || { x: 0, y: 0 }),
+      position: contextMenu ? contextMenu.flowPosition : nodes[0]?.position || { x: 0, y: 0 },
       data: {},
       selectable: false,
       draggable: false,
@@ -961,19 +1002,6 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
         return node;
       })
     );
-  };
-
-  const getBroadcastDefaultNodeData = (type: string): Record<string, unknown> => {
-    switch (type) {
-      case 'INPUT':
-        return { text: 'Please enter a value:', variableName: 'input_var' };
-      case 'ORDER':
-        return { productName: 'Product Name', price: '100', currency: 'UAH' };
-      case 'LEAD':
-        return { name: 'user_name', email: 'user_email', phone: 'user_phone' };
-      default:
-        return createDefaultNodeData(type);
-    }
   };
 
   const handleAddNode = (type: string) => {
@@ -1057,146 +1085,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     setIsDirty(true);
   };
 
-  const handleAddTagCondition = (tagName: string) => {
-    const newCond: AudienceCondition = {
-      id: `cond_${Date.now()}`,
-      field: 'tag',
-      operator: 'is',
-      value: tagName,
-    };
-    setConditions((prev) => [...prev, newCond]);
-    setIsConditionDropdownOpen(false);
-    setIsDirty(true);
-  };
-
-  const handleRemoveCondition = (id: string) => {
-    setConditions((prev) => prev.filter((c) => c.id !== id));
-    setIsDirty(true);
-  };
-
-  const handleSaveDraft = () => {
-    if (!campaign) return;
-
-    const { filterType, filterValue } = resolveFilter(conditions);
-    const mainMsgNode = nodes.find((n) => n.type === 'MESSAGE');
-    const finalMessage = (mainMsgNode?.data?.text as string) || messageText || 'Hello!';
-
-    updateCampaignMut.mutate(
-      {
-        campaignId,
-        req: {
-          name: campaignName,
-          message: finalMessage,
-          filterType,
-          filterValue,
-          nodes: JSON.stringify(nodes),
-          edges: JSON.stringify(edges),
-        },
-      },
-      {
-        onSuccess: () => {
-          setIsDirty(false);
-        },
-      }
-    );
-  };
-
-  const handleSendCampaign = async () => {
-    if (!campaign) return;
-
-    try {
-      const { filterType, filterValue } = resolveFilter(conditions);
-      const mainMsgNode = nodes.find((n) => n.type === 'MESSAGE');
-      const finalMessage = (mainMsgNode?.data?.text as string) || messageText || 'Hello!';
-
-      await updateCampaignMut.mutateAsync({
-        campaignId,
-        req: {
-          name: campaignName,
-          message: finalMessage,
-          filterType,
-          filterValue,
-          nodes: JSON.stringify(nodes),
-          edges: JSON.stringify(edges),
-        },
-      });
-      setIsDirty(false);
-
-      sendCampaignMut.mutate(campaignId, {
-        onSuccess: () => {
-          navigate(ROUTES.BROADCASTS);
-        },
-      });
-    } catch (err) {
-      console.error('Failed to save campaign before sending:', err);
-    }
-  };
-
-  const handleScheduleCampaign = async (dateTimeIso: string) => {
-    if (!campaign) return;
-    try {
-      const { filterType, filterValue } = resolveFilter(conditions);
-      const mainMsgNode = nodes.find((n) => n.type === 'MESSAGE');
-      const finalMessage = (mainMsgNode?.data?.text as string) || messageText || 'Hello!';
-
-      await updateCampaignMut.mutateAsync({
-        campaignId,
-        req: {
-          name: campaignName,
-          message: finalMessage,
-          filterType,
-          filterValue,
-          nodes: JSON.stringify(nodes),
-          edges: JSON.stringify(edges),
-          scheduledAt: dateTimeIso,
-        },
-      });
-      setIsDirty(false);
-      navigate(ROUTES.BROADCASTS);
-    } catch (err) {
-      console.error('Failed to schedule campaign:', err);
-    }
-  };
-
-  const getAudienceCount = () => {
-    const currentBot = bots.find((b) => b.id === botId);
-    const totalUsers = currentBot ? (currentBot.totalUsers ?? 0) : 0;
-    if (totalUsers === 0) return 0;
-
-    if (conditions.length === 0) return totalUsers;
-
-    const hasTag = conditions.some((c) => c.field === 'tag');
-    const hasOrder = conditions.some((c) => c.field === 'order');
-    const hasLead = conditions.some((c) => c.field === 'lead');
-
-    let count = totalUsers;
-    if (hasTag) {
-      const tagCond = conditions.find((c) => c.field === 'tag');
-      if (tagCond && tagCond.value) {
-        const tagName = tagCond.value;
-        let tagCount = 0;
-        if (tagName === 'Окунь') tagCount = 1;
-        else if (tagName === 'Щука') tagCount = 0;
-        else if (tagName === 'Карась') tagCount = 0;
-        else {
-          tagCount = Math.abs(tagName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 4;
-        }
-        count = Math.min(tagCount, totalUsers);
-      } else {
-        count = 0;
-      }
-    }
-    if (hasOrder) {
-      count = Math.min(orders.length || 2, count);
-    }
-    if (hasLead) {
-      count = Math.min(leads.length || 3, count);
-    }
-    return Math.min(count, totalUsers);
-  };
-
   const activeNode = nodes.find((n) => n.id === selectedNodeId);
-
 
   return {
     campaignId,
@@ -1240,8 +1129,8 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     leads,
     orders,
     activeNode,
-    handleNodesChange,
-    handleEdgesChange,
+    handleNodesChange: onNodesChange,
+    handleEdgesChange: onEdgesChange,
     onConnect,
     onConnectStart,
     onConnectEnd,

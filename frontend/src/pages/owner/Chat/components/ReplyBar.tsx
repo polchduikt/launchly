@@ -72,7 +72,6 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
   const replyTextareaRef = useRef<HTMLTextAreaElement>(null);
   const noteTextareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-expand reply textarea
   useEffect(() => {
     const el = replyTextareaRef.current;
     if (!el) return;
@@ -82,7 +81,6 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
     el.style.overflowY = newHeight >= 160 ? 'auto' : 'hidden';
   }, [typedMessage]);
 
-  // Auto-expand note textarea
   useEffect(() => {
     const el = noteTextareaRef.current;
     if (!el) return;

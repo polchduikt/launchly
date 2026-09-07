@@ -36,7 +36,6 @@ const getChannel = (): BroadcastChannel | null => {
   return sharedChannel;
 };
 
-// Set of recently processed message IDs to prevent duplicate handling
 const recentMessageIds = new Set<string>();
 
 const isDuplicateMessage = (msg: SyncMessage): boolean => {
@@ -72,7 +71,6 @@ export const broadcastEvent = <T = unknown>(type: SyncEventType, payload?: T): v
     }
   }
 
-  // Only broadcast via localStorage fallback if BroadcastChannel is unavailable or failed
   if (!channelSuccess && typeof localStorage !== 'undefined') {
     try {
       localStorage.setItem(FALLBACK_STORAGE_KEY, JSON.stringify(message));

@@ -54,7 +54,7 @@ export const PaymentsPanel: React.FC = () => {
 
     if (paypalIntegration) {
       setIsPaypalConnected(paypalIntegration.active);
-      const cfg = paypalIntegration.config || {};
+      const cfg = (paypalIntegration.config as Record<string, any>) || {};
       setPaypalClientId(cfg.paypalClientId || '');
       setPaypalWebhookId(cfg.paypalWebhookId || '');
       setPaypalLiveClientId(cfg.paypalLiveClientId || '');

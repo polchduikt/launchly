@@ -31,7 +31,6 @@ export const getFlowBlocks = (): Array<{ type: string; label: string; color: str
     icon: NODE_ICON_COMPONENTS[type],
   }));
 
-// Legacy export for backward compatibility — static labels (English fallback)
 export const FLOW_BLOCKS = FLOW_BLOCK_TYPES.map((type) => ({
   type,
   get label() { return t(`flow_block.${type}`); },

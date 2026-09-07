@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { formatAuditTitle, formatAuditDescription } from '../../../utils/auditFormatters';
+import { formatEuroDateTime } from '../../../utils/date';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../../../api/queryKeys';
 import { AdminLayout } from '../../../components/layout/AdminLayout';
 import {
-  Search,
   Filter,
   Send,
   Bot,
@@ -51,11 +52,13 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../routes/paths';
 import { useTranslation } from '../../../i18n/config';
 
+import { AdminSearchBar } from '../../../components/admin';
+
 export const AdminChatsPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user: currentUser } = useAuthStore();
+  const currentUser = useAuthStore((state) => state.user);
 
   useEffect(() => {
     if (currentUser && currentUser.role === 'ROLE_ADMIN') {
@@ -80,7 +83,7 @@ export const AdminChatsPage: React.FC = () => {
   const [activityPage, setActivityPage] = useState(0);
 
   const { data: ticketsData, isLoading: isTicketsLoading } = useQuery({
-    queryKey: ['adminSupportTickets', activeTab, selectedPeriod, debouncedSearchQuery],
+    queryKey: [...queryKeys.admin.supportTickets, activeTab, selectedPeriod, debouncedSearchQuery],
     queryFn: () => fetchAdminSupportTicketsApi(activeTab, selectedPeriod, debouncedSearchQuery, 0, 50),
     refetchInterval: 5000,
   });
@@ -111,14 +114,14 @@ export const AdminChatsPage: React.FC = () => {
   }, [tickets, selectedTicketId]);
 
   const { data: selectedTicket } = useQuery({
-    queryKey: ['adminSupportTicketDetail', selectedTicketId],
+    queryKey: queryKeys.admin.supportTicketDetail(selectedTicketId),
     queryFn: () => fetchAdminSupportTicketDetailApi(selectedTicketId!),
     enabled: !!selectedTicketId,
     refetchInterval: 3000,
   });
 
   const { data: userDetailData, isLoading: isDetailLoading } = useQuery({
-    queryKey: ['adminUserDetails', selectedTicket?.userId, detailPeriod, activityCategoryFilter, activityPage],
+    queryKey: [...queryKeys.admin.userDetails(selectedTicket?.userId), detailPeriod, activityCategoryFilter, activityPage],
     queryFn: () => fetchAdminUserDetailsApi(selectedTicket!.userId, detailPeriod, activityCategoryFilter, activityPage, 20),
     enabled: !!selectedTicket?.userId && showDetailModal
   });
@@ -131,32 +134,32 @@ export const AdminChatsPage: React.FC = () => {
     mutationFn: ({ id, text }: { id: number; text: string }) => sendAdminSupportMessageApi(id, text),
     onSuccess: () => {
       setReplyText('');
-      queryClient.invalidateQueries({ queryKey: ['adminSupportTickets'] });
-      queryClient.invalidateQueries({ queryKey: ['adminSupportTicketDetail', selectedTicketId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.supportTickets });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.supportTicketDetail(selectedTicketId) });
     },
   });
 
   const toggleFavoriteMutation = useMutation({
     mutationFn: (id: number) => toggleAdminSupportTicketFavoriteApi(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminSupportTickets'] });
-      queryClient.invalidateQueries({ queryKey: ['adminSupportTicketDetail', selectedTicketId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.supportTickets });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.supportTicketDetail(selectedTicketId) });
     },
   });
 
   const toggleStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status?: string }) => toggleAdminSupportTicketStatusApi(id, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminSupportTickets'] });
-      queryClient.invalidateQueries({ queryKey: ['adminSupportTicketDetail', selectedTicketId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.supportTickets });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.supportTicketDetail(selectedTicketId) });
     },
   });
 
   const claimTicketMutation = useMutation({
     mutationFn: (id: number) => claimAdminSupportTicketApi(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminSupportTickets'] });
-      queryClient.invalidateQueries({ queryKey: ['adminSupportTicketDetail', selectedTicketId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.supportTickets });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.supportTicketDetail(selectedTicketId) });
     },
   });
 
@@ -205,17 +208,6 @@ export const AdminChatsPage: React.FC = () => {
     }
   };
 
-  const formatEuroDateTime = (dateStr?: string) => {
-    if (!dateStr) return '—';
-    const d = new Date(dateStr);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    const seconds = String(d.getSeconds()).padStart(2, '0');
-    return `${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
-  };
 
   const formatTime = (timeStr: string | null) => {
     if (!timeStr) return '';
@@ -283,16 +275,11 @@ export const AdminChatsPage: React.FC = () => {
               <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A]">
                 {t('admin.search')}
               </label>
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#0A0A0A]" size={13} />
-                <input
-                  type="text"
-                  placeholder={t('admin.search_chats_placeholder')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder-slate-500 focus:outline-none transition shadow-[2px_2px_0px_#0A0A0A]"
-                />
-              </div>
+              <AdminSearchBar
+                placeholder={t('admin.search_chats_placeholder')}
+                value={searchQuery}
+                onChange={setSearchQuery}
+              />
             </div>
 
             <div className="space-y-1 shrink-0">

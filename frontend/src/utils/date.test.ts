@@ -22,7 +22,8 @@ describe('formatRelativeTime', () => {
   it('formats dates in minutes', () => {
     const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000);
     const res = formatRelativeTime(fiveMinsAgo);
-    expect(res).toBeTruthy();
+    expect(res).toContain('5');
+    expect(res).toContain('хв.');
   });
 
   it('formats dates in hours', () => {

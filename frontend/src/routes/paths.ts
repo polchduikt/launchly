@@ -28,6 +28,11 @@ export const ROUTES = {
   AI_TERMS: '/ai-terms',
   PAYMENT_TERMS: '/payment-terms',
   BLOCKED: '/blocked',
+  TEMPLATES: '/templates',
+  TEMPLATES_CREATE: '/templates/create',
+  TEMPLATES_EDIT: '/templates/edit/:shareCode',
+  TEMPLATES_DETAIL: '/templates/detail/:shareCode',
+  TEMPLATES_INSTALL: '/templates/install/:shareCode',
   ADMIN_HOME: '/admin',
   ADMIN_STATS: '/admin/stats',
   ADMIN_CHATS: '/admin/chats',
@@ -36,5 +41,30 @@ export const ROUTES = {
   ADMIN_BROADCASTS: '/admin/broadcasts',
   ADMIN_LOGS: '/admin/logs',
   ADMIN_BLOG: '/admin/blog',
-};
+} as const;
 
+export const isPublicRoute = (pathname: string): boolean => {
+  if (
+    pathname === ROUTES.LANDING ||
+    pathname === ROUTES.LOGIN ||
+    pathname === ROUTES.REGISTER ||
+    pathname === ROUTES.BLOCKED ||
+    pathname === ROUTES.TERMS ||
+    pathname === ROUTES.PRIVACY ||
+    pathname === ROUTES.FAQ ||
+    pathname === ROUTES.ACCEPTABLE_USE ||
+    pathname === ROUTES.AI_TERMS ||
+    pathname === ROUTES.PAYMENT_TERMS ||
+    pathname === ROUTES.OAUTH_CALLBACK
+  ) {
+    return true;
+  }
+  if (
+    pathname.startsWith('/blog') ||
+    pathname.startsWith('/templates/install') ||
+    pathname.startsWith('/templates/detail')
+  ) {
+    return true;
+  }
+  return false;
+};

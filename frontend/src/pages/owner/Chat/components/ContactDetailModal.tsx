@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Play,
@@ -21,7 +21,7 @@ import { useUpdateBotUserMutation, useDeleteBotUserMutation } from '../../../../
 import { ROUTES } from '../../../../routes/paths';
 import { t } from '../../../../i18n/config';
 import { createTagApi } from '../../../../api/broadcast';
-import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../api/bot';
+import { useCustomFieldsQuery, useSaveCustomFieldsMutation } from '../../../../hooks/bot/useCustomFieldsQuery';
 import { TagSearchSelect } from '../../FlowBuilder/components/sidebar/editors/TagSearchSelect';
 import { ConfirmModal } from '../../../../components/common/ConfirmModal';
 
@@ -58,7 +58,6 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
   const [showAddCustomFieldInline, setShowAddCustomFieldInline] = useState(false);
   const [customFieldName, setCustomFieldName] = useState('');
   const [customFieldValue, setCustomFieldValue] = useState('');
-  const [availableFields, setAvailableFields] = useState<any[]>([]);
   const [isFieldDropdownOpen, setIsFieldDropdownOpen] = useState(false);
   const fieldDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -76,19 +75,15 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
     };
   }, [isFieldDropdownOpen]);
 
-  useEffect(() => {
-    if (botId) {
-      getCustomFieldsApi(botId)
-        .then((data) => {
-          if (data && typeof data === 'object') {
-            if (Array.isArray(data.fields)) setAvailableFields(data.fields);
-            else if (Array.isArray(data)) setAvailableFields(data);
-            else setAvailableFields([]);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [botId]);
+  const { data: customFieldsData } = useCustomFieldsQuery(botId);
+  const saveCustomFieldsMutation = useSaveCustomFieldsMutation(botId);
+
+  const availableFields = useMemo(() => {
+    if (!customFieldsData || typeof customFieldsData !== 'object') return [];
+    if (Array.isArray(customFieldsData.fields)) return customFieldsData.fields;
+    if (Array.isArray(customFieldsData)) return customFieldsData as any[];
+    return [];
+  }, [customFieldsData]);
 
   const parseMetadata = (metaStr: string | null): BotUserMetadata => {
     try {
@@ -133,12 +128,12 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
     const fields = meta.customFields || {};
     handleUpdateContactMetadata({ ...meta, customFields: { ...fields, [nameTrimmed]: customFieldValue } });
     if (botId) {
-      getCustomFieldsApi(botId).then((existing) => {
-        const list = existing && Array.isArray(existing.fields) ? existing.fields : Array.isArray(existing) ? existing : [];
-        if (!list.some((f: any) => f.name === nameTrimmed)) {
-          saveCustomFieldsApi(botId, { fields: [...list, { name: nameTrimmed, type: 'Text', value: customFieldValue, description: '', folder: null }] }).catch(() => {});
-        }
-      }).catch(() => {});
+      const list = availableFields;
+      if (!list.some((f: any) => f?.name === nameTrimmed)) {
+        saveCustomFieldsMutation.mutate({
+          fields: [...list, { name: nameTrimmed, type: 'Text', value: customFieldValue, description: '', folder: null }]
+        });
+      }
     }
     setCustomFieldName(''); setCustomFieldValue(''); setIsFieldDropdownOpen(false); setShowAddCustomFieldInline(false);
   };

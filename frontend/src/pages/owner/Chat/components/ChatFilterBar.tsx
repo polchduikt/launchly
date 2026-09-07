@@ -20,6 +20,12 @@ interface ChatFilterBarProps {
   showSortDrop: boolean;
   onShowSortDrop: (show: boolean) => void;
   sortRef: React.RefObject<HTMLDivElement | null>;
+  selectedAutomation: string;
+  onSelectedAutomationChange: (automation: string) => void;
+  automations: string[];
+  showAutomationDrop: boolean;
+  onShowAutomationDrop: (show: boolean) => void;
+  automationRef: React.RefObject<HTMLDivElement | null>;
   onResetFilters?: () => void;
 }
 
@@ -68,13 +74,19 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
   showSortDrop,
   onShowSortDrop,
   sortRef,
+  selectedAutomation,
+  onSelectedAutomationChange,
+  automations,
+  showAutomationDrop,
+  onShowAutomationDrop,
+  automationRef,
 }) => (
   <div className="h-12 border-b-2 border-[#0A0A0A] flex items-center justify-between px-4 bg-[#F2EBDD] shrink-0 select-none font-['JetBrains_Mono',monospace]">
     <div className="flex items-center gap-2 py-1">
 
       <div ref={filterRef} className="shrink-0">
         <button
-          onClick={() => { onShowChatFilterDrop(!showChatFilterDrop); onShowSortDrop(false); }}
+          onClick={() => { onShowChatFilterDrop(!showChatFilterDrop); onShowSortDrop(false); onShowAutomationDrop(false); }}
           className="flex items-center gap-1.5 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all"
         >
           <MessageSquare size={12} className="shrink-0" />
@@ -113,12 +125,12 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
 
       <div ref={sortRef} className="shrink-0">
         <button
-          onClick={() => { onShowSortDrop(!showSortDrop); onShowChatFilterDrop(false); }}
+          onClick={() => { onShowSortDrop(!showSortDrop); onShowChatFilterDrop(false); onShowAutomationDrop(false); }}
           className="flex items-center gap-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all"
         >
           {sortOrder === 'newest' ? t('crm.chat.sort_newest') : t('crm.chat.sort_oldest')} <ChevronDown size={11} />
         </button>
-        <DropdownPortal anchorRef={sortRef} isOpen={showSortDrop} minWidth={140}>
+        <DropdownPortal anchorRef={sortRef} isOpen={showSortDrop} minWidth={180}>
           <button
             onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onSortOrderChange('newest'); onShowSortDrop(false); }}
             className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap transition-colors ${
@@ -139,6 +151,59 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
           >
             {t('crm.chat.sort_oldest_opt')}
           </button>
+        </DropdownPortal>
+      </div>
+
+      <div ref={automationRef} className="shrink-0">
+        <button
+          onClick={() => {
+            onShowAutomationDrop(!showAutomationDrop);
+            onShowChatFilterDrop(false);
+            onShowSortDrop(false);
+          }}
+          className="flex items-center gap-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all max-w-[200px]"
+        >
+          <span className="truncate">
+            {selectedAutomation === 'all'
+              ? t('crm.chat.all_automations', 'Автоматизація: Усі')
+              : selectedAutomation}
+          </span>
+          <ChevronDown size={11} className="shrink-0" />
+        </button>
+        <DropdownPortal anchorRef={automationRef} isOpen={showAutomationDrop} minWidth={180}>
+          <button
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onSelectedAutomationChange('all');
+              onShowAutomationDrop(false);
+            }}
+            className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap transition-colors ${
+              selectedAutomation === 'all'
+                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+            }`}
+          >
+            {t('crm.chat.all_automations_opt', 'Усі')}
+          </button>
+          {automations.map((name) => (
+            <button
+              key={name}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onSelectedAutomationChange(name);
+                onShowAutomationDrop(false);
+              }}
+              className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap transition-colors ${
+                selectedAutomation === name
+                  ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                  : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+              }`}
+            >
+              {name}
+            </button>
+          ))}
         </DropdownPortal>
       </div>
 

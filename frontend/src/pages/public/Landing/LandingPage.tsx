@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../routes/paths';
-import { LAUNCHLY_PLANS } from '../../../const/plans';
 import { useTranslation } from '../../../i18n/config';
 import { useSEO } from '../../../hooks/useSEO';
 import { HeroInteractiveDemo } from './components/HeroInteractiveDemo';
 import { CountUpNumber } from './components/CountUpNumber';
 import { StickySolutionsSection } from './components/StickySolutionsSection';
+import { LandingTestimonialsSection } from './components/LandingTestimonialsSection';
+import { LandingTrustSection } from './components/LandingTrustSection';
+import { LandingPricingSection } from './components/LandingPricingSection';
+import { LandingFaqSection } from './components/LandingFaqSection';
 import { PublicFooter } from '../../../components/layout/PublicFooter';
 import { PublicHeader } from '../../../components/layout/PublicHeader';
 import { useScrollReveal } from '../../../hooks/useScrollReveal';
@@ -20,10 +23,6 @@ import {
   Zap,
   Check,
   Star,
-  Shield,
-  Server,
-  Lock,
-  ChevronDown,
   TrendingUp,
   MessageSquare,
   GitBranch,
@@ -38,7 +37,6 @@ export const LandingPage: React.FC = () => {
   const isAuthenticated = useAuthStore((state) => !!state.accessToken);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const { t } = useTranslation();
-  const [faqOpen, setFaqOpen] = useState<number | null>(null);
 
   useSEO({
     title: t('seo.landing.title', 'Launchly — No-Code Telegram Bot Automation & CRM Platform'),
@@ -646,405 +644,17 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        <section id="testimonials" className="py-20 md:py-28 bg-[#F2EBDD] border-b-4 border-[#0A0A0A] px-6 lg:px-12 relative z-10">
-          <div className="max-w-7xl mx-auto space-y-10">
-            
-            <div className="text-left border-l-8 border-[#0A0A0A] pl-6 reveal-blur-in">
-              <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl font-black text-[#0A0A0A] mb-2 uppercase leading-none">
-                {t('landing.testimonials.title', 'Що кажуть наші клієнти')}
-              </h2>
-              <p className="text-base sm:text-lg text-[#0A0A0A] font-bold max-w-2xl">
-                {t('landing.testimonials.subtitle', 'Понад 500+ бізнесів та агентств автоматизують продажі та підтримку за допомогою Launchly.')}
-              </p>
-            </div>
+        <LandingTestimonialsSection />
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-8">
-              
-              <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-3.5 sm:p-7 flex flex-col justify-between space-y-3 sm:space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-brutal-pop reveal-delay-50">
-                <div className="space-y-2 sm:space-y-3">
-                  <div className="flex items-center gap-0.5 sm:gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-500" />
-                    ))}
-                  </div>
-                  <p className="font-['Geist',sans-serif] text-xs sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
-                    {t('landing.testimonials.t1_text')}
-                  </p>
-                </div>
+        <LandingTrustSection />
 
-                <div className="flex items-center gap-2 sm:gap-3.5 pt-2.5 sm:pt-4 border-t border-[#0A0A0A]/10">
-                  <img
-                    src="https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?auto=format&fit=crop&w=256&q=80"
-                    alt={t('landing.testimonials.t1_name')}
-                    className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
-                  />
-                  <div className="min-w-0">
-                    <h4 className="font-['Anybody',sans-serif] text-xs sm:text-base font-black text-[#0A0A0A] uppercase leading-tight truncate">
-                      {t('landing.testimonials.t1_name')}
-                    </h4>
-                    <p className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold text-slate-600 truncate">
-                      {t('landing.testimonials.t1_role')}
-                    </p>
-                  </div>
-                </div>
-              </div>
+        <LandingPricingSection
+          billingCycle={billingCycle}
+          setBillingCycle={setBillingCycle}
+          onCtaClick={handleCta}
+        />
 
-              <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-3.5 sm:p-7 flex flex-col justify-between space-y-3 sm:space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-scale-rotate reveal-delay-100">
-                <div className="space-y-2 sm:space-y-3">
-                  <div className="flex items-center gap-0.5 sm:gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-500" />
-                    ))}
-                  </div>
-                  <p className="font-['Geist',sans-serif] text-xs sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
-                    {t('landing.testimonials.t2_text')}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 sm:gap-3.5 pt-2.5 sm:pt-4 border-t border-[#0A0A0A]/10">
-                  <img
-                    src="https://images.unsplash.com/photo-1598550874175-4d0ef436c909?auto=format&fit=crop&w=256&q=80"
-                    alt={t('landing.testimonials.t2_name')}
-                    className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
-                  />
-                  <div className="min-w-0">
-                    <h4 className="font-['Anybody',sans-serif] text-xs sm:text-base font-black text-[#0A0A0A] uppercase leading-tight truncate">
-                      {t('landing.testimonials.t2_name')}
-                    </h4>
-                    <p className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold text-slate-600 truncate">
-                      {t('landing.testimonials.t2_role')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-3.5 sm:p-7 flex flex-col justify-between space-y-3 sm:space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-brutal-pop reveal-delay-150">
-                <div className="space-y-2 sm:space-y-3">
-                  <div className="flex items-center gap-0.5 sm:gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-500" />
-                    ))}
-                  </div>
-                  <p className="font-['Geist',sans-serif] text-xs sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
-                    {t('landing.testimonials.t3_text')}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 sm:gap-3.5 pt-2.5 sm:pt-4 border-t border-[#0A0A0A]/10">
-                  <img
-                    src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=256&q=80"
-                    alt={t('landing.testimonials.t3_name')}
-                    className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
-                  />
-                  <div className="min-w-0">
-                    <h4 className="font-['Anybody',sans-serif] text-xs sm:text-base font-black text-[#0A0A0A] uppercase leading-tight truncate">
-                      {t('landing.testimonials.t3_name')}
-                    </h4>
-                    <p className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold text-slate-600 truncate">
-                      {t('landing.testimonials.t3_role')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-3.5 sm:p-7 flex flex-col justify-between space-y-3 sm:space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-scale-rotate reveal-delay-200">
-                <div className="space-y-2 sm:space-y-3">
-                  <div className="flex items-center gap-0.5 sm:gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-500" />
-                    ))}
-                  </div>
-                  <p className="font-['Geist',sans-serif] text-xs sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
-                    {t('landing.testimonials.t4_text')}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 sm:gap-3.5 pt-2.5 sm:pt-4 border-t border-[#0A0A0A]/10">
-                  <img
-                    src="https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?auto=format&fit=crop&w=256&q=80"
-                    alt={t('landing.testimonials.t4_name')}
-                    className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
-                  />
-                  <div className="min-w-0">
-                    <h4 className="font-['Anybody',sans-serif] text-xs sm:text-base font-black text-[#0A0A0A] uppercase leading-tight truncate">
-                      {t('landing.testimonials.t4_name')}
-                    </h4>
-                    <p className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold text-slate-600 truncate">
-                      {t('landing.testimonials.t4_role')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-3.5 sm:p-7 flex flex-col justify-between space-y-3 sm:space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-brutal-pop reveal-delay-250">
-                <div className="space-y-2 sm:space-y-3">
-                  <div className="flex items-center gap-0.5 sm:gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-500" />
-                    ))}
-                  </div>
-                  <p className="font-['Geist',sans-serif] text-xs sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
-                    {t('landing.testimonials.t5_text')}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 sm:gap-3.5 pt-2.5 sm:pt-4 border-t border-[#0A0A0A]/10">
-                  <img
-                    src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=256&q=80"
-                    alt={t('landing.testimonials.t5_name')}
-                    className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
-                  />
-                  <div className="min-w-0">
-                    <h4 className="font-['Anybody',sans-serif] text-xs sm:text-base font-black text-[#0A0A0A] uppercase leading-tight truncate">
-                      {t('landing.testimonials.t5_name')}
-                    </h4>
-                    <p className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold text-slate-600 truncate">
-                      {t('landing.testimonials.t5_role')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] p-3.5 sm:p-7 flex flex-col justify-between space-y-3 sm:space-y-5 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all reveal-scale-rotate reveal-delay-300">
-                <div className="space-y-2 sm:space-y-3">
-                  <div className="flex items-center gap-0.5 sm:gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-500" />
-                    ))}
-                  </div>
-                  <p className="font-['Geist',sans-serif] text-xs sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
-                    {t('landing.testimonials.t6_text')}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 sm:gap-3.5 pt-2.5 sm:pt-4 border-t border-[#0A0A0A]/10">
-                  <img
-                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=256&q=80"
-                    alt={t('landing.testimonials.t6_name')}
-                    className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
-                  />
-                  <div className="min-w-0">
-                    <h4 className="font-['Anybody',sans-serif] text-xs sm:text-base font-black text-[#0A0A0A] uppercase leading-tight truncate">
-                      {t('landing.testimonials.t6_name')}
-                    </h4>
-                    <p className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold text-slate-600 truncate">
-                      {t('landing.testimonials.t6_role')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </section>
-
-        <section id="trust" className="py-20 md:py-28 bg-[#0A0A0A] text-[#F2EBDD] border-b-4 border-[#F2EBDD] px-6 lg:px-12 relative z-10" data-header-theme="dark">
-          <div className="max-w-7xl mx-auto space-y-10">
-            <div className="text-left border-l-8 border-[#F2EBDD] pl-6 reveal-blur-in">
-              <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl font-black text-white mb-2 uppercase leading-none">
-                {t('landing.trust.title', 'Ваш бізнес у надійних руках')}
-              </h2>
-              <p className="text-base sm:text-lg text-[#F2EBDD]/70 font-bold max-w-2xl">
-                {t('landing.trust.subtitle', 'Ми дбаємо про безперебійну роботу ваших автоматизацій та безпеку даних на рівні Enterprise.')}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-              {[
-                { icon: <Server className="w-5 h-5 sm:w-7 sm:h-7 text-emerald-400" />, title: t('landing.trust.uptime_title', '99.9% Uptime SLA'), desc: t('landing.trust.uptime_desc', 'Боти працюють цілодобово навіть під час пікових рекламних кампаній'), border: 'border-emerald-500/50 hover:border-emerald-400' },
-                { icon: <Lock className="w-5 h-5 sm:w-7 sm:h-7 text-amber-400" />, title: t('landing.trust.encryption_title', 'Шифрування AES-256'), desc: t('landing.trust.encryption_desc', 'Токени Telegram та ключі Stripe зберігаються у зашифрованому vault'), border: 'border-amber-500/50 hover:border-amber-400' },
-                { icon: <Server className="w-5 h-5 sm:w-7 sm:h-7 text-indigo-400" />, title: t('landing.trust.backup_title', 'Авто-резервування'), desc: t('landing.trust.backup_desc', 'Кожен стан воронки та налаштування бота резервуються щохвилини'), border: 'border-indigo-500/50 hover:border-indigo-400' },
-                { icon: <Shield className="w-5 h-5 sm:w-7 sm:h-7 text-rose-400" />, title: t('landing.trust.gdpr_title', 'GDPR Compliant'), desc: t('landing.trust.gdpr_desc', 'Дані користувачів обробляються відповідно до вимог законодавства ЄС'), border: 'border-rose-500/50 hover:border-rose-400' },
-              ].map((item, i) => (
-                <div key={i} className={`bg-white/5 border-2 ${item.border} p-3.5 sm:p-6 space-y-2 sm:space-y-4 hover:-translate-y-1 transition-all reveal-brutal-pop`} style={{ animationDelay: `${i * 80}ms` }}>
-                  <div className="w-9 h-9 sm:w-12 sm:h-12 bg-white/10 border border-white/20 flex items-center justify-center mb-1.5 sm:mb-3">
-                    {item.icon}
-                  </div>
-                  <h3 className="font-['Anybody',sans-serif] text-xs sm:text-lg font-black uppercase text-white leading-tight">
-                    {item.title}
-                  </h3>
-                  <p className="font-['Geist',sans-serif] text-[10px] sm:text-sm text-[#F2EBDD]/60 font-medium leading-relaxed">
-                    {item.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-20 md:py-28 bg-[#F2EBDD]" id="pricing">
-          <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="text-center mb-12 space-y-4 reveal-blur-in">
-            <h2 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl font-black text-[#0A0A0A] uppercase leading-none">
-              {t('landing.pricing.title', 'SIMPLE, TRANSPARENT PRICING')}
-            </h2>
-            <p className="text-base sm:text-lg text-[#0A0A0A] font-bold">
-              {t('landing.pricing.subtitle', 'Choose the plan that fits your growth.')}
-            </p>
-
-            <div className="inline-flex bg-white border-2 border-[#0A0A0A] p-1 shadow-[4px_4px_0px_#0A0A0A] mt-4">
-              <button
-                onClick={() => setBillingCycle('monthly')}
-                className={`px-6 py-2 font-['JetBrains_Mono',monospace] text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer ${
-                  billingCycle === 'monthly' ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A] hover:bg-slate-100'
-                }`}
-              >
-                {t('landing.pricing.monthly', 'MONTHLY')}
-              </button>
-              <button
-                onClick={() => setBillingCycle('annual')}
-                className={`px-6 py-2 font-['JetBrains_Mono',monospace] text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer ${
-                  billingCycle === 'annual' ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A] hover:bg-slate-100'
-                }`}
-              >
-                {t('landing.pricing.annual', 'ANNUAL')} <span className="font-bold border-b border-current ml-1">{t('landing.pricing.discount', '-20%')}</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6 items-stretch">
-            {LAUNCHLY_PLANS.map((plan, idx) => {
-              const price = billingCycle === 'annual' ? plan.priceAnnual : plan.priceMonthly;
-              const isPro = plan.id === 'pro';
-
-              const planName = t(`landing.plans.${plan.id}.name`, plan.name);
-              const planSubtitle = t(`landing.plans.${plan.id}.subtitle`, plan.subtitle);
-              const planCta = t(`landing.plans.${plan.id}.cta`, plan.cta);
-              const planFeatures = plan.features.map((feat, fIdx) =>
-                t(`landing.plans.${plan.id}.f${fIdx + 1}`, feat)
-              );
-
-              const delays = ['reveal-delay-100', 'reveal-delay-200', 'reveal-delay-300', 'reveal-delay-400'];
-
-              return (
-                <div
-                  key={plan.id}
-                  className={`border-2 border-[#0A0A0A] p-2.5 sm:p-6 flex flex-col justify-between relative transition-all reveal-brutal-pop ${delays[idx % 4]} ${
-                    isPro
-                      ? 'bg-[#0A0A0A] text-[#F2EBDD] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[6px_6px_0px_#0A0A0A] ring-2 ring-indigo-500 lg:-translate-y-2'
-                      : 'bg-[#F2EBDD] text-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] sm:shadow-[5px_5px_0px_#0A0A0A]'
-                  }`}
-                >
-                  {plan.popular && (
-                    <div className="absolute top-0 right-0 bg-indigo-600 text-white px-1.5 py-0.5 sm:px-3 sm:py-1 font-['JetBrains_Mono',monospace] text-[8px] sm:text-[10px] uppercase tracking-wider font-black border-l-2 border-b-2 border-[#0A0A0A]">
-                      {t('landing.pricing.popular', 'POPULAR')}
-                    </div>
-                  )}
-
-                  <div className="space-y-2.5 sm:space-y-5">
-                    <div>
-                      <div className="flex items-center gap-1 sm:gap-2">
-                        <h3 className={`font-['Anybody',sans-serif] text-sm sm:text-2xl font-black uppercase ${isPro ? 'text-[#F2EBDD]' : 'text-[#0A0A0A]'}`}>
-                          {planName}
-                        </h3>
-                        {plan.badge && (
-                          <span className="px-1 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded text-[8px] sm:text-[10px] font-bold">
-                            {plan.badge}
-                          </span>
-                        )}
-                      </div>
-                      <p className={`text-[10px] sm:text-xs font-medium mt-0.5 sm:mt-1 min-h-0 sm:min-h-[2.25rem] leading-snug line-clamp-1 ${isPro ? 'text-slate-300' : 'text-slate-600'}`}>
-                        {planSubtitle}
-                      </p>
-                    </div>
-
-                    <div className="py-1.5 sm:py-2 border-t border-b border-current/20 space-y-0.5 sm:space-y-1">
-                      <div className="flex items-baseline gap-0.5">
-                        <span className="font-['Anybody',sans-serif] text-xl sm:text-4xl font-black">${price}</span>
-                        <span className="font-['JetBrains_Mono',monospace] text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-80">{t('landing.pricing.mo', '/mo')}</span>
-                      </div>
-                      <div className="pt-0.5">
-                        <span className="font-['Anybody',sans-serif] text-xs sm:text-lg font-extrabold">{plan.contactsLimit}</span>
-                        <span className="text-[9px] sm:text-[11px] font-bold block opacity-70 leading-none mt-0.5">{t('landing.pricing.contacts_label', 'Active Contacts / mo')}</span>
-                      </div>
-                    </div>
-
-                    <ul className="space-y-1 sm:space-y-2">
-                      {planFeatures.map((feat) => (
-                        <li key={feat} className="flex items-start gap-1 sm:gap-2 text-[9.5px] sm:text-xs font-medium leading-tight">
-                          <Check className={`w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 mt-0.5 ${isPro ? 'text-indigo-400' : 'text-[#0A0A0A]'}`} />
-                          <span className="line-clamp-2">{feat}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="pt-2 sm:pt-5">
-                    <button
-                      onClick={handleCta}
-                      className={`w-full font-['JetBrains_Mono',monospace] text-[9.5px] sm:text-xs font-extrabold uppercase tracking-tight sm:tracking-wider py-2 sm:py-3 px-1 sm:px-4 border-2 transition-all cursor-pointer truncate ${
-                        isPro
-                          ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD] shadow-[2px_2px_0px_rgba(242,235,221,0.4)] sm:shadow-[3px_3px_0px_rgba(242,235,221,0.4)] hover:bg-white hover:border-white hover:shadow-none hover:translate-x-1 hover:translate-y-1'
-                          : 'bg-white text-[#0A0A0A] border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] sm:shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] hover:shadow-none hover:translate-x-1 hover:translate-y-1'
-                      }`}
-                    >
-                      {planCta}
-                    </button>
-                  </div>
-
-                </div>
-              );
-              })}
-          </div>
-        </div>
-      </section>
-      <div className="w-full bg-[#0A0A0A] h-1"></div>
-
-        <section id="faq" className="py-20 md:py-28 px-6 lg:px-12 relative z-10">
-          <div className="max-w-4xl mx-auto space-y-10">
-            <div className="text-left border-l-8 border-[#0A0A0A] pl-6 reveal-blur-in">
-              <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl font-black text-[#0A0A0A] mb-2 uppercase leading-none">
-                {t('landing.faq.title', 'Маєте питання?')}
-              </h2>
-              <p className="text-base sm:text-lg text-[#0A0A0A] font-bold max-w-2xl">
-                {t('landing.faq.subtitle', 'Знаходимо відповіді на найпоширеніші запитання наших клієнтів.')}
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              {([1, 2, 3, 4, 5, 6] as const).map((n) => {
-                const isOpen = faqOpen === n;
-                return (
-                  <div
-                    key={n}
-                    className={`border-4 border-[#0A0A0A] bg-white transition-all ${isOpen ? 'shadow-[6px_6px_0px_#0A0A0A]' : 'shadow-[4px_4px_0px_#0A0A0A] hover:shadow-[6px_6px_0px_#0A0A0A]'}`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setFaqOpen(isOpen ? null : n)}
-                      className="w-full flex items-center justify-between gap-4 p-5 sm:p-6 text-left cursor-pointer"
-                    >
-                      <span className="font-['Anybody',sans-serif] text-base sm:text-lg font-black uppercase text-[#0A0A0A] leading-tight">
-                        {t(`landing.faq.q${n}`, '')}
-                      </span>
-                      <span className={`shrink-0 w-8 h-8 border-2 border-[#0A0A0A] flex items-center justify-center transition-transform duration-200 ${isOpen ? 'bg-[#0A0A0A] rotate-180' : 'bg-white'}`}>
-                        <ChevronDown size={16} className={isOpen ? 'text-amber-400' : 'text-[#0A0A0A]'} />
-                      </span>
-                    </button>
-                    {isOpen && (
-                      <div className="px-5 sm:px-6 pb-5 sm:pb-6 border-t-2 border-[#0A0A0A]/10 pt-4">
-                        <p className="font-['Geist',sans-serif] text-sm sm:text-base text-[#0A0A0A] font-medium leading-relaxed">
-                          {t(`landing.faq.a${n}`, '')}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-
-              <button
-                type="button"
-                onClick={() => navigate(ROUTES.FAQ)}
-                className="w-full bg-[#0A0A0A] text-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer flex items-center justify-center p-5 sm:p-6"
-              >
-                <span className="font-['Anybody',sans-serif] text-base sm:text-lg font-black uppercase text-[#F2EBDD]">
-                  {t('landing.faq.more', 'БІЛЬШЕ')}
-                </span>
-              </button>
-            </div>
-          </div>
-        </section>
+        <LandingFaqSection onNavigateToFaq={() => navigate(ROUTES.FAQ)} />
 
         <section className="w-full pb-0 bg-transparent select-none overflow-hidden" data-header-theme="dark">
           <div className="w-full overflow-hidden leading-none -mb-1 relative h-20 sm:h-28 md:h-36 lg:h-44">
