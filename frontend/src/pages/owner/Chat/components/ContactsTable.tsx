@@ -18,6 +18,8 @@ interface ContactsTableProps {
   onSelectContactDetail: (contact: BotUserResponse) => void;
 }
 
+import { formatRelativeTime } from '../../../../utils/date';
+
 interface ContactTableRowProps {
   contact: BotUserResponse;
   isSelected: boolean;
@@ -31,21 +33,6 @@ const parseContactMetadata = (metaStr: string | null) => {
   } catch {
     return {};
   }
-};
-
-const formatRelativeTime = (dateStr: string) => {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffMins < 1) return t('common.time.just_now');
-  if (diffMins < 60) return t('common.time.mins_ago', { count: diffMins });
-  if (diffHours < 24) return t('common.time.hours_ago', { count: diffHours });
-  if (diffDays < 30) return t('common.time.days_ago', { count: diffDays });
-  return date.toLocaleDateString();
 };
 
 const ContactTableRow = React.memo<ContactTableRowProps>(({

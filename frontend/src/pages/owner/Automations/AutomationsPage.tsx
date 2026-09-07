@@ -38,6 +38,7 @@ import {
 } from '../../../hooks/bot/useBotMutations';
 
 import type { Folder, BotResponse } from '../../../types/bot';
+import { formatRelativeTime } from '../../../utils/date';
 import {
   DISPLAY_KEY_AUTO_RUNS,
   DISPLAY_KEY_AUTO_CTR,
@@ -229,27 +230,6 @@ export const AutomationsPage: React.FC = () => {
       window.removeEventListener('scroll', handleClose, true);
     };
   }, []);
-
-  const formatModifiedDate = (dateString?: string | null) => {
-    if (!dateString) return t('common.not_applicable');
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return t('common.not_applicable');
-      const now = new Date();
-      const diffMs = now.getTime() - date.getTime();
-      if (diffMs < 0) return t('common.time.just_now');
-      const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return t('common.time.just_now');
-      if (diffMins < 60) return t('common.time.mins_ago', { count: diffMins });
-      const diffHours = Math.floor(diffMins / 60);
-      if (diffHours < 24) return t('common.time.hours_ago', { count: diffHours });
-      const diffDays = Math.floor(diffHours / 24);
-      if (diffDays < 30) return t('common.time.days_ago', { count: diffDays });
-      return date.toLocaleDateString();
-    } catch {
-      return t('common.not_applicable');
-    }
-  };
 
   const getFolderBotCount = (folderId: string | number | null) => {
     if (folderId === null) {
@@ -726,7 +706,7 @@ export const AutomationsPage: React.FC = () => {
                               {(bot.runs ?? 0) === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
                             </td>
                           )}
-                          <td className="py-4 px-2 w-40 text-xs font-bold text-slate-700">{formatModifiedDate(bot.updatedAt || bot.createdAt)}</td>
+                          <td className="py-4 px-2 w-40 text-xs font-bold text-slate-700">{formatRelativeTime(bot.updatedAt || bot.createdAt)}</td>
                           <td className="py-4 px-4 w-12 text-right" onClick={(e) => e.stopPropagation()}>
                             {bot.role !== 'Viewer' && (
                               <button
@@ -824,7 +804,7 @@ export const AutomationsPage: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        <span className="text-slate-700">{formatModifiedDate(bot.updatedAt || bot.createdAt)}</span>
+                        <span className="text-slate-700">{formatRelativeTime(bot.updatedAt || bot.createdAt)}</span>
                       </div>
                     </div>
                   ))}
