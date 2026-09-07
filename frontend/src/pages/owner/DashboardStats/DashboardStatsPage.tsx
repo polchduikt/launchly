@@ -18,6 +18,7 @@ import {
   Plus
 } from 'lucide-react';
 import { AiIcon } from '../../../components/ui/AiIcon';
+import { CHART_DIMENSIONS } from '../../../const/constants';
 
 interface MiniBarChartProps {
   data: number[];
@@ -26,17 +27,15 @@ interface MiniBarChartProps {
 
 const MiniBarChart: React.FC<MiniBarChartProps> = ({ data, color }) => {
   const maxVal = Math.max(...data, 1);
-  const width = 100;
-  const height = 24;
-  const gap = 3;
-  const barWidth = (width - gap * (data.length - 1)) / data.length;
+  const { WIDTH, HEIGHT, GAP, MIN_BAR_HEIGHT } = CHART_DIMENSIONS.MINI_BAR;
+  const barWidth = (WIDTH - GAP * (data.length - 1)) / data.length;
 
   return (
-    <svg width={width} height={height} className="overflow-visible">
+    <svg width={WIDTH} height={HEIGHT} className="overflow-visible">
       {data.map((val, idx) => {
-        const barHeight = Math.max((val / maxVal) * height, 2);
-        const x = idx * (barWidth + gap);
-        const y = height - barHeight;
+        const barHeight = Math.max((val / maxVal) * HEIGHT, MIN_BAR_HEIGHT);
+        const x = idx * (barWidth + GAP);
+        const y = HEIGHT - barHeight;
         return (
           <rect
             key={idx}
@@ -60,32 +59,30 @@ interface SemiDonutChartProps {
 }
 
 const SemiDonutChart: React.FC<SemiDonutChartProps> = ({ data, total }) => {
-  const size = 85;
-  const strokeWidth = 10.5;
-  const r = (size - strokeWidth) / 2;
+  const { SIZE, STROKE_WIDTH, GAP_DEG, START_OFFSET_DEG } = CHART_DIMENSIONS.SEMI_DONUT;
+  const r = (SIZE - STROKE_WIDTH) / 2;
   const circumference = 2 * Math.PI * r;
-  const cx = size / 2;
-  const cy = size / 2;
-  const gapDeg = 2;
+  const cx = SIZE / 2;
+  const cy = SIZE / 2;
   const totalCounts = data.reduce((sum, item) => sum + item.count, 0);
 
   let cumulativeOffset = 0;
-  const startOffset = circumference * (90 / 360);
+  const startOffset = circumference * (START_OFFSET_DEG / 360);
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
+    <div className="relative flex items-center justify-center" style={{ width: SIZE, height: SIZE }}>
+      <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{ transform: 'rotate(-90deg)' }}>
         <circle
           cx={cx}
           cy={cy}
           r={r}
           fill="none"
           stroke="#e2e8f0"
-          strokeWidth={strokeWidth}
+          strokeWidth={STROKE_WIDTH}
         />
         {data.map((item, idx) => {
           const fraction = totalCounts > 0 ? item.count / totalCounts : 0;
-          const gapFraction = (gapDeg / 360) * circumference;
+          const gapFraction = (GAP_DEG / 360) * circumference;
           const segLength = fraction * circumference - gapFraction;
           const dashArray = `${Math.max(segLength, 0)} ${circumference - Math.max(segLength, 0)}`;
           const dashOffset = -(cumulativeOffset - startOffset);
@@ -99,7 +96,7 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({ data, total }) => {
               r={r}
               fill="none"
               stroke={item.color}
-              strokeWidth={strokeWidth}
+              strokeWidth={STROKE_WIDTH}
               strokeDasharray={dashArray}
               strokeDashoffset={dashOffset}
               strokeLinecap="round"

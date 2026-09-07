@@ -21,11 +21,27 @@ export const TIMING = {
   POLL_INTERVAL_MS: 3000,
   AUTO_SAVE_DEBOUNCE_MS: 1000,
   ANIMATION_DURATION_MS: 300,
+  FOCUS_DELAY_MS: 50,
 } as const;
 
 export const FLOW_DEFAULTS = {
   DELAY_SECONDS: 3,
   FIT_VIEW_PADDING: 0.5,
   FIT_VIEW_DURATION_MS: 300,
+} as const;
+
+export const CHART_DIMENSIONS = {
+  MINI_BAR: {
+    WIDTH: 100,
+    HEIGHT: 24,
+    GAP: 3,
+    MIN_BAR_HEIGHT: 2,
+  },
+  SEMI_DONUT: {
+    SIZE: 85,
+    STROKE_WIDTH: 10.5,
+    GAP_DEG: 2,
+    START_OFFSET_DEG: 90,
+  },
 } as const;
 

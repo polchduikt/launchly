@@ -1,4 +1,5 @@
 import apiClient from './axios';
+import { PAGINATION } from '../const/constants';
 
 export interface PlanDistribution {
   name: string;
@@ -301,13 +302,13 @@ export const fetchAdminUsersApi = async (
   role = '',
   plan = '',
   sort = 'desc',
-  page = 0,
-  size = 20
+  page: number = PAGINATION.DEFAULT_PAGE,
+  size: number = PAGINATION.DEFAULT_PAGE_SIZE
 ): Promise<{ content: AdminUser[]; totalElements: number; totalPages: number }> => {
   const params: Record<string, string | number> = {};
   if (typeof paramsOrSearch === 'object' && paramsOrSearch !== null) {
-    params.page = paramsOrSearch.page ?? 0;
-    params.size = paramsOrSearch.size ?? 20;
+    params.page = paramsOrSearch.page ?? PAGINATION.DEFAULT_PAGE;
+    params.size = paramsOrSearch.size ?? PAGINATION.DEFAULT_PAGE_SIZE;
     if (paramsOrSearch.search) params.search = paramsOrSearch.search;
     if (paramsOrSearch.role) params.role = paramsOrSearch.role;
     if (paramsOrSearch.plan) params.plan = paramsOrSearch.plan;

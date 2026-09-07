@@ -13,6 +13,9 @@
   --color-outline: #737688;
   --color-tertiary-fixed-dim: #4edea3;
   --color-surface: #f8f9ff;
+  --color-canvas: #F2EBDD;
+  --color-ink: #0A0A0A;
+  --color-canvas-subtle: #F8FAFC;
 }
 
 .bg-pattern {

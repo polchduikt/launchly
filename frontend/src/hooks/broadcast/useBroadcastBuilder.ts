@@ -22,6 +22,7 @@ import { ROUTES } from '../../routes/paths';
 import type { ButtonData } from '../../types/bot';
 import { createDefaultNodeData } from '../../const/flowBlocks';
 import { generateId } from '../../utils/id';
+import { TIMING } from '../../const/constants';
 
 const resolveFilter = (conditions: AudienceCondition[]) => {
   let filterType: FilterType = 'ALL';
@@ -92,7 +93,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
         const hasActive = data.some(
           (c) => c.status === 'IN_PROGRESS' || c.status === 'SCHEDULED'
         );
-        return hasActive ? 3000 : false;
+        return hasActive ? TIMING.POLL_INTERVAL_MS : false;
       },
     })),
   });

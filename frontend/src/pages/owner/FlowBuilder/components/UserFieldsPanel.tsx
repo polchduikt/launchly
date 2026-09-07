@@ -8,6 +8,7 @@ import type { UserField, UserFieldFolder } from '../../../../types/bot';
 import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../api/bot';
 import { customFieldSchema, automationFolderSchema } from '../../../../schemas';
 import { CustomSelect } from '../../../../components/ui/CustomSelect';
+import { generateId } from '../../../../utils/id';
 
 export const UserFieldsPanel: React.FC = () => {
   const activeBotId = useBotStore((state) => state?.activeBotId);
@@ -192,7 +193,7 @@ export const UserFieldsPanel: React.FC = () => {
     if (!newFolderName.trim()) return;
 
     const newFolder: UserFieldFolder = {
-      id: Math.random().toString(36).substring(7),
+      id: generateId('folder'),
       name: newFolderName.trim()
     };
 

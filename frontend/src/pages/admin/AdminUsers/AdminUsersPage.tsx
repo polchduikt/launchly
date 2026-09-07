@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { fetchAdminUsersApi, updateUserRoleApi, toggleUserStatusApi, fetchAdminUserDetailsApi } from '../../../api/admin';
 import type { AdminUser } from '../../../api/admin';
+import { PAGINATION } from '../../../const/constants';
 import { AdminLayout } from '../../../components/layout/AdminLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { ROUTES } from '../../../routes/paths';
@@ -65,7 +66,7 @@ export const AdminUsersPage: React.FC = () => {
 
   const { data, isLoading } = useQuery({
     queryKey: ['adminUsers', debouncedSearch, roleFilter, planFilter, sortFilter, page],
-    queryFn: () => fetchAdminUsersApi(debouncedSearch, roleFilter, planFilter, sortFilter, page, 30),
+    queryFn: () => fetchAdminUsersApi(debouncedSearch, roleFilter, planFilter, sortFilter, page, PAGINATION.ADMIN_PAGE_SIZE),
   });
 
   const allUserIdsOnPage = data?.content?.map((u: AdminUser) => u.id) || [];

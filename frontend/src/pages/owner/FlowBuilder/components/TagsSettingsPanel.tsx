@@ -9,6 +9,7 @@ import { deleteTagApi } from '../../../../api/broadcast';
 import type { TagResponse } from '../../../../types/broadcast';
 import { useQueryClient } from '@tanstack/react-query';
 import type { TagFolder } from '../../../../types/bot';
+import { generateId } from '../../../../utils/id';
 
 export const TagsSettingsPanel: React.FC = () => {
   const queryClient = useQueryClient();
@@ -101,7 +102,7 @@ export const TagsSettingsPanel: React.FC = () => {
     if (!newFolderName.trim()) return;
 
     const newFolder: TagFolder = {
-      id: Math.random().toString(36).substring(7),
+      id: generateId('folder'),
       name: newFolderName.trim()
     };
 

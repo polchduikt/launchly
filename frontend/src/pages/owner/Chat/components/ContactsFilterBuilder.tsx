@@ -5,6 +5,7 @@ import type { FilterCondition, BotUserMetadata } from '../../../../types/crm';
 import type { TagResponse } from '../../../../types';
 import type { BotUserResponse } from '../../../../types/bot';
 import { getCustomFieldsApi } from '../../../../api/bot';
+import { generateId } from '../../../../utils/id';
 
 interface ContactsFilterBuilderProps {
   isOpen: boolean;
@@ -127,7 +128,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
     const isPaused = item.field === 'paused' || item.field === 'optedInTelegram';
 
     const newCond: FilterCondition = {
-      id: `cond_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      id: generateId('cond'),
       field: item.field,
       label: item.label,
       operator: isDate ? 'after' : 'is',

@@ -38,6 +38,7 @@ import { useCustomFieldsQuery } from '../../../../../../hooks/bot/useCustomField
 import emojiData from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import { generateId } from '../../../../../../utils/id';
+import { FLOW_DEFAULTS, TIMING } from '../../../../../../const/constants';
 
 interface MessageNodeEditorProps {
   nodeId: string;
@@ -84,8 +85,12 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
         }))
       );
       setTimeout(() => {
-        fitView({ nodes: [{ id: targetId }], duration: 300, padding: 0.5 });
-      }, 50);
+        fitView({
+          nodes: [{ id: targetId }],
+          duration: FLOW_DEFAULTS.FIT_VIEW_DURATION_MS,
+          padding: FLOW_DEFAULTS.FIT_VIEW_PADDING,
+        });
+      }, TIMING.FOCUS_DELAY_MS);
     }
   };
 
@@ -101,7 +106,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
       newBlock.imageUrl = '';
       newBlock.buttons = [];
     } else if (type === 'delay') {
-      newBlock.delaySeconds = 3;
+      newBlock.delaySeconds = FLOW_DEFAULTS.DELAY_SECONDS;
     } else if (type === 'data_collection') {
       newBlock.text = '';
       newBlock.variableName = '';
@@ -688,8 +693,8 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       type="number"
                       min={1}
                       max={60}
-                      value={block.delaySeconds || 3}
-                      onChange={(e) => updateBlockContent(block.id, { delaySeconds: Math.max(1, parseInt(e.target.value) || 3) })}
+                      value={block.delaySeconds || FLOW_DEFAULTS.DELAY_SECONDS}
+                      onChange={(e) => updateBlockContent(block.id, { delaySeconds: Math.max(1, parseInt(e.target.value) || FLOW_DEFAULTS.DELAY_SECONDS) })}
                       className="w-16 px-2.5 py-1.5 border border-slate-205 rounded-xl text-xs font-bold text-center bg-slate-50/50 focus:outline-none focus:border-indigo-500"
                     />
                     <span className="text-xs text-slate-500 font-bold">{t('editor.message.seconds')}</span>
