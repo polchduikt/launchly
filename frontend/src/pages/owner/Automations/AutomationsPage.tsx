@@ -99,32 +99,6 @@ export const AutomationsPage: React.FC = () => {
     });
   };
 
-  const handleBulkDelete = () => {
-    if (selectedBotIds.size === 0) return;
-    setConfirmDialog({
-      title: t('automations.bulk_delete_title', 'Видалити автоматизації'),
-      message: t('automations.bulk_delete_desc', 'Ви впевнені, що хочете видалити {{count}} обрану(их) автоматизацію(ій)?', { count: selectedBotIds.size }),
-      variant: 'danger',
-      confirmLabel: t('common.delete', 'Видалити'),
-      onConfirm: () => {
-        const ids = Array.from(selectedBotIds);
-        ids.forEach((id) => {
-          deleteBotMutation.mutate(id, {
-            onSuccess: () => {
-              setBotFolders((prev) => {
-                const updated = { ...prev };
-                delete updated[id];
-                return updated;
-              });
-            }
-          });
-        });
-        setSelectedBotIds(new Set());
-        setConfirmDialog(null);
-      },
-    });
-  };
-
   const createBotMutation = useCreateBotMutation();
   const deleteBotMutation = useDeleteBotMutation();
   const startBotMutation = useStartBotMutation();
@@ -132,6 +106,34 @@ export const AutomationsPage: React.FC = () => {
   const updateBotMutation = useUpdateBotMutation();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [botFolders, setBotFolders] = useState<Record<number, string | number>>({});
+
+  const handleBulkDelete = () => {
+    if (selectedBotIds.size === 0) return;
+    setConfirmDialog({
+      title: t('automations.bulk_delete_title', 'Видалити автоматизації'),
+      message: t('automations.bulk_delete_desc', 'Ви впевнені, що хочете видалити {{count}} обрану(их) автоматизацію(ій)?', { count: selectedBotIds.size }),
+      variant: 'danger',
+      confirmLabel: t('common.delete', 'Видалити'),
+      onConfirm: async () => {
+        const ids = Array.from(selectedBotIds);
+        setConfirmDialog(null);
+        const results = await Promise.allSettled(ids.map((id) => deleteBotMutation.mutateAsync(id)));
+        const successfulIds = new Set(
+          ids.filter((_, idx) => results[idx].status === 'fulfilled')
+        );
+        setBotFolders((prev) => {
+          const updated = { ...prev };
+          successfulIds.forEach((id) => delete updated[id]);
+          return updated;
+        });
+        setSelectedBotIds((prev) => {
+          const next = new Set(prev);
+          successfulIds.forEach((id) => next.delete(id));
+          return next;
+        });
+      },
+    });
+  };
 
   useEffect(() => {
     getAutomationFoldersApi()
