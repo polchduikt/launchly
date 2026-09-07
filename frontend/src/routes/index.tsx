@@ -5,12 +5,12 @@ import { useAuthStore } from '../store/useAuthStore';
 import { getCurrentUserApi } from '../api/auth';
 import { AuthLayout } from '../components/layout';
 
-import LandingPage from '../pages/public/Landing/LandingPage';
-import BlogPage from '../pages/public/Blog/BlogPage';
-import BlogDetailPage from '../pages/public/BlogDetail/BlogDetailPage';
-import TermsOfServicePage from '../pages/public/Terms/TermsOfServicePage';
-import PrivacyPolicyPage from '../pages/public/Privacy/PrivacyPolicyPage';
-import { FaqPage } from '../pages/public/Faq/FaqPage';
+const LandingPage = lazy(() => import('../pages/public/Landing/LandingPage'));
+const BlogPage = lazy(() => import('../pages/public/Blog/BlogPage'));
+const BlogDetailPage = lazy(() => import('../pages/public/BlogDetail/BlogDetailPage'));
+const TermsOfServicePage = lazy(() => import('../pages/public/Terms/TermsOfServicePage'));
+const PrivacyPolicyPage = lazy(() => import('../pages/public/Privacy/PrivacyPolicyPage'));
+const FaqPage = lazy(() => import('../pages/public/Faq/FaqPage').then(m => ({ default: m.FaqPage })));
 
 const LoginPage = lazy(() => import('../pages/public/Login/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/public/Register/RegisterPage'));
@@ -21,7 +21,7 @@ const BotsConnectPage = lazy(() => import('../pages/owner/BotsConnect/BotsConnec
 const AutomationsPage = lazy(() => import('../pages/owner/Automations/AutomationsPage').then(m => ({ default: m.AutomationsPage })));
 const SettingsPage = lazy(() => import('../pages/owner/Settings/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const FlowBuilderPage = lazy(() => import('../pages/owner/FlowBuilder/FlowBuilderPage').then(m => ({ default: m.FlowBuilderPage })));
-import { ChatPage } from '../pages/owner/Chat/ChatPage';
+const ChatPage = lazy(() => import('../pages/owner/Chat/ChatPage').then(m => ({ default: m.ChatPage })));
 const ContactsPage = lazy(() => import('../pages/owner/Contacts/ContactsPage').then(m => ({ default: m.ContactsPage })));
 const AiPage = lazy(() => import('../pages/owner/Ai/AiPage'));
 const OrdersPage = lazy(() => import('../pages/owner/Orders/OrdersPage').then(m => ({ default: m.OrdersPage })));
@@ -34,10 +34,10 @@ const AcceptableUsePolicyPage = lazy(() => import('../pages/public/Legal/Accepta
 const AiTermsPage = lazy(() => import('../pages/public/Legal/AiTermsPage'));
 const PaymentTermsPage = lazy(() => import('../pages/public/Legal/PaymentTermsPage'));
 const BlockedPage = lazy(() => import('../pages/public/Blocked/BlockedPage'));
-import { CreateTemplateWizardPage } from '../pages/owner/Templates/CreateTemplateWizardPage';
-import { InstallTemplateWizardPage } from '../pages/public/InstallTemplate/InstallTemplateWizardPage';
-import { MyTemplatesPage } from '../pages/owner/Templates/MyTemplatesPage';
-import { TemplateDetailPage } from '../pages/owner/Templates/TemplateDetailPage';
+const CreateTemplateWizardPage = lazy(() => import('../pages/owner/Templates/CreateTemplateWizardPage').then(m => ({ default: m.CreateTemplateWizardPage })));
+const InstallTemplateWizardPage = lazy(() => import('../pages/public/InstallTemplate/InstallTemplateWizardPage').then(m => ({ default: m.InstallTemplateWizardPage })));
+const MyTemplatesPage = lazy(() => import('../pages/owner/Templates/MyTemplatesPage').then(m => ({ default: m.MyTemplatesPage })));
+const TemplateDetailPage = lazy(() => import('../pages/owner/Templates/TemplateDetailPage').then(m => ({ default: m.TemplateDetailPage })));
 
 const AdminStatsPage = lazy(() => import('../pages/admin/AdminStats/AdminStatsPage'));
 const AdminChatsPage = lazy(() => import('../pages/admin/AdminChats/AdminChatsPage'));
