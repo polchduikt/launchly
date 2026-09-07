@@ -77,13 +77,13 @@ const ContactTableRow = React.memo<ContactTableRowProps>(({
           type="checkbox"
           checked={isSelected}
           onChange={(e) => onToggleSelect(c.id, e.target.checked)}
-          className="accent-ink cursor-pointer"
+          className="accent-[#0A0A0A] cursor-pointer"
         />
       </td>
       <td className="py-4 px-2 w-16">
         <ContactAvatar photoUrl={c.photoUrl} name={c.firstName} size="md" />
       </td>
-      <td className="py-4 px-2 font-black text-ink">
+      <td className="py-4 px-2 font-black text-[#0A0A0A]">
         <div className="flex flex-col">
           <span className="font-extrabold">{c.firstName} {c.lastName}</span>
           {c.username && (
@@ -93,12 +93,12 @@ const ContactTableRow = React.memo<ContactTableRowProps>(({
       </td>
       <td className="py-4 px-6">
         <span
-          className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border-2 border-ink ${
+          className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border-2 border-[#0A0A0A] ${
             isUnsubscribed
-              ? 'bg-rose-200 text-ink'
+              ? 'bg-rose-200 text-[#0A0A0A]'
               : isPaused
-              ? 'bg-amber-200 text-ink'
-              : 'bg-emerald-200 text-ink'
+              ? 'bg-amber-200 text-[#0A0A0A]'
+              : 'bg-emerald-200 text-[#0A0A0A]'
           }`}
         >
           {statusText}
@@ -146,17 +146,17 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
 
   if (botId === 0) {
     return (
-      <div className="h-full flex items-center justify-center p-8 text-center bg-canvas m-6">
-        <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-canvas border-2 border-ink rounded-3xl p-10 shadow-brutal">
-          <div className="w-16 h-16 rounded-2xl bg-white border-2 border-ink shadow-brutal flex items-center justify-center mx-auto text-ink">
+      <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD] m-6">
+        <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
+          <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
             <AlertCircle size={32} />
           </div>
-          <p className="font-['Anybody',sans-serif] font-black text-ink text-xl uppercase tracking-tight">{t('crm.contacts.no_bot_title')}</p>
-          <p className="font-['Geist',sans-serif] text-xs text-ink/70 font-semibold max-w-xs mx-auto leading-relaxed">{t('crm.contacts.no_bot_desc')}</p>
+          <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">{t('crm.contacts.no_bot_title')}</p>
+          <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">{t('crm.contacts.no_bot_desc')}</p>
           <div className="pt-2">
             <button
               onClick={() => navigate('/connect-bot')}
-              className="px-6 py-3 bg-ink text-canvas font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-ink shadow-brutal hover:bg-white hover:text-ink hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
+              className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
             >
               <Plus size={14} />
               <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
@@ -169,7 +169,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
 
   if (filteredContacts.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center text-ink font-['JetBrains_Mono',monospace] font-bold text-xs bg-canvas border-2 border-ink rounded-2xl m-6">
+      <div className="h-full flex items-center justify-center text-[#0A0A0A] font-['JetBrains_Mono',monospace] font-bold text-xs bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl m-6">
         {t('crm.contacts.no_contacts_found')}
       </div>
     );
@@ -177,10 +177,10 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
 
   return (
     <div ref={parentRef} className="flex-1 overflow-auto p-6 font-['JetBrains_Mono',monospace]">
-      <div className="bg-canvas border-2 border-ink rounded-2xl overflow-hidden">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-white border-b-2 border-ink text-[10px] font-black text-ink uppercase tracking-wider select-none">
+            <tr className="bg-white border-b-2 border-[#0A0A0A] text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider select-none">
               <th className="py-4 pl-6 pr-2 w-10">
                 <input
                   type="checkbox"
@@ -189,7 +189,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
                     filteredContacts.every((c) => selectedContactIds.has(c.id))
                   }
                   onChange={(e) => onSelectAll(e.target.checked)}
-                  className="accent-ink cursor-pointer"
+                  className="accent-[#0A0A0A] cursor-pointer"
                 />
               </th>
               <th className="py-4 px-2 w-16">{t('crm.contacts.table.avatar')}</th>
@@ -198,7 +198,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
               <th className="py-4 px-6">{t('crm.contacts.table.subscribed')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-ink/15 text-xs font-bold text-ink">
+          <tbody className="divide-y divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A]">
             {paddingTop > 0 && (
               <tr>
                 <td style={{ height: `${paddingTop}px` }} colSpan={5} />

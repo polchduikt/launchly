@@ -45,7 +45,7 @@ export const DropdownPortal: React.FC<DropdownPortalProps> = ({ anchorRef, isOpe
   return ReactDOM.createPortal(
     <div
       style={{ top: coords.top, left: coords.left, minWidth: minWidth ?? 'auto' }}
-      className="fixed bg-canvas border-2 border-ink rounded-xl shadow-brutal z-[9999] py-1 font-['JetBrains_Mono',monospace] overflow-hidden"
+      className="fixed bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_0px_#0A0A0A] z-[9999] py-1 font-['JetBrains_Mono',monospace] overflow-hidden"
     >
       {children}
     </div>,
@@ -69,13 +69,13 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
   onShowSortDrop,
   sortRef,
 }) => (
-  <div className="h-12 border-b-2 border-ink flex items-center justify-between px-4 bg-canvas shrink-0 select-none font-['JetBrains_Mono',monospace]">
+  <div className="h-12 border-b-2 border-[#0A0A0A] flex items-center justify-between px-4 bg-[#F2EBDD] shrink-0 select-none font-['JetBrains_Mono',monospace]">
     <div className="flex items-center gap-2 py-1">
 
       <div ref={filterRef} className="shrink-0">
         <button
           onClick={() => { onShowChatFilterDrop(!showChatFilterDrop); onShowSortDrop(false); }}
-          className="flex items-center gap-1.5 px-3 py-1 rounded-xl border-2 border-ink bg-white text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas cursor-pointer transition-all"
+          className="flex items-center gap-1.5 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all"
         >
           <MessageSquare size={12} className="shrink-0" />
           {chatFilter === 'open' ? t('crm.chat.open_chats') : chatFilter === 'closed' ? t('crm.chat.closed_chats') : t('crm.chat.all_chats')} <ChevronDown size={11} />
@@ -92,8 +92,8 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
               }}
               className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap transition-colors ${
                 chatFilter === f.value
-                  ? 'bg-ink text-canvas'
-                  : 'text-ink hover:bg-ink hover:text-canvas'
+                  ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                  : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
               }`}
             >
               {f.value === 'open' ? t('crm.chat.open_chats') : f.value === 'closed' ? t('crm.chat.closed_chats') : t('crm.chat.all_chats')}
@@ -104,17 +104,17 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
 
       <button
         onClick={() => onShowUnreadOnlyChange(!showUnreadOnly)}
-        className={`px-3 py-1 rounded-xl border-2 border-ink text-xs font-black uppercase cursor-pointer transition-all shrink-0 ${
-          showUnreadOnly ? 'bg-ink text-canvas' : 'bg-white text-ink hover:bg-canvas'
+        className={`px-3 py-1 rounded-xl border-2 border-[#0A0A0A] text-xs font-black uppercase cursor-pointer transition-all shrink-0 ${
+          showUnreadOnly ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'bg-white text-[#0A0A0A] hover:bg-[#F2EBDD]'
         }`}
       >
-        {t('crm.chat.unread')} {unreadCount > 0 && <span className="ml-1 bg-white text-ink border border-ink text-[10px] font-black px-1.5 py-0.5 rounded-md">{unreadCount}</span>}
+        {t('crm.chat.unread')} {unreadCount > 0 && <span className="ml-1 bg-white text-[#0A0A0A] border border-[#0A0A0A] text-[10px] font-black px-1.5 py-0.5 rounded-md">{unreadCount}</span>}
       </button>
 
       <div ref={sortRef} className="shrink-0">
         <button
           onClick={() => { onShowSortDrop(!showSortDrop); onShowChatFilterDrop(false); }}
-          className="flex items-center gap-1 px-3 py-1 rounded-xl border-2 border-ink bg-white text-xs font-black uppercase text-ink hover:bg-ink hover:text-canvas cursor-pointer transition-all"
+          className="flex items-center gap-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all"
         >
           {sortOrder === 'newest' ? t('crm.chat.sort_newest') : t('crm.chat.sort_oldest')} <ChevronDown size={11} />
         </button>
@@ -123,8 +123,8 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
             onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onSortOrderChange('newest'); onShowSortDrop(false); }}
             className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap transition-colors ${
               sortOrder === 'newest'
-                ? 'bg-ink text-canvas'
-                : 'text-ink hover:bg-ink hover:text-canvas'
+                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
             }`}
           >
             {t('crm.chat.sort_newest_opt')}
@@ -133,8 +133,8 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
             onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onSortOrderChange('oldest'); onShowSortDrop(false); }}
             className={`w-full text-left px-4 py-2 text-xs font-black uppercase cursor-pointer block whitespace-nowrap transition-colors ${
               sortOrder === 'oldest'
-                ? 'bg-ink text-canvas'
-                : 'text-ink hover:bg-ink hover:text-canvas'
+                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
             }`}
           >
             {t('crm.chat.sort_oldest_opt')}

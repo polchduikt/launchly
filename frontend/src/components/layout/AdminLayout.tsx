@@ -120,14 +120,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
   };
 
   return (
-    <div className="flex h-screen bg-canvas text-ink font-['JetBrains_Mono',monospace] overflow-hidden select-none">
-      <aside className="w-64 bg-canvas border-r-4 border-ink flex flex-col justify-between h-full z-30 shrink-0">
+    <div className="flex h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace] overflow-hidden select-none">
+      <aside className="w-64 bg-[#F2EBDD] border-r-4 border-[#0A0A0A] flex flex-col justify-between h-full z-30 shrink-0">
         <div>
-          <div className="h-16 px-5 flex items-center border-b-4 border-ink bg-canvas">
+          <div className="h-16 px-5 flex items-center border-b-4 border-[#0A0A0A] bg-[#F2EBDD]">
             <div className="flex items-center space-x-3">
               <img src={logoL} alt="Launchly Logo" className="h-8 w-auto object-contain" />
               <div className="flex flex-col">
-                <span className="font-['Anybody',sans-serif] font-black text-sm text-ink tracking-tight uppercase">Launchly</span>
+                <span className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] tracking-tight uppercase">Launchly</span>
                 <span className="text-[9px] uppercase font-black text-slate-700 tracking-wider font-['Anybody',sans-serif]">{t('admin.control_panel')}</span>
               </div>
             </div>
@@ -144,22 +144,22 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
                   to={item.path}
                   className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-tight transition-all duration-150 border-2 ${
                     isActive
-                      ? 'bg-ink text-canvas border-ink shadow-brutal-md'
-                      : 'text-ink border-transparent hover:bg-white hover:border-ink'
+                      ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A]'
+                      : 'text-[#0A0A0A] border-transparent hover:bg-white hover:border-[#0A0A0A]'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <IconComponent size={18} className={isActive ? 'text-canvas' : 'text-ink'} />
+                    <IconComponent size={18} className={isActive ? 'text-[#F2EBDD]' : 'text-[#0A0A0A]'} />
                     <span>{item.label}</span>
                   </div>
-                  {isActive && <ChevronRight size={14} className="text-canvas" />}
+                  {isActive && <ChevronRight size={14} className="text-[#F2EBDD]" />}
                 </Link>
               );
             })}
           </div>
         </div>
 
-        <div className="p-3 border-t-4 border-ink bg-canvas">
+        <div className="p-3 border-t-4 border-[#0A0A0A] bg-[#F2EBDD]">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center space-x-2.5 overflow-hidden">
               {isValidAvatarUrl(user.avatar) && !avatarError ? (
@@ -168,23 +168,23 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
                   alt={user.name}
                   referrerPolicy="no-referrer"
                   onError={() => setAvatarError(true)}
-                  className="w-8 h-8 rounded-full border-2 border-ink object-cover shrink-0 select-none"
+                  className="w-8 h-8 rounded-full border-2 border-[#0A0A0A] object-cover shrink-0 select-none"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-white border-2 border-ink flex items-center justify-center text-ink font-black text-xs shrink-0 select-none">
+                <div className="w-8 h-8 rounded-full bg-white border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] font-black text-xs shrink-0 select-none">
                   {getInitials(user.name, 'A')}
                 </div>
               )}
               <div className="flex flex-col min-w-0">
                 <div className="flex items-center space-x-1.5 min-w-0">
-                  <span className="text-xs font-bold text-ink truncate">{user.name}</span>
+                  <span className="text-xs font-bold text-[#0A0A0A] truncate">{user.name}</span>
                   {isAdmin && (
-                    <span className="px-1.5 py-0.5 rounded-md bg-white border border-ink text-ink text-[9px] font-black uppercase shrink-0">
+                    <span className="px-1.5 py-0.5 rounded-md bg-white border border-[#0A0A0A] text-[#0A0A0A] text-[9px] font-black uppercase shrink-0">
                       Super Admin
                     </span>
                   )}
                   {isManager && (
-                    <span className="px-1.5 py-0.5 rounded-md bg-white border border-ink text-ink text-[9px] font-black uppercase shrink-0">
+                    <span className="px-1.5 py-0.5 rounded-md bg-white border border-[#0A0A0A] text-[#0A0A0A] text-[9px] font-black uppercase shrink-0">
                       Manager
                     </span>
                   )}
@@ -195,7 +195,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
 
             <button
               onClick={handleLogout}
-              className="p-1.5 rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-canvas transition-all cursor-pointer shrink-0 ml-1"
+              className="p-1.5 rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer shrink-0 ml-1"
               title="Logout"
             >
               <LogOut size={16} />
@@ -204,24 +204,24 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 h-full bg-canvas overflow-hidden">
-        <header className="h-16 border-b-4 border-ink px-8 flex items-center justify-between bg-canvas shrink-0 font-['JetBrains_Mono',monospace]">
+      <div className="flex-1 flex flex-col min-w-0 h-full bg-[#F2EBDD] overflow-hidden">
+        <header className="h-16 border-b-4 border-[#0A0A0A] px-8 flex items-center justify-between bg-[#F2EBDD] shrink-0 font-['JetBrains_Mono',monospace]">
           <div className="flex items-center space-x-3">
-            <h1 className="font-['Anybody',sans-serif] text-base font-black uppercase text-ink tracking-tight">
+            <h1 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] tracking-tight">
               {getPageTitle()}
             </h1>
           </div>
 
           <div className="flex items-center space-x-4">
-            <div className="flex items-center bg-white p-1 rounded-xl border-2 border-ink shadow-brutal-sm">
-              <Globe size={14} className="text-ink ml-1.5 mr-1" />
+            <div className="flex items-center bg-white p-1 rounded-xl border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
+              <Globe size={14} className="text-[#0A0A0A] ml-1.5 mr-1" />
               <button
                 type="button"
                 onClick={() => handleLanguageSelect('uk')}
                 className={`px-2.5 py-1 rounded-lg text-xs font-black uppercase transition-all cursor-pointer ${
                   currentLanguage === 'uk'
-                    ? 'bg-ink text-canvas'
-                    : 'text-ink hover:bg-canvas'
+                    ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                    : 'text-[#0A0A0A] hover:bg-[#F2EBDD]'
                 }`}
               >
                 UK
@@ -231,8 +231,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
                 onClick={() => handleLanguageSelect('en')}
                 className={`px-2.5 py-1 rounded-lg text-xs font-black uppercase transition-all cursor-pointer ${
                   currentLanguage === 'en'
-                    ? 'bg-ink text-canvas'
-                    : 'text-ink hover:bg-canvas'
+                    ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                    : 'text-[#0A0A0A] hover:bg-[#F2EBDD]'
                 }`}
               >
                 EN
@@ -241,7 +241,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
           </div>
         </header>
 
-        <main className={`flex-1 overflow-y-auto bg-canvas text-ink ${noPadding ? 'p-0 flex h-full min-h-0 overflow-hidden' : 'p-8'}`}>
+        <main className={`flex-1 overflow-y-auto bg-[#F2EBDD] text-[#0A0A0A] ${noPadding ? 'p-0 flex h-full min-h-0 overflow-hidden' : 'p-8'}`}>
           <ErrorBoundary
             inline
             fallbackTitle="Admin View Error"

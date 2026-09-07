@@ -178,21 +178,21 @@ export const ChatPage: React.FC = () => {
   if (!isBotsLoading && botId === 0) {
     return (
       <DashboardLayout>
-        <div className="h-full flex items-center justify-center p-8 text-center bg-canvas">
-          <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-canvas border-2 border-ink rounded-3xl p-10 shadow-brutal">
-            <div className="w-16 h-16 rounded-2xl bg-white border-2 border-ink shadow-brutal flex items-center justify-center mx-auto text-ink">
+        <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">
+          <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
+            <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
               <AlertCircle size={32} />
             </div>
-            <p className="font-['Anybody',sans-serif] font-black text-ink text-xl uppercase tracking-tight">
+            <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">
               {t('crm.contacts.no_bot_title', 'No active bot found')}
             </p>
-            <p className="font-['Geist',sans-serif] text-xs text-ink/70 font-semibold max-w-xs mx-auto leading-relaxed">
+            <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">
               {t('crm.contacts.no_bot_desc', 'Please connect a bot first to access the chat.')}
             </p>
             <div className="pt-2">
               <button
                 onClick={() => navigate('/connect-bot')}
-                className="px-6 py-3 bg-ink text-canvas font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-ink shadow-brutal hover:bg-white hover:text-ink hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
+                className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
               >
                 <Plus size={14} />
                 <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
@@ -206,7 +206,7 @@ export const ChatPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col bg-canvas font-['JetBrains_Mono',monospace] overflow-hidden w-full max-w-full">
+      <div className="h-full flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace] overflow-hidden w-full max-w-full">
         <style>{`
           .scrollbar-none::-webkit-scrollbar { display: none; }
           .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }

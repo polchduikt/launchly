@@ -237,7 +237,7 @@ export const AdminBroadcastsPage: React.FC = () => {
   const getStatusBadge = (status: string, isBlocked?: boolean) => {
     if (isBlocked || status === 'BLOCKED') {
       return (
-        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-200 text-rose-950 border-2 border-ink">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-200 text-rose-950 border-2 border-[#0A0A0A]">
           <span>{t('admin.status_blocked')}</span>
         </span>
       );
@@ -246,38 +246,38 @@ export const AdminBroadcastsPage: React.FC = () => {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-emerald-200 text-emerald-950 border-2 border-ink">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-emerald-200 text-emerald-950 border-2 border-[#0A0A0A]">
             <span>{t('admin.status_completed')}</span>
           </span>
         );
       case 'RUNNING':
       case 'IN_PROGRESS':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-cyan-200 text-cyan-950 border-2 border-ink">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-cyan-200 text-cyan-950 border-2 border-[#0A0A0A]">
             <span>{t('admin.status_running')}</span>
           </span>
         );
       case 'SCHEDULED':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-amber-200 text-amber-950 border-2 border-ink">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-amber-200 text-amber-950 border-2 border-[#0A0A0A]">
             <span>{t('admin.status_scheduled')}</span>
           </span>
         );
       case 'CANCELLED':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-slate-200 text-slate-900 border-2 border-ink">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-slate-200 text-slate-900 border-2 border-[#0A0A0A]">
             <span>{t('admin.status_cancelled')}</span>
           </span>
         );
       case 'FAILED':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-200 text-rose-950 border-2 border-ink">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-200 text-rose-950 border-2 border-[#0A0A0A]">
             <span>{t('admin.status_failed')}</span>
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-white text-ink border-2 border-ink">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-white text-[#0A0A0A] border-2 border-[#0A0A0A]">
             <span>{t('admin.status_draft')}</span>
           </span>
         );
@@ -309,13 +309,13 @@ export const AdminBroadcastsPage: React.FC = () => {
 
   return (
     <AdminLayout noPadding={true}>
-      <div className="flex h-full w-full overflow-hidden bg-canvas text-ink font-['JetBrains_Mono',monospace]">
+      <div className="flex h-full w-full overflow-hidden bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
         
-        <aside className="w-56 lg:w-60 bg-canvas border-r-2 border-ink h-full p-4 space-y-5 overflow-y-auto shrink-0 flex flex-col justify-between z-10">
+        <aside className="w-56 lg:w-60 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] h-full p-4 space-y-5 overflow-y-auto shrink-0 flex flex-col justify-between z-10">
           <div className="space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b-2 border-ink">
-              <h3 className="font-['Anybody',sans-serif] text-xs font-black uppercase text-ink flex items-center gap-1.5">
-                <Filter size={14} className="text-ink" />
+            <div className="flex items-center justify-between pb-3 border-b-2 border-[#0A0A0A]">
+              <h3 className="font-['Anybody',sans-serif] text-xs font-black uppercase text-[#0A0A0A] flex items-center gap-1.5">
+                <Filter size={14} className="text-[#0A0A0A]" />
                 <span>{t('admin.filters_title')}</span>
               </h3>
               {(statusFilter !== 'all' || sortFilter !== 'desc') && (
@@ -325,7 +325,7 @@ export const AdminBroadcastsPage: React.FC = () => {
                     setSortFilter('desc');
                     setPage(0);
                   }}
-                  className="text-[10px] font-black uppercase text-ink underline hover:opacity-80 transition cursor-pointer"
+                  className="text-[10px] font-black uppercase text-[#0A0A0A] underline hover:opacity-80 transition cursor-pointer"
                 >
                   {t('admin.reset_filters')}
                 </button>
@@ -333,19 +333,19 @@ export const AdminBroadcastsPage: React.FC = () => {
             </div>
 
             <div className="space-y-1" ref={statusDropdownRef}>
-              <label className="text-[10px] font-black uppercase tracking-wider text-ink block">{t('admin.status_filter_label')}</label>
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.status_filter_label')}</label>
               <div className="relative w-full">
                 <button
                   type="button"
                   onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink transition-all cursor-pointer shadow-brutal-sm"
+                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <span>{getStatusLabel(statusFilter)}</span>
-                  <ChevronDown size={14} className={`text-ink transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isStatusDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-canvas border-2 border-ink rounded-xl shadow-brutal z-50 py-1 font-['JetBrains_Mono',monospace]">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace]">
                     {statusOptions.map((opt) => (
                       <button
                         key={opt.value}
@@ -357,8 +357,8 @@ export const AdminBroadcastsPage: React.FC = () => {
                         }}
                         className={`w-full text-left px-3 py-1.5 text-xs font-bold uppercase flex items-center justify-between transition-colors ${
                           statusFilter === opt.value
-                            ? 'bg-ink text-canvas'
-                            : 'text-ink hover:bg-white'
+                            ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                            : 'text-[#0A0A0A] hover:bg-white'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -370,19 +370,19 @@ export const AdminBroadcastsPage: React.FC = () => {
             </div>
 
             <div className="space-y-1" ref={sortDropdownRef}>
-              <label className="text-[10px] font-black uppercase tracking-wider text-ink block">{t('admin.sorting_label')}</label>
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.sorting_label')}</label>
               <div className="relative w-full">
                 <button
                   type="button"
                   onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink transition-all cursor-pointer shadow-brutal-sm"
+                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <span>{sortFilter === 'asc' ? t('admin.sort_oldest') : t('admin.sort_newest')}</span>
-                  <ChevronDown size={14} className={`text-ink transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isSortDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-canvas border-2 border-ink rounded-xl shadow-brutal z-50 py-1 font-['JetBrains_Mono',monospace]">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace]">
                     {[
                       { value: 'desc', label: t('admin.sort_newest') },
                       { value: 'asc', label: t('admin.sort_oldest') },
@@ -396,7 +396,7 @@ export const AdminBroadcastsPage: React.FC = () => {
                           setIsSortDropdownOpen(false);
                         }}
                         className={`w-full px-3 py-1.5 text-left text-xs font-bold uppercase flex items-center justify-between hover:bg-white transition cursor-pointer ${
-                          sortFilter === opt.value ? 'bg-ink text-canvas' : 'text-ink'
+                          sortFilter === opt.value ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A]'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -409,22 +409,22 @@ export const AdminBroadcastsPage: React.FC = () => {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-canvas space-y-4">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-[#F2EBDD] space-y-4">
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-3 flex-1 max-w-md">
               <div className="relative w-full">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink" size={15} />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]" size={15} />
                 <input
                   type="text"
                   placeholder={t('admin.search_broadcasts_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink placeholder-slate-500 focus:outline-none transition-all shadow-brutal-sm"
+                  className="w-full pl-9 pr-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder-slate-500 focus:outline-none transition-all shadow-[2px_2px_0px_#0A0A0A]"
                 />
               </div>
               {selectedIds.length > 0 && (
-                <span className="px-3.5 py-1.5 rounded-xl bg-white border-2 border-ink text-ink font-black text-xs shrink-0 shadow-brutal-sm">
+                <span className="px-3.5 py-1.5 rounded-xl bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] font-black text-xs shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
                   {t('admin.selected_count', { count: selectedIds.length })}
                 </span>
               )}
@@ -435,25 +435,25 @@ export const AdminBroadcastsPage: React.FC = () => {
                 type="button"
                 disabled={selectedIds.length === 0}
                 onClick={() => setIsBulkActionOpen(!isBulkActionOpen)}
-                className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-ink hover:text-canvas border-2 border-ink rounded-xl text-xs font-black uppercase text-ink disabled:opacity-40 disabled:cursor-not-allowed transition shadow-brutal-sm cursor-pointer"
+                className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
               >
                 <span>{t('admin.bulk_actions')}</span>
                 <ChevronDown size={14} className={`transition-transform duration-200 ${isBulkActionOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isBulkActionOpen && selectedIds.length > 0 && (
-                <div className="absolute right-0 top-full mt-1.5 w-52 bg-canvas border-2 border-ink rounded-2xl shadow-brutal z-50 py-1.5 font-['JetBrains_Mono',monospace]">
+                <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1.5 font-['JetBrains_Mono',monospace]">
                   <button
                     type="button"
                     onClick={handleBulkCancel}
-                    className="w-full text-left px-4 py-2 text-xs font-bold text-ink hover:bg-white flex items-center space-x-2.5 transition cursor-pointer"
+                    className="w-full text-left px-4 py-2 text-xs font-bold text-[#0A0A0A] hover:bg-white flex items-center space-x-2.5 transition cursor-pointer"
                   >
-                    <Ban size={14} className="text-ink" />
+                    <Ban size={14} className="text-[#0A0A0A]" />
                     <span>{t('admin.bulk_cancel')}</span>
                   </button>
                   {isAdmin && (
                     <>
-                      <div className="my-1 border-t-2 border-ink" />
+                      <div className="my-1 border-t-2 border-[#0A0A0A]" />
                       <button
                         type="button"
                         onClick={handleBulkBlock}
@@ -478,22 +478,22 @@ export const AdminBroadcastsPage: React.FC = () => {
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-20 bg-canvas border-2 border-ink rounded-3xl shadow-brutal">
-              <Loader2 className="animate-spin text-ink" size={32} />
+            <div className="flex items-center justify-center py-20 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-[4px_4px_0px_#0A0A0A]">
+              <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
             </div>
           ) : (
             <>
-              <div className="bg-canvas border-2 border-ink rounded-3xl overflow-hidden shadow-brutal">
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl overflow-hidden shadow-[4px_4px_0px_#0A0A0A]">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs font-['JetBrains_Mono',monospace]">
-                    <thead className="bg-canvas border-b-2 border-ink text-ink font-black uppercase text-[10px]">
+                    <thead className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-black uppercase text-[10px]">
                       <tr>
                         <th className="py-3.5 px-4 text-center w-10">
                           <input
                             type="checkbox"
                             checked={isAllSelected}
                             onChange={handleToggleSelectAll}
-                            className="w-4 h-4 rounded border-2 border-ink text-ink accent-ink cursor-pointer"
+                            className="w-4 h-4 rounded border-2 border-[#0A0A0A] text-[#0A0A0A] accent-[#0A0A0A] cursor-pointer"
                           />
                         </th>
                         <th className="py-3.5 px-4">{t('admin.title_col')}</th>
@@ -504,7 +504,7 @@ export const AdminBroadcastsPage: React.FC = () => {
                         <th className="py-3.5 px-4 text-center">{t('admin.status_col')}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-ink/20">
+                    <tbody className="divide-y divide-[#0A0A0A]/20">
                       {broadcasts.length === 0 ? (
                         <tr>
                           <td colSpan={7} className="py-12 text-center text-slate-700 font-bold">
@@ -531,26 +531,26 @@ export const AdminBroadcastsPage: React.FC = () => {
                                   type="checkbox"
                                   checked={selectedIds.includes(b.id)}
                                   onChange={() => handleToggleSelectRow(b.id)}
-                                  className="w-4 h-4 rounded border-2 border-ink text-ink accent-ink cursor-pointer"
+                                  className="w-4 h-4 rounded border-2 border-[#0A0A0A] text-[#0A0A0A] accent-[#0A0A0A] cursor-pointer"
                                 />
                               </td>
                               <td className="py-3.5 px-4">
                                 <div className="flex flex-col">
-                                  <span className="font-black text-ink group-hover:underline transition text-xs">{b.title}</span>
+                                  <span className="font-black text-[#0A0A0A] group-hover:underline transition text-xs">{b.title}</span>
                                   <span className="text-[11px] text-slate-700 line-clamp-1 font-bold mt-0.5">{b.content}</span>
                                 </div>
                               </td>
 
                               <td className="py-3.5 px-4">
-                                <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-white border border-ink text-ink font-black text-[10px]">
-                                  <Users size={12} className="text-ink" />
+                                <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-white border border-[#0A0A0A] text-[#0A0A0A] font-black text-[10px]">
+                                  <Users size={12} className="text-[#0A0A0A]" />
                                   <span>
                                     {b.targetAudience === 'ALL_USERS' ? t('admin.target_audience_all') : (b.botName || t('admin.target_audience_bot'))}
                                   </span>
                                 </span>
                               </td>
 
-                              <td className="py-3.5 px-4 text-center font-mono font-black text-ink">
+                              <td className="py-3.5 px-4 text-center font-mono font-black text-[#0A0A0A]">
                                 {b.sentCount}
                               </td>
 
@@ -563,7 +563,7 @@ export const AdminBroadcastsPage: React.FC = () => {
                                   className="flex flex-col cursor-pointer group/author inline-flex hover:opacity-80 transition"
                                   title="Переглянути профіль користувача"
                                 >
-                                  <span className="font-black text-ink group-hover/author:underline text-xs">
+                                  <span className="font-black text-[#0A0A0A] group-hover/author:underline text-xs">
                                     {b.authorName || (b.createdByEmail || '').split('@')[0]}
                                   </span>
                                   <span className="text-[10px] text-slate-700 font-mono font-bold">
@@ -587,24 +587,24 @@ export const AdminBroadcastsPage: React.FC = () => {
                   </table>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-canvas border-t-2 border-ink text-xs text-ink font-bold">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] text-xs text-[#0A0A0A] font-bold">
                   <div>
                     {t('admin.showing')}{' '}
-                    <span className="font-black text-ink">{broadcasts.length}</span>{' '}
+                    <span className="font-black text-[#0A0A0A]">{broadcasts.length}</span>{' '}
                     {t('admin.of')}{' '}
-                    <span className="font-black text-ink">{totalElements}</span>
+                    <span className="font-black text-[#0A0A0A]">{totalElements}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                       disabled={page === 0}
-                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-ink bg-white hover:bg-ink hover:text-canvas text-ink font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-brutal-sm cursor-pointer"
+                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
                     >
                       <ChevronLeft size={14} />
                       <span>{t('admin.prev')}</span>
                     </button>
 
-                    <div className="flex items-center space-x-1 px-2.5 py-1 rounded-xl bg-white border-2 border-ink text-xs font-black font-mono text-ink shadow-brutal-sm">
+                    <div className="flex items-center space-x-1 px-2.5 py-1 rounded-xl bg-white border-2 border-[#0A0A0A] text-xs font-black font-mono text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
                       <span>{page + 1}</span>
                       <span>/</span>
                       <span>{totalPages}</span>
@@ -613,7 +613,7 @@ export const AdminBroadcastsPage: React.FC = () => {
                     <button
                       onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
                       disabled={page >= totalPages - 1}
-                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-ink bg-white hover:bg-ink hover:text-canvas text-ink font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-brutal-sm cursor-pointer"
+                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
                     >
                       <span>{t('admin.next')}</span>
                       <ChevronRight size={14} />
@@ -626,17 +626,17 @@ export const AdminBroadcastsPage: React.FC = () => {
         </main>
 
         {showDetailModal && selectedBroadcast && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-            <div className="bg-canvas border-4 border-ink rounded-3xl w-full max-w-4xl max-h-[90vh] p-6 sm:p-7 shadow-brutal-2xl flex flex-col justify-between space-y-5 overflow-hidden text-ink font-['JetBrains_Mono',monospace]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+            <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] rounded-3xl w-full max-w-4xl max-h-[90vh] p-6 sm:p-7 shadow-[10px_10px_0px_#0A0A0A] flex flex-col justify-between space-y-5 overflow-hidden text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
               
-              <div className="flex items-start justify-between border-b-2 border-ink pb-4 shrink-0">
+              <div className="flex items-start justify-between border-b-2 border-[#0A0A0A] pb-4 shrink-0">
                 <div className="flex items-start space-x-3.5">
-                  <div className="p-3 rounded-2xl bg-white border-2 border-ink text-ink shrink-0 mt-0.5 shadow-brutal-sm">
+                  <div className="p-3 rounded-2xl bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] shrink-0 mt-0.5 shadow-[2px_2px_0px_#0A0A0A]">
                     <Send size={22} />
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <h2 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-ink tracking-tight">{selectedBroadcast.title}</h2>
+                      <h2 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-[#0A0A0A] tracking-tight">{selectedBroadcast.title}</h2>
                       {getStatusBadge(selectedBroadcast.status || '', selectedBroadcast.blocked)}
                     </div>
                     <div className="text-xs text-slate-700 font-bold flex items-center gap-2 flex-wrap">
@@ -648,14 +648,14 @@ export const AdminBroadcastsPage: React.FC = () => {
                             setShowDetailModal(false);
                             navigate(`${ROUTES.ADMIN_USERS}?search=${encodeURIComponent(selectedBroadcast.createdByEmail || '')}`);
                           }}
-                          className="font-black text-ink hover:underline cursor-pointer transition"
+                          className="font-black text-[#0A0A0A] hover:underline cursor-pointer transition"
                           title="Перейти до профілю користувача"
                         >
                           {selectedBroadcast.authorName || (selectedBroadcast.createdByEmail || '').split('@')[0]} ({selectedBroadcast.createdByEmail})
                         </button>
                       </span>
                       <span>•</span>
-                      <span>ID: <strong className="text-ink font-black">#{selectedBroadcast.id}</strong></span>
+                      <span>ID: <strong className="text-[#0A0A0A] font-black">#{selectedBroadcast.id}</strong></span>
                     </div>
                   </div>
                 </div>
@@ -669,7 +669,7 @@ export const AdminBroadcastsPage: React.FC = () => {
                           unblockMutation.mutate(selectedBroadcast.id);
                           setShowDetailModal(false);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-200 border-2 border-ink text-emerald-950 font-black uppercase text-xs flex items-center space-x-1.5 hover:bg-emerald-300 transition cursor-pointer shadow-brutal-sm"
+                        className="px-3 py-1.5 rounded-xl bg-emerald-200 border-2 border-[#0A0A0A] text-emerald-950 font-black uppercase text-xs flex items-center space-x-1.5 hover:bg-emerald-300 transition cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                       >
                         <Unlock size={14} />
                         <span>{t('admin.unblock_broadcast')}</span>
@@ -681,7 +681,7 @@ export const AdminBroadcastsPage: React.FC = () => {
                           setShowDetailModal(false);
                           handleOpenBlockModal(selectedBroadcast);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-rose-200 border-2 border-ink text-rose-950 font-black uppercase text-xs flex items-center space-x-1.5 hover:bg-rose-300 transition cursor-pointer shadow-brutal-sm"
+                        className="px-3 py-1.5 rounded-xl bg-rose-200 border-2 border-[#0A0A0A] text-rose-950 font-black uppercase text-xs flex items-center space-x-1.5 hover:bg-rose-300 transition cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                       >
                         <Lock size={14} />
                         <span>{t('admin.block_broadcast')}</span>
@@ -691,7 +691,7 @@ export const AdminBroadcastsPage: React.FC = () => {
 
                   <button
                     onClick={() => setShowDetailModal(false)}
-                    className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm ml-1"
+                    className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm ml-1"
                   >
                     <X size={16} />
                   </button>
@@ -700,53 +700,53 @@ export const AdminBroadcastsPage: React.FC = () => {
 
               <div className="space-y-5 overflow-y-auto pr-1 flex-1">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                  <div className="p-4 bg-white border-2 border-ink rounded-2xl flex items-center space-x-3 shadow-brutal-sm">
-                    <div className="p-2.5 rounded-xl bg-canvas border border-ink text-ink">
+                  <div className="p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl flex items-center space-x-3 shadow-[2px_2px_0px_#0A0A0A]">
+                    <div className="p-2.5 rounded-xl bg-[#F2EBDD] border border-[#0A0A0A] text-[#0A0A0A]">
                       <Users size={18} />
                     </div>
                     <div>
                       <div className="text-[10px] font-black uppercase text-slate-700 tracking-wider">{t('admin.audience_col')}</div>
-                      <div className="text-sm font-black text-ink mt-0.5 truncate max-w-[110px]">
+                      <div className="text-sm font-black text-[#0A0A0A] mt-0.5 truncate max-w-[110px]">
                         {selectedBroadcast.targetAudience === 'ALL_USERS' ? t('admin.target_audience_all') : (selectedBroadcast.botName || t('admin.target_audience_bot'))}
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-white border-2 border-ink rounded-2xl flex items-center space-x-3 shadow-brutal-sm">
-                    <div className="p-2.5 rounded-xl bg-canvas border border-ink text-ink">
+                  <div className="p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl flex items-center space-x-3 shadow-[2px_2px_0px_#0A0A0A]">
+                    <div className="p-2.5 rounded-xl bg-[#F2EBDD] border border-[#0A0A0A] text-[#0A0A0A]">
                       <CheckCircle2 size={18} />
                     </div>
                     <div>
                       <div className="text-[10px] font-black uppercase text-slate-700 tracking-wider">{t('admin.delivered_col')}</div>
-                      <div className="text-base font-black font-mono text-ink mt-0.5">{selectedBroadcast.sentCount}</div>
+                      <div className="text-base font-black font-mono text-[#0A0A0A] mt-0.5">{selectedBroadcast.sentCount}</div>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-white border-2 border-ink rounded-2xl flex items-center space-x-3 shadow-brutal-sm">
-                    <div className="p-2.5 rounded-xl bg-canvas border border-ink text-ink">
+                  <div className="p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl flex items-center space-x-3 shadow-[2px_2px_0px_#0A0A0A]">
+                    <div className="p-2.5 rounded-xl bg-[#F2EBDD] border border-[#0A0A0A] text-[#0A0A0A]">
                       <AlertCircle size={18} />
                     </div>
                     <div>
                       <div className="text-[10px] font-black uppercase text-slate-700 tracking-wider">{t('admin.errors_col')}</div>
-                      <div className="text-base font-black font-mono text-ink mt-0.5">{selectedBroadcast.failedCount || 0}</div>
+                      <div className="text-base font-black font-mono text-[#0A0A0A] mt-0.5">{selectedBroadcast.failedCount || 0}</div>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-white border-2 border-ink rounded-2xl flex items-center space-x-3 shadow-brutal-sm">
-                    <div className="p-2.5 rounded-xl bg-canvas border border-ink text-ink">
+                  <div className="p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl flex items-center space-x-3 shadow-[2px_2px_0px_#0A0A0A]">
+                    <div className="p-2.5 rounded-xl bg-[#F2EBDD] border border-[#0A0A0A] text-[#0A0A0A]">
                       <Send size={18} />
                     </div>
                     <div>
                       <div className="text-[10px] font-black uppercase text-slate-700 tracking-wider">{t('admin.total_records')}</div>
-                      <div className="text-base font-black font-mono text-ink mt-0.5">{selectedBroadcast.totalCount || selectedBroadcast.sentCount}</div>
+                      <div className="text-base font-black font-mono text-[#0A0A0A] mt-0.5">{selectedBroadcast.totalCount || selectedBroadcast.sentCount}</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between px-4 py-2.5 bg-white border-2 border-ink rounded-2xl text-xs shadow-brutal-sm">
+                <div className="flex items-center justify-between px-4 py-2.5 bg-white border-2 border-[#0A0A0A] rounded-2xl text-xs shadow-[2px_2px_0px_#0A0A0A]">
                   <div className="flex items-center space-x-2">
-                    <Filter size={14} className="text-ink" />
-                    <span className="font-black uppercase text-ink text-[10px] tracking-wider">{t('admin.period_label')}</span>
+                    <Filter size={14} className="text-[#0A0A0A]" />
+                    <span className="font-black uppercase text-[#0A0A0A] text-[10px] tracking-wider">{t('admin.period_label')}</span>
                   </div>
                   <div className="flex items-center space-x-1">
                     {(
@@ -765,8 +765,8 @@ export const AdminBroadcastsPage: React.FC = () => {
                         }}
                         className={`px-3 py-1 rounded-xl text-xs font-black uppercase transition cursor-pointer ${
                           selectedPeriod === p.key
-                            ? 'bg-ink text-canvas'
-                            : 'text-ink hover:bg-canvas'
+                            ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                            : 'text-[#0A0A0A] hover:bg-[#F2EBDD]'
                         }`}
                       >
                         {p.label}
@@ -775,10 +775,10 @@ export const AdminBroadcastsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="border-2 border-ink rounded-2xl p-4 space-y-3 bg-white shadow-brutal-sm">
-                  <div className="flex items-center justify-between pb-1 border-b-2 border-ink">
-                    <div className="flex items-center space-x-2 text-xs font-black uppercase text-ink">
-                      <Clock size={16} className="text-ink" />
+                <div className="border-2 border-[#0A0A0A] rounded-2xl p-4 space-y-3 bg-white shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="flex items-center justify-between pb-1 border-b-2 border-[#0A0A0A]">
+                    <div className="flex items-center space-x-2 text-xs font-black uppercase text-[#0A0A0A]">
+                      <Clock size={16} className="text-[#0A0A0A]" />
                       <span>{t('admin.broadcast_history_title')}</span>
                     </div>
                     <span className="text-[11px] font-bold text-slate-700">
@@ -789,7 +789,7 @@ export const AdminBroadcastsPage: React.FC = () => {
                   <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
                     {isDetailsLoading ? (
                       <div className="flex items-center justify-center py-10">
-                        <Loader2 className="animate-spin text-ink" size={24} />
+                        <Loader2 className="animate-spin text-[#0A0A0A]" size={24} />
                       </div>
                     ) : !detailsData?.activities.content.length ? (
                       <div className="py-8 text-center text-xs font-bold text-slate-700">
@@ -799,13 +799,13 @@ export const AdminBroadcastsPage: React.FC = () => {
                       detailsData.activities.content.map((act) => (
                         <div
                           key={act.id}
-                          className="p-3.5 bg-canvas border-2 border-ink rounded-xl space-y-1 hover:bg-white transition flex items-start justify-between gap-4"
+                          className="p-3.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl space-y-1 hover:bg-white transition flex items-start justify-between gap-4"
                         >
                           <div className="space-y-0.5">
                             <div className="flex items-center gap-2">
-                              <span className="font-black text-xs text-ink">{t(act.title) !== act.title ? t(act.title) : act.title}</span>
+                              <span className="font-black text-xs text-[#0A0A0A]">{t(act.title) !== act.title ? t(act.title) : act.title}</span>
                               {act.badge && (
-                                <span className="px-2 py-0.5 rounded-md bg-white border border-ink text-ink font-black text-[9px] uppercase">
+                                <span className="px-2 py-0.5 rounded-md bg-white border border-[#0A0A0A] text-[#0A0A0A] font-black text-[9px] uppercase">
                                   {act.badge}
                                 </span>
                               )}
@@ -824,24 +824,24 @@ export const AdminBroadcastsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t-2 border-ink shrink-0">
+              <div className="flex items-center justify-between pt-3 border-t-2 border-[#0A0A0A] shrink-0">
                 <div className="flex items-center space-x-2">
                   <button
                     disabled={detailsPage === 0}
                     onClick={() => setDetailsPage((prev) => Math.max(prev - 1, 0))}
-                    className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border-2 border-ink bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer shadow-brutal-sm"
+                    className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                   >
                     <ChevronLeft size={14} />
                     <span>{t('admin.prev')}</span>
                   </button>
-                  <span className="text-xs font-black font-mono text-ink px-1">
+                  <span className="text-xs font-black font-mono text-[#0A0A0A] px-1">
                     {t('admin.page')} <strong>{detailsPage + 1}</strong> {t('admin.of')}{' '}
                     <strong>{detailsData?.activities.totalPages || 1}</strong>
                   </span>
                   <button
                     disabled={!detailsData || detailsPage >= detailsData.activities.totalPages - 1}
                     onClick={() => setDetailsPage((prev) => prev + 1)}
-                    className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border-2 border-ink bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer shadow-brutal-sm"
+                    className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                   >
                     <span>{t('admin.next')}</span>
                     <ChevronRight size={14} />
@@ -851,7 +851,7 @@ export const AdminBroadcastsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowDetailModal(false)}
-                  className="px-6 py-2.5 rounded-xl text-xs font-black uppercase text-canvas bg-ink border-2 border-ink hover:bg-[#2A2A2A] transition shadow-brutal-sm cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] border-2 border-[#0A0A0A] hover:bg-[#2A2A2A] transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
                 >
                   {t('admin.close')}
                 </button>
@@ -861,15 +861,15 @@ export const AdminBroadcastsPage: React.FC = () => {
         )}
 
         {showBlockModal && selectedBlockBroadcast && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-            <div className="bg-canvas border-4 border-ink rounded-3xl w-full max-w-md p-6 shadow-brutal-2xl space-y-5 text-ink font-['JetBrains_Mono',monospace]">
-              <div className="flex items-center justify-between border-b-2 border-ink pb-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+            <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] rounded-3xl w-full max-w-md p-6 shadow-[10px_10px_0px_#0A0A0A] space-y-5 text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
+              <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-2xl bg-rose-200 border-2 border-ink flex items-center justify-center text-rose-950 font-bold shadow-brutal-sm">
+                  <div className="w-10 h-10 rounded-2xl bg-rose-200 border-2 border-[#0A0A0A] flex items-center justify-center text-rose-950 font-bold shadow-[2px_2px_0px_#0A0A0A]">
                     <ShieldAlert size={20} />
                   </div>
                   <div>
-                    <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-ink leading-snug">
+                    <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] leading-snug">
                       {t('admin.block_broadcast_title')}
                     </h3>
                     <p className="text-xs text-slate-700 font-mono font-bold">
@@ -879,14 +879,14 @@ export const AdminBroadcastsPage: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setShowBlockModal(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm"
+                  className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
                 >
                   <X size={16} />
                 </button>
               </div>
 
               <div className="space-y-3">
-                <label className="text-xs font-black uppercase text-ink block">
+                <label className="text-xs font-black uppercase text-[#0A0A0A] block">
                   {t('admin.select_block_reason')}
                 </label>
 
@@ -895,10 +895,10 @@ export const AdminBroadcastsPage: React.FC = () => {
                     <label
                       key={r.code}
                       onClick={() => setBlockReasonOption(r.code)}
-                      className={`flex items-center space-x-3 p-3.5 rounded-2xl border-2 border-ink cursor-pointer transition ${
+                      className={`flex items-center space-x-3 p-3.5 rounded-2xl border-2 border-[#0A0A0A] cursor-pointer transition ${
                         blockReasonOption === r.code
-                          ? 'bg-ink text-canvas font-black shadow-brutal-sm'
-                          : 'bg-white text-ink hover:bg-amber-50'
+                          ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black shadow-[2px_2px_0px_#0A0A0A]'
+                          : 'bg-white text-[#0A0A0A] hover:bg-amber-50'
                       }`}
                     >
                       <input
@@ -906,7 +906,7 @@ export const AdminBroadcastsPage: React.FC = () => {
                         name="blockReason"
                         checked={blockReasonOption === r.code}
                         onChange={() => setBlockReasonOption(r.code)}
-                        className="accent-ink"
+                        className="accent-[#0A0A0A]"
                       />
                       <span className="text-xs uppercase font-bold">{r.label}</span>
                     </label>
@@ -915,29 +915,29 @@ export const AdminBroadcastsPage: React.FC = () => {
 
                 {blockReasonOption === 'OTHER' && (
                   <div className="space-y-1.5 pt-1">
-                    <label className="text-xs font-black uppercase text-ink block">{t('admin.specify_block_reason')}</label>
+                    <label className="text-xs font-black uppercase text-[#0A0A0A] block">{t('admin.specify_block_reason')}</label>
                     <textarea
                       value={customBlockReason}
                       onChange={(e) => setCustomBlockReason(e.target.value)}
                       placeholder="..."
                       rows={3}
-                      className="w-full p-3 bg-white border-2 border-ink rounded-2xl text-xs font-bold text-ink focus:outline-none transition shadow-brutal-sm"
+                      className="w-full p-3 bg-white border-2 border-[#0A0A0A] rounded-2xl text-xs font-bold text-[#0A0A0A] focus:outline-none transition shadow-[2px_2px_0px_#0A0A0A]"
                     />
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-ink">
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-[#0A0A0A]">
                 <button
                   onClick={() => setShowBlockModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-ink border-2 border-transparent hover:border-ink bg-white transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#0A0A0A] border-2 border-transparent hover:border-[#0A0A0A] bg-white transition cursor-pointer"
                 >
                   {t('admin.cancel')}
                 </button>
                 <button
                   onClick={handleConfirmBlockBroadcast}
                   disabled={blockMutation.isPending}
-                  className="px-4 py-2 rounded-xl text-xs font-black uppercase text-white bg-rose-700 border-2 border-ink hover:bg-rose-800 transition shadow-brutal-sm cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
+                  className="px-4 py-2 rounded-xl text-xs font-black uppercase text-white bg-rose-700 border-2 border-[#0A0A0A] hover:bg-rose-800 transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
                 >
                   {blockMutation.isPending && <Loader2 size={14} className="animate-spin" />}
                   <span>{t('admin.block')}</span>

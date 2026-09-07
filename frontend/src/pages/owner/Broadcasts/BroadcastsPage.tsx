@@ -200,10 +200,10 @@ export const BroadcastsPage: React.FC = () => {
         onConfirm={() => confirmDialog?.onConfirm()}
         onCancel={() => setConfirmDialog(null)}
       />
-      <div className="min-h-screen bg-canvas p-6 md:p-10 max-w-6xl mx-auto space-y-6 font-['Geist',sans-serif]">
-        <div className="flex items-center justify-between pb-6 border-b-2 border-ink">
+      <div className="min-h-screen bg-[#F2EBDD] p-6 md:p-10 max-w-6xl mx-auto space-y-6 font-['Geist',sans-serif]">
+        <div className="flex items-center justify-between pb-6 border-b-2 border-[#0A0A0A]">
           <div>
-            <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-ink uppercase tracking-tight select-none">{t('broadcasts.title')}</h1>
+            <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight select-none">{t('broadcasts.title')}</h1>
             <p className="font-['JetBrains_Mono',monospace] text-xs text-slate-700 font-bold mt-1 uppercase">
               {t('broadcasts.subtitle')}
             </p>
@@ -211,7 +211,7 @@ export const BroadcastsPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-white bg-ink hover:bg-[#2A2A2A] border-2 border-ink rounded-xl transition-all cursor-pointer shadow-brutal-sm select-none"
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-white bg-[#0A0A0A] hover:bg-[#2A2A2A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] select-none"
             >
               <Plus size={14} />
               <span>{t('broadcasts.btn.new')}</span>
@@ -221,25 +221,25 @@ export const BroadcastsPage: React.FC = () => {
 
         {isLoadingTotal ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3 font-['JetBrains_Mono',monospace]">
-            <Loader2 className="animate-spin text-ink" size={32} />
-            <span className="text-xs font-bold text-ink uppercase tracking-wider">{t('common.loading', 'Loading...')}</span>
+            <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
+            <span className="text-xs font-bold text-[#0A0A0A] uppercase tracking-wider">{t('common.loading', 'Loading...')}</span>
           </div>
         ) : hasNoBots ? (
-          <div className="h-full flex items-center justify-center p-8 text-center bg-canvas">
-            <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-canvas border-2 border-ink rounded-3xl p-10 shadow-brutal">
-              <div className="w-16 h-16 rounded-2xl bg-white border-2 border-ink shadow-brutal flex items-center justify-center mx-auto text-ink">
+          <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">
+            <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
+              <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
                 <Bell size={32} />
               </div>
-              <p className="font-['Anybody',sans-serif] font-black text-ink text-xl uppercase tracking-tight">
+              <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">
                 {t('broadcasts.connect_bot_title')}
               </p>
-              <p className="font-['Geist',sans-serif] text-xs text-ink/70 font-semibold max-w-xs mx-auto leading-relaxed">
+              <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">
                 {t('broadcasts.connect_bot_desc')}
               </p>
               <div className="pt-2">
                 <button
                   onClick={() => navigate('/connect-bot')}
-                  className="px-6 py-3 bg-ink text-canvas font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-ink shadow-brutal hover:bg-white hover:text-ink hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
+                  className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
                 >
                   <Plus size={14} />
                   <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
@@ -248,37 +248,37 @@ export const BroadcastsPage: React.FC = () => {
             </div>
           </div>
         ) : campaigns.length === 0 ? (
-          <div className="bg-canvas border-2 border-ink rounded-3xl p-10 md:p-16 text-center max-w-4xl mx-auto mt-6">
+          <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 md:p-16 text-center max-w-4xl mx-auto mt-6">
             <div className="relative w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-2xl bg-white border-2 border-ink flex items-center justify-center text-ink relative">
+              <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] relative">
                 <Bell size={36} />
               </div>
-              <div className="absolute top-1 right-1 w-10 h-10 rounded-full bg-amber-200 border-2 border-ink flex items-center justify-center text-ink">
-                <Flame size={20} className="fill-ink" />
+              <div className="absolute top-1 right-1 w-10 h-10 rounded-full bg-amber-200 border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A]">
+                <Flame size={20} className="fill-[#0A0A0A]" />
               </div>
-              <div className="absolute bottom-1 left-1 w-8 h-8 rounded-full bg-emerald-200 border-2 border-ink flex items-center justify-center text-ink">
-                <span className="w-3 h-3 rounded-full bg-ink" />
+              <div className="absolute bottom-1 left-1 w-8 h-8 rounded-full bg-emerald-200 border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A]">
+                <span className="w-3 h-3 rounded-full bg-[#0A0A0A]" />
               </div>
             </div>
 
-            <h2 className="font-['Anybody',sans-serif] text-xl font-black text-ink uppercase tracking-tight mb-2">{t('broadcasts.empty.title')}</h2>
+            <h2 className="font-['Anybody',sans-serif] text-xl font-black text-[#0A0A0A] uppercase tracking-tight mb-2">{t('broadcasts.empty.title')}</h2>
             <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-700 max-w-md mx-auto mb-6 leading-relaxed">
               {t('broadcasts.empty.desc')}
             </p>
 
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="px-6 py-2.5 text-xs font-black uppercase font-['JetBrains_Mono',monospace] text-ink bg-white border-2 border-ink hover:bg-ink hover:text-canvas rounded-xl transition-all cursor-pointer"
+              className="px-6 py-2.5 text-xs font-black uppercase font-['JetBrains_Mono',monospace] text-[#0A0A0A] bg-white border-2 border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl transition-all cursor-pointer"
             >
               {t('broadcasts.btn.new')}
             </button>
           </div>
         ) : (
-          <div className="bg-canvas border-2 border-ink rounded-2xl overflow-hidden">
+          <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-['JetBrains_Mono',monospace]">
                 <thead>
-                  <tr className="border-b-2 border-ink text-ink text-[10px] font-black uppercase tracking-wider bg-white">
+                  <tr className="border-b-2 border-[#0A0A0A] text-[#0A0A0A] text-[10px] font-black uppercase tracking-wider bg-white">
                     <th className="py-3 px-4">{t('broadcasts.table.campaign_name')}</th>
                     <th className="py-3 px-4">{t('broadcasts.table.automation')}</th>
                     <th className="py-3 px-4">{t('broadcasts.table.target_audience')}</th>
@@ -288,7 +288,7 @@ export const BroadcastsPage: React.FC = () => {
                     <th className="py-3 px-4 text-right">{t('broadcasts.table.action')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-ink/15 text-xs font-bold text-ink">
+                <tbody className="divide-y divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A]">
                   {campaigns.map((camp) => {
                     const campaignBot = bots.find((b) => b.id === camp.botId);
                     const isBlocked = camp.blocked || camp.status === 'BLOCKED';
@@ -313,15 +313,15 @@ export const BroadcastsPage: React.FC = () => {
                       >
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-2">
-                            <span className="font-extrabold text-sm text-ink group-hover:text-indigo-600 transition-all">
+                            <span className="font-extrabold text-sm text-[#0A0A0A] group-hover:text-indigo-600 transition-all">
                               {camp.name}
                             </span>
                             {templateNameTag ? (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-ink uppercase shrink-0">
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
                                 [{t('template.badge', 'ШАБЛОН')} {templateNameTag}]
                               </span>
                             ) : isTemplateBot ? (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-ink uppercase shrink-0">
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-slate-200 text-slate-800 border border-[#0A0A0A] uppercase shrink-0">
                                 [{t('template.badge', 'ШАБЛОН')}]
                               </span>
                             ) : null}
@@ -332,14 +332,14 @@ export const BroadcastsPage: React.FC = () => {
                               : camp.message}
                           </div>
                         </td>
-                        <td className="py-4 px-4 text-xs font-extrabold text-ink">
+                        <td className="py-4 px-4 text-xs font-extrabold text-[#0A0A0A]">
                           {camp.targetAllBots || !campaignBot
                             ? t('broadcast.dialog.all_automations', 'Усі автоматизації')
                             : campaignBot.name}
                         </td>
-                        <td className="py-4 px-4 text-xs text-ink font-bold">
+                        <td className="py-4 px-4 text-xs text-[#0A0A0A] font-bold">
                           <span className="flex items-center gap-1.5">
-                            <Filter size={12} className="text-ink" />
+                            <Filter size={12} className="text-[#0A0A0A]" />
                             {getFilterText(camp.filterType, camp.filterValue)}
                           </span>
                         </td>
@@ -347,7 +347,7 @@ export const BroadcastsPage: React.FC = () => {
                           <StatusBadge status={isBlocked ? 'BLOCKED' : camp.status} />
                         </td>
                         <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
-                          <div className="text-xs text-ink font-bold mb-1.5 whitespace-nowrap">
+                          <div className="text-xs text-[#0A0A0A] font-bold mb-1.5 whitespace-nowrap">
                             {camp.status === 'SCHEDULED'
                               ? `${t('status.scheduled') || 'Заплановано'} (${formatScheduledDate(camp.scheduledAt)})`
                               : t('broadcasts.table.sent', {
@@ -482,7 +482,7 @@ export const BroadcastsPage: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setBlockedDetailsCampaign(null)}
-                  className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm"
+                  className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
                 >
                   <X size={16} />
                 </button>
@@ -502,7 +502,7 @@ export const BroadcastsPage: React.FC = () => {
               <div className="pt-2">
                 <button
                   onClick={() => setBlockedDetailsCampaign(null)}
-                  className="w-full py-3 bg-ink hover:bg-[#2A2A2A] text-canvas font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                  className="w-full py-3 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
                 >
                   {t('common.close') || 'Зрозуміло'}
                 </button>

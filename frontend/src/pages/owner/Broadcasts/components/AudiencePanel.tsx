@@ -241,25 +241,25 @@ interface AudienceFilterItem {
 
   return (
     <div
-      className={`absolute left-0 right-0 z-20 bg-canvas border-t-2 border-ink transition-all duration-300 ease-in-out select-none flex flex-col font-['JetBrains_Mono',monospace] ${
+      className={`absolute left-0 right-0 z-20 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] transition-all duration-300 ease-in-out select-none flex flex-col font-['JetBrains_Mono',monospace] ${
         isAudienceOpen ? 'top-0 bottom-0' : 'h-14 bottom-0'
       }`}
     >
       {!isAudienceOpen ? (
         <div
           onClick={() => setIsAudienceOpen(true)}
-          className="px-6 h-14 flex items-center justify-between border-b-2 border-ink hover:bg-white cursor-pointer shrink-0"
+          className="px-6 h-14 flex items-center justify-between border-b-2 border-[#0A0A0A] hover:bg-white cursor-pointer shrink-0"
         >
           <div className="flex items-center gap-2">
-            <span className="font-['Anybody',sans-serif] font-black text-sm text-ink uppercase">
+            <span className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase">
               {t('audience.panel.target_audience')}
             </span>
-            <button className="text-ink mt-0.5">
+            <button className="text-[#0A0A0A] mt-0.5">
               <ChevronUp size={15} />
             </button>
           </div>
-          <div className="flex items-center gap-2 text-xs font-bold text-ink bg-white border-2 border-ink px-3.5 py-1.5 rounded-xl">
-            <User size={13} className="text-ink" />
+          <div className="flex items-center gap-2 text-xs font-bold text-[#0A0A0A] bg-white border-2 border-[#0A0A0A] px-3.5 py-1.5 rounded-xl">
+            <User size={13} className="text-[#0A0A0A]" />
             <span>{t('audience.panel.subscribers_receive', { count: getAudienceCount() })}</span>
           </div>
         </div>
@@ -267,22 +267,22 @@ interface AudienceFilterItem {
         <div className="flex-1 flex flex-col overflow-hidden">
           <div
             onClick={() => setIsAudienceOpen(false)}
-            className="px-6 h-14 flex items-center justify-between border-b-2 border-ink hover:bg-white cursor-pointer shrink-0"
+            className="px-6 h-14 flex items-center justify-between border-b-2 border-[#0A0A0A] hover:bg-white cursor-pointer shrink-0"
           >
             <div className="flex items-center gap-2">
-              <span className="font-['Anybody',sans-serif] font-black text-sm text-ink uppercase">{t('audience.panel.target_audience')}</span>
-              <ChevronDown size={15} className="text-ink mt-0.5" />
+              <span className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase">{t('audience.panel.target_audience')}</span>
+              <ChevronDown size={15} className="text-[#0A0A0A] mt-0.5" />
             </div>
 
-            <div className="flex-1 px-8 text-xs font-black text-ink uppercase tracking-wider text-center pointer-events-none">
+            <div className="flex-1 px-8 text-xs font-black text-[#0A0A0A] uppercase tracking-wider text-center pointer-events-none">
               {t('audience.panel.send_matching')}{' '}
-              <span className="underline underline-offset-2 text-ink">
+              <span className="underline underline-offset-2 text-[#0A0A0A]">
                 {t('audience.panel.matching_conditions')}
               </span>
             </div>
 
             <div
-              className="flex items-center gap-1.5 text-ink font-black bg-white border-2 border-ink px-3 py-1 rounded-xl text-xs shrink-0"
+              className="flex items-center gap-1.5 text-[#0A0A0A] font-black bg-white border-2 border-[#0A0A0A] px-3 py-1 rounded-xl text-xs shrink-0"
               onClick={(e) => e.stopPropagation()}
             >
               <UserCheck size={13} strokeWidth={2.5} />
@@ -291,7 +291,7 @@ interface AudienceFilterItem {
           </div>
 
           <div className="flex-1 flex overflow-hidden">
-            <div className="w-64 border-r-2 border-ink px-6 py-5 shrink-0">
+            <div className="w-64 border-r-2 border-[#0A0A0A] px-6 py-5 shrink-0">
               <p className="text-xs font-bold text-slate-700 leading-relaxed">
                 {t('audience.panel.targeting_desc')}
               </p>
@@ -312,9 +312,9 @@ interface AudienceFilterItem {
                     return (
                       <div
                         key={cond.id}
-                        className="bg-white border-2 border-ink px-3 py-2 rounded-xl flex items-center gap-2 relative animate-in zoom-in-95 duration-100 transition-colors shrink-0"
+                        className="bg-white border-2 border-[#0A0A0A] px-3 py-2 rounded-xl flex items-center gap-2 relative animate-in zoom-in-95 duration-100 transition-colors shrink-0"
                       >
-                        <span className="text-[11px] font-black text-ink uppercase shrink-0">
+                        <span className="text-[11px] font-black text-[#0A0A0A] uppercase shrink-0">
                           {displayField}
                         </span>
 
@@ -338,7 +338,7 @@ interface AudienceFilterItem {
                               setValSearch(displayVal === 'Select...' ? '' : displayVal);
                               setActiveDropdownId(activeDropdownId === cond.id ? null : cond.id);
                             }}
-                            className="text-ink font-black cursor-pointer border-b-2 border-dashed border-ink pb-0.5"
+                            className="text-[#0A0A0A] font-black cursor-pointer border-b-2 border-dashed border-[#0A0A0A] pb-0.5"
                           >
                             {displayValue}
                           </button>
@@ -347,7 +347,7 @@ interface AudienceFilterItem {
                         <button
                           type="button"
                           onClick={() => handleRemoveCondition(cond.id)}
-                          className="text-ink hover:bg-rose-600 hover:text-white p-1 rounded-lg transition-all cursor-pointer shrink-0"
+                          className="text-[#0A0A0A] hover:bg-rose-600 hover:text-white p-1 rounded-lg transition-all cursor-pointer shrink-0"
                         >
                           <X size={13} />
                         </button>
@@ -358,8 +358,8 @@ interface AudienceFilterItem {
                               className="fixed inset-0 z-30 bg-transparent cursor-default"
                               onClick={() => setActiveDropdownId(null)}
                             />
-                            <div className="absolute top-full left-0 mt-1.5 bg-canvas border-2 border-ink rounded-2xl shadow-brutal flex z-40 overflow-hidden animate-in fade-in duration-150">
-                              <div className="w-[95px] bg-canvas border-r-2 border-ink p-1.5 flex flex-col gap-1 shrink-0">
+                            <div className="absolute top-full left-0 mt-1.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_0px_#0A0A0A] flex z-40 overflow-hidden animate-in fade-in duration-150">
+                              <div className="w-[95px] bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-1.5 flex flex-col gap-1 shrink-0">
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -371,8 +371,8 @@ interface AudienceFilterItem {
                                   }}
                                   className={`w-full text-left px-2.5 py-1.5 text-xs font-black uppercase transition-all rounded-lg cursor-pointer ${
                                     cond.operator === 'is'
-                                      ? 'text-canvas bg-ink'
-                                      : 'text-ink hover:bg-white'
+                                      ? 'text-[#F2EBDD] bg-[#0A0A0A]'
+                                      : 'text-[#0A0A0A] hover:bg-white'
                                   }`}
                                 >
                                   {t('audience.panel.operator.is')}
@@ -389,8 +389,8 @@ interface AudienceFilterItem {
                                   }}
                                   className={`w-full text-left px-2.5 py-1.5 text-xs font-black uppercase transition-all rounded-lg cursor-pointer ${
                                     cond.operator === 'is_not'
-                                      ? 'text-canvas bg-ink'
-                                      : 'text-ink hover:bg-white'
+                                      ? 'text-[#F2EBDD] bg-[#0A0A0A]'
+                                      : 'text-[#0A0A0A] hover:bg-white'
                                   }`}
                                 >
                                   {t('audience.panel.operator.is_not')}
@@ -399,7 +399,7 @@ interface AudienceFilterItem {
 
                               {cond.field === 'lead' && (cond.value?.startsWith('System:') || cond.value?.startsWith('Field:')) ? (
                                 <div className="w-[200px] p-3 flex flex-col gap-2 shrink-0 bg-white">
-                                  <span className="text-[10px] font-black text-ink uppercase tracking-wider">
+                                  <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">
                                     {t('audience.panel.enter_value')}
                                   </span>
                                   <input
@@ -421,7 +421,7 @@ interface AudienceFilterItem {
                                         setActiveDropdownId(null);
                                       }
                                     }}
-                                    className="w-full px-3 py-1.5 bg-white border-2 border-ink rounded-xl text-xs font-bold focus:outline-none text-ink"
+                                    className="w-full px-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none text-[#0A0A0A]"
                                     autoFocus
                                   />
                                   <button
@@ -438,7 +438,7 @@ interface AudienceFilterItem {
                                       setIsDirty(true);
                                       setActiveDropdownId(null);
                                     }}
-                                    className="w-full py-1.5 bg-ink hover:bg-[#2A2A2A] text-canvas font-black uppercase rounded-lg text-xs transition-all cursor-pointer text-center border-2 border-ink"
+                                    className="w-full py-1.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] font-black uppercase rounded-lg text-xs transition-all cursor-pointer text-center border-2 border-[#0A0A0A]"
                                   >
                                     {t('editor.condition.apply')}
                                   </button>
@@ -446,13 +446,13 @@ interface AudienceFilterItem {
                               ) : (
                                 <div className="w-[200px] p-2 flex flex-col gap-1.5 shrink-0 bg-white">
                                   <div className="relative">
-                                    <Search size={11} className="text-ink absolute left-2.5 top-1/2 -translate-y-1/2" />
+                                    <Search size={11} className="text-[#0A0A0A] absolute left-2.5 top-1/2 -translate-y-1/2" />
                                     <input
                                       type="text"
                                       placeholder={t('audience.panel.search_ellipsis')}
                                       value={valSearch}
                                       onChange={(e) => setValSearch(e.target.value)}
-                                      className="w-full pl-7 pr-3 py-1 bg-white border-2 border-ink rounded-lg text-[11px] font-bold focus:outline-none text-ink"
+                                      className="w-full pl-7 pr-3 py-1 bg-white border-2 border-[#0A0A0A] rounded-lg text-[11px] font-bold focus:outline-none text-[#0A0A0A]"
                                       autoFocus
                                     />
                                   </div>
@@ -469,10 +469,10 @@ interface AudienceFilterItem {
                                           setIsDirty(true);
                                           setActiveDropdownId(null);
                                         }}
-                                        className={`w-full flex items-center justify-between px-2 py-1.5 hover:bg-canvas border border-transparent rounded-lg text-left text-xs font-bold transition-all cursor-pointer group ${
+                                        className={`w-full flex items-center justify-between px-2 py-1.5 hover:bg-[#F2EBDD] border border-transparent rounded-lg text-left text-xs font-bold transition-all cursor-pointer group ${
                                           cond.value === valObj.name
-                                            ? 'text-ink bg-canvas border-ink'
-                                            : 'text-ink'
+                                            ? 'text-[#0A0A0A] bg-[#F2EBDD] border-[#0A0A0A]'
+                                            : 'text-[#0A0A0A]'
                                         }`}
                                       >
                                         <span className="truncate">{valObj.name}</span>
@@ -500,7 +500,7 @@ interface AudienceFilterItem {
                   <button
                     type="button"
                     onClick={() => setIsConditionDropdownOpen(!isConditionDropdownOpen)}
-                    className="flex items-center justify-center gap-1.5 px-4 py-2 border-2 border-dashed border-ink hover:bg-white text-xs font-black text-ink uppercase rounded-xl transition-all cursor-pointer whitespace-nowrap"
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 border-2 border-dashed border-[#0A0A0A] hover:bg-white text-xs font-black text-[#0A0A0A] uppercase rounded-xl transition-all cursor-pointer whitespace-nowrap"
                   >
                     <span>{t('audience.panel.add_condition')}</span>
                   </button>
@@ -511,28 +511,28 @@ interface AudienceFilterItem {
                         className="fixed inset-0 z-30 bg-transparent cursor-default"
                         onClick={() => setIsConditionDropdownOpen(false)}
                       />
-                      <div className="absolute top-full left-0 mt-1.5 w-[460px] bg-canvas border-2 border-ink rounded-2xl shadow-brutal flex flex-col overflow-hidden z-45 animate-in fade-in duration-150">
-                        <div className="p-3 border-b-2 border-ink flex items-center gap-2 relative bg-white">
-                          <Search size={13} className="text-ink absolute left-6 top-1/2 -translate-y-1/2" />
+                      <div className="absolute top-full left-0 mt-1.5 w-[460px] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_0px_#0A0A0A] flex flex-col overflow-hidden z-45 animate-in fade-in duration-150">
+                        <div className="p-3 border-b-2 border-[#0A0A0A] flex items-center gap-2 relative bg-white">
+                          <Search size={13} className="text-[#0A0A0A] absolute left-6 top-1/2 -translate-y-1/2" />
                           <input
                             type="text"
                             placeholder={t('audience.panel.search_filters')}
                             value={dropdownSearch}
                             onChange={(e) => setDropdownSearch(e.target.value)}
-                            className="w-full pl-9 pr-3 py-1.5 bg-white border-2 border-ink rounded-xl text-xs font-bold focus:outline-none text-ink"
+                            className="w-full pl-9 pr-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold focus:outline-none text-[#0A0A0A]"
                             autoFocus
                           />
                         </div>
 
-                        <div className="flex h-56 bg-canvas">
-                          <div className="w-44 bg-canvas border-r-2 border-ink p-2 space-y-1 shrink-0">
+                        <div className="flex h-56 bg-[#F2EBDD]">
+                          <div className="w-44 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-2 space-y-1 shrink-0">
                             <button
                               type="button"
                               onClick={() => setSelectedCategory('general')}
                               className={`w-full px-3 py-2 text-left text-xs font-black uppercase rounded-lg transition-all cursor-pointer border-2 ${
                                 selectedCategory === 'general'
-                                  ? 'bg-ink text-canvas border-ink'
-                                  : 'text-ink border-transparent hover:bg-white'
+                                  ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
+                                  : 'text-[#0A0A0A] border-transparent hover:bg-white'
                               }`}
                             >
                               {t('audience.panel.general_filters')}
@@ -542,8 +542,8 @@ interface AudienceFilterItem {
                               onClick={() => setSelectedCategory('system')}
                               className={`w-full px-3 py-2 text-left text-xs font-black uppercase rounded-lg transition-all cursor-pointer border-2 ${
                                 selectedCategory === 'system'
-                                  ? 'bg-ink text-canvas border-ink'
-                                  : 'text-ink border-transparent hover:bg-white'
+                                  ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
+                                  : 'text-[#0A0A0A] border-transparent hover:bg-white'
                               }`}
                             >
                               {t('audience.panel.system_fields')}
@@ -553,8 +553,8 @@ interface AudienceFilterItem {
                               onClick={() => setSelectedCategory('custom')}
                               className={`w-full px-3 py-2 text-left text-xs font-black uppercase rounded-lg transition-all cursor-pointer border-2 ${
                                 selectedCategory === 'custom'
-                                  ? 'bg-ink text-canvas border-ink'
-                                  : 'text-ink border-transparent hover:bg-white'
+                                  ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
+                                  : 'text-[#0A0A0A] border-transparent hover:bg-white'
                               }`}
                             >
                               {t('audience.panel.custom_fields')}
@@ -570,9 +570,9 @@ interface AudienceFilterItem {
                                     key={idx}
                                     type="button"
                                     onClick={() => handleAddConditionItem(item)}
-                                    className="w-full px-3 py-2 hover:bg-canvas rounded-lg text-left text-xs font-bold text-ink flex items-center gap-2.5 transition-colors cursor-pointer group"
+                                    className="w-full px-3 py-2 hover:bg-[#F2EBDD] rounded-lg text-left text-xs font-bold text-[#0A0A0A] flex items-center gap-2.5 transition-colors cursor-pointer group"
                                   >
-                                    <IconComponent size={14} className="text-ink shrink-0" />
+                                    <IconComponent size={14} className="text-[#0A0A0A] shrink-0" />
                                     <span className="truncate flex-1">{item.label}</span>
                                     {item.count !== undefined && (
                                       <span className="text-[10px] text-slate-700 font-black shrink-0">

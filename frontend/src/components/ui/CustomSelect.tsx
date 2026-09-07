@@ -37,21 +37,21 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setIsOpen((prev) => !prev)}
-        className={`w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold text-ink bg-white flex items-center justify-between transition-all cursor-pointer ${
-          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-ink'
-        } ${isOpen ? 'ring-2 ring-ink/20' : ''}`}
+        className={`w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold text-[#0A0A0A] bg-white flex items-center justify-between transition-all cursor-pointer ${
+          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-[#0A0A0A]'
+        } ${isOpen ? 'ring-2 ring-[#0A0A0A]/20' : ''}`}
       >
         <span className="truncate">{selectedOption?.label || value}</span>
         <ChevronDown
           size={14}
-          className={`shrink-0 text-ink transition-transform duration-150 ${
+          className={`shrink-0 text-[#0A0A0A] transition-transform duration-150 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-canvas border-2 border-ink rounded-xl shadow-brutal py-1 z-50 max-h-56 overflow-y-auto font-['JetBrains_Mono',monospace]">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] py-1 z-50 max-h-56 overflow-y-auto font-['JetBrains_Mono',monospace]">
           {options.map((opt) => {
             const isSelected = opt.value === value;
             return (
@@ -64,8 +64,8 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                 }}
                 className={`w-full text-left px-4 py-2 text-xs font-bold transition-all cursor-pointer block truncate ${
                   isSelected
-                    ? 'bg-ink text-canvas'
-                    : 'text-ink hover:bg-ink hover:text-canvas'
+                    ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                    : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
                 }`}
               >
                 {opt.label}

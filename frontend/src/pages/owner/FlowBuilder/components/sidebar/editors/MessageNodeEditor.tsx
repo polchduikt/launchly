@@ -438,21 +438,21 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
             <div 
               key={block.id} 
               id={`block-container-${block.id || ''}`}
-              className="border-2 border-ink rounded-3xl bg-white shadow-sm flex flex-col group/block transition-all relative overflow-hidden font-['JetBrains_Mono',monospace]"
+              className="border-2 border-[#0A0A0A] rounded-3xl bg-white shadow-sm flex flex-col group/block transition-all relative overflow-hidden font-['JetBrains_Mono',monospace]"
             >
-              <div className="bg-canvas border-b-2 border-ink px-4 py-2.5 flex items-center justify-between rounded-t-[22px]">
+              <div className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-4 py-2.5 flex items-center justify-between rounded-t-[22px]">
                 <div className="flex items-center gap-2">
-                  <span className="text-ink shrink-0">
+                  <span className="text-[#0A0A0A] shrink-0">
                     {block.type === 'text' && <AlignLeft size={13} />}
-                    {block.type === 'image' && <ImageIcon size={13} className="text-ink" />}
-                    {block.type === 'delay' && <Clock size={13} className="text-ink" />}
-                    {block.type === 'data_collection' && <Database size={13} className="text-ink" />}
-                    {block.type === 'file' && <Paperclip size={13} className="text-ink" />}
-                    {block.type === 'audio' && <Volume2 size={13} className="text-ink" />}
-                    {block.type === 'video' && <Video size={13} className="text-ink" />}
-                    {block.type === 'telegram_menu' && <Grid size={13} className="text-ink" />}
+                    {block.type === 'image' && <ImageIcon size={13} className="text-[#0A0A0A]" />}
+                    {block.type === 'delay' && <Clock size={13} className="text-[#0A0A0A]" />}
+                    {block.type === 'data_collection' && <Database size={13} className="text-[#0A0A0A]" />}
+                    {block.type === 'file' && <Paperclip size={13} className="text-[#0A0A0A]" />}
+                    {block.type === 'audio' && <Volume2 size={13} className="text-[#0A0A0A]" />}
+                    {block.type === 'video' && <Video size={13} className="text-[#0A0A0A]" />}
+                    {block.type === 'telegram_menu' && <Grid size={13} className="text-[#0A0A0A]" />}
                   </span>
-                  <span className="text-[10px] font-black text-ink uppercase tracking-wider font-['Anybody',sans-serif]">
+                  <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">
                     {block.type === 'text' && t('flow_builder.text_block')}
                     {block.type === 'image' && t('flow_builder.image_block')}
                     {block.type === 'delay' && t('flow_builder.delay_block')}
@@ -461,12 +461,12 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                     {block.type === 'audio' && t('flow_builder.audio_block')}
                     {block.type === 'video' && t('flow_builder.video_block')}
                     {block.type === 'telegram_menu' && (
-                      <span className="inline-flex items-center gap-1 normal-case font-black text-ink">
+                      <span className="inline-flex items-center gap-1 normal-case font-black text-[#0A0A0A]">
                         <span>{t('flow_builder.telegram_menu_block')}</span>
                         <span title="Group buttons into rows. Buttons in the same row appear side-by-side in Telegram. Drag and drop to reorder.">
                           <HelpCircle 
                             size={12} 
-                            className="text-ink/60 cursor-pointer hover:text-ink transition-colors ml-0.5"
+                            className="text-[#0A0A0A]/60 cursor-pointer hover:text-[#0A0A0A] transition-colors ml-0.5"
                           />
                         </span>
                       </span>
@@ -479,7 +479,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                     type="button"
                     disabled={idx === 0}
                     onClick={() => moveBlockUp(idx)}
-                    className="p-1 hover:bg-ink hover:text-canvas rounded transition-colors text-ink disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
+                    className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded transition-colors text-[#0A0A0A] disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
                   >
                     <ArrowUp size={12} className="stroke-[2.5]" />
                   </button>
@@ -487,21 +487,21 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                     type="button"
                     disabled={idx === blocks.length - 1}
                     onClick={() => moveBlockDown(idx)}
-                    className="p-1 hover:bg-ink hover:text-canvas rounded transition-colors text-ink disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
+                    className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded transition-colors text-[#0A0A0A] disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
                   >
                     <ArrowDown size={12} className="stroke-[2.5]" />
                   </button>
                   <button
                     type="button"
                     onClick={() => duplicateBlock(block)}
-                    className="p-1 hover:bg-ink hover:text-canvas rounded transition-colors text-ink cursor-pointer"
+                    className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded transition-colors text-[#0A0A0A] cursor-pointer"
                   >
                     <Copy size={12} className="stroke-[2.5]" />
                   </button>
                   <button
                     type="button"
                     onClick={() => deleteBlock(block.id || '')}
-                    className="p-1 hover:bg-rose-600 hover:text-white rounded transition-colors text-ink cursor-pointer"
+                    className="p-1 hover:bg-rose-600 hover:text-white rounded transition-colors text-[#0A0A0A] cursor-pointer"
                   >
                     <Trash2 size={12} className="stroke-[2.5]" />
                   </button>
@@ -525,11 +525,11 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       }}
                       onClick={(e) => handleContentEditableClick(e, block.id || '')}
                       data-placeholder={t('editor.message.text_placeholder')}
-                      className="w-full text-xs font-bold text-ink focus:outline-none bg-transparent min-h-[80px] cursor-text break-words outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-ink/40 empty:before:pointer-events-none font-['JetBrains_Mono',monospace]"
+                      className="w-full text-xs font-bold text-[#0A0A0A] focus:outline-none bg-transparent min-h-[80px] cursor-text break-words outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-[#0A0A0A]/40 empty:before:pointer-events-none font-['JetBrains_Mono',monospace]"
                     />
                     
                     {activeBlockId === block.id && (
-                      <div className="absolute bottom-2.5 right-3 bg-ink text-canvas border-2 border-ink px-3 py-1.5 rounded-full flex items-center gap-2.5 shadow-md z-30 font-['JetBrains_Mono',monospace]">
+                      <div className="absolute bottom-2.5 right-3 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] px-3 py-1.5 rounded-full flex items-center gap-2.5 shadow-md z-30 font-['JetBrains_Mono',monospace]">
                         <button
                           type="button"
                           onMouseDown={(e) => e.preventDefault()}
@@ -557,7 +557,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                                               : val === 'contact_id' ? 'Contact Id'
                                               : val === 'subscribed' ? 'Subscribed'
                                               : val;
-                            const html = `<span class="inline-flex items-center bg-ink text-canvas rounded-lg px-2 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline border border-ink" contenteditable="false" data-type="variable" data-val="${val}">${displayName}</span>`;
+                            const html = `<span class="inline-flex items-center bg-[#0A0A0A] text-[#F2EBDD] rounded-lg px-2 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline border border-[#0A0A0A]" contenteditable="false" data-type="variable" data-val="${val}">${displayName}</span>`;
                             insertHtmlAtCursor(html, block.id || '');
                             setActiveLinkBlockId(null);
                             setActiveEmojiBlockId(null);
@@ -582,7 +582,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                           }
                         />
                         <div className="w-[1px] h-3.5 bg-white/30 my-0.5" />
-                        <span className="text-[10px] font-extrabold tracking-wider text-canvas/80 font-mono">
+                        <span className="text-[10px] font-extrabold tracking-wider text-[#F2EBDD]/80 font-mono">
                           {2000 - (block.text || '').length}
                         </span>
                       </div>
@@ -1019,10 +1019,10 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
             }}
             onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-canvas border-2 border-ink rounded-3xl shadow-2xl p-4 w-80 text-ink space-y-3 text-left font-['JetBrains_Mono',monospace] animate-in zoom-in-95 duration-150"
+            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-2xl p-4 w-80 text-[#0A0A0A] space-y-3 text-left font-['JetBrains_Mono',monospace] animate-in zoom-in-95 duration-150"
           >
-            <div className="flex justify-between items-center pb-1.5 border-b-2 border-ink/20">
-              <span className="text-[10px] font-black text-ink uppercase tracking-wider font-['Anybody',sans-serif]">
+            <div className="flex justify-between items-center pb-1.5 border-b-2 border-[#0A0A0A]/20">
+              <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">
                 {t('editor.message.link_clicked')}
               </span>
               <button
@@ -1031,7 +1031,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                   setActiveLinkBlockId(null);
                   setPopoverCoords(null);
                 }}
-                className="p-1 hover:bg-ink hover:text-canvas border-2 border-ink rounded-xl text-ink cursor-pointer transition-colors"
+                className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-[#0A0A0A] cursor-pointer transition-colors"
               >
                 <X size={12} />
               </button>
@@ -1043,7 +1043,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                   type="button"
                   onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
                   onClick={(e) => { e.stopPropagation(); setLinkStep('form'); }}
-                  className="flex items-center gap-2.5 w-full p-3 bg-white hover:bg-ink hover:text-canvas border-2 border-ink rounded-2xl text-xs font-bold text-ink transition-colors text-left cursor-pointer group"
+                  className="flex items-center gap-2.5 w-full p-3 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-xs font-bold text-[#0A0A0A] transition-colors text-left cursor-pointer group"
                 >
                   <LinkIcon size={14} className="shrink-0" />
                   <span>{t('editor.edit_button.action.open_website')}</span>
@@ -1051,7 +1051,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                 <button
                   type="button"
                   disabled
-                  className="flex items-center gap-2.5 w-full p-3 border-2 border-ink/30 bg-canvas/50 text-ink/40 rounded-2xl text-xs font-bold text-left cursor-not-allowed"
+                  className="flex items-center gap-2.5 w-full p-3 border-2 border-[#0A0A0A]/30 bg-[#F2EBDD]/50 text-[#0A0A0A]/40 rounded-2xl text-xs font-bold text-left cursor-not-allowed"
                 >
                   <MessageSquare size={14} className="shrink-0" />
                   <span>{t('editor.message.open_messenger')}</span>
@@ -1059,7 +1059,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="flex items-center justify-between bg-white border-2 border-ink rounded-2xl px-3 py-2 text-xs text-ink font-bold">
+                <div className="flex items-center justify-between bg-white border-2 border-[#0A0A0A] rounded-2xl px-3 py-2 text-xs text-[#0A0A0A] font-bold">
                   <div className="flex items-center gap-2">
                     <LinkIcon size={12} />
                     <span>{t('editor.edit_button.action.open_website')}</span>
@@ -1068,14 +1068,14 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                     type="button"
                     onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     onClick={(e) => { e.stopPropagation(); setLinkStep('select'); }}
-                    className="p-0.5 hover:bg-ink hover:text-canvas rounded text-ink cursor-pointer"
+                    className="p-0.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded text-[#0A0A0A] cursor-pointer"
                   >
                     <X size={12} />
                   </button>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black text-ink uppercase tracking-wider block font-['Anybody',sans-serif]">
+                  <label className="text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider block font-['Anybody',sans-serif]">
                     Website URL
                   </label>
                   <input
@@ -1085,12 +1085,12 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                     placeholder="https://yourwebsite.com"
-                    className="w-full border-2 border-ink rounded-xl px-3 py-2 text-xs font-bold focus:outline-none bg-white text-ink placeholder:text-ink/40"
+                    className="w-full border-2 border-[#0A0A0A] rounded-xl px-3 py-2 text-xs font-bold focus:outline-none bg-white text-[#0A0A0A] placeholder:text-[#0A0A0A]/40"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black text-ink uppercase tracking-wider block font-['Anybody',sans-serif]">
+                  <label className="text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider block font-['Anybody',sans-serif]">
                     Link text
                   </label>
                   <input
@@ -1100,7 +1100,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                     placeholder="Click here"
-                    className="w-full border-2 border-ink rounded-xl px-3 py-2 text-xs font-bold focus:outline-none bg-white text-ink placeholder:text-ink/40"
+                    className="w-full border-2 border-[#0A0A0A] rounded-xl px-3 py-2 text-xs font-bold focus:outline-none bg-white text-[#0A0A0A] placeholder:text-[#0A0A0A]/40"
                   />
                 </div>
 
@@ -1146,7 +1146,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
                       setActiveLinkBlockId(null);
                       setPopoverCoords(null);
                     }}
-                    className="flex-1 py-2.5 bg-ink hover:bg-ink/90 disabled:bg-ink/20 text-canvas text-xs font-black rounded-xl border-2 border-ink transition-all cursor-pointer disabled:cursor-not-allowed uppercase tracking-wider font-['Anybody',sans-serif]"
+                    className="flex-1 py-2.5 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 disabled:bg-[#0A0A0A]/20 text-[#F2EBDD] text-xs font-black rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer disabled:cursor-not-allowed uppercase tracking-wider font-['Anybody',sans-serif]"
                   >
                     Save link
                   </button>
@@ -1176,7 +1176,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
             }}
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
-            className="shadow-2xl rounded-3xl overflow-hidden border-2 border-ink bg-white animate-in zoom-in-95 duration-150 font-['JetBrains_Mono',monospace]"
+            className="shadow-2xl rounded-3xl overflow-hidden border-2 border-[#0A0A0A] bg-white animate-in zoom-in-95 duration-150 font-['JetBrains_Mono',monospace]"
           >
             <Picker
               data={emojiData}

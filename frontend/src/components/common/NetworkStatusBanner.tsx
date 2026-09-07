@@ -73,11 +73,11 @@ export const NetworkStatusBanner: React.FC = () => {
       <div
         role="alert"
         aria-live="assertive"
-        className="w-full bg-rose-600 text-white border-b-2 border-ink px-4 py-2.5 font-['JetBrains_Mono',monospace] text-xs font-bold shadow-[0_2px_0px_#0A0A0A] z-[9999] relative animate-fade-in"
+        className="w-full bg-rose-600 text-white border-b-2 border-[#0A0A0A] px-4 py-2.5 font-['JetBrains_Mono',monospace] text-xs font-bold shadow-[0_2px_0px_#0A0A0A] z-[9999] relative animate-fade-in"
       >
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5">
           <div className="flex items-center gap-2.5 text-center sm:text-left">
-            <div className="w-6 h-6 rounded-lg bg-white border-2 border-ink flex items-center justify-center shrink-0 text-rose-600 shadow-brutal-xs">
+            <div className="w-6 h-6 rounded-lg bg-white border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 text-rose-600 shadow-[1px_1px_0px_#0A0A0A]">
               <WifiOff size={14} />
             </div>
             <span>
@@ -91,7 +91,7 @@ export const NetworkStatusBanner: React.FC = () => {
             type="button"
             onClick={handleManualRetry}
             disabled={isRetrying}
-            className="px-3 py-1 bg-white text-ink border-2 border-ink rounded-lg shadow-brutal-sm hover:bg-slate-100 uppercase tracking-wider text-[11px] font-black cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+            className="px-3 py-1 bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-lg shadow-[2px_2px_0px_#0A0A0A] hover:bg-slate-100 uppercase tracking-wider text-[11px] font-black cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
           >
             {isRetrying ? (
               <RefreshCw size={12} className="animate-spin inline mr-1" />
@@ -108,11 +108,11 @@ export const NetworkStatusBanner: React.FC = () => {
       <div
         role="alert"
         aria-live="polite"
-        className="w-full bg-amber-300 text-ink border-b-2 border-ink px-4 py-2 font-['JetBrains_Mono',monospace] text-xs font-bold shadow-[0_2px_0px_#0A0A0A] z-[9999] relative animate-fade-in"
+        className="w-full bg-amber-300 text-[#0A0A0A] border-b-2 border-[#0A0A0A] px-4 py-2 font-['JetBrains_Mono',monospace] text-xs font-bold shadow-[0_2px_0px_#0A0A0A] z-[9999] relative animate-fade-in"
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
-            <RefreshCw size={14} className="animate-spin text-ink shrink-0" />
+            <RefreshCw size={14} className="animate-spin text-[#0A0A0A] shrink-0" />
             <span>
               {t(
                 'network.reconnecting_message',
@@ -123,7 +123,7 @@ export const NetworkStatusBanner: React.FC = () => {
           <button
             type="button"
             onClick={handleManualRetry}
-            className="px-2.5 py-0.5 bg-ink text-canvas border border-ink rounded text-[10px] uppercase font-black cursor-pointer hover:bg-white hover:text-ink transition-all"
+            className="px-2.5 py-0.5 bg-[#0A0A0A] text-[#F2EBDD] border border-[#0A0A0A] rounded text-[10px] uppercase font-black cursor-pointer hover:bg-white hover:text-[#0A0A0A] transition-all"
           >
             {t('network.reconnect_btn', 'Перепідключити')}
           </button>
@@ -137,11 +137,11 @@ export const NetworkStatusBanner: React.FC = () => {
       <div
         role="status"
         aria-live="polite"
-        className="w-full bg-emerald-400 text-ink border-b-2 border-ink px-4 py-2 font-['JetBrains_Mono',monospace] text-xs font-black shadow-[0_2px_0px_#0A0A0A] z-[9999] relative animate-fade-in"
+        className="w-full bg-emerald-400 text-[#0A0A0A] border-b-2 border-[#0A0A0A] px-4 py-2 font-['JetBrains_Mono',monospace] text-xs font-black shadow-[0_2px_0px_#0A0A0A] z-[9999] relative animate-fade-in"
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <CheckCircle2 size={16} className="text-ink shrink-0" />
+            <CheckCircle2 size={16} className="text-[#0A0A0A] shrink-0" />
             <span>
               {t('network.restored_message', "Підключення відновлено. Дані успішно синхронізовані.")}
             </span>
@@ -149,7 +149,7 @@ export const NetworkStatusBanner: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowRestored(false)}
-            className="p-1 hover:bg-ink/10 rounded cursor-pointer transition-all"
+            className="p-1 hover:bg-[#0A0A0A]/10 rounded cursor-pointer transition-all"
           >
             <X size={14} />
           </button>

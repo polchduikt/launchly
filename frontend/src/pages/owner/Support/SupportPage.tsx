@@ -170,14 +170,14 @@ export const SupportPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-full bg-canvas font-['JetBrains_Mono',monospace] overflow-hidden">
-        <header className="px-6 py-4 border-b-2 border-ink bg-white flex flex-wrap items-center justify-between gap-4 shrink-0">
+      <div className="flex flex-col h-full bg-[#F2EBDD] font-['JetBrains_Mono',monospace] overflow-hidden">
+        <header className="px-6 py-4 border-b-2 border-[#0A0A0A] bg-white flex flex-wrap items-center justify-between gap-4 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-ink text-canvas flex items-center justify-center border-2 border-ink shadow-brutal-sm">
+            <div className="w-10 h-10 rounded-2xl bg-[#0A0A0A] text-[#F2EBDD] flex items-center justify-center border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
               <Headphones size={20} />
             </div>
             <div>
-              <h1 className="font-['Anybody',sans-serif] text-lg md:text-xl font-black text-ink uppercase tracking-tight leading-none">
+              <h1 className="font-['Anybody',sans-serif] text-lg md:text-xl font-black text-[#0A0A0A] uppercase tracking-tight leading-none">
                 {t('support.page_title', 'СЛУЖБА ПІДТРИМКИ')}
               </h1>
               <p className="text-xs text-slate-500 font-bold mt-1 hidden sm:block">
@@ -191,7 +191,7 @@ export const SupportPage: React.FC = () => {
               setNewError(null);
               setIsNewModalOpen(true);
             }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-ink text-canvas border-2 border-ink rounded-xl text-xs font-black uppercase shadow-brutal-md hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase shadow-[3px_3px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer"
           >
             <Plus size={15} />
             <span>{t('support.btn_new_ticket', 'Нове звернення')}</span>
@@ -199,8 +199,8 @@ export const SupportPage: React.FC = () => {
         </header>
 
         <div className="flex-1 flex overflow-hidden">
-          <aside className="w-full md:w-80 lg:w-96 border-r-2 border-ink bg-canvas flex flex-col shrink-0 overflow-hidden">
-            <div className="p-3.5 border-b-2 border-ink bg-white space-y-2.5 shrink-0">
+          <aside className="w-full md:w-80 lg:w-96 border-r-2 border-[#0A0A0A] bg-[#F2EBDD] flex flex-col shrink-0 overflow-hidden">
+            <div className="p-3.5 border-b-2 border-[#0A0A0A] bg-white space-y-2.5 shrink-0">
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
@@ -208,27 +208,27 @@ export const SupportPage: React.FC = () => {
                   placeholder={t('support.search_placeholder', 'Пошук звернень...')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none placeholder:text-slate-400"
+                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none placeholder:text-slate-400"
                 />
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setFilterStatus('active')}
-                  className={`flex-1 py-1.5 text-xs font-black uppercase rounded-xl border-2 transition-all cursor-pointer shadow-brutal-sm ${
+                  className={`flex-1 py-1.5 text-xs font-black uppercase rounded-xl border-2 transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] ${
                     filterStatus === 'active'
-                      ? 'bg-ink text-canvas border-ink'
-                      : 'bg-white text-ink border-ink hover:bg-slate-100'
+                      ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
+                      : 'bg-white text-[#0A0A0A] border-[#0A0A0A] hover:bg-slate-100'
                   }`}
                 >
                   {t('support.filter_active', 'Активні')}
                 </button>
                 <button
                   onClick={() => setFilterStatus('resolved')}
-                  className={`flex-1 py-1.5 text-xs font-black uppercase rounded-xl border-2 transition-all cursor-pointer shadow-brutal-sm ${
+                  className={`flex-1 py-1.5 text-xs font-black uppercase rounded-xl border-2 transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] ${
                     filterStatus === 'resolved'
-                      ? 'bg-ink text-canvas border-ink'
-                      : 'bg-white text-ink border-ink hover:bg-slate-100'
+                      ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
+                      : 'bg-white text-[#0A0A0A] border-[#0A0A0A] hover:bg-slate-100'
                   }`}
                 >
                   {t('support.filter_resolved', 'Вирішені')}
@@ -239,13 +239,13 @@ export const SupportPage: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-2.5 space-y-2 custom-scrollbar">
               {isTicketsLoading ? (
                 <div className="py-12 flex flex-col items-center justify-center gap-2 text-slate-500">
-                  <Loader2 className="animate-spin text-ink" size={24} />
+                  <Loader2 className="animate-spin text-[#0A0A0A]" size={24} />
                   <span className="text-xs font-bold">{t('common.loading', 'Завантаження...')}</span>
                 </div>
               ) : filteredTickets.length === 0 ? (
-                <div className="p-6 text-center space-y-3 bg-white border-2 border-ink rounded-2xl">
+                <div className="p-6 text-center space-y-3 bg-white border-2 border-[#0A0A0A] rounded-2xl">
                   <HelpCircle className="mx-auto text-slate-400" size={32} />
-                  <p className="text-xs font-black text-ink uppercase">
+                  <p className="text-xs font-black text-[#0A0A0A] uppercase">
                     {filterStatus === 'active'
                       ? t('support.empty_tickets_title', 'У вас ще немає активних звернень')
                       : 'Немає вирішених звернень'}
@@ -256,7 +256,7 @@ export const SupportPage: React.FC = () => {
                   {filterStatus === 'active' && (
                     <button
                       onClick={() => setIsNewModalOpen(true)}
-                      className="px-3 py-1.5 bg-ink text-canvas border-2 border-ink rounded-xl text-[10px] font-black uppercase cursor-pointer"
+                      className="px-3 py-1.5 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-[10px] font-black uppercase cursor-pointer"
                     >
                       {t('support.btn_new_ticket', 'Нове звернення')}
                     </button>
@@ -274,12 +274,12 @@ export const SupportPage: React.FC = () => {
                       onClick={() => setSelectedTicketId(ticket.id)}
                       className={`p-3 rounded-2xl border-2 transition-all cursor-pointer flex flex-col gap-1.5 ${
                         isSelected
-                          ? 'bg-white border-ink shadow-brutal-md -translate-y-0.5'
-                          : 'bg-[#FAF8F5] border-ink hover:bg-white hover:shadow-brutal-sm'
+                          ? 'bg-white border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] -translate-y-0.5'
+                          : 'bg-[#FAF8F5] border-[#0A0A0A] hover:bg-white hover:shadow-[2px_2px_0px_#0A0A0A]'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-['Anybody',sans-serif] text-xs font-black text-ink uppercase truncate flex-1">
+                        <span className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase truncate flex-1">
                           {ticket.subject || t('support.page_title', 'Звернення')}
                         </span>
                         <span
@@ -303,7 +303,7 @@ export const SupportPage: React.FC = () => {
                         {ticket.lastMessage || '—'}
                       </p>
 
-                      <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-ink/10 mt-1">
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-[#0A0A0A]/10 mt-1">
                         <span className="flex items-center gap-1 font-semibold truncate max-w-[140px]">
                           {ticket.assignedManagerName ? (
                             <>
@@ -329,9 +329,9 @@ export const SupportPage: React.FC = () => {
           <main className="flex-1 flex flex-col bg-white overflow-hidden">
             {selectedTicketId && currentTicket ? (
               <>
-                <div className="px-6 py-3.5 border-b-2 border-ink bg-white flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <div className="px-6 py-3.5 border-b-2 border-[#0A0A0A] bg-white flex flex-wrap items-center justify-between gap-3 shrink-0">
                   <div className="space-y-0.5">
-                    <h2 className="font-['Anybody',sans-serif] text-sm md:text-base font-black text-ink uppercase tracking-tight">
+                    <h2 className="font-['Anybody',sans-serif] text-sm md:text-base font-black text-[#0A0A0A] uppercase tracking-tight">
                       {currentTicket.subject}
                     </h2>
                     <div className="flex items-center gap-3 text-xs text-slate-500 font-bold">
@@ -370,7 +370,7 @@ export const SupportPage: React.FC = () => {
                 <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-white custom-scrollbar">
                   {isDetailLoading ? (
                     <div className="h-full flex items-center justify-center">
-                      <Loader2 className="animate-spin text-ink" size={32} />
+                      <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
                     </div>
                   ) : (
                     (currentTicket.messages || []).map((msg: SupportMessageItem) => {
@@ -380,8 +380,8 @@ export const SupportPage: React.FC = () => {
                       if (isSystem) {
                         return (
                           <div key={msg.id} className="flex justify-center my-2">
-                            <div className="px-4 py-1.5 rounded-xl bg-amber-200 border-2 border-ink text-ink text-[11px] font-black uppercase shadow-brutal-sm flex items-center gap-1.5">
-                              <UserCheck size={13} className="text-ink" />
+                            <div className="px-4 py-1.5 rounded-xl bg-amber-200 border-2 border-[#0A0A0A] text-[#0A0A0A] text-[11px] font-black uppercase shadow-[2px_2px_0px_#0A0A0A] flex items-center gap-1.5">
+                              <UserCheck size={13} className="text-[#0A0A0A]" />
                               <span>{formatSystemMessage(msg)}</span>
                             </div>
                           </div>
@@ -394,9 +394,9 @@ export const SupportPage: React.FC = () => {
                           className={`flex gap-3 max-w-2xl ${isUser ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
                         >
                           <div
-                            className={`w-8 h-8 rounded-full border-2 border-ink flex items-center justify-center shrink-0 font-bold text-xs ${
+                            className={`w-8 h-8 rounded-full border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 font-bold text-xs ${
                               isUser
-                                ? 'bg-ink text-canvas'
+                                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
                                 : 'bg-emerald-500 text-white'
                             }`}
                           >
@@ -415,10 +415,10 @@ export const SupportPage: React.FC = () => {
                             </div>
 
                             <div
-                              className={`p-3.5 rounded-2xl border-2 border-ink text-xs font-bold leading-relaxed break-words whitespace-pre-wrap ${
+                              className={`p-3.5 rounded-2xl border-2 border-[#0A0A0A] text-xs font-bold leading-relaxed break-words whitespace-pre-wrap ${
                                 isUser
-                                  ? 'bg-canvas text-ink shadow-brutal-sm rounded-tr-none'
-                                  : 'bg-white text-ink shadow-brutal-sm rounded-tl-none'
+                                  ? 'bg-[#F2EBDD] text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] rounded-tr-none'
+                                  : 'bg-white text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] rounded-tl-none'
                               }`}
                             >
                               {msg.text}
@@ -431,9 +431,9 @@ export const SupportPage: React.FC = () => {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <div className="p-4 border-t-2 border-ink bg-white shrink-0 space-y-3">
+                <div className="p-4 border-t-2 border-[#0A0A0A] bg-white shrink-0 space-y-3">
                   {isResolvedOrClosed ? (
-                    <div className="p-3.5 bg-slate-100 border-2 border-ink rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-brutal-sm">
+                    <div className="p-3.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-[2px_2px_0px_#0A0A0A]">
                       <div className="flex items-center gap-2.5 text-xs font-bold text-slate-700">
                         {currentTicket.status === 'CLOSED' ? (
                           <Lock size={16} className="text-slate-600 shrink-0" />
@@ -451,23 +451,23 @@ export const SupportPage: React.FC = () => {
                           setNewSubject(`Follow-up: ${currentTicket.subject}`);
                           setIsNewModalOpen(true);
                         }}
-                        className="px-4 py-2 bg-ink text-canvas border-2 border-ink rounded-xl text-xs font-black uppercase cursor-pointer shrink-0 shadow-brutal-sm"
+                        className="px-4 py-2 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase cursor-pointer shrink-0 shadow-[2px_2px_0px_#0A0A0A]"
                       >
                         {t('support.btn_new_ticket', 'Нове звернення')}
                       </button>
                     </div>
                   ) : (
                     <>
-                      <div className="p-2.5 bg-white border-2 border-ink rounded-2xl flex items-center justify-between gap-3 shadow-brutal-sm">
-                        <div className="text-xs font-black uppercase text-ink flex items-center gap-2">
-                          <CheckCircle2 size={15} className="text-ink" />
+                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-2xl flex items-center justify-between gap-3 shadow-[2px_2px_0px_#0A0A0A]">
+                        <div className="text-xs font-black uppercase text-[#0A0A0A] flex items-center gap-2">
+                          <CheckCircle2 size={15} className="text-[#0A0A0A]" />
                           <span>{t('support.actions_label', 'Дії з діалогом:')}</span>
                         </div>
                         <button
                           type="button"
                           onClick={() => updateStatusMut.mutate('RESOLVED')}
                           disabled={updateStatusMut.isPending}
-                          className="px-3.5 py-1.5 bg-emerald-200 hover:bg-emerald-300 text-emerald-950 border-2 border-ink rounded-xl text-xs font-black uppercase transition flex items-center space-x-1.5 cursor-pointer shadow-brutal-sm disabled:opacity-50"
+                          className="px-3.5 py-1.5 bg-emerald-200 hover:bg-emerald-300 text-emerald-950 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase transition flex items-center space-x-1.5 cursor-pointer shadow-[2px_2px_0px_#0A0A0A] disabled:opacity-50"
                         >
                           {updateStatusMut.isPending ? (
                             <Loader2 size={13} className="animate-spin" />
@@ -485,12 +485,12 @@ export const SupportPage: React.FC = () => {
                           onKeyDown={handleKeyDown}
                           rows={2}
                           placeholder={t('support.type_message_placeholder', 'Напишіть повідомлення менеджеру... (Enter для відправки)')}
-                          className="flex-1 p-3 bg-slate-50 border-2 border-ink rounded-2xl text-xs font-bold text-ink focus:outline-none resize-none placeholder:text-slate-400"
+                          className="flex-1 p-3 bg-slate-50 border-2 border-[#0A0A0A] rounded-2xl text-xs font-bold text-[#0A0A0A] focus:outline-none resize-none placeholder:text-slate-400"
                         />
                         <button
                           type="submit"
                           disabled={!replyText.trim() || sendMessageMut.isPending}
-                          className="px-5 bg-ink text-canvas border-2 border-ink rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 hover:bg-[#2A2A2A] disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-brutal-md"
+                          className="px-5 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 hover:bg-[#2A2A2A] disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-[3px_3px_0px_#0A0A0A]"
                         >
                           {sendMessageMut.isPending ? (
                             <Loader2 className="animate-spin" size={16} />
@@ -508,10 +508,10 @@ export const SupportPage: React.FC = () => {
               </>
             ) : (
               <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-3 bg-white">
-                <div className="w-14 h-14 rounded-full bg-white border-2 border-ink flex items-center justify-center shadow-brutal-md">
-                  <MessageSquare size={26} className="text-ink" />
+                <div className="w-14 h-14 rounded-full bg-white border-2 border-[#0A0A0A] flex items-center justify-center shadow-[3px_3px_0px_#0A0A0A]">
+                  <MessageSquare size={26} className="text-[#0A0A0A]" />
                 </div>
-                <h3 className="font-['Anybody',sans-serif] text-base font-black text-ink uppercase">
+                <h3 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase">
                   {t('support.select_ticket_title', 'Оберіть звернення зі списку ліворуч')}
                 </h3>
                 <p className="text-xs text-slate-500 font-bold max-w-sm leading-relaxed">
@@ -519,7 +519,7 @@ export const SupportPage: React.FC = () => {
                 </p>
                 <button
                   onClick={() => setIsNewModalOpen(true)}
-                  className="px-4 py-2 bg-ink text-canvas border-2 border-ink rounded-xl text-xs font-black uppercase shadow-brutal-md cursor-pointer"
+                  className="px-4 py-2 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase shadow-[3px_3px_0px_#0A0A0A] cursor-pointer"
                 >
                   {t('support.btn_new_ticket', 'Нове звернення')}
                 </button>
@@ -534,22 +534,22 @@ export const SupportPage: React.FC = () => {
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsNewModalOpen(false);
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50 animate-fade-in font-['JetBrains_Mono',monospace] cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/50 animate-fade-in font-['JetBrains_Mono',monospace] cursor-pointer"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-canvas rounded-3xl border-2 border-ink shadow-brutal-xl w-full max-w-lg overflow-hidden flex flex-col animate-zoom-in cursor-default"
+            className="bg-[#F2EBDD] rounded-3xl border-2 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] w-full max-w-lg overflow-hidden flex flex-col animate-zoom-in cursor-default"
           >
-            <div className="px-6 py-4 border-b-2 border-ink bg-white flex items-center justify-between shrink-0">
+            <div className="px-6 py-4 border-b-2 border-[#0A0A0A] bg-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2.5">
-                <Headphones size={18} className="text-ink" />
-                <h3 className="font-['Anybody',sans-serif] text-sm md:text-base font-black text-ink uppercase tracking-tight">
+                <Headphones size={18} className="text-[#0A0A0A]" />
+                <h3 className="font-['Anybody',sans-serif] text-sm md:text-base font-black text-[#0A0A0A] uppercase tracking-tight">
                   {t('support.new_modal_title', 'Нове звернення до підтримки')}
                 </h3>
               </div>
               <button
                 onClick={() => setIsNewModalOpen(false)}
-                className="w-7 h-7 rounded-xl border-2 border-ink bg-white flex items-center justify-center text-ink hover:bg-ink hover:text-canvas transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-xl border-2 border-[#0A0A0A] bg-white flex items-center justify-center text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors cursor-pointer"
               >
                 <X size={14} />
               </button>
@@ -564,7 +564,7 @@ export const SupportPage: React.FC = () => {
               )}
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-black uppercase text-ink block">
+                <label className="text-[11px] font-black uppercase text-[#0A0A0A] block">
                   {t('support.subject_label', 'Тема звернення')}
                 </label>
                 <div className="flex flex-wrap gap-1.5 pb-1">
@@ -573,7 +573,7 @@ export const SupportPage: React.FC = () => {
                       key={cat.value}
                       type="button"
                       onClick={() => setNewSubject(cat.value)}
-                      className="px-2 py-0.5 bg-white border border-ink rounded-lg text-[10px] font-bold text-ink hover:bg-ink hover:text-canvas transition-colors cursor-pointer"
+                      className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-lg text-[10px] font-bold text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors cursor-pointer"
                     >
                       {cat.label}
                     </button>
@@ -584,12 +584,12 @@ export const SupportPage: React.FC = () => {
                   value={newSubject}
                   onChange={(e) => setNewSubject(e.target.value)}
                   placeholder={t('support.subject_placeholder', 'напр. Питання щодо налаштування бота')}
-                  className="w-full px-3.5 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none placeholder:text-slate-400"
+                  className="w-full px-3.5 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none placeholder:text-slate-400"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-black uppercase text-ink block">
+                <label className="text-[11px] font-black uppercase text-[#0A0A0A] block">
                   {t('support.message_label', 'Опишіть ваше запитання або проблему')}
                 </label>
                 <textarea
@@ -597,7 +597,7 @@ export const SupportPage: React.FC = () => {
                   onChange={(e) => setNewMessage(e.target.value)}
                   rows={5}
                   placeholder={t('support.message_placeholder', 'Детально опишіть ситуацію, додайте деталі тощо...')}
-                  className="w-full p-3.5 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none resize-none placeholder:text-slate-400"
+                  className="w-full p-3.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none resize-none placeholder:text-slate-400"
                 />
               </div>
 
@@ -605,14 +605,14 @@ export const SupportPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsNewModalOpen(false)}
-                  className="px-4 py-2 bg-white border-2 border-ink rounded-xl text-xs font-black uppercase text-ink hover:bg-slate-100 transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   {t('support.cancel_btn', 'Скасувати')}
                 </button>
                 <button
                   type="submit"
                   disabled={createTicketMut.isPending || !newSubject.trim() || !newMessage.trim()}
-                  className="px-5 py-2 bg-ink text-canvas border-2 border-ink rounded-xl text-xs font-black uppercase flex items-center gap-2 hover:bg-[#2A2A2A] disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-brutal-md"
+                  className="px-5 py-2 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase flex items-center gap-2 hover:bg-[#2A2A2A] disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-[3px_3px_0px_#0A0A0A]"
                 >
                   {createTicketMut.isPending ? (
                     <Loader2 className="animate-spin" size={14} />

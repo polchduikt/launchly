@@ -51,17 +51,17 @@ export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({
         }}
         onFocus={() => setIsOpen(true)}
         onClick={() => setIsOpen(true)}
-        className="w-full px-3 py-2 rounded-xl border-2 border-ink focus:outline-none text-xs font-bold bg-white text-ink placeholder:text-slate-500"
+        className="w-full px-3 py-2 rounded-xl border-2 border-[#0A0A0A] focus:outline-none text-xs font-bold bg-white text-[#0A0A0A] placeholder:text-slate-500"
       />
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-1 bg-white border-2 border-ink rounded-2xl shadow-brutal z-50 p-1.5 max-h-48 overflow-y-auto custom-scrollbar flex flex-col gap-1">
+        <div className="absolute left-0 right-0 mt-1 bg-white border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_0px_#0A0A0A] z-50 p-1.5 max-h-48 overflow-y-auto custom-scrollbar flex flex-col gap-1">
           <button
             type="button"
             onClick={() => {
               onCreateTag();
               setIsOpen(false);
             }}
-            className="w-full text-left px-3 py-2 bg-ink hover:bg-[#2A2A2A] text-canvas rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition-all cursor-pointer"
+            className="w-full text-left px-3 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <Plus size={12} />
             <span>{t('crm.tags.create_new_tag')}</span>
@@ -84,12 +84,12 @@ export const TagSearchSelect: React.FC<TagSearchSelectProps> = ({
                 className={`w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-between ${
                   isAssigned
                     ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                    : 'hover:bg-canvas text-ink cursor-pointer'
+                    : 'hover:bg-[#F2EBDD] text-[#0A0A0A] cursor-pointer'
                 }`}
               >
                 <span>{tag.name}</span>
                 {isAssigned && (
-                  <span className="text-[9px] bg-white text-ink border border-ink px-1.5 py-0.5 rounded font-black uppercase">
+                  <span className="text-[9px] bg-white text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded font-black uppercase">
                     {t('crm.tags.added_label')}
                   </span>
                 )}

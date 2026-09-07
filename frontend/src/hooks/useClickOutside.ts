@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from 'react';
+﻿import { useEffect, type RefObject } from 'react';
 
 type TargetRef = RefObject<HTMLElement | null> | Array<RefObject<HTMLElement | null>>;
 

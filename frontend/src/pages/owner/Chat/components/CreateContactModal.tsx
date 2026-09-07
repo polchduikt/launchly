@@ -68,20 +68,20 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4 cursor-pointer"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/50 p-4 cursor-pointer"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-canvas rounded-2xl border-2 border-ink shadow-2xl max-w-md w-full overflow-hidden cursor-default font-['JetBrains_Mono',monospace]"
+        className="bg-[#F2EBDD] rounded-2xl border-2 border-[#0A0A0A] shadow-2xl max-w-md w-full overflow-hidden cursor-default font-['JetBrains_Mono',monospace]"
       >
-        <div className="px-6 py-4 border-b-2 border-ink flex items-center justify-between">
-          <h3 className="font-['Anybody',sans-serif] text-base font-black text-ink uppercase tracking-tight select-none">
+        <div className="px-6 py-4 border-b-2 border-[#0A0A0A] flex items-center justify-between">
+          <h3 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] uppercase tracking-tight select-none">
             {t('crm.contacts.btn.create')}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm"
+            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
           >
             <X size={16} />
           </button>
@@ -93,7 +93,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] font-black text-ink uppercase tracking-wider select-none">
+            <label className="text-[11px] font-black text-[#0A0A0A] uppercase tracking-wider select-none">
               {t('crm.contact.first_name')}
             </label>
             <input
@@ -101,24 +101,24 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
               required
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="w-full px-3.5 py-2.5 border-2 border-ink rounded-xl text-xs font-bold text-ink placeholder:text-slate-500 focus:outline-none transition-all bg-white"
+              className="w-full px-3.5 py-2.5 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder:text-slate-500 focus:outline-none transition-all bg-white"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] font-black text-ink uppercase tracking-wider select-none">
+            <label className="text-[11px] font-black text-[#0A0A0A] uppercase tracking-wider select-none">
               {t('crm.contact.last_name')}
             </label>
             <input
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full px-3.5 py-2.5 border-2 border-ink rounded-xl text-xs font-bold text-ink placeholder:text-slate-500 focus:outline-none transition-all bg-white"
+              className="w-full px-3.5 py-2.5 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder:text-slate-500 focus:outline-none transition-all bg-white"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] font-black text-ink uppercase tracking-wider select-none">
+            <label className="text-[11px] font-black text-[#0A0A0A] uppercase tracking-wider select-none">
               {t('crm.contact.phone_number')}
             </label>
             <div className="flex gap-2">
@@ -126,7 +126,7 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
                 <select
                   value={countryIndex}
                   onChange={(e) => setCountryIndex(Number(e.target.value))}
-                  className="px-3 py-2.5 border-2 border-ink rounded-xl text-xs font-bold text-ink bg-white focus:outline-none cursor-pointer appearance-none pr-7"
+                  className="px-3 py-2.5 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] bg-white focus:outline-none cursor-pointer appearance-none pr-7"
                 >
                   {COUNTRIES.map((c, i) => (
                     <option key={c.code} value={i}>
@@ -134,12 +134,12 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
                     </option>
                   ))}
                 </select>
-                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[9px] text-ink">
+                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[9px] text-[#0A0A0A]">
                   ▼
                 </div>
               </div>
-              <div className="flex-1 flex border-2 border-ink rounded-xl overflow-hidden bg-white">
-                <span className="px-2.5 flex items-center justify-center text-xs font-bold text-ink bg-slate-100 border-r border-ink select-none">
+              <div className="flex-1 flex border-2 border-[#0A0A0A] rounded-xl overflow-hidden bg-white">
+                <span className="px-2.5 flex items-center justify-center text-xs font-bold text-[#0A0A0A] bg-slate-100 border-r border-[#0A0A0A] select-none">
                   {activeCountry.dial}
                 </span>
                 <input
@@ -147,32 +147,32 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
                   placeholder={t('crm.contact.enter_phone')}
                   value={phoneBody}
                   onChange={(e) => setPhoneBody(e.target.value.replace(/[^0-9]/g, ''))}
-                  className="flex-1 px-3 py-2.5 text-xs font-bold text-ink placeholder:text-slate-500 focus:outline-none bg-white"
+                  className="flex-1 px-3 py-2.5 text-xs font-bold text-[#0A0A0A] placeholder:text-slate-500 focus:outline-none bg-white"
                 />
               </div>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] font-black text-ink uppercase tracking-wider select-none">
+            <label className="text-[11px] font-black text-[#0A0A0A] uppercase tracking-wider select-none">
               Email
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 border-2 border-ink rounded-xl text-xs font-bold text-ink placeholder:text-slate-500 focus:outline-none transition-all bg-white"
+              className="w-full px-3.5 py-2.5 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder:text-slate-500 focus:outline-none transition-all bg-white"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] font-black text-ink uppercase tracking-wider select-none">
+            <label className="text-[11px] font-black text-[#0A0A0A] uppercase tracking-wider select-none">
               {t('crm.contact.gender')}
             </label>
             <select
               value={gender}
               onChange={(e) => setGender(e.target.value)}
-              className="w-full px-3.5 py-2.5 border-2 border-ink rounded-xl text-xs font-bold text-ink bg-white focus:outline-none cursor-pointer"
+              className="w-full px-3.5 py-2.5 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] bg-white focus:outline-none cursor-pointer"
             >
               <option value="">{t('crm.contact.select_gender')}</option>
               <option value="Male">{t('crm.contact.gender_male')}</option>
@@ -186,25 +186,25 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
               type="checkbox"
               checked={isConfirmed}
               onChange={(e) => setIsConfirmed(e.target.checked)}
-              className="mt-0.5 accent-ink cursor-pointer"
+              className="mt-0.5 accent-[#0A0A0A] cursor-pointer"
             />
             <span>
               {t('crm.contact.consent_confirmation')}
             </span>
           </label>
 
-          <div className="flex justify-end gap-3 pt-3 border-t-2 border-ink/15">
+          <div className="flex justify-end gap-3 pt-3 border-t-2 border-[#0A0A0A]/15">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-xs font-bold text-ink hover:bg-white border-2 border-ink rounded-xl transition-all cursor-pointer"
+              className="px-5 py-2.5 text-xs font-bold text-[#0A0A0A] hover:bg-white border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
             >
               {t('crm.contacts.bulk.btn_cancel')}
             </button>
             <button
               type="submit"
               disabled={!isFormValid}
-              className="px-5 py-2.5 text-xs font-black uppercase text-canvas bg-ink hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-ink rounded-xl transition-all cursor-pointer"
+              className="px-5 py-2.5 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
             >
               {t('crm.contacts.btn.create')}
             </button>

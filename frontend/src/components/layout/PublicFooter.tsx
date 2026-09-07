@@ -9,7 +9,7 @@ export const PublicFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-ink text-canvas w-full py-12 px-6 lg:px-16 border-t-4 border-ink font-['JetBrains_Mono',monospace] select-none relative z-10">
+    <footer className="bg-[#0A0A0A] text-[#F2EBDD] w-full py-12 px-6 lg:px-16 border-t-4 border-[#0A0A0A] font-['JetBrains_Mono',monospace] select-none relative z-10">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
         <div className="flex flex-col gap-2">
           <Link to={ROUTES.LANDING} className="flex items-center">

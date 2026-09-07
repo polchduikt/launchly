@@ -65,9 +65,9 @@ export const BlogDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-canvas flex flex-col items-center justify-center p-8">
-        <Loader2 className="animate-spin text-ink" size={32} />
-        <span className="font-['JetBrains_Mono',monospace] text-xs font-bold text-ink mt-3 uppercase tracking-wider">
+      <div className="min-h-screen bg-[#F2EBDD] flex flex-col items-center justify-center p-8">
+        <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
+        <span className="font-['JetBrains_Mono',monospace] text-xs font-bold text-[#0A0A0A] mt-3 uppercase tracking-wider">
           {t('blog.detail.loading', 'Loading article...')}
         </span>
       </div>
@@ -76,13 +76,13 @@ export const BlogDetailPage: React.FC = () => {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-canvas flex flex-col items-center justify-center p-8 space-y-4">
-        <h2 className="font-['Anybody',sans-serif] text-3xl font-black uppercase text-ink">
+      <div className="min-h-screen bg-[#F2EBDD] flex flex-col items-center justify-center p-8 space-y-4">
+        <h2 className="font-['Anybody',sans-serif] text-3xl font-black uppercase text-[#0A0A0A]">
           {t('blog.detail.not_found', 'Article Not Found')}
         </h2>
         <button
           onClick={() => navigate(ROUTES.BLOG)}
-          className="bg-ink text-canvas font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-3 border-2 border-ink shadow-brutal hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer"
+          className="bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-3 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer"
         >
           {t('blog.detail.back', 'Back to Blog')}
         </button>
@@ -91,7 +91,7 @@ export const BlogDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-canvas text-ink font-['Geist',sans-serif] antialiased flex flex-col justify-between relative z-0 selection:bg-ink selection:text-canvas">
+    <div className="min-h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased flex flex-col justify-between relative z-0 selection:bg-[#0A0A0A] selection:text-[#F2EBDD]">
       
       <div 
         className="fixed inset-0 z-[-1] pointer-events-none opacity-5"
@@ -114,7 +114,7 @@ export const BlogDetailPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate(ROUTES.BLOG)}
-              className="bg-canvas text-ink border-2 border-ink shadow-brutal-md hover:bg-ink hover:text-canvas transition-all px-4 py-2 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase flex items-center gap-2 cursor-pointer"
+              className="bg-[#F2EBDD] text-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all px-4 py-2 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase flex items-center gap-2 cursor-pointer"
             >
               <ArrowLeft size={14} />
               <span>{t('blog.detail.back', 'Back to Blog')}</span>
@@ -122,25 +122,25 @@ export const BlogDetailPage: React.FC = () => {
 
             <button
               onClick={handleShareArticle}
-              className="bg-canvas text-ink border-2 border-ink shadow-brutal-md hover:bg-ink hover:text-canvas transition-all px-4 py-2 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase flex items-center gap-2 cursor-pointer"
+              className="bg-[#F2EBDD] text-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all px-4 py-2 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase flex items-center gap-2 cursor-pointer"
             >
               {isCopied ? <Check size={14} className="text-emerald-600" /> : <Share2 size={14} />}
               <span>{isCopied ? t('blog.detail.copied', 'Link Copied!') : t('blog.detail.share', 'Share Article')}</span>
             </button>
           </div>
 
-          <article className="bg-canvas border-2 border-ink shadow-brutal-xl p-6 sm:p-10 lg:p-12 space-y-8">
+          <article className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] p-6 sm:p-10 lg:p-12 space-y-8">
             
-            <div className="space-y-4 border-b-2 border-ink pb-6 min-w-0">
-              <span className="bg-ink text-canvas font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-widest px-3 py-1 inline-block border border-white max-w-[80%] truncate">
+            <div className="space-y-4 border-b-2 border-[#0A0A0A] pb-6 min-w-0">
+              <span className="bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-widest px-3 py-1 inline-block border border-white max-w-[80%] truncate">
                 {article.category}
               </span>
 
-              <h1 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl font-black uppercase text-ink leading-tight tracking-tight break-words [overflow-wrap:anywhere]">
+              <h1 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl font-black uppercase text-[#0A0A0A] leading-tight tracking-tight break-words [overflow-wrap:anywhere]">
                 {article.title}
               </h1>
 
-              <div className="flex flex-wrap items-center justify-between gap-4 font-['JetBrains_Mono',monospace] text-xs font-bold text-ink pt-2">
+              <div className="flex flex-wrap items-center justify-between gap-4 font-['JetBrains_Mono',monospace] text-xs font-bold text-[#0A0A0A] pt-2">
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1.5">
                     <User size={14} />
@@ -151,14 +151,14 @@ export const BlogDetailPage: React.FC = () => {
                     <span>{article.date}</span>
                   </span>
                 </div>
-                <span className="flex items-center gap-1.5 bg-white border border-ink px-2.5 py-1">
+                <span className="flex items-center gap-1.5 bg-white border border-[#0A0A0A] px-2.5 py-1">
                   <Clock size={14} />
                   <span>{article.readTime || t('blog.detail.read_time', { min: 5 })}</span>
                 </span>
               </div>
             </div>
 
-            <div className="aspect-[16/9] w-full border-2 border-ink overflow-hidden bg-slate-200 shadow-brutal">
+            <div className="aspect-[16/9] w-full border-2 border-[#0A0A0A] overflow-hidden bg-slate-200 shadow-[4px_4px_0px_#0A0A0A]">
               <img
                 src={article.coverImage}
                 alt={article.title}
@@ -166,21 +166,21 @@ export const BlogDetailPage: React.FC = () => {
               />
             </div>
 
-            <div className="space-y-6 font-['Geist',sans-serif] text-base text-ink leading-relaxed font-medium">
+            <div className="space-y-6 font-['Geist',sans-serif] text-base text-[#0A0A0A] leading-relaxed font-medium">
               {article.contentBlocks?.map((block, idx) => {
                 if (block.type === 'paragraph') {
                   return <p key={idx} className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{block.text}</p>;
                 }
                 if (block.type === 'heading') {
                   return (
-                    <h2 key={idx} className="font-['Anybody',sans-serif] text-2xl font-black uppercase text-ink pt-4 border-b border-ink/20 pb-2 break-words [overflow-wrap:anywhere]">
+                    <h2 key={idx} className="font-['Anybody',sans-serif] text-2xl font-black uppercase text-[#0A0A0A] pt-4 border-b border-[#0A0A0A]/20 pb-2 break-words [overflow-wrap:anywhere]">
                       {block.text}
                     </h2>
                   );
                 }
                 if (block.type === 'quote') {
                   return (
-                    <blockquote key={idx} className="bg-ink text-canvas p-6 border-l-8 border-canvas font-['JetBrains_Mono',monospace] text-sm font-bold my-4 shadow-brutal break-words [overflow-wrap:anywhere]">
+                    <blockquote key={idx} className="bg-[#0A0A0A] text-[#F2EBDD] p-6 border-l-8 border-[#F2EBDD] font-['JetBrains_Mono',monospace] text-sm font-bold my-4 shadow-[4px_4px_0px_#0A0A0A] break-words [overflow-wrap:anywhere]">
                       "{block.text}"
                       {block.author && <span className="block mt-2 text-xs opacity-75 break-words [overflow-wrap:anywhere]">— {block.author}</span>}
                     </blockquote>
@@ -197,9 +197,9 @@ export const BlogDetailPage: React.FC = () => {
                 }
                 if (block.type === 'image') {
                   return (
-                    <div key={idx} className="my-6 border-2 border-ink bg-slate-200 overflow-hidden shadow-brutal">
+                    <div key={idx} className="my-6 border-2 border-[#0A0A0A] bg-slate-200 overflow-hidden shadow-[4px_4px_0px_#0A0A0A]">
                       <img src={block.url} alt={block.caption || 'Article image'} className="w-full h-auto object-cover" />
-                      {block.caption && <p className="p-2 text-center text-xs font-mono font-bold bg-ink text-canvas break-words [overflow-wrap:anywhere]">{block.caption}</p>}
+                      {block.caption && <p className="p-2 text-center text-xs font-mono font-bold bg-[#0A0A0A] text-[#F2EBDD] break-words [overflow-wrap:anywhere]">{block.caption}</p>}
                     </div>
                   );
                 }

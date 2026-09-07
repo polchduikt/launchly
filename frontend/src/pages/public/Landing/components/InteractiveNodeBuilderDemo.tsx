@@ -343,21 +343,21 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
   return (
     <section
       id="interactive-demo"
-      className="py-20 md:py-28 bg-canvas border-b-4 border-ink px-4 sm:px-6 lg:px-12 relative z-10"
+      className="py-20 md:py-28 bg-[#F2EBDD] border-b-4 border-[#0A0A0A] px-4 sm:px-6 lg:px-12 relative z-10"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="text-left mb-10 border-l-8 border-ink pl-6">
-          <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl font-black text-ink mb-3 uppercase leading-tight">
+        <div className="text-left mb-10 border-l-8 border-[#0A0A0A] pl-6">
+          <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl font-black text-[#0A0A0A] mb-3 uppercase leading-tight">
             {t('landing.builder_demo.title', 'TRY THE NODE BUILDER RIGHT NOW')}
           </h2>
-          <p className="text-base sm:text-lg text-ink/85 font-bold max-w-3xl">
+          <p className="text-base sm:text-lg text-[#0A0A0A]/85 font-bold max-w-3xl">
             {t(
               'landing.builder_demo.subtitle',
               'Add nodes, connect them with buttons, and see live results inside the Telegram simulator on the right.'
             )}
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-ink text-canvas p-3 sm:p-4 rounded-xl border-3 border-ink shadow-brutal-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-[#0A0A0A] text-[#F2EBDD] p-3 sm:p-4 rounded-xl border-3 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A]">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-['JetBrains_Mono',monospace] text-xs font-black uppercase text-amber-400 flex items-center gap-1 mr-2">
               <Layers size={15} />
@@ -399,7 +399,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
 
           <button
             onClick={resetSimulation}
-            className="px-3 py-1.5 bg-white text-ink font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg border-2 border-ink shadow-brutal-sm hover:bg-amber-100 transition-all flex items-center gap-1 cursor-pointer ml-auto"
+            className="px-3 py-1.5 bg-white text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-black uppercase rounded-lg border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] hover:bg-amber-100 transition-all flex items-center gap-1 cursor-pointer ml-auto"
           >
             <RotateCcw size={13} />
             <span>Скинути</span>
@@ -408,7 +408,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-7">
-            <div className="flex items-center justify-between px-2 mb-2 font-['JetBrains_Mono',monospace] text-xs font-black uppercase text-ink">
+            <div className="flex items-center justify-between px-2 mb-2 font-['JetBrains_Mono',monospace] text-xs font-black uppercase text-[#0A0A0A]">
               <span className="flex items-center gap-1.5">
                 <Zap size={14} className="text-amber-500 fill-amber-500" />
                 <span>FLOW BUILDER CANVAS ({nodes.length} NODES)</span>
@@ -420,7 +420,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
 
             <div
               ref={canvasRef}
-              className="relative min-h-[560px] sm:min-h-[620px] bg-[#0E1726] border-4 border-ink shadow-brutal-xl rounded-2xl p-4 sm:p-6 overflow-x-auto overflow-y-visible [background-image:radial-gradient(#2d3c52_1.5px,transparent_1.5px)] [background-size:20px_20px]"
+              className="relative min-h-[560px] sm:min-h-[620px] bg-[#0E1726] border-4 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] rounded-2xl p-4 sm:p-6 overflow-x-auto overflow-y-visible [background-image:radial-gradient(#2d3c52_1.5px,transparent_1.5px)] [background-size:20px_20px]"
             ><svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
                 <defs>
                   <marker
@@ -478,15 +478,15 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                   return (
                     <div
                       key={node.id}
-                      className={`bg-white border-3 border-ink rounded-xl p-4 transition-all relative ${
+                      className={`bg-white border-3 border-[#0A0A0A] rounded-xl p-4 transition-all relative ${
                         isActive
                           ? 'shadow-[6px_6px_0px_#10B981] ring-3 ring-emerald-400 -translate-y-0.5'
-                          : 'shadow-brutal hover:shadow-brutal-lg'
+                          : 'shadow-[4px_4px_0px_#0A0A0A] hover:shadow-[6px_6px_0px_#0A0A0A]'
                       }`}
                     >
                       <div
                         id={`node-port-${node.id}`}
-                        className={`absolute -left-3 top-6 w-5 h-5 rounded-full border-2 border-ink flex items-center justify-center text-[9px] font-mono font-bold shadow ${
+                        className={`absolute -left-3 top-6 w-5 h-5 rounded-full border-2 border-[#0A0A0A] flex items-center justify-center text-[9px] font-mono font-bold shadow ${
                           isActive ? 'bg-emerald-400 text-black animate-ping' : 'bg-slate-200 text-slate-700'
                         }`}
                         title="Input Port"
@@ -497,7 +497,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                       <div className="flex items-center justify-between border-b-2 border-slate-100 pb-2 mb-3">
                         <div className="flex items-center gap-2">
                           <div
-                            className={`w-6 h-6 rounded border border-ink flex items-center justify-center text-xs font-bold ${
+                            className={`w-6 h-6 rounded border border-[#0A0A0A] flex items-center justify-center text-xs font-bold ${
                               node.type === 'promo'
                                 ? 'bg-amber-300'
                                 : node.type === 'form'
@@ -518,7 +518,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                             type="text"
                             value={node.title}
                             onChange={(e) => handleUpdateNodeTitle(node.id, e.target.value)}
-                            className="font-['Anybody',sans-serif] text-xs font-black text-ink bg-transparent border-b border-dashed border-transparent hover:border-ink outline-none px-1 py-0.5"
+                            className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] bg-transparent border-b border-dashed border-transparent hover:border-[#0A0A0A] outline-none px-1 py-0.5"
                           />
                         </div>
 
@@ -540,7 +540,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                             rows={2}
                             value={node.message}
                             onChange={(e) => handleUpdateNodeMessage(node.id, e.target.value)}
-                            className="w-full p-2 bg-slate-50 border border-ink font-sans text-xs font-medium text-ink rounded-lg focus:bg-white outline-none resize-none"
+                            className="w-full p-2 bg-slate-50 border border-[#0A0A0A] font-sans text-xs font-medium text-[#0A0A0A] rounded-lg focus:bg-white outline-none resize-none"
                           />
                         </div>
                         {node.promoCode && (
@@ -570,7 +570,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                                   key={btn.id}
                                   onMouseEnter={() => setHoveredButtonId(btn.id)}
                                   onMouseLeave={() => setHoveredButtonId(null)}
-                                  className="relative flex items-center gap-1.5 p-1.5 bg-canvas/60 border border-ink/30 rounded-lg group"
+                                  className="relative flex items-center gap-1.5 p-1.5 bg-[#F2EBDD]/60 border border-[#0A0A0A]/30 rounded-lg group"
                                 >
                                   <input
                                     type="text"
@@ -578,7 +578,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                                     onChange={(e) =>
                                       handleUpdateButtonLabel(node.id, btn.id, e.target.value)
                                     }
-                                    className="flex-1 p-1 bg-white border border-ink text-[11px] font-bold rounded outline-none"
+                                    className="flex-1 p-1 bg-white border border-[#0A0A0A] text-[11px] font-bold rounded outline-none"
                                   />
 
                                   <select
@@ -586,7 +586,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                                     onChange={(e) =>
                                       handleUpdateButtonTarget(node.id, btn.id, e.target.value)
                                     }
-                                    className="p-1 bg-white border border-ink text-[10px] font-bold rounded outline-none cursor-pointer"
+                                    className="p-1 bg-white border border-[#0A0A0A] text-[10px] font-bold rounded outline-none cursor-pointer"
                                   >
                                     {nodes.map((n) => (
                                       <option key={n.id} value={n.id}>
@@ -603,7 +603,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
                                   </button>
                                   <div
                                     id={`btn-port-${btn.id}`}
-                                    className="absolute -right-3 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-emerald-500 border border-ink flex items-center justify-center text-[8px] text-white font-mono shadow"
+                                    className="absolute -right-3 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-emerald-500 border border-[#0A0A0A] flex items-center justify-center text-[8px] text-white font-mono shadow"
                                     title="Output Port (Connects to target)"
                                   >
                                     ➔
@@ -624,7 +624,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
           </div>
 
           <div className="lg:col-span-5 lg:sticky lg:top-24">
-            <div className="flex items-center justify-between px-2 mb-2 font-['JetBrains_Mono',monospace] text-xs font-black uppercase text-ink">
+            <div className="flex items-center justify-between px-2 mb-2 font-['JetBrains_Mono',monospace] text-xs font-black uppercase text-[#0A0A0A]">
               <span className="flex items-center gap-1">
                 <Smartphone size={14} />
                 <span>{t('landing.builder_demo.preview_telegram', 'Telegram Simulation')}</span>
@@ -635,8 +635,8 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
               </span>
             </div>
 
-            <div className="bg-ink p-3 sm:p-4 rounded-[36px] shadow-brutal-2xl border-4 border-ink relative overflow-hidden">
-              <div className="w-32 h-4 bg-ink mx-auto rounded-b-xl mb-2 relative z-20"></div>
+            <div className="bg-[#0A0A0A] p-3 sm:p-4 rounded-[36px] shadow-[10px_10px_0px_#0A0A0A] border-4 border-[#0A0A0A] relative overflow-hidden">
+              <div className="w-32 h-4 bg-[#0A0A0A] mx-auto rounded-b-xl mb-2 relative z-20"></div>
               <div className="bg-[#0e1621] rounded-[24px] overflow-hidden flex flex-col h-[520px] sm:h-[580px] border border-slate-700 relative z-10">
                 <div className="bg-[#17212b] px-4 py-3 border-b border-slate-800 flex items-center justify-between shrink-0">
                   <div className="flex items-center gap-3">
@@ -760,7 +760,7 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
               <div className="w-28 h-1 bg-slate-700 mx-auto rounded-full mt-2"></div>
             </div>
 
-            <p className="text-[11px] font-['JetBrains_Mono',monospace] font-bold text-ink/60 text-center mt-3">
+            <p className="text-[11px] font-['JetBrains_Mono',monospace] font-bold text-[#0A0A0A]/60 text-center mt-3">
               💡 {t('landing.builder_demo.test_click_hint', 'Click inline buttons in chat to test the workflow')}
             </p>
           </div>

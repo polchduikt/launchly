@@ -16,16 +16,6 @@
   --color-canvas: #F2EBDD;
   --color-ink: #0A0A0A;
   --color-canvas-subtle: #F8FAFC;
-  --shadow-brutal-xs: 1px 1px 0px #0A0A0A;
-  --shadow-brutal-sm: 2px 2px 0px #0A0A0A;
-  --shadow-brutal-md: 3px 3px 0px #0A0A0A;
-  --shadow-brutal: 4px 4px 0px #0A0A0A;
-  --shadow-brutal-lg: 6px 6px 0px #0A0A0A;
-  --shadow-brutal-xl: 8px 8px 0px #0A0A0A;
-  --shadow-brutal-2xl: 10px 10px 0px #0A0A0A;
-  --shadow-brutal-3xl: 12px 12px 0px #0A0A0A;
-  --shadow-brutal-canvas: 4px 4px 0px #F2EBDD;
-  --shadow-brutal-canvas-xl: 8px 8px 0px #F2EBDD;
 }
 
 .bg-pattern {

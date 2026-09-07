@@ -38,22 +38,22 @@ const BlogCard: React.FC<{
     return (
       <article
         onClick={() => onOpen(article.id)}
-        className={`relative bg-ink border-2 border-ink shadow-brutal-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden aspect-[4/5] min-w-0 w-full ${className}`}
+        className={`relative bg-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden aspect-[4/5] min-w-0 w-full ${className}`}
       >
         <img
           src={article.coverImage}
           alt={article.title}
           className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-transparent" />
-        <div className="absolute top-3 left-3 bg-canvas text-ink font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest px-2.5 py-1 z-10 max-w-[80%] truncate">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/55 to-transparent" />
+        <div className="absolute top-3 left-3 bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest px-2.5 py-1 z-10 max-w-[80%] truncate">
           {article.category}
         </div>
         <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 space-y-3 min-w-0">
-          <h2 className="font-['Anybody',sans-serif] text-xl sm:text-2xl font-extrabold uppercase text-canvas leading-snug line-clamp-3 break-words [overflow-wrap:anywhere]">
+          <h2 className="font-['Anybody',sans-serif] text-xl sm:text-2xl font-extrabold uppercase text-[#F2EBDD] leading-snug line-clamp-3 break-words [overflow-wrap:anywhere]">
             {article.title}
           </h2>
-          <div className="flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-canvas/80 shrink-0">
+          <div className="flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#F2EBDD]/80 shrink-0">
             <div className="flex items-center gap-1.5 shrink-0">
               <Calendar size={13} />
               <span>{article.date}</span>
@@ -72,28 +72,28 @@ const BlogCard: React.FC<{
     return (
       <article
         onClick={() => onOpen(article.id)}
-        className={`bg-canvas border-2 border-ink shadow-brutal-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden flex flex-col min-w-0 w-full h-full ${className}`}
+        className={`bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden flex flex-col min-w-0 w-full h-full ${className}`}
       >
-        <div className="aspect-[16/10] w-full border-b-2 border-ink relative overflow-hidden bg-slate-200 shrink-0">
+        <div className="aspect-[16/10] w-full border-b-2 border-[#0A0A0A] relative overflow-hidden bg-slate-200 shrink-0">
           <img
             src={article.coverImage}
             alt={article.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          <div className="absolute top-3 left-3 bg-ink text-canvas font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest px-2.5 py-1 border border-white max-w-[80%] truncate">
+          <div className="absolute top-3 left-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest px-2.5 py-1 border border-white max-w-[80%] truncate">
             {article.category}
           </div>
         </div>
         <div className="p-4 sm:p-5 flex flex-col flex-1 gap-2 min-w-0 justify-between">
           <div className="space-y-2 min-w-0">
-            <h2 className="font-['Anybody',sans-serif] text-base sm:text-lg font-extrabold uppercase text-ink leading-snug line-clamp-2 break-words [overflow-wrap:anywhere]">
+            <h2 className="font-['Anybody',sans-serif] text-base sm:text-lg font-extrabold uppercase text-[#0A0A0A] leading-snug line-clamp-2 break-words [overflow-wrap:anywhere]">
               {article.title}
             </h2>
             <p className="font-['Geist',sans-serif] text-xs font-medium text-slate-800 line-clamp-2 leading-relaxed break-words [overflow-wrap:anywhere]">
               {article.summary}
             </p>
           </div>
-          <div className="pt-2 mt-auto flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-ink shrink-0 border-t border-ink/20">
+          <div className="pt-2 mt-auto flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] shrink-0 border-t border-[#0A0A0A]/20">
             <span>{article.date}</span>
             <div className="flex items-center gap-1 text-indigo-700 font-extrabold group-hover:translate-x-1 transition-transform shrink-0">
               <span>{readLabel}</span>
@@ -109,13 +109,13 @@ const BlogCard: React.FC<{
     return (
       <article
         onClick={() => onOpen(article.id)}
-        className={`bg-canvas border-2 border-ink shadow-brutal-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden flex flex-col min-w-0 w-full h-full ${className}`}
+        className={`bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden flex flex-col min-w-0 w-full h-full ${className}`}
       >
-        <div className="p-4 sm:p-5 border-b-2 border-ink space-y-2 min-w-0">
+        <div className="p-4 sm:p-5 border-b-2 border-[#0A0A0A] space-y-2 min-w-0">
           <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-widest text-indigo-700 block truncate">
             {article.category}
           </span>
-          <h2 className="font-['Anybody',sans-serif] text-lg sm:text-xl font-extrabold uppercase text-ink leading-snug line-clamp-3 break-words [overflow-wrap:anywhere]">
+          <h2 className="font-['Anybody',sans-serif] text-lg sm:text-xl font-extrabold uppercase text-[#0A0A0A] leading-snug line-clamp-3 break-words [overflow-wrap:anywhere]">
             {article.title}
           </h2>
         </div>
@@ -126,7 +126,7 @@ const BlogCard: React.FC<{
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
-        <div className="p-4 mt-auto flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-ink shrink-0">
+        <div className="p-4 mt-auto flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] shrink-0">
           <div className="flex items-center gap-1.5 shrink-0">
             <Calendar size={13} />
             <span>{article.date}</span>
@@ -143,12 +143,12 @@ const BlogCard: React.FC<{
   return (
     <article
       onClick={() => onOpen(article.id)}
-      className={`bg-canvas border-2 border-ink shadow-brutal-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden min-w-0 w-full ${
+      className={`bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-200 cursor-pointer group overflow-hidden min-w-0 w-full ${
         isVertical ? 'flex flex-col' : 'flex flex-col md:flex-row'
       } ${fixedHeight ? 'h-full' : ''} ${className}`}
     >
       <div
-        className={`relative overflow-hidden bg-slate-200 shrink-0 border-ink ${
+        className={`relative overflow-hidden bg-slate-200 shrink-0 border-[#0A0A0A] ${
           isVertical
             ? fixedHeight
               ? 'aspect-[16/10] sm:aspect-[4/3] md:aspect-auto md:h-[52%] w-full border-b-2'
@@ -163,7 +163,7 @@ const BlogCard: React.FC<{
           alt={article.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-ink text-canvas font-['JetBrains_Mono',monospace] text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 sm:px-2.5 sm:py-1 border border-white max-w-[85%] truncate">
+        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 sm:px-2.5 sm:py-1 border border-white max-w-[85%] truncate">
           {article.category}
         </div>
       </div>
@@ -175,7 +175,7 @@ const BlogCard: React.FC<{
       >
         <div className="space-y-2 min-w-0">
           <h2
-            className={`font-['Anybody',sans-serif] font-extrabold uppercase text-ink leading-snug break-words [overflow-wrap:anywhere] ${
+            className={`font-['Anybody',sans-serif] font-extrabold uppercase text-[#0A0A0A] leading-snug break-words [overflow-wrap:anywhere] ${
               isVertical ? 'text-base sm:text-lg lg:text-xl line-clamp-2 sm:line-clamp-3' : 'text-base sm:text-xl lg:text-2xl line-clamp-2 sm:line-clamp-3'
             }`}
           >
@@ -189,7 +189,7 @@ const BlogCard: React.FC<{
             {article.summary}
           </p>
         </div>
-        <div className="pt-3 border-t border-ink/20 mt-auto flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-ink shrink-0">
+        <div className="pt-3 border-t border-[#0A0A0A]/20 mt-auto flex items-center justify-between font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] shrink-0">
           <div className="flex items-center gap-1.5 shrink-0">
             <Calendar size={13} />
             <span>{article.date}</span>
@@ -296,7 +296,7 @@ export const BlogPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-canvas text-ink font-['Geist',sans-serif] antialiased flex flex-col justify-between relative z-0 selection:bg-ink selection:text-canvas">
+    <div className="min-h-screen bg-[#F2EBDD] text-[#0A0A0A] font-['Geist',sans-serif] antialiased flex flex-col justify-between relative z-0 selection:bg-[#0A0A0A] selection:text-[#F2EBDD]">
       <div
         className="fixed inset-0 z-[-1] pointer-events-none opacity-5"
         style={{
@@ -315,11 +315,11 @@ export const BlogPage: React.FC = () => {
 
         <div className="w-full max-w-[1680px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 pt-14 pb-16 space-y-12">
           {blogArticles.length === 0 ? (
-            <div className="bg-canvas border-2 border-ink shadow-brutal-lg p-12 text-center space-y-4">
-              <h3 className="font-['Anybody',sans-serif] text-2xl font-black uppercase text-ink">
+            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] p-12 text-center space-y-4">
+              <h3 className="font-['Anybody',sans-serif] text-2xl font-black uppercase text-[#0A0A0A]">
                 {t('blog.empty.title', 'No Articles Found')}
               </h3>
-              <p className="font-['Geist',sans-serif] text-sm text-ink font-bold">
+              <p className="font-['Geist',sans-serif] text-sm text-[#0A0A0A] font-bold">
                 {t('blog.empty.desc', 'Try searching for a different keyword or topic.')}
               </p>
             </div>
@@ -380,7 +380,7 @@ export const BlogPage: React.FC = () => {
                         type="button"
                         onClick={handlePrevSlide}
                         aria-label={t('blog.featured.prev', 'Previous article')}
-                        className="border-2 border-ink bg-canvas p-2.5 text-ink shadow-brutal-md hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer active:scale-95"
+                        className="border-2 border-[#0A0A0A] bg-[#F2EBDD] p-2.5 text-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer active:scale-95"
                       >
                         <ChevronLeft size={16} />
                       </button>
@@ -388,7 +388,7 @@ export const BlogPage: React.FC = () => {
                         type="button"
                         onClick={handleNextSlide}
                         aria-label={t('blog.featured.next', 'Next article')}
-                        className="border-2 border-ink bg-ink p-2.5 text-canvas shadow-brutal-md hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer active:scale-95"
+                        className="border-2 border-[#0A0A0A] bg-[#0A0A0A] p-2.5 text-[#F2EBDD] shadow-[3px_3px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer active:scale-95"
                       >
                         <ChevronRight size={16} />
                       </button>
@@ -465,23 +465,23 @@ export const BlogPage: React.FC = () => {
 
         {blogArticles.length > 0 && (
           <section
-            className="w-full bg-ink text-canvas border-y-4 border-ink select-none"
+            className="w-full bg-[#0A0A0A] text-[#F2EBDD] border-y-4 border-[#0A0A0A] select-none"
             data-header-theme="dark"
           >
             <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-16 sm:py-28 md:py-48 lg:py-64 min-h-0 lg:min-h-[70vh] grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center">
               <div className="space-y-6">
-                <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-[0.25em] bg-canvas text-ink px-3 py-1 inline-block">
+                <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black uppercase tracking-[0.25em] bg-[#F2EBDD] text-[#0A0A0A] px-3 py-1 inline-block">
                   {t('blog.promo.badge', 'LAUNCHLY PLATFORM')}
                 </span>
                 <h2 className="font-['Anybody',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-black uppercase leading-[0.95] tracking-tight">
-                  <span className="block text-canvas">
+                  <span className="block text-[#F2EBDD]">
                     {t('blog.promo.title_1', 'Scale your business.')}
                   </span>
                   <span className="block text-indigo-300 mt-2">
                     {t('blog.promo.title_2', 'Automate the rest.')}
                   </span>
                 </h2>
-                <p className="font-['Geist',sans-serif] text-sm sm:text-base text-canvas/75 max-w-xl leading-relaxed font-medium">
+                <p className="font-['Geist',sans-serif] text-sm sm:text-base text-[#F2EBDD]/75 max-w-xl leading-relaxed font-medium">
                   {t(
                     'blog.promo.desc',
                     'Build visual chat flows, qualify leads, and close sales automatically — while you focus on growing the brand.'
@@ -490,7 +490,7 @@ export const BlogPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handlePromoCta}
-                  className="bg-canvas text-ink font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-black uppercase tracking-wider px-8 py-3.5 border-2 border-canvas shadow-[4px_4px_0px_rgba(242,235,221,0.35)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer inline-flex items-center gap-2"
+                  className="bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-black uppercase tracking-wider px-8 py-3.5 border-2 border-[#F2EBDD] shadow-[4px_4px_0px_rgba(242,235,221,0.35)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer inline-flex items-center gap-2"
                 >
                   <span>
                     {isAuthenticated
@@ -521,16 +521,16 @@ export const BlogPage: React.FC = () => {
                 ].map(({ icon: Icon, title, desc }) => (
                   <div
                     key={title}
-                    className="border-2 border-canvas/30 bg-ink p-4 sm:p-5 flex gap-3 items-start hover:border-canvas transition-colors"
+                    className="border-2 border-[#F2EBDD]/30 bg-[#0A0A0A] p-4 sm:p-5 flex gap-3 items-start hover:border-[#F2EBDD] transition-colors"
                   >
-                    <div className="shrink-0 border-2 border-canvas bg-canvas text-ink p-2">
+                    <div className="shrink-0 border-2 border-[#F2EBDD] bg-[#F2EBDD] text-[#0A0A0A] p-2">
                       <Icon size={18} />
                     </div>
                     <div>
                       <h3 className="font-['Anybody',sans-serif] text-base font-extrabold uppercase tracking-tight">
                         {title}
                       </h3>
-                      <p className="font-['Geist',sans-serif] text-xs text-canvas/65 mt-1 leading-relaxed">
+                      <p className="font-['Geist',sans-serif] text-xs text-[#F2EBDD]/65 mt-1 leading-relaxed">
                         {desc}
                       </p>
                     </div>
@@ -548,7 +548,7 @@ export const BlogPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowMore(true)}
-                  className="bg-ink text-canvas font-['JetBrains_Mono',monospace] text-sm sm:text-base font-black uppercase tracking-widest px-16 sm:px-24 py-5 sm:py-6 border-2 border-ink shadow-brutal-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer"
+                  className="bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-sm sm:text-base font-black uppercase tracking-widest px-16 sm:px-24 py-5 sm:py-6 border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer"
                 >
                   {t('blog.more.cta', 'DIVE IN')}
                 </button>
@@ -605,13 +605,13 @@ export const BlogPage: React.FC = () => {
           </svg>
         </div>
 
-        <div className="bg-ink text-canvas w-full pt-2 sm:pt-4 pb-16 sm:pb-24 px-6 lg:px-16 text-center">
+        <div className="bg-[#0A0A0A] text-[#F2EBDD] w-full pt-2 sm:pt-4 pb-16 sm:pb-24 px-6 lg:px-16 text-center">
           <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6">
             <h2 className="font-['Anybody',sans-serif] text-3xl sm:text-5xl lg:text-6xl font-black uppercase text-white tracking-tight leading-[0.95]">
               {t('landing.cta.title', 'Створіть свою першу автоматизацію безкоштовно вже сьогодні')}
             </h2>
 
-            <p className="font-['JetBrains_Mono',monospace] text-xs sm:text-base text-canvas/70 font-bold max-w-2xl mx-auto leading-relaxed">
+            <p className="font-['JetBrains_Mono',monospace] text-xs sm:text-base text-[#F2EBDD]/70 font-bold max-w-2xl mx-auto leading-relaxed">
               {t('landing.cta.subtitle', "Без прив'язки банківської картки. Налаштування займе 3 хвилини.")}
             </p>
 
@@ -619,7 +619,7 @@ export const BlogPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handlePromoCta}
-                className="bg-canvas text-ink font-['JetBrains_Mono',monospace] text-sm sm:text-base font-black uppercase tracking-wider px-8 sm:px-12 py-3.5 sm:py-4 border-4 border-canvas shadow-[6px_6px_0px_rgba(255,255,255,0.25)] hover:bg-white hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center gap-3"
+                className="bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-sm sm:text-base font-black uppercase tracking-wider px-8 sm:px-12 py-3.5 sm:py-4 border-4 border-[#F2EBDD] shadow-[6px_6px_0px_rgba(255,255,255,0.25)] hover:bg-white hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer flex items-center gap-3"
               >
                 <span>{t('landing.cta.button', 'Розпочати безкоштовно →')}</span>
               </button>

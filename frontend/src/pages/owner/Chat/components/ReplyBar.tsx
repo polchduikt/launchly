@@ -93,14 +93,14 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
   }, [typedNote]);
 
   return (
-    <div className="border-t-2 border-ink shrink-0 bg-canvas font-['JetBrains_Mono',monospace]">
-      <div className="flex border-b-2 border-ink px-4 pt-2 gap-2">
+    <div className="border-t-2 border-[#0A0A0A] shrink-0 bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
+      <div className="flex border-b-2 border-[#0A0A0A] px-4 pt-2 gap-2">
         <button
           onClick={() => onTabChange('reply')}
           className={`px-4 py-1.5 text-xs font-black uppercase rounded-t-xl transition-all cursor-pointer ${
             bottomTab === 'reply'
-              ? 'bg-ink text-canvas border-2 border-ink border-b-0'
-              : 'text-ink hover:bg-white border-2 border-transparent'
+              ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] border-b-0'
+              : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
           }`}
         >
           {t('crm.reply.tab_reply')}
@@ -109,8 +109,8 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
           onClick={() => onTabChange('note')}
           className={`px-4 py-1.5 text-xs font-black uppercase rounded-t-xl transition-all cursor-pointer ${
             bottomTab === 'note'
-              ? 'bg-amber-400 text-ink border-2 border-ink border-b-0'
-              : 'text-ink hover:bg-white border-2 border-transparent'
+              ? 'bg-amber-400 text-[#0A0A0A] border-2 border-[#0A0A0A] border-b-0'
+              : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
           }`}
         >
           {t('crm.reply.tab_note')}
@@ -119,17 +119,17 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
       {bottomTab === 'reply' ? (
         <>
           {pendingImage && (
-            <div className="px-4 pt-3 flex items-center gap-2 bg-canvas">
-              <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-ink shadow-brutal-sm">
+            <div className="px-4 pt-3 flex items-center gap-2 bg-[#F2EBDD]">
+              <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-[#0A0A0A] shadow-[2px_2px_0px_0px_#0A0A0A]">
                 <img src={pendingImage.url} alt="Preview" className="w-full h-full object-cover" />
-                <button onClick={onClearPendingImage} className="absolute -top-1 -right-1 w-5 h-5 bg-rose-600 text-white border border-ink rounded-full flex items-center justify-center cursor-pointer"><X size={10} /></button>
+                <button onClick={onClearPendingImage} className="absolute -top-1 -right-1 w-5 h-5 bg-rose-600 text-white border border-[#0A0A0A] rounded-full flex items-center justify-center cursor-pointer"><X size={10} /></button>
               </div>
-              <span className="text-xs font-bold text-ink">{t('crm.reply.image_attached')}</span>
+              <span className="text-xs font-bold text-[#0A0A0A]">{t('crm.reply.image_attached')}</span>
             </div>
           )}
           {isRecording && (
             <div className="px-4 pt-3 flex items-center gap-2 text-rose-600 font-bold">
-              <span className="w-2.5 h-2.5 bg-rose-600 rounded-full animate-pulse border border-ink" />
+              <span className="w-2.5 h-2.5 bg-rose-600 rounded-full animate-pulse border border-[#0A0A0A]" />
               <span className="text-xs uppercase">{t('crm.reply.recording')}</span>
             </div>
           )}
@@ -142,39 +142,39 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
               placeholder={t('crm.reply.placeholder_reply')}
               rows={1}
               style={{ minHeight: '40px', maxHeight: '160px' }}
-              className="w-full text-xs font-bold text-ink placeholder:text-slate-500 bg-white border-2 border-ink rounded-xl p-3 focus:outline-none resize-none leading-relaxed"
+              className="w-full text-xs font-bold text-[#0A0A0A] placeholder:text-slate-500 bg-white border-2 border-[#0A0A0A] rounded-xl p-3 focus:outline-none resize-none leading-relaxed"
             />
           </div>
-          <div className="px-5 py-2.5 border-t-2 border-ink flex items-center justify-between bg-canvas">
+          <div className="px-5 py-2.5 border-t-2 border-[#0A0A0A] flex items-center justify-between bg-[#F2EBDD]">
             <div className="flex items-center gap-1.5 relative">
               <div ref={emojiRef} className="relative">
-                <button onClick={onToggleEmojiPicker} className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-canvas cursor-pointer transition-all"><Smile size={16} /></button>
+                <button onClick={onToggleEmojiPicker} className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all"><Smile size={16} /></button>
                 {showEmojiPicker && (
-                  <div className="absolute bottom-10 left-0 z-50 shadow-brutal-xl border-2 border-ink rounded-2xl overflow-hidden">
+                  <div className="absolute bottom-10 left-0 z-50 shadow-[8px_8px_0px_0px_#0A0A0A] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
                     <Picker data={data} onEmojiSelect={onEmojiSelect} theme="light" previewPosition="none" skinTonePosition="none" />
                   </div>
                 )}
               </div>
-              <button onClick={() => imageInputRef.current?.click()} className={`w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-canvas cursor-pointer transition-all ${isImageUploading ? 'animate-pulse' : ''}`}>
+              <button onClick={() => imageInputRef.current?.click()} className={`w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all ${isImageUploading ? 'animate-pulse' : ''}`}>
                 {isImageUploading ? <Loader2 size={16} className="animate-spin" /> : <ImageIcon size={16} />}
               </button>
               <input ref={imageInputRef} type="file" accept="image/*" onChange={onImageSelect} className="hidden" />
-              <button onClick={() => fileInputRef.current?.click()} className={`w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-canvas cursor-pointer transition-all ${isFileUploading ? 'animate-pulse' : ''}`}>
+              <button onClick={() => fileInputRef.current?.click()} className={`w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all ${isFileUploading ? 'animate-pulse' : ''}`}>
                 {isFileUploading ? <Loader2 size={16} className="animate-spin" /> : <Paperclip size={16} />}
               </button>
               <input ref={fileInputRef} type="file" accept="*/*" onChange={onFileSelect} className="hidden" />
               <button
                 onClick={onMicClick}
-                className={`w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink cursor-pointer transition-all ${isRecording ? 'bg-rose-600 text-white' : 'bg-white text-ink hover:bg-ink hover:text-canvas'}`}
+                className={`w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] cursor-pointer transition-all ${isRecording ? 'bg-rose-600 text-white' : 'bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'}`}
               >
                 {isRecording ? <StopCircle size={16} /> : <Mic size={16} />}
               </button>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={onSend} disabled={(!typedMessage.trim() && !pendingImage) || isSending} className="flex items-center gap-2 px-5 py-2 bg-ink hover:bg-[#2A2A2A] disabled:opacity-50 text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink cursor-pointer transition-all">
+              <button onClick={onSend} disabled={(!typedMessage.trim() && !pendingImage) || isSending} className="flex items-center gap-2 px-5 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] disabled:opacity-50 text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] cursor-pointer transition-all">
                 {isSending ? <Loader2 className="animate-spin" size={14} /> : <>{t('crm.reply.btn_send')}</>}
               </button>
-              <button onClick={onScheduleClick} disabled={(!typedMessage.trim() && !pendingImage) || isSending} className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-canvas disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"><RefreshCw size={14} /></button>
+              <button onClick={onScheduleClick} disabled={(!typedMessage.trim() && !pendingImage) || isSending} className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"><RefreshCw size={14} /></button>
             </div>
           </div>
         </>
@@ -188,25 +188,25 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
               placeholder={t('crm.reply.placeholder_note')}
               rows={1}
               style={{ minHeight: '40px', maxHeight: '160px' }}
-              className="w-full text-xs font-bold text-ink placeholder:text-amber-800/60 bg-white border-2 border-ink rounded-xl p-3 focus:outline-none resize-none leading-relaxed"
+              className="w-full text-xs font-bold text-[#0A0A0A] placeholder:text-amber-800/60 bg-white border-2 border-[#0A0A0A] rounded-xl p-3 focus:outline-none resize-none leading-relaxed"
             />
           </div>
-          <div className="px-5 py-2.5 border-t-2 border-ink flex items-center justify-between">
+          <div className="px-5 py-2.5 border-t-2 border-[#0A0A0A] flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <button className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-canvas cursor-pointer">
+              <button className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer">
                 <Smile size={16} />
               </button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-canvas cursor-pointer">
+              <button className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer">
                 <ImageIcon size={16} />
               </button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-canvas cursor-pointer">
+              <button className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer">
                 <Paperclip size={16} />
               </button>
             </div>
             <button
               onClick={onSaveNote}
               disabled={!typedNote.trim()}
-              className="px-5 py-2 bg-amber-400 hover:bg-amber-500 disabled:opacity-40 text-ink border-2 border-ink text-xs font-black uppercase rounded-xl cursor-pointer transition-all"
+              className="px-5 py-2 bg-amber-400 hover:bg-amber-500 disabled:opacity-40 text-[#0A0A0A] border-2 border-[#0A0A0A] text-xs font-black uppercase rounded-xl cursor-pointer transition-all"
             >
               {t('crm.reply.btn_add_note')}
             </button>

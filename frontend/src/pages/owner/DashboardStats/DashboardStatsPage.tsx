@@ -105,8 +105,8 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({ data, total }) => {
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none font-['JetBrains_Mono',monospace]">
-        <span className="text-[8px] font-extrabold text-ink/60 uppercase tracking-widest block">Total</span>
-        <span className="text-sm font-black text-ink tracking-tight block mt-0.5">
+        <span className="text-[8px] font-extrabold text-[#0A0A0A]/60 uppercase tracking-widest block">Total</span>
+        <span className="text-sm font-black text-[#0A0A0A] tracking-tight block mt-0.5">
           {total.toLocaleString()}
         </span>
       </div>
@@ -455,7 +455,7 @@ export const DashboardStatsPage: React.FC = () => {
 
         {hoveredIdx !== null && data[hoveredIdx] && (
           <div 
-            className="absolute bg-ink text-canvas px-3.5 py-2.5 rounded-xl border-2 border-ink pointer-events-none text-left z-30 flex flex-col gap-1 min-w-[160px] font-['JetBrains_Mono',monospace]"
+            className="absolute bg-[#0A0A0A] text-[#F2EBDD] px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] pointer-events-none text-left z-30 flex flex-col gap-1 min-w-[160px] font-['JetBrains_Mono',monospace]"
             style={(() => {
               const xPercent = (getX(hoveredIdx) / width) * 100;
               if (xPercent < 20) {
@@ -531,7 +531,7 @@ export const DashboardStatsPage: React.FC = () => {
             {Array.from({ length: 24 }).map((_, hour) => (
               <div 
                 key={hour} 
-                className="flex-1 text-center text-[9px] font-black text-ink/60"
+                className="flex-1 text-center text-[9px] font-black text-[#0A0A0A]/60"
               >
                 {String(hour).padStart(2, '0')}
               </div>
@@ -544,7 +544,7 @@ export const DashboardStatsPage: React.FC = () => {
 
               return (
                 <div key={dayIdx} className="flex items-center gap-1">
-                  <div className="w-7 text-[10px] font-extrabold text-ink text-left pr-2 shrink-0 uppercase">
+                  <div className="w-7 text-[10px] font-extrabold text-[#0A0A0A] text-left pr-2 shrink-0 uppercase">
                     {dayName}
                   </div>
 
@@ -560,7 +560,7 @@ export const DashboardStatsPage: React.FC = () => {
                       return (
                         <div
                           key={hour}
-                          className="flex-1 rounded-[2px] border border-ink/20 transition-all duration-200 hover:scale-110 cursor-pointer"
+                          className="flex-1 rounded-[2px] border border-[#0A0A0A]/20 transition-all duration-200 hover:scale-110 cursor-pointer"
                           style={{ backgroundColor, height: '10px', minHeight: '10px' }}
                           title={`${dayName}, ${String(hour).padStart(2, '0')}:00 — ${count} ${t('dashboard.stats.actions_count_label')}`}
                         />
@@ -572,12 +572,12 @@ export const DashboardStatsPage: React.FC = () => {
             })}
           </div>
 
-          <div className="flex items-center justify-end gap-1.5 mt-2 text-[9px] font-bold text-ink pr-1">
+          <div className="flex items-center justify-end gap-1.5 mt-2 text-[9px] font-bold text-[#0A0A0A] pr-1">
             <span>{t('dashboard.stats.heatmap.less')}</span>
-            <div className="w-2.5 h-2.5 bg-slate-200 border border-ink/30 rounded-sm" />
-            <div className="w-2.5 h-2.5 bg-indigo-200 border border-ink/30 rounded-sm" />
-            <div className="w-2.5 h-2.5 bg-indigo-400 border border-ink/30 rounded-sm" />
-            <div className="w-2.5 h-2.5 bg-indigo-600 border border-ink/30 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-slate-200 border border-[#0A0A0A]/30 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-indigo-200 border border-[#0A0A0A]/30 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-indigo-400 border border-[#0A0A0A]/30 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-indigo-600 border border-[#0A0A0A]/30 rounded-sm" />
             <span>{t('dashboard.stats.heatmap.more')}</span>
           </div>
         </div>
@@ -590,13 +590,13 @@ export const DashboardStatsPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col bg-canvas font-['Geist',sans-serif] min-h-full pb-6">
+      <div className="flex flex-col bg-[#F2EBDD] font-['Geist',sans-serif] min-h-full pb-6">
         
         {/* Top Header */}
-        <header className="bg-canvas border-b-2 border-ink px-6 py-4 flex flex-row justify-between items-center gap-4 shrink-0 z-20">
+        <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-6 py-4 flex flex-row justify-between items-center gap-4 shrink-0 z-20">
           <div>
-            <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-ink uppercase tracking-tight flex items-center gap-2.5 select-none">
-              <TrendingUp size={22} className="text-ink" />
+            <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight flex items-center gap-2.5 select-none">
+              <TrendingUp size={22} className="text-[#0A0A0A]" />
               <span>{t('dashboard.stats.title')}</span>
             </h1>
             <p className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-700 mt-1 uppercase">{t('dashboard.stats.subtitle')}</p>
@@ -610,8 +610,8 @@ export const DashboardStatsPage: React.FC = () => {
                     setIsBotSelectorOpen(!isBotSelectorOpen);
                   }
                 }}
-                className={`flex items-center gap-2 px-4 py-2 bg-white border-2 border-ink rounded-xl text-ink font-['JetBrains_Mono',monospace] text-xs font-bold transition-all select-none min-w-[180px] justify-between ${
-                  isMultipleBots ? 'hover:bg-ink hover:text-canvas cursor-pointer' : 'cursor-default'
+                className={`flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold transition-all select-none min-w-[180px] justify-between ${
+                  isMultipleBots ? 'hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer' : 'cursor-default'
                 }`}
               >
                 <div className="flex items-center gap-2 truncate">
@@ -624,13 +624,13 @@ export const DashboardStatsPage: React.FC = () => {
               </button>
 
               {isBotSelectorOpen && isMultipleBots && (
-                <div className="absolute right-0 mt-2 w-60 bg-canvas border-2 border-ink rounded-xl shadow-xl py-1 z-35 max-h-60 overflow-y-auto font-['JetBrains_Mono',monospace]">
+                <div className="absolute right-0 mt-2 w-60 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 z-35 max-h-60 overflow-y-auto font-['JetBrains_Mono',monospace]">
                   <button
                     onClick={() => handleBotChange(0)}
                     className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors cursor-pointer block truncate ${
                       selectedBotId === 0
-                        ? 'bg-ink text-canvas'
-                        : 'text-ink hover:bg-white'
+                        ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                        : 'text-[#0A0A0A] hover:bg-white'
                     }`}
                   >
                     {t('dashboard.stats.all_automation')}
@@ -642,8 +642,8 @@ export const DashboardStatsPage: React.FC = () => {
                       onClick={() => handleBotChange(bot.id)}
                       className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors cursor-pointer block truncate ${
                         bot.id === selectedBotId
-                          ? 'bg-ink text-canvas'
-                          : 'text-ink hover:bg-white'
+                          ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                          : 'text-[#0A0A0A] hover:bg-white'
                       }`}
                     >
                       {bot.name}
@@ -657,19 +657,19 @@ export const DashboardStatsPage: React.FC = () => {
 
         <div className="p-6 space-y-6">
           {hasNoBots ? (
-            <div className="h-full flex items-center justify-center p-12 text-center bg-canvas border-2 border-ink rounded-3xl shadow-brutal">
+            <div className="h-full flex items-center justify-center p-12 text-center bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-[4px_4px_0px_#0A0A0A]">
               <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace]">
-                <div className="w-16 h-16 rounded-2xl bg-white border-2 border-ink shadow-brutal flex items-center justify-center mx-auto text-ink">
+                <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
                   <AlertCircle size={32} />
                 </div>
-                <p className="font-['Anybody',sans-serif] font-black text-ink text-xl uppercase tracking-tight">{t('dashboard.stats.no_bot_title')}</p>
-                <p className="font-['Geist',sans-serif] text-xs text-ink/70 font-semibold max-w-xs mx-auto leading-relaxed">
+                <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">{t('dashboard.stats.no_bot_title')}</p>
+                <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">
                   {t('dashboard.stats.no_bot_desc')}
                 </p>
                 <div className="pt-2">
                   <button
                     onClick={() => navigate('/connect-bot')}
-                    className="px-6 py-3 bg-ink text-canvas font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-ink shadow-brutal hover:bg-white hover:text-ink hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
+                    className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
                   >
                     <Plus size={14} />
                     <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
@@ -679,11 +679,11 @@ export const DashboardStatsPage: React.FC = () => {
             </div>
           ) : (isLoading || isBotsLoading) ? (
             <div className="h-96 flex flex-col items-center justify-center gap-3 font-['JetBrains_Mono',monospace]">
-              <Loader2 className="animate-spin text-ink" size={32} />
-              <span className="text-xs font-bold text-ink uppercase tracking-wider">{t('dashboard.stats.loading')}</span>
+              <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
+              <span className="text-xs font-bold text-[#0A0A0A] uppercase tracking-wider">{t('dashboard.stats.loading')}</span>
             </div>
           ) : error ? (
-            <div className="p-6 bg-rose-100 border-2 border-ink rounded-2xl flex items-center gap-3 text-rose-900 text-xs font-bold font-['JetBrains_Mono',monospace]">
+            <div className="p-6 bg-rose-100 border-2 border-[#0A0A0A] rounded-2xl flex items-center gap-3 text-rose-900 text-xs font-bold font-['JetBrains_Mono',monospace]">
               <AlertCircle size={18} className="shrink-0" />
               <span>{t('dashboard.stats.error')}: {error.message}</span>
             </div>
@@ -694,15 +694,15 @@ export const DashboardStatsPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
                 {/* Stat 1: Total Subscribers */}
-                <div className="bg-canvas border-2 border-ink rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
                   <div className="flex justify-between items-start">
-                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-ink/70 uppercase tracking-widest block">{t('dashboard.stats.total_subscribers')}</span>
-                    <button className="text-ink hover:opacity-70 transition-opacity cursor-pointer">
+                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A]/70 uppercase tracking-widest block">{t('dashboard.stats.total_subscribers')}</span>
+                    <button className="text-[#0A0A0A] hover:opacity-70 transition-opacity cursor-pointer">
                       <MoreVertical size={14} />
                     </button>
                   </div>
                   <div className="my-2 select-text">
-                    <span className="font-['Anybody',sans-serif] text-3xl font-black text-ink tracking-tight block">
+                    <span className="font-['Anybody',sans-serif] text-3xl font-black text-[#0A0A0A] tracking-tight block">
                       {stats?.totalSubscribers ?? 0}
                     </span>
                     <span className={`font-['JetBrains_Mono',monospace] text-[10px] font-extrabold flex items-center gap-1 mt-0.5 ${(stats?.subscribersGrowth ?? 0) >= 0 ? 'text-indigo-700' : 'text-rose-600'}`}>
@@ -713,22 +713,22 @@ export const DashboardStatsPage: React.FC = () => {
                       </span>
                     </span>
                   </div>
-                  <div className="mt-1 flex justify-between items-end border-t border-ink/20 pt-2.5">
-                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold text-ink/70 uppercase">{t('dashboard.stats.lifetime_total')}</span>
+                  <div className="mt-1 flex justify-between items-end border-t border-[#0A0A0A]/20 pt-2.5">
+                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold text-[#0A0A0A]/70 uppercase">{t('dashboard.stats.lifetime_total')}</span>
                     <MiniBarChart data={last6DaysSubscribers} color="#818cf8" />
                   </div>
                 </div>
 
                 {/* Stat 2: Active Users */}
-                <div className="bg-canvas border-2 border-ink rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
                   <div className="flex justify-between items-start">
-                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-ink/70 uppercase tracking-widest block">{t('dashboard.stats.active_users')}</span>
-                    <button className="text-ink hover:opacity-70 transition-opacity cursor-pointer">
+                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A]/70 uppercase tracking-widest block">{t('dashboard.stats.active_users')}</span>
+                    <button className="text-[#0A0A0A] hover:opacity-70 transition-opacity cursor-pointer">
                       <MoreVertical size={14} />
                     </button>
                   </div>
                   <div className="my-2 select-text">
-                    <span className="font-['Anybody',sans-serif] text-3xl font-black text-ink tracking-tight block">
+                    <span className="font-['Anybody',sans-serif] text-3xl font-black text-[#0A0A0A] tracking-tight block">
                       {stats?.activeUsers24h ?? 0}
                     </span>
                     <span className={`font-['JetBrains_Mono',monospace] text-[10px] font-extrabold flex items-center gap-1 mt-0.5 ${(stats?.activeUsersGrowth ?? 0) >= 0 ? 'text-violet-700' : 'text-rose-600'}`}>
@@ -739,22 +739,22 @@ export const DashboardStatsPage: React.FC = () => {
                       </span>
                     </span>
                   </div>
-                  <div className="mt-1 flex justify-between items-end border-t border-ink/20 pt-2.5">
-                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold text-ink/70 uppercase">{t('dashboard.stats.unique_visitors')}</span>
+                  <div className="mt-1 flex justify-between items-end border-t border-[#0A0A0A]/20 pt-2.5">
+                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold text-[#0A0A0A]/70 uppercase">{t('dashboard.stats.unique_visitors')}</span>
                     <MiniBarChart data={last6DaysActiveUsers} color="#c084fc" />
                   </div>
                 </div>
 
                 {/* Stat 3: Total Clicks */}
-                <div className="bg-canvas border-2 border-ink rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
                   <div className="flex justify-between items-start">
-                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-ink/70 uppercase tracking-widest block">{t('dashboard.stats.total_clicks')}</span>
-                    <button className="text-ink hover:opacity-70 transition-opacity cursor-pointer">
+                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A]/70 uppercase tracking-widest block">{t('dashboard.stats.total_clicks')}</span>
+                    <button className="text-[#0A0A0A] hover:opacity-70 transition-opacity cursor-pointer">
                       <MoreVertical size={14} />
                     </button>
                   </div>
                   <div className="my-2 select-text">
-                    <span className="font-['Anybody',sans-serif] text-3xl font-black text-ink tracking-tight block">
+                    <span className="font-['Anybody',sans-serif] text-3xl font-black text-[#0A0A0A] tracking-tight block">
                       {stats?.clicksCount30d ?? 0}
                     </span>
                     <span className={`font-['JetBrains_Mono',monospace] text-[10px] font-extrabold flex items-center gap-1 mt-0.5 ${(stats?.clicksGrowth ?? 0) >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
@@ -765,22 +765,22 @@ export const DashboardStatsPage: React.FC = () => {
                       </span>
                     </span>
                   </div>
-                  <div className="mt-1 flex justify-between items-end border-t border-ink/20 pt-2.5">
-                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold text-ink/70 uppercase">{t('dashboard.stats.interaction_counts')}</span>
+                  <div className="mt-1 flex justify-between items-end border-t border-[#0A0A0A]/20 pt-2.5">
+                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold text-[#0A0A0A]/70 uppercase">{t('dashboard.stats.interaction_counts')}</span>
                     <MiniBarChart data={last6DaysClicks} color="#34d399" />
                   </div>
                 </div>
 
                 {/* Stat 4: Active Automations */}
-                <div className="bg-canvas border-2 border-ink rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between group select-none min-h-[150px]">
                   <div className="flex justify-between items-start">
-                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-ink/70 uppercase tracking-widest block">{t('dashboard.stats.active_automations')}</span>
-                    <button className="text-ink hover:opacity-70 transition-opacity cursor-pointer">
+                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-black text-[#0A0A0A]/70 uppercase tracking-widest block">{t('dashboard.stats.active_automations')}</span>
+                    <button className="text-[#0A0A0A] hover:opacity-70 transition-opacity cursor-pointer">
                       <MoreVertical size={14} />
                     </button>
                   </div>
                   <div className="my-2 select-text">
-                    <span className="font-['Anybody',sans-serif] text-3xl font-black text-ink tracking-tight block">
+                    <span className="font-['Anybody',sans-serif] text-3xl font-black text-[#0A0A0A] tracking-tight block">
                       {stats?.activeAutomations ?? 0}
                     </span>
                     <span className={`font-['JetBrains_Mono',monospace] text-[10px] font-extrabold flex items-center gap-1 mt-0.5 ${(stats?.automationsGrowth ?? 0) >= 0 ? 'text-amber-700' : 'text-rose-600'}`}>
@@ -791,8 +791,8 @@ export const DashboardStatsPage: React.FC = () => {
                       </span>
                     </span>
                   </div>
-                  <div className="mt-1 flex justify-between items-end border-t border-ink/20 pt-2.5">
-                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold text-ink/70 uppercase">{t('dashboard.stats.active_bots_count')}</span>
+                  <div className="mt-1 flex justify-between items-end border-t border-[#0A0A0A]/20 pt-2.5">
+                    <span className="font-['JetBrains_Mono',monospace] text-[9px] font-bold text-[#0A0A0A]/70 uppercase">{t('dashboard.stats.active_bots_count')}</span>
                     <MiniBarChart data={last6DaysActiveBots} color="#fbbf24" />
                   </div>
                 </div>
@@ -803,23 +803,23 @@ export const DashboardStatsPage: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* Line Chart */}
-                <div className="lg:col-span-2 bg-canvas border-2 border-ink rounded-2xl p-5 flex flex-col justify-between lg:h-[310px] overflow-hidden">
+                <div className="lg:col-span-2 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between lg:h-[310px] overflow-hidden">
                   <div className="flex flex-row justify-between items-center mb-4 select-none font-['JetBrains_Mono',monospace]">
                     <div className="space-y-1">
-                      <h2 className="font-['Anybody',sans-serif] text-xs font-black text-ink uppercase tracking-widest">{t('dashboard.stats.interaction_history')}</h2>
+                      <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest">{t('dashboard.stats.interaction_history')}</h2>
                       <div className="flex items-center gap-4 text-[10px] font-bold mt-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 border border-ink" />
-                          <span className="text-ink">{t('dashboard.stats.active_users_legend')}</span>
+                          <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 border border-[#0A0A0A]" />
+                          <span className="text-[#0A0A0A]">{t('dashboard.stats.active_users_legend')}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-ink" />
-                          <span className="text-ink">{t('dashboard.stats.button_clicks_legend')}</span>
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-[#0A0A0A]" />
+                          <span className="text-[#0A0A0A]">{t('dashboard.stats.button_clicks_legend')}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 bg-white p-1 rounded-xl border-2 border-ink shrink-0">
+                    <div className="flex items-center gap-1 bg-white p-1 rounded-xl border-2 border-[#0A0A0A] shrink-0">
                       {[
                         { label: t('dashboard.stats.days_7'), val: 7 },
                         { label: t('dashboard.stats.days_14'), val: 14 },
@@ -830,8 +830,8 @@ export const DashboardStatsPage: React.FC = () => {
                           onClick={() => handlePeriodChange(p.val)}
                           className={`px-3 py-1 text-[10px] font-extrabold uppercase transition-all cursor-pointer ${
                             days === p.val
-                              ? 'bg-ink text-canvas'
-                              : 'text-ink hover:bg-ink/10'
+                              ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                              : 'text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
                           }`}
                         >
                           {p.label}
@@ -843,15 +843,15 @@ export const DashboardStatsPage: React.FC = () => {
                 </div>
 
                 {/* Top Buttons Progress List */}
-                <div className="bg-canvas border-2 border-ink rounded-2xl p-5 flex flex-col lg:h-[310px]">
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col lg:h-[310px]">
                   <div className="mb-4">
-                    <h2 className="font-['Anybody',sans-serif] text-xs font-black text-ink uppercase tracking-widest">{t('dashboard.stats.top_clicked_buttons')}</h2>
+                    <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest">{t('dashboard.stats.top_clicked_buttons')}</h2>
                     <p className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-700 mt-1 uppercase">{t('dashboard.stats.top_clicked_buttons_desc')}</p>
                   </div>
 
                   <div className="flex-1 overflow-y-auto space-y-4 pr-1 select-none custom-scrollbar">
                     {!stats || !stats.topButtons || stats.topButtons.length === 0 ? (
-                      <div className="h-full flex items-center justify-center text-center p-6 text-ink text-xs font-bold font-['JetBrains_Mono',monospace]">
+                      <div className="h-full flex items-center justify-center text-center p-6 text-[#0A0A0A] text-xs font-bold font-['JetBrains_Mono',monospace]">
                         {t('dashboard.stats.no_buttons')}
                       </div>
                     ) : (
@@ -864,15 +864,15 @@ export const DashboardStatsPage: React.FC = () => {
 
                           return (
                             <div key={idx} className="space-y-1.5 font-['JetBrains_Mono',monospace]">
-                              <div className="flex justify-between items-center text-xs font-bold text-ink">
+                              <div className="flex justify-between items-center text-xs font-bold text-[#0A0A0A]">
                                 <span className="truncate max-w-[170px] uppercase">{btn.buttonName || t('dashboard.stats.option_button')}</span>
-                                <span className="text-[10.5px] text-ink font-extrabold flex gap-1.5 items-center">
+                                <span className="text-[10.5px] text-[#0A0A0A] font-extrabold flex gap-1.5 items-center">
                                   <span>{t('dashboard.stats.clicks_count', { count: btn.clicks })}</span>
                                   <span>•</span>
                                   <span className="text-indigo-700 font-black">{pct}%</span>
                                 </span>
                               </div>
-                              <div className="w-full h-2 bg-white border border-ink overflow-hidden">
+                              <div className="w-full h-2 bg-white border border-[#0A0A0A] overflow-hidden">
                                 <div 
                                   className="h-full bg-indigo-600 transition-all duration-500 ease-out" 
                                   style={{ width: `${pct}%` }} 
@@ -892,50 +892,50 @@ export const DashboardStatsPage: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
                 
                 {/* AI Insights */}
-                <div className="bg-canvas border-2 border-ink rounded-2xl p-5 flex flex-col justify-between lg:col-span-3 lg:h-[275px]">
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between lg:col-span-3 lg:h-[275px]">
                   <div>
-                    <h2 className="font-['Anybody',sans-serif] text-xs font-black text-ink uppercase tracking-widest block mb-1">{t('dashboard.stats.ai_insights_title')}</h2>
+                    <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest block mb-1">{t('dashboard.stats.ai_insights_title')}</h2>
                     <p className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-700 mb-3 mt-0.5 uppercase">{t('dashboard.stats.ai_insights_desc')}</p>
                     
                     <div className="grid grid-cols-2 gap-2.5 font-['JetBrains_Mono',monospace]">
-                      <div className="p-2.5 bg-white border-2 border-ink rounded-xl flex flex-col justify-center min-h-[56px]">
-                        <span className="text-[9px] font-black text-ink/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_messages')}</span>
-                        <span className="text-base font-black text-ink flex items-center gap-1.5">
+                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
+                        <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_messages')}</span>
+                        <span className="text-base font-black text-[#0A0A0A] flex items-center gap-1.5">
                           <AiIcon size={13} className="text-indigo-600" />
                           {aiStats.messagesProcessed}
                         </span>
                       </div>
                       
-                      <div className="p-2.5 bg-white border-2 border-ink rounded-xl flex flex-col justify-center min-h-[56px]">
-                        <span className="text-[9px] font-black text-ink/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_resolution_rate')}</span>
-                        <span className="text-base font-black text-ink">{aiStats.resolutionRate}%</span>
+                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
+                        <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_resolution_rate')}</span>
+                        <span className="text-base font-black text-[#0A0A0A]">{aiStats.resolutionRate}%</span>
                       </div>
                       
-                      <div className="p-2.5 bg-white border-2 border-ink rounded-xl flex flex-col justify-center min-h-[56px]">
-                        <span className="text-[9px] font-black text-ink/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_time_saved')}</span>
+                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
+                        <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_time_saved')}</span>
                         <span className="text-base font-black text-emerald-700 flex items-center gap-1.5">
                           <Clock size={13} className="text-emerald-600" />
                           {aiStats.timeSavedHours}h
                         </span>
                       </div>
                       
-                      <div className="p-2.5 bg-white border-2 border-ink rounded-xl flex flex-col justify-center min-h-[56px]">
-                        <span className="text-[9px] font-black text-ink/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_response_time')}</span>
-                        <span className="text-base font-black text-ink">{aiStats.responseTimeSeconds}s</span>
+                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
+                        <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_response_time')}</span>
+                        <span className="text-base font-black text-[#0A0A0A]">{aiStats.responseTimeSeconds}s</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Tags Breakdown */}
-                <div className="bg-canvas border-2 border-ink rounded-2xl p-5 flex flex-col justify-between lg:col-span-3 lg:h-[275px]">
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between lg:col-span-3 lg:h-[275px]">
                   <div>
-                    <h2 className="font-['Anybody',sans-serif] text-xs font-black text-ink uppercase tracking-widest block mb-1 select-none">{t('dashboard.stats.tags_breakdown_title')}</h2>
+                    <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest block mb-1 select-none">{t('dashboard.stats.tags_breakdown_title')}</h2>
                     <p className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-700 mb-3 mt-0.5 uppercase">{t('dashboard.stats.tags_breakdown_desc')}</p>
                     
                     {tagStats.length === 0 ? (
-                      <div className="py-6 text-center text-xs font-bold text-ink font-['JetBrains_Mono',monospace] flex flex-col items-center gap-2 select-none">
-                        <HelpCircle size={22} className="text-ink" />
+                      <div className="py-6 text-center text-xs font-bold text-[#0A0A0A] font-['JetBrains_Mono',monospace] flex flex-col items-center gap-2 select-none">
+                        <HelpCircle size={22} className="text-[#0A0A0A]" />
                         <span>{t('dashboard.stats.no_tags_found')}</span>
                       </div>
                     ) : (
@@ -947,10 +947,10 @@ export const DashboardStatsPage: React.FC = () => {
                           {chartData.map((tag) => (
                             <div key={tag.name} className="flex justify-between items-center text-xs font-semibold select-none">
                               <div className="flex items-center gap-2 min-w-0">
-                                <div className="w-2 h-3 border border-ink shrink-0" style={{ backgroundColor: tag.color }} />
-                                <span className="text-ink font-bold truncate text-[11px] uppercase">{tag.name}</span>
+                                <div className="w-2 h-3 border border-[#0A0A0A] shrink-0" style={{ backgroundColor: tag.color }} />
+                                <span className="text-[#0A0A0A] font-bold truncate text-[11px] uppercase">{tag.name}</span>
                               </div>
-                              <div className="flex items-center gap-3 text-ink font-extrabold text-[10.5px] shrink-0">
+                              <div className="flex items-center gap-3 text-[#0A0A0A] font-extrabold text-[10.5px] shrink-0">
                                 <span>{tag.count.toLocaleString()}</span>
                                 <span>{tag.pct}%</span>
                               </div>
@@ -963,10 +963,10 @@ export const DashboardStatsPage: React.FC = () => {
                 </div>
 
                 {/* Activity Heatmap */}
-                <div className="bg-canvas border-2 border-ink rounded-2xl p-5 flex flex-col justify-between h-full lg:col-span-6 lg:h-[275px]">
+                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between h-full lg:col-span-6 lg:h-[275px]">
                   <div>
                     <div className="mb-3">
-                      <h2 className="font-['Anybody',sans-serif] text-xs font-black text-ink uppercase tracking-widest block mb-1">{t('dashboard.stats.activity_heatmap_title')}</h2>
+                      <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest block mb-1">{t('dashboard.stats.activity_heatmap_title')}</h2>
                       <p className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-700 mt-0.5 uppercase">{t('dashboard.stats.activity_heatmap_desc')}</p>
                     </div>
                     {renderActivityHeatmap()}

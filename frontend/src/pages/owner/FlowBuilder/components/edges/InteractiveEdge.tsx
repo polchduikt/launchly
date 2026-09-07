@@ -182,7 +182,7 @@ export const InteractiveEdge: React.FC<EdgeProps> = ({
           >
             <button
               onClick={handleDelete}
-              className="w-8 h-8 bg-white dark:bg-[#18181B] border-2 border-ink dark:border-[#27272A] rounded-xl shadow-brutal-sm dark:shadow-none flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-[#3B1219] transition-colors cursor-pointer"
+              className="w-8 h-8 bg-white dark:bg-[#18181B] border-2 border-[#0A0A0A] dark:border-[#27272A] rounded-xl shadow-[2px_2px_0px_#0A0A0A] dark:shadow-none flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-[#3B1219] transition-colors cursor-pointer"
               title="Delete Connection"
             >
               <Trash2 size={15} />

@@ -59,10 +59,10 @@ export const InstallTemplatePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-canvas font-['JetBrains_Mono',monospace] flex flex-col items-center justify-center p-4 text-ink">
-      <div className="bg-canvas border-4 border-ink shadow-brutal-2xl rounded-3xl max-w-xl w-full p-8 space-y-6">
-        <div className="flex items-center gap-4 pb-6 border-b-2 border-ink">
-          <div className="w-12 h-12 rounded-2xl bg-ink text-white border-2 border-ink shadow-brutal-md flex items-center justify-center shrink-0">
+    <div className="min-h-screen bg-[#F2EBDD] font-['JetBrains_Mono',monospace] flex flex-col items-center justify-center p-4 text-[#0A0A0A]">
+      <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] rounded-3xl max-w-xl w-full p-8 space-y-6">
+        <div className="flex items-center gap-4 pb-6 border-b-2 border-[#0A0A0A]">
+          <div className="w-12 h-12 rounded-2xl bg-[#0A0A0A] text-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] flex items-center justify-center shrink-0">
             <Sparkles size={24} />
           </div>
           <div>
@@ -77,7 +77,7 @@ export const InstallTemplatePage: React.FC = () => {
 
         {loading ? (
           <div className="py-12 flex flex-col items-center justify-center gap-3">
-            <Loader2 className="animate-spin text-ink" size={32} />
+            <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
             <span className="text-xs font-bold">{t('common.loading', 'Завантаження шаблону...')}</span>
           </div>
         ) : errorMsg && !template ? (
@@ -99,7 +99,7 @@ export const InstallTemplatePage: React.FC = () => {
             </p>
             <button
               onClick={() => navigate('/templates?tab=installed')}
-              className="w-full py-3 bg-ink hover:bg-[#2A2A2A] text-white border-2 border-ink shadow-brutal text-xs font-black uppercase rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <span>{t('template.tab_installed_templates', 'Завантажені темплейти')}</span>
               <ArrowRight size={16} />
@@ -107,30 +107,30 @@ export const InstallTemplatePage: React.FC = () => {
           </div>
         ) : template && (
           <div className="space-y-6">
-            <div className="bg-white border-2 border-ink p-5 rounded-2xl space-y-3 shadow-brutal-md">
-              <div className="flex items-center justify-between border-b border-ink/15 pb-3">
-                <h3 className="font-black text-sm uppercase text-ink">{template.name}</h3>
-                <span className="px-2.5 py-0.5 bg-ink text-white border border-ink rounded-md font-black text-[10px] uppercase">
+            <div className="bg-white border-2 border-[#0A0A0A] p-5 rounded-2xl space-y-3 shadow-[3px_3px_0px_#0A0A0A]">
+              <div className="flex items-center justify-between border-b border-[#0A0A0A]/15 pb-3">
+                <h3 className="font-black text-sm uppercase text-[#0A0A0A]">{template.name}</h3>
+                <span className="px-2.5 py-0.5 bg-[#0A0A0A] text-white border border-[#0A0A0A] rounded-md font-black text-[10px] uppercase">
                   Template
                 </span>
               </div>
               <p className="text-xs font-bold text-slate-600">{template.description}</p>
               <div className="flex items-center gap-4 text-[11px] font-bold text-slate-700 pt-1">
-                <span>👤 Автор: <strong className="text-ink">{template.creatorName}</strong></span>
-                <span>🤖 Джерело: <strong className="text-ink">{template.sourceBotName}</strong></span>
+                <span>👤 Автор: <strong className="text-[#0A0A0A]">{template.creatorName}</strong></span>
+                <span>🤖 Джерело: <strong className="text-[#0A0A0A]">{template.sourceBotName}</strong></span>
               </div>
             </div>
             {isAuthenticated ? (
               <div className="space-y-4">
                 {bots.length > 0 ? (
                   <div className="space-y-2">
-                    <label className="block text-xs font-black uppercase text-ink">
+                    <label className="block text-xs font-black uppercase text-[#0A0A0A]">
                       {t('template.install.select_bot_label', 'Оберіть бот для встановлення:')}
                     </label>
                     <select
                       value={selectedBotId || ''}
                       onChange={(e) => setSelectedBotId(Number(e.target.value))}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-ink bg-white text-xs font-black uppercase text-ink focus:outline-none shadow-brutal-sm cursor-pointer"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#0A0A0A] bg-white text-xs font-black uppercase text-[#0A0A0A] focus:outline-none shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
                     >
                       {bots.map((b) => (
                         <option key={b.id} value={b.id}>
@@ -140,7 +140,7 @@ export const InstallTemplatePage: React.FC = () => {
                     </select>
                   </div>
                 ) : (
-                  <div className="bg-slate-50 border-2 border-ink p-4 rounded-xl text-xs font-bold text-slate-700">
+                  <div className="bg-slate-50 border-2 border-[#0A0A0A] p-4 rounded-xl text-xs font-bold text-slate-700">
                     У вас немає активних ботів. Спочатку підключіть бот Telegram, щоб встановити цей шаблон.
                   </div>
                 )}
@@ -154,7 +154,7 @@ export const InstallTemplatePage: React.FC = () => {
                 <button
                   onClick={handleInstall}
                   disabled={submitting || !selectedBotId || bots.length === 0}
-                  className="w-full py-3.5 bg-ink hover:bg-[#2A2A2A] text-white border-2 border-ink shadow-brutal hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? (
                     <>
@@ -170,13 +170,13 @@ export const InstallTemplatePage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="bg-slate-100 border-2 border-ink p-6 rounded-2xl text-center space-y-4">
+              <div className="bg-slate-100 border-2 border-[#0A0A0A] p-6 rounded-2xl text-center space-y-4">
                 <p className="text-xs font-bold text-slate-800">
                   Увійдіть у свій акаунт Launchly або зареєструйтеся, щоб встановити цей шаблон.
                 </p>
                 <Link
                   to={`/login?redirect=/templates/install/${shareCode}`}
-                  className="inline-flex items-center justify-center py-3 px-6 bg-ink hover:bg-[#2A2A2A] text-white border-2 border-ink shadow-brutal-md text-xs font-black uppercase rounded-xl transition-all gap-2"
+                  className="inline-flex items-center justify-center py-3 px-6 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] text-xs font-black uppercase rounded-xl transition-all gap-2"
                 >
                   <span>Увійти для встановлення</span>
                   <ArrowRight size={14} />

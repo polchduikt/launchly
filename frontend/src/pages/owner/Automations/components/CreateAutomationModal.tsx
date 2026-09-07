@@ -45,46 +45,46 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 bg-ink/40 z-50 flex items-center justify-center p-4 cursor-pointer font-['JetBrains_Mono',monospace]"
+      className="fixed inset-0 bg-[#0A0A0A]/40 z-50 flex items-center justify-center p-4 cursor-pointer font-['JetBrains_Mono',monospace]"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-canvas rounded-3xl max-w-md w-full border-2 border-ink shadow-brutal-xl animate-in fade-in duration-200 cursor-default overflow-hidden"
+        className="bg-[#F2EBDD] rounded-3xl max-w-md w-full border-2 border-[#0A0A0A] shadow-[8px_8px_0px_0px_#0A0A0A] animate-in fade-in duration-200 cursor-default overflow-hidden"
       >
-        <div className="p-6 pb-4 border-b-2 border-ink flex items-center justify-between">
-          <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-ink">
+        <div className="p-6 pb-4 border-b-2 border-[#0A0A0A] flex items-center justify-between">
+          <h3 className="font-['Anybody',sans-serif] text-lg font-black uppercase text-[#0A0A0A]">
             {t('automations.modal.new_automation')}
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm"
+            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
           >
             <X size={16} />
           </button>
         </div>
         <div className="p-6 space-y-4 bg-white">
           <div>
-            <label className="block text-xs font-black text-ink uppercase tracking-wider mb-1">
+            <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
               {t('automations.modal.name_label')}
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border-2 border-ink text-xs font-bold focus:outline-none bg-white text-ink"
+              className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
               placeholder={t('automations.modal.name_placeholder')}
             />
           </div>
           <div className="relative">
-            <label className="block text-xs font-black text-ink uppercase tracking-wider mb-1">
+            <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
               {t('automations.modal.conn_label')}
             </label>
             <button
               type="button"
               onClick={() => setIsBotSelectOpen(!isBotSelectOpen)}
-              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-left cursor-pointer transition-colors"
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-left cursor-pointer transition-colors"
             >
-              <span className="text-ink font-bold truncate">
+              <span className="text-[#0A0A0A] font-bold truncate">
                 {(() => {
                   if (selectedBotOption === 'nobot') return t('automations.modal.conn_without');
                   if (selectedBotOption === 'new') return t('automations.modal.conn_new');
@@ -97,14 +97,14 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
               </span>
               <ChevronDown
                 size={16}
-                className={`text-ink transition-transform ${isBotSelectOpen ? 'rotate-180' : ''}`}
+                className={`text-[#0A0A0A] transition-transform ${isBotSelectOpen ? 'rotate-180' : ''}`}
               />
             </button>
 
             {isBotSelectOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setIsBotSelectOpen(false)} />
-                <div className="absolute left-0 right-0 mt-1 bg-canvas border-2 border-ink rounded-2xl shadow-brutal-lg z-20 max-h-60 overflow-y-auto py-1.5">
+                <div className="absolute left-0 right-0 mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[6px_6px_0px_0px_#0A0A0A] z-20 max-h-60 overflow-y-auto py-1.5">
                   <button
                     type="button"
                     onClick={() => {
@@ -114,8 +114,8 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
                     }}
                     className={`w-full text-left px-4 py-2.5 text-xs uppercase transition-colors flex items-center justify-between ${
                       selectedBotOption === 'nobot'
-                        ? 'bg-ink text-canvas font-black'
-                        : 'text-ink hover:bg-white font-bold'
+                        ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black'
+                        : 'text-[#0A0A0A] hover:bg-white font-bold'
                     }`}
                   >
                     <span>{t('automations.modal.conn_without')}</span>
@@ -129,8 +129,8 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
                     }}
                     className={`w-full text-left px-4 py-2.5 text-xs uppercase transition-colors flex items-center justify-between ${
                       selectedBotOption === 'new'
-                        ? 'bg-ink text-canvas font-black'
-                        : 'text-ink hover:bg-white font-bold'
+                        ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black'
+                        : 'text-[#0A0A0A] hover:bg-white font-bold'
                     }`}
                   >
                     <span>{t('automations.modal.conn_new')}</span>
@@ -141,8 +141,8 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
                     if (existingRealBots.length === 0) return null;
                     return (
                       <>
-                        <div className="border-t-2 border-ink my-1" />
-                        <div className="px-4 py-1.5 text-[10px] font-black text-ink uppercase tracking-wider">
+                        <div className="border-t-2 border-[#0A0A0A] my-1" />
+                        <div className="px-4 py-1.5 text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">
                           Use existing bot token
                         </div>
                         {existingRealBots.map((b) => (
@@ -156,8 +156,8 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
                             }}
                             className={`w-full text-left px-4 py-2.5 text-xs uppercase transition-colors flex items-center justify-between ${
                               selectedBotOption === String(b.id)
-                                ? 'bg-ink text-canvas font-black'
-                                : 'text-ink hover:bg-white font-bold'
+                                ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black'
+                                : 'text-[#0A0A0A] hover:bg-white font-bold'
                             }`}
                           >
                             <div className="flex flex-col">
@@ -175,26 +175,26 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
           </div>
           {selectedBotOption === 'new' && (
             <div className="animate-in slide-in-from-top-1 duration-150">
-              <label className="block text-xs font-black text-ink uppercase tracking-wider mb-1">
+              <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
                 Telegram Bot Token
               </label>
               <input
                 type="text"
                 value={botToken}
                 onChange={(e) => setBotToken(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border-2 border-ink text-xs font-bold focus:outline-none bg-white text-ink"
+                className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
                 placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
               />
             </div>
           )}
           <div>
-            <label className="block text-xs font-black text-ink uppercase tracking-wider mb-1">
+            <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
               Description (Optional)
             </label>
             <textarea
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border-2 border-ink text-xs font-bold focus:outline-none bg-white text-ink min-h-[80px] resize-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A] min-h-[80px] resize-none"
               placeholder="What does this automation do?"
             />
           </div>
@@ -205,17 +205,17 @@ export const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
             </p>
           )}
         </div>
-        <div className="p-6 pt-4 bg-canvas border-t-2 border-ink flex items-center justify-end gap-2">
+        <div className="p-6 pt-4 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] flex items-center justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-xs font-black uppercase text-ink dark:text-[#E4E4E7] hover:bg-white dark:hover:bg-[#27272A] border-2 border-transparent hover:border-ink dark:hover:border-[#3F3F46] rounded-xl transition-all cursor-pointer"
+            className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] dark:text-[#E4E4E7] hover:bg-white dark:hover:bg-[#27272A] border-2 border-transparent hover:border-[#0A0A0A] dark:hover:border-[#3F3F46] rounded-xl transition-all cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={onSubmit}
             disabled={isPending}
-            className="px-4 py-2 text-xs font-black uppercase text-canvas bg-ink hover:bg-[#2A2A2A] border-2 border-ink rounded-xl transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+            className="px-4 py-2 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-[#2A2A2A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
           >
             {isPending ? (
               <>

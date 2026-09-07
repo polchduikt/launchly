@@ -47,26 +47,26 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       if (inline) {
         return (
-          <div className="w-full h-full min-h-[160px] flex items-center justify-center p-4 bg-canvas font-['JetBrains_Mono',monospace]">
-            <div className="bg-white border-2 border-ink rounded-2xl p-6 max-w-md w-full shadow-brutal space-y-4">
-              <div className="flex items-center gap-3 border-b-2 border-ink/10 pb-3">
-                <span className="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center border-2 border-ink shrink-0">
+          <div className="w-full h-full min-h-[160px] flex items-center justify-center p-4 bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
+            <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-6 max-w-md w-full shadow-[4px_4px_0px_#0A0A0A] space-y-4">
+              <div className="flex items-center gap-3 border-b-2 border-[#0A0A0A]/10 pb-3">
+                <span className="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center border-2 border-[#0A0A0A] shrink-0">
                   <AlertTriangle size={18} />
                 </span>
                 <div>
-                  <h3 className="font-['Anybody',sans-serif] font-black text-xs text-ink uppercase tracking-wide">
+                  <h3 className="font-['Anybody',sans-serif] font-black text-xs text-[#0A0A0A] uppercase tracking-wide">
                     {title}
                   </h3>
                   <span className="text-[10px] text-slate-500 font-bold uppercase">Component Isolated</span>
                 </div>
               </div>
 
-              <p className="text-xs text-ink/80 font-semibold leading-relaxed">
+              <p className="text-xs text-[#0A0A0A]/80 font-semibold leading-relaxed">
                 {description}
               </p>
 
               {this.state.error && (
-                <div className="bg-slate-100 border border-ink/20 rounded-lg p-2.5 text-[11px] font-mono text-rose-600 break-all select-all">
+                <div className="bg-slate-100 border border-[#0A0A0A]/20 rounded-lg p-2.5 text-[11px] font-mono text-rose-600 break-all select-all">
                   {this.state.error.message || this.state.error.toString()}
                 </div>
               )}
@@ -75,7 +75,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 <button
                   type="button"
                   onClick={this.handleReset}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-ink text-canvas hover:bg-white hover:text-ink border-2 border-ink text-xs font-bold rounded-xl transition-all shadow-brutal-sm cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#0A0A0A] text-[#F2EBDD] hover:bg-white hover:text-[#0A0A0A] border-2 border-[#0A0A0A] text-xs font-bold rounded-xl transition-all shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
                 >
                   <RefreshCw size={12} />
                   <span>Retry</span>

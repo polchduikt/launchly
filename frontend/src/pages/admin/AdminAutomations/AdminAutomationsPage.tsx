@@ -203,13 +203,13 @@ export const AdminAutomationsPage: React.FC = () => {
 
   return (
     <AdminLayout noPadding={true}>
-      <div className="flex h-full w-full overflow-hidden bg-canvas text-ink font-['JetBrains_Mono',monospace]">
+      <div className="flex h-full w-full overflow-hidden bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
         
-        <aside className="w-56 lg:w-60 bg-canvas border-r-2 border-ink h-full p-4 space-y-5 overflow-y-auto shrink-0 flex flex-col justify-between z-10">
+        <aside className="w-56 lg:w-60 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] h-full p-4 space-y-5 overflow-y-auto shrink-0 flex flex-col justify-between z-10">
           <div className="space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b-2 border-ink">
-              <h3 className="font-['Anybody',sans-serif] text-xs font-black uppercase text-ink flex items-center gap-1.5">
-                <Filter size={14} className="text-ink" />
+            <div className="flex items-center justify-between pb-3 border-b-2 border-[#0A0A0A]">
+              <h3 className="font-['Anybody',sans-serif] text-xs font-black uppercase text-[#0A0A0A] flex items-center gap-1.5">
+                <Filter size={14} className="text-[#0A0A0A]" />
                 <span>{t('admin.filters_title')}</span>
               </h3>
               {(statusFilter !== 'all' || sortFilter !== 'desc') && (
@@ -219,7 +219,7 @@ export const AdminAutomationsPage: React.FC = () => {
                     setSortFilter('desc');
                     setPage(0);
                   }}
-                  className="text-[10px] font-black uppercase text-ink underline hover:opacity-80 transition cursor-pointer"
+                  className="text-[10px] font-black uppercase text-[#0A0A0A] underline hover:opacity-80 transition cursor-pointer"
                 >
                   {t('admin.reset_filters')}
                 </button>
@@ -227,19 +227,19 @@ export const AdminAutomationsPage: React.FC = () => {
             </div>
 
             <div className="space-y-1" ref={statusDropdownRef}>
-              <label className="text-[10px] font-black uppercase tracking-wider text-ink block">{t('admin.status_filter_label')}</label>
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.status_filter_label')}</label>
               <div className="relative w-full">
                 <button
                   type="button"
                   onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink transition-all cursor-pointer shadow-brutal-sm"
+                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <span>{getStatusLabel(statusFilter)}</span>
-                  <ChevronDown size={14} className={`text-ink transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isStatusDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-canvas border-2 border-ink rounded-xl shadow-brutal z-50 py-1 font-['JetBrains_Mono',monospace]">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace]">
                     {statusOptions.map((opt) => (
                       <button
                         key={opt.value}
@@ -251,8 +251,8 @@ export const AdminAutomationsPage: React.FC = () => {
                         }}
                         className={`w-full text-left px-3 py-1.5 text-xs font-bold uppercase flex items-center justify-between transition-colors ${
                           statusFilter === opt.value
-                            ? 'bg-ink text-canvas'
-                            : 'text-ink hover:bg-white'
+                            ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                            : 'text-[#0A0A0A] hover:bg-white'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -264,19 +264,19 @@ export const AdminAutomationsPage: React.FC = () => {
             </div>
 
             <div className="space-y-1" ref={sortDropdownRef}>
-              <label className="text-[10px] font-black uppercase tracking-wider text-ink block">{t('admin.sorting_label')}</label>
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.sorting_label')}</label>
               <div className="relative w-full">
                 <button
                   type="button"
                   onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink transition-all cursor-pointer shadow-brutal-sm"
+                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <span>{sortFilter === 'asc' ? t('admin.sort_oldest') : t('admin.sort_newest')}</span>
-                  <ChevronDown size={14} className={`text-ink transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isSortDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-canvas border-2 border-ink rounded-xl shadow-brutal z-50 py-1 font-['JetBrains_Mono',monospace]">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace]">
                     {[
                       { value: 'desc', label: t('admin.sort_newest') },
                       { value: 'asc', label: t('admin.sort_oldest') },
@@ -290,7 +290,7 @@ export const AdminAutomationsPage: React.FC = () => {
                           setIsSortDropdownOpen(false);
                         }}
                         className={`w-full px-3 py-1.5 text-left text-xs font-bold uppercase flex items-center justify-between hover:bg-white transition cursor-pointer ${
-                          sortFilter === opt.value ? 'bg-ink text-canvas' : 'text-ink'
+                          sortFilter === opt.value ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A]'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -303,12 +303,12 @@ export const AdminAutomationsPage: React.FC = () => {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-canvas space-y-4">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-[#F2EBDD] space-y-4">
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-3 flex-1 max-w-md">
               <div className="relative w-full">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink" size={15} />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]" size={15} />
                 <input
                   type="text"
                   placeholder={t('admin.search_automations_placeholder') !== 'admin.search_automations_placeholder' ? t('admin.search_automations_placeholder') : 'Пошук назви, власника або бота...'}
@@ -317,11 +317,11 @@ export const AdminAutomationsPage: React.FC = () => {
                     setSearch(e.target.value);
                     setPage(0);
                   }}
-                  className="w-full pl-9 pr-4 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink placeholder-slate-500 focus:outline-none transition-all shadow-brutal-sm"
+                  className="w-full pl-9 pr-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder-slate-500 focus:outline-none transition-all shadow-[2px_2px_0px_#0A0A0A]"
                 />
               </div>
               {selectedIds.length > 0 && (
-                <span className="px-3.5 py-1.5 rounded-xl bg-white border-2 border-ink text-ink font-black text-xs shrink-0 shadow-brutal-sm">
+                <span className="px-3.5 py-1.5 rounded-xl bg-white border-2 border-[#0A0A0A] text-[#0A0A0A] font-black text-xs shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
                   {t('admin.selected_count', { count: selectedIds.length })}
                 </span>
               )}
@@ -332,33 +332,33 @@ export const AdminAutomationsPage: React.FC = () => {
                 type="button"
                 disabled={selectedIds.length === 0}
                 onClick={() => setIsBulkActionOpen(!isBulkActionOpen)}
-                className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-ink hover:text-canvas border-2 border-ink rounded-xl text-xs font-black uppercase text-ink disabled:opacity-40 disabled:cursor-not-allowed transition shadow-brutal-sm cursor-pointer"
+                className="flex items-center space-x-2.5 px-5 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
               >
                 <span>{t('admin.bulk_actions')}</span>
                 <ChevronDown size={14} className={`transition-transform duration-200 ${isBulkActionOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isBulkActionOpen && selectedIds.length > 0 && (
-                <div className="absolute right-0 top-full mt-1.5 w-52 bg-canvas border-2 border-ink rounded-2xl shadow-brutal z-50 py-1.5 font-['JetBrains_Mono',monospace]">
+                <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1.5 font-['JetBrains_Mono',monospace]">
                   <button
                     type="button"
                     onClick={handleBulkPause}
-                    className="w-full text-left px-4 py-2 text-xs font-bold text-ink hover:bg-white flex items-center space-x-2.5 transition cursor-pointer"
+                    className="w-full text-left px-4 py-2 text-xs font-bold text-[#0A0A0A] hover:bg-white flex items-center space-x-2.5 transition cursor-pointer"
                   >
-                    <Pause size={14} className="text-ink" />
+                    <Pause size={14} className="text-[#0A0A0A]" />
                     <span>{t('admin.bulk_pause')}</span>
                   </button>
                   <button
                     type="button"
                     onClick={handleBulkResume}
-                    className="w-full text-left px-4 py-2 text-xs font-bold text-ink hover:bg-white flex items-center space-x-2.5 transition cursor-pointer"
+                    className="w-full text-left px-4 py-2 text-xs font-bold text-[#0A0A0A] hover:bg-white flex items-center space-x-2.5 transition cursor-pointer"
                   >
-                    <Play size={14} className="text-ink" />
+                    <Play size={14} className="text-[#0A0A0A]" />
                     <span>{t('admin.bulk_resume')}</span>
                   </button>
                   {isAdmin && (
                     <>
-                      <div className="my-1 border-t-2 border-ink" />
+                      <div className="my-1 border-t-2 border-[#0A0A0A]" />
                       <button
                         type="button"
                         onClick={handleBulkBlock}
@@ -383,22 +383,22 @@ export const AdminAutomationsPage: React.FC = () => {
           </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-20 bg-canvas border-2 border-ink rounded-3xl shadow-brutal">
-            <Loader2 className="animate-spin text-ink" size={32} />
+          <div className="flex items-center justify-center py-20 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-[4px_4px_0px_#0A0A0A]">
+            <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
           </div>
         ) : (
           <>
-            <div className="bg-canvas border-2 border-ink rounded-3xl overflow-hidden shadow-brutal">
+            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl overflow-hidden shadow-[4px_4px_0px_#0A0A0A]">
               <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs font-['JetBrains_Mono',monospace]">
-                    <thead className="bg-canvas border-b-2 border-ink text-ink font-black uppercase text-[10px]">
+                    <thead className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-black uppercase text-[10px]">
                       <tr>
                         <th className="py-3.5 px-4 text-center w-10">
                           <input
                             type="checkbox"
                             checked={isAllSelected}
                             onChange={handleToggleSelectAll}
-                            className="w-4 h-4 rounded border-2 border-ink text-ink accent-ink cursor-pointer"
+                            className="w-4 h-4 rounded border-2 border-[#0A0A0A] text-[#0A0A0A] accent-[#0A0A0A] cursor-pointer"
                           />
                         </th>
                         <th className="py-3.5 px-4">{t('admin.flow_schema_col')}</th>
@@ -409,7 +409,7 @@ export const AdminAutomationsPage: React.FC = () => {
                         <th className="py-3.5 px-4 text-center">{t('admin.status_col')}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-ink/20">
+                    <tbody className="divide-y divide-[#0A0A0A]/20">
                       {automations.map((item) => (
                         <tr
                           key={item.id}
@@ -426,13 +426,13 @@ export const AdminAutomationsPage: React.FC = () => {
                               type="checkbox"
                               checked={selectedIds.includes(item.id)}
                               onChange={() => handleToggleSelectRow(item.id)}
-                              className="w-4 h-4 rounded border-2 border-ink text-ink accent-ink cursor-pointer"
+                              className="w-4 h-4 rounded border-2 border-[#0A0A0A] text-[#0A0A0A] accent-[#0A0A0A] cursor-pointer"
                             />
                           </td>
                           <td className="py-3.5 px-4">
                             <div className="flex flex-col">
-                              <span className="font-black text-ink group-hover:underline transition">{item.name}</span>
-                              <span className="text-[10px] font-black text-ink font-mono">Trigger: {item.triggerType}</span>
+                              <span className="font-black text-[#0A0A0A] group-hover:underline transition">{item.name}</span>
+                              <span className="text-[10px] font-black text-[#0A0A0A] font-mono">Trigger: {item.triggerType}</span>
                             </div>
                           </td>
 
@@ -445,14 +445,14 @@ export const AdminAutomationsPage: React.FC = () => {
                               className="flex flex-col items-center justify-center cursor-pointer group/owner inline-flex hover:opacity-80 transition"
                               title={t('admin.view_owner') !== 'admin.view_owner' ? t('admin.view_owner') : 'Переглянути користувача'}
                             >
-                              <span className="text-ink font-black group-hover/owner:underline transition">{item.ownerName}</span>
+                              <span className="text-[#0A0A0A] font-black group-hover/owner:underline transition">{item.ownerName}</span>
                               <span className="text-slate-700 text-[11px] font-bold transition">{item.ownerEmail}</span>
                             </div>
                           </td>
 
                           <td className="py-3.5 px-4 text-center">
                             {item.botName && item.botName !== '—' && item.botName !== 'Unassigned Bot' ? (
-                              <div className="flex items-center justify-center space-x-1.5 text-ink font-black">
+                              <div className="flex items-center justify-center space-x-1.5 text-[#0A0A0A] font-black">
                                 <span>{item.botName}</span>
                               </div>
                             ) : (
@@ -460,18 +460,18 @@ export const AdminAutomationsPage: React.FC = () => {
                             )}
                           </td>
 
-                          <td className="py-3.5 px-4 text-center font-mono font-black text-ink">
+                          <td className="py-3.5 px-4 text-center font-mono font-black text-[#0A0A0A]">
                             {item.triggerCount}
                           </td>
 
                           <td className="py-3.5 px-4 text-center">
                             <div className="flex items-center justify-center">
                               {(item.errorCount || 0) > 0 ? (
-                                <span className="inline-flex items-center space-x-1 text-rose-950 font-black bg-rose-200 border-2 border-ink px-2.5 py-1 rounded-lg text-[10px] uppercase">
+                                <span className="inline-flex items-center space-x-1 text-rose-950 font-black bg-rose-200 border-2 border-[#0A0A0A] px-2.5 py-1 rounded-lg text-[10px] uppercase">
                                   <span>{item.errorCount} errors</span>
                                 </span>
                               ) : (
-                                <span className="text-ink font-mono font-black text-[11px]">0</span>
+                                <span className="text-[#0A0A0A] font-mono font-black text-[11px]">0</span>
                               )}
                             </div>
                           </td>
@@ -479,15 +479,15 @@ export const AdminAutomationsPage: React.FC = () => {
                           <td className="py-3.5 px-4 text-center">
                             <div className="flex items-center justify-center">
                               {item.blocked ? (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-200 text-rose-950 border-2 border-ink">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-200 text-rose-950 border-2 border-[#0A0A0A]">
                                   {t('admin.status_blocked') !== 'admin.status_blocked' ? t('admin.status_blocked') : 'Blocked'}
                                 </span>
                               ) : item.active ? (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-emerald-200 text-emerald-950 border-2 border-ink">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-emerald-200 text-emerald-950 border-2 border-[#0A0A0A]">
                                   {t('admin.status_active') !== 'admin.status_active' ? t('admin.status_active') : 'Active'}
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-white text-ink border-2 border-ink">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-white text-[#0A0A0A] border-2 border-[#0A0A0A]">
                                   {t('admin.status_paused') !== 'admin.status_paused' ? t('admin.status_paused') : 'Paused'}
                                 </span>
                               )}
@@ -499,24 +499,24 @@ export const AdminAutomationsPage: React.FC = () => {
                   </table>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-canvas border-t-2 border-ink text-xs text-ink font-bold">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] text-xs text-[#0A0A0A] font-bold">
                   <div>
                     {t('admin.showing') !== 'admin.showing' ? t('admin.showing') : 'Показано'}{' '}
-                    <span className="font-black text-ink">{automations.length}</span>{' '}
+                    <span className="font-black text-[#0A0A0A]">{automations.length}</span>{' '}
                     {t('admin.of') !== 'admin.of' ? t('admin.of') : 'з'}{' '}
-                    <span className="font-black text-ink">{totalElements}</span>
+                    <span className="font-black text-[#0A0A0A]">{totalElements}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                       disabled={page === 0}
-                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-ink bg-white hover:bg-ink hover:text-canvas text-ink font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-brutal-sm cursor-pointer"
+                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
                     >
                       <ChevronLeft size={14} />
                       <span>{t('admin.prev') !== 'admin.prev' ? t('admin.prev') : 'Назад'}</span>
                     </button>
 
-                    <div className="flex items-center space-x-1 px-2.5 py-1 rounded-xl bg-white border-2 border-ink text-xs font-black font-mono text-ink shadow-brutal-sm">
+                    <div className="flex items-center space-x-1 px-2.5 py-1 rounded-xl bg-white border-2 border-[#0A0A0A] text-xs font-black font-mono text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
                       <span>{page + 1}</span>
                       <span>/</span>
                       <span>{totalPages}</span>
@@ -525,7 +525,7 @@ export const AdminAutomationsPage: React.FC = () => {
                     <button
                       onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
                       disabled={page >= totalPages - 1}
-                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-ink bg-white hover:bg-ink hover:text-canvas text-ink font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-brutal-sm cursor-pointer"
+                      className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
                     >
                       <span>{t('admin.next') !== 'admin.next' ? t('admin.next') : 'Далі'}</span>
                       <ChevronRight size={14} />
@@ -538,26 +538,26 @@ export const AdminAutomationsPage: React.FC = () => {
         </main>
 
         {showDetailModal && selectedDetailAutomation && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-            <div className="bg-canvas border-4 border-ink rounded-3xl w-full max-w-4xl h-[710px] p-6 sm:p-7 shadow-brutal-2xl flex flex-col justify-between space-y-4 overflow-hidden text-ink font-['JetBrains_Mono',monospace]">
-              <div className="flex items-center justify-between border-b-2 border-ink pb-3.5 shrink-0">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+            <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] rounded-3xl w-full max-w-4xl h-[710px] p-6 sm:p-7 shadow-[10px_10px_0px_#0A0A0A] flex flex-col justify-between space-y-4 overflow-hidden text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
+              <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3.5 shrink-0">
                 <div className="flex items-center space-x-3.5">
-                  <div className="w-12 h-12 rounded-xl bg-white border-2 border-ink flex items-center justify-center font-black text-ink text-lg shadow-brutal-sm">
+                  <div className="w-12 h-12 rounded-xl bg-white border-2 border-[#0A0A0A] flex items-center justify-center font-black text-[#0A0A0A] text-lg shadow-[2px_2px_0px_#0A0A0A]">
                     <Workflow size={24} />
                   </div>
 
                   <div className="space-y-0.5">
                     <div className="flex items-center space-x-2">
-                      <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-ink leading-tight">{selectedDetailAutomation.name}</h3>
-                      <span className="px-2 py-0.5 rounded-md bg-white border border-ink text-ink font-mono font-black text-[10px]">
+                      <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] leading-tight">{selectedDetailAutomation.name}</h3>
+                      <span className="px-2 py-0.5 rounded-md bg-white border border-[#0A0A0A] text-[#0A0A0A] font-mono font-black text-[10px]">
                         Trigger: {selectedDetailAutomation.triggerType}
                       </span>
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase border-2 border-ink ${
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase border-2 border-[#0A0A0A] ${
                         selectedDetailAutomation.blocked || automationDetailData?.blocked
                           ? 'bg-rose-200 text-rose-950'
                           : selectedDetailAutomation.active
                           ? 'bg-emerald-200 text-emerald-950'
-                          : 'bg-white text-ink'
+                          : 'bg-white text-[#0A0A0A]'
                       }`}>
                         {selectedDetailAutomation.blocked || automationDetailData?.blocked
                           ? (t('admin.status_blocked') !== 'admin.status_blocked' ? t('admin.status_blocked') : 'Blocked')
@@ -581,7 +581,7 @@ export const AdminAutomationsPage: React.FC = () => {
                             setShowDetailModal(false);
                             navigate(`${ROUTES.ADMIN_USERS}?search=${encodeURIComponent(selectedDetailAutomation?.ownerEmail || '')}`);
                           }}
-                          className="text-ink font-black hover:underline cursor-pointer transition"
+                          className="text-[#0A0A0A] font-black hover:underline cursor-pointer transition"
                           title={t('admin.view_owner') !== 'admin.view_owner' ? t('admin.view_owner') : 'Переглянути користувача'}
                         >
                           {selectedDetailAutomation.ownerName}
@@ -603,7 +603,7 @@ export const AdminAutomationsPage: React.FC = () => {
                           toggleMutation.mutate(selectedDetailAutomation.id);
                           setSelectedDetailAutomation((prev: AdminAutomationItem | null) => prev ? { ...prev, active: !prev.active } : null);
                         }}
-                        className={`px-3 py-1.5 rounded-xl border-2 border-ink text-xs font-black uppercase transition shadow-brutal-sm ${
+                        className={`px-3 py-1.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-black uppercase transition shadow-[2px_2px_0px_#0A0A0A] ${
                           selectedDetailAutomation.blocked || automationDetailData?.blocked
                             ? 'opacity-40 cursor-not-allowed bg-slate-200 text-slate-500'
                             : selectedDetailAutomation.active
@@ -620,7 +620,7 @@ export const AdminAutomationsPage: React.FC = () => {
                             unblockMutation.mutate(selectedDetailAutomation.id);
                             setSelectedDetailAutomation((prev: AdminAutomationItem | null) => prev ? { ...prev, blocked: false } : null);
                           }}
-                          className="px-3 py-1.5 rounded-xl border-2 border-ink bg-emerald-200 text-emerald-950 hover:bg-emerald-300 text-xs font-black uppercase transition cursor-pointer flex items-center space-x-1.5 shadow-brutal-sm"
+                          className="px-3 py-1.5 rounded-xl border-2 border-[#0A0A0A] bg-emerald-200 text-emerald-950 hover:bg-emerald-300 text-xs font-black uppercase transition cursor-pointer flex items-center space-x-1.5 shadow-[2px_2px_0px_#0A0A0A]"
                         >
                           <Unlock size={14} />
                           <span>Розблокувати</span>
@@ -633,7 +633,7 @@ export const AdminAutomationsPage: React.FC = () => {
                             setCustomBlockReason('');
                             setShowBlockModal(true);
                           }}
-                          className="px-3 py-1.5 rounded-xl border-2 border-ink bg-rose-200 text-rose-950 hover:bg-rose-300 text-xs font-black uppercase transition cursor-pointer flex items-center space-x-1.5 shadow-brutal-sm"
+                          className="px-3 py-1.5 rounded-xl border-2 border-[#0A0A0A] bg-rose-200 text-rose-950 hover:bg-rose-300 text-xs font-black uppercase transition cursor-pointer flex items-center space-x-1.5 shadow-[2px_2px_0px_#0A0A0A]"
                         >
                           <Lock size={14} />
                           <span>Заблокувати</span>
@@ -644,7 +644,7 @@ export const AdminAutomationsPage: React.FC = () => {
 
                   <button
                     onClick={() => setShowDetailModal(false)}
-                    className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm ml-1"
+                    className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm ml-1"
                   >
                     <X size={16} />
                   </button>
@@ -652,7 +652,7 @@ export const AdminAutomationsPage: React.FC = () => {
               </div>
 
               {(selectedDetailAutomation.blocked || automationDetailData?.blocked) && (
-                <div className="bg-rose-100 border-2 border-ink rounded-xl p-2.5 text-xs text-rose-950 font-bold shrink-0 flex items-center space-x-2 shadow-brutal-sm">
+                <div className="bg-rose-100 border-2 border-[#0A0A0A] rounded-xl p-2.5 text-xs text-rose-950 font-bold shrink-0 flex items-center space-x-2 shadow-[2px_2px_0px_#0A0A0A]">
                   <ShieldAlert size={16} className="text-rose-700 shrink-0" />
                   <div>
                     <span className="font-black">{t('admin.blocked_by_admin')}</span> {automationDetailData?.blockReason || selectedDetailAutomation.blockReason || t('admin.block_reason_rules')}
@@ -661,58 +661,58 @@ export const AdminAutomationsPage: React.FC = () => {
               )}
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
-                <div className="bg-white border-2 border-ink rounded-xl p-3 flex items-center space-x-3 shadow-brutal-sm">
-                  <div className="w-9 h-9 rounded-lg bg-canvas border border-ink text-ink flex items-center justify-center shrink-0">
+                <div className="bg-white border-2 border-[#0A0A0A] rounded-xl p-3 flex items-center space-x-3 shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="w-9 h-9 rounded-lg bg-[#F2EBDD] border border-[#0A0A0A] text-[#0A0A0A] flex items-center justify-center shrink-0">
                     <Workflow size={18} />
                   </div>
                   <div>
                     <div className="text-[11px] font-black text-slate-700 uppercase">{t('admin.nodes_col')}</div>
-                    <div className="text-base font-black text-ink font-mono">
+                    <div className="text-base font-black text-[#0A0A0A] font-mono">
                       {isDetailLoading ? '...' : (automationDetailData?.nodesCount || 0)}
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white border-2 border-ink rounded-xl p-3 flex items-center space-x-3 shadow-brutal-sm">
-                  <div className="w-9 h-9 rounded-lg bg-canvas border border-ink text-ink flex items-center justify-center shrink-0">
+                <div className="bg-white border-2 border-[#0A0A0A] rounded-xl p-3 flex items-center space-x-3 shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="w-9 h-9 rounded-lg bg-[#F2EBDD] border border-[#0A0A0A] text-[#0A0A0A] flex items-center justify-center shrink-0">
                     <Layers size={18} />
                   </div>
                   <div>
                     <div className="text-[11px] font-black text-slate-700 uppercase">{t('admin.integrations_col')}</div>
-                    <div className="text-base font-black text-ink font-mono">
+                    <div className="text-base font-black text-[#0A0A0A] font-mono">
                       {isDetailLoading ? '...' : (automationDetailData?.integrationsCount || 0)}
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white border-2 border-ink rounded-xl p-3 flex items-center space-x-3 shadow-brutal-sm">
-                  <div className="w-9 h-9 rounded-lg bg-canvas border border-ink text-ink flex items-center justify-center shrink-0">
+                <div className="bg-white border-2 border-[#0A0A0A] rounded-xl p-3 flex items-center space-x-3 shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="w-9 h-9 rounded-lg bg-[#F2EBDD] border border-[#0A0A0A] text-[#0A0A0A] flex items-center justify-center shrink-0">
                     <Zap size={18} />
                   </div>
                   <div>
                     <div className="text-[11px] font-black text-slate-700 uppercase">{t('admin.executions_col')}</div>
-                    <div className="text-base font-black text-ink font-mono">
+                    <div className="text-base font-black text-[#0A0A0A] font-mono">
                       {isDetailLoading ? '...' : (automationDetailData?.triggerCount || selectedDetailAutomation.triggerCount || 0)}
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white border-2 border-ink rounded-xl p-3 flex items-center space-x-3 shadow-brutal-sm">
-                  <div className="w-9 h-9 rounded-lg bg-canvas border border-ink text-ink flex items-center justify-center shrink-0">
+                <div className="bg-white border-2 border-[#0A0A0A] rounded-xl p-3 flex items-center space-x-3 shadow-[2px_2px_0px_#0A0A0A]">
+                  <div className="w-9 h-9 rounded-lg bg-[#F2EBDD] border border-[#0A0A0A] text-[#0A0A0A] flex items-center justify-center shrink-0">
                     <AlertTriangle size={18} />
                   </div>
                   <div>
                     <div className="text-[11px] font-black text-slate-700 uppercase">{t('admin.errors_col')}</div>
-                    <div className="text-base font-black text-ink font-mono">
+                    <div className="text-base font-black text-[#0A0A0A] font-mono">
                       {isDetailLoading ? '...' : (automationDetailData?.errorCount || 0)}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-2 bg-white p-2.5 rounded-xl border-2 border-ink shrink-0 shadow-brutal-sm">
+              <div className="flex items-center justify-between gap-2 bg-white p-2.5 rounded-xl border-2 border-[#0A0A0A] shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
                 <div className="flex items-center space-x-1">
-                  <span className="text-[11px] font-black text-ink uppercase mr-1 flex items-center gap-1">
+                  <span className="text-[11px] font-black text-[#0A0A0A] uppercase mr-1 flex items-center gap-1">
                     <Calendar size={13} />
                     {t('admin.period_label')}
                   </span>
@@ -732,8 +732,8 @@ export const AdminAutomationsPage: React.FC = () => {
                       }}
                       className={`px-2.5 py-1 rounded-lg text-xs font-black uppercase transition cursor-pointer ${
                         detailPeriod === p.id
-                          ? 'bg-ink text-canvas'
-                          : 'text-ink hover:bg-canvas'
+                          ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                          : 'text-[#0A0A0A] hover:bg-[#F2EBDD]'
                       }`}
                     >
                       {p.label}
@@ -742,14 +742,14 @@ export const AdminAutomationsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto min-h-0 border-2 border-ink rounded-xl bg-white p-3 space-y-2 custom-scrollbar shadow-brutal-sm">
-                <div className="flex items-center justify-between pb-1 border-b-2 border-ink text-xs font-black uppercase text-ink">
+              <div className="flex-1 overflow-y-auto min-h-0 border-2 border-[#0A0A0A] rounded-xl bg-white p-3 space-y-2 custom-scrollbar shadow-[2px_2px_0px_#0A0A0A]">
+                <div className="flex items-center justify-between pb-1 border-b-2 border-[#0A0A0A] text-xs font-black uppercase text-[#0A0A0A]">
                   <div className="flex items-center gap-1.5">
-                    <Clock size={14} className="text-ink" />
+                    <Clock size={14} className="text-[#0A0A0A]" />
                     <span>{t('admin.activity_history')}</span>
                   </div>
                   {automationDetailData?.activities && (
-                    <span className="text-[11px] font-mono text-ink font-bold">
+                    <span className="text-[11px] font-mono text-[#0A0A0A] font-bold">
                       {t('admin.total_records')} {automationDetailData.activities.totalElements}
                     </span>
                   )}
@@ -757,7 +757,7 @@ export const AdminAutomationsPage: React.FC = () => {
 
                 {isDetailLoading ? (
                   <div className="flex items-center justify-center py-10 text-slate-700 font-bold">
-                    <Loader2 size={24} className="animate-spin text-ink mr-2" />
+                    <Loader2 size={24} className="animate-spin text-[#0A0A0A] mr-2" />
                     <span className="text-xs font-bold">{t('admin.loading_history')}</span>
                   </div>
                 ) : !automationDetailData?.activities?.content?.length ? (
@@ -767,12 +767,12 @@ export const AdminAutomationsPage: React.FC = () => {
                 ) : (
                   <div className="space-y-1.5">
                     {automationDetailData.activities.content.map((act) => (
-                      <div key={act.id} className="bg-canvas border-2 border-ink rounded-lg p-2.5 flex items-start justify-between text-xs transition">
+                      <div key={act.id} className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-lg p-2.5 flex items-start justify-between text-xs transition">
                         <div className="space-y-0.5">
-                          <div className="font-black text-ink flex items-center space-x-2">
+                          <div className="font-black text-[#0A0A0A] flex items-center space-x-2">
                             <span>{translateAuditTitle(act.title, act.targetName || automationDetailData?.name)}</span>
                             {act.badge && (
-                              <span className="px-1.5 py-0.2 rounded bg-white border border-ink text-ink font-mono text-[9px] uppercase font-black">
+                              <span className="px-1.5 py-0.2 rounded bg-white border border-[#0A0A0A] text-[#0A0A0A] font-mono text-[9px] uppercase font-black">
                                 {act.badge}
                               </span>
                             )}
@@ -787,25 +787,25 @@ export const AdminAutomationsPage: React.FC = () => {
                   </div>
                 )}
               </div>
-              <div className="flex items-center justify-between pt-3 border-t-2 border-ink shrink-0">
+              <div className="flex items-center justify-between pt-3 border-t-2 border-[#0A0A0A] shrink-0">
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setActivityPage((prev) => Math.max(0, prev - 1))}
                     disabled={activityPage === 0 || isDetailLoading}
-                    className="px-2.5 py-1 rounded-lg border-2 border-ink bg-white text-ink text-xs font-black uppercase hover:bg-ink hover:text-canvas disabled:opacity-40 cursor-pointer flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-lg border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] text-xs font-black uppercase hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-40 cursor-pointer flex items-center gap-1"
                   >
                     <ChevronLeft size={14} />
                     <span>{t('admin.prev')}</span>
                   </button>
 
-                  <span className="text-xs text-ink font-mono font-black px-1">
+                  <span className="text-xs text-[#0A0A0A] font-mono font-black px-1">
                     {t('admin.page_x_of_y', { current: activityPage + 1, total: automationDetailData?.activities?.totalPages || 1 })}
                   </span>
 
                   <button
                     onClick={() => setActivityPage((prev) => prev + 1)}
                     disabled={!automationDetailData?.activities || activityPage + 1 >= automationDetailData.activities.totalPages || isDetailLoading}
-                    className="px-2.5 py-1 rounded-lg border-2 border-ink bg-white text-ink text-xs font-black uppercase hover:bg-ink hover:text-canvas disabled:opacity-40 cursor-pointer flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-lg border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] text-xs font-black uppercase hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-40 cursor-pointer flex items-center gap-1"
                   >
                     <span>{t('admin.next')}</span>
                     <ChevronRight size={14} />
@@ -814,7 +814,7 @@ export const AdminAutomationsPage: React.FC = () => {
 
                 <button
                   onClick={() => setShowDetailModal(false)}
-                  className="px-4 py-1.5 rounded-lg text-xs font-black uppercase text-canvas bg-ink border-2 border-ink hover:bg-[#2A2A2A] cursor-pointer transition shadow-brutal-sm"
+                  className="px-4 py-1.5 rounded-lg text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] border-2 border-[#0A0A0A] hover:bg-[#2A2A2A] cursor-pointer transition shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   {t('admin.close')}
                 </button>
@@ -823,15 +823,15 @@ export const AdminAutomationsPage: React.FC = () => {
           </div>
         )}
         {showBlockModal && selectedBlockAutomation && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-            <div className="bg-canvas border-4 border-ink rounded-3xl w-full max-w-md p-6 shadow-brutal-2xl space-y-5 text-ink font-['JetBrains_Mono',monospace]">
-              <div className="flex items-center justify-between border-b-2 border-ink pb-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+            <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] rounded-3xl w-full max-w-md p-6 shadow-[10px_10px_0px_#0A0A0A] space-y-5 text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
+              <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-2xl bg-rose-200 border-2 border-ink flex items-center justify-center text-rose-950 font-bold shadow-brutal-sm">
+                  <div className="w-10 h-10 rounded-2xl bg-rose-200 border-2 border-[#0A0A0A] flex items-center justify-center text-rose-950 font-bold shadow-[2px_2px_0px_#0A0A0A]">
                     <ShieldAlert size={20} />
                   </div>
                   <div>
-                    <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-ink leading-snug">
+                    <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] leading-snug">
                       {t('admin.block_automation_title') !== 'admin.block_automation_title' ? t('admin.block_automation_title') : 'Блокування автоматизації'}
                     </h3>
                     <p className="text-xs text-slate-700 font-mono font-bold">
@@ -841,14 +841,14 @@ export const AdminAutomationsPage: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setShowBlockModal(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm"
+                  className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
                 >
                   <X size={16} />
                 </button>
               </div>
 
               <div className="space-y-3">
-                <label className="text-xs font-black uppercase text-ink block">
+                <label className="text-xs font-black uppercase text-[#0A0A0A] block">
                   {t('admin.select_block_reason')}
                 </label>
 
@@ -857,10 +857,10 @@ export const AdminAutomationsPage: React.FC = () => {
                     <label
                       key={r.code}
                       onClick={() => setBlockReasonOption(r.code)}
-                      className={`flex items-center space-x-3 p-3.5 rounded-2xl border-2 border-ink cursor-pointer transition ${
+                      className={`flex items-center space-x-3 p-3.5 rounded-2xl border-2 border-[#0A0A0A] cursor-pointer transition ${
                         blockReasonOption === r.code
-                          ? 'bg-ink text-canvas font-black shadow-brutal-sm'
-                          : 'bg-white text-ink hover:bg-amber-50'
+                          ? 'bg-[#0A0A0A] text-[#F2EBDD] font-black shadow-[2px_2px_0px_#0A0A0A]'
+                          : 'bg-white text-[#0A0A0A] hover:bg-amber-50'
                       }`}
                     >
                       <input
@@ -868,7 +868,7 @@ export const AdminAutomationsPage: React.FC = () => {
                         name="blockReason"
                         checked={blockReasonOption === r.code}
                         onChange={() => setBlockReasonOption(r.code)}
-                        className="accent-ink"
+                        className="accent-[#0A0A0A]"
                       />
                       <span className="text-xs uppercase font-bold">{t(r.key)}</span>
                     </label>
@@ -877,29 +877,29 @@ export const AdminAutomationsPage: React.FC = () => {
 
                 {blockReasonOption === 'OTHER' && (
                   <div className="space-y-1.5 pt-1">
-                    <label className="text-xs font-black uppercase text-ink block">{t('admin.specify_block_reason')}</label>
+                    <label className="text-xs font-black uppercase text-[#0A0A0A] block">{t('admin.specify_block_reason')}</label>
                     <textarea
                       value={customBlockReason}
                       onChange={(e) => setCustomBlockReason(e.target.value)}
                       placeholder="..."
                       rows={3}
-                      className="w-full p-3 bg-white border-2 border-ink rounded-2xl text-xs font-bold text-ink focus:outline-none transition shadow-brutal-sm"
+                      className="w-full p-3 bg-white border-2 border-[#0A0A0A] rounded-2xl text-xs font-bold text-[#0A0A0A] focus:outline-none transition shadow-[2px_2px_0px_#0A0A0A]"
                     />
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-ink">
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-[#0A0A0A]">
                 <button
                   onClick={() => setShowBlockModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-ink border-2 border-transparent hover:border-ink bg-white transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#0A0A0A] border-2 border-transparent hover:border-[#0A0A0A] bg-white transition cursor-pointer"
                 >
                   {t('admin.cancel')}
                 </button>
                 <button
                   onClick={handleConfirmBlockAutomation}
                   disabled={blockMutation.isPending}
-                  className="px-4 py-2 rounded-xl text-xs font-black uppercase text-white bg-rose-700 border-2 border-ink hover:bg-rose-800 transition shadow-brutal-sm cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
+                  className="px-4 py-2 rounded-xl text-xs font-black uppercase text-white bg-rose-700 border-2 border-[#0A0A0A] hover:bg-rose-800 transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
                 >
                   {blockMutation.isPending && <Loader2 size={14} className="animate-spin" />}
                   <span>{t('admin.confirm_block_automation') !== 'admin.confirm_block_automation' ? t('admin.confirm_block_automation') : 'Заблокувати автоматизацію'}</span>

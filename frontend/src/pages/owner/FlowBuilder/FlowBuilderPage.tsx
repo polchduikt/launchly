@@ -390,20 +390,20 @@ const FlowBuilderInner: React.FC = () => {
           </marker>
         </defs>
       </svg>
-      <div className="h-full w-full flex flex-col bg-canvas font-['JetBrains_Mono',monospace] overflow-hidden">
-        <header className="h-16 border-b-2 border-ink bg-canvas px-6 flex justify-between items-center z-10 shrink-0 select-none">
+      <div className="h-full w-full flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace] overflow-hidden">
+        <header className="h-16 border-b-2 border-[#0A0A0A] bg-[#F2EBDD] px-6 flex justify-between items-center z-10 shrink-0 select-none">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate(ROUTES.AUTOMATIONS || '/automations')}
-              className="w-9 h-9 rounded-xl border-2 border-ink bg-white flex items-center justify-center text-ink hover:bg-ink hover:text-canvas transition-all cursor-pointer shadow-sm"
+              className="w-9 h-9 rounded-xl border-2 border-[#0A0A0A] bg-white flex items-center justify-center text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer shadow-sm"
               title={t('flow_builder.automations', 'Автоматизації')}
             >
               <ArrowLeft size={16} />
             </button>
-            <div className="flex items-center gap-2 text-ink/60 text-xs font-bold font-['JetBrains_Mono',monospace]">
+            <div className="flex items-center gap-2 text-[#0A0A0A]/60 text-xs font-bold font-['JetBrains_Mono',monospace]">
               <span>{t('flow_builder.automations')}</span>
               <span>&gt;</span>
-              <span className="text-ink font-black text-sm font-['Anybody',sans-serif] uppercase tracking-wider">
+              <span className="text-[#0A0A0A] font-black text-sm font-['Anybody',sans-serif] uppercase tracking-wider">
                 {currentBot?.name || t('flow_builder.telegram_flow_schema')}
               </span>
             </div>
@@ -411,14 +411,14 @@ const FlowBuilderInner: React.FC = () => {
 
           <div className="flex items-center gap-4">
             {saveError && (
-              <span className="text-xs font-black text-rose-800 bg-rose-200 px-3 py-1.5 border-2 border-ink rounded-xl animate-pulse mr-1">
+              <span className="text-xs font-black text-rose-800 bg-rose-200 px-3 py-1.5 border-2 border-[#0A0A0A] rounded-xl animate-pulse mr-1">
                 {saveError}
               </span>
             )}
 
             {activeAction && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-200 border-2 border-ink rounded-xl text-[10px] text-ink font-extrabold shadow-sm animate-in slide-in-from-right-2 duration-300 max-w-[240px] truncate select-none">
-                <span className="w-2 h-2 bg-ink rounded-full animate-ping" />
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-200 border-2 border-[#0A0A0A] rounded-xl text-[10px] text-[#0A0A0A] font-extrabold shadow-sm animate-in slide-in-from-right-2 duration-300 max-w-[240px] truncate select-none">
+                <span className="w-2 h-2 bg-[#0A0A0A] rounded-full animate-ping" />
                 <span className="truncate">{activeAction}</span>
               </div>
             )}
@@ -429,7 +429,7 @@ const FlowBuilderInner: React.FC = () => {
                   src={currentUser?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80"}
                   alt={currentUser?.name || "Me"}
                   title={`${currentUser?.name || "Me"} (You)`}
-                  className="w-7 h-7 rounded-full border-2 border-ink object-cover shadow-sm"
+                  className="w-7 h-7 rounded-full border-2 border-[#0A0A0A] object-cover shadow-sm"
                 />
                 {collaborators.map((c) => (
                   <div key={c.userId} className="relative">
@@ -437,24 +437,24 @@ const FlowBuilderInner: React.FC = () => {
                       src={c.avatar || "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&h=80"}
                       alt={c.name}
                       title={`${c.name} (Online)`}
-                      className={`w-7 h-7 rounded-full border-2 border-ink object-cover shadow-sm transition-all ${
-                        c.action ? 'ring-2 ring-ink scale-105' : ''
+                      className={`w-7 h-7 rounded-full border-2 border-[#0A0A0A] object-cover shadow-sm transition-all ${
+                        c.action ? 'ring-2 ring-[#0A0A0A] scale-105' : ''
                       }`}
                     />
                     {c.action && (
-                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-ink animate-ping" />
+                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0A0A0A] animate-ping" />
                     )}
                   </div>
                 ))}
               </div>
             )}
 
-            <div className="flex items-center gap-3 bg-canvas border-2 border-ink px-3.5 py-1.5 rounded-xl shadow-sm font-['JetBrains_Mono',monospace]">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-ink min-w-[85px] justify-start select-none">
+            <div className="flex items-center gap-3 bg-[#F2EBDD] border-2 border-[#0A0A0A] px-3.5 py-1.5 rounded-xl shadow-sm font-['JetBrains_Mono',monospace]">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#0A0A0A] min-w-[85px] justify-start select-none">
                 {isDirty || saveMutation.isPending ? (
                   <>
-                    <Loader2 className="animate-spin text-ink shrink-0" size={14} />
-                    <span className="text-ink/70">{t('flow_builder.saving')}</span>
+                    <Loader2 className="animate-spin text-[#0A0A0A] shrink-0" size={14} />
+                    <span className="text-[#0A0A0A]/70">{t('flow_builder.saving')}</span>
                   </>
                 ) : saveMutation.isError ? (
                   <>
@@ -464,19 +464,19 @@ const FlowBuilderInner: React.FC = () => {
                 ) : (
                   <>
                     <span className="text-emerald-700 shrink-0 font-black">✓</span>
-                    <span className="text-ink font-bold">{t('flow_builder.saved')}</span>
+                    <span className="text-[#0A0A0A] font-bold">{t('flow_builder.saved')}</span>
                   </>
                 )}
               </div>
 
-              <div className="w-[2px] h-4 bg-ink/30" />
+              <div className="w-[2px] h-4 bg-[#0A0A0A]/30" />
 
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={undo}
                   disabled={isViewer || !canUndo}
                   title="Undo (Ctrl+Z)"
-                  className="p-1 text-ink hover:bg-ink hover:text-canvas disabled:opacity-30 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center border border-ink/20"
+                  className="p-1 text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-30 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center border border-[#0A0A0A]/20"
                 >
                   <Undo2 size={15} />
                 </button>
@@ -484,21 +484,21 @@ const FlowBuilderInner: React.FC = () => {
                   onClick={redo}
                   disabled={isViewer || !canRedo}
                   title="Redo (Ctrl+Y)"
-                  className="p-1 text-ink hover:bg-ink hover:text-canvas disabled:opacity-30 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center border border-ink/20"
+                  className="p-1 text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-30 rounded-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center border border-[#0A0A0A]/20"
                 >
                   <Redo2 size={15} />
                 </button>
               </div>
             </div>
 
-            <div className="w-[2px] h-6 bg-ink/30 hidden sm:block" />
+            <div className="w-[2px] h-6 bg-[#0A0A0A]/30 hidden sm:block" />
 
             <button
               onClick={() => setIsPreviewOpen((v) => !v)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-2 border-ink cursor-pointer shadow-sm ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer shadow-sm ${
                 isPreviewOpen
-                  ? 'bg-ink text-canvas'
-                  : 'bg-canvas hover:bg-ink hover:text-canvas text-ink'
+                  ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                  : 'bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A]'
               }`}
               title="Preview flow"
             >
@@ -512,7 +512,7 @@ const FlowBuilderInner: React.FC = () => {
                   useAiStore.getState().setIsOpen(true);
                   useAiStore.getState().setActiveTab('generator');
                 }}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-canvas hover:bg-ink hover:text-canvas text-ink text-xs font-bold rounded-xl transition-all border-2 border-ink cursor-pointer shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer shadow-sm"
                 title="Generate flow with AI"
               >
                 <AiIcon size={14} />
@@ -524,16 +524,16 @@ const FlowBuilderInner: React.FC = () => {
               <button
                 onClick={handleLaunchOrUpdate}
                 disabled={saveMutation.isPending || startBotMutation.isPending}
-                className="flex items-center gap-2 px-4 py-2 bg-ink hover:bg-ink/90 active:translate-x-[1px] active:translate-y-[1px] disabled:opacity-70 disabled:cursor-not-allowed text-canvas text-xs font-black rounded-xl transition-all border-2 border-ink shadow-sm cursor-pointer uppercase tracking-wider font-['Anybody',sans-serif]"
+                className="flex items-center gap-2 px-4 py-2 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 active:translate-x-[1px] active:translate-y-[1px] disabled:opacity-70 disabled:cursor-not-allowed text-[#F2EBDD] text-xs font-black rounded-xl transition-all border-2 border-[#0A0A0A] shadow-sm cursor-pointer uppercase tracking-wider font-['Anybody',sans-serif]"
               >
                 {saveMutation.isPending || startBotMutation.isPending ? (
                   <>
-                    <Loader2 className="animate-spin text-canvas" size={14} />
+                    <Loader2 className="animate-spin text-[#F2EBDD]" size={14} />
                     <span>{t('flow_builder.saving')}</span>
                   </>
                 ) : (
                   <>
-                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 border border-ink ${buttonConfig.dotClass}`} />
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 border border-[#0A0A0A] ${buttonConfig.dotClass}`} />
                     <span>{buttonConfig.label}</span>
                   </>
                 )}
@@ -575,7 +575,7 @@ const FlowBuilderInner: React.FC = () => {
               fitView
               fitViewOptions={{ maxZoom: 1, padding: 0.2 }}
               proOptions={{ hideAttribution: true }}
-              className="bg-canvas"
+              className="bg-[#F2EBDD]"
               zoomOnDoubleClick={false}
               multiSelectionKeyCode="Control"
               selectionKeyCode="Control"
@@ -591,7 +591,7 @@ const FlowBuilderInner: React.FC = () => {
                   transform: 'translateY(-50%)',
                   margin: 0,
                 }}
-                className="border-2 border-ink rounded-2xl overflow-hidden shadow-md flex flex-col bg-canvas custom-controls-panel"
+                className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-md flex flex-col bg-[#F2EBDD] custom-controls-panel"
               >
                 <button
                   onClick={() => setEdgeType((t) => (t === 'default' ? 'smoothstep' : 'default'))}
@@ -600,9 +600,9 @@ const FlowBuilderInner: React.FC = () => {
                   style={{ order: -3 }}
                 >
                   {edgeType === 'default' ? (
-                    <Route size={18} className="text-ink" />
+                    <Route size={18} className="text-[#0A0A0A]" />
                   ) : (
-                    <GitCommit size={18} className="text-ink" />
+                    <GitCommit size={18} className="text-[#0A0A0A]" />
                   )}
                 </button>
                 <button
@@ -611,7 +611,7 @@ const FlowBuilderInner: React.FC = () => {
                   className="react-flow__controls-button"
                   style={{ order: -2 }}
                 >
-                  <GitFork size={18} className="rotate-90 text-ink" />
+                  <GitFork size={18} className="rotate-90 text-[#0A0A0A]" />
                 </button>
                 <button
                   onClick={() => handleAutoLayout('TB')}
@@ -619,13 +619,13 @@ const FlowBuilderInner: React.FC = () => {
                   className="react-flow__controls-button"
                   style={{ order: -1 }}
                 >
-                  <GitFork size={18} className="text-ink" />
+                  <GitFork size={18} className="text-[#0A0A0A]" />
                 </button>
               </Controls>
               <Background color="#0A0A0A" gap={20} size={1.2} />
             </ReactFlow>
 
-            <aside className={`absolute left-0 top-0 h-full w-80 border-r-2 border-ink bg-canvas z-20 flex flex-col justify-between overflow-visible shadow-xl transition-all duration-300 ease-in-out ${
+            <aside className={`absolute left-0 top-0 h-full w-80 border-r-2 border-[#0A0A0A] bg-[#F2EBDD] z-20 flex flex-col justify-between overflow-visible shadow-xl transition-all duration-300 ease-in-out ${
               selectedNodeId ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'
             }`}>
               {selectedNode && (
@@ -637,7 +637,7 @@ const FlowBuilderInner: React.FC = () => {
                 />
               )}
 
-              <div className={`absolute left-0 top-0 h-full w-80 border-r-2 border-ink bg-canvas -z-10 flex flex-col justify-between overflow-hidden shadow-xl transition-all duration-300 ease-in-out ${
+              <div className={`absolute left-0 top-0 h-full w-80 border-r-2 border-[#0A0A0A] bg-[#F2EBDD] -z-10 flex flex-col justify-between overflow-hidden shadow-xl transition-all duration-300 ease-in-out ${
                 (editorState.isBtnDialogOpen || editorState.isNextStepDrawerOpen || editorState.isDataCollectionDrawerOpen) ? 'translate-x-full opacity-100' : 'translate-x-0 opacity-0 pointer-events-none'
               }`}>
                 {selectedNode && editorState.isNextStepDrawerOpen ? (
@@ -715,7 +715,7 @@ const FlowBuilderInner: React.FC = () => {
               <div className="absolute top-4 right-4 z-10 select-none">
                 <button
                   onClick={() => setIsAddDropdownOpen(!isAddDropdownOpen)}
-                  className="w-12 h-12 rounded-full bg-ink hover:bg-ink/90 active:scale-95 text-canvas flex items-center justify-center shadow-md transition-all border-2 border-ink cursor-pointer"
+                  className="w-12 h-12 rounded-full bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 active:scale-95 text-[#F2EBDD] flex items-center justify-center shadow-md transition-all border-2 border-[#0A0A0A] cursor-pointer"
                 >
                   <Plus size={24} className={`transition-transform duration-200 ${isAddDropdownOpen ? 'rotate-45' : ''}`} />
                 </button>
@@ -725,8 +725,8 @@ const FlowBuilderInner: React.FC = () => {
                       className="fixed inset-0 z-10"
                       onClick={() => setIsAddDropdownOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2.5 w-56 bg-canvas border-2 border-ink p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150 font-['JetBrains_Mono',monospace]">
-                      <span className="text-[10px] font-black text-ink uppercase tracking-wider mb-1 px-1 font-['Anybody',sans-serif]">
+                    <div className="absolute right-0 mt-2.5 w-56 bg-[#F2EBDD] border-2 border-[#0A0A0A] p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150 font-['JetBrains_Mono',monospace]">
+                      <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-1 font-['Anybody',sans-serif]">
                         {t('flow_builder.add_standalone_node')}
                       </span>
                       {FLOW_BLOCKS.map((item) => {
@@ -738,11 +738,11 @@ const FlowBuilderInner: React.FC = () => {
                               handleAddNode(item.type);
                               setIsAddDropdownOpen(false);
                             }}
-                            className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-ink hover:text-canvas border-2 border-ink/10 hover:border-ink rounded-xl text-left text-xs font-bold text-ink transition-all cursor-pointer group"
+                            className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A]/10 hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group"
                           >
                             <span
                               data-block-type={item.type}
-                              className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-ink ${item.color}`}
+                              className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${item.color}`}
                             >
                               <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
                             </span>
@@ -762,14 +762,14 @@ const FlowBuilderInner: React.FC = () => {
                 onClick={() => setContextMenu(null)}
               >
                 <div
-                  className="absolute bg-canvas border-2 border-ink p-2.5 rounded-2xl shadow-xl w-60 flex flex-col gap-1 select-none pointer-events-auto animate-in fade-in zoom-in-95 duration-150 z-50 font-['JetBrains_Mono',monospace]"
+                  className="absolute bg-[#F2EBDD] border-2 border-[#0A0A0A] p-2.5 rounded-2xl shadow-xl w-60 flex flex-col gap-1 select-none pointer-events-auto animate-in fade-in zoom-in-95 duration-150 z-50 font-['JetBrains_Mono',monospace]"
                   style={{
                     left: Math.min(contextMenu.x, window.innerWidth - 250),
                     top: Math.min(contextMenu.y, window.innerHeight - 380),
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <span className="text-[10px] font-black text-ink uppercase tracking-wider mb-1 px-3 pt-1 select-none font-['Anybody',sans-serif]">
+                  <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-3 pt-1 select-none font-['Anybody',sans-serif]">
                     {t('flow_builder.connect_to')}
                   </span>
                   {filteredContextMenuOptions.map((opt, idx) => {
@@ -780,12 +780,12 @@ const FlowBuilderInner: React.FC = () => {
                       <button
                         key={idx}
                         onClick={() => handleCreateAndConnectNode(opt.type)}
-                        className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-ink hover:text-canvas border-2 border-transparent hover:border-ink rounded-xl text-left text-xs font-bold text-ink transition-all cursor-pointer group select-none"
+                        className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-transparent hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group select-none"
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           <span
                             data-block-type={opt.type}
-                            className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-ink ${colorClass}`}
+                            className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${colorClass}`}
                           >
                             <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
                           </span>
@@ -793,12 +793,12 @@ const FlowBuilderInner: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
                           {opt.isPro && (
-                            <span className="text-[8px] font-black bg-amber-400 text-ink border border-ink px-1.5 py-0.5 rounded uppercase tracking-wider">
+                            <span className="text-[8px] font-black bg-amber-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
                               PRO
                             </span>
                           )}
                           {opt.isAi && (
-                            <span className="text-[8px] font-black bg-purple-400 text-ink border border-ink px-1.5 py-0.5 rounded uppercase tracking-wider">
+                            <span className="text-[8px] font-black bg-purple-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
                               AI
                             </span>
                           )}
@@ -809,7 +809,7 @@ const FlowBuilderInner: React.FC = () => {
                   
                   <button
                     onClick={() => setContextMenu(null)}
-                    className="w-full text-center py-2 text-xs font-black text-ink/60 hover:text-ink hover:bg-ink/10 rounded-xl transition-all border-t-2 border-ink/20 mt-1 cursor-pointer select-none uppercase tracking-wider"
+                    className="w-full text-center py-2 text-xs font-black text-[#0A0A0A]/60 hover:text-[#0A0A0A] hover:bg-[#0A0A0A]/10 rounded-xl transition-all border-t-2 border-[#0A0A0A]/20 mt-1 cursor-pointer select-none uppercase tracking-wider"
                   >
                     {t('flow_builder.cancel')}
                   </button>
@@ -823,19 +823,19 @@ const FlowBuilderInner: React.FC = () => {
       {isConnectModalOpen && currentBot && (
         <div
           onClick={() => setIsConnectModalOpen(false)}
-          className="fixed inset-0 bg-ink/40 z-50 flex items-center justify-center p-4 cursor-pointer font-['JetBrains_Mono',monospace]"
+          className="fixed inset-0 bg-[#0A0A0A]/40 z-50 flex items-center justify-center p-4 cursor-pointer font-['JetBrains_Mono',monospace]"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-canvas rounded-3xl max-w-md w-full border-2 border-ink shadow-brutal-xl animate-in fade-in duration-200 cursor-default overflow-hidden"
+            className="bg-[#F2EBDD] rounded-3xl max-w-md w-full border-2 border-[#0A0A0A] shadow-[8px_8px_0px_0px_#0A0A0A] animate-in fade-in duration-200 cursor-default overflow-hidden"
           >
-            <div className="p-6 pb-4 border-b-2 border-ink flex items-center justify-between bg-white">
-              <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-ink">
+            <div className="p-6 pb-4 border-b-2 border-[#0A0A0A] flex items-center justify-between bg-white">
+              <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A]">
                 Підключення Telegram бота
               </h3>
               <button
                 onClick={() => setIsConnectModalOpen(false)}
-                className="p-1 text-ink hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                className="p-1 text-[#0A0A0A] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -850,7 +850,7 @@ const FlowBuilderInner: React.FC = () => {
                 </div>
               )}
               <div>
-                <label className="block text-xs font-black text-ink uppercase tracking-wider mb-1">
+                <label className="block text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-1">
                   Telegram Bot Token:
                 </label>
                 <input
@@ -861,14 +861,14 @@ const FlowBuilderInner: React.FC = () => {
                     setTokenError(null);
                   }}
                   placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ"
-                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-ink text-xs font-bold focus:outline-none bg-white text-ink"
+                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold focus:outline-none bg-white text-[#0A0A0A]"
                 />
               </div>
             </div>
-            <div className="p-4 border-t-2 border-ink bg-canvas flex justify-end gap-3">
+            <div className="p-4 border-t-2 border-[#0A0A0A] bg-[#F2EBDD] flex justify-end gap-3">
               <button
                 onClick={() => setIsConnectModalOpen(false)}
-                className="px-4 py-2 text-xs font-black uppercase text-ink hover:bg-white rounded-xl border border-transparent hover:border-ink transition-all cursor-pointer"
+                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-white rounded-xl border border-transparent hover:border-[#0A0A0A] transition-all cursor-pointer"
               >
                 Скасувати
               </button>
@@ -888,7 +888,7 @@ const FlowBuilderInner: React.FC = () => {
                     setTokenError(err?.response?.data?.message || 'Не вдалося підключити бота. Перевірте токен.');
                   }
                 }}
-                className="px-6 py-2 bg-ink hover:bg-[#2A2A2A] text-canvas text-xs font-black uppercase rounded-xl border border-ink shadow-brutal-sm transition-all cursor-pointer disabled:opacity-50"
+                className="px-6 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] transition-all cursor-pointer disabled:opacity-50"
               >
                 {updateBotMutation.isPending ? 'Підключення...' : 'Підключити та активувати'}
               </button>

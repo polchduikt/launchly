@@ -38,27 +38,27 @@ export const ChatHistoryModal: React.FC<ChatHistoryModalProps> = ({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 select-none animate-fade-in font-['JetBrains_Mono',monospace] cursor-pointer"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/40 select-none animate-fade-in font-['JetBrains_Mono',monospace] cursor-pointer"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-canvas border-4 border-ink shadow-brutal-2xl rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] text-ink animate-scale-up cursor-default"
+        className="bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] text-[#0A0A0A] animate-scale-up cursor-default"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b-2 border-ink bg-canvas select-none">
-          <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-ink flex-1 text-center">
+        <div className="flex items-center justify-between px-6 py-4 border-b-2 border-[#0A0A0A] bg-[#F2EBDD] select-none">
+          <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] flex-1 text-center">
             {t('crm.panel.history_btn', 'Вся історія чату')}
           </h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm"
+            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
           >
             <X size={16} />
           </button>
         </div>
-        <div className="flex items-center gap-3 px-6 py-3 border-b-2 border-ink bg-canvas select-none">
+        <div className="flex items-center gap-3 px-6 py-3 border-b-2 border-[#0A0A0A] bg-[#F2EBDD] select-none">
           <UserAvatar name={conversation.botUserName} photoUrl={conversation.botUserPhotoUrl} size={36} />
           <div>
-            <h4 className="font-['Anybody',sans-serif] font-bold text-sm text-ink uppercase">{conversation.botUserName}</h4>
+            <h4 className="font-['Anybody',sans-serif] font-bold text-sm text-[#0A0A0A] uppercase">{conversation.botUserName}</h4>
             <div className="flex items-center gap-1 text-[11px] text-slate-700 font-bold uppercase">
               <span>Me</span>
               <span className="text-[9px] translate-y-[0.5px]">▼</span>
@@ -66,10 +66,10 @@ export const ChatHistoryModal: React.FC<ChatHistoryModalProps> = ({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 max-h-[55vh] bg-canvas" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 max-h-[55vh] bg-[#F2EBDD]" style={{ scrollbarWidth: 'none' }}>
           {isLoading ? (
             <div className="py-20 flex items-center justify-center">
-              <Loader2 className="animate-spin text-ink" size={24} />
+              <Loader2 className="animate-spin text-[#0A0A0A]" size={24} />
             </div>
           ) : messages.length === 0 ? (
             <div className="py-20 text-center text-xs text-slate-700 font-bold italic">

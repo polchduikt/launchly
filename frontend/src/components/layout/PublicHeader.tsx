@@ -61,8 +61,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
     <header
       className={`sticky top-0 w-full z-50 flex justify-between items-center h-20 px-4 sm:px-6 md:px-12 lg:px-16 backdrop-blur-md transition-all duration-300 ${
         isDarkHeader
-          ? 'bg-ink/95 border-b-2 border-canvas shadow-[0_4px_0px_#F2EBDD] text-canvas'
-          : 'bg-canvas/90 border-b-2 border-ink shadow-[0_4px_0px_#0A0A0A] text-ink'
+          ? 'bg-[#0A0A0A]/95 border-b-2 border-[#F2EBDD] shadow-[0_4px_0px_#F2EBDD] text-[#F2EBDD]'
+          : 'bg-[#F2EBDD]/90 border-b-2 border-[#0A0A0A] shadow-[0_4px_0px_#0A0A0A] text-[#0A0A0A]'
       }`}
     >
       <div className="flex items-center gap-3 sm:gap-4">
@@ -80,7 +80,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
             onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
             onBlur={() => setTimeout(() => setIsLangDropdownOpen(false), 200)}
             className={`flex items-center gap-1 font-['JetBrains_Mono',monospace] text-xs sm:text-sm font-bold border-b-2 pb-0.5 transition-all cursor-pointer select-none ${
-              isDarkHeader ? 'text-canvas border-canvas' : 'text-ink border-ink'
+              isDarkHeader ? 'text-[#F2EBDD] border-[#F2EBDD]' : 'text-[#0A0A0A] border-[#0A0A0A]'
             }`}
           >
             <span>{currentLanguage === 'uk' ? 'Uk' : 'En'}</span>
@@ -91,8 +91,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
             <div
               className={`absolute top-full left-0 mt-2 border-2 py-1 min-w-[75px] z-50 ${
                 isDarkHeader
-                  ? 'bg-ink border-canvas shadow-brutal-canvas'
-                  : 'bg-canvas border-ink shadow-brutal'
+                  ? 'bg-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD]'
+                  : 'bg-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A]'
               }`}
             >
               <button
@@ -102,10 +102,10 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
                 }}
                 className={`w-full px-3 py-1 text-left font-['JetBrains_Mono',monospace] text-xs font-bold transition-colors cursor-pointer ${
                   isDarkHeader
-                    ? 'hover:bg-canvas hover:text-ink ' +
-                      (currentLanguage === 'en' ? 'bg-canvas/20 font-black' : 'text-canvas')
-                    : 'hover:bg-ink hover:text-canvas ' +
-                      (currentLanguage === 'en' ? 'bg-ink/10 font-black' : 'text-ink')
+                    ? 'hover:bg-[#F2EBDD] hover:text-[#0A0A0A] ' +
+                      (currentLanguage === 'en' ? 'bg-[#F2EBDD]/20 font-black' : 'text-[#F2EBDD]')
+                    : 'hover:bg-[#0A0A0A] hover:text-[#F2EBDD] ' +
+                      (currentLanguage === 'en' ? 'bg-[#0A0A0A]/10 font-black' : 'text-[#0A0A0A]')
                 }`}
               >
                 En
@@ -117,10 +117,10 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
                 }}
                 className={`w-full px-3 py-1 text-left font-['JetBrains_Mono',monospace] text-xs font-bold transition-colors cursor-pointer ${
                   isDarkHeader
-                    ? 'hover:bg-canvas hover:text-ink ' +
-                      (currentLanguage === 'uk' ? 'bg-canvas/20 font-black' : 'text-canvas')
-                    : 'hover:bg-ink hover:text-canvas ' +
-                      (currentLanguage === 'uk' ? 'bg-ink/10 font-black' : 'text-ink')
+                    ? 'hover:bg-[#F2EBDD] hover:text-[#0A0A0A] ' +
+                      (currentLanguage === 'uk' ? 'bg-[#F2EBDD]/20 font-black' : 'text-[#F2EBDD]')
+                    : 'hover:bg-[#0A0A0A] hover:text-[#F2EBDD] ' +
+                      (currentLanguage === 'uk' ? 'bg-[#0A0A0A]/10 font-black' : 'text-[#0A0A0A]')
                 }`}
               >
                 Uk
@@ -138,8 +138,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
               to={`${ROUTES.LANDING}${item.href}`}
               className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider transition-colors duration-200 px-2 py-1 ${
                 isDarkHeader
-                  ? 'text-canvas hover:bg-canvas hover:text-ink'
-                  : 'text-ink hover:bg-ink hover:text-canvas'
+                  ? 'text-[#F2EBDD] hover:bg-[#F2EBDD] hover:text-[#0A0A0A]'
+                  : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
               }`}
             >
               {t(item.key, item.fallback)}
@@ -150,8 +150,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
               to={ROUTES.BLOG}
               className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider transition-colors duration-200 px-2 py-1 ${
                 isDarkHeader
-                  ? 'text-canvas hover:bg-canvas hover:text-ink'
-                  : 'text-ink hover:bg-ink hover:text-canvas'
+                  ? 'text-[#F2EBDD] hover:bg-[#F2EBDD] hover:text-[#0A0A0A]'
+                  : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
               }`}
             >
               {t('landing.nav.blog', 'BLOG')}
@@ -166,8 +166,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
             onClick={() => navigate(ROUTES.HOME)}
             className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-2.5 border-2 transition-all cursor-pointer ${
               isDarkHeader
-                ? 'bg-canvas text-ink border-canvas shadow-brutal-canvas hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
-                : 'bg-ink text-canvas border-ink shadow-brutal hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
+                ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
+                : 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
             }`}
           >
             {t('landing.nav.dashboard', 'DASHBOARD')}
@@ -177,7 +177,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
             <button
               onClick={() => navigate(redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : ROUTES.LOGIN)}
               className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider hover:underline underline-offset-4 cursor-pointer ${
-                isDarkHeader ? 'text-canvas' : 'text-ink'
+                isDarkHeader ? 'text-[#F2EBDD]' : 'text-[#0A0A0A]'
               }`}
             >
               {t('landing.nav.login', 'LOGIN')}
@@ -186,8 +186,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
               onClick={() => navigate(redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : ROUTES.REGISTER)}
               className={`font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider px-6 py-2.5 border-2 transition-all cursor-pointer ${
                 isDarkHeader
-                  ? 'bg-canvas text-ink border-canvas shadow-brutal-canvas hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
-                  : 'bg-ink text-canvas border-ink shadow-brutal hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
+                  ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD] shadow-[4px_4px_0px_#F2EBDD] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
+                  : 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
               }`}
             >
               {t('landing.nav.signup', 'SIGN UP')}
@@ -202,8 +202,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className={`p-2 border-2 rounded-lg transition-all cursor-pointer ${
             isDarkHeader
-              ? 'bg-ink text-canvas border-canvas'
-              : 'bg-canvas text-ink border-ink'
+              ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#F2EBDD]'
+              : 'bg-[#F2EBDD] text-[#0A0A0A] border-[#0A0A0A]'
           }`}
           aria-label="Toggle mobile menu"
         >
@@ -215,8 +215,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
         <div
           className={`absolute top-full left-0 right-0 border-b-4 py-6 px-6 shadow-2xl flex flex-col space-y-4 lg:hidden z-50 transition-all ${
             isDarkHeader
-              ? 'bg-ink border-canvas text-canvas'
-              : 'bg-canvas border-ink text-ink'
+              ? 'bg-[#0A0A0A] border-[#F2EBDD] text-[#F2EBDD]'
+              : 'bg-[#F2EBDD] border-[#0A0A0A] text-[#0A0A0A]'
           }`}
         >
           {!simple && (
@@ -251,7 +251,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
                   navigate(ROUTES.HOME);
                 }}
                 className={`w-full py-3 border-2 font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_currentColor] cursor-pointer ${
-                  isDarkHeader ? 'bg-canvas text-ink border-canvas' : 'bg-ink text-canvas border-ink'
+                  isDarkHeader ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD]' : 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
                 }`}
               >
                 {t('landing.nav.dashboard', 'DASHBOARD')}
@@ -264,7 +264,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
                     navigate(redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : ROUTES.LOGIN);
                   }}
                   className={`py-3 border-2 font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider text-center cursor-pointer ${
-                    isDarkHeader ? 'border-canvas text-canvas' : 'border-ink text-ink'
+                    isDarkHeader ? 'border-[#F2EBDD] text-[#F2EBDD]' : 'border-[#0A0A0A] text-[#0A0A0A]'
                   }`}
                 >
                   {t('landing.nav.login', 'LOGIN')}
@@ -275,7 +275,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
                     navigate(redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : ROUTES.REGISTER);
                   }}
                   className={`py-3 border-2 font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_currentColor] text-center cursor-pointer ${
-                    isDarkHeader ? 'bg-canvas text-ink border-canvas' : 'bg-ink text-canvas border-ink'
+                    isDarkHeader ? 'bg-[#F2EBDD] text-[#0A0A0A] border-[#F2EBDD]' : 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
                   }`}
                 >
                   {t('landing.nav.signup', 'SIGN UP')}

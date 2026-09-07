@@ -27,7 +27,7 @@ function useDisplayToggle(storageKey: string, defaultVal: boolean) {
 
 const SectionHeader: React.FC<{ label: string }> = ({ label }) => (
   <div className="px-6 pt-5 pb-2">
-    <span className="text-[10px] font-black text-ink/40 uppercase tracking-[0.15em] font-['JetBrains_Mono',monospace]">
+    <span className="text-[10px] font-black text-[#0A0A0A]/40 uppercase tracking-[0.15em] font-['JetBrains_Mono',monospace]">
       {label}
     </span>
   </div>
@@ -42,7 +42,7 @@ const ToggleRow: React.FC<{
 }> = ({ titleKey, toggleKey, descKey, value, onChange }) => (
   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-start">
     <div className="lg:col-span-3">
-      <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase">
+      <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
         {t(titleKey)}
       </h3>
     </div>
@@ -52,9 +52,9 @@ const ToggleRow: React.FC<{
           type="checkbox"
           checked={value}
           onChange={(e) => onChange(e.target.checked)}
-          className="w-4 h-4 accent-ink cursor-pointer"
+          className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
         />
-        <span className="text-xs font-bold text-ink">{t(toggleKey)}</span>
+        <span className="text-xs font-bold text-[#0A0A0A]">{t(toggleKey)}</span>
       </label>
     </div>
     <div className="lg:col-span-4">
@@ -73,7 +73,7 @@ export const DisplayPanel: React.FC = () => {
 
   return (
     <div className="space-y-6 font-['JetBrains_Mono',monospace]">
-      <div className="bg-canvas border-2 border-ink rounded-2xl divide-y-2 divide-ink/15 overflow-hidden text-left">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden text-left">
 
         {/* ── Головна сторінка ── */}
         <SectionHeader label={t('settings.display.section_home')} />

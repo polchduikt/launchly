@@ -48,16 +48,16 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
           onClose();
         }
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 animate-fade-in font-['JetBrains_Mono',monospace]"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/40 animate-fade-in font-['JetBrains_Mono',monospace]"
     >
-      <div className="bg-white border-4 border-ink shadow-brutal-2xl rounded-3xl max-w-lg w-full overflow-hidden text-ink relative">
-        <div className="p-6 border-b-2 border-ink flex items-center justify-between bg-slate-100">
+      <div className="bg-white border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] rounded-3xl max-w-lg w-full overflow-hidden text-[#0A0A0A] relative">
+        <div className="p-6 border-b-2 border-[#0A0A0A] flex items-center justify-between bg-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-ink text-white border-2 border-ink flex items-center justify-center shrink-0 shadow-brutal-sm">
+            <div className="w-10 h-10 rounded-2xl bg-[#0A0A0A] text-white border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
               <Sparkles size={22} />
             </div>
             <div>
-              <h2 className="font-extrabold text-base uppercase tracking-tight text-ink">
+              <h2 className="font-extrabold text-base uppercase tracking-tight text-[#0A0A0A]">
                 {t('settings.template.title', 'Шаблон')}
               </h2>
               <p className="text-[11px] font-bold text-slate-600">
@@ -67,14 +67,14 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm"
+            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
           >
             <X size={16} />
           </button>
         </div>
         <div className="p-6 space-y-5">
-          <div className="bg-white border-2 border-ink p-4 rounded-2xl space-y-2">
-            <div className="flex items-center gap-2 text-xs font-extrabold uppercase text-ink">
+          <div className="bg-white border-2 border-[#0A0A0A] p-4 rounded-2xl space-y-2">
+            <div className="flex items-center gap-2 text-xs font-extrabold uppercase text-[#0A0A0A]">
               <Layout size={16} className="text-indigo-600 shrink-0" />
               <span>{t('settings.template.info_title', 'Як працює шаблон:')}</span>
             </div>
@@ -94,7 +94,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
 
           {template ? (
             <div className="space-y-3 pt-2">
-              <label className="block text-[11px] font-extrabold uppercase text-ink leading-tight">
+              <label className="block text-[11px] font-extrabold uppercase text-[#0A0A0A] leading-tight">
                 {t('settings.template.link_label', 'Ваше посилання на шаблон:')}
               </label>
               <div className="flex items-center gap-2">
@@ -102,11 +102,11 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
                   type="text"
                   readOnly
                   value={template.shareUrl}
-                  className="flex-1 px-3.5 py-2.5 rounded-xl border-2 border-ink bg-white text-xs font-black text-ink focus:outline-none tracking-wide select-all"
+                  className="flex-1 px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] bg-white text-xs font-black text-[#0A0A0A] focus:outline-none tracking-wide select-all"
                 />
                 <button
                   onClick={handleCopyLink}
-                  className="px-4 py-2.5 bg-ink hover:bg-[#2A2A2A] text-white border-2 border-ink shadow-brutal-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                  className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
                 >
                   {copied ? (
                     <>
@@ -127,7 +127,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
               <button
                 onClick={handleGenerateTemplate}
                 disabled={loading}
-                className="w-full py-3 bg-ink hover:bg-[#2A2A2A] text-canvas border-2 border-ink shadow-brutal hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-3 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
                   <>
@@ -145,10 +145,10 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
           )}
         </div>
 
-        <div className="p-4 border-t-2 border-ink bg-white flex justify-end">
+        <div className="p-4 border-t-2 border-[#0A0A0A] bg-white flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-white hover:bg-slate-100 text-ink border-2 border-ink text-xs font-extrabold rounded-xl transition-all cursor-pointer"
+            className="px-5 py-2 bg-white hover:bg-slate-100 text-[#0A0A0A] border-2 border-[#0A0A0A] text-xs font-extrabold rounded-xl transition-all cursor-pointer"
           >
             {t('common.close', 'Закрити')}
           </button>

@@ -13,7 +13,7 @@ export const SafeAvatar: React.FC<SafeAvatarProps> = ({
   src,
   name,
   className = 'w-9 h-9 rounded-full object-cover',
-  fallbackClassName = 'w-9 h-9 rounded-full bg-ink text-canvas font-black flex items-center justify-center text-xs shrink-0 select-none border-2 border-ink',
+  fallbackClassName = 'w-9 h-9 rounded-full bg-[#0A0A0A] text-[#F2EBDD] font-black flex items-center justify-center text-xs shrink-0 select-none border-2 border-[#0A0A0A]',
   alt = 'Avatar',
 }) => {
   const [imgError, setImgError] = useState(false);

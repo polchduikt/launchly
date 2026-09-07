@@ -329,12 +329,12 @@ export const CreateTemplateWizardPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col min-h-full font-['JetBrains_Mono',monospace] text-ink bg-canvas">
-        <div className="w-full h-16 min-h-[64px] max-h-[64px] bg-white border-b-2 border-ink px-6 flex items-center justify-between gap-4 sticky top-0 z-20">
+      <div className="flex flex-col min-h-full font-['JetBrains_Mono',monospace] text-[#0A0A0A] bg-[#F2EBDD]">
+        <div className="w-full h-16 min-h-[64px] max-h-[64px] bg-white border-b-2 border-[#0A0A0A] px-6 flex items-center justify-between gap-4 sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <button
               onClick={() => (step === 3 ? setStep(2) : step === 2 ? setStep(1) : navigate('/templates'))}
-              className="px-3 py-1.5 bg-white hover:bg-ink hover:text-white border border-ink text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1 shrink-0"
+              className="px-3 py-1.5 bg-white hover:bg-[#0A0A0A] hover:text-white border border-[#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1 shrink-0"
             >
               <ChevronLeft size={15} />
               <span>{t('common.back', 'Назад')}</span>
@@ -354,7 +354,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
               <button
                 onClick={() => setStep(2)}
                 disabled={selectedIds.length === 0}
-                className="px-4 py-2 bg-ink hover:bg-[#2A2A2A] text-white border border-ink shadow-brutal-sm text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>{t('template.create.next_step', 'Далі')}</span>
                 <ChevronRight size={15} />
@@ -364,7 +364,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
               <button
                 onClick={handleCreateOrUpdateTemplate}
                 disabled={submitting || !templateName.trim()}
-                className="px-4 py-2 bg-ink hover:bg-[#2A2A2A] text-white border border-ink shadow-brutal-sm text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <>
@@ -382,7 +382,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
             {step === 3 && (
               <button
                 onClick={() => navigate('/templates')}
-                className="px-4 py-2 bg-white hover:bg-slate-100 text-ink border border-ink text-xs font-black uppercase cursor-pointer"
+                className="px-4 py-2 bg-white hover:bg-slate-100 text-[#0A0A0A] border border-[#0A0A0A] text-xs font-black uppercase cursor-pointer"
               >
                 {t('template.create.finish_btn', 'Завершити')}
               </button>
@@ -400,7 +400,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
 
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
                 <div className="xl:col-span-2 space-y-4">
-                  <div className="bg-white border-2 border-ink p-4 shadow-brutal-sm flex items-center justify-between">
+                  <div className="bg-white border-2 border-[#0A0A0A] p-4 shadow-[2px_2px_0px_#0A0A0A] flex items-center justify-between">
                     <span className="text-xs font-black uppercase text-slate-800 tracking-wide">
                       {t('template.create.selected_count', { count: selectedIds.length, total: allItems.length })}
                     </span>
@@ -416,8 +416,8 @@ export const CreateTemplateWizardPage: React.FC = () => {
                   </div>
 
                   {loadingRealData || isLoadingBots ? (
-                    <div className="py-12 bg-white border-2 border-ink text-center space-y-3 shadow-brutal-sm">
-                      <Loader2 className="animate-spin mx-auto text-ink" size={28} />
+                    <div className="py-12 bg-white border-2 border-[#0A0A0A] text-center space-y-3 shadow-[2px_2px_0px_#0A0A0A]">
+                      <Loader2 className="animate-spin mx-auto text-[#0A0A0A]" size={28} />
                       <span className="text-xs font-bold uppercase">{t('common.loading', 'Завантаження реальних даних...')}</span>
                     </div>
                   ) : (
@@ -433,13 +433,13 @@ export const CreateTemplateWizardPage: React.FC = () => {
                       return (
                         <div
                           key={cat.key}
-                          className="bg-white border-2 border-ink shadow-brutal-sm overflow-hidden"
+                          className="bg-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] overflow-hidden"
                         >
                           <button
                             onClick={() => setCollapsed({ ...collapsed, [cat.key]: !isCollapsed })}
-                            className="w-full p-4 flex items-center justify-between bg-slate-50 border-b-2 border-ink cursor-pointer"
+                            className="w-full p-4 flex items-center justify-between bg-slate-50 border-b-2 border-[#0A0A0A] cursor-pointer"
                           >
-                            <span className="font-black text-xs uppercase text-ink flex items-center gap-2">
+                            <span className="font-black text-xs uppercase text-[#0A0A0A] flex items-center gap-2">
                               {cat.icon}
                               <span>{cat.label} ({selectedCatCount}/{cat.items.length})</span>
                             </span>
@@ -450,7 +450,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                           </button>
 
                           {!isCollapsed && (
-                            <div className="p-4 divide-y border-ink/10 space-y-2">
+                            <div className="p-4 divide-y border-[#0A0A0A]/10 space-y-2">
                               {cat.items.length === 0 ? (
                                 <div className="text-xs font-bold text-slate-500 py-3 italic text-center">
                                   {t('template.create.no_items', 'Немає доступних елементів у цій категорії')}
@@ -465,7 +465,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                                       type="checkbox"
                                       checked={selectedIds.includes(item.id)}
                                       onChange={() => toggleItem(item.id)}
-                                      className="w-4 h-4 border-2 border-ink accent-indigo-600 cursor-pointer shrink-0"
+                                      className="w-4 h-4 border-2 border-[#0A0A0A] accent-indigo-600 cursor-pointer shrink-0"
                                     />
                                     <span className="text-xs font-bold text-slate-800">{item.name}</span>
                                   </label>
@@ -479,17 +479,17 @@ export const CreateTemplateWizardPage: React.FC = () => {
                   )}
                 </div>
                 <div className="xl:col-span-1 space-y-4">
-                  <div className="bg-white border-2 border-ink p-5 shadow-brutal-sm space-y-3">
-                    <div className="flex items-center justify-between border-b-2 border-ink pb-3">
-                      <h3 className="font-black text-xs uppercase text-ink">
+                  <div className="bg-white border-2 border-[#0A0A0A] p-5 shadow-[2px_2px_0px_#0A0A0A] space-y-3">
+                    <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3">
+                      <h3 className="font-black text-xs uppercase text-[#0A0A0A]">
                         {t('template.create.selected_items_title', 'Що обрано')}
                       </h3>
-                      <span className="px-2 py-0.5 bg-ink text-white border border-ink font-black text-[10px] rounded">
+                      <span className="px-2 py-0.5 bg-[#0A0A0A] text-white border border-[#0A0A0A] font-black text-[10px] rounded">
                         {selectedIds.length}
                       </span>
                     </div>
 
-                    <div className="max-h-64 overflow-y-auto divide-y border-2 border-ink bg-slate-50 p-3 text-xs font-bold text-slate-800">
+                    <div className="max-h-64 overflow-y-auto divide-y border-2 border-[#0A0A0A] bg-slate-50 p-3 text-xs font-bold text-slate-800">
                       {selectedIds.length === 0 ? (
                         <div className="text-center text-slate-400 py-4 italic">
                           {t('template.create.no_items_selected', 'Нічого не обрано')}
@@ -504,7 +504,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  <div className="bg-sky-50 border-2 border-ink p-5 shadow-brutal-sm space-y-4">
+                  <div className="bg-sky-50 border-2 border-[#0A0A0A] p-5 shadow-[2px_2px_0px_#0A0A0A] space-y-4">
                     <h3 className="font-black text-xs uppercase tracking-wider text-sky-900 flex items-center gap-2">
                       <Info size={16} />
                       <span>{t('template.create.note_title', 'Зверніть увагу')}</span>
@@ -512,14 +512,14 @@ export const CreateTemplateWizardPage: React.FC = () => {
                     
                     <div className="space-y-4 text-[11.5px] font-bold text-slate-800 leading-relaxed">
                       <div>
-                        <h4 className="font-black text-ink mb-1">{t('template.create.note_connected_title', 'Звʼязані елементи копіюються автоматично')}</h4>
+                        <h4 className="font-black text-[#0A0A0A] mb-1">{t('template.create.note_connected_title', 'Звʼязані елементи копіюються автоматично')}</h4>
                         <p className="text-slate-700">
                           {t('template.create.note_connected_desc', 'Вибір конкретної воронки автоматично включає повʼязані кроки та користувацькі поля.')}
                         </p>
                       </div>
                       
                       <div className="pt-3 border-t border-sky-200">
-                        <h4 className="font-black text-ink mb-1">{t('template.create.note_privacy_title', 'Конфіденційність та Ізоляція')}</h4>
+                        <h4 className="font-black text-[#0A0A0A] mb-1">{t('template.create.note_privacy_title', 'Конфіденційність та Ізоляція')}</h4>
                         <p className="text-slate-700">
                           {t('template.create.note_privacy_desc', 'Підписники, приватні чати, API-токени Telegram та платіжні дані НІКОЛИ не включаються у шаблони.')}
                         </p>
@@ -543,18 +543,18 @@ export const CreateTemplateWizardPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white border-2 border-ink p-6 shadow-brutal-sm space-y-6">
-                  <h3 className="font-black text-xs uppercase text-ink border-b-2 border-ink pb-3">
+                <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[2px_2px_0px_#0A0A0A] space-y-6">
+                  <h3 className="font-black text-xs uppercase text-[#0A0A0A] border-b-2 border-[#0A0A0A] pb-3">
                     {t('template.create.avatar_and_name_title', 'Аватар та назва шаблону')}
                   </h3>
 
                   <div className="space-y-5">
                     <div className="flex items-center gap-4">
-                      <label className="relative w-16 h-16 bg-ink border-2 border-ink shadow-brutal-xs flex items-center justify-center cursor-pointer overflow-hidden group shrink-0 rounded-lg">
+                      <label className="relative w-16 h-16 bg-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[1px_1px_0px_#0A0A0A] flex items-center justify-center cursor-pointer overflow-hidden group shrink-0 rounded-lg">
                         {avatarPreview ? (
                           <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-canvas text-lg font-black font-['Anybody',sans-serif]">
+                          <div className="w-full h-full flex items-center justify-center text-[#F2EBDD] text-lg font-black font-['Anybody',sans-serif]">
                             {templateName ? (templateName.trim().length >= 2 ? templateName.trim().slice(0, 2).toUpperCase() : templateName.toUpperCase()) : 'JP'}
                           </div>
                         )}
@@ -573,16 +573,16 @@ export const CreateTemplateWizardPage: React.FC = () => {
                           value={templateName}
                           onChange={(e) => setTemplateName(e.target.value)}
                           placeholder={t('template.create.template_name_placeholder', 'Введіть назву шаблону...')}
-                          className="w-full px-3.5 py-2.5 border-2 border-ink bg-white text-xs font-black focus:outline-none focus:bg-white"
+                          className="w-full px-3.5 py-2.5 border-2 border-[#0A0A0A] bg-white text-xs font-black focus:outline-none focus:bg-white"
                         />
                       </div>
                     </div>
 
-                    <div className="pt-4 border-t-2 border-ink/10 flex items-center justify-between">
+                    <div className="pt-4 border-t-2 border-[#0A0A0A]/10 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Shield size={16} className="text-indigo-600" />
                         <div>
-                          <span className="text-xs font-black uppercase text-ink">
+                          <span className="text-xs font-black uppercase text-[#0A0A0A]">
                             {t('template.create.protect_label', 'Захистити шаблон')}
                           </span>
                           <p className="text-[10px] font-bold text-slate-500">
@@ -594,24 +594,24 @@ export const CreateTemplateWizardPage: React.FC = () => {
                         type="checkbox"
                         checked={isProtected}
                         onChange={(e) => setIsProtected(e.target.checked)}
-                        className="w-5 h-5 border-2 border-ink accent-indigo-600 cursor-pointer"
+                        className="w-5 h-5 border-2 border-[#0A0A0A] accent-indigo-600 cursor-pointer"
                       />
                     </div>
                   </div>
                 </div>
-                <div className="bg-white border-2 border-ink p-6 shadow-brutal-sm space-y-4">
-                  <div className="flex items-center justify-between border-b-2 border-ink pb-3">
-                    <h3 className="font-black text-xs uppercase text-ink">
+                <div className="bg-white border-2 border-[#0A0A0A] p-6 shadow-[2px_2px_0px_#0A0A0A] space-y-4">
+                  <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3">
+                    <h3 className="font-black text-xs uppercase text-[#0A0A0A]">
                       {t('template.create.preview_title', 'Попередній перегляд вмісту')}
                     </h3>
                   </div>
 
                   <div className="space-y-3">
-                    <div className="p-3 bg-slate-100 border-2 border-ink flex items-center justify-between text-xs font-black text-slate-900 rounded-lg">
+                    <div className="p-3 bg-slate-100 border-2 border-[#0A0A0A] flex items-center justify-between text-xs font-black text-slate-900 rounded-lg">
                       <span>{t('template.create.selected_items_count', '{{count}} обраних елементів', { count: selectedIds.length })}</span>
                     </div>
 
-                    <div className="max-h-60 overflow-y-auto divide-y border-2 border-ink bg-slate-50 p-3 text-xs font-bold text-slate-800">
+                    <div className="max-h-60 overflow-y-auto divide-y border-2 border-[#0A0A0A] bg-slate-50 p-3 text-xs font-bold text-slate-800">
                       {selectedIds.length === 0 ? (
                         <div className="text-center text-slate-400 py-4 italic">
                           {t('template.create.no_items_selected', 'Нічого не обрано')}
@@ -633,8 +633,8 @@ export const CreateTemplateWizardPage: React.FC = () => {
           )}
           {step === 3 && createdTemplate && (
             <div className="space-y-8 max-w-3xl mx-auto">
-              <div className="bg-white border-2 border-ink p-8 shadow-brutal-sm text-center space-y-4">
-                <div className="w-14 h-14 bg-emerald-400 border-2 border-ink shadow-brutal-sm flex items-center justify-center mx-auto text-emerald-950">
+              <div className="bg-white border-2 border-[#0A0A0A] p-8 shadow-[2px_2px_0px_#0A0A0A] text-center space-y-4">
+                <div className="w-14 h-14 bg-emerald-400 border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] flex items-center justify-center mx-auto text-emerald-950">
                   <Check size={28} strokeWidth={3} />
                 </div>
                 <h2 className="font-['Anybody',sans-serif] text-xl font-black uppercase tracking-tight">
@@ -653,11 +653,11 @@ export const CreateTemplateWizardPage: React.FC = () => {
                       type="text"
                       readOnly
                       value={createdTemplate?.shareUrl || (createdTemplate?.shareCode ? `${window.location.origin}/templates/install/${createdTemplate.shareCode}` : '')}
-                      className="flex-1 px-4 py-2.5 border-2 border-ink bg-slate-50 text-xs font-black select-all"
+                      className="flex-1 px-4 py-2.5 border-2 border-[#0A0A0A] bg-slate-50 text-xs font-black select-all"
                     />
                     <button
                       onClick={handleCopyLink}
-                      className="px-4 py-2.5 bg-ink hover:bg-[#2A2A2A] text-white border-2 border-ink shadow-brutal-sm text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                      className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
                     >
                       {copied ? (
                         <>
@@ -675,14 +675,14 @@ export const CreateTemplateWizardPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white border-2 border-ink p-8 shadow-brutal-sm space-y-6">
-                <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase border-b-2 border-ink pb-3">
+              <div className="bg-white border-2 border-[#0A0A0A] p-8 shadow-[2px_2px_0px_#0A0A0A] space-y-6">
+                <h3 className="font-['Anybody',sans-serif] text-base font-black uppercase border-b-2 border-[#0A0A0A] pb-3">
                   {t('template.create.details_heading', 'Налаштування опису та інструкцій')}
                 </h3>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-black uppercase text-ink mb-1">
+                    <label className="block text-xs font-black uppercase text-[#0A0A0A] mb-1">
                       {t('template.create.about_label', 'Про шаблон *')}
                     </label>
                     <textarea
@@ -690,12 +690,12 @@ export const CreateTemplateWizardPage: React.FC = () => {
                       value={aboutText}
                       onChange={(e) => setAboutText(e.target.value)}
                       placeholder={t('template.create.about_placeholder', 'Опишіть як користуватися цим шаблоном, для якого бізнесу тощо...')}
-                      className="w-full p-3 border-2 border-ink bg-white text-xs font-bold focus:outline-none resize-none"
+                      className="w-full p-3 border-2 border-[#0A0A0A] bg-white text-xs font-bold focus:outline-none resize-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-black uppercase text-ink mb-1">
+                    <label className="block text-xs font-black uppercase text-[#0A0A0A] mb-1">
                       {t('template.create.guide_url_label', 'Посилання на повну інструкцію')}
                     </label>
                     <input
@@ -703,12 +703,12 @@ export const CreateTemplateWizardPage: React.FC = () => {
                       value={guideUrl}
                       onChange={(e) => setGuideUrl(e.target.value)}
                       placeholder={t('template.create.guide_url_placeholder', 'e.g. mysite.com/my-template-guide')}
-                      className="w-full px-3 py-2 border-2 border-ink bg-white text-xs font-bold focus:outline-none"
+                      className="w-full px-3 py-2 border-2 border-[#0A0A0A] bg-white text-xs font-bold focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-black uppercase text-ink mb-1">
+                    <label className="block text-xs font-black uppercase text-[#0A0A0A] mb-1">
                       {t('template.create.video_url_label', 'Посилання на відео-презентацію')}
                     </label>
                     <input
@@ -716,7 +716,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                       value={videoUrl}
                       onChange={(e) => setVideoUrl(e.target.value)}
                       placeholder={t('template.create.video_url_placeholder', 'e.g. https://www.youtube.com/watch?v=XXXXXX')}
-                      className="w-full px-3 py-2 border-2 border-ink bg-white text-xs font-bold focus:outline-none"
+                      className="w-full px-3 py-2 border-2 border-[#0A0A0A] bg-white text-xs font-bold focus:outline-none"
                     />
                   </div>
 
@@ -730,7 +730,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                     <button
                       onClick={handleSaveDetails}
                       disabled={savingDetails}
-                      className="px-5 py-2 bg-ink hover:bg-[#2A2A2A] text-white border border-ink shadow-brutal-sm text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-2"
+                      className="px-5 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-2"
                     >
                       {savingDetails ? (
                         <>

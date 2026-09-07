@@ -287,45 +287,45 @@ export const UserFieldsPanel: React.FC = () => {
             placeholder={t('settings.fields.search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border-2 border-ink focus:outline-none rounded-xl text-xs font-bold bg-white text-ink"
+            className="w-full pl-9 pr-4 py-2 border-2 border-[#0A0A0A] focus:outline-none rounded-xl text-xs font-bold bg-white text-[#0A0A0A]"
           />
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink" />
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]" />
         </div>
       </div>
 
-      <div className="bg-canvas border-2 border-ink rounded-2xl text-left overflow-visible">
-        <div className="p-5 flex justify-between items-center border-b-2 border-ink">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-left overflow-visible">
+        <div className="p-5 flex justify-between items-center border-b-2 border-[#0A0A0A]">
           <div className="flex items-center gap-1.5 text-xs font-bold select-none">
             {activeFolderId && activeFolder ? (
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setActiveFolderId(null)}
-                  className="text-slate-600 hover:text-ink transition-colors cursor-pointer uppercase"
+                  className="text-slate-600 hover:text-[#0A0A0A] transition-colors cursor-pointer uppercase"
                 >
                   {t('settings.fields.user_fields_tab')}
                 </button>
-                <ChevronRight size={14} className="text-ink" />
+                <ChevronRight size={14} className="text-[#0A0A0A]" />
                 <div className="flex items-center gap-1">
-                  <span className="text-ink font-black">{activeFolder.name}</span>
+                  <span className="text-[#0A0A0A] font-black">{activeFolder.name}</span>
                   <button
                     onClick={() => {
                       setRenameFolderName(activeFolder.name);
                       setIsRenameFolderOpen(true);
                     }}
-                    className="p-1 hover:bg-white text-ink rounded-lg cursor-pointer transition-all border-2 border-transparent hover:border-ink"
+                    className="p-1 hover:bg-white text-[#0A0A0A] rounded-lg cursor-pointer transition-all border-2 border-transparent hover:border-[#0A0A0A]"
                   >
                     <Edit2 size={11} />
                   </button>
                 </div>
               </div>
             ) : (
-              <span className="font-['Anybody',sans-serif] text-ink font-black text-sm uppercase">{t('settings.fields.user_fields_tab')}</span>
+              <span className="font-['Anybody',sans-serif] text-[#0A0A0A] font-black text-sm uppercase">{t('settings.fields.user_fields_tab')}</span>
             )}
           </div>
 
           <button
             onClick={() => setIsFieldModalOpen(true)}
-            className="px-4 py-2 bg-ink hover:bg-[#2A2A2A] text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all flex items-center gap-1.5 cursor-pointer select-none"
+            className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all flex items-center gap-1.5 cursor-pointer select-none"
           >
             <Plus size={14} />
             <span>{t('settings.fields.new_field_btn', 'Нове поле користувача')}</span>
@@ -338,24 +338,24 @@ export const UserFieldsPanel: React.FC = () => {
               {folders.map((folder) => (
                 <div
                   key={folder.id}
-                  className="flex items-center justify-between border-2 border-ink rounded-xl px-4 py-2.5 bg-white w-48 hover:bg-canvas transition-all relative"
+                  className="flex items-center justify-between border-2 border-[#0A0A0A] rounded-xl px-4 py-2.5 bg-white w-48 hover:bg-[#F2EBDD] transition-all relative"
                 >
                   <button
                     onClick={() => setActiveFolderId(folder.id)}
                     className="flex items-center gap-2 text-left flex-1 cursor-pointer"
                   >
-                    <Folder size={16} className="text-ink shrink-0" />
-                    <span className="text-xs font-bold text-ink truncate w-28">{folder.name}</span>
+                    <Folder size={16} className="text-[#0A0A0A] shrink-0" />
+                    <span className="text-xs font-bold text-[#0A0A0A] truncate w-28">{folder.name}</span>
                   </button>
                   <button
                     onClick={() => setActiveMenuFolder(activeMenuFolder === folder.id ? null : folder.id)}
-                    className="p-0.5 hover:bg-ink rounded text-ink hover:text-canvas cursor-pointer"
+                    className="p-0.5 hover:bg-[#0A0A0A] rounded text-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer"
                   >
                     <MoreVertical size={14} />
                   </button>
 
                   {activeMenuFolder === folder.id && (
-                    <div className="absolute right-3 top-11 z-[100] bg-canvas border-2 border-ink rounded-xl shadow-brutal py-1 w-28 text-left animate-in fade-in duration-100">
+                    <div className="absolute right-3 top-11 z-[100] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_0px_#0A0A0A] py-1 w-28 text-left animate-in fade-in duration-100">
                       <button
                         onClick={() => {
                           setActiveFolderId(folder.id);
@@ -363,13 +363,13 @@ export const UserFieldsPanel: React.FC = () => {
                           setIsRenameFolderOpen(true);
                           setActiveMenuFolder(null);
                         }}
-                        className="w-full px-3 py-1.5 hover:bg-ink hover:text-canvas text-ink text-xs font-bold text-left cursor-pointer uppercase"
+                        className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase"
                       >
                         {t('settings.fields.action_rename', 'Перейменувати')}
                       </button>
                       <button
                         onClick={() => handleDeleteFolder(folder.id)}
-                        className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-ink/15 uppercase"
+                        className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/15 uppercase"
                       >
                         {t('settings.fields.action_delete', 'Видалити')}
                       </button>
@@ -380,7 +380,7 @@ export const UserFieldsPanel: React.FC = () => {
 
               <button
                 onClick={() => setIsFolderModalOpen(true)}
-                className="px-4 py-2.5 border-2 border-dashed border-ink text-ink hover:bg-white text-xs font-black uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer select-none"
+                className="px-4 py-2.5 border-2 border-dashed border-[#0A0A0A] text-[#0A0A0A] hover:bg-white text-xs font-black uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer select-none"
               >
                 <Plus size={14} />
                 <span>{t('settings.fields.new_folder_btn', 'Нова папка')}</span>
@@ -388,15 +388,15 @@ export const UserFieldsPanel: React.FC = () => {
             </div>
           )}
 
-          <div className="border-2 border-ink rounded-2xl bg-white overflow-hidden shadow-sm">
+          <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-hidden shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-white border-b-2 border-ink text-xs font-black text-ink uppercase tracking-wider select-none">
+                <tr className="bg-white border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
                   <th className="px-5 py-3 w-10">
                     <input
                       type="checkbox"
                       disabled
-                      className="w-4 h-4 accent-ink cursor-not-allowed"
+                      className="w-4 h-4 accent-[#0A0A0A] cursor-not-allowed"
                     />
                   </th>
                   <th className="px-5 py-3">
@@ -426,16 +426,16 @@ export const UserFieldsPanel: React.FC = () => {
                   <th className="px-5 py-3 w-12 text-right"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ink/10 text-xs font-bold text-ink">
+              <tbody className="divide-y divide-[#0A0A0A]/10 text-xs font-bold text-[#0A0A0A]">
                 {filteredFields.map((field) => (
                   <tr key={field.name} className="hover:bg-slate-50 bg-white transition-colors">
                     <td className="px-5 py-3.5">
                       <input
                         type="checkbox"
-                        className="w-4 h-4 accent-ink cursor-pointer"
+                        className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
                       />
                     </td>
-                    <td className="px-5 py-3.5 font-bold text-ink">
+                    <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">
                       {field.name}
                     </td>
                     <td className="px-5 py-3.5 text-slate-700">
@@ -455,7 +455,7 @@ export const UserFieldsPanel: React.FC = () => {
                           setMenuCoords({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
                           setActiveMenuField(activeMenuField === field.name ? null : field.name);
                         }}
-                        className="p-1 hover:bg-ink hover:text-canvas rounded-lg text-ink cursor-pointer transition-all"
+                        className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
                       >
                         <MoreVertical size={15} />
                       </button>
@@ -478,7 +478,7 @@ export const UserFieldsPanel: React.FC = () => {
       {activeMenuField && menuCoords && createPortal(
         <div
           style={{ top: menuCoords.top, right: menuCoords.right }}
-          className="fixed z-[9999] bg-canvas border-2 border-ink rounded-xl shadow-xl py-1 w-32 text-left animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]"
+          className="fixed z-[9999] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 w-32 text-left animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]"
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -494,7 +494,7 @@ export const UserFieldsPanel: React.FC = () => {
               }
               setActiveMenuField(null);
             }}
-            className="w-full px-3 py-1.5 hover:bg-ink hover:text-canvas text-ink text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
+            className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
           >
             {t('settings.fields.action_edit', 'Редагувати')}
           </button>
@@ -503,7 +503,7 @@ export const UserFieldsPanel: React.FC = () => {
               handleArchiveField(activeMenuField);
               setActiveMenuField(null);
             }}
-            className="w-full px-3 py-1.5 hover:bg-ink hover:text-canvas text-ink text-xs font-bold text-left cursor-pointer border-t-2 border-ink/10 uppercase select-none transition-colors"
+            className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
           >
             {t('settings.fields.action_archive')}
           </button>
@@ -512,7 +512,7 @@ export const UserFieldsPanel: React.FC = () => {
               handleDeleteField(activeMenuField, false);
               setActiveMenuField(null);
             }}
-            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-ink/10 uppercase select-none transition-colors"
+            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
           >
             {t('settings.fields.action_delete')}
           </button>
@@ -520,22 +520,22 @@ export const UserFieldsPanel: React.FC = () => {
         document.body
       )}
 
-      <div className="bg-canvas border-2 border-ink rounded-2xl text-left overflow-visible">
-        <div className="p-5 border-b-2 border-ink">
-          <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-left overflow-visible">
+        <div className="p-5 border-b-2 border-[#0A0A0A]">
+          <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
             {t('settings.fields.archived_header')}
           </h3>
         </div>
         <div className="p-5">
-          <div className="border-2 border-ink rounded-2xl bg-white overflow-hidden shadow-sm">
+          <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-hidden shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-white border-b-2 border-ink text-xs font-black text-ink uppercase tracking-wider select-none">
+                <tr className="bg-white border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
                   <th className="px-5 py-3 w-10">
                     <input
                       type="checkbox"
                       disabled
-                      className="w-4 h-4 accent-ink cursor-not-allowed"
+                      className="w-4 h-4 accent-[#0A0A0A] cursor-not-allowed"
                     />
                   </th>
                   <th className="px-5 py-3">{t('settings.fields.table_name')}</th>
@@ -545,16 +545,16 @@ export const UserFieldsPanel: React.FC = () => {
                   <th className="px-5 py-3 w-12 text-right"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ink/10 text-xs font-bold text-ink">
+              <tbody className="divide-y divide-[#0A0A0A]/10 text-xs font-bold text-[#0A0A0A]">
                 {filteredArchived.map((field) => (
                   <tr key={field.name} className="hover:bg-slate-50 bg-white transition-colors">
                     <td className="px-5 py-3.5">
                       <input
                         type="checkbox"
-                        className="w-4 h-4 accent-ink cursor-pointer"
+                        className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
                       />
                     </td>
-                    <td className="px-5 py-3.5 font-bold text-ink">
+                    <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">
                       {field.name}
                     </td>
                     <td className="px-5 py-3.5 text-slate-700">
@@ -577,7 +577,7 @@ export const UserFieldsPanel: React.FC = () => {
                           });
                           setActiveMenuArchivedField(activeMenuArchivedField === field.name ? null : field.name);
                         }}
-                        className="p-1 hover:bg-ink hover:text-canvas rounded-lg text-ink cursor-pointer transition-all"
+                        className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
                       >
                         <MoreVertical size={15} />
                       </button>
@@ -600,7 +600,7 @@ export const UserFieldsPanel: React.FC = () => {
       {activeMenuArchivedField && archivedMenuCoords && createPortal(
         <div
           style={{ top: archivedMenuCoords.top, right: archivedMenuCoords.right }}
-          className="fixed z-[9999] bg-canvas border-2 border-ink rounded-xl shadow-xl py-1 w-32 text-left animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]"
+          className="fixed z-[9999] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 w-32 text-left animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]"
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -608,7 +608,7 @@ export const UserFieldsPanel: React.FC = () => {
               handleUnarchiveField(activeMenuArchivedField);
               setActiveMenuArchivedField(null);
             }}
-            className="w-full px-3 py-1.5 hover:bg-ink hover:text-canvas text-ink text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
+            className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
           >
             Unarchive
           </button>
@@ -617,7 +617,7 @@ export const UserFieldsPanel: React.FC = () => {
               handleDeleteField(activeMenuArchivedField, true);
               setActiveMenuArchivedField(null);
             }}
-            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-ink/10 uppercase select-none transition-colors"
+            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
           >
             Delete
           </button>
@@ -628,21 +628,21 @@ export const UserFieldsPanel: React.FC = () => {
       {isFieldModalOpen && (
         <div 
           onClick={() => setIsFieldModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
         >
           <form 
             onSubmit={handleCreateField}
             onClick={(e) => e.stopPropagation()}
-            className="bg-canvas border-2 border-ink rounded-3xl p-6 shadow-brutal-xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
           >
-            <div className="flex items-center justify-between border-b-2 border-ink pb-3 select-none">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase tracking-wide">
+            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
+              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
                 {t('settings.fields.create_field_title')}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsFieldModalOpen(false)}
-                className="p-1 hover:bg-white rounded-lg text-ink transition-all cursor-pointer border-2 border-transparent hover:border-ink"
+                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
               >
                 <X size={16} />
               </button>
@@ -650,7 +650,7 @@ export const UserFieldsPanel: React.FC = () => {
 
             <div className="space-y-3.5">
               <div>
-                <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
                   {t('settings.fields.name_label')}
                 </label>
                 <input
@@ -659,12 +659,12 @@ export const UserFieldsPanel: React.FC = () => {
                   value={newFieldName}
                   onChange={(e) => setNewFieldName(e.target.value)}
                   placeholder={t('settings.fields.placeholder_field_name')}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
                   {t('settings.fields.type_label')}
                 </label>
                 <CustomSelect
@@ -680,7 +680,7 @@ export const UserFieldsPanel: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
                   {t('settings.fields.value_label', 'Значення (необов\'язково)')}
                 </label>
                 <input
@@ -688,12 +688,12 @@ export const UserFieldsPanel: React.FC = () => {
                   value={newFieldValue}
                   onChange={(e) => setNewFieldValue(e.target.value)}
                   placeholder={t('settings.fields.placeholder_value', 'Введіть значення поля')}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
                   {t('settings.fields.desc_label')}
                 </label>
                 <input
@@ -701,22 +701,22 @@ export const UserFieldsPanel: React.FC = () => {
                   value={newFieldDesc}
                   onChange={(e) => setNewFieldDesc(e.target.value)}
                   placeholder={t('settings.fields.placeholder_desc')}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-ink/15 select-none">
+            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
               <button
                 type="button"
                 onClick={() => setIsFieldModalOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {t('settings.fields.btn_cancel')}
               </button>
               <button
                 type="submit"
-                className="px-4 py-2.5 bg-ink hover:bg-[#2A2A2A] text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {t('settings.fields.btn_create_field')}
               </button>
@@ -728,21 +728,21 @@ export const UserFieldsPanel: React.FC = () => {
       {isEditFieldModalOpen && (
         <div 
           onClick={() => setIsEditFieldModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
         >
           <form 
             onSubmit={handleEditField}
             onClick={(e) => e.stopPropagation()}
-            className="bg-canvas border-2 border-ink rounded-3xl p-6 shadow-brutal-xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
           >
-            <div className="flex items-center justify-between border-b-2 border-ink pb-3 select-none">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase tracking-wide">
+            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
+              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
                 {t('settings.fields.edit_field_title', 'Редагувати поле користувача')}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsEditFieldModalOpen(false)}
-                className="p-1 hover:bg-white rounded-lg text-ink transition-all cursor-pointer border-2 border-transparent hover:border-ink"
+                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
               >
                 <X size={16} />
               </button>
@@ -750,7 +750,7 @@ export const UserFieldsPanel: React.FC = () => {
 
             <div className="space-y-3.5">
               <div>
-                <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
                   {t('settings.fields.name_label')}
                 </label>
                 <input
@@ -759,12 +759,12 @@ export const UserFieldsPanel: React.FC = () => {
                   value={editFieldName}
                   onChange={(e) => setEditFieldName(e.target.value)}
                   placeholder={t('settings.fields.placeholder_field_name')}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
                   {t('settings.fields.type_label')}
                 </label>
                 <CustomSelect
@@ -780,7 +780,7 @@ export const UserFieldsPanel: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
                   {t('settings.fields.value_label', 'Значення (необов\'язково)')}
                 </label>
                 <input
@@ -788,12 +788,12 @@ export const UserFieldsPanel: React.FC = () => {
                   value={editFieldValue}
                   onChange={(e) => setEditFieldValue(e.target.value)}
                   placeholder={t('settings.fields.placeholder_value', 'Введіть значення поля')}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
                   {t('settings.fields.desc_label')}
                 </label>
                 <input
@@ -801,22 +801,22 @@ export const UserFieldsPanel: React.FC = () => {
                   value={editFieldDesc}
                   onChange={(e) => setEditFieldDesc(e.target.value)}
                   placeholder={t('settings.fields.placeholder_desc')}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-ink/15 select-none">
+            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
               <button
                 type="button"
                 onClick={() => setIsEditFieldModalOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {t('settings.fields.btn_cancel')}
               </button>
               <button
                 type="submit"
-                className="px-4 py-2.5 bg-ink hover:bg-[#2A2A2A] text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {t('settings.fields.btn_save')}
               </button>
@@ -828,28 +828,28 @@ export const UserFieldsPanel: React.FC = () => {
       {isFolderModalOpen && (
         <div 
           onClick={() => setIsFolderModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
         >
           <form 
             onSubmit={handleCreateFolder}
             onClick={(e) => e.stopPropagation()}
-            className="bg-canvas border-2 border-ink rounded-3xl p-6 shadow-brutal-xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
           >
-            <div className="flex items-center justify-between border-b-2 border-ink pb-3 select-none">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase tracking-wide">
+            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
+              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
                 {t('settings.fields.create_folder_title')}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsFolderModalOpen(false)}
-                className="p-1 hover:bg-white rounded-lg text-ink transition-all cursor-pointer border-2 border-transparent hover:border-ink"
+                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
               >
                 <X size={16} />
               </button>
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
                 {t('settings.fields.folder_name_label')}
               </label>
               <input
@@ -858,21 +858,21 @@ export const UserFieldsPanel: React.FC = () => {
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
                 placeholder={t('settings.fields.placeholder_folder_name')}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
+                className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
               />
             </div>
 
-            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-ink/15 select-none">
+            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
               <button
                 type="button"
                 onClick={() => setIsFolderModalOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {t('settings.fields.btn_cancel')}
               </button>
               <button
                 type="submit"
-                className="px-4 py-2.5 bg-ink hover:bg-[#2A2A2A] text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {t('settings.fields.btn_create_folder')}
               </button>
@@ -884,28 +884,28 @@ export const UserFieldsPanel: React.FC = () => {
       {isRenameFolderOpen && (
         <div 
           onClick={() => setIsRenameFolderOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 p-4 animate-in fade-in duration-200 cursor-pointer"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
         >
           <form 
             onSubmit={handleRenameFolder}
             onClick={(e) => e.stopPropagation()}
-            className="bg-canvas border-2 border-ink rounded-3xl p-6 shadow-brutal-xl w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
           >
-            <div className="flex items-center justify-between border-b-2 border-ink pb-3 select-none">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-ink uppercase tracking-wide">
+            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
+              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
                 {t('settings.fields.rename_folder_title')}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsRenameFolderOpen(false)}
-                className="p-1 hover:bg-white rounded-lg text-ink transition-all cursor-pointer border-2 border-transparent hover:border-ink"
+                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
               >
                 <X size={16} />
               </button>
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-ink uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
                 {t('settings.fields.folder_name_label')}
               </label>
               <input
@@ -914,21 +914,21 @@ export const UserFieldsPanel: React.FC = () => {
                 value={renameFolderName}
                 onChange={(e) => setRenameFolderName(e.target.value)}
                 placeholder={t('settings.fields.placeholder_folder_name')}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-ink text-xs font-bold bg-white text-ink focus:outline-none"
+                className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
               />
             </div>
 
-            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-ink/15 select-none">
+            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
               <button
                 type="button"
                 onClick={() => setIsRenameFolderOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {t('settings.fields.btn_cancel')}
               </button>
               <button
                 type="submit"
-                className="px-4 py-2.5 bg-ink hover:bg-[#2A2A2A] text-canvas text-xs font-black uppercase rounded-xl border-2 border-ink transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {t('settings.fields.btn_save')}
               </button>

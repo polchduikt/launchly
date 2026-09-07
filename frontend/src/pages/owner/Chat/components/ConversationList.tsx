@@ -58,21 +58,21 @@ const ConversationListItem = React.memo<ConversationListItemProps>(({
         height: `${size}px`,
         transform: `translateY(${offsetTop}px)`,
       }}
-      className={`w-full text-left px-4 py-3 flex items-start gap-2.5 transition-all cursor-pointer border-b-2 border-ink group ${isSel ? 'bg-white font-black' : 'bg-canvas hover:bg-white'}`}
+      className={`w-full text-left px-4 py-3 flex items-start gap-2.5 transition-all cursor-pointer border-b-2 border-[#0A0A0A] group ${isSel ? 'bg-white font-black' : 'bg-[#F2EBDD] hover:bg-white'}`}
     >
       <div className="relative shrink-0">
         <UserAvatar name={c.botUserName} photoUrl={c.botUserPhotoUrl} size={36} />
-        {isUnrd && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-ink rounded-full border-2 border-white" />}
+        {isUnrd && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-[#0A0A0A] rounded-full border-2 border-white" />}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-center">
-          <span className={`text-xs uppercase truncate ${isUnrd ? 'font-black text-ink' : 'font-bold text-ink'}`}>{c.botUserName}</span>
+          <span className={`text-xs uppercase truncate ${isUnrd ? 'font-black text-[#0A0A0A]' : 'font-bold text-[#0A0A0A]'}`}>{c.botUserName}</span>
           <span className="text-[10px] text-slate-700 font-bold shrink-0 ml-1">{timeAgo(c.lastMessageAt)}</span>
         </div>
         <div className="flex justify-between items-center mt-0.5">
-          <p className={`text-xs truncate ${isUnrd ? 'text-ink font-bold' : 'text-slate-700 font-medium'}`}>{c.lastMessage || 'No messages'}</p>
+          <p className={`text-xs truncate ${isUnrd ? 'text-[#0A0A0A] font-bold' : 'text-slate-700 font-medium'}`}>{c.lastMessage || 'No messages'}</p>
           {c.botName && (
-            <span className="text-[9px] bg-white text-ink border border-ink px-1.5 py-0.5 rounded font-black uppercase shrink-0 ml-1">
+            <span className="text-[9px] bg-white text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded font-black uppercase shrink-0 ml-1">
               {c.botName}
             </span>
           )}
@@ -81,7 +81,7 @@ const ConversationListItem = React.memo<ConversationListItemProps>(({
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); onToggleFavorite(c.id); }}
-        className={`shrink-0 mt-0.5 transition-all cursor-pointer ${isFav ? 'text-rose-600' : 'text-transparent group-hover:text-ink'}`}
+        className={`shrink-0 mt-0.5 transition-all cursor-pointer ${isFav ? 'text-rose-600' : 'text-transparent group-hover:text-[#0A0A0A]'}`}
       >
         <Heart size={13} className={isFav ? 'fill-rose-600' : ''} />
       </button>
@@ -109,12 +109,12 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   });
 
   return (
-    <div className="w-[280px] border-r-2 border-ink flex flex-col bg-canvas shrink-0 overflow-hidden font-['JetBrains_Mono',monospace]">
+    <div className="w-[280px] border-r-2 border-[#0A0A0A] flex flex-col bg-[#F2EBDD] shrink-0 overflow-hidden font-['JetBrains_Mono',monospace]">
       <div ref={parentRef} className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
         {isLoading && conversations.length === 0 ? (
           <div className="animate-pulse flex-1 p-4" />
         ) : conversations.length === 0 ? (
-          <div className="p-8 text-center text-xs text-ink font-bold italic">
+          <div className="p-8 text-center text-xs text-[#0A0A0A] font-bold italic">
             {searchQuery
               ? t('crm.list.no_conversations_found')
               : chatFilter === 'open'

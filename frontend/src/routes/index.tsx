@@ -97,7 +97,7 @@ const PrivateRoute = () => {
   }
 
   if (isSyncing && !user) {
-    return <div className="min-h-screen bg-canvas-subtle dark:bg-ink" />;
+    return <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0A0A0A]" />;
   }
 
   const role = user?.role;

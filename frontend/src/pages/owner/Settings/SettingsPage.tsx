@@ -93,12 +93,12 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex min-h-full w-full bg-canvas font-['Geist',sans-serif] items-stretch">
-        <aside className="w-60 bg-canvas border-r-2 border-ink p-4 shrink-0 font-['JetBrains_Mono',monospace] self-stretch min-h-[calc(100vh-2rem)]">
+      <div className="flex min-h-full w-full bg-[#F2EBDD] font-['Geist',sans-serif] items-stretch">
+        <aside className="w-60 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-4 shrink-0 font-['JetBrains_Mono',monospace] self-stretch min-h-[calc(100vh-2rem)]">
           <div className="sticky top-4 space-y-6 pb-20 select-none">
             {SETTINGS_SECTIONS.map((section) => (
               <div key={section.title}>
-                <h3 className="text-xs font-black text-ink uppercase tracking-wider mb-2 px-2 select-none">
+                <h3 className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-2 px-2 select-none">
                   {t('settings.section.' + section.title.toLowerCase())}
                 </h3>
                 <nav className="space-y-1">
@@ -111,8 +111,8 @@ export const SettingsPage: React.FC = () => {
                       }}
                       className={`w-full flex items-center px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${
                         activeTab === item.id
-                          ? 'bg-ink text-canvas border-2 border-ink'
-                          : 'text-ink hover:bg-white border-2 border-transparent'
+                          ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A]'
+                          : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'
                       }`}
                     >
                       {t('settings.section.' + item.id)}
@@ -125,19 +125,19 @@ export const SettingsPage: React.FC = () => {
         </aside>
 
         <div className="flex-1 p-6 md:p-10 max-w-7xl mx-auto space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b-2 border-ink">
-            <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-ink uppercase tracking-tight select-none">{t('settings.settings')}</h1>
+          <div className="flex items-center justify-between pb-4 border-b-2 border-[#0A0A0A]">
+            <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight select-none">{t('settings.settings')}</h1>
           </div>
 
           {showSuccessBanner && (
-            <div className="bg-emerald-200 border-2 border-ink text-ink p-4 rounded-2xl flex items-center justify-between font-['JetBrains_Mono',monospace]">
+            <div className="bg-emerald-200 border-2 border-[#0A0A0A] text-[#0A0A0A] p-4 rounded-2xl flex items-center justify-between font-['JetBrains_Mono',monospace]">
               <div className="flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-ink shrink-0" />
+                <CheckCircle2 size={16} className="text-[#0A0A0A] shrink-0" />
                 <span className="text-xs font-bold">Google Sheets account successfully connected!</span>
               </div>
               <button
                 onClick={() => setShowSuccessBanner(false)}
-                className="text-ink hover:opacity-75 p-1 rounded-lg transition-all cursor-pointer"
+                className="text-[#0A0A0A] hover:opacity-75 p-1 rounded-lg transition-all cursor-pointer"
               >
                 <X size={14} />
               </button>
@@ -147,11 +147,11 @@ export const SettingsPage: React.FC = () => {
           {activeTab === 'profile' ? (
             <ProfilePanel />
           ) : activeTab === 'general' ? (
-            <div className="bg-canvas border-2 border-ink rounded-3xl divide-y-2 divide-ink/15 overflow-hidden font-['JetBrains_Mono',monospace]">
+            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden font-['JetBrains_Mono',monospace]">
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between">
                 <div className="w-full md:w-1/3">
-                  <h3 className="font-bold text-sm text-ink uppercase">{t('settings.general.account_timezone')}</h3>
+                  <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.account_timezone')}</h3>
                 </div>
                 <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
                   <div className="w-full md:max-w-[300px]">
@@ -163,7 +163,7 @@ export const SettingsPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {timezoneMutation.isPending && (
-                      <span className="flex items-center gap-1.5 text-xs font-bold text-ink/50">
+                      <span className="flex items-center gap-1.5 text-xs font-bold text-[#0A0A0A]/50">
                         <Loader2 size={11} className="animate-spin" /> Збереження...
                       </span>
                     )}
@@ -182,12 +182,12 @@ export const SettingsPage: React.FC = () => {
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                 <div className="w-full md:w-1/3">
-                  <h3 className="font-bold text-sm text-ink uppercase">{t('settings.general.use_template')}</h3>
+                  <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.use_template')}</h3>
                 </div>
                 <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
                   <button
                     onClick={() => navigate('/templates/create')}
-                    className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-bold border-2 border-ink rounded-xl transition-all cursor-pointer"
+                    className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
                   >
                     {t('settings.general.template_btn')}
                   </button>
@@ -199,12 +199,12 @@ export const SettingsPage: React.FC = () => {
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                 <div className="w-full md:w-1/3">
-                  <h3 className="font-bold text-sm text-ink uppercase">{t('settings.general.leave_account')}</h3>
+                  <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.leave_account')}</h3>
                 </div>
                 <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
                   <button
                     onClick={() => setIsLeaveModalOpen(true)}
-                    className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-bold border-2 border-ink rounded-xl transition-all cursor-pointer"
+                    className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
                   >
                     {t('settings.general.leave_btn')}
                   </button>
@@ -216,13 +216,13 @@ export const SettingsPage: React.FC = () => {
 
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                 <div className="w-full md:w-1/3">
-                  <h3 className="font-bold text-sm text-ink uppercase">{t('settings.general.sign_out')}</h3>
+                  <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.sign_out')}</h3>
                 </div>
                 <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
                   <button
                     onClick={handleLogout}
                     disabled={logoutMutation.isPending}
-                    className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-ink hover:text-canvas border-2 border-ink text-ink text-xs font-bold rounded-xl transition-all cursor-pointer gap-2 disabled:opacity-75 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer gap-2 disabled:opacity-75 disabled:cursor-not-allowed"
                   >
                     {logoutMutation.isPending ? (
                       <>
@@ -246,7 +246,7 @@ export const SettingsPage: React.FC = () => {
                 <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
                   <button
                     onClick={() => setIsDeleteModalOpen(true)}
-                    className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-rose-200 hover:bg-rose-300 border-2 border-ink text-ink text-xs font-bold rounded-xl transition-all cursor-pointer"
+                    className="inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-rose-200 hover:bg-rose-300 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer"
                   >
                     {t('settings.general.delete_btn')}
                   </button>
@@ -264,9 +264,9 @@ export const SettingsPage: React.FC = () => {
             botId ? (
               <IntegrationsPanel botId={botId} onOpenPricing={() => setShowPricing(true)} />
             ) : (
-              <div className="bg-canvas border-2 border-ink rounded-3xl p-8 text-center max-w-md mx-auto space-y-4 font-['JetBrains_Mono',monospace]">
-                <AlertCircle size={40} className="text-ink mx-auto" />
-                <h3 className="font-bold text-ink text-sm uppercase">No active bot found</h3>
+              <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-8 text-center max-w-md mx-auto space-y-4 font-['JetBrains_Mono',monospace]">
+                <AlertCircle size={40} className="text-[#0A0A0A] mx-auto" />
+                <h3 className="font-bold text-[#0A0A0A] text-sm uppercase">No active bot found</h3>
                 <p className="text-xs text-slate-700 font-medium">Please connect a Telegram bot first to access integrations.</p>
               </div>
             )
@@ -283,7 +283,7 @@ export const SettingsPage: React.FC = () => {
           ) : activeTab === 'telegram' ? (
             <TelegramSettingsPanel />
           ) : (
-            <div className="bg-canvas border-2 border-ink rounded-3xl p-12 text-center text-sm font-bold text-ink font-['JetBrains_Mono',monospace]">
+            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-12 text-center text-sm font-bold text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
               This section is currently under development. Settings will be linked here soon.
             </div>
           )}

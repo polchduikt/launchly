@@ -125,14 +125,14 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId, onO
         onUpgrade={handleUpgradeClick}
       />
 
-      <div className="bg-canvas border-2 border-ink rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between transition-all opacity-80 font-['JetBrains_Mono',monospace]">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between transition-all opacity-80 font-['JetBrains_Mono',monospace]">
         <div className="w-full md:w-1/4 shrink-0">
           <div className="flex items-center gap-2">
-            <h3 className="font-['Anybody',sans-serif] font-black text-sm text-ink uppercase tracking-tight leading-snug">
+            <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">
               {t('settings.integrations.hubspot.title', 'HubSpot CRM')}
             </h3>
           </div>
-          <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-200 border border-ink text-ink uppercase tracking-wider">
+          <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-200 border border-[#0A0A0A] text-[#0A0A0A] uppercase tracking-wider">
             {t('settings.integrations.coming_soon', 'Coming Soon')}
           </div>
         </div>
@@ -142,12 +142,12 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId, onO
             <SiHubspot className="w-12 h-12 text-[#FF7A59]" />
           </div>
           <div className="flex-1 flex flex-col gap-1">
-            <span className="font-black text-ink text-sm uppercase">HubSpot</span>
+            <span className="font-black text-[#0A0A0A] text-sm uppercase">HubSpot</span>
             <div className="mt-2">
               <button
                 type="button"
                 disabled
-                className="w-full px-4 py-2 border-2 border-ink/40 bg-slate-100 text-slate-400 text-xs font-black uppercase rounded-xl cursor-not-allowed select-none text-center"
+                className="w-full px-4 py-2 border-2 border-[#0A0A0A]/40 bg-slate-100 text-slate-400 text-xs font-black uppercase rounded-xl cursor-not-allowed select-none text-center"
               >
                 {t('settings.integrations.coming_soon', 'Coming Soon')}
               </button>

@@ -94,13 +94,13 @@ export const AdminLogsPage: React.FC = () => {
 
   return (
     <AdminLayout noPadding={true}>
-      <div className="flex h-full w-full overflow-hidden bg-canvas text-ink font-['JetBrains_Mono',monospace]">
+      <div className="flex h-full w-full overflow-hidden bg-[#F2EBDD] text-[#0A0A0A] font-['JetBrains_Mono',monospace]">
         
-        <aside className="w-56 lg:w-60 bg-canvas border-r-2 border-ink h-full p-4 space-y-5 overflow-y-auto shrink-0 flex flex-col justify-between z-10">
+        <aside className="w-56 lg:w-60 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] h-full p-4 space-y-5 overflow-y-auto shrink-0 flex flex-col justify-between z-10">
           <div className="space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b-2 border-ink">
-              <h3 className="font-['Anybody',sans-serif] text-xs font-black uppercase text-ink flex items-center gap-1.5">
-                <Filter size={14} className="text-ink" />
+            <div className="flex items-center justify-between pb-3 border-b-2 border-[#0A0A0A]">
+              <h3 className="font-['Anybody',sans-serif] text-xs font-black uppercase text-[#0A0A0A] flex items-center gap-1.5">
+                <Filter size={14} className="text-[#0A0A0A]" />
                 <span>{t('admin.filters_title')}</span>
               </h3>
               {(levelFilter !== 'all' || serviceFilter !== 'all' || startDate !== '' || endDate !== '' || sortFilter !== 'desc') && (
@@ -113,7 +113,7 @@ export const AdminLogsPage: React.FC = () => {
                     setSortFilter('desc');
                     setPage(0);
                   }}
-                  className="text-[10px] font-black uppercase text-ink underline hover:opacity-80 transition cursor-pointer"
+                  className="text-[10px] font-black uppercase text-[#0A0A0A] underline hover:opacity-80 transition cursor-pointer"
                 >
                   {t('admin.reset_filters')}
                 </button>
@@ -121,19 +121,19 @@ export const AdminLogsPage: React.FC = () => {
             </div>
 
             <div className="space-y-1" ref={levelDropdownRef}>
-              <label className="text-[10px] font-black uppercase tracking-wider text-ink block">{t('admin.level_col') || 'РІВЕНЬ'}</label>
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.level_col') || 'РІВЕНЬ'}</label>
               <div className="relative w-full">
                 <button
                   type="button"
                   onClick={() => setIsLevelDropdownOpen(!isLevelDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink transition-all cursor-pointer shadow-brutal-sm"
+                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <span>{getLevelLabel(levelFilter)}</span>
-                  <ChevronDown size={14} className={`text-ink transition-transform duration-200 ${isLevelDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform duration-200 ${isLevelDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isLevelDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-canvas border-2 border-ink rounded-xl shadow-brutal z-50 py-1 font-['JetBrains_Mono',monospace]">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace]">
                     {levelOptions.map((opt) => (
                       <button
                         key={opt.value}
@@ -143,7 +143,7 @@ export const AdminLogsPage: React.FC = () => {
                           setIsLevelDropdownOpen(false);
                         }}
                         className={`w-full px-3 py-1.5 text-left text-xs font-bold uppercase flex items-center justify-between hover:bg-white transition cursor-pointer ${
-                          levelFilter === opt.value ? 'bg-ink text-canvas' : 'text-ink'
+                          levelFilter === opt.value ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A]'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -155,19 +155,19 @@ export const AdminLogsPage: React.FC = () => {
             </div>
 
             <div className="space-y-1" ref={serviceDropdownRef}>
-              <label className="text-[10px] font-black uppercase tracking-wider text-ink block">{t('admin.service_col') || 'СЕРВІС'}</label>
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.service_col') || 'СЕРВІС'}</label>
               <div className="relative w-full">
                 <button
                   type="button"
                   onClick={() => setIsServiceDropdownOpen(!isServiceDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink transition-all cursor-pointer shadow-brutal-sm"
+                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <span>{getServiceLabel(serviceFilter)}</span>
-                  <ChevronDown size={14} className={`text-ink transition-transform duration-200 ${isServiceDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform duration-200 ${isServiceDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isServiceDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-canvas border-2 border-ink rounded-xl shadow-brutal z-50 py-1 font-['JetBrains_Mono',monospace]">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace]">
                     {serviceOptions.map((opt) => (
                       <button
                         key={opt.value}
@@ -177,7 +177,7 @@ export const AdminLogsPage: React.FC = () => {
                           setIsServiceDropdownOpen(false);
                         }}
                         className={`w-full px-3 py-1.5 text-left text-xs font-bold uppercase flex items-center justify-between hover:bg-white transition cursor-pointer ${
-                          serviceFilter === opt.value ? 'bg-ink text-canvas' : 'text-ink'
+                          serviceFilter === opt.value ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A]'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -189,7 +189,7 @@ export const AdminLogsPage: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase tracking-wider text-ink block">
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">
                 {t('admin.date_from')}
               </label>
               <input
@@ -199,12 +199,12 @@ export const AdminLogsPage: React.FC = () => {
                   setStartDate(e.target.value);
                   setPage(0);
                 }}
-                className="w-full px-2.5 py-1.5 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none transition shadow-brutal-sm"
+                className="w-full px-2.5 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none transition shadow-[2px_2px_0px_#0A0A0A]"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase tracking-wider text-ink block">
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">
                 {t('admin.date_to')}
               </label>
               <input
@@ -214,24 +214,24 @@ export const AdminLogsPage: React.FC = () => {
                   setEndDate(e.target.value);
                   setPage(0);
                 }}
-                className="w-full px-2.5 py-1.5 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink focus:outline-none transition shadow-brutal-sm"
+                className="w-full px-2.5 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none transition shadow-[2px_2px_0px_#0A0A0A]"
               />
             </div>
 
             <div className="space-y-1" ref={sortDropdownRef}>
-              <label className="text-[10px] font-black uppercase tracking-wider text-ink block">{t('admin.sorting_label')}</label>
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#0A0A0A] block">{t('admin.sorting_label')}</label>
               <div className="relative w-full">
                 <button
                   type="button"
                   onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink transition-all cursor-pointer shadow-brutal-sm"
+                  className="w-full flex items-center justify-between px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <span>{sortFilter === 'asc' ? t('admin.sort_oldest') : t('admin.sort_newest')}</span>
-                  <ChevronDown size={14} className={`text-ink transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isSortDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-canvas border-2 border-ink rounded-xl shadow-brutal z-50 py-1 font-['JetBrains_Mono',monospace]">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_#0A0A0A] z-50 py-1 font-['JetBrains_Mono',monospace]">
                     {[
                       { value: 'desc', label: t('admin.sort_newest') },
                       { value: 'asc', label: t('admin.sort_oldest') },
@@ -244,7 +244,7 @@ export const AdminLogsPage: React.FC = () => {
                           setIsSortDropdownOpen(false);
                         }}
                         className={`w-full px-3 py-1.5 text-left text-xs font-bold uppercase flex items-center justify-between hover:bg-white transition cursor-pointer ${
-                          sortFilter === opt.value ? 'bg-ink text-canvas' : 'text-ink'
+                          sortFilter === opt.value ? 'bg-[#0A0A0A] text-[#F2EBDD]' : 'text-[#0A0A0A]'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -257,18 +257,18 @@ export const AdminLogsPage: React.FC = () => {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-canvas space-y-4">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 min-w-0 h-full bg-[#F2EBDD] space-y-4">
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-3 flex-1 max-w-md">
               <div className="relative w-full">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink" size={15} />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]" size={15} />
                 <input
                   type="text"
                   placeholder={t('admin.search_logs')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink placeholder-slate-500 focus:outline-none transition-all shadow-brutal-sm"
+                  className="w-full pl-9 pr-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder-slate-500 focus:outline-none transition-all shadow-[2px_2px_0px_#0A0A0A]"
                 />
               </div>
             </div>
@@ -277,10 +277,10 @@ export const AdminLogsPage: React.FC = () => {
           {isLoading ? (
             <TableSkeleton rows={8} columns={5} />
           ) : (
-            <div className="bg-canvas border-2 border-ink rounded-3xl overflow-hidden shadow-brutal">
+            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl overflow-hidden shadow-[4px_4px_0px_#0A0A0A]">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-['JetBrains_Mono',monospace]">
-                  <thead className="bg-canvas border-b-2 border-ink text-ink font-black uppercase text-[10px]">
+                  <thead className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-black uppercase text-[10px]">
                     <tr>
                       <th className="py-3.5 px-4">{t('admin.time_col') || 'ЧАС'}</th>
                       <th className="py-3.5 px-4 text-center">{t('admin.level_col') || 'РІВЕНЬ'}</th>
@@ -289,7 +289,7 @@ export const AdminLogsPage: React.FC = () => {
                       <th className="py-3.5 px-4">{t('admin.created_by_col') || 'КОРИСТУВАЧ'}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-ink/20">
+                  <tbody className="divide-y divide-[#0A0A0A]/20">
                     {logs.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="py-12 text-center text-slate-700 font-bold">
@@ -299,30 +299,30 @@ export const AdminLogsPage: React.FC = () => {
                     ) : (
                       logs.map((log) => (
                         <tr key={log.id} className="hover:bg-white transition">
-                          <td className="py-3.5 px-4 font-mono text-[11px] font-bold text-ink whitespace-nowrap">
+                          <td className="py-3.5 px-4 font-mono text-[11px] font-bold text-[#0A0A0A] whitespace-nowrap">
                             {formatEuropeanTimestamp(log.timestamp)}
                           </td>
                           <td className="py-3.5 px-4 text-center whitespace-nowrap">
                             {log.level === 'ERROR' ? (
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-200 text-rose-950 border-2 border-ink">
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-200 text-rose-950 border-2 border-[#0A0A0A]">
                                 ERROR
                               </span>
                             ) : log.level === 'WARN' ? (
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-amber-200 text-amber-950 border-2 border-ink">
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-amber-200 text-amber-950 border-2 border-[#0A0A0A]">
                                 WARN
                               </span>
                             ) : (
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-white text-ink border-2 border-ink">
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-white text-[#0A0A0A] border-2 border-[#0A0A0A]">
                                 INFO
                               </span>
                             )}
                           </td>
                           <td className="py-3.5 px-4 whitespace-nowrap">
-                            <span className="px-2 py-0.5 rounded-lg bg-white text-ink font-mono text-[11px] font-black border-2 border-ink">
+                            <span className="px-2 py-0.5 rounded-lg bg-white text-[#0A0A0A] font-mono text-[11px] font-black border-2 border-[#0A0A0A]">
                               [{log.service}]
                             </span>
                           </td>
-                          <td className="py-3.5 px-4 text-ink font-bold text-xs break-words max-w-md">
+                          <td className="py-3.5 px-4 text-[#0A0A0A] font-bold text-xs break-words max-w-md">
                             {log.message}
                           </td>
                           <td className="py-3.5 px-4 text-slate-700 font-bold text-xs whitespace-nowrap">
@@ -335,24 +335,24 @@ export const AdminLogsPage: React.FC = () => {
                 </table>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-canvas border-t-2 border-ink text-xs text-ink font-bold">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-[#F2EBDD] border-t-2 border-[#0A0A0A] text-xs text-[#0A0A0A] font-bold">
                 <div>
                   {t('admin.showing') || 'Показано'}{' '}
-                  <span className="font-black text-ink">{logs.length}</span>{' '}
+                  <span className="font-black text-[#0A0A0A]">{logs.length}</span>{' '}
                   {t('admin.of') || 'з'}{' '}
-                  <span className="font-black text-ink">{totalElements}</span>
+                  <span className="font-black text-[#0A0A0A]">{totalElements}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                     disabled={page === 0}
-                    className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-ink bg-white hover:bg-ink hover:text-canvas text-ink font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-brutal-sm cursor-pointer"
+                    className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
                   >
                     <ChevronLeft size={14} />
                     <span>{t('admin.prev') || 'Назад'}</span>
                   </button>
 
-                  <div className="flex items-center space-x-1 px-2.5 py-1 rounded-xl bg-white border-2 border-ink text-xs font-black font-mono text-ink shadow-brutal-sm">
+                  <div className="flex items-center space-x-1 px-2.5 py-1 rounded-xl bg-white border-2 border-[#0A0A0A] text-xs font-black font-mono text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
                     <span>{page + 1}</span>
                     <span>/</span>
                     <span>{totalPages}</span>
@@ -361,7 +361,7 @@ export const AdminLogsPage: React.FC = () => {
                   <button
                     onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
                     disabled={page >= totalPages - 1}
-                    className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-ink bg-white hover:bg-ink hover:text-canvas text-ink font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-brutal-sm cursor-pointer"
+                    className="flex items-center space-x-1 px-3 py-1 rounded-xl border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] font-black disabled:opacity-40 disabled:cursor-not-allowed transition shadow-[2px_2px_0px_#0A0A0A] cursor-pointer"
                   >
                     <span>{t('admin.next') || 'Далі'}</span>
                     <ChevronRight size={14} />

@@ -86,13 +86,13 @@ export const HotmartCard: React.FC<HotmartCardProps> = ({
   };
 
   return (
-    <div className="bg-canvas border-2 border-ink rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between transition-all font-['JetBrains_Mono',monospace]">
+    <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between transition-all font-['JetBrains_Mono',monospace]">
       <div className="w-full md:w-1/4 shrink-0">
-        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-ink uppercase tracking-tight leading-snug">
+        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">
           {t('settings.integrations.hotmart.title', 'Hotmart Sales & Webhooks')}
         </h3>
         {isConnected && (
-          <div className="mt-2.5 flex items-center gap-1.5 text-ink font-black text-xs">
+          <div className="mt-2.5 flex items-center gap-1.5 text-[#0A0A0A] font-black text-xs">
             <CheckCircle size={14} className="shrink-0 text-emerald-700" />
             <span>{t('settings.integrations.premium.connected', 'Connected')}</span>
           </div>
@@ -107,24 +107,24 @@ export const HotmartCard: React.FC<HotmartCardProps> = ({
         </div>
 
         <div className="flex-1 flex flex-col gap-2">
-          <span className="font-black text-ink text-sm uppercase">Hotmart</span>
+          <span className="font-black text-[#0A0A0A] text-sm uppercase">Hotmart</span>
 
           <div className="space-y-1 mt-1">
-            <label className="flex items-center gap-1 text-[9px] font-black text-ink uppercase tracking-wider select-none">
+            <label className="flex items-center gap-1 text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider select-none">
               <span>{t('settings.integrations.hotmart.webhook_url_label', 'Your Webhook Endpoint URL')}</span>
-              <HelpCircle size={10} className="text-ink" />
+              <HelpCircle size={10} className="text-[#0A0A0A]" />
             </label>
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 readOnly
                 value={webhookUrl}
-                className="w-full px-3 py-2 border-2 border-ink rounded-xl text-[11px] font-mono font-bold bg-white text-ink select-all focus:outline-none"
+                className="w-full px-3 py-2 border-2 border-[#0A0A0A] rounded-xl text-[11px] font-mono font-bold bg-white text-[#0A0A0A] select-all focus:outline-none"
               />
               <button
                 type="button"
                 onClick={handleCopyWebhook}
-                className="p-2 border-2 border-ink rounded-xl bg-white hover:bg-ink hover:text-canvas transition-colors shrink-0 cursor-pointer"
+                className="p-2 border-2 border-[#0A0A0A] rounded-xl bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-colors shrink-0 cursor-pointer"
                 title="Copy Webhook URL"
               >
                 {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
@@ -134,7 +134,7 @@ export const HotmartCard: React.FC<HotmartCardProps> = ({
 
           {isConnected ? (
             <div className="space-y-3 w-full mt-2">
-              <div className="p-3 bg-white border-2 border-ink rounded-xl text-xs font-bold text-ink">
+              <div className="p-3 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A]">
                 <span className="text-slate-600 uppercase text-[10px] block">
                   {t('settings.integrations.hotmart.token_label', 'Hottok Token')}:
                 </span>
@@ -145,7 +145,7 @@ export const HotmartCard: React.FC<HotmartCardProps> = ({
                 type="button"
                 onClick={handleDisconnect}
                 disabled={deleteMutation.isPending}
-                className="w-full px-4 py-2 border-2 border-ink bg-rose-200 hover:bg-rose-300 text-ink text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center flex items-center justify-center gap-2"
+                className="w-full px-4 py-2 border-2 border-[#0A0A0A] bg-rose-200 hover:bg-rose-300 text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center flex items-center justify-center gap-2"
               >
                 {deleteMutation.isPending && <Loader2 size={14} className="animate-spin" />}
                 <span>{t('settings.integrations.premium.disconnect', 'Disconnect')}</span>
@@ -154,7 +154,7 @@ export const HotmartCard: React.FC<HotmartCardProps> = ({
           ) : (
             <form onSubmit={handleConnect} className="space-y-2.5 w-full mt-1">
               <div className="space-y-1">
-                <label className="flex items-center gap-1 text-[9px] font-black text-ink uppercase tracking-wider select-none">
+                <label className="flex items-center gap-1 text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider select-none">
                   <span>{t('settings.integrations.hotmart.token_label', 'Hottok Verification Token')}</span>
                 </label>
                 <input
@@ -162,7 +162,7 @@ export const HotmartCard: React.FC<HotmartCardProps> = ({
                   value={hottok}
                   onChange={(e) => setHottok(e.target.value)}
                   placeholder={t('settings.integrations.hotmart.token_placeholder', 'Paste your Hotmart Hottok')}
-                  className="w-full px-3.5 py-2 border-2 border-ink rounded-xl text-xs font-bold bg-white text-ink focus:outline-none"
+                  className="w-full px-3.5 py-2 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
                 />
               </div>
 
@@ -175,7 +175,7 @@ export const HotmartCard: React.FC<HotmartCardProps> = ({
               <button
                 type="submit"
                 disabled={createMutation.isPending}
-                className="w-full px-4 py-2.5 border-2 border-ink bg-white hover:bg-ink hover:text-canvas text-ink text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center flex items-center justify-center gap-2"
+                className="w-full px-4 py-2.5 border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center flex items-center justify-center gap-2"
               >
                 {createMutation.isPending && <Loader2 size={14} className="animate-spin" />}
                 <span>{t('settings.integrations.premium.connect', { name: 'Hotmart' })}</span>

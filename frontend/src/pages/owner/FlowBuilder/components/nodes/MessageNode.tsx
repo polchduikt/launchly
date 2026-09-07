@@ -199,7 +199,7 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
         parts.push(
           <span 
             key={match.index} 
-            className="inline-flex items-center bg-ink text-canvas rounded-lg px-2 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline shrink-0 border border-ink font-mono"
+            className="inline-flex items-center bg-[#0A0A0A] text-[#F2EBDD] rounded-lg px-2 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline shrink-0 border border-[#0A0A0A] font-mono"
           >
             {match.displayName}
           </span>
@@ -232,9 +232,9 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-ink rounded-3xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected 
-          ? 'shadow-lg ring-2 ring-ink' 
+          ? 'shadow-lg ring-2 ring-[#0A0A0A]' 
           : 'shadow-md'
       } ${isGrayedOut ? 'opacity-40 grayscale pointer-events-none' : ''}`}
     >

@@ -135,13 +135,13 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
           onClose();
         }
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 animate-fade-in font-['JetBrains_Mono',monospace]"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/40 animate-fade-in font-['JetBrains_Mono',monospace]"
     >
-      <div className="bg-canvas border-4 border-ink shadow-brutal-2xl rounded-3xl max-w-lg w-full overflow-hidden text-ink relative">
+      <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] rounded-3xl max-w-lg w-full overflow-hidden text-[#0A0A0A] relative">
         
-        <div className="p-6 border-b-2 border-ink flex items-center justify-between bg-amber-100/60">
+        <div className="p-6 border-b-2 border-[#0A0A0A] flex items-center justify-between bg-amber-100/60">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-ink border-2 border-ink flex items-center justify-center shrink-0 shadow-brutal-sm">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-[#0A0A0A] border-2 border-[#0A0A0A] flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#0A0A0A]">
               <AlertTriangle size={22} />
             </div>
             <div>
@@ -156,7 +156,7 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
           <button
             onClick={onClose}
             disabled={submitting}
-            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white transition-all cursor-pointer shadow-sm"
+            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
           >
             <X size={16} />
           </button>
@@ -165,16 +165,16 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
         <div className="p-6 space-y-5">
           {loading ? (
             <div className="py-8 flex flex-col items-center justify-center gap-3">
-              <Loader2 className="animate-spin text-ink" size={28} />
+              <Loader2 className="animate-spin text-[#0A0A0A]" size={28} />
               <span className="text-xs font-bold">{t('settings.leave.checking_team', 'Перевірка складу команди...')}</span>
             </div>
           ) : !isOwner ? (
             <>
-              <div className="bg-amber-50 border-2 border-ink p-5 rounded-2xl space-y-3">
+              <div className="bg-amber-50 border-2 border-[#0A0A0A] p-5 rounded-2xl space-y-3">
                 <div className="flex items-start gap-3">
                   <AlertTriangle size={22} className="text-amber-600 shrink-0 mt-0.5" />
                   <div className="space-y-1.5">
-                    <h4 className="font-extrabold text-xs uppercase text-ink">
+                    <h4 className="font-extrabold text-xs uppercase text-[#0A0A0A]">
                       {t('settings.leave.member_notice_title', 'Ви є членом цієї команди')}
                     </h4>
                     <p className="text-[11.5px] font-bold text-slate-700 leading-relaxed">
@@ -187,10 +187,10 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
                 </div>
               </div>
 
-              <div className="pt-3 border-t-2 border-ink/15 space-y-2">
-                <label className="block text-[11px] font-extrabold uppercase text-ink leading-tight">
+              <div className="pt-3 border-t-2 border-[#0A0A0A]/15 space-y-2">
+                <label className="block text-[11px] font-extrabold uppercase text-[#0A0A0A] leading-tight">
                   {t('settings.leave.confirm_leave_label', 'Для підтвердження виходу введіть слово')}{' '}
-                  <span className="bg-amber-300 px-2 py-0.5 rounded-md border border-ink font-black text-ink select-all">
+                  <span className="bg-amber-300 px-2 py-0.5 rounded-md border border-[#0A0A0A] font-black text-[#0A0A0A] select-all">
                     {confirmLeaveWord}
                   </span>:
                 </label>
@@ -199,14 +199,14 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
                   value={confirmText}
                   onChange={(e) => setConfirmText(e.target.value)}
                   placeholder={t('settings.leave.confirm_leave_placeholder', `Введіть ${confirmLeaveWord}...`)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-ink bg-white text-xs font-black uppercase text-ink focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-slate-400 placeholder:font-bold tracking-wider"
+                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] bg-white text-xs font-black uppercase text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-slate-400 placeholder:font-bold tracking-wider"
                 />
               </div>
             </>
           ) : hasCandidates ? (
             <>
-              <div className="bg-white border-2 border-ink p-4 rounded-2xl space-y-2">
-                <div className="flex items-center gap-2 text-xs font-extrabold uppercase text-ink">
+              <div className="bg-white border-2 border-[#0A0A0A] p-4 rounded-2xl space-y-2">
+                <div className="flex items-center gap-2 text-xs font-extrabold uppercase text-[#0A0A0A]">
                   <ShieldCheck size={16} className="text-emerald-600 shrink-0" />
                   <span>{t('settings.leave.select_owner_title', 'Оберіть нового Власника (Owner):')}</span>
                 </div>
@@ -233,8 +233,8 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
                       onClick={() => m.userId && setSelectedNewOwnerId(m.userId)}
                       className={`p-3 rounded-2xl border-2 transition-all flex items-center justify-between cursor-pointer ${
                         isSelected
-                          ? 'bg-ink text-canvas border-ink shadow-brutal'
-                          : 'bg-white text-ink border-ink hover:bg-slate-50'
+                          ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A]'
+                          : 'bg-white text-[#0A0A0A] border-[#0A0A0A] hover:bg-slate-50'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -242,7 +242,7 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
                           src={m.avatar}
                           name={m.name}
                           className="w-9 h-9 rounded-full object-cover border-2 border-current shrink-0"
-                          fallbackClassName="w-9 h-9 rounded-full bg-amber-400 text-ink font-black flex items-center justify-center text-xs shrink-0 border-2 border-current"
+                          fallbackClassName="w-9 h-9 rounded-full bg-amber-400 text-[#0A0A0A] font-black flex items-center justify-center text-xs shrink-0 border-2 border-current"
                         />
                         <div>
                           <p className="font-extrabold text-xs leading-snug">{m.name}</p>
@@ -253,20 +253,20 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
                       </div>
                       <div
                         className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                          isSelected ? 'border-canvas bg-amber-400' : 'border-ink'
+                          isSelected ? 'border-[#F2EBDD] bg-amber-400' : 'border-[#0A0A0A]'
                         }`}
                       >
-                        {isSelected && <UserCheck size={12} className="text-ink" />}
+                        {isSelected && <UserCheck size={12} className="text-[#0A0A0A]" />}
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              <div className="pt-3 border-t-2 border-ink/15 space-y-2">
-                <label className="block text-[11px] font-extrabold uppercase text-ink leading-tight">
+              <div className="pt-3 border-t-2 border-[#0A0A0A]/15 space-y-2">
+                <label className="block text-[11px] font-extrabold uppercase text-[#0A0A0A] leading-tight">
                   {t('settings.leave.confirm_label', 'Для підтвердження введіть слово')}{' '}
-                  <span className="bg-amber-300 px-2 py-0.5 rounded-md border border-ink font-black text-ink select-all">
+                  <span className="bg-amber-300 px-2 py-0.5 rounded-md border border-[#0A0A0A] font-black text-[#0A0A0A] select-all">
                     {confirmTransferWord}
                   </span>:
                 </label>
@@ -275,16 +275,16 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
                   value={confirmText}
                   onChange={(e) => setConfirmText(e.target.value)}
                   placeholder={t('settings.leave.confirm_placeholder', `Введіть ${confirmTransferWord}...`)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-ink bg-white text-xs font-black uppercase text-ink focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-slate-400 placeholder:font-bold tracking-wider"
+                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] bg-white text-xs font-black uppercase text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-amber-500 placeholder:text-slate-400 placeholder:font-bold tracking-wider"
                 />
               </div>
             </>
           ) : (
-            <div className="bg-amber-50 border-2 border-ink p-5 rounded-2xl space-y-3">
+            <div className="bg-amber-50 border-2 border-[#0A0A0A] p-5 rounded-2xl space-y-3">
               <div className="flex items-start gap-3">
                 <AlertTriangle size={20} className="text-amber-600 shrink-0 mt-0.5" />
                 <div className="space-y-1.5">
-                  <h4 className="font-extrabold text-xs uppercase text-ink">
+                  <h4 className="font-extrabold text-xs uppercase text-[#0A0A0A]">
                     {t('settings.leave.no_members_title', 'Ви єдиний користувач у цьому акаунті')}
                   </h4>
                   <p className="text-[11.5px] font-bold text-slate-700 leading-relaxed">
@@ -299,11 +299,11 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
           )}
         </div>
 
-        <div className="p-5 border-t-2 border-ink bg-white flex items-center justify-end gap-3">
+        <div className="p-5 border-t-2 border-[#0A0A0A] bg-white flex items-center justify-end gap-3">
           <button
             onClick={onClose}
             disabled={submitting}
-            className="px-5 py-2.5 bg-white hover:bg-slate-100 text-ink border-2 border-ink text-xs font-extrabold rounded-xl transition-all cursor-pointer"
+            className="px-5 py-2.5 bg-white hover:bg-slate-100 text-[#0A0A0A] border-2 border-[#0A0A0A] text-xs font-extrabold rounded-xl transition-all cursor-pointer"
           >
             {t('common.cancel', 'Скасувати')}
           </button>
@@ -312,7 +312,7 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
             <button
               onClick={handleOnlyLeaveTeam}
               disabled={submitting || !isLeaveConfirmed}
-              className="px-6 py-2.5 bg-rose-500 hover:bg-rose-600 text-white border-2 border-ink shadow-brutal-md hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2.5 bg-rose-500 hover:bg-rose-600 text-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <>
@@ -330,7 +330,7 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
             <button
               onClick={handleTransferAndLeave}
               disabled={submitting || !selectedNewOwnerId || !isTransferConfirmed}
-              className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-ink border-2 border-ink shadow-brutal-md hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <>
@@ -351,7 +351,7 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
                   onClose();
                   onNavigateToTeam();
                 }}
-                className="px-6 py-2.5 bg-ink hover:bg-ink/90 text-canvas border-2 border-ink shadow-brutal-md hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-2"
+                className="px-6 py-2.5 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-2"
               >
                 <span>{t('settings.leave.btn_add_member', 'Перейти в раздел Команда')}</span>
                 <ArrowRight size={14} />

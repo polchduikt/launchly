@@ -51,12 +51,12 @@ const RegisterPage: React.FC = () => {
   const rightContent = (
     <div className="w-full text-left">
       <div className="mb-8">
-        <h1 className="font-['Anybody',sans-serif] font-black text-xl text-ink mb-2 uppercase tracking-tight">{t('auth.register.title', 'Create Account')}</h1>
-        <p className="text-sm text-ink/70 font-bold">{t('auth.register.subtitle', 'Register to start configuring Telegram bots')}</p>
+        <h1 className="font-['Anybody',sans-serif] font-black text-xl text-[#0A0A0A] mb-2 uppercase tracking-tight">{t('auth.register.title', 'Create Account')}</h1>
+        <p className="text-sm text-[#0A0A0A]/70 font-bold">{t('auth.register.subtitle', 'Register to start configuring Telegram bots')}</p>
       </div>
 
       {apiError && (
-        <div className="mb-6 p-4 rounded-xl border-2 border-ink bg-rose-200 text-ink text-sm font-bold">
+        <div className="mb-6 p-4 rounded-xl border-2 border-[#0A0A0A] bg-rose-200 text-[#0A0A0A] text-sm font-bold">
           {apiError}
         </div>
       )}
@@ -94,7 +94,7 @@ const RegisterPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-ink/50 hover:text-ink transition-colors cursor-pointer"
+              className="text-[#0A0A0A]/50 hover:text-[#0A0A0A] transition-colors cursor-pointer"
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -111,7 +111,7 @@ const RegisterPage: React.FC = () => {
         <button
           type="submit"
           disabled={isPending || !isTurnstileReady}
-          className="w-full flex justify-center py-2.5 px-4 border-2 border-ink rounded-xl bg-ink text-canvas font-black text-sm hover:bg-canvas hover:text-ink transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer uppercase tracking-wider"
+          className="w-full flex justify-center py-2.5 px-4 border-2 border-[#0A0A0A] rounded-xl bg-[#0A0A0A] text-[#F2EBDD] font-black text-sm hover:bg-[#F2EBDD] hover:text-[#0A0A0A] transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer uppercase tracking-wider"
         >
           {isPending ? (
             <Loader2 className="animate-spin" size={16} />
@@ -124,10 +124,10 @@ const RegisterPage: React.FC = () => {
       <div className="mt-8">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t-2 border-ink/20"></div>
+            <div className="w-full border-t-2 border-[#0A0A0A]/20"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-canvas text-ink/60 text-xs font-bold">
+            <span className="px-2 bg-[#F2EBDD] text-[#0A0A0A]/60 text-xs font-bold">
               {t('auth.or_continue', 'Or continue with')}
             </span>
           </div>
@@ -138,7 +138,7 @@ const RegisterPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsTelegramOpen(true)}
-            className="w-full inline-flex justify-center items-center py-2.5 px-4 border-2 border-ink rounded-xl bg-white text-ink text-sm font-black hover:bg-ink hover:text-canvas transition-all cursor-pointer"
+            className="w-full inline-flex justify-center items-center py-2.5 px-4 border-2 border-[#0A0A0A] rounded-xl bg-white text-[#0A0A0A] text-sm font-black hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer"
           >
             <svg className="h-5 w-5 mr-3 fill-blue-500" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.18-.08-.04-.19-.01-.27.01-.12.02-2.03 1.28-5.73 3.77-.54.37-1.03.55-1.47.54-.48-.01-1.4-.27-2.08-.49-.83-.27-1.5-.42-1.44-.89.03-.24.37-.49 1.03-.74 4.05-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.64-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.16-.03.22z" />
@@ -148,11 +148,11 @@ const RegisterPage: React.FC = () => {
         </div>
       </div>
 
-      <p className="mt-8 text-center text-sm text-ink/70 font-bold">
+      <p className="mt-8 text-center text-sm text-[#0A0A0A]/70 font-bold">
         {t('auth.register.has_account', 'Already have an account?')}{' '}
         <Link
           to={redirectParam ? `/login?redirect=${encodeURIComponent(redirectParam)}` : '/login'}
-          className="text-ink hover:underline font-black transition-colors"
+          className="text-[#0A0A0A] hover:underline font-black transition-colors"
         >
           {t('auth.login.link', 'Sign In')}
         </Link>

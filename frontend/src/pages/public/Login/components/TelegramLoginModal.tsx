@@ -127,18 +127,18 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-canvas border-4 border-ink shadow-brutal-xl p-6 sm:p-8 transform transition-all animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] p-6 sm:p-8 transform transition-all animate-in zoom-in-95 duration-200">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-xl border-2 border-ink bg-white text-ink hover:bg-ink hover:text-white shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer"
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer"
           aria-label="Close"
         >
           <X size={16} strokeWidth={2.5} />
         </button>
 
         <div className="flex flex-col items-center text-center">
-          <div className="w-16 h-16 bg-[#229ED9] border-3 border-ink shadow-brutal rounded-2xl flex items-center justify-center mb-4">
+          <div className="w-16 h-16 bg-[#229ED9] border-3 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-2xl flex items-center justify-center mb-4">
             <svg
               className="w-9 h-9 fill-white"
               viewBox="0 0 24 24"
@@ -148,29 +148,29 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({
             </svg>
           </div>
 
-          <h2 className="font-['Anybody',sans-serif] font-black text-2xl uppercase tracking-tight text-ink">
+          <h2 className="font-['Anybody',sans-serif] font-black text-2xl uppercase tracking-tight text-[#0A0A0A]">
             {t('auth.telegram_modal.title', 'Telegram Authorization')}
           </h2>
-          <p className="text-xs sm:text-sm text-ink/75 font-bold mt-1.5 px-2">
+          <p className="text-xs sm:text-sm text-[#0A0A0A]/75 font-bold mt-1.5 px-2">
             {t('auth.telegram_modal.subtitle', 'Follow the steps below to securely authorize your account.')}
           </p>
 
           <div className="w-full mt-6 space-y-4">
             {loading && (
-              <div className="py-8 flex flex-col items-center justify-center space-y-3 bg-white border-2 border-ink shadow-brutal rounded-xl p-4">
-                <Loader2 className="animate-spin text-ink" size={28} />
-                <span className="font-['JetBrains_Mono',monospace] text-xs font-extrabold uppercase text-ink">
+              <div className="py-8 flex flex-col items-center justify-center space-y-3 bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl p-4">
+                <Loader2 className="animate-spin text-[#0A0A0A]" size={28} />
+                <span className="font-['JetBrains_Mono',monospace] text-xs font-extrabold uppercase text-[#0A0A0A]">
                   {t('auth.telegram_modal.creating', 'Creating authorization session...')}
                 </span>
               </div>
             )}
 
             {error && (
-              <div className="p-4 bg-rose-200 border-2 border-ink shadow-brutal rounded-xl text-ink text-xs font-bold text-left leading-relaxed">
+              <div className="p-4 bg-rose-200 border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl text-[#0A0A0A] text-xs font-bold text-left leading-relaxed">
                 <p>{error}</p>
                 <button
                   onClick={startSession}
-                  className="mt-3 w-full py-2.5 bg-ink text-canvas hover:bg-white hover:text-ink border-2 border-ink rounded-lg font-['JetBrains_Mono',monospace] font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-brutal-sm"
+                  className="mt-3 w-full py-2.5 bg-[#0A0A0A] text-[#F2EBDD] hover:bg-white hover:text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-lg font-['JetBrains_Mono',monospace] font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   {t('auth.telegram_modal.try_again', 'Try Again')}
                 </button>
@@ -179,11 +179,11 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({
 
             {!loading && !error && token && botUsername && (
               <div className="space-y-5">
-                <div className="bg-white border-2 border-ink shadow-brutal rounded-xl p-4 text-left">
-                  <h4 className="font-['JetBrains_Mono',monospace] text-xs font-black text-ink uppercase tracking-wider mb-2.5 pb-1.5 border-b border-ink/20">
+                <div className="bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl p-4 text-left">
+                  <h4 className="font-['JetBrains_Mono',monospace] text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-2.5 pb-1.5 border-b border-[#0A0A0A]/20">
                     {t('auth.telegram_modal.instructions_title', 'LOGIN INSTRUCTIONS:')}
                   </h4>
-                  <ol className="list-decimal list-inside text-xs text-ink font-semibold space-y-2 leading-relaxed">
+                  <ol className="list-decimal list-inside text-xs text-[#0A0A0A] font-semibold space-y-2 leading-relaxed">
                     <li>{t('auth.telegram_modal.step1', 'Click the button below to open our official Telegram Assistant Bot.')}</li>
                     <li>
                       {t('auth.telegram_modal.step2', 'In Telegram, click the "Start" (/start) button at the bottom of the chat.')}
@@ -195,7 +195,7 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({
                 <div className="flex flex-col gap-3">
                   <a
                     href={`tg://resolve?domain=${botUsername}&start=${token}`}
-                    className="w-full py-3.5 px-4 bg-ink text-canvas hover:bg-[#229ED9] hover:text-ink border-2 border-ink shadow-brutal hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none rounded-xl font-['JetBrains_Mono',monospace] font-black text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+                    className="w-full py-3.5 px-4 bg-[#0A0A0A] text-[#F2EBDD] hover:bg-[#229ED9] hover:text-[#0A0A0A] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none rounded-xl font-['JetBrains_Mono',monospace] font-black text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2.5 cursor-pointer"
                   >
                     <span>{t('auth.telegram_modal.btn_open', 'Open Telegram App')}</span>
                     <ExternalLink size={16} strokeWidth={2.5} />
@@ -205,14 +205,14 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({
                     href={`https://t.me/${botUsername}?start=${token}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-['JetBrains_Mono',monospace] text-xs font-bold text-ink/70 hover:text-ink hover:underline underline-offset-4 transition-all block mt-0.5"
+                    className="font-['JetBrains_Mono',monospace] text-xs font-bold text-[#0A0A0A]/70 hover:text-[#0A0A0A] hover:underline underline-offset-4 transition-all block mt-0.5"
                   >
                     {t('auth.telegram_modal.web_link', 'Trouble opening? Open in browser (t.me)')}
                   </a>
                 </div>
 
-                <div className="py-2 px-3 bg-amber-300 border-2 border-ink shadow-brutal-sm rounded-lg inline-flex items-center justify-center gap-2 font-['JetBrains_Mono',monospace] text-xs font-black text-ink uppercase tracking-wider animate-pulse">
-                  <Loader2 className="animate-spin text-ink" size={14} strokeWidth={2.5} />
+                <div className="py-2 px-3 bg-amber-300 border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] rounded-lg inline-flex items-center justify-center gap-2 font-['JetBrains_Mono',monospace] text-xs font-black text-[#0A0A0A] uppercase tracking-wider animate-pulse">
+                  <Loader2 className="animate-spin text-[#0A0A0A]" size={14} strokeWidth={2.5} />
                   <span>{t('auth.telegram_modal.waiting', 'Waiting for you to click Start in Telegram...')}</span>
                 </div>
               </div>

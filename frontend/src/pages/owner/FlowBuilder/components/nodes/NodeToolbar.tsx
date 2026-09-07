@@ -13,19 +13,19 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = ({ nodeId, onMouseEnter, 
     <div
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className="absolute top-[-44px] left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-1 bg-white border-2 border-ink rounded-xl shadow-brutal-sm animate-in fade-in slide-in-from-bottom-1 duration-150"
+      className="absolute top-[-44px] left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-1 bg-white border-2 border-[#0A0A0A] rounded-xl shadow-[2px_2px_0px_#0A0A0A] animate-in fade-in slide-in-from-bottom-1 duration-150"
     >
       <button
         onClick={(e) => {
           e.stopPropagation();
           window.dispatchEvent(new CustomEvent('flow-copy-node', { detail: { nodeId } }));
         }}
-        className="w-7 h-7 flex items-center justify-center rounded-lg text-ink hover:bg-ink hover:text-white transition-colors cursor-pointer"
+        className="w-7 h-7 flex items-center justify-center rounded-lg text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors cursor-pointer"
         title={t('flow_builder.copy_block')}
       >
         <Copy size={14} />
       </button>
-      <div className="w-[1.5px] h-4 bg-ink/20" />
+      <div className="w-[1.5px] h-4 bg-[#0A0A0A]/20" />
       <button
         onClick={(e) => {
           e.stopPropagation();
