@@ -5,12 +5,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLoginMutation } from './useLoginMutation';
 import { ROUTES } from '../../routes/paths';
-import { loginSchema } from '../../schemas/auth.schema';
-import type { LoginSchemaType } from '../../schemas/auth.schema';
+import { getLoginSchema, type LoginSchemaType } from '../../schemas/auth.schema';
+import { useTranslation } from '../../i18n/config';
 
 export type LoginFields = LoginSchemaType;
 
 export const useLoginForm = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { mutateAsync: loginMutate, isPending } = useLoginMutation();
@@ -18,7 +19,7 @@ export const useLoginForm = () => {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const form = useForm<LoginFields>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(getLoginSchema(t)),
     defaultValues: {
       email: '',
       password: '',

@@ -1,22 +1,25 @@
 import { z } from 'zod';
-import { t } from '../i18n/config';
+import { t as defaultT } from '../i18n/config';
+import type { TranslateFn } from './auth.schema';
 
-export const botSchema = z.object({
-  botName: z
-    .string()
-    .trim()
-    .optional(),
-  botDesc: z
-    .string()
-    .trim()
-    .max(500, t('automations.create.error_desc_long'))
-    .optional(),
-  botToken: z
-    .string()
-    .trim()
-    .min(1, t('automations.create.error_token')),
-});
+export const getBotSchema = (t: TranslateFn = defaultT) =>
+  z.object({
+    botName: z
+      .string()
+      .trim()
+      .optional(),
+    botDesc: z
+      .string()
+      .trim()
+      .max(500, t('automations.create.error_desc_long'))
+      .optional(),
+    botToken: z
+      .string()
+      .trim()
+      .min(1, t('automations.create.error_token')),
+  });
 
+export const botSchema = getBotSchema();
 export type BotSchemaType = z.infer<typeof botSchema>;
 
 export const customFieldSchema = z.object({

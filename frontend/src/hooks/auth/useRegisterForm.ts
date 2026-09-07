@@ -4,12 +4,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useRegisterMutation } from './useRegisterMutation';
-import { registerSchema } from '../../schemas/auth.schema';
-import type { RegisterSchemaType } from '../../schemas/auth.schema';
+import { getRegisterSchema, type RegisterSchemaType } from '../../schemas/auth.schema';
+import { useTranslation } from '../../i18n/config';
 
 export type RegisterFields = RegisterSchemaType;
 
 export const useRegisterForm = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { mutateAsync: registerMutate, isPending } = useRegisterMutation();
@@ -17,7 +18,7 @@ export const useRegisterForm = () => {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const form = useForm<RegisterFields>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(getRegisterSchema(t)),
     defaultValues: {
       firstName: '',
       lastName: '',
