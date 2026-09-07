@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { BotState } from '../types/bot';
 import { broadcastEvent } from '../utils/multiTabSync';
+import { registerAuthCleanup } from './authCleanup';
 
 export const useBotStore = create<BotState>((set) => {
   const savedActiveBotIdStr = localStorage.getItem('activeBotId');
@@ -33,4 +34,8 @@ export const useBotStore = create<BotState>((set) => {
       set({ activeBotId: null });
     },
   };
+});
+
+registerAuthCleanup(() => {
+  useBotStore.getState().clearBots();
 });

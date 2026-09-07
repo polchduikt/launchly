@@ -174,17 +174,41 @@ export interface AdminBroadcastDetail {
   };
 }
 
+export interface AdminBroadcastsQueryParams {
+  search?: string;
+  status?: string;
+  sort?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface AdminBroadcastDetailsQueryParams {
+  period?: string;
+  page?: number;
+  size?: number;
+}
+
 export const fetchAdminBroadcastsApi = async (
-  search = '',
+  paramsOrSearch?: AdminBroadcastsQueryParams | string,
   status = 'all',
   sort = 'desc',
   page = 0,
   size = 10
 ): Promise<{ content: AdminBroadcast[]; totalElements: number; totalPages: number }> => {
-  const params: Record<string, string | number> = { page, size };
-  if (search) params.search = search;
-  if (status) params.status = status;
-  if (sort) params.sort = sort;
+  const params: Record<string, string | number> = {};
+  if (typeof paramsOrSearch === 'object' && paramsOrSearch !== null) {
+    params.page = paramsOrSearch.page ?? 0;
+    params.size = paramsOrSearch.size ?? 10;
+    if (paramsOrSearch.search) params.search = paramsOrSearch.search;
+    if (paramsOrSearch.status) params.status = paramsOrSearch.status;
+    if (paramsOrSearch.sort) params.sort = paramsOrSearch.sort;
+  } else {
+    params.page = page;
+    params.size = size;
+    if (paramsOrSearch) params.search = paramsOrSearch;
+    if (status) params.status = status;
+    if (sort) params.sort = sort;
+  }
 
   const response = await apiClient.get<{ content: AdminBroadcast[]; totalElements: number; totalPages: number }>('/admin/broadcasts', { params });
   return response.data;
@@ -192,11 +216,20 @@ export const fetchAdminBroadcastsApi = async (
 
 export const fetchAdminBroadcastDetailsApi = async (
   broadcastId: number,
-  period = 'all',
+  paramsOrPeriod?: AdminBroadcastDetailsQueryParams | string,
   page = 0,
   size = 10
 ): Promise<AdminBroadcastDetail> => {
-  const params: Record<string, string | number> = { period, page, size };
+  const params: Record<string, string | number> = {};
+  if (typeof paramsOrPeriod === 'object' && paramsOrPeriod !== null) {
+    params.page = paramsOrPeriod.page ?? 0;
+    params.size = paramsOrPeriod.size ?? 10;
+    if (paramsOrPeriod.period) params.period = paramsOrPeriod.period;
+  } else {
+    params.page = page;
+    params.size = size;
+    if (paramsOrPeriod) params.period = paramsOrPeriod;
+  }
   const response = await apiClient.get<AdminBroadcastDetail>(`/admin/broadcasts/${broadcastId}`, { params });
   return response.data;
 };
@@ -222,35 +255,69 @@ export interface AdminLog {
   timestamp: string;
 }
 
+export interface AdminStatsQueryParams {
+  search?: string;
+  period?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
 export const fetchAdminStatsApi = async (
-  search = '',
+  paramsOrSearch?: AdminStatsQueryParams | string,
   period = '',
   startDate = '',
   endDate = ''
 ): Promise<AdminStats> => {
   const params: Record<string, string> = {};
-  if (search) params.search = search;
-  if (period) params.period = period;
-  if (startDate) params.startDate = startDate;
-  if (endDate) params.endDate = endDate;
+  if (typeof paramsOrSearch === 'object' && paramsOrSearch !== null) {
+    if (paramsOrSearch.search) params.search = paramsOrSearch.search;
+    if (paramsOrSearch.period) params.period = paramsOrSearch.period;
+    if (paramsOrSearch.startDate) params.startDate = paramsOrSearch.startDate;
+    if (paramsOrSearch.endDate) params.endDate = paramsOrSearch.endDate;
+  } else {
+    if (paramsOrSearch) params.search = paramsOrSearch;
+    if (period) params.period = period;
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+  }
 
   const response = await apiClient.get<AdminStats>('/admin/stats', { params });
   return response.data;
 };
 
+export interface AdminUsersQueryParams {
+  search?: string;
+  role?: string;
+  plan?: string;
+  sort?: string;
+  page?: number;
+  size?: number;
+}
+
 export const fetchAdminUsersApi = async (
-  search = '',
+  paramsOrSearch?: AdminUsersQueryParams | string,
   role = '',
   plan = '',
   sort = 'desc',
   page = 0,
   size = 20
 ): Promise<{ content: AdminUser[]; totalElements: number; totalPages: number }> => {
-  const params: Record<string, string | number> = { page, size };
-  if (search) params.search = search;
-  if (role) params.role = role;
-  if (plan) params.plan = plan;
-  if (sort) params.sort = sort;
+  const params: Record<string, string | number> = {};
+  if (typeof paramsOrSearch === 'object' && paramsOrSearch !== null) {
+    params.page = paramsOrSearch.page ?? 0;
+    params.size = paramsOrSearch.size ?? 20;
+    if (paramsOrSearch.search) params.search = paramsOrSearch.search;
+    if (paramsOrSearch.role) params.role = paramsOrSearch.role;
+    if (paramsOrSearch.plan) params.plan = paramsOrSearch.plan;
+    if (paramsOrSearch.sort) params.sort = paramsOrSearch.sort;
+  } else {
+    params.page = page;
+    params.size = size;
+    if (paramsOrSearch) params.search = paramsOrSearch;
+    if (role) params.role = role;
+    if (plan) params.plan = plan;
+    if (sort) params.sort = sort;
+  }
 
   const response = await apiClient.get<{ content: AdminUser[]; totalElements: number; totalPages: number }>('/admin/users', { params });
   return response.data;
@@ -266,9 +333,17 @@ export const toggleUserStatusApi = async (userId: number, blockData?: { reason: 
   return response.data;
 };
 
-export interface fetchAdminAutomationDetailsApiParams {
-  automationId: number;
+export interface AdminAutomationDetailsQueryParams {
   period?: string;
+  page?: number;
+  size?: number;
+}
+export type fetchAdminAutomationDetailsApiParams = AdminAutomationDetailsQueryParams & { automationId?: number };
+
+export interface AdminAutomationsQueryParams {
+  search?: string;
+  status?: string;
+  sort?: string;
   page?: number;
   size?: number;
 }
@@ -305,16 +380,26 @@ export interface AdminAutomationDetail {
 }
 
 export const fetchAdminAutomationsApi = async (
-  search = '',
+  paramsOrSearch?: AdminAutomationsQueryParams | string,
   status = '',
   sort = 'desc',
   page = 0,
   size = 30
 ): Promise<{ content: AdminAutomation[]; totalElements: number; totalPages: number }> => {
-  const params: Record<string, string | number> = { page, size };
-  if (search) params.search = search;
-  if (status) params.status = status;
-  if (sort) params.sort = sort;
+  const params: Record<string, string | number> = {};
+  if (typeof paramsOrSearch === 'object' && paramsOrSearch !== null) {
+    params.page = paramsOrSearch.page ?? 0;
+    params.size = paramsOrSearch.size ?? 30;
+    if (paramsOrSearch.search) params.search = paramsOrSearch.search;
+    if (paramsOrSearch.status) params.status = paramsOrSearch.status;
+    if (paramsOrSearch.sort) params.sort = paramsOrSearch.sort;
+  } else {
+    params.page = page;
+    params.size = size;
+    if (paramsOrSearch) params.search = paramsOrSearch;
+    if (status) params.status = status;
+    if (sort) params.sort = sort;
+  }
 
   const response = await apiClient.get<{ content: AdminAutomation[]; totalElements: number; totalPages: number }>('/admin/automations', { params });
   return response.data;
@@ -322,11 +407,20 @@ export const fetchAdminAutomationsApi = async (
 
 export const fetchAdminAutomationDetailsApi = async (
   automationId: number,
-  period = 'all',
+  paramsOrPeriod?: AdminAutomationDetailsQueryParams | string,
   page = 0,
   size = 20
 ): Promise<AdminAutomationDetail> => {
-  const params: Record<string, string | number> = { period, page, size };
+  const params: Record<string, string | number> = {};
+  if (typeof paramsOrPeriod === 'object' && paramsOrPeriod !== null) {
+    params.page = paramsOrPeriod.page ?? 0;
+    params.size = paramsOrPeriod.size ?? 20;
+    if (paramsOrPeriod.period) params.period = paramsOrPeriod.period;
+  } else {
+    params.page = page;
+    params.size = size;
+    if (paramsOrPeriod) params.period = paramsOrPeriod;
+  }
   const response = await apiClient.get<AdminAutomationDetail>(`/admin/automations/${automationId}`, { params });
   return response.data;
 };
@@ -353,8 +447,19 @@ export interface AdminLogsResponse {
   size: number;
 }
 
+export interface AdminLogsQueryParams {
+  level?: string;
+  service?: string;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+  sort?: string;
+  page?: number;
+  size?: number;
+}
+
 export const fetchAdminLogsApi = async (
-  level = '',
+  paramsOrLevel?: AdminLogsQueryParams | string,
   service = '',
   search = '',
   startDate = '',
@@ -363,13 +468,26 @@ export const fetchAdminLogsApi = async (
   page = 0,
   size = 100
 ): Promise<AdminLogsResponse> => {
-  const params: Record<string, string | number> = { page, size };
-  if (level) params.level = level;
-  if (service) params.service = service;
-  if (search) params.search = search;
-  if (startDate) params.startDate = startDate;
-  if (endDate) params.endDate = endDate;
-  if (sort) params.sort = sort;
+  const params: Record<string, string | number> = {};
+  if (typeof paramsOrLevel === 'object' && paramsOrLevel !== null) {
+    params.page = paramsOrLevel.page ?? 0;
+    params.size = paramsOrLevel.size ?? 100;
+    if (paramsOrLevel.level) params.level = paramsOrLevel.level;
+    if (paramsOrLevel.service) params.service = paramsOrLevel.service;
+    if (paramsOrLevel.search) params.search = paramsOrLevel.search;
+    if (paramsOrLevel.startDate) params.startDate = paramsOrLevel.startDate;
+    if (paramsOrLevel.endDate) params.endDate = paramsOrLevel.endDate;
+    if (paramsOrLevel.sort) params.sort = paramsOrLevel.sort;
+  } else {
+    params.page = page;
+    params.size = size;
+    if (paramsOrLevel) params.level = paramsOrLevel;
+    if (service) params.service = service;
+    if (search) params.search = search;
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    if (sort) params.sort = sort;
+  }
 
   const response = await apiClient.get<AdminLog[] | AdminLogsResponse>('/admin/logs', { params });
   const data = response.data;
@@ -445,14 +563,32 @@ export interface AdminUserDetail {
   broadcasts?: UserBroadcastSummary[];
 }
 
+export interface AdminUserDetailsQueryParams {
+  period?: string;
+  category?: string;
+  page?: number;
+  size?: number;
+}
+
 export const fetchAdminUserDetailsApi = async (
   userId: number,
-  period = 'all',
+  paramsOrPeriod?: AdminUserDetailsQueryParams | string,
   category = 'all',
   page = 0,
   size = 20
 ): Promise<AdminUserDetail> => {
-  const params: Record<string, string | number> = { period, category, page, size };
+  const params: Record<string, string | number> = {};
+  if (typeof paramsOrPeriod === 'object' && paramsOrPeriod !== null) {
+    params.page = paramsOrPeriod.page ?? 0;
+    params.size = paramsOrPeriod.size ?? 20;
+    if (paramsOrPeriod.period) params.period = paramsOrPeriod.period;
+    if (paramsOrPeriod.category) params.category = paramsOrPeriod.category;
+  } else {
+    params.page = page;
+    params.size = size;
+    if (paramsOrPeriod) params.period = paramsOrPeriod;
+    if (category) params.category = category;
+  }
   const response = await apiClient.get<AdminUserDetail>(`/admin/users/${userId}`, { params });
   return response.data;
 };
@@ -503,14 +639,35 @@ export interface PaginatedSupportTickets {
   size: number;
 }
 
+export interface AdminSupportTicketsQueryParams {
+  filter?: string;
+  period?: string;
+  search?: string;
+  page?: number;
+  size?: number;
+}
+
 export const fetchAdminSupportTicketsApi = async (
-  filter = 'all',
+  paramsOrFilter?: AdminSupportTicketsQueryParams | string,
   period = 'all',
   search = '',
   page = 0,
   size = 50
 ): Promise<PaginatedSupportTickets> => {
-  const params: Record<string, string | number> = { filter, period, search, page, size };
+  const params: Record<string, string | number> = {};
+  if (typeof paramsOrFilter === 'object' && paramsOrFilter !== null) {
+    params.page = paramsOrFilter.page ?? 0;
+    params.size = paramsOrFilter.size ?? 50;
+    if (paramsOrFilter.filter) params.filter = paramsOrFilter.filter;
+    if (paramsOrFilter.period) params.period = paramsOrFilter.period;
+    if (paramsOrFilter.search) params.search = paramsOrFilter.search;
+  } else {
+    params.page = page;
+    params.size = size;
+    if (paramsOrFilter) params.filter = paramsOrFilter;
+    if (period) params.period = period;
+    if (search) params.search = search;
+  }
   const response = await apiClient.get<PaginatedSupportTickets>('/admin/support-chats', { params });
   return response.data;
 };

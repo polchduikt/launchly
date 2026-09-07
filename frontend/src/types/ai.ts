@@ -90,10 +90,10 @@ export interface AiChatSession {
 export interface AiState {
   isOpen: boolean;
   activeTab: 'chat' | 'generator';
-  onGenerate: ((nodes: unknown[], edges: unknown[]) => void) | null;
+  onGenerate: ((nodes: Node[], edges: Edge[]) => void) | null;
   hasExistingNodes: boolean;
   setIsOpen: (isOpen: boolean) => void;
   setActiveTab: (tab: 'chat' | 'generator') => void;
-  setOnGenerate: (onGenerate: ((nodes: unknown[], edges: unknown[]) => void) | null) => void;
+  setOnGenerate: (onGenerate: ((nodes: Node[], edges: Edge[]) => void) | null) => void;
   setHasExistingNodes: (hasExistingNodes: boolean) => void;
 }

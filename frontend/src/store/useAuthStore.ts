@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import type { User, AuthState } from '../types/auth';
-import { queryClient } from '../api/queryClient';
-import { useBotStore } from './useBotStore';
+import { runAuthCleanup } from './authCleanup';
 import { broadcastEvent } from '../utils/multiTabSync';
 
 export const useAuthStore = create<AuthState>((set) => {
@@ -39,8 +38,7 @@ export const useAuthStore = create<AuthState>((set) => {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
-      useBotStore.getState().clearBots();
-      queryClient.clear();
+      runAuthCleanup();
       broadcastEvent('AUTH_LOGOUT');
       set({
         accessToken: null,
