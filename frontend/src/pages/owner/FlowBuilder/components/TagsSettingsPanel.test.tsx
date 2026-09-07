@@ -14,6 +14,7 @@ vi.mock('../../../../hooks/bot/useBotsQuery', () => ({
 vi.mock('../../../../hooks/broadcast/useBroadcastQueries', () => ({
   useAllTagsQuery: () => ({ data: [], refetch: vi.fn() }),
   useCreateTagMutation: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateTagMutation: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
 vi.mock('../../../../api/broadcast', () => ({

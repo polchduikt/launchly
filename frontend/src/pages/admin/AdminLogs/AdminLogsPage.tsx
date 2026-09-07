@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useClickOutside } from '../../../hooks/useClickOutside';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAdminLogsApi } from '../../../api/admin';
 import { AdminLayout } from '../../../components/layout/AdminLayout';
@@ -38,21 +39,9 @@ export const AdminLogsPage: React.FC = () => {
     return () => clearTimeout(handler);
   }, [search]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (levelDropdownRef.current && !levelDropdownRef.current.contains(event.target as Node)) {
-        setIsLevelDropdownOpen(false);
-      }
-      if (serviceDropdownRef.current && !serviceDropdownRef.current.contains(event.target as Node)) {
-        setIsServiceDropdownOpen(false);
-      }
-      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
-        setIsSortDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(levelDropdownRef, () => setIsLevelDropdownOpen(false), isLevelDropdownOpen);
+  useClickOutside(serviceDropdownRef, () => setIsServiceDropdownOpen(false), isServiceDropdownOpen);
+  useClickOutside(sortDropdownRef, () => setIsSortDropdownOpen(false), isSortDropdownOpen);
 
   const { data: logData, isLoading } = useQuery({
     queryKey: ['adminLogs', levelFilter, serviceFilter, debouncedSearch, startDate, endDate, sortFilter, page],

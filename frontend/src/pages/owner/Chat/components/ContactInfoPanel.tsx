@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useClickOutside } from '../../../../hooks/useClickOutside';
 import { useTranslation } from '../../../../i18n/config';
 import {
   Hash,
@@ -52,15 +53,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
-        setShowMoreMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(moreMenuRef, () => setShowMoreMenu(false), showMoreMenu);
 
   const { t } = useTranslation();
 

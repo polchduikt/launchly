@@ -59,6 +59,14 @@ export const BroadcastsPage: React.FC = () => {
       queryKey: ['campaigns', bot.id],
       queryFn: () => getCampaignsApi(bot.id),
       enabled: bots.length > 0,
+      refetchInterval: (query: any) => {
+        const data = query.state.data;
+        if (!data) return false;
+        const hasActive = data.some(
+          (c: CampaignResponse) => c.status === 'IN_PROGRESS' || c.status === 'SCHEDULED'
+        );
+        return hasActive ? 2000 : false;
+      },
     })),
   });
 

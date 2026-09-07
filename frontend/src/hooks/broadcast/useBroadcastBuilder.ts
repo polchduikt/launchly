@@ -21,6 +21,7 @@ import { FLOW_EDGE_DEFAULTS } from '../../const/flowEdges';
 import { ROUTES } from '../../routes/paths';
 import type { ButtonData } from '../../types/bot';
 import { createDefaultNodeData } from '../../const/flowBlocks';
+import { generateId } from '../../utils/id';
 
 const resolveFilter = (conditions: AudienceCondition[]) => {
   let filterType: FilterType = 'ALL';
@@ -180,7 +181,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     const newNodes = copiedNodes.map((node) => {
       if (node.type === 'START') return null;
 
-      const newId = `node_${node.type?.toLowerCase() || 'msg'}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const newId = generateId(`node_${node.type?.toLowerCase() || 'msg'}`);
       nodeIdMap[node.id] = newId;
 
       const updatedData = { ...node.data };
@@ -189,7 +190,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
         const blockClone = { ...block };
         if (Array.isArray(blockClone.buttons)) {
           blockClone.buttons = blockClone.buttons.map((btn: ButtonData) => {
-            const newValue = `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+            const newValue = generateId('btn');
             if (btn.value) {
               buttonValueMap[btn.value] = newValue;
             }
@@ -234,7 +235,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
       const target = nodeIdMap[edge.target];
       if (!source || !target) return null;
 
-      const newEdgeId = `edge_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const newEdgeId = generateId('edge');
       const sourceHandle = edge.sourceHandle && buttonValueMap[edge.sourceHandle]
         ? (buttonValueMap[edge.sourceHandle] as string)
         : edge.sourceHandle;
@@ -540,7 +541,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
         if (Array.isArray(blockClone.buttons)) {
           blockClone.buttons = blockClone.buttons.map((btn: ButtonData) => ({
             ...btn,
-            value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            value: generateId('btn'),
           }));
         }
         return blockClone;

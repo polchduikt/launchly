@@ -10,7 +10,7 @@ import { customFieldSchema, automationFolderSchema } from '../../../../schemas';
 import { CustomSelect } from '../../../../components/ui/CustomSelect';
 
 export const UserFieldsPanel: React.FC = () => {
-  const activeBotId = useBotStore((state) => state.activeBotId);
+  const activeBotId = useBotStore((state) => state?.activeBotId);
   const { data: bots = [] } = useBotsQuery();
   const botId = activeBotId || (bots[0]?.id || 0);
 
@@ -56,7 +56,56 @@ export const UserFieldsPanel: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (botId > 0) {
+    if (bots.length > 0) {
+      Promise.all(bots.map((b) => getCustomFieldsApi(b.id).catch(() => null)))
+        .then((results) => {
+          const mergedFieldsMap = new Map<string, UserField>();
+          const mergedArchivedMap = new Map<string, UserField>();
+          const mergedFoldersMap = new Map<string, UserFieldFolder>();
+
+          results.forEach((data) => {
+            if (!data || typeof data !== 'object') return;
+            const fieldList = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
+            fieldList.forEach((f: UserField) => {
+              if (f && f.name) {
+                const key = f.name.trim().toLowerCase();
+                if (!mergedFieldsMap.has(key)) {
+                  mergedFieldsMap.set(key, f);
+                }
+              }
+            });
+
+            if (Array.isArray(data.archivedFields)) {
+              data.archivedFields.forEach((af: UserField) => {
+                if (af && af.name) {
+                  const key = af.name.trim().toLowerCase();
+                  if (!mergedArchivedMap.has(key)) {
+                    mergedArchivedMap.set(key, af);
+                  }
+                }
+              });
+            }
+
+            if (Array.isArray(data.folders)) {
+              data.folders.forEach((fld: UserFieldFolder) => {
+                if (fld && fld.name) {
+                  const key = fld.name.trim().toLowerCase();
+                  if (!mergedFoldersMap.has(key)) {
+                    mergedFoldersMap.set(key, fld);
+                  }
+                }
+              });
+            }
+          });
+
+          setFields(Array.from(mergedFieldsMap.values()));
+          setArchivedFields(Array.from(mergedArchivedMap.values()));
+          setFolders(Array.from(mergedFoldersMap.values()));
+        })
+        .catch((err) => {
+          console.error('Failed to fetch custom fields:', err);
+        });
+    } else if (botId > 0) {
       getCustomFieldsApi(botId)
         .then((data) => {
           if (data && typeof data === 'object') {
@@ -73,18 +122,23 @@ export const UserFieldsPanel: React.FC = () => {
           console.error('Failed to fetch custom fields:', err);
         });
     }
-  }, [botId]);
+  }, [bots, botId]);
 
   const saveFieldsData = (updatedFields: UserField[], updatedArchived: UserField[], updatedFolders: UserFieldFolder[]) => {
     setFields(updatedFields);
     setArchivedFields(updatedArchived);
     setFolders(updatedFolders);
-    if (botId > 0) {
-      saveCustomFieldsApi(botId, {
-        fields: updatedFields,
-        archivedFields: updatedArchived,
-        folders: updatedFolders,
-      }).catch((err) => console.error('Failed to save custom fields:', err));
+    const payload = {
+      fields: updatedFields,
+      archivedFields: updatedArchived,
+      folders: updatedFolders,
+    };
+    if (bots.length > 0) {
+      bots.forEach((b) => {
+        saveCustomFieldsApi(b.id, payload).catch((err) => console.error('Failed to save custom fields:', err));
+      });
+    } else if (botId > 0) {
+      saveCustomFieldsApi(botId, payload).catch((err) => console.error('Failed to save custom fields:', err));
     }
   };
 

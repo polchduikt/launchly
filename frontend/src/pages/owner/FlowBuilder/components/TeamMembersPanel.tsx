@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useClickOutside } from '../../../../hooks/useClickOutside';
 import { X, HelpCircle, Check, Plus, ChevronDown } from 'lucide-react';
 import { useBotStore } from '../../../../store/useBotStore';
 import { useAuthStore } from '../../../../store/useAuthStore';
@@ -21,15 +22,7 @@ const CustomRoleDropdown: React.FC<{
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
   const roles = ['Admin', 'Editor', 'Inbox Agent', 'Viewer'];
 

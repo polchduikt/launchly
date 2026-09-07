@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useClickOutside } from '../../hooks/useClickOutside';
 import { t } from '../../i18n/config';
 import { 
   CheckCircle2, 
@@ -38,15 +39,7 @@ export const PaymentsPanel: React.FC = () => {
   const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
   const currencyDropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(e.target as Node)) {
-        setIsCurrencyOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(currencyDropdownRef, () => setIsCurrencyOpen(false), isCurrencyOpen);
   const [notifyMessenger, setNotifyMessenger] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState(false);
   const [sendReceiptEmail, setSendReceiptEmail] = useState(false);

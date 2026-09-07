@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { formatAuditTitle, formatAuditDescription } from '../../../utils/auditFormatters';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AdminLayout } from '../../../components/layout/AdminLayout';
 import {
@@ -232,63 +233,8 @@ export const AdminChatsPage: React.FC = () => {
     return 'Email / Пароль';
   };
 
-  const translateAuditTitle = (title: string) => {
-    if (!title) return '';
-    if (title.startsWith('Реєстрація у Launchly') || title.startsWith('Registered in Launchly')) {
-      return t('audit.user_registration.title');
-    }
-    if (title.startsWith('Створено бота') || title.startsWith('Created bot')) {
-      return t('audit.bot_created.title');
-    }
-    if (title.startsWith('Оновлено конфігурацію бота') || title.startsWith('Updated bot configuration')) {
-      return t('audit.bot_updated.title');
-    }
-    if (title.startsWith('Створено автоворонку') || title.startsWith('Created flow schema')) {
-      return t('audit.flow_schema_created.title');
-    }
-    if (title.startsWith('Запущено розсилку') || title.startsWith('Launched broadcast')) {
-      return t('audit.broadcast_launched.title');
-    }
-    if (title.startsWith('Зміна ролі користувача') || title.startsWith('User role updated')) {
-      return t('audit.user_role_updated.title');
-    }
-    if (title.startsWith('Блокування акаунту') || title.startsWith('Account blocked')) {
-      return t('audit.user_blocked.title');
-    }
-    if (title.startsWith('Розблокування акаунту') || title.startsWith('Account unblocked')) {
-      return t('audit.user_unblocked.title');
-    }
-    return title;
-  };
-
-  const translateAuditDescription = (desc: string) => {
-    if (!desc) return '';
-    if (desc.startsWith('Обліковий запис активовано через') || desc.startsWith('Account activated via')) {
-      const parts = desc.split(/через|via/);
-      const prov = parts[1]?.trim() || 'LOCAL';
-      return t('audit.user_registration.desc', { provider: prov });
-    }
-    if (desc.startsWith('Успішна сесія авторизації в системі через Google OAuth') || desc.startsWith('Successful authentication session via Google OAuth')) {
-      return t('audit.user_auth_oauth.desc');
-    }
-    if (desc.startsWith('Успішна сесія авторизації') || desc.startsWith('Successful authentication session')) {
-      return t('audit.user_auth.desc');
-    }
-    if (desc.includes('Створено та активовано бота') || desc.includes('Created and activated bot') || desc.includes('Bot ID:')) {
-      const match = desc.match(/Bot ID:\s*#?(\d+)/i);
-      const botId = match ? match[1] : '';
-      return t('audit.bot_connected.desc', { botId });
-    }
-    if (desc.includes('Оновлено структуру бот-схеми') || desc.includes('Updated flow schema')) {
-      return t('audit.automation_modified.desc');
-    }
-    if (desc.includes('Створено розсилку') || desc.includes('Created broadcast')) {
-      const nameMatch = desc.match(/['"](.*?)['"]/);
-      const campaignName = nameMatch ? nameMatch[1] : '';
-      return t('audit.broadcast_created.desc', { campaignName });
-    }
-    return desc;
-  };
+  const translateAuditTitle = (title: string) => formatAuditTitle(title, undefined, t);
+  const translateAuditDescription = (desc: string) => formatAuditDescription(desc, t);
 
   return (
     <AdminLayout noPadding={true}>

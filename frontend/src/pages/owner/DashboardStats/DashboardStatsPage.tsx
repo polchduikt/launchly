@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useClickOutside } from '../../../hooks/useClickOutside';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { useDashboardStatsQuery } from '../../../hooks/dashboard/useDashboardStatsQuery';
@@ -129,19 +130,7 @@ export const DashboardStatsPage: React.FC = () => {
 
   const botSelectorRef = React.useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (botSelectorRef.current && !botSelectorRef.current.contains(e.target as Node)) {
-        setIsBotSelectorOpen(false);
-      }
-    };
-    if (isBotSelectorOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isBotSelectorOpen]);
+  useClickOutside(botSelectorRef, () => setIsBotSelectorOpen(false), isBotSelectorOpen);
 
   React.useEffect(() => {
     if (connectedBots.length === 1 && selectedBotId === 0) {

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useClickOutside } from '../../../../../../hooks/useClickOutside';
 import { createPortal } from 'react-dom';
 import { t } from '../../../../../../i18n/config';
 import {
@@ -72,22 +73,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
   }, [isOpen]);
 
   
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current && !containerRef.current.contains(event.target as Node) &&
-        (!dropdownRef.current || !dropdownRef.current.contains(event.target as Node))
-      ) {
-        setIsOpen(false);
-      }
-    };
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
+  useClickOutside([containerRef, dropdownRef], () => setIsOpen(false), isOpen);
 
   const systemFields = useMemo(() => [
     { key: 'first_name', name: t('editor.gs.fields.first_name'), val: 'first_name', icon: <User size={13} className="text-slate-400" /> },

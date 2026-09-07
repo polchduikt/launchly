@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useClickOutside } from '../../hooks/useClickOutside';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useThemeStore } from '../../store/useThemeStore';
@@ -39,20 +40,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
-        setShowProfileMenu(false);
-      }
-      if (helpMenuRef.current && !helpMenuRef.current.contains(event.target as Node)) {
-        setShowHelpMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside, true);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside, true);
-    };
-  }, []);
+  useClickOutside(profileMenuRef, () => setShowProfileMenu(false), showProfileMenu);
+  useClickOutside(helpMenuRef, () => setShowHelpMenu(false), showHelpMenu);
 
   if (!user) return null;
 

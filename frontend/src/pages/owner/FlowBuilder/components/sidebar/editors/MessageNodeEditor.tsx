@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useClickOutside } from '../../../../../../hooks/useClickOutside';
 import { createPortal } from 'react-dom';
 import { 
   Plus, 
@@ -33,6 +34,7 @@ import { t } from '../../../../../../i18n/config';
 import { FieldVariableSelector } from './FieldVariableSelector';
 import emojiData from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
+import { generateId } from '../../../../../../utils/id';
 
 interface MessageNodeEditorProps {
   nodeId: string;
@@ -122,15 +124,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
     updateBlockContent(blockId, { buttons: currentBtns });
   };
 
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (moreContainerRef.current && !moreContainerRef.current.contains(event.target as Node)) {
-        setIsMoreOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(moreContainerRef, () => setIsMoreOpen(false), isMoreOpen);
 
   const { setNodes, fitView } = useReactFlow();
   const edges = useEdges();
@@ -193,7 +187,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
 
   const addBlock = (type: 'text' | 'image' | 'delay' | 'data_collection' | 'file' | 'audio' | 'video' | 'telegram_menu') => {
     const newBlock: Record<string, unknown> = {
-      id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: generateId('block'),
       type,
     };
     if (type === 'text') {
@@ -231,12 +225,12 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = ({
 
     const clonedBlock = {
       ...block,
-      id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: generateId('block'),
     };
     if (Array.isArray(clonedBlock.buttons)) {
       clonedBlock.buttons = clonedBlock.buttons.map((btn: ButtonData) => ({
         ...btn,
-        value: `btn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        value: generateId('btn'),
       }));
     }
 

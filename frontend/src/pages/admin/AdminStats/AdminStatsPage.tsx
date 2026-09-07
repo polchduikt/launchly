@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useClickOutside } from '../../../hooks/useClickOutside';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { fetchAdminStatsApi } from '../../../api/admin';
 import { AdminLayout } from '../../../components/layout/AdminLayout';
@@ -96,18 +97,8 @@ export const AdminStatsPage: React.FC = () => {
     });
   }, [period]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsPeriodOpen(false);
-      }
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        setIsPickerOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(dropdownRef, () => setIsPeriodOpen(false), isPeriodOpen);
+  useClickOutside(pickerRef, () => setIsPickerOpen(false), isPickerOpen);
 
   const toIsoStringLocal = (date: Date) => {
     const pad = (num: number) => String(num).padStart(2, '0');

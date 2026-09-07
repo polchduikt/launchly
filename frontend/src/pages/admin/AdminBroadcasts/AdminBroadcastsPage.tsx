@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useClickOutside } from '../../../hooks/useClickOutside';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -56,21 +57,9 @@ export const AdminBroadcastsPage: React.FC = () => {
   const [isBulkActionOpen, setIsBulkActionOpen] = useState(false);
   const bulkActionDropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
-        setIsStatusDropdownOpen(false);
-      }
-      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
-        setIsSortDropdownOpen(false);
-      }
-      if (bulkActionDropdownRef.current && !bulkActionDropdownRef.current.contains(event.target as Node)) {
-        setIsBulkActionOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(statusDropdownRef, () => setIsStatusDropdownOpen(false), isStatusDropdownOpen);
+  useClickOutside(sortDropdownRef, () => setIsSortDropdownOpen(false), isSortDropdownOpen);
+  useClickOutside(bulkActionDropdownRef, () => setIsBulkActionOpen(false), isBulkActionOpen);
 
   const [selectedBroadcast, setSelectedBroadcast] = useState<AdminBroadcast | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -100,6 +89,14 @@ export const AdminBroadcastsPage: React.FC = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['adminBroadcasts', debouncedSearch, statusFilter, sortFilter, page, size],
     queryFn: () => fetchAdminBroadcastsApi(debouncedSearch, statusFilter, sortFilter, page, size),
+    refetchInterval: (query: any) => {
+      const content = query.state.data?.content;
+      if (!content) return false;
+      const hasActive = content.some(
+        (b: AdminBroadcastItem) => b.status === 'IN_PROGRESS' || b.status === 'SCHEDULED'
+      );
+      return hasActive ? 2000 : false;
+    },
   });
 
   const broadcasts = data?.content || [];

@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useClickOutside } from '../../../hooks/useClickOutside';
+import { formatAuditTitle, formatAuditDescription } from '../../../utils/auditFormatters';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { fetchAdminUsersApi, updateUserRoleApi, toggleUserStatusApi, fetchAdminUserDetailsApi } from '../../../api/admin';
@@ -54,24 +56,10 @@ export const AdminUsersPage: React.FC = () => {
   const planDropdownRef = useRef<HTMLDivElement>(null);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target as Node)) {
-        setIsRoleDropdownOpen(false);
-      }
-      if (planDropdownRef.current && !planDropdownRef.current.contains(event.target as Node)) {
-        setIsPlanDropdownOpen(false);
-      }
-      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
-        setIsSortDropdownOpen(false);
-      }
-      if (bulkActionDropdownRef.current && !bulkActionDropdownRef.current.contains(event.target as Node)) {
-        setIsBulkActionOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(roleDropdownRef, () => setIsRoleDropdownOpen(false), isRoleDropdownOpen);
+  useClickOutside(planDropdownRef, () => setIsPlanDropdownOpen(false), isPlanDropdownOpen);
+  useClickOutside(sortDropdownRef, () => setIsSortDropdownOpen(false), isSortDropdownOpen);
+  useClickOutside(bulkActionDropdownRef, () => setIsBulkActionOpen(false), isBulkActionOpen);
 
   const { data, isLoading } = useQuery({
     queryKey: ['adminUsers', search, roleFilter, planFilter, sortFilter, page],
@@ -175,89 +163,8 @@ export const AdminUsersPage: React.FC = () => {
     return `${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
   };
 
-  const translateAuditTitle = (title: string, targetName?: string) => {
-    if (!title) return targetName || '';
-    let name = (targetName || '').trim();
-    if (name === '{0}' || name === '{botName}' || name === 'null' || name === 'undefined') {
-      name = '';
-    }
-
-    if (title.includes(':')) {
-      const extracted = title.split(':')[1]?.trim() || '';
-      if (extracted && extracted !== '{0}' && extracted !== '{botName}' && extracted !== 'null' && extracted !== 'undefined') {
-        name = extracted;
-      }
-    }
-
-    const cleanedTitle = title.replace(/:\s*\{0\}/g, '').replace(/\s*\{0\}/g, '').replace(/\{0\}/g, '').trim();
-
-    if (cleanedTitle.startsWith('Реєстрація у Launchly') || cleanedTitle.startsWith('Registered in Launchly')) {
-      return t('audit.user_registration.title');
-    }
-    if (cleanedTitle.startsWith('Авторизація користувача') || cleanedTitle.startsWith('User Authentication')) {
-      return t('audit.user_auth.title');
-    }
-    if (cleanedTitle.startsWith('Підключення бота') || cleanedTitle.startsWith('Bot Connected')) {
-      return name ? t('audit.bot_connected.title', { botName: name }) : t('audit.bot_created.title');
-    }
-    if (cleanedTitle.startsWith('Модифікація автоматизації') || cleanedTitle.startsWith('Automation Modified')) {
-      return name ? t('audit.automation_modified.title', { botName: name }) : (t('audit.automation_modified.title_simple') || 'Модифікація автоматизації');
-    }
-    if (cleanedTitle.startsWith('Запуск розсилки') || cleanedTitle.startsWith('Broadcast Launched')) {
-      return name ? `${t('audit.broadcast_launched.title')}: ${name}` : t('audit.broadcast_launched.title');
-    }
-    if (cleanedTitle.startsWith('Скасування розсилки') || cleanedTitle.startsWith('Broadcast Cancelled')) {
-      return name ? `${t('audit.broadcast_cancelled.title')}: ${name}` : t('audit.broadcast_cancelled.title');
-    }
-    if (cleanedTitle.startsWith('Права доступу та роль') || cleanedTitle.startsWith('Access Rights & Role')) {
-      return t('audit.access_role.title');
-    }
-    if (cleanedTitle.startsWith('Адміністративне блокування') || cleanedTitle.startsWith('Administrative Block')) {
-      return t('audit.admin_block.title');
-    }
-    if (cleanedTitle.startsWith('Адміністративне розблокування') || cleanedTitle.startsWith('Administrative Unblock')) {
-      return t('audit.admin_unblock.title');
-    }
-    return cleanedTitle;
-  };
-
-  const translateAuditDescription = (desc: string) => {
-    if (!desc) return '';
-    if (desc.startsWith('Обліковий запис активовано через') || desc.startsWith('Account activated via')) {
-      const parts = desc.split(/через|via/);
-      const prov = parts[1]?.trim() || 'LOCAL';
-      return t('audit.user_registration.desc', { provider: prov });
-    }
-    if (desc.startsWith('Успішна сесія авторизації в системі через Google OAuth') || desc.startsWith('Successful authentication session via Google OAuth')) {
-      return t('audit.user_auth_oauth.desc');
-    }
-    if (desc.startsWith('Успішна сесія авторизації') || desc.startsWith('Successful authentication session')) {
-      return t('audit.user_auth.desc');
-    }
-    if (desc.includes('Створено та активовано бота') || desc.includes('Created and activated bot') || desc.includes('Bot ID:')) {
-      const match = desc.match(/Bot ID:\s*#?(\d+)/i);
-      const botId = match ? match[1] : '';
-      return t('audit.bot_connected.desc', { botId });
-    }
-    if (desc.includes('Оновлено структуру бот-схеми') || desc.includes('Updated flow schema')) {
-      return t('audit.automation_modified.desc');
-    }
-    if (desc.includes('Створено розсилку') || desc.includes('Created broadcast')) {
-      const nameMatch = desc.match(/['"](.*?)['"]/);
-      const statusMatch = desc.match(/Статус:\s*(\w+)|Status:\s*(\w+)/i);
-      const name = nameMatch ? nameMatch[1] : '';
-      const status = statusMatch ? (statusMatch[1] || statusMatch[2]) : 'ACTIVE';
-      return t('audit.broadcast_launched.desc', { name, status });
-    }
-    if (desc.startsWith('Причина:') || desc.startsWith('Reason:')) {
-      const reasonStr = desc.replace('Причина:', '').replace('Reason:', '').trim();
-      return `${t('blocked.reason_title')} ${reasonStr}`;
-    }
-    if (desc.startsWith('Акаунт відновлено') || desc.startsWith('Account restored')) {
-      return t('audit.admin_unblock.desc');
-    }
-    return desc;
-  };
+  const translateAuditTitle = (title: string, targetName?: string) => formatAuditTitle(title, targetName, t);
+  const translateAuditDescription = (desc: string) => formatAuditDescription(desc, t);
 
   const roleOptions = [
     { value: '', label: t('admin.all_roles') !== 'admin.all_roles' ? t('admin.all_roles') : 'Всі ролі' },

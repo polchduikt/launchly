@@ -8,3 +8,24 @@ export const VARIATION_COLORS = [
   '#047857',
   '#4338CA',
 ];
+
+export const PAGINATION = {
+  DEFAULT_PAGE: 0,
+  DEFAULT_PAGE_SIZE: 20,
+  ADMIN_PAGE_SIZE: 30,
+  LOGS_PAGE_SIZE: 100,
+} as const;
+
+export const TIMING = {
+  SEARCH_DEBOUNCE_MS: 300,
+  POLL_INTERVAL_MS: 3000,
+  AUTO_SAVE_DEBOUNCE_MS: 1000,
+  ANIMATION_DURATION_MS: 300,
+} as const;
+
+export const FLOW_DEFAULTS = {
+  DELAY_SECONDS: 3,
+  FIT_VIEW_PADDING: 0.5,
+  FIT_VIEW_DURATION_MS: 300,
+} as const;
+
