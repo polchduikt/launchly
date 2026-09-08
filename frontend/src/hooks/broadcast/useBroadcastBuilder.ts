@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo, type MutableRefObjec
 import { useParams, useNavigate } from 'react-router-dom';
 import { useNodesState, useEdgesState, addEdge, useReactFlow } from '@xyflow/react';
 import type { Edge, Node, Connection, NodeChange, EdgeChange } from '@xyflow/react';
-import { useQueries } from '@tanstack/react-query';
+import { useQuery, useQueries } from '@tanstack/react-query';
 import { useBotStore } from '../../store/useBotStore';
 import { useFlowUiStore } from '../../store/useFlowUiStore';
 import {
@@ -82,25 +82,46 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
   const [searchQuery, setSearchQuery] = useState('');
 
   const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
+  const targetBotId = activeBotId || (bots.length > 0 ? bots[0].id : 0);
 
-  const campaignQueries = useQueries({
-    queries: bots.map((bot) => ({
+  const { data: targetCampaigns = [], isLoading: isTargetCampaignsLoading } = useQuery({
+    queryKey: queryKeys.broadcasts.campaigns(targetBotId),
+    queryFn: () => getCampaignsApi(targetBotId),
+    enabled: targetBotId > 0,
+    refetchInterval: (query: { state: { data?: CampaignResponse[] } }) => {
+      const data = query.state.data;
+      if (!data || !campaignId) return false;
+      const currentCampaign = data.find((c) => c.id === campaignId);
+      return currentCampaign?.status === 'IN_PROGRESS' || currentCampaign?.status === 'SCHEDULED'
+        ? TIMING.POLL_INTERVAL_MS
+        : false;
+    },
+  });
+
+  const campaignFoundInTarget = targetCampaigns.some((c) => c.id === campaignId);
+  const fallbackBots = useMemo(
+    () => (campaignId > 0 && !campaignFoundInTarget ? bots.filter((b) => b.id !== targetBotId) : []),
+    [campaignId, campaignFoundInTarget, bots, targetBotId]
+  );
+
+  const fallbackQueries = useQueries({
+    queries: fallbackBots.map((bot) => ({
       queryKey: queryKeys.broadcasts.campaigns(bot.id),
       queryFn: () => getCampaignsApi(bot.id),
-      enabled: bots.length > 0,
-      refetchInterval: (query: { state: { data?: CampaignResponse[] } }) => {
-        const data = query.state.data;
-        if (!data) return false;
-        const hasActive = data.some((c) => c.status === 'IN_PROGRESS' || c.status === 'SCHEDULED');
-        return hasActive ? TIMING.POLL_INTERVAL_MS : false;
-      },
+      enabled: fallbackBots.length > 0,
+      staleTime: 60_000,
     })),
   });
 
-  const isCampaignsLoading = isBotsLoading || (bots.length > 0 && campaignQueries.some((q) => q.isLoading));
-  const allCampaigns = campaignQueries.flatMap((q) => q.data || []);
+  const fallbackCampaigns = fallbackQueries.flatMap((q) => q.data || []);
+  const allCampaigns = [...targetCampaigns, ...fallbackCampaigns];
   const campaign = allCampaigns.find((c) => c.id === campaignId);
-  const campaignBotId = campaign?.botId || botId;
+  const campaignBotId = campaign?.botId || targetBotId || botId;
+
+  const isCampaignsLoading =
+    isBotsLoading ||
+    isTargetCampaignsLoading ||
+    (fallbackBots.length > 0 && fallbackQueries.some((q) => q.isLoading));
 
   const { data: tags = [] } = useTagsQuery(campaignBotId);
   const { data: leads = [] } = useLeadsQuery(campaignBotId);
