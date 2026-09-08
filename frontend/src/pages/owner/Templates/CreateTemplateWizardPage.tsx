@@ -84,6 +84,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
   const [detailsSavedMsg, setDetailsSavedMsg] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     if (bots.length === 0) return;
     setLoadingRealData(true);
 
@@ -97,6 +98,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
       Promise.all(fieldPromises),
     ])
       .then(([allCamps, allTags, allFields]) => {
+        if (!isMounted) return;
         const mergedCamps: CampaignResponse[] = [];
         const campMap = new Map<number, CampaignResponse>();
         allCamps.flat().forEach((c) => {
@@ -191,7 +193,13 @@ export const CreateTemplateWizardPage: React.FC = () => {
           }).catch(() => {});
         }
       })
-      .finally(() => setLoadingRealData(false));
+      .finally(() => {
+        if (isMounted) setLoadingRealData(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [bots, editShareCode, currentUser, navigate, t, reset]);
 
   const automationItems: SelectionItem[] = bots.map((b) => ({

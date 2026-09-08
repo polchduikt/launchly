@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
+import { ErrorBoundary } from '../../../components/common/ErrorBoundary';
 import {
   CreateAutomationModal,
   EditAutomationModal,
@@ -540,39 +541,41 @@ export const AutomationsPage: React.FC = () => {
               </div>
             </div>
 
-            {isLoading ? (
-              <div className="py-12 flex flex-col items-center justify-center gap-2 text-xs font-bold text-[#0A0A0A]">
-                <Loader2 size={24} className="animate-spin text-[#0A0A0A]" />
-                <span>{t('automations.loading')}</span>
-              </div>
-            ) : filteredBots.length > 0 ? (
-              viewMode === 'list' ? (
-                <AutomationsTableView
-                  bots={filteredBots}
-                  selectedBotIds={selectedBotIds}
-                  showRuns={showRuns}
-                  showCtr={showCtr}
-                  showBadge={showBadge}
-                  onToggleSelectAll={handleToggleSelectAll}
-                  onToggleSelectBot={handleToggleSelectBot}
-                  onBotClick={handleBotClick}
-                  onMenuClick={handleMenuClick}
-                />
+            <ErrorBoundary inline fallbackTitle="Automations Error">
+              {isLoading ? (
+                <div className="py-12 flex flex-col items-center justify-center gap-2 text-xs font-bold text-[#0A0A0A]">
+                  <Loader2 size={24} className="animate-spin text-[#0A0A0A]" />
+                  <span>{t('automations.loading')}</span>
+                </div>
+              ) : filteredBots.length > 0 ? (
+                viewMode === 'list' ? (
+                  <AutomationsTableView
+                    bots={filteredBots}
+                    selectedBotIds={selectedBotIds}
+                    showRuns={showRuns}
+                    showCtr={showCtr}
+                    showBadge={showBadge}
+                    onToggleSelectAll={handleToggleSelectAll}
+                    onToggleSelectBot={handleToggleSelectBot}
+                    onBotClick={handleBotClick}
+                    onMenuClick={handleMenuClick}
+                  />
+                ) : (
+                  <AutomationsGridView
+                    bots={filteredBots}
+                    showRuns={showRuns}
+                    showCtr={showCtr}
+                    showBadge={showBadge}
+                    onBotClick={handleBotClick}
+                    onMenuClick={handleMenuClick}
+                  />
+                )
               ) : (
-                <AutomationsGridView
-                  bots={filteredBots}
-                  showRuns={showRuns}
-                  showCtr={showCtr}
-                  showBadge={showBadge}
-                  onBotClick={handleBotClick}
-                  onMenuClick={handleMenuClick}
-                />
-              )
-            ) : (
-              <div className="py-12 text-center text-xs font-bold text-[#0A0A0A] italic">
-                {t('automations.no_automations')}
-              </div>
-            )}
+                <div className="py-12 text-center text-xs font-bold text-[#0A0A0A] italic">
+                  {t('automations.no_automations')}
+                </div>
+              )}
+            </ErrorBoundary>
           </div>
         </div>
       </div>

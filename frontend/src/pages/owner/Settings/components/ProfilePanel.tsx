@@ -42,15 +42,8 @@ export const ProfilePanel: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const avatarUploadMutation = useMediaUpload('avatars');
-
-  useEffect(() => {
-    if (user) {
-      setName(user.name || '');
-      setEmail(user.email || '');
-      setAvatar(user.avatar || null);
-    }
-  }, [user]);
 
   const isGoogle = user?.provider === 'GOOGLE';
   const hasPassword = Boolean(user?.hasPassword);
@@ -62,6 +55,32 @@ export const ProfilePanel: React.FC = () => {
     (hasPassword && currentPassword.length > 0) ||
     newPassword.length > 0 ||
     confirmPassword.length > 0;
+
+  const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    if (!user) return;
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      setName(user.name || '');
+      setEmail(user.email || '');
+      setAvatar(user.avatar || null);
+      return;
+    }
+    if (!hasChanges) {
+      setName(user.name || '');
+      setEmail(user.email || '');
+      setAvatar(user.avatar || null);
+    }
+  }, [user, hasChanges]);
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -139,9 +158,9 @@ export const ProfilePanel: React.FC = () => {
       setUser(updatedUser);
       setCurrentPassword('');
       setNewPassword('');
-      setConfirmPassword('');
       setSuccessMsg(t('settings.profile.save_success', 'Profile successfully updated!'));
-      setTimeout(() => setSuccessMsg(null), 4000);
+      if (successTimeoutRef.current) clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = setTimeout(() => setSuccessMsg(null), 4000);
     } catch (err: unknown) {
       const message = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
       setErrorMsg(message || t('settings.profile.save_error', 'Failed to update profile'));

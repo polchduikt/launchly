@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
+import { ErrorBoundary } from '../../../components/common/ErrorBoundary';
 import { useTranslation } from '../../../i18n/config';
 import {
   useOrdersQuery,
@@ -60,8 +61,9 @@ export const OrdersPage: React.FC = () => {
         </header>
 
         <div className="flex-1 overflow-hidden">
-          {isOrdersLoading || isBotsLoading ? (
-            <div className="h-full overflow-y-auto p-6 font-['JetBrains_Mono',monospace]">
+          <ErrorBoundary inline fallbackTitle="Orders Error">
+            {isOrdersLoading || isBotsLoading ? (
+              <div className="h-full overflow-y-auto p-6 font-['JetBrains_Mono',monospace]">
               <TableSkeleton rows={6} columns={5} />
             </div>
           ) : botId === 0 ? (
@@ -200,6 +202,7 @@ export const OrdersPage: React.FC = () => {
               </div>
             </div>
           )}
+          </ErrorBoundary>
         </div>
       </div>
     </DashboardLayout>

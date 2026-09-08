@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
+import { ErrorBoundary } from '../../../components/common/ErrorBoundary';
 import {
   useAllBotUsersQuery,
   useUpdateBotUserMutation,
@@ -365,16 +366,18 @@ export const ContactsPage: React.FC = () => {
 
 
 
-          <ContactsTable
-            botId={botId}
-            isBotsLoading={isBotsLoading}
-            isContactsLoading={isContactsLoading}
-            filteredContacts={filteredContacts}
-            selectedContactIds={selectedContactIds}
-            onSelectAll={handleSelectAll}
-            onSelectContact={handleSelectContact}
-            onSelectContactDetail={setSelectedContact}
-          />
+          <ErrorBoundary inline fallbackTitle="Contacts Error">
+            <ContactsTable
+              botId={botId}
+              isBotsLoading={isBotsLoading}
+              isContactsLoading={isContactsLoading}
+              filteredContacts={filteredContacts}
+              selectedContactIds={selectedContactIds}
+              onSelectAll={handleSelectAll}
+              onSelectContact={handleSelectContact}
+              onSelectContactDetail={setSelectedContact}
+            />
+          </ErrorBoundary>
         </main>
       </div>
 
