@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { t } from '../../../../i18n/config';
+import React, { useRef, useEffect, useState, lazy, Suspense } from 'react';
+import { useTranslation } from '../../../../i18n/config';
 import {
   Smile,
   ImageIcon,
@@ -10,9 +10,24 @@ import {
   X,
   RefreshCw,
 } from 'lucide-react';
-import data from '@emoji-mart/data';
-import Picker from '@emoji-mart/react';
 import type { BottomTab } from '../../../../types/chat';
+
+const LazyPicker = lazy(async () => {
+  const [emojiDataModule, pickerModule] = await Promise.all([
+    import('@emoji-mart/data'),
+    import('@emoji-mart/react'),
+  ]);
+  const PickerComponent = (pickerModule.default || pickerModule) as unknown as React.ComponentType<Record<string, unknown>>;
+  const emojiData = emojiDataModule.default || emojiDataModule;
+  return {
+    default: (props: {
+      onEmojiSelect: (emoji: { native: string }) => void;
+      theme?: string;
+      previewPosition?: string;
+      skinTonePosition?: string;
+    }) => <PickerComponent data={emojiData} {...props} />,
+  };
+});
 
 interface ReplyBarProps {
   bottomTab: BottomTab;
@@ -69,6 +84,7 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
   onSaveNote,
   onScheduleClick,
 }) => {
+  const { t } = useTranslation();
   const [internalShowEmojiPicker, setInternalShowEmojiPicker] = useState(false);
   const localEmojiRef = useRef<HTMLDivElement>(null);
   const localImageInputRef = useRef<HTMLInputElement>(null);
@@ -192,14 +208,21 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
                   <Smile size={16} />
                 </button>
                 {isEmojiOpen && (
-                  <div className="absolute bottom-10 left-0 z-50 shadow-[8px_8px_0px_0px_#0A0A0A] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
-                    <Picker
-                      data={data}
-                      onEmojiSelect={handleEmojiSelectInternal}
-                      theme="light"
-                      previewPosition="none"
-                      skinTonePosition="none"
-                    />
+                  <div className="absolute bottom-10 left-0 z-50 shadow-[8px_8px_0px_0px_#0A0A0A] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden bg-white">
+                    <Suspense
+                      fallback={
+                        <div className="w-[352px] h-[435px] flex items-center justify-center bg-white">
+                          <Loader2 className="animate-spin text-[#0A0A0A]" size={24} />
+                        </div>
+                      }
+                    >
+                      <LazyPicker
+                        onEmojiSelect={handleEmojiSelectInternal}
+                        theme="light"
+                        previewPosition="none"
+                        skinTonePosition="none"
+                      />
+                    </Suspense>
                   </div>
                 )}
               </div>
