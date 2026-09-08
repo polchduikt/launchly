@@ -2,6 +2,8 @@ import React from 'react';
 import { Copy, Trash2 } from 'lucide-react';
 import { t } from '../../../../../i18n/config';
 
+import { useFlowUiStore } from '../../../../../store/useFlowUiStore';
+
 interface NodeToolbarProps {
   nodeId: string;
   onMouseEnter?: () => void;
@@ -18,7 +20,7 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = ({ nodeId, onMouseEnter, 
       <button
         onClick={(e) => {
           e.stopPropagation();
-          window.dispatchEvent(new CustomEvent('flow-copy-node', { detail: { nodeId } }));
+          useFlowUiStore.getState().requestCopyNode(nodeId);
         }}
         className="w-7 h-7 flex items-center justify-center rounded-lg text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors cursor-pointer"
         title={t('flow_builder.copy_block')}
@@ -29,7 +31,7 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = ({ nodeId, onMouseEnter, 
       <button
         onClick={(e) => {
           e.stopPropagation();
-          window.dispatchEvent(new CustomEvent('flow-delete-node', { detail: { nodeId } }));
+          useFlowUiStore.getState().requestDeleteNode(nodeId);
         }}
         className="w-7 h-7 flex items-center justify-center rounded-lg text-rose-600 hover:bg-rose-600 hover:text-white transition-colors cursor-pointer"
         title={t('flow_builder.delete_block')}

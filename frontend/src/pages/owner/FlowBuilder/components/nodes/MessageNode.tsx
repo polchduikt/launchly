@@ -8,6 +8,7 @@ import { NodeHandle } from './NodeHandle';
 import { getBlocks } from '../../../../../hooks/bot/useNodeEditor';
 import { useNodeHover } from '../../../../../hooks/bot/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
+import { useFlowUiStore } from '../../../../../store/useFlowUiStore';
 
 const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const { setNodes } = useReactFlow();
@@ -63,23 +64,13 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
     );
 
     setActiveButtonValue(newBtn.value);
-
-    setTimeout(() => {
-      const editEvent = new CustomEvent('edit-flow-button', {
-        detail: { nodeId: id, button: newBtn },
-      });
-      window.dispatchEvent(editEvent);
-    }, 50);
+    useFlowUiStore.getState().openEditButton(id, newBtn);
   };
 
   const handleButtonClick = (e: React.MouseEvent, btn: ButtonData) => {
     e.stopPropagation();
     setActiveButtonValue(btn.value);
-    
-    const editEvent = new CustomEvent('edit-flow-button', {
-      detail: { nodeId: id, button: btn },
-    });
-    window.dispatchEvent(editEvent);
+    useFlowUiStore.getState().openEditButton(id, btn);
   };
 
   const groupButtonsByRow = (btns: ButtonData[]) => {

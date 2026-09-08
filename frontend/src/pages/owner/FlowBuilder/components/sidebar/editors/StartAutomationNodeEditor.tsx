@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useBotsQuery } from '../../../../../../hooks/bot/useBotsQuery';
 import { useFlowSchemaQuery } from '../../../../../../hooks/bot/useFlowSchema';
 import { useBotStore } from '../../../../../../store/useBotStore';
+import { useFlowUiStore } from '../../../../../../store/useFlowUiStore';
 import { InlineFlowPreview } from './InlineFlowPreview';
 import type { Node, Edge } from '@xyflow/react';
 import { t } from '../../../../../../i18n/config';
@@ -25,6 +26,16 @@ export const StartAutomationNodeEditor: React.FC<StartAutomationNodeEditorProps>
   const [selectedBotId, setSelectedBotId] = useState<number | null>(null);
   const navigate = useNavigate();
   const setActiveBotId = useBotStore((state) => state.setActiveBotId);
+
+  const pickAutomationNodeId = useFlowUiStore((s) => s.pickAutomationNodeId);
+  const closePickAutomation = useFlowUiStore((s) => s.closePickAutomation);
+
+  useEffect(() => {
+    if (node && pickAutomationNodeId === node.id) {
+      setIsModalOpen(true);
+      closePickAutomation();
+    }
+  }, [node, pickAutomationNodeId, closePickAutomation]);
 
   useEffect(() => {
     const handleOpenPickEvent = (e: Event) => {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Node } from '@xyflow/react';
 import type { CustomNodeData, ButtonData, FlowBlock } from '../../types/bot';
+import { useFlowUiStore } from '../../store/useFlowUiStore';
 import apiClient from '../../api/axios';
 
 export const getBlocks = (data: CustomNodeData): FlowBlock[] => {
@@ -99,25 +100,20 @@ export const useNodeEditor = (
     setEditingDataCollectionBlock(null);
   }, [node?.id]);
 
+  const editingButtonState = useFlowUiStore((s) => s.editingButtonState);
+
   useEffect(() => {
-    const handleEditButtonFromNode = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (node && customEvent.detail.nodeId === node.id) {
-        const btn = customEvent.detail.button;
-        setEditingButton(btn);
-        const blocksList = getBlocks(node.data || {});
-        const parentBlock = blocksList.find((b) => 
-          ((b.buttons || []) as ButtonData[]).some((button) => button.value === btn.value)
-        );
-        setEditingButtonBlockId(parentBlock ? (parentBlock.id as string) : null);
-        setIsBtnDialogOpen(true);
-      }
-    };
-    window.addEventListener('edit-flow-button', handleEditButtonFromNode);
-    return () => {
-      window.removeEventListener('edit-flow-button', handleEditButtonFromNode);
-    };
-  }, [node]);
+    if (editingButtonState && node && editingButtonState.nodeId === node.id) {
+      const btn = editingButtonState.button;
+      setEditingButton(btn);
+      const blocksList = getBlocks(node.data || {});
+      const parentBlock = blocksList.find((b) => 
+        ((b.buttons || []) as ButtonData[]).some((button) => button.value === btn.value)
+      );
+      setEditingButtonBlockId(parentBlock ? (parentBlock.id as string) : null);
+      setIsBtnDialogOpen(true);
+    }
+  }, [node, editingButtonState]);
 
   const data = (node?.data || {}) as CustomNodeData;
   const buttons = (data.buttons || []) as ButtonData[];

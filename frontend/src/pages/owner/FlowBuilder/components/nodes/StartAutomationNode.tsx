@@ -8,6 +8,7 @@ import type { CustomNodeData } from '../../../../../types/bot';
 import { useNodeHover } from '../../../../../hooks/bot/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 import { useBotStore } from '../../../../../store/useBotStore';
+import { useFlowUiStore } from '../../../../../store/useFlowUiStore';
 import { t } from '../../../../../i18n/config';
 
 const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
@@ -58,7 +59,7 @@ const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ i
 
   const handleSelectClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.dispatchEvent(new CustomEvent('open-pick-automation', { detail: { nodeId: id } }));
+    useFlowUiStore.getState().openPickAutomation(id);
   };
 
   return (

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getBezierPath, getSmoothStepPath, EdgeLabelRenderer, useReactFlow, type EdgeProps } from '@xyflow/react';
 import { Trash2 } from 'lucide-react';
+import { useFlowUiStore } from '../../../../../store/useFlowUiStore';
 
 export const InteractiveEdge: React.FC<EdgeProps> = ({
   id,
@@ -12,8 +13,8 @@ export const InteractiveEdge: React.FC<EdgeProps> = ({
   targetPosition,
   style = {},
   type, 
-  source,
-  target,
+  source: _source,
+  target: _target,
 }) => {
   const [showDelete, setShowDelete] = useState(false);
   const [isHighlighted, setIsHighlighted] = useState(false);
@@ -34,11 +35,7 @@ export const InteractiveEdge: React.FC<EdgeProps> = ({
     }
 
     setIsHighlighted(true);
-    window.dispatchEvent(
-      new CustomEvent('flow-hover-edge', {
-        detail: { edgeId: id, source, target },
-      })
-    );
+    useFlowUiStore.getState().setHoveredEdgeId(id);
 
     if (!showDelete && !enterTimeoutRef.current) {
       const clientX = event.clientX;
@@ -73,7 +70,7 @@ export const InteractiveEdge: React.FC<EdgeProps> = ({
     if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
     highlightTimeoutRef.current = setTimeout(() => {
       setIsHighlighted(false);
-      window.dispatchEvent(new CustomEvent('flow-hover-edge', { detail: null }));
+      useFlowUiStore.getState().setHoveredEdgeId(null);
       highlightTimeoutRef.current = null;
     }, 50);
 
@@ -112,7 +109,7 @@ export const InteractiveEdge: React.FC<EdgeProps> = ({
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.dispatchEvent(new CustomEvent('flow-delete-edge', { detail: { edgeId: id } }));
+    useFlowUiStore.getState().requestDeleteEdge(id);
   };
 
   const displayX = deletePos ? deletePos.x : labelX;

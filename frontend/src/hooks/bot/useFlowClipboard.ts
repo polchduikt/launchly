@@ -4,6 +4,7 @@ import { generateId } from '../../utils/id';
 import { getBlocks } from './useNodeEditor';
 import type { ButtonData } from '../../types/bot';
 import { STORAGE_KEYS } from '../../const/constants';
+import { useFlowUiStore } from '../../store/useFlowUiStore';
 
 interface UseFlowClipboardParams {
   nodes: Node[];
@@ -169,41 +170,8 @@ export const useFlowClipboard = ({
     setSelectedNodeId(newNodes[newNodes.length - 1].id);
   }, [takeSnapshot, setNodes, setEdges, setSelectedNodeId, screenToFlowPosition]);
 
-  useEffect(() => {
-    const handleEditButton = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail.isRedispatched) {
-        return;
-      }
-
-      const { nodeId, button } = customEvent.detail;
-      setSelectedNodeId(nodeId);
-      setNodes((nds) =>
-        nds.map((n) => ({
-          ...n,
-          selected: n.id === nodeId,
-        }))
-      );
-
-      setTimeout(() => {
-        window.dispatchEvent(
-          new CustomEvent('edit-flow-button', {
-            detail: { nodeId, button, isRedispatched: true },
-          })
-        );
-      }, 50);
-    };
-
-    window.addEventListener('edit-flow-button', handleEditButton);
-    return () => {
-      window.removeEventListener('edit-flow-button', handleEditButton);
-    };
-  }, [setNodes, setSelectedNodeId]);
-
-  useEffect(() => {
-    const handleCopy = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      const { nodeId } = customEvent.detail;
+  const handleCopyNode = useCallback(
+    (nodeId: string) => {
       const nodeToCopy = nodes.find((n) => n.id === nodeId);
       if (!nodeToCopy || nodeToCopy.type === 'START') return;
 
@@ -248,11 +216,12 @@ export const useFlowClipboard = ({
 
       setNodes((nds) => [...nds.map((n) => ({ ...n, selected: false }) as Node), newNode]);
       setSelectedNodeId(newId);
-    };
+    },
+    [nodes, setNodes, setSelectedNodeId, takeSnapshot]
+  );
 
-    const handleDelete = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      const { nodeId } = customEvent.detail;
+  const handleDeleteNode = useCallback(
+    (nodeId: string) => {
       const nodeToDelete = nodes.find((n) => n.id === nodeId);
       if (!nodeToDelete || nodeToDelete.type === 'START') return;
 
@@ -262,24 +231,101 @@ export const useFlowClipboard = ({
       if (selectedNodeId === nodeId) {
         setSelectedNodeId(null);
       }
-    };
+    },
+    [nodes, selectedNodeId, setNodes, setEdges, setSelectedNodeId, takeSnapshot]
+  );
 
-    const handleDeleteEdge = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      const { edgeId } = customEvent.detail;
+  const handleDeleteEdge = useCallback(
+    (edgeId: string) => {
       takeSnapshot();
       setEdges((eds) => eds.filter((edge) => edge.id !== edgeId));
+    },
+    [setEdges, takeSnapshot]
+  );
+
+  useEffect(() => {
+    const unsub = useFlowUiStore.subscribe((state, prevState) => {
+      if (state.editingButtonState && state.editingButtonState !== prevState.editingButtonState) {
+        const { nodeId } = state.editingButtonState;
+        setSelectedNodeId(nodeId);
+        setNodes((nds) =>
+          nds.map((n) => ({
+            ...n,
+            selected: n.id === nodeId,
+          }))
+        );
+      }
+      if (state.pickAutomationNodeId && state.pickAutomationNodeId !== prevState.pickAutomationNodeId) {
+        const nodeId = state.pickAutomationNodeId;
+        setSelectedNodeId(nodeId);
+        setNodes((nds) =>
+          nds.map((n) => ({
+            ...n,
+            selected: n.id === nodeId,
+          }))
+        );
+      }
+      if (state.copyNodeId && state.copyNodeId !== prevState.copyNodeId) {
+        const nodeId = state.copyNodeId;
+        useFlowUiStore.getState().clearCopyNode();
+        handleCopyNode(nodeId);
+      }
+      if (state.deleteNodeId && state.deleteNodeId !== prevState.deleteNodeId) {
+        const nodeId = state.deleteNodeId;
+        useFlowUiStore.getState().clearDeleteNode();
+        handleDeleteNode(nodeId);
+      }
+      if (state.deleteEdgeId && state.deleteEdgeId !== prevState.deleteEdgeId) {
+        const edgeId = state.deleteEdgeId;
+        useFlowUiStore.getState().clearDeleteEdge();
+        handleDeleteEdge(edgeId);
+      }
+    });
+
+    const handleLegacyEditButton = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.isRedispatched) return;
+      const { nodeId, button } = customEvent.detail;
+      setSelectedNodeId(nodeId);
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          selected: n.id === nodeId,
+        }))
+      );
+      if (button) {
+        useFlowUiStore.getState().openEditButton(nodeId, button);
+      }
     };
 
-    window.addEventListener('flow-copy-node', handleCopy);
-    window.addEventListener('flow-delete-node', handleDelete);
-    window.addEventListener('flow-delete-edge', handleDeleteEdge);
-    return () => {
-      window.removeEventListener('flow-copy-node', handleCopy);
-      window.removeEventListener('flow-delete-node', handleDelete);
-      window.removeEventListener('flow-delete-edge', handleDeleteEdge);
+    const handleLegacyCopy = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      handleCopyNode(customEvent.detail.nodeId);
     };
-  }, [nodes, selectedNodeId, setNodes, setEdges, setSelectedNodeId, takeSnapshot]);
+
+    const handleLegacyDelete = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      handleDeleteNode(customEvent.detail.nodeId);
+    };
+
+    const handleLegacyDeleteEdge = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      handleDeleteEdge(customEvent.detail.edgeId);
+    };
+
+    window.addEventListener('edit-flow-button', handleLegacyEditButton);
+    window.addEventListener('flow-copy-node', handleLegacyCopy);
+    window.addEventListener('flow-delete-node', handleLegacyDelete);
+    window.addEventListener('flow-delete-edge', handleLegacyDeleteEdge);
+
+    return () => {
+      unsub();
+      window.removeEventListener('edit-flow-button', handleLegacyEditButton);
+      window.removeEventListener('flow-copy-node', handleLegacyCopy);
+      window.removeEventListener('flow-delete-node', handleLegacyDelete);
+      window.removeEventListener('flow-delete-edge', handleLegacyDeleteEdge);
+    };
+  }, [handleCopyNode, handleDeleteNode, handleDeleteEdge, setNodes, setSelectedNodeId]);
 
   return {
     copySelectedNodes,

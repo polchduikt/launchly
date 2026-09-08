@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { addEdge } from '@xyflow/react';
 import type { Connection, Edge, Node } from '@xyflow/react';
 import { FLOW_EDGE_DEFAULTS } from '../../const/flowEdges';
 import type { FlowContextMenuState } from './useFlowContextMenu';
+import { useFlowUiStore } from '../../store/useFlowUiStore';
 
 interface UseFlowConnectionsParams {
   nodes: Node[];
@@ -23,7 +24,8 @@ export const useFlowConnections = ({
   screenToFlowPosition,
   setContextMenu,
 }: UseFlowConnectionsParams) => {
-  const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
+  const hoveredEdgeId = useFlowUiStore((s) => s.hoveredEdgeId);
+  const setHoveredEdgeId = useFlowUiStore((s) => s.setHoveredEdgeId);
   const connectionStartRef = useRef<{ nodeId: string; handleId: string | null; handleType: string } | null>(null);
   const didConnectRef = useRef<boolean>(false);
   const justEndedDragRef = useRef<boolean>(false);
@@ -42,7 +44,7 @@ export const useFlowConnections = ({
     return () => {
       window.removeEventListener('flow-hover-edge', handleHover);
     };
-  }, []);
+  }, [setHoveredEdgeId]);
 
   const restoreTempRemovedEdge = useCallback(() => {
     if (tempRemovedEdgeRef.current) {
