@@ -174,7 +174,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   return React.createElement(
     LanguageContext.Provider,
     { value: { currentLanguage: lang, changeLanguage, t } },
-    React.createElement(React.Fragment, { key: lang }, children)
+    children
   );
 };
 
