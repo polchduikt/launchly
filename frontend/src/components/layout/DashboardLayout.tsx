@@ -8,7 +8,7 @@ import { NAV_ITEMS } from './config/navItems';
 import { useTranslation } from '../../i18n/config';
 import type { DashboardLayoutProps } from '../../types/shared';
 import { HelpCircle, Layers, ChevronDown } from 'lucide-react';
-import { useAllBotUsersQuery } from '../../hooks/crm/useCrmQueries';
+import { useContactsCountQuery } from '../../hooks/crm/useCrmQueries';
 import { useSubscriptionQuery } from '../../hooks/bot/useBillingQueries';
 import { useUserTicketsQuery } from '../../hooks/support/useSupportQueries';
 import { PendingInvitationsBanner } from '../common/PendingInvitationsBanner';
@@ -31,7 +31,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const [showLangMenu, setShowLangMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const helpMenuRef = useRef<HTMLDivElement>(null);
-  const { data: contacts = [] } = useAllBotUsersQuery();
+  const { count: contactsCount } = useContactsCountQuery();
   const { data: subscription } = useSubscriptionQuery();
   const { data: userTicketsData } = useUserTicketsQuery();
   const hasUnreadSupport = userTicketsData?.content?.some((t) => Boolean(t.unreadForUser)) || false;
@@ -47,7 +47,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
   const planName = subscription?.plan?.displayName || 'Free';
   const maxBotUsers = subscription?.plan?.maxBotUsers || 100;
-  const contactsCount = contacts?.length || 0;
   const percentage = Math.min(100, Math.round((contactsCount / maxBotUsers) * 100));
   const isPaidPlan = subscription?.plan && subscription.plan.name.toUpperCase() !== 'FREE';
 

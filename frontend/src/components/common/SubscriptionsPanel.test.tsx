@@ -24,6 +24,7 @@ vi.mock('../../hooks/bot/useBillingQueries', () => ({
 
 vi.mock('../../hooks/crm/useCrmQueries', () => ({
   useAllBotUsersQuery: () => ({ data: [] }),
+  useContactsCountQuery: () => ({ count: 0 }),
 }));
 
 vi.mock('./PricingModal', () => ({

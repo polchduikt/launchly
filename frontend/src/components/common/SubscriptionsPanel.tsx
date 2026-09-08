@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { t } from '../../i18n/config';
+import { useContactsCountQuery } from '../../hooks/crm/useCrmQueries';
 import {
   useSubscriptionQuery,
   useCancelSubscriptionMutation,
   useResumeSubscriptionMutation,
 } from '../../hooks/bot/useBillingQueries';
-import { useAllBotUsersQuery } from '../../hooks/crm/useCrmQueries';
 import { PricingModal } from './PricingModal';
 
 export const SubscriptionsPanel: React.FC = () => {
-  const { data: contacts = [] } = useAllBotUsersQuery();
-  const activeContactsCount = contacts.length;
+  const { count: activeContactsCount = 0 } = useContactsCountQuery();
 
   const {
     data: subscription,

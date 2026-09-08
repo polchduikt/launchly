@@ -244,13 +244,13 @@ export const useBotUsersQuery = (botId: number, enabled: boolean = true) => {
   });
 };
 
-export const useAllBotUsersQuery = () => {
+export const useAllBotUsersQuery = (enabled: boolean = true) => {
   const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
   const queries = useQueries({
     queries: bots.map((bot) => ({
       queryKey: ['botUsers', bot.id],
       queryFn: () => getBotUsersApi(bot.id),
-      enabled: bots.length > 0,
+      enabled: enabled && bots.length > 0,
     })),
   });
 
@@ -271,6 +271,21 @@ export const useAllBotUsersQuery = () => {
   const isLoading = isBotsLoading || queries.some((q) => q.isLoading);
 
   return { data: contacts, isLoading, refetch: () => queries.forEach((q) => q.refetch()) };
+};
+
+export const useContactsCountQuery = () => {
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
+  const queryClient = useQueryClient();
+  const cachedUsers = queryClient.getQueryData<BotUserResponse[]>(['allBotUsers']);
+
+  const count = useMemo(() => {
+    if (cachedUsers && Array.isArray(cachedUsers)) {
+      return cachedUsers.length;
+    }
+    return bots.reduce((sum, b) => sum + (b.totalUsers || 0), 0);
+  }, [cachedUsers, bots]);
+
+  return { count, isLoading: isBotsLoading };
 };
 
 export const useUpdateBotUserMutation = (botId: number) => {
