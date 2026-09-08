@@ -13,6 +13,7 @@ import {
 } from '../utils/requestCancellation';
 import { STORAGE_KEYS } from '../const/constants';
 import { ROUTES, isPublicRoute } from '../routes/paths';
+import { toast } from '../store/useToastStore';
 
 const apiClient = axios.create({
   baseURL: '/api/v1',
@@ -134,6 +135,17 @@ apiClient.interceptors.response.use(
         isRefreshing = false;
       }
     }
+
+    const skipToast = (originalRequest as { skipToast?: boolean } | undefined)?.skipToast;
+    if (!skipToast && error.response?.status !== 401) {
+      const msg =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        (error.code === 'ERR_NETWORK' ? 'Network error: please check your connection' : error.message) ||
+        'Request failed';
+      toast.error(msg);
+    }
+
     return Promise.reject(error);
   }
 );

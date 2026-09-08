@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useSendMessageMutation } from './useCrmQueries';
 import { useMediaUpload } from '../bot/useMediaUpload';
+import { toast } from '../../store/useToastStore';
 
 interface UseChatActionsParams {
   selectedConvId: number | null;
@@ -63,6 +64,7 @@ export const useChatActions = ({ selectedConvId, botId }: UseChatActionsParams) 
       setPendingImage({ url: result.url, file });
     } catch (err) {
       console.error('Image upload failed:', err);
+      toast.error('Image upload failed');
     }
     e.target.value = '';
   };
@@ -80,6 +82,7 @@ export const useChatActions = ({ selectedConvId, botId }: UseChatActionsParams) 
       });
     } catch (err) {
       console.error('File upload failed:', err);
+      toast.error('File upload failed');
     }
     e.target.value = '';
   };
@@ -111,6 +114,7 @@ export const useChatActions = ({ selectedConvId, botId }: UseChatActionsParams) 
           sendMessageMut.mutate({ content: '🎤 Voice message', mediaUrl: result.url, mediaType: 'voice' });
         } catch (err) {
           console.error('Voice upload failed:', err);
+          toast.error('Voice upload failed');
         }
       };
       recorder.start();
@@ -118,7 +122,7 @@ export const useChatActions = ({ selectedConvId, botId }: UseChatActionsParams) 
       setIsRecording(true);
     } catch (err) {
       console.error('Microphone access denied:', err);
-      alert('Please allow microphone access to record voice messages.');
+      toast.warning('Please allow microphone access to record voice messages.');
     }
   };
 

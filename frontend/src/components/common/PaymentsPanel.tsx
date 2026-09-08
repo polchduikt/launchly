@@ -2,13 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { t } from '../../i18n/config';
 import { 
-  CheckCircle2, 
   HelpCircle, 
   CreditCard, 
-  AlertCircle, 
   Plus,
   ChevronDown
 } from 'lucide-react';
+import { toast } from '../../store/useToastStore';
 
 import { useBotStore } from '../../store/useBotStore';
 import {
@@ -44,7 +43,6 @@ export const PaymentsPanel: React.FC = () => {
   const [notifyEmail, setNotifyEmail] = useState(false);
   const [sendReceiptEmail, setSendReceiptEmail] = useState(false);
   const [orders, setOrders] = useState<PaymentOrder[]>([]);
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const stripeActive = stripeIntegration?.active;
   useEffect(() => {
@@ -67,19 +65,12 @@ export const PaymentsPanel: React.FC = () => {
     }
   }, [stripeActive, paypalIntegration]);
 
-  const showNotification = (type: 'success' | 'error', message: string) => {
-    setNotification({ type, message });
-    setTimeout(() => {
-      setNotification(null);
-    }, 4000);
-  };
-
   const handleConnectStripe = async () => {
     if (isStripeConnected && stripeIntegration) {
       try {
         await deleteIntegrationMutation.mutateAsync(stripeIntegration.id);
         setIsStripeConnected(false);
-        showNotification('success', t('settings.payments.stripe.disconnected_msg'));
+        toast.success(t('settings.payments.stripe.disconnected_msg'));
       } catch (err) {
         console.error(err);
       }
@@ -95,10 +86,10 @@ export const PaymentsPanel: React.FC = () => {
         config: { connected: true },
       });
       setIsStripeConnected(true);
-      showNotification('success', t('settings.payments.stripe.connected_msg'));
+      toast.success(t('settings.payments.stripe.connected_msg'));
     } catch (err) {
       console.error(err);
-      showNotification('error', 'Failed to connect Stripe');
+      toast.error('Failed to connect Stripe');
     } finally {
       setIsStripeConnecting(false);
     }
@@ -114,7 +105,7 @@ export const PaymentsPanel: React.FC = () => {
         setPaypalWebhookId('');
         setPaypalLiveClientId('');
         setPaypalLiveWebhookId('');
-        showNotification('success', t('settings.payments.paypal.disconnected_msg'));
+        toast.success(t('settings.payments.paypal.disconnected_msg'));
       } catch (err) {
         console.error(err);
       }
@@ -134,7 +125,7 @@ export const PaymentsPanel: React.FC = () => {
 
     const validation = paypalConfigSchema.safeParse(payload);
     if (!validation.success || !paypalClientId.trim() || !paypalWebhookId.trim() || !paypalLiveClientId.trim() || !paypalLiveWebhookId.trim()) {
-      showNotification('error', t('settings.payments.paypal.error_fill'));
+      toast.error(t('settings.payments.paypal.error_fill'));
       return;
     }
 
@@ -150,17 +141,17 @@ export const PaymentsPanel: React.FC = () => {
         },
       });
       setIsPaypalConnected(true);
-      showNotification('success', t('settings.payments.paypal.connected_msg'));
+      toast.success(t('settings.payments.paypal.connected_msg'));
     } catch (err) {
       console.error(err);
-      showNotification('error', 'Failed to connect PayPal');
+      toast.error('Failed to connect PayPal');
     } finally {
       setIsPaypalConnecting(false);
     }
   };
 
   const handleSaveSettings = async (updates: Record<string, unknown>) => {
-    showNotification('success', t('settings.payments.history.saved_msg'));
+    toast.success(t('settings.payments.history.saved_msg'));
     if (paypalIntegration) {
       const updatedConfig = { ...paypalIntegration.config, ...updates };
       try {
@@ -178,7 +169,7 @@ export const PaymentsPanel: React.FC = () => {
 
   const handleGenerateTestOrder = () => {
     if (!isStripeConnected && !isPaypalConnected) {
-      showNotification('error', t('settings.payments.history.connect_needed'));
+      toast.error(t('settings.payments.history.connect_needed'));
       return;
     }
 
@@ -225,31 +216,17 @@ export const PaymentsPanel: React.FC = () => {
     const updated = [newOrder, ...orders];
     setOrders(updated);
     handleSaveSettings({ orders: updated });
-    showNotification('success', t('settings.payments.history.success_sim'));
+    toast.success(t('settings.payments.history.success_sim'));
   };
 
   const handleClearOrders = () => {
     setOrders([]);
     handleSaveSettings({ orders: [] });
-    showNotification('success', t('settings.payments.history.success_clear'));
+    toast.success(t('settings.payments.history.success_clear'));
   };
 
   return (
     <div className="space-y-6 pb-10 font-['JetBrains_Mono',monospace]">
-      {notification && (
-        <div className={`fixed top-4 right-4 z-[9999] flex items-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-[#0A0A0A] shadow-[4px_4px_0px_0px_#0A0A0A] animate-in fade-in duration-200 ${
-          notification.type === 'success' 
-            ? 'bg-emerald-200 text-[#0A0A0A]' 
-            : 'bg-rose-200 text-[#0A0A0A]'
-        }`}>
-          {notification.type === 'success' ? (
-            <CheckCircle2 size={16} className="text-[#0A0A0A] shrink-0" />
-          ) : (
-            <AlertCircle size={16} className="text-[#0A0A0A] shrink-0" />
-          )}
-          <span className="text-xs font-bold">{notification.message}</span>
-        </div>
-      )}
       <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden">
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
           <div className="w-full md:w-1/4">
