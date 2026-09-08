@@ -294,6 +294,7 @@ export const useCustomFieldsData = ({ bots = [], botId = 0 }: UseCustomFieldsDat
     archivedFields,
     folders,
     isLoading,
+    saveFieldsData,
     createField,
     editField,
     createFolder,

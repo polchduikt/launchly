@@ -30,7 +30,7 @@ import {
 } from '../../../api/templateApi';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { templateWizardSchema, type TemplateWizardFormValues } from '../../../schemas';
+import { templateWizardSchema } from '../../../schemas';
 import { toast } from '../../../store/useToastStore';
 import { useTranslation } from '../../../i18n/config';
 import type { CampaignResponse, TagResponse } from '../../../types';
@@ -64,7 +64,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
     reset,
     control,
     formState: { errors },
-  } = useForm<TemplateWizardFormValues>({
+  } = useForm({
     resolver: zodResolver(templateWizardSchema),
     defaultValues: {
       name: '',
@@ -208,7 +208,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
 
   const fieldItems: SelectionItem[] = customFields.map((f, idx) => ({
     id: `field_${idx}`,
-    name: f.name || f.label || `${t('template.create.fallback_field', 'Поле')} #${idx + 1}`,
+    name: String(f.name || f.label || `${t('template.create.fallback_field', 'Поле')} #${idx + 1}`),
     category: 'fields',
   }));
 
