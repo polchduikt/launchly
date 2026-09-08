@@ -13,6 +13,45 @@
   --color-outline: #737688;
   --color-tertiary-fixed-dim: #4edea3;
   --color-surface: #f8f9ff;
+
+  /* Neo-brutalist Design System Tokens */
+  --color-brand-dark: #0A0A0A;
+  --color-brand-dark-hover: #2A2A2A;
+  --color-canvas-cream: #F2EBDD;
+  --color-canvas-slate: #F8FAFC;
+
+  --shadow-brutal-sm: 2px 2px 0px #0A0A0A;
+  --shadow-brutal: 4px 4px 0px #0A0A0A;
+  --shadow-brutal-md: 6px 6px 0px #0A0A0A;
+  --shadow-brutal-lg: 8px 8px 0px #0A0A0A;
+  --shadow-brutal-white: 4px 4px 0px #FFFFFF;
+}
+
+:root {
+  --color-brand-dark: #0A0A0A;
+  --color-brand-dark-hover: #2A2A2A;
+  --color-canvas-cream: #F2EBDD;
+  --color-canvas-slate: #F8FAFC;
+  --shadow-brutal-sm: 2px 2px 0px #0A0A0A;
+  --shadow-brutal: 4px 4px 0px #0A0A0A;
+  --shadow-brutal-md: 6px 6px 0px #0A0A0A;
+  --shadow-brutal-lg: 8px 8px 0px #0A0A0A;
+}
+
+.shadow-brutal-sm {
+  box-shadow: var(--shadow-brutal-sm);
+}
+
+.shadow-brutal {
+  box-shadow: var(--shadow-brutal);
+}
+
+.shadow-brutal-md {
+  box-shadow: var(--shadow-brutal-md);
+}
+
+.shadow-brutal-lg {
+  box-shadow: var(--shadow-brutal-lg);
 }
 
 .bg-pattern {
