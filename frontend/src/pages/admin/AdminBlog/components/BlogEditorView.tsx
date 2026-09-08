@@ -1,19 +1,9 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ArrowLeft,
   Check,
   Loader2,
   AlertTriangle,
-  UploadCloud,
-  Type,
-  Heading2,
-  Heading3,
-  Quote,
-  List as ListIcon,
-  Image as ImageIcon,
-  ArrowUp,
-  ArrowDown,
-  X,
 } from 'lucide-react';
 import { useTranslation, getLanguage } from '../../../../i18n/config';
 import {
@@ -24,13 +14,14 @@ import { useMediaUpload } from '../../../../hooks/bot/useMediaUpload';
 import { isAxiosError } from 'axios';
 import type { BlogArticle } from '../../../../const/blogData';
 import type { SaveBlogArticlePayload } from '../../../../api/adminBlog';
+import {
+  BlogGeneralInfoForm,
+  BlogBlocksEditor,
+  BlogPreviewPane,
+} from './blogEditor';
+import type { ContentBlock } from './blogEditor';
 
-export type ContentBlock =
-  | { type: 'paragraph'; text: string }
-  | { type: 'heading'; text: string; level: number }
-  | { type: 'quote'; text: string; author?: string }
-  | { type: 'list'; items: string[] }
-  | { type: 'image'; url: string; caption?: string };
+export type { ContentBlock };
 
 interface BlogEditorViewProps {
   initialArticle: BlogArticle | null;
@@ -65,7 +56,9 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
   const [formId, setFormId] = useState(initialArticle?.id || '');
   const [formTitle, setFormTitle] = useState(initialArticle?.title || '');
   const [formCategory, setFormCategory] = useState(initialArticle?.category || 'Гайди');
-  const [formLanguage, setFormLanguage] = useState<string>(initialArticle?.language || getLanguage() || 'uk');
+  const [formLanguage, setFormLanguage] = useState<string>(
+    initialArticle?.language || getLanguage() || 'uk'
+  );
   const formAuthor = initialArticle?.author || currentUser?.name || 'Launchly Team';
   const formDate = useMemo(() => {
     if (initialArticle?.date) return initialArticle.date;
@@ -77,6 +70,7 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
       year: 'numeric',
     });
   }, [initialArticle?.date]);
+
   const [formSummary, setFormSummary] = useState(initialArticle?.summary || '');
   const [formCoverImage, setFormCoverImage] = useState(initialArticle?.coverImage || '');
   const [formTags, setFormTags] = useState((initialArticle?.tags || []).join(', '));
@@ -89,8 +83,6 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
   const [activeTab, setActiveTab] = useState<'builder' | 'preview'>('builder');
   const [formError, setFormError] = useState<string | null>(null);
   const [uploadingBlockIndex, setUploadingBlockIndex] = useState<number | null>(null);
-
-  const coverFileInputRef = useRef<HTMLInputElement>(null);
 
   const computedReadTime = useMemo(() => {
     const allText = [
@@ -114,7 +106,9 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
         setFormCoverImage(res.url);
       },
       onError: (err: unknown) => {
-        const msg = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+        const msg = isAxiosError(err)
+          ? (err.response?.data as { message?: string })?.message
+          : undefined;
         setFormError(msg || 'Помилка завантаження фото');
       },
     });
@@ -135,7 +129,9 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
       },
       onError: (err: unknown) => {
         setUploadingBlockIndex(null);
-        const msg = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+        const msg = isAxiosError(err)
+          ? (err.response?.data as { message?: string })?.message
+          : undefined;
         setFormError(msg || 'Помилка завантаження фото блоку');
       },
     });
@@ -198,7 +194,7 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
 
     const tagsArray = formTags
       .split(',')
-      .map((t) => t.trim())
+      .map((tag) => tag.trim())
       .filter(Boolean);
 
     const payload: SaveBlogArticlePayload = {
@@ -223,7 +219,9 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
           onSuccess();
         },
         onError: (err: unknown) => {
-          const msg = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+          const msg = isAxiosError(err)
+            ? (err.response?.data as { message?: string })?.message
+            : undefined;
           setFormError(msg || t('admin.blog.error_update', 'Помилка оновлення статті'));
         },
       });
@@ -233,7 +231,9 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
           onSuccess();
         },
         onError: (err: unknown) => {
-          const msg = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+          const msg = isAxiosError(err)
+            ? (err.response?.data as { message?: string })?.message
+            : undefined;
           setFormError(msg || t('admin.blog.error_create', 'Помилка створення статті'));
         },
       });
@@ -317,561 +317,48 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
 
       {activeTab === 'builder' ? (
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-3xl border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] space-y-5">
-            <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wider pb-3 border-b-2 border-slate-100">
-              {t('admin.blog.sec_general', '1. Основна інформація')}
-            </h3>
+          <BlogGeneralInfoForm
+            formLanguage={formLanguage}
+            setFormLanguage={setFormLanguage}
+            formId={formId}
+            setFormId={setFormId}
+            formTitle={formTitle}
+            setFormTitle={setFormTitle}
+            formCategory={formCategory}
+            setFormCategory={setFormCategory}
+            defaultCategories={defaultCategories}
+            formCoverImage={formCoverImage}
+            setFormCoverImage={setFormCoverImage}
+            onCoverFileUpload={handleCoverFileUpload}
+            isCoverUploading={coverUploadMutation.isPending}
+            formSummary={formSummary}
+            setFormSummary={setFormSummary}
+            formTags={formTags}
+            setFormTags={setFormTags}
+          />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase text-[#0A0A0A] block">
-                  {t('admin.blog.label_language', 'Мова статті / Аудиторія *')}
-                </label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setFormLanguage('uk')}
-                    className={`flex-1 py-2.5 px-3 rounded-xl border-2 font-black text-xs uppercase flex items-center justify-center cursor-pointer transition ${
-                      formLanguage === 'uk'
-                        ? 'bg-blue-600 text-white border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]'
-                        : 'bg-white text-[#0A0A0A] border-slate-300 hover:border-[#0A0A0A]'
-                    }`}
-                  >
-                    {t('admin.blog.lang_uk', 'Українська')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormLanguage('en')}
-                    className={`flex-1 py-2.5 px-3 rounded-xl border-2 font-black text-xs uppercase flex items-center justify-center cursor-pointer transition ${
-                      formLanguage === 'en'
-                        ? 'bg-amber-400 text-[#0A0A0A] border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]'
-                        : 'bg-white text-[#0A0A0A] border-slate-300 hover:border-[#0A0A0A]'
-                    }`}
-                  >
-                    {t('admin.blog.lang_en', 'English')}
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase text-[#0A0A0A] block">
-                  {t('admin.blog.label_slug', 'URL Slug (ідентифікатор)')}
-                </label>
-                <input
-                  type="text"
-                  placeholder={t('admin.blog.placeholder_slug', 'автоматично з заголовка, напр. how-to-create-telegram-bot')}
-                  value={formId}
-                  onChange={(e) => setFormId(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none placeholder:text-slate-400"
-                />
-              </div>
-
-              <div className="md:col-span-2 space-y-1.5">
-                <label className="text-xs font-black uppercase text-[#0A0A0A] block">
-                  {t('admin.blog.label_title', 'Заголовок статті *')}
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder={t('admin.blog.placeholder_title', 'напр. Як створити Telegram бота для бізнесу за 10 хвилин')}
-                  value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none"
-                />
-              </div>
-
-              <div className="md:col-span-2 space-y-1.5">
-                <label className="text-xs font-black uppercase text-[#0A0A0A] block">
-                  {t('admin.blog.label_category', 'Категорія *')}
-                </label>
-                <div className="flex gap-1.5 flex-wrap pb-1">
-                  {defaultCategories.map((cat) => (
-                    <button
-                      key={cat.key}
-                      type="button"
-                      onClick={() => setFormCategory(cat.value)}
-                      className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border cursor-pointer transition ${
-                        formCategory === cat.value
-                          ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]'
-                          : 'bg-white text-[#0A0A0A] border-slate-300 hover:border-[#0A0A0A]'
-                      }`}
-                    >
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
-                <input
-                  type="text"
-                  required
-                  placeholder="Гайди"
-                  value={formCategory}
-                  onChange={(e) => setFormCategory(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none"
-                />
-              </div>
-
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-xs font-black uppercase text-[#0A0A0A] block">
-                  {t('admin.blog.label_cover', 'Обкладинка статті')}
-                </label>
-
-                <input
-                  type="file"
-                  ref={coverFileInputRef}
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleCoverFileUpload(file);
-                  }}
-                />
-
-                {formCoverImage ? (
-                  <div className="relative rounded-2xl border-2 border-[#0A0A0A] overflow-hidden max-w-lg aspect-[16/9] shadow-[4px_4px_0px_#0A0A0A] bg-slate-100 group">
-                    <img src={formCoverImage} alt="Cover preview" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => coverFileInputRef.current?.click()}
-                        className="px-3 py-1.5 bg-white text-[#0A0A0A] rounded-xl text-xs font-black uppercase border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] hover:bg-slate-100 cursor-pointer"
-                      >
-                        {t('admin.blog.change_image', 'Змінити фото')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormCoverImage('')}
-                        className="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-black uppercase border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] hover:bg-rose-700 cursor-pointer"
-                      >
-                        {t('admin.blog.remove_image', 'Видалити фото')}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => coverFileInputRef.current?.click()}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      const file = e.dataTransfer.files?.[0];
-                      if (file) handleCoverFileUpload(file);
-                    }}
-                    className="border-2 border-dashed border-[#0A0A0A] rounded-2xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition cursor-pointer flex flex-col items-center justify-center gap-2"
-                  >
-                    {coverUploadMutation.isPending ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <Loader2 className="animate-spin text-[#0A0A0A]" size={28} />
-                        <span className="text-xs font-bold text-slate-600">
-                          {t('admin.blog.dropzone_uploading', 'Завантаження фото...')}
-                        </span>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="w-12 h-12 rounded-2xl bg-amber-200 border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
-                          <UploadCloud size={24} />
-                        </div>
-                        <div className="text-xs font-black uppercase text-[#0A0A0A]">
-                          {t('admin.blog.dropzone_title', 'Перетягніть фото сюди або натисніть для вибору')}
-                        </div>
-                        <div className="text-[11px] text-slate-500 font-medium">
-                          {t('admin.blog.dropzone_hint', 'PNG, JPG, WEBP або GIF (до 10 МБ)')}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="md:col-span-2 space-y-1.5">
-                <label className="text-xs font-black uppercase text-[#0A0A0A] block">
-                  {t('admin.blog.label_summary', 'Короткий опис (Summary)')}
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder={t('admin.blog.placeholder_summary', 'Короткий зміст або лід статті для карток та пошукових систем...')}
-                  value={formSummary}
-                  onChange={(e) => setFormSummary(e.target.value)}
-                  className="w-full p-3.5 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none resize-none font-['Geist',sans-serif]"
-                />
-              </div>
-
-              <div className="md:col-span-2 space-y-1.5">
-                <label className="text-xs font-black uppercase text-[#0A0A0A] block">
-                  {t('admin.blog.label_tags', 'Теги (через кому)')}
-                </label>
-                <input
-                  type="text"
-                  placeholder={t('admin.blog.placeholder_tags', 'telegram, bots, marketing, automation')}
-                  value={formTags}
-                  onChange={(e) => setFormTags(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-3xl border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b-2 border-slate-100">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wider">
-                {t('admin.blog.sec_blocks', '2. Блоки статті')} ({formBlocks.length})
-              </h3>
-
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => handleAddBlock('paragraph')}
-                  className="px-3 py-1.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
-                >
-                  <Type size={13} />
-                  <span>{t('admin.blog.btn_add_paragraph', '+ Абзац')}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAddBlock('h2')}
-                  className="px-3 py-1.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
-                >
-                  <Heading2 size={13} />
-                  <span>{t('admin.blog.btn_add_h2', '+ Заголовок H2')}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAddBlock('h3')}
-                  className="px-3 py-1.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
-                >
-                  <Heading3 size={13} />
-                  <span>{t('admin.blog.btn_add_h3', '+ H3')}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAddBlock('quote')}
-                  className="px-3 py-1.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
-                >
-                  <Quote size={13} />
-                  <span>{t('admin.blog.btn_add_quote', '+ Цитата')}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAddBlock('list')}
-                  className="px-3 py-1.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
-                >
-                  <ListIcon size={13} />
-                  <span>{t('admin.blog.btn_add_list', '+ Список')}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAddBlock('image')}
-                  className="px-3 py-1.5 bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#0A0A0A]"
-                >
-                  <ImageIcon size={13} />
-                  <span>{t('admin.blog.btn_add_image', '+ Зображення')}</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {formBlocks.map((block, idx) => (
-                <div
-                  key={idx}
-                  className="p-5 bg-slate-50 border-2 border-[#0A0A0A] rounded-2xl space-y-3 relative shadow-[3px_3px_0px_#0A0A0A]"
-                >
-                  <div className="flex items-center justify-between gap-2 pb-2 border-b-2 border-slate-200">
-                    <span className="text-xs font-black uppercase text-slate-500 flex items-center gap-1.5">
-                      <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-md text-[#0A0A0A]">
-                        #{idx + 1}
-                      </span>
-                      <span className="text-[#0A0A0A] font-black">
-                        {block.type === 'paragraph' && t('admin.blog.block_paragraph', 'Абзац тексту')}
-                        {block.type === 'heading' && t('admin.blog.block_heading', { level: block.level || 2 })}
-                        {block.type === 'quote' && t('admin.blog.block_quote', 'Цитата')}
-                        {block.type === 'list' && t('admin.blog.block_list', 'Маркований список')}
-                        {block.type === 'image' && t('admin.blog.block_image', 'Зображення')}
-                      </span>
-                    </span>
-
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        disabled={idx === 0}
-                        onClick={() => handleMoveBlock(idx, 'up')}
-                        className="w-7 h-7 rounded-xl border-2 border-[#0A0A0A] bg-white flex items-center justify-center text-[#0A0A0A] disabled:opacity-30 cursor-pointer shadow-[1px_1px_0px_#0A0A0A]"
-                      >
-                        <ArrowUp size={13} />
-                      </button>
-                      <button
-                        type="button"
-                        disabled={idx === formBlocks.length - 1}
-                        onClick={() => handleMoveBlock(idx, 'down')}
-                        className="w-7 h-7 rounded-xl border-2 border-[#0A0A0A] bg-white flex items-center justify-center text-[#0A0A0A] disabled:opacity-30 cursor-pointer shadow-[1px_1px_0px_#0A0A0A]"
-                      >
-                        <ArrowDown size={13} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveBlock(idx)}
-                        className="w-7 h-7 rounded-xl border-2 border-rose-600 bg-rose-50 text-rose-700 flex items-center justify-center cursor-pointer hover:bg-rose-100 shadow-[1px_1px_0px_#0A0A0A]"
-                      >
-                        <X size={13} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {block.type === 'paragraph' && (
-                    <textarea
-                      rows={4}
-                      placeholder={t('admin.blog.placeholder_paragraph', 'Введіть текст абзацу...')}
-                      value={block.text}
-                      onChange={(e) => handleUpdateBlock(idx, { ...block, text: e.target.value })}
-                      className="w-full p-3 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-medium text-[#0A0A0A] focus:outline-none font-['Geist',sans-serif] leading-relaxed"
-                    />
-                  )}
-
-                  {block.type === 'heading' && (
-                    <div className="flex gap-2 items-center">
-                      <select
-                        value={block.level}
-                        onChange={(e) =>
-                          handleUpdateBlock(idx, { ...block, level: Number(e.target.value) })
-                        }
-                        className="px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] focus:outline-none shrink-0"
-                      >
-                        <option value={2}>H2</option>
-                        <option value={3}>H3</option>
-                      </select>
-                      <input
-                        type="text"
-                        placeholder={t('admin.blog.placeholder_heading', 'Текст заголовка...')}
-                        value={block.text}
-                        onChange={(e) => handleUpdateBlock(idx, { ...block, text: e.target.value })}
-                        className="flex-1 px-3.5 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none"
-                      />
-                    </div>
-                  )}
-
-                  {block.type === 'quote' && (
-                    <div className="space-y-2.5">
-                      <textarea
-                        rows={3}
-                        placeholder={t('admin.blog.placeholder_quote', 'Текст цитати...')}
-                        value={block.text}
-                        onChange={(e) => handleUpdateBlock(idx, { ...block, text: e.target.value })}
-                        className="w-full p-3 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-medium italic text-[#0A0A0A] focus:outline-none font-['Geist',sans-serif]"
-                      />
-                      <input
-                        type="text"
-                        placeholder={t('admin.blog.placeholder_quote_author', 'Автор цитати (напр. Стів Джобс або Експерт Launchly)...')}
-                        value={block.author || ''}
-                        onChange={(e) => handleUpdateBlock(idx, { ...block, author: e.target.value })}
-                        className="w-full px-3.5 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none"
-                      />
-                    </div>
-                  )}
-
-                  {block.type === 'list' && (
-                    <div className="space-y-2.5">
-                      {block.items.map((item, itemIdx) => (
-                        <div key={itemIdx} className="flex items-center gap-2">
-                          <span className="text-xs font-black text-slate-400">•</span>
-                          <input
-                            type="text"
-                            placeholder={t('admin.blog.placeholder_list_item', { index: itemIdx + 1 })}
-                            value={item}
-                            onChange={(e) => {
-                              const newItems = [...block.items];
-                              newItems[itemIdx] = e.target.value;
-                              handleUpdateBlock(idx, { ...block, items: newItems });
-                            }}
-                            className="flex-1 px-3.5 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-medium text-[#0A0A0A] focus:outline-none font-['Geist',sans-serif]"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newItems = block.items.filter((_, i) => i !== itemIdx);
-                              handleUpdateBlock(idx, { ...block, items: newItems });
-                            }}
-                            className="w-7 h-7 rounded-lg border border-slate-300 text-slate-500 hover:text-rose-600 hover:border-rose-600 flex items-center justify-center cursor-pointer"
-                          >
-                            <X size={13} />
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          handleUpdateBlock(idx, { ...block, items: [...block.items, ''] });
-                        }}
-                        className="px-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-slate-800 hover:bg-slate-100 cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
-                      >
-                        {t('admin.blog.btn_add_list_item', '+ Додати пункт списку')}
-                      </button>
-                    </div>
-                  )}
-
-                  {block.type === 'image' && (
-                    <div className="space-y-3">
-                      {block.url ? (
-                        <div className="relative rounded-2xl border-2 border-[#0A0A0A] overflow-hidden max-w-md aspect-[16/9] shadow-[3px_3px_0px_#0A0A0A] bg-slate-100 group">
-                          <img src={block.url} alt={block.caption || 'Block'} className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                            <label className="px-3 py-1.5 bg-white text-[#0A0A0A] rounded-xl text-xs font-black uppercase border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] hover:bg-slate-100 cursor-pointer">
-                              {t('admin.blog.change_image', 'Змінити фото')}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) handleBlockImageUpload(idx, file);
-                                }}
-                              />
-                            </label>
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateBlock(idx, { ...block, url: '' })}
-                              className="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-black uppercase border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] hover:bg-rose-700 cursor-pointer"
-                            >
-                              {t('admin.blog.remove_image', 'Видалити фото')}
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <label className="border-2 border-dashed border-[#0A0A0A] rounded-2xl p-6 text-center bg-white hover:bg-slate-100 transition cursor-pointer flex flex-col items-center justify-center gap-2 block">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleBlockImageUpload(idx, file);
-                            }}
-                          />
-                          {uploadingBlockIndex === idx ? (
-                            <div className="flex flex-col items-center gap-2">
-                              <Loader2 className="animate-spin text-[#0A0A0A]" size={24} />
-                              <span className="text-xs font-bold text-slate-600">
-                                {t('admin.blog.dropzone_uploading', 'Завантаження фото...')}
-                              </span>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="w-10 h-10 rounded-xl bg-purple-100 border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A]">
-                                <UploadCloud size={20} />
-                              </div>
-                              <div className="text-xs font-black uppercase text-[#0A0A0A]">
-                                {t('admin.blog.dropzone_title', 'Перетягніть фото сюди або натисніть для вибору')}
-                              </div>
-                              <div className="text-[10px] text-slate-500 font-medium">
-                                {t('admin.blog.dropzone_hint', 'PNG, JPG, WEBP або GIF (до 10 МБ)')}
-                              </div>
-                            </>
-                          )}
-                        </label>
-                      )}
-
-                      <input
-                        type="text"
-                        placeholder={t('admin.blog.placeholder_image_caption', 'Підпис до зображення (необов\'язково)...')}
-                        value={block.caption || ''}
-                        onChange={(e) => handleUpdateBlock(idx, { ...block, caption: e.target.value })}
-                        className="w-full px-3.5 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-medium text-[#0A0A0A] focus:outline-none"
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          <BlogBlocksEditor
+            formBlocks={formBlocks}
+            onAddBlock={handleAddBlock}
+            onUpdateBlock={handleUpdateBlock}
+            onRemoveBlock={handleRemoveBlock}
+            onMoveBlock={handleMoveBlock}
+            onBlockImageUpload={handleBlockImageUpload}
+            uploadingBlockIndex={uploadingBlockIndex}
+          />
         </div>
       ) : (
-        <div className="bg-white p-8 rounded-3xl border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] space-y-6 overflow-hidden">
-          <div className="space-y-3 pb-6 border-b-2 border-slate-100">
-            <div className="flex items-center gap-2">
-              <div className="inline-block px-3 py-1 bg-[#0A0A0A] text-[#F2EBDD] rounded-lg text-[10px] font-black uppercase">
-                {formCategory || 'Category'}
-              </div>
-              <div
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase border border-[#0A0A0A] ${
-                  formLanguage === 'en' ? 'bg-amber-400 text-[#0A0A0A]' : 'bg-blue-600 text-white'
-                }`}
-              >
-                {formLanguage === 'en' ? 'EN' : 'UK'}
-              </div>
-            </div>
-            <h1 className="font-['Anybody',sans-serif] text-2xl md:text-4xl font-black text-[#0A0A0A] uppercase leading-snug break-words [overflow-wrap:anywhere]">
-              {formTitle || 'Article Title'}
-            </h1>
-            <div className="flex items-center gap-3 text-xs text-slate-500 font-bold">
-              <span>{formAuthor || 'Launchly Team'}</span>
-              <span>•</span>
-              <span>{formDate || 'Date'}</span>
-              <span>•</span>
-              <span>{computedReadTime}</span>
-            </div>
-          </div>
-
-          {formCoverImage && (
-            <div className="rounded-3xl border-2 border-[#0A0A0A] overflow-hidden aspect-[16/9] shadow-[6px_6px_0px_#0A0A0A]">
-              <img src={formCoverImage} alt={formTitle} className="w-full h-full object-cover" />
-            </div>
-          )}
-
-          {formSummary && (
-            <div className="p-5 bg-amber-50 border-l-4 border-amber-400 rounded-r-2xl text-sm font-medium text-slate-800 leading-relaxed font-['Geist',sans-serif] break-words [overflow-wrap:anywhere]">
-              {formSummary}
-            </div>
-          )}
-
-          <div className="space-y-5 pt-2 font-['Geist',sans-serif]">
-            {formBlocks.map((block, idx) => {
-              if (block.type === 'paragraph') {
-                return (
-                  <p key={idx} className="text-base text-slate-800 leading-relaxed whitespace-pre-wrap font-normal break-words [overflow-wrap:anywhere]">
-                    {block.text}
-                  </p>
-                );
-              }
-              if (block.type === 'heading') {
-                return block.level === 3 ? (
-                  <h3 key={idx} className="font-['Anybody',sans-serif] text-xl font-black text-[#0A0A0A] uppercase pt-4 break-words [overflow-wrap:anywhere]">
-                    {block.text}
-                  </h3>
-                ) : (
-                  <h2 key={idx} className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase pt-6 pb-2 border-b-2 border-slate-200 break-words [overflow-wrap:anywhere]">
-                    {block.text}
-                  </h2>
-                );
-              }
-              if (block.type === 'quote') {
-                return (
-                  <blockquote key={idx} className="p-5 my-3 border-l-4 border-[#0A0A0A] bg-slate-50 rounded-r-2xl italic text-slate-800 break-words [overflow-wrap:anywhere]">
-                    <p className="text-base font-medium">"{block.text}"</p>
-                    {block.author && <cite className="block text-xs font-bold text-slate-500 mt-2 not-italic font-['JetBrains_Mono',monospace]">— {block.author}</cite>}
-                  </blockquote>
-                );
-              }
-              if (block.type === 'list') {
-                return (
-                  <ul key={idx} className="list-disc list-inside space-y-2 text-base text-slate-800 pl-2">
-                    {block.items.map((it, i) => (
-                      <li key={i} className="font-normal break-words [overflow-wrap:anywhere]">{it}</li>
-                    ))}
-                  </ul>
-                );
-              }
-              if (block.type === 'image') {
-                return (
-                  <figure key={idx} className="my-6 space-y-2">
-                    <img src={block.url} alt={block.caption || ''} className="w-full rounded-2xl border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] object-cover max-h-[500px]" />
-                    {block.caption && (
-                      <figcaption className="text-center text-xs text-slate-500 font-bold font-['JetBrains_Mono',monospace] break-words [overflow-wrap:anywhere]">
-                        {block.caption}
-                      </figcaption>
-                    )}
-                  </figure>
-                );
-              }
-              return null;
-            })}
-          </div>
-        </div>
+        <BlogPreviewPane
+          formCategory={formCategory}
+          formLanguage={formLanguage}
+          formTitle={formTitle}
+          formAuthor={formAuthor}
+          formDate={formDate}
+          computedReadTime={computedReadTime}
+          formCoverImage={formCoverImage}
+          formSummary={formSummary}
+          formBlocks={formBlocks}
+        />
       )}
     </div>
   );
