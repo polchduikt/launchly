@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Loader2, X, User, Save } from 'lucide-react';
-import { t } from '../../../../i18n/config';
+import { useTranslation } from '../../../../i18n/config';
 import type { CampaignResponse } from '../../../../types';
 import type { BotResponse } from '../../../../types/bot';
 import { useUpdateCampaignMutation } from '../../../../hooks/broadcast/useBroadcastQueries';
@@ -21,6 +21,7 @@ export const EditBroadcastDialog: React.FC<EditBroadcastDialogProps> = ({
   bots,
   botId,
 }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [selectedAutomation, setSelectedAutomation] = useState<string>('ALL');

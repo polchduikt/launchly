@@ -2,9 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, ArrowRight, Home } from 'lucide-react';
 import { ROUTES } from '../../../routes/paths';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 
 const CheckoutCancelPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (

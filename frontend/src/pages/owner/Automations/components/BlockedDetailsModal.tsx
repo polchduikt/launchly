@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, ShieldAlert } from 'lucide-react';
-import { t, getLanguage } from '../../../../i18n/config';
+import { useTranslation } from '../../../../i18n/config';
 import type { BotResponse } from '../../../../types/bot';
 import { translateBlockReason } from '../../../../utils/blockReason';
 
@@ -13,6 +13,7 @@ export const BlockedDetailsModal: React.FC<BlockedDetailsModalProps> = ({
   bot,
   onClose,
 }) => {
+  const { t, getLanguage } = useTranslation();
   if (!bot) return null;
 
   const formatDateShort = (dateStr?: string | null) => {

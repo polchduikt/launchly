@@ -1,8 +1,9 @@
 import React from 'react';
 import type { StatusBadgeProps } from '../../../../types';
-import { t } from '../../../../i18n/config';
+import { useTranslation } from '../../../../i18n/config';
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+  const { t } = useTranslation();
   switch (status) {
     case 'BLOCKED':
       return (

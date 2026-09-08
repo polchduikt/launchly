@@ -3,9 +3,10 @@ import { useAiAssistant } from '../../hooks/ai/useAiAssistant';
 import { QUICK_QUESTIONS, AI_FLOW_TEMPLATES } from '../../const/aiConfig';
 import { X, Send, User, Loader2, RefreshCw, AlertCircle, AlertTriangle } from 'lucide-react';
 import { AiIcon } from '../ui/AiIcon';
-import { t } from '../../i18n/config';
+import { useTranslation } from '../../i18n/config';
 
 export const AiAssistantDrawer: React.FC = () => {
+  const { t } = useTranslation();
   const {
     isOpen,
     setIsOpen,

@@ -4,7 +4,7 @@ import { updateProfileApi } from '../../../../api/auth';
 import { useMediaUpload } from '../../../../hooks/bot/useMediaUpload';
 import { isAxiosError } from 'axios';
 import { SafeAvatar } from '../../../../components/common/SafeAvatar';
-import { t } from '../../../../i18n/config';
+import { useTranslation } from '../../../../i18n/config';
 import { 
   Camera, 
   Trash2, 
@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 
 export const ProfilePanel: React.FC = () => {
+  const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
 

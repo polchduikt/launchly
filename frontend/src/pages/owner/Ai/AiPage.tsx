@@ -10,7 +10,7 @@ import {
   useAiUsageQuery,
 } from '../../../hooks/ai/useAiQueries';
 import { QUICK_QUESTIONS } from '../../../const/aiConfig';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { Send, Loader2, AlertCircle, Trash2, MessageSquare } from 'lucide-react';
 import { AiIcon } from '../../../components/ui/AiIcon';
@@ -18,6 +18,7 @@ import { SafeAvatar } from '../../../components/common/SafeAvatar';
 import type { AiChatSessionResponse } from '../../../types';
 
 const AiPage: React.FC = () => {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const { setActiveTab, setOnGenerate, setIsOpen } = useAiStore();
 

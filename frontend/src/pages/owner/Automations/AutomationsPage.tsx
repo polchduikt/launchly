@@ -25,7 +25,7 @@ import {
 import { useBotStore } from '../../../store/useBotStore';
 import { getAutomationFoldersApi, saveAutomationFoldersApi } from '../../../api/bot';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 import {
   useCreateBotMutation,
   useDeleteBotMutation,
@@ -42,6 +42,7 @@ import {
 } from '../FlowBuilder/components/DisplayPanel';
 
 export const AutomationsPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const setActiveBotId = useBotStore((state) => state.setActiveBotId);
   const [searchQuery, setSearchQuery] = useState('');

@@ -3,9 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, Loader2, ArrowRight } from 'lucide-react';
 import { ROUTES } from '../../../routes/paths';
 import { useConfirmSessionMutation } from '../../../hooks/bot/useBillingQueries';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 
 const CheckoutSuccessPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');

@@ -6,7 +6,7 @@ import { useAuthStore } from '../../../../store/useAuthStore';
 import { useLogoutMutation } from '../../../../hooks/auth/useLogoutMutation';
 import { getTeamMembersApi, transferOwnershipApi, leaveBotApi, type TeamMemberResponse } from '../../../../api/teamApi';
 import { SafeAvatar } from '../../../../components/common/SafeAvatar';
-import { t } from '../../../../i18n/config';
+import { useTranslation } from '../../../../i18n/config';
 
 interface LeaveAccountModalProps {
   isOpen: boolean;
@@ -19,6 +19,7 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
   onClose,
   onNavigateToTeam,
 }) => {
+  const { t } = useTranslation();
   const activeBotId = useBotStore((state) => state.activeBotId);
   const { data: bots = [] } = useBotsQuery();
   const botId = activeBotId || (bots[0]?.id || 0);

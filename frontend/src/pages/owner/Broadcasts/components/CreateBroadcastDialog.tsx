@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AlertTriangle, Send, Loader2, X, User } from 'lucide-react';
-import { t } from '../../../../i18n/config';
+import { useTranslation } from '../../../../i18n/config';
 import type { CreateBroadcastDialogProps } from '../../../../types';
 import { CustomSelect } from '../../../../components/ui/CustomSelect';
 
@@ -13,6 +13,7 @@ export const CreateBroadcastDialog: React.FC<CreateBroadcastDialogProps> = ({
   createError,
   bots,
 }) => {
+  const { t } = useTranslation();
   const [selectedAutomation, setSelectedAutomation] = useState<string>('ALL');
 
   if (!isOpen) return null;

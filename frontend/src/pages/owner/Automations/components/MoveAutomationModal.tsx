@@ -1,7 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { CustomSelect } from '../../../../components/ui/CustomSelect';
-import { t } from '../../../../i18n/config';
+import { useTranslation } from '../../../../i18n/config';
 import type { Folder } from '../../../../types/bot';
 
 interface MoveAutomationModalProps {
@@ -21,6 +21,7 @@ export const MoveAutomationModal: React.FC<MoveAutomationModalProps> = ({
   tempFolderId,
   setTempFolderId,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (

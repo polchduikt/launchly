@@ -9,10 +9,11 @@ import { TelegramLoginModal } from './components/TelegramLoginModal';
 import { TurnstileWidget, type TurnstileWidgetRef } from '../../../components/common/TurnstileWidget';
 import { GOOGLE_OAUTH_URL } from '../../../const/auth';
 import { STORAGE_KEYS } from '../../../const/constants';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 import { useSEO } from '../../../hooks/useSEO';
 
 const LoginPage: React.FC = () => {
+  const { t } = useTranslation();
   useSEO({
     title: t('seo.login.title', 'Sign In — Launchly'),
     description: t('seo.login.description', 'Sign in to your Launchly workspace to manage your Telegram bots, automations, CRM, and broadcasts.'),

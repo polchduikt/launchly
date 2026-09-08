@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ShieldAlert, Send, CheckCircle2, LogOut, Loader2, Mail } from 'lucide-react';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { PublicHeader } from '../../../components/layout/PublicHeader';
 import { STORAGE_KEYS } from '../../../const/constants';
@@ -9,6 +9,7 @@ import { ROUTES } from '../../../routes/paths';
 import axios from 'axios';
 
 export const BlockedPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const logout = useAuthStore((state) => state.logout);

@@ -21,13 +21,14 @@ import { LeaveAccountModal } from './components/LeaveAccountModal';
 import { DeleteAccountModal } from './components/DeleteAccountModal';
 import { ProfilePanel } from './components/ProfilePanel';
 import { CreateTemplateModal } from './components/CreateTemplateModal';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 import { Loader2, AlertCircle, CheckCircle2, X, Check } from 'lucide-react';
 import { TimezoneSelect } from '../../../components/ui/TimezoneSelect/TimezoneSelect';
 import { updateTimezoneApi } from '../../../api/auth';
 import { useAuthStore } from '../../../store/useAuthStore';
 
 export const SettingsPage: React.FC = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);

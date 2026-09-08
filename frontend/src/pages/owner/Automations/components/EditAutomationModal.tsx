@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, AlertCircle, Loader2, ChevronDown } from 'lucide-react';
-import { t } from '../../../../i18n/config';
+import { useTranslation } from '../../../../i18n/config';
 import type { BotResponse } from '../../../../types/bot';
 
 interface EditAutomationModalProps {
@@ -40,6 +40,7 @@ export const EditAutomationModal: React.FC<EditAutomationModalProps> = ({
   error,
   setError,
 }) => {
+  const { t } = useTranslation();
   const [isEditBotSelectOpen, setIsEditBotSelectOpen] = React.useState(false);
 
   if (!isOpen) return null;

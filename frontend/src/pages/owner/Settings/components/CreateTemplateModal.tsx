@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Layout, Copy, Check, Loader2, Sparkles } from 'lucide-react';
 import { createTemplateApi, type TemplateResponse } from '../../../../api/templateApi';
-import { t } from '../../../../i18n/config';
+import { useTranslation } from '../../../../i18n/config';
 
 interface CreateTemplateModalProps {
   isOpen: boolean;
@@ -14,6 +14,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
   onClose,
   botId,
 }) => {
+  const { t } = useTranslation();
   const [template, setTemplate] = useState<TemplateResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);

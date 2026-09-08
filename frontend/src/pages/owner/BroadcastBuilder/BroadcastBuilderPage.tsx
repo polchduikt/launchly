@@ -54,7 +54,7 @@ import {
 } from 'lucide-react';
 import { AiIcon } from '../../../components/ui/AiIcon';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 import { useAiStore } from '../../../store/useAiStore';
 import { AiAssistantDrawer } from '../../../components/common/AiAssistantDrawer';
 
@@ -68,6 +68,7 @@ interface ScheduleModalProps {
 }
 
 const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedule }) => {
+  const { t } = useTranslation();
   const [dateTime, setDateTime] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -153,6 +154,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedu
 
 
 const BroadcastBuilderInner: React.FC = () => {
+  const { t } = useTranslation();
   const isLocalChangeRef = React.useRef(false);
 
   const {

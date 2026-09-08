@@ -1,6 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { t } from '../../../../i18n/config';
+import { useTranslation } from '../../../../i18n/config';
 
 interface CreateFolderModalProps {
   isOpen: boolean;
@@ -17,6 +17,7 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
   folderName,
   setFolderName,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (

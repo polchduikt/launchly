@@ -4,8 +4,8 @@ import { EditBroadcastDialog } from './EditBroadcastDialog';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('../../../../i18n/config', () => ({
-  t: (k: string) => k,
-  useTranslation: () => ({ t: (k: string, fb?: string) => fb || k }),
+  t: (k: string, fb?: unknown) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: unknown) => (typeof fb === 'string' ? fb : k) }),
 }));
 
 const mockMutate = vi.fn();

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 import { ErrorBoundary } from '../../../components/common/ErrorBoundary';
 import { ReactFlow, Controls, Background, ReactFlowProvider, ConnectionLineType } from '@xyflow/react';
 import type { Edge, Node, OnNodeDrag } from '@xyflow/react';
@@ -43,6 +43,7 @@ import { useFlowCollaboration } from '../../../hooks/bot/useFlowCollaboration';
 
 
 const FlowBuilderInner: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
   const { data: bots = [] } = useBotsQuery();
@@ -279,7 +280,7 @@ const FlowBuilderInner: React.FC = () => {
       label: t('flow_builder.btn_running'),
       dotClass: 'bg-emerald-400',
     };
-  }, [isBotLive, hasUnpublishedChanges]);
+  }, [isBotLive, hasUnpublishedChanges, t]);
 
   const handleLaunchOrUpdate = () => {
     const saved = handleSaveFlow();

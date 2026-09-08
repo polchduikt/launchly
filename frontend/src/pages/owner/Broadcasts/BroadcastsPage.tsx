@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useBotStore } from '../../../store/useBotStore';
-import { t, getLanguage } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 import { ROUTES } from '../../../routes/paths';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 
 export const BroadcastsPage: React.FC = () => {
+  const { t, getLanguage } = useTranslation();
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
   const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();

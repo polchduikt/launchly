@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Trash2, AlertOctagon, Loader2 } from 'lucide-react';
 import { useLogoutMutation } from '../../../../hooks/auth/useLogoutMutation';
 import { deleteAccountApi } from '../../../../api/auth';
-import { t } from '../../../../i18n/config';
+import { useTranslation } from '../../../../i18n/config';
 
 interface DeleteAccountModalProps {
   isOpen: boolean;
@@ -13,6 +13,7 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const logoutMutation = useLogoutMutation();
 
   const [confirmText, setConfirmText] = useState('');

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDown, Search, Globe } from 'lucide-react';
 import { getAllTimezones } from '../../../utils/timezones';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 
 interface TimezoneSelectProps {
   value: string;
@@ -10,6 +10,7 @@ interface TimezoneSelectProps {
 }
 
 export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({ value, onChange, disabled }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
