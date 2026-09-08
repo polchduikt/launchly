@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo, type MutableRefObject, type SetStateAction } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useNodesState, useEdgesState, addEdge, useReactFlow } from '@xyflow/react';
-import type { Edge, Node, Connection, NodeChange, EdgeChange } from '@xyflow/react';
+import { useNodesState, useEdgesState, useReactFlow } from '@xyflow/react';
+import type { Edge, Node, NodeChange, EdgeChange } from '@xyflow/react';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { useBotStore } from '../../store/useBotStore';
 import { useFlowUiStore } from '../../store/useFlowUiStore';
@@ -23,9 +23,11 @@ import { FLOW_EDGE_DEFAULTS } from '../../const/flowEdges';
 import type { ButtonData } from '../../types/bot';
 import { createDefaultNodeData } from '../../const/flowBlocks';
 import { generateId } from '../../utils/id';
-import { TIMING, STORAGE_KEYS } from '../../const/constants';
+import { TIMING } from '../../const/constants';
 import { useBroadcastAudience, resolveFilter } from './useBroadcastAudience';
 import { useBroadcastScheduler } from './useBroadcastScheduler';
+import { useBroadcastClipboard } from './useBroadcastClipboard';
+import { useBroadcastConnections } from './useBroadcastConnections';
 
 const getBroadcastDefaultNodeData = (type: string): Record<string, unknown> => {
   switch (type) {
@@ -72,7 +74,6 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
   );
 
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const [campaignName, setCampaignName] = useState('');
   const [isEditingName, setIsEditingName] = useState(false);
   const [messageText, setMessageText] = useState('');
@@ -183,153 +184,37 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     setSelectedNodeId
   );
 
-  const copySelectedNodes = useCallback(() => {
-    const selectedNodes = nodes.filter((n) => n.selected);
-    if (selectedNodes.length === 0) return;
+  const { copySelectedNodes, pasteCopiedNodes } = useBroadcastClipboard({
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    setSelectedNodeId,
+    takeSnapshot,
+    screenToFlowPosition,
+  });
 
-    const selectedNodeIds = new Set(selectedNodes.map((n) => n.id));
-    const internalEdges = edges.filter(
-      (e) => selectedNodeIds.has(e.source) && selectedNodeIds.has(e.target)
-    );
-
-    const clipboardData = {
-      nodes: selectedNodes,
-      edges: internalEdges,
-    };
-    localStorage.setItem(STORAGE_KEYS.FLOW_CLIPBOARD, JSON.stringify(clipboardData));
-  }, [nodes, edges]);
-
-  const pasteCopiedNodes = useCallback(() => {
-    const clipboardStr = localStorage.getItem(STORAGE_KEYS.FLOW_CLIPBOARD);
-    if (!clipboardStr) return;
-
-    let copiedNodes: CustomNode[] = [];
-    let copiedEdges: Edge[] = [];
-    try {
-      const parsed = JSON.parse(clipboardStr);
-      copiedNodes = parsed.nodes || [];
-      copiedEdges = parsed.edges || [];
-    } catch (err) {
-      console.error('Failed to parse clipboard data', err);
-      return;
-    }
-    if (copiedNodes.length === 0) return;
-
-    takeSnapshot();
-
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-    const flowCenter = screenToFlowPosition({ x: centerX, y: centerY });
-
-    const validNodes = copiedNodes.filter((n) => n.type !== 'START');
-    let minX = Infinity;
-    let maxX = -Infinity;
-    let minY = Infinity;
-    let maxY = -Infinity;
-
-    validNodes.forEach((node) => {
-      if (node.position) {
-        if (node.position.x < minX) minX = node.position.x;
-        if (node.position.x > maxX) maxX = node.position.x;
-        if (node.position.y < minY) minY = node.position.y;
-        if (node.position.y > maxY) maxY = node.position.y;
-      }
-    });
-
-    const groupCenterX = minX !== Infinity ? (minX + maxX) / 2 : 0;
-    const groupCenterY = minY !== Infinity ? (minY + maxY) / 2 : 0;
-
-    const offsetX = minX !== Infinity ? flowCenter.x - groupCenterX : 24;
-    const offsetY = minY !== Infinity ? flowCenter.y - groupCenterY : 24;
-
-    const nodeIdMap: Record<string, string> = {};
-    const buttonValueMap: Record<string, string> = {};
-
-    const newNodes = copiedNodes
-      .map((node) => {
-        if (node.type === 'START') return null;
-
-        const newId = generateId(`node_${node.type?.toLowerCase() || 'msg'}`);
-        nodeIdMap[node.id] = newId;
-
-        const updatedData = { ...node.data };
-        const blocksList = getBlocks(updatedData);
-        const updatedBlocks = blocksList.map((block) => {
-          const blockClone = { ...block };
-          if (Array.isArray(blockClone.buttons)) {
-            blockClone.buttons = blockClone.buttons.map((btn: ButtonData) => {
-              const newValue = generateId('btn');
-              if (btn.value) {
-                buttonValueMap[btn.value] = newValue;
-              }
-              return { ...btn, value: newValue };
-            });
-          }
-          return blockClone;
-        });
-
-        if (updatedData.blocks || blocksList.length > 1 || (blocksList[0] && blocksList[0].id !== 'default_text')) {
-          updatedData.blocks = updatedBlocks;
-        }
-
-        const firstText = updatedBlocks.find((b) => b.type === 'text');
-        const firstImage = updatedBlocks.find((b) => b.type === 'image');
-        const allButtons: ButtonData[] = [];
-        updatedBlocks.forEach((b) => {
-          if (Array.isArray(b.buttons)) {
-            allButtons.push(...(b.buttons as ButtonData[]));
-          }
-        });
-        updatedData.text = firstText ? firstText.text : updatedData.text || '';
-        updatedData.imageUrl = firstImage ? firstImage.imageUrl : updatedData.imageUrl || '';
-        updatedData.buttons = allButtons;
-
-        return {
-          ...node,
-          id: newId,
-          position: {
-            x: node.position.x + offsetX,
-            y: node.position.y + offsetY,
-          },
-          selected: true,
-          data: updatedData,
-        } as CustomNode;
-      })
-      .filter(Boolean) as CustomNode[];
-
-    if (newNodes.length === 0) return;
-
-    const newEdges = copiedEdges
-      .map((edge) => {
-        const source = nodeIdMap[edge.source];
-        const target = nodeIdMap[edge.target];
-        if (!source || !target) return null;
-
-        const newEdgeId = generateId('edge');
-        const sourceHandle =
-          edge.sourceHandle && buttonValueMap[edge.sourceHandle]
-            ? (buttonValueMap[edge.sourceHandle] as string)
-            : edge.sourceHandle;
-
-        return {
-          ...edge,
-          id: newEdgeId,
-          source,
-          target,
-          sourceHandle,
-        };
-      })
-      .filter(Boolean) as Edge[];
-
-    setNodes((nds) => [...nds.map((n) => ({ ...n, selected: false }) as CustomNode), ...newNodes]);
-    setEdges((eds) => [...eds, ...newEdges]);
-    setSelectedNodeId(newNodes[newNodes.length - 1].id);
-  }, [takeSnapshot, setNodes, setEdges, setSelectedNodeId, screenToFlowPosition]);
-
-  const connectionStartRef = useRef<{ nodeId: string; handleId: string | null; handleType: string } | null>(null);
-  const didConnectRef = useRef<boolean>(false);
-  const justEndedDragRef = useRef<boolean>(false);
-  const tempRemovedEdgeRef = useRef<Edge | null>(null);
+  const {
+    onConnect,
+    onConnectStart,
+    onConnectEnd,
+    onPaneClick,
+    contextMenu,
+    setContextMenu,
+    handleCreateAndConnectNode,
+    edgeType,
+    setEdgeType,
+    hoveredEdgeId,
+  } = useBroadcastConnections({
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    takeSnapshot,
+    screenToFlowPosition,
+    setSelectedNodeId,
+    getDefaultNodeData: getBroadcastDefaultNodeData,
+  });
 
   const dragStartStateRef = useRef<{ nodes: CustomNode[]; edges: Edge[] } | null>(null);
 
@@ -360,51 +245,6 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     }
     dragStartStateRef.current = null;
   }, [nodes, edges, setPast, setFuture, isLocalChangeRef, setIsDirty]);
-
-  const [contextMenuState, setContextMenuState] = useState<{
-    isOpen: boolean;
-    x: number;
-    y: number;
-    flowPosition: { x: number; y: number };
-    source: { nodeId: string; handleId: string | null; handleType: string };
-  } | null>(null);
-
-  const contextMenu = contextMenuState;
-
-  const restoreTempRemovedEdge = useCallback(() => {
-    if (tempRemovedEdgeRef.current) {
-      const edgeToRestore = tempRemovedEdgeRef.current;
-      tempRemovedEdgeRef.current = null;
-      setEdges((eds) => {
-        if (eds.some((e) => e.id === edgeToRestore.id)) return eds;
-        return [...eds, edgeToRestore];
-      });
-    }
-  }, [setEdges]);
-
-  const setContextMenu = useCallback(
-    (val: typeof contextMenuState) => {
-      setContextMenuState(val);
-      if (val === null) {
-        restoreTempRemovedEdge();
-      }
-    },
-    [restoreTempRemovedEdge]
-  );
-
-  const [edgeType, setEdgeType] = useState<'default' | 'smoothstep'>(
-    (localStorage.getItem(STORAGE_KEYS.FLOW_EDGE_TYPE) as 'default' | 'smoothstep') || 'smoothstep'
-  );
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.FLOW_EDGE_TYPE, edgeType);
-    setEdges((eds) =>
-      eds.map((edge) => ({
-        ...edge,
-        type: edgeType,
-      }))
-    );
-  }, [edgeType, setEdges]);
 
   const isCampaignLoadedRef = useRef<boolean>(false);
 
@@ -579,21 +419,6 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
 
     return () => clearTimeout(timer);
   }, [nodes, edges, campaignName, messageText, conditions, campaignId, isCampaignsLoading, campaign?.status, updateCampaignMut, isLocalChangeRef]);
-
-  useEffect(() => {
-    const handleHover = (e: Event) => {
-      const customEvent = e as CustomEvent<{ edgeId: string; source: string; target: string } | null>;
-      if (customEvent.detail) {
-        setHoveredEdgeId(customEvent.detail.edgeId);
-      } else {
-        setHoveredEdgeId(null);
-      }
-    };
-    window.addEventListener('flow-hover-edge', handleHover);
-    return () => {
-      window.removeEventListener('flow-hover-edge', handleHover);
-    };
-  }, []);
 
   const handleCopyNode = useCallback(
     (nodeId: string) => {
@@ -790,197 +615,6 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
     },
     [setSelectedNodeId]
   );
-
-  const onPaneClick = useCallback(() => {
-    if (justEndedDragRef.current) return;
-    setSelectedNodeId(null);
-    setContextMenu(null);
-  }, [setSelectedNodeId, setContextMenu]);
-
-  const onConnect = useCallback(
-    (params: Connection) => {
-      if (params.source === params.target) return;
-      takeSnapshot();
-      didConnectRef.current = true;
-      let sourceHandle = params.sourceHandle;
-      if (!sourceHandle) {
-        const sourceNode = nodes.find((n) => n.id === params.source);
-        sourceHandle = sourceNode?.type === 'START_BROADCAST' ? 'then' : 'next';
-      }
-      tempRemovedEdgeRef.current = null;
-      setEdges((eds) => {
-        const filtered = eds.filter((e) => !(e.source === params.source && e.sourceHandle === sourceHandle));
-        return addEdge({ ...params, sourceHandle, ...FLOW_EDGE_DEFAULTS, type: edgeType }, filtered);
-      });
-    },
-    [setEdges, nodes, edgeType, takeSnapshot]
-  );
-
-  const onConnectStart = useCallback(
-    (_event: unknown, { nodeId, handleId, handleType }: { nodeId: string | null; handleId: string | null; handleType: 'source' | 'target' | null }) => {
-      if (!nodeId || !handleType) return;
-      connectionStartRef.current = { nodeId, handleId, handleType };
-      didConnectRef.current = false;
-
-      if (tempRemovedEdgeRef.current) {
-        restoreTempRemovedEdge();
-      }
-
-      if (handleType === 'source') {
-        let sourceHandle = handleId;
-        if (!sourceHandle) {
-          const sourceNode = nodes.find((n) => n.id === nodeId);
-          sourceHandle = sourceNode?.type === 'START_BROADCAST' ? 'then' : 'next';
-        }
-        const existingEdge = edges.find((e) => e.source === nodeId && e.sourceHandle === sourceHandle);
-        if (existingEdge) {
-          tempRemovedEdgeRef.current = existingEdge;
-          setEdges((eds) => eds.filter((e) => e.id !== existingEdge.id));
-        }
-      }
-    },
-    [nodes, edges, setEdges, restoreTempRemovedEdge]
-  );
-
-  const onConnectEnd = useCallback(
-    (event: MouseEvent | TouchEvent) => {
-      const connectionStart = connectionStartRef.current;
-      if (!connectionStart) return;
-
-      if (didConnectRef.current) {
-        connectionStartRef.current = null;
-        return;
-      }
-
-      let clientX: number;
-      let clientY: number;
-      if ('clientX' in event) {
-        clientX = event.clientX;
-        clientY = event.clientY;
-      } else if ('touches' in event && event.touches.length > 0) {
-        clientX = event.touches[0].clientX;
-        clientY = event.touches[0].clientY;
-      } else if ('changedTouches' in event && event.changedTouches.length > 0) {
-        clientX = event.changedTouches[0].clientX;
-        clientY = event.changedTouches[0].clientY;
-      } else {
-        return;
-      }
-
-      const elementsUnderPoint =
-        typeof document.elementsFromPoint === 'function' ? document.elementsFromPoint(clientX, clientY) : [];
-
-      let nodeElement: Element | null = null;
-      let isHandle = false;
-
-      for (const el of elementsUnderPoint) {
-        if (el.classList.contains('react-flow__handle') || el.closest('.react-flow__handle')) {
-          isHandle = true;
-        }
-        const closestNode = el.closest('.react-flow__node');
-        if (closestNode) {
-          nodeElement = closestNode;
-          break;
-        }
-      }
-
-      if (nodeElement) {
-        const targetNodeId = nodeElement.getAttribute('data-id');
-        const targetNode = nodes.find((n) => n.id === targetNodeId);
-        if (targetNodeId && targetNodeId !== connectionStart.nodeId && targetNode?.type !== 'START_BROADCAST') {
-          let sourceHandle = connectionStart.handleId;
-          if (!sourceHandle) {
-            const sourceNode = nodes.find((n) => n.id === connectionStart.nodeId);
-            sourceHandle = sourceNode?.type === 'START_BROADCAST' ? 'then' : 'next';
-          }
-          const params: Connection = {
-            source: connectionStart.nodeId,
-            sourceHandle: sourceHandle,
-            target: targetNodeId,
-            targetHandle: null,
-          };
-          takeSnapshot();
-          tempRemovedEdgeRef.current = null;
-          setEdges((eds) => {
-            const filtered = eds.filter((e) => !(e.source === params.source && e.sourceHandle === sourceHandle));
-            return addEdge({ ...params, ...FLOW_EDGE_DEFAULTS, type: edgeType }, filtered);
-          });
-        } else {
-          restoreTempRemovedEdge();
-        }
-        connectionStartRef.current = null;
-        return;
-      }
-
-      if (!isHandle) {
-        const targetScreenX = Math.min(clientX, window.innerWidth - 240) - 8;
-        const targetScreenY = Math.min(clientY, window.innerHeight - 360) + 150;
-
-        const position = screenToFlowPosition({
-          x: targetScreenX,
-          y: targetScreenY,
-        });
-
-        justEndedDragRef.current = true;
-        setTimeout(() => {
-          justEndedDragRef.current = false;
-        }, 100);
-
-        setContextMenu({
-          isOpen: true,
-          x: clientX,
-          y: clientY,
-          flowPosition: position,
-          source: connectionStart,
-        });
-      } else {
-        restoreTempRemovedEdge();
-      }
-
-      connectionStartRef.current = null;
-    },
-    [screenToFlowPosition, setEdges, nodes, edgeType, takeSnapshot, setContextMenu, restoreTempRemovedEdge]
-  );
-
-  const handleCreateAndConnectNode = (type: string) => {
-    if (!contextMenu) return;
-    const { flowPosition, source } = contextMenu;
-
-    takeSnapshot();
-    const id = `node_${type.toLowerCase()}_${Date.now()}`;
-    const newNode: CustomNode = {
-      id,
-      type,
-      position: flowPosition,
-      data: getBroadcastDefaultNodeData(type),
-      selected: true,
-    };
-
-    let sourceHandle = source.handleId;
-    if (!sourceHandle) {
-      const srcNode = nodes.find((n) => n.id === source.nodeId);
-      sourceHandle = srcNode?.type === 'START_BROADCAST' ? 'then' : 'next';
-    }
-
-    const newEdge: Edge = {
-      ...FLOW_EDGE_DEFAULTS,
-      id: `edge_${source.nodeId}_${id}`,
-      source: source.nodeId,
-      sourceHandle: sourceHandle,
-      target: id,
-      type: edgeType,
-    };
-
-    setNodes((nds) => [...nds.map((n) => ({ ...n, selected: false }) as CustomNode), newNode]);
-
-    setEdges((eds) => {
-      const filtered = eds.filter((e) => !(e.source === source.nodeId && e.sourceHandle === sourceHandle));
-      return [...filtered, newEdge];
-    });
-
-    setSelectedNodeId(id);
-    setContextMenu(null);
-  };
 
   const displayNodes = useMemo(() => {
     const tempNode: CustomNode = {
