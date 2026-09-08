@@ -16,13 +16,9 @@ const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ i
   const navigate = useNavigate();
   const setActiveBotId = useBotStore((state) => state.setActiveBotId);
   const { setNodes } = useReactFlow();
-  const connection = useConnection();
-  const isConnecting = connection.inProgress;
-  const isGrayedOut = useMemo(() => {
-    if (!isConnecting) return false;
-    if (connection.fromNode?.id === id) return true;
-    return false;
-  }, [isConnecting, id]);
+  const isConnecting = useConnection((s) => s.inProgress);
+  const isSelfSource = useConnection((s) => s.fromNode?.id === id);
+  const isGrayedOut = isConnecting && isSelfSource;
 
   const { showToolbar, bindHover } = useNodeHover();
 

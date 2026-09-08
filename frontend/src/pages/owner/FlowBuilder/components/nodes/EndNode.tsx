@@ -10,17 +10,10 @@ import { t } from '../../../../../i18n/config';
 
 const EndNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected }) => {
   const targetConns = useNodeConnections({ id, handleType: 'target' });
-  const connection = useConnection();
-  const isConnecting = connection.inProgress;
-  const isGrayedOut = useMemo(() => {
-    if (!isConnecting) return false;
-    if (connection.fromNode?.id === id) return true;
-    const sourceHandleId = connection.fromHandle?.id;
-    if (sourceHandleId === 'reply') {
-      return true;
-    }
-    return false;
-  }, [isConnecting, connection, id]);
+  const isConnecting = useConnection((s) => s.inProgress);
+  const isSelfSource = useConnection((s) => s.fromNode?.id === id);
+  const isReplyHandle = useConnection((s) => s.fromHandle?.id === 'reply');
+  const isGrayedOut = isConnecting && (isSelfSource || isReplyHandle);
   const { showToolbar, bindHover } = useNodeHover();
 
   return (

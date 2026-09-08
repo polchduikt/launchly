@@ -7,8 +7,7 @@ import type { CustomNodeData } from '../../../../../types/bot';
 import { t } from '../../../../../i18n/config';
 
 const StartBroadcastNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, data = {} }) => {
-  const connection = useConnection();
-  const isConnecting = connection.inProgress;
+  const isConnecting = useConnection((s) => s.inProgress);
   const sourceConns = useNodeConnections({ id, handleType: 'source' });
   const isConnected = data?._tempSourceHandle !== 'then' && sourceConns.some((c) => c.sourceHandle === 'then');
 

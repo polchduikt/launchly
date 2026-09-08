@@ -8,8 +8,7 @@ import { t } from '../../../../../i18n/config';
 
 const CommentNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const { showToolbar, bindHover } = useNodeHover();
-  const connection = useConnection();
-  const isConnecting = connection.inProgress;
+  const isConnecting = useConnection((s) => s.inProgress);
 
   const noteSize = data.noteSize || 'M';
   const fontSize = data.fontSize || 'S';

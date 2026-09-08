@@ -12,20 +12,10 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
   const sourceConns = useNodeConnections({ id, handleType: 'source' });
   const targetConns = useNodeConnections({ id, handleType: 'target' });
   const actions = (data?.actions || []) as ActionItem[];
-  const connection = useConnection();
-  const isConnecting = connection.inProgress;
-  const isGrayedOut = useMemo(() => {
-    if (!isConnecting) return false;
-    if (connection.fromNode?.id === id) return true;
-    const sourceHandleId = connection.fromHandle?.id;
-    if (sourceHandleId === 'reply') {
-      return false;
-    }
-    if (sourceHandleId === 'timeout') {
-      return true;
-    }
-    return false;
-  }, [isConnecting, connection, id]);
+  const isConnecting = useConnection((s) => s.inProgress);
+  const isSelfSource = useConnection((s) => s.fromNode?.id === id);
+  const isTimeoutHandle = useConnection((s) => s.fromHandle?.id === 'timeout');
+  const isGrayedOut = isConnecting && (isSelfSource || isTimeoutHandle);
   const { showToolbar, bindHover } = useNodeHover();
 
   const getActionLabelForCanvas = (type: string) => {

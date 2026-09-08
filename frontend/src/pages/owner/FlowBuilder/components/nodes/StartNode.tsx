@@ -8,8 +8,7 @@ import { t } from '../../../../../i18n/config';
 
 const StartNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const sourceConns = useNodeConnections({ id, handleType: 'source' });
-  const connection = useConnection();
-  const isConnecting = connection.inProgress;
+  const isConnecting = useConnection((s) => s.inProgress);
 
   return (
     <div

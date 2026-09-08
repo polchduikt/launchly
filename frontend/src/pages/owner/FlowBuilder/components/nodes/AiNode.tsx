@@ -11,14 +11,9 @@ import { t } from '../../../../../i18n/config';
 const AiNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const sourceConns = useNodeConnections({ id, handleType: 'source' });
   const targetConns = useNodeConnections({ id, handleType: 'target' });
-  const connection = useConnection();
-  const isConnecting = connection.inProgress;
-
-  const isGrayedOut = useMemo(() => {
-    if (!isConnecting) return false;
-    if (connection.fromNode?.id === id) return true;
-    return false;
-  }, [isConnecting, connection, id]);
+  const isConnecting = useConnection((s) => s.inProgress);
+  const isSelfSource = useConnection((s) => s.fromNode?.id === id);
+  const isGrayedOut = isConnecting && isSelfSource;
 
   const { showToolbar, bindHover } = useNodeHover();
 
