@@ -9,18 +9,8 @@ import { NodeToolbar } from './NodeToolbar';
 import { t } from '../../../../../i18n/config';
 
 const EndNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected }) => {
-  let targetConns: any[] = [];
-  try {
-    targetConns = useNodeConnections({ handleType: 'target' }) || [];
-  } catch (e) {
-    targetConns = [];
-  }
-  let connection: any = { inProgress: false };
-  try {
-    connection = useConnection() || { inProgress: false };
-  } catch (e) {
-    connection = { inProgress: false };
-  }
+  const targetConns = useNodeConnections({ id, handleType: 'target' });
+  const connection = useConnection();
   const isConnecting = connection.inProgress;
   const isGrayedOut = useMemo(() => {
     if (!isConnecting) return false;

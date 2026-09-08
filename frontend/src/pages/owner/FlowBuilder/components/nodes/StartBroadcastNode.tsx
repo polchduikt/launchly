@@ -6,20 +6,10 @@ import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../../types/bot';
 import { t } from '../../../../../i18n/config';
 
-const StartBroadcastNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ data = {} }) => {
-  let connection: any = { inProgress: false };
-  try {
-    connection = useConnection() || { inProgress: false };
-  } catch (e) {
-    connection = { inProgress: false };
-  }
+const StartBroadcastNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, data = {} }) => {
+  const connection = useConnection();
   const isConnecting = connection.inProgress;
-  let sourceConns: any[] = [];
-  try {
-    sourceConns = useNodeConnections({ handleType: 'source' }) || [];
-  } catch (e) {
-    sourceConns = [];
-  }
+  const sourceConns = useNodeConnections({ id, handleType: 'source' });
   const isConnected = data?._tempSourceHandle !== 'then' && sourceConns.some((c) => c.sourceHandle === 'then');
 
   return (

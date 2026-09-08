@@ -78,8 +78,9 @@ apiClient.interceptors.response.use(
     }
 
     const originalRequest = error.config;
-    if (error.response?.status === 403 || error.response?.data?.error === 'ACCOUNT_BLOCKED') {
-      const reason = error.response?.data?.reason || 'Violation of platform rules';
+    const isAccountBlocked = error.response?.data?.error === 'ACCOUNT_BLOCKED';
+    if (isAccountBlocked) {
+      const reason = error.response?.data?.reason || error.response?.data?.message || 'Violation of platform rules';
       localStorage.setItem(STORAGE_KEYS.BLOCK_REASON, reason);
       window.location.href = ROUTES.BLOCKED;
       return Promise.reject(error);

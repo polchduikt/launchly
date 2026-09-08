@@ -20,9 +20,9 @@ export default defineConfig([
     },
     rules: {
       // TypeScript rules
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-empty-object-type': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
 
       // JavaScript core rules
       'no-useless-assignment': 'off',
@@ -30,14 +30,13 @@ export default defineConfig([
       'prefer-const': 'off',
       'no-empty': 'off',
 
-      // React / React Hooks rules (relax compiler preview rules)
+      // React / React Hooks rules
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/refs': 'off',
       'react-hooks/purity': 'off',
       'react-hooks/immutability': 'off',
-      'react-hooks/refs': 'off',
       'react-hooks/set-state-in-effect': 'off',
-      'react-hooks/rules-of-hooks': 'off',
-      'react-hooks/exhaustive-deps': 'off',
-      'react-hooks/incompatible-library': 'off',
       'react-refresh/only-export-components': 'off',
     },
   },

@@ -10,27 +10,11 @@ import { NodeToolbar } from './NodeToolbar';
 import { t } from '../../../../../i18n/config';
 
 const ApiCallNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  let sourceConns: any[] = [];
-  try {
-    sourceConns = useNodeConnections({ handleType: 'source' }) || [];
-  } catch (e) {
-    sourceConns = [];
-  }
-  let targetConns: any[] = [];
-  try {
-    targetConns = useNodeConnections({ handleType: 'target' }) || [];
-  } catch (e) {
-    targetConns = [];
-  }
+  const sourceConns = useNodeConnections({ id, handleType: 'source' });
+  const targetConns = useNodeConnections({ id, handleType: 'target' });
   const url = data?.url || 'https://api.example.com/endpoint';
   const method = data?.method || 'GET';
-
-  let connection: any = { inProgress: false };
-  try {
-    connection = useConnection() || { inProgress: false };
-  } catch (e) {
-    connection = { inProgress: false };
-  }
+  const connection = useConnection();
   const isConnecting = connection.inProgress;
   const isGrayedOut = useMemo(() => {
     if (!isConnecting) return false;

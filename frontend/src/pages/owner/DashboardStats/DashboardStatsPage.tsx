@@ -161,16 +161,16 @@ export const DashboardStatsPage: React.FC = () => {
   }, [stats]);
 
   const last6DaysSubscribers = React.useMemo(() => {
-    if (!stats || !stats.dailyStats || stats.dailyStats.length === 0) return [10, 20, 30, 40, 50, 60];
-    const data = stats.dailyStats.slice(-6).map((d) => d.activeUsers + d.clicks + 5);
+    if (!stats || !stats.dailyStats || stats.dailyStats.length === 0) return [0, 0, 0, 0, 0, 0];
+    const data = stats.dailyStats.slice(-6).map((d) => d.activeUsers + d.clicks);
     while (data.length < 6) {
-      data.unshift(5);
+      data.unshift(0);
     }
     return data;
   }, [stats]);
 
   const last6DaysActiveUsers = React.useMemo(() => {
-    if (!stats || !stats.dailyStats || stats.dailyStats.length === 0) return [5, 10, 8, 15, 12, 20];
+    if (!stats || !stats.dailyStats || stats.dailyStats.length === 0) return [0, 0, 0, 0, 0, 0];
     const data = stats.dailyStats.slice(-6).map((d) => d.activeUsers);
     while (data.length < 6) {
       data.unshift(0);
@@ -179,7 +179,7 @@ export const DashboardStatsPage: React.FC = () => {
   }, [stats]);
 
   const last6DaysClicks = React.useMemo(() => {
-    if (!stats || !stats.dailyStats || stats.dailyStats.length === 0) return [15, 25, 20, 35, 30, 45];
+    if (!stats || !stats.dailyStats || stats.dailyStats.length === 0) return [0, 0, 0, 0, 0, 0];
     const data = stats.dailyStats.slice(-6).map((d) => d.clicks);
     while (data.length < 6) {
       data.unshift(0);
@@ -188,8 +188,8 @@ export const DashboardStatsPage: React.FC = () => {
   }, [stats]);
 
   const last6DaysActiveBots = React.useMemo(() => {
-    if (!stats || !stats.dailyStats || stats.dailyStats.length === 0) return [0, 0, 0, 0, 1, 2];
-    const data = stats.dailyStats.slice(-6).map((d) => (d.activeUsers > 0 || d.clicks > 0 ? (stats?.activeAutomations || 1) : 0));
+    if (!stats || !stats.dailyStats || stats.dailyStats.length === 0) return [0, 0, 0, 0, 0, 0];
+    const data = stats.dailyStats.slice(-6).map((d) => (d.activeUsers > 0 || d.clicks > 0 ? (stats?.activeAutomations || 0) : 0));
     while (data.length < 6) {
       data.unshift(0);
     }
@@ -197,7 +197,7 @@ export const DashboardStatsPage: React.FC = () => {
   }, [stats]);
 
   const chartData = React.useMemo(() => {
-    const totalSub = stats?.totalSubscribers ?? 100;
+    const totalSub = stats?.totalSubscribers ?? 0;
     const colors = ['#6366f1', '#a855f7', '#3b82f6', '#10b981', '#f59e0b'];
     return tagStats.map((tag, idx) => {
       const pct = totalSub > 0 ? Math.round((tag.count / totalSub) * 100) : 0;

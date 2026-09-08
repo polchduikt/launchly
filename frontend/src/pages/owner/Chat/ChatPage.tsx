@@ -310,12 +310,7 @@ export const ChatPage: React.FC = () => {
                         onClearPendingImage={() => actions.setPendingImage(null)}
                         isRecording={actions.isRecording}
                         onMicClick={actions.handleMicClick}
-                        showEmojiPicker={actions.showEmojiPicker}
-                        onToggleEmojiPicker={() => actions.setShowEmojiPicker(!actions.showEmojiPicker)}
                         onEmojiSelect={actions.handleEmojiSelect}
-                        emojiRef={actions.emojiRef}
-                        imageInputRef={actions.imageInputRef}
-                        fileInputRef={actions.fileInputRef}
                         onImageSelect={actions.handleImageSelect}
                         onFileSelect={actions.handleFileSelect}
                         isImageUploading={actions.mediaUpload.isPending}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ActionItem } from '../../../../../../../types/bot';
-import { useAuthStore } from '../../../../../../../store/useAuthStore';
+import apiClient from '../../../../../../../api/axios';
 
 interface UseGoogleSheetsActionsProps {
   activeBotId: number | null;
@@ -36,36 +36,27 @@ export const useGoogleSheetsActions = ({
 
   const handleReconnectGoogleSheets = () => {
     if (!activeBotId) return;
-    const token = useAuthStore.getState().accessToken;
-    window.location.href = `/api/v1/integrations/google/auth?botId=${activeBotId}&token=${token}`;
+    window.location.href = `/api/v1/integrations/google/auth?botId=${activeBotId}`;
   };
 
   const fetchSpreadsheets = async () => {
     setIsLoadingSpreadsheets(true);
     setSpreadsheetsError('');
     try {
-      const token = useAuthStore.getState().accessToken;
-      const res = await fetch(`/api/v1/integrations/google/spreadsheets?botId=${activeBotId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiClient.get<{ id: string; name: string }[]>('/integrations/google/spreadsheets', {
+        params: { botId: activeBotId },
       });
-      if (res.ok) {
-        const result = await res.json();
-        setSpreadsheets(result);
-        return result as { id: string; name: string }[];
-      } else {
-        const error = await res.json().catch(() => null);
-        setSpreadsheets([]);
-        const message = error?.message || 'Failed to load Google spreadsheets.';
-        setSpreadsheetsError(
-          message.includes('No static resource')
-            ? 'Google Sheets API endpoint is not available. Restart the backend so the latest integrations routes are loaded.'
-            : message
-        );
-      }
-    } catch (e) {
+      setSpreadsheets(res.data);
+      return res.data;
+    } catch (e: any) {
       console.error('Failed to fetch spreadsheets', e);
       setSpreadsheets([]);
-      setSpreadsheetsError('Failed to load Google spreadsheets.');
+      const message = e?.response?.data?.message || e?.message || 'Failed to load Google spreadsheets.';
+      setSpreadsheetsError(
+        message.includes('No static resource')
+          ? 'Google Sheets API endpoint is not available. Restart the backend so the latest integrations routes are loaded.'
+          : message
+      );
     } finally {
       setIsLoadingSpreadsheets(false);
     }
@@ -76,22 +67,15 @@ export const useGoogleSheetsActions = ({
     setIsLoadingWorksheets(true);
     setWorksheetsError('');
     try {
-      const token = useAuthStore.getState().accessToken;
-      const res = await fetch(`/api/v1/integrations/google/spreadsheets/${spreadsheetId}/worksheets?botId=${activeBotId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiClient.get<string[]>(`/integrations/google/spreadsheets/${spreadsheetId}/worksheets`, {
+        params: { botId: activeBotId },
       });
-      if (res.ok) {
-        const result = await res.json();
-        setWorksheets(result);
-      } else {
-        const error = await res.json().catch(() => null);
-        setWorksheets([]);
-        setWorksheetsError(error?.message || 'Failed to load worksheets.');
-      }
-    } catch (e) {
+      setWorksheets(res.data);
+    } catch (e: any) {
       console.error('Failed to fetch worksheets', e);
       setWorksheets([]);
-      setWorksheetsError('Failed to load worksheets.');
+      const message = e?.response?.data?.message || e?.message || 'Failed to load worksheets.';
+      setWorksheetsError(message);
     } finally {
       setIsLoadingWorksheets(false);
     }
@@ -100,15 +84,11 @@ export const useGoogleSheetsActions = ({
   const fetchHeaders = async (spreadsheetId: string, worksheetName: string) => {
     setIsLoadingHeaders(true);
     try {
-      const token = useAuthStore.getState().accessToken;
       const encodedSheet = encodeURIComponent(worksheetName);
-      const res = await fetch(`/api/v1/integrations/google/spreadsheets/${spreadsheetId}/values/${encodedSheet}/headers?botId=${activeBotId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiClient.get<string[]>(`/integrations/google/spreadsheets/${spreadsheetId}/values/${encodedSheet}/headers`, {
+        params: { botId: activeBotId },
       });
-      if (res.ok) {
-        const result = await res.json();
-        return result as string[];
-      }
+      return res.data;
     } catch (e) {
       console.error('Failed to fetch headers', e);
     } finally {

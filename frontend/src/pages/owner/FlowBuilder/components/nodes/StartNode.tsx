@@ -6,19 +6,9 @@ import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../../types/bot';
 import { t } from '../../../../../i18n/config';
 
-const StartNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ selected, data = {} }) => {
-  let sourceConns: any[] = [];
-  try {
-    sourceConns = useNodeConnections({ handleType: 'source' }) || [];
-  } catch (e) {
-    sourceConns = [];
-  }
-  let connection: any = { inProgress: false };
-  try {
-    connection = useConnection() || { inProgress: false };
-  } catch (e) {
-    connection = { inProgress: false };
-  }
+const StartNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
+  const sourceConns = useNodeConnections({ id, handleType: 'source' });
+  const connection = useConnection();
   const isConnecting = connection.inProgress;
 
   return (

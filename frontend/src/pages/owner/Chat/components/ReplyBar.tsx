@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { t } from '../../../../i18n/config';
 import {
   Smile,
@@ -26,12 +26,7 @@ interface ReplyBarProps {
   onClearPendingImage: () => void;
   isRecording: boolean;
   onMicClick: () => void;
-  showEmojiPicker: boolean;
-  onToggleEmojiPicker: () => void;
   onEmojiSelect: (emoji: { native: string }) => void;
-  emojiRef: React.RefObject<HTMLDivElement | null>;
-  imageInputRef: React.RefObject<HTMLInputElement | null>;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
   onImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isImageUploading: boolean;
@@ -40,6 +35,11 @@ interface ReplyBarProps {
   onTypedNoteChange: (note: string) => void;
   onSaveNote: () => void;
   onScheduleClick: () => void;
+  showEmojiPicker?: boolean;
+  onToggleEmojiPicker?: () => void;
+  emojiRef?: React.RefObject<HTMLDivElement | null>;
+  imageInputRef?: React.RefObject<HTMLInputElement | null>;
+  fileInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 export const ReplyBar: React.FC<ReplyBarProps> = ({
@@ -58,8 +58,8 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
   onToggleEmojiPicker,
   onEmojiSelect,
   emojiRef,
-  imageInputRef,
-  fileInputRef,
+  imageInputRef: externalImageInputRef,
+  fileInputRef: externalFileInputRef,
   onImageSelect,
   onFileSelect,
   isImageUploading,
@@ -69,8 +69,35 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
   onSaveNote,
   onScheduleClick,
 }) => {
+  const [internalShowEmojiPicker, setInternalShowEmojiPicker] = useState(false);
+  const localEmojiRef = useRef<HTMLDivElement>(null);
+  const localImageInputRef = useRef<HTMLInputElement>(null);
+  const localFileInputRef = useRef<HTMLInputElement>(null);
+
+  const resolvedEmojiRef = emojiRef || localEmojiRef;
+  const resolvedImageRef = externalImageInputRef || localImageInputRef;
+  const resolvedFileRef = externalFileInputRef || localFileInputRef;
+
+  const isEmojiOpen = showEmojiPicker !== undefined ? showEmojiPicker : internalShowEmojiPicker;
+  const toggleEmoji = onToggleEmojiPicker || (() => setInternalShowEmojiPicker((prev) => !prev));
+
   const replyTextareaRef = useRef<HTMLTextAreaElement>(null);
   const noteTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!isEmojiOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (resolvedEmojiRef.current && !resolvedEmojiRef.current.contains(e.target as Node)) {
+        if (onToggleEmojiPicker) {
+          onToggleEmojiPicker();
+        } else {
+          setInternalShowEmojiPicker(false);
+        }
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isEmojiOpen, onToggleEmojiPicker, resolvedEmojiRef]);
 
   useEffect(() => {
     const el = replyTextareaRef.current;
@@ -89,6 +116,13 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
     el.style.height = newHeight + 'px';
     el.style.overflowY = newHeight >= 160 ? 'auto' : 'hidden';
   }, [typedNote]);
+
+  const handleEmojiSelectInternal = (emoji: { native: string }) => {
+    onEmojiSelect(emoji);
+    if (showEmojiPicker === undefined) {
+      setInternalShowEmojiPicker(false);
+    }
+  };
 
   return (
     <div className="border-t-2 border-[#0A0A0A] shrink-0 bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
@@ -120,7 +154,12 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
             <div className="px-4 pt-3 flex items-center gap-2 bg-[#F2EBDD]">
               <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-[#0A0A0A] shadow-[2px_2px_0px_0px_#0A0A0A]">
                 <img src={pendingImage.url} alt="Preview" className="w-full h-full object-cover" />
-                <button onClick={onClearPendingImage} className="absolute -top-1 -right-1 w-5 h-5 bg-rose-600 text-white border border-[#0A0A0A] rounded-full flex items-center justify-center cursor-pointer"><X size={10} /></button>
+                <button
+                  onClick={onClearPendingImage}
+                  className="absolute -top-1 -right-1 w-5 h-5 bg-rose-600 text-white border border-[#0A0A0A] rounded-full flex items-center justify-center cursor-pointer"
+                >
+                  <X size={10} />
+                </button>
               </div>
               <span className="text-xs font-bold text-[#0A0A0A]">{t('crm.reply.image_attached')}</span>
             </div>
@@ -135,7 +174,7 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
             <textarea
               ref={replyTextareaRef}
               value={typedMessage}
-              onChange={e => onTypedMessageChange(e.target.value)}
+              onChange={(e) => onTypedMessageChange(e.target.value)}
               onKeyDown={onKeyPress}
               placeholder={t('crm.reply.placeholder_reply')}
               rows={1}
@@ -145,34 +184,69 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
           </div>
           <div className="px-5 py-2.5 border-t-2 border-[#0A0A0A] flex items-center justify-between bg-[#F2EBDD]">
             <div className="flex items-center gap-1.5 relative">
-              <div ref={emojiRef} className="relative">
-                <button onClick={onToggleEmojiPicker} className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all"><Smile size={16} /></button>
-                {showEmojiPicker && (
+              <div ref={resolvedEmojiRef} className="relative">
+                <button
+                  onClick={toggleEmoji}
+                  className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all"
+                >
+                  <Smile size={16} />
+                </button>
+                {isEmojiOpen && (
                   <div className="absolute bottom-10 left-0 z-50 shadow-[8px_8px_0px_0px_#0A0A0A] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
-                    <Picker data={data} onEmojiSelect={onEmojiSelect} theme="light" previewPosition="none" skinTonePosition="none" />
+                    <Picker
+                      data={data}
+                      onEmojiSelect={handleEmojiSelectInternal}
+                      theme="light"
+                      previewPosition="none"
+                      skinTonePosition="none"
+                    />
                   </div>
                 )}
               </div>
-              <button onClick={() => imageInputRef.current?.click()} className={`w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all ${isImageUploading ? 'animate-pulse' : ''}`}>
+              <button
+                onClick={() => resolvedImageRef.current?.click()}
+                className={`w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all ${
+                  isImageUploading ? 'animate-pulse' : ''
+                }`}
+              >
                 {isImageUploading ? <Loader2 size={16} className="animate-spin" /> : <ImageIcon size={16} />}
               </button>
-              <input ref={imageInputRef} type="file" accept="image/*" onChange={onImageSelect} className="hidden" />
-              <button onClick={() => fileInputRef.current?.click()} className={`w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all ${isFileUploading ? 'animate-pulse' : ''}`}>
+              <input ref={resolvedImageRef} type="file" accept="image/*" onChange={onImageSelect} className="hidden" />
+              <button
+                onClick={() => resolvedFileRef.current?.click()}
+                className={`w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer transition-all ${
+                  isFileUploading ? 'animate-pulse' : ''
+                }`}
+              >
                 {isFileUploading ? <Loader2 size={16} className="animate-spin" /> : <Paperclip size={16} />}
               </button>
-              <input ref={fileInputRef} type="file" accept="*/*" onChange={onFileSelect} className="hidden" />
+              <input ref={resolvedFileRef} type="file" accept="*/*" onChange={onFileSelect} className="hidden" />
               <button
                 onClick={onMicClick}
-                className={`w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] cursor-pointer transition-all ${isRecording ? 'bg-rose-600 text-white' : 'bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'}`}
+                className={`w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] cursor-pointer transition-all ${
+                  isRecording
+                    ? 'bg-rose-600 text-white'
+                    : 'bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+                }`}
               >
                 {isRecording ? <StopCircle size={16} /> : <Mic size={16} />}
               </button>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={onSend} disabled={(!typedMessage.trim() && !pendingImage) || isSending} className="flex items-center gap-2 px-5 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] disabled:opacity-50 text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] cursor-pointer transition-all">
+              <button
+                onClick={onSend}
+                disabled={(!typedMessage.trim() && !pendingImage) || isSending}
+                className="flex items-center gap-2 px-5 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] disabled:opacity-50 text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] cursor-pointer transition-all"
+              >
                 {isSending ? <Loader2 className="animate-spin" size={14} /> : <>{t('crm.reply.btn_send')}</>}
               </button>
-              <button onClick={onScheduleClick} disabled={(!typedMessage.trim() && !pendingImage) || isSending} className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"><RefreshCw size={14} /></button>
+              <button
+                onClick={onScheduleClick}
+                disabled={(!typedMessage.trim() && !pendingImage) || isSending}
+                className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"
+              >
+                <RefreshCw size={14} />
+              </button>
             </div>
           </div>
         </>
@@ -182,7 +256,7 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
             <textarea
               ref={noteTextareaRef}
               value={typedNote}
-              onChange={e => onTypedNoteChange(e.target.value)}
+              onChange={(e) => onTypedNoteChange(e.target.value)}
               placeholder={t('crm.reply.placeholder_note')}
               rows={1}
               style={{ minHeight: '40px', maxHeight: '160px' }}
