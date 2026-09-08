@@ -136,7 +136,7 @@ interface AudienceFilterItem {
     }
 
     return [];
-  }, [selectedCategory, dropdownSearch, tags, customFields]);
+  }, [selectedCategory, dropdownSearch, customFields, t]);
 
   const handleAddConditionItem = (item: AudienceFilterItem) => {
     setIsConditionDropdownOpen(false);

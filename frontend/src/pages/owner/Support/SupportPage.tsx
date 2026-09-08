@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { isAxiosError } from 'axios';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import {
   useUserTicketsQuery,
@@ -73,7 +74,7 @@ export const SupportPage: React.FC = () => {
     } else {
       setSelectedTicketId(null);
     }
-  }, [filterStatus, ticketsData]);
+  }, [filteredTickets, selectedTicketId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -119,8 +120,11 @@ export const SupportPage: React.FC = () => {
           setFilterStatus('active');
           setSelectedTicketId(created.id);
         },
-        onError: (err: any) => {
-          setNewError(err?.response?.data?.message || 'Failed to create support ticket');
+        onError: (err: unknown) => {
+          const msg = isAxiosError(err)
+            ? (err.response?.data?.message || err.message)
+            : (err instanceof Error ? err.message : 'Failed to create support ticket');
+          setNewError(msg);
         },
       }
     );

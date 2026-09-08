@@ -61,7 +61,9 @@ const FlowBuilderInner: React.FC = () => {
       : Array.isArray(customFieldsData)
         ? (customFieldsData as unknown[])
         : [];
-    const names = list.map((f: any) => (typeof f === 'string' ? f : f?.name)).filter(Boolean);
+    const names = list
+      .map((f: unknown) => (typeof f === 'string' ? f : (f as { name?: string })?.name))
+      .filter((n): n is string => Boolean(n));
     return names.length > 0 ? names : [...DEFAULT_CUSTOM_FIELDS];
   }, [customFieldsData]);
 
@@ -143,9 +145,14 @@ const FlowBuilderInner: React.FC = () => {
     updateLocalAction(null, null);
   }, [onNodeDragStop, updateLocalAction, setDragging, publishNodeMoveForce]);
 
+  const nodesRef = useRef(nodes);
+  useEffect(() => {
+    nodesRef.current = nodes;
+  }, [nodes]);
+
   useEffect(() => {
     if (selectedNodeId) {
-      const selectedNodeObj = nodes.find((n) => n.id === selectedNodeId);
+      const selectedNodeObj = nodesRef.current.find((n) => n.id === selectedNodeId);
       const nodeName = (selectedNodeObj?.data?.label as string) || selectedNodeObj?.type || 'block';
       updateLocalAction(
         `${currentUser?.name || 'Someone'} is editing ${nodeName}...`,

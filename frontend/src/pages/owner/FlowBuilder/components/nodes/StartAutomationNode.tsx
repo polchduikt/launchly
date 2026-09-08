@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Position, useNodeConnections, useConnection, useReactFlow } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { SquareArrowRight, X } from 'lucide-react';

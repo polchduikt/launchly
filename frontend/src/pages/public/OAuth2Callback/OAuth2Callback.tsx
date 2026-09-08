@@ -39,7 +39,7 @@ const OAuth2Callback: React.FC = () => {
         } else {
           navigate(ROUTES.HOME, { replace: true });
         }
-      } catch (error) {
+      } catch {
         useAuthStore.getState().logout();
         navigate(ROUTES.LOGIN, { replace: true });
       }

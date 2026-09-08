@@ -62,7 +62,7 @@ export const BlockedPage: React.FC = () => {
       });
       setSentSuccess(true);
       setMessage('');
-    } catch (err: unknown) {
+    } catch {
       setErrorMsg('Error sending appeal. Please try again.');
     } finally {
       setIsSending(false);

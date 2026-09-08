@@ -312,7 +312,7 @@ const BroadcastBuilderInner: React.FC = () => {
       : Array.isArray(customFieldsData)
         ? (customFieldsData as unknown[])
         : [];
-    const names = list.map((f: any) => (typeof f === 'string' ? f : f?.name)).filter(Boolean);
+    const names = list.map((f: unknown) => (typeof f === 'string' ? f : (f as { name?: string })?.name)).filter(Boolean) as string[];
     return names.length > 0 ? names : [...DEFAULT_CUSTOM_FIELDS];
   }, [customFieldsData]);
 
@@ -352,7 +352,7 @@ const BroadcastBuilderInner: React.FC = () => {
     setIsDirty(true);
   };
 
-  const isValidConnection = React.useCallback((connection: any) => {
+  const isValidConnection = React.useCallback((connection: { source?: string | null; target?: string | null; sourceHandle?: string | null }) => {
     if (connection.source === connection.target) return false;
     const targetNode = nodes.find((n) => n.id === connection.target);
     if (targetNode?.type === 'START_BROADCAST') return false;
@@ -915,7 +915,7 @@ const BroadcastBuilderInner: React.FC = () => {
                         ...activeNode.data,
                         blocks: updated
                       });
-                      setEdges((eds: any[]) => eds.filter((e: any) => !(e.source === activeNode.id && (e.sourceHandle === 'reply' || e.sourceHandle === 'timeout'))));
+                      setEdges((eds) => eds.filter((e) => !(e.source === activeNode.id && (e.sourceHandle === 'reply' || e.sourceHandle === 'timeout'))));
                     }
                     editorState.setIsDataCollectionDrawerOpen(false);
                   }}
@@ -923,7 +923,7 @@ const BroadcastBuilderInner: React.FC = () => {
                   nodes={nodes}
                   nodeId={activeNode.id}
                   onUnlinkConnection={(handleId) => {
-                    setEdges((eds: any[]) => eds.filter((e: any) => !(e.source === activeNode.id && e.sourceHandle === handleId)));
+                    setEdges((eds) => eds.filter((e) => !(e.source === activeNode.id && e.sourceHandle === handleId)));
                   }}
                   onAddAndConnectNode={(sourceNodeId, type, sourceHandle) => {
                     handleAddAndConnectNode(sourceNodeId, type, sourceHandle);
@@ -947,7 +947,7 @@ const BroadcastBuilderInner: React.FC = () => {
                   nodes={nodes}
                   nodeId={activeNode.id}
                   onUnlinkConnection={(btnValue) => {
-                    setEdges((eds: any[]) => eds.filter((e: any) => !(e.source === activeNode.id && e.sourceHandle === btnValue)));
+                    setEdges((eds) => eds.filter((e) => !(e.source === activeNode.id && e.sourceHandle === btnValue)));
                   }}
                 />
               ) : null}

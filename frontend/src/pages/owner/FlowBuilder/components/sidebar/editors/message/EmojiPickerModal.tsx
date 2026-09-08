@@ -7,7 +7,7 @@ const LazyPicker = lazy(async () => {
     import('@emoji-mart/data'),
     import('@emoji-mart/react'),
   ]);
-  const Picker = (pickerModule.default || pickerModule) as unknown as React.ComponentType<any>;
+  const Picker = (pickerModule.default || pickerModule) as unknown as React.ComponentType<Record<string, unknown>>;
   const data = emojiDataModule.default || emojiDataModule;
   return {
     default: (props: {

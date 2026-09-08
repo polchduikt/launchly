@@ -112,8 +112,11 @@ export const InteractiveNodeBuilderDemo: React.FC = () => {
     }
   };
 
+  const resetSimulationRef = useRef(resetSimulation);
+  resetSimulationRef.current = resetSimulation;
+
   useEffect(() => {
-    resetSimulation();
+    resetSimulationRef.current();
   }, []);
 
   useEffect(() => {

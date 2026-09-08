@@ -238,7 +238,7 @@ export const TrendChartWidget: React.FC<TrendChartWidgetProps> = ({ userGrowth =
             );
           })}
 
-          {userGrowth.map((d: any, idx: number) => {
+          {userGrowth.map((d, idx) => {
             const x = getX(idx);
             const skipCount = Math.ceil(userGrowth.length / 7);
             const shouldShow = idx === 0 || idx === userGrowth.length - 1 || idx % skipCount === 0;

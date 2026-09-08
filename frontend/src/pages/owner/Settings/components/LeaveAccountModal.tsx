@@ -68,7 +68,7 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
             setSelectedNewOwnerId(defaultCand.userId);
           }
         }
-      } catch (err) {
+      } catch {
         setIsOwner(true);
         setCandidates([]);
       } finally {
@@ -105,7 +105,7 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
       }
 
       logoutMutation.mutate();
-    } catch (err) {
+    } catch {
       logoutMutation.mutate();
     } finally {
       setSubmitting(false);
@@ -119,7 +119,7 @@ export const LeaveAccountModal: React.FC<LeaveAccountModalProps> = ({
     try {
       await leaveBotApi(botId);
       logoutMutation.mutate();
-    } catch (err) {
+    } catch {
       logoutMutation.mutate();
     } finally {
       setSubmitting(false);

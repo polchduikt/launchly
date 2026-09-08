@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { formatAuditTitle, formatAuditDescription } from './auditFormatters';
 
 describe('auditFormatters', () => {
-  const mockT = (key: string, opts?: any) => {
+  const mockT = (key: string, opts?: Record<string, unknown>) => {
     if (opts?.botName) return `${key}:${opts.botName}`;
     if (opts?.provider) return `${key}:${opts.provider}`;
     if (opts?.botId) return `${key}:${opts.botId}`;

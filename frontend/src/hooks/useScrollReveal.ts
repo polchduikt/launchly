@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-export function useScrollReveal(dependencyKey?: any) {
+export function useScrollReveal(dependencyKey?: unknown) {
   useEffect(() => {
     const observerCallback: IntersectionObserverCallback = (entries, observer) => {
       entries.forEach((entry) => {

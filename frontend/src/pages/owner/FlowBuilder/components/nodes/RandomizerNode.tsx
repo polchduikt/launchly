@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { t } from '../../../../../i18n/config';
 import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';

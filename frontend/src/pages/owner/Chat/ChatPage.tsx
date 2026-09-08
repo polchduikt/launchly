@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
@@ -111,8 +111,11 @@ export const ChatPage: React.FC = () => {
     }
   }, [conversations, ls, queryClient]);
 
+  const contactNotesRef = useRef(ls.contactNotes);
+  contactNotesRef.current = ls.contactNotes;
+
   useEffect(() => {
-    if (selectedConvId) setTypedNote(ls.contactNotes[selectedConvId] || '');
+    if (selectedConvId) setTypedNote(contactNotesRef.current[selectedConvId] || '');
   }, [selectedConvId]);
   const parsedMeta: Record<string, unknown> = (() => {
     try {

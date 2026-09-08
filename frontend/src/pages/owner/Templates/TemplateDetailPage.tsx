@@ -56,7 +56,7 @@ export const TemplateDetailPage: React.FC = () => {
         navigate('/templates');
       })
       .finally(() => setLoading(false));
-  }, [shareCode, navigate]);
+  }, [shareCode, navigate, t]);
 
   const isCreator = Boolean(
     currentUser &&
@@ -120,7 +120,7 @@ export const TemplateDetailPage: React.FC = () => {
     try {
       const parsed = JSON.parse(template.broadcastsDataJson);
       if (Array.isArray(parsed)) {
-        parsed.forEach((c: any) => {
+        parsed.forEach((c: { name?: string; nodes?: unknown; edges?: unknown }) => {
           if (c && c.name) {
             let nCnt = 0;
             let eCnt = 0;
@@ -153,9 +153,9 @@ export const TemplateDetailPage: React.FC = () => {
     try {
       const parsed = JSON.parse(template.tagsDataJson);
       if (Array.isArray(parsed)) {
-        parsed.forEach((tg: any) => {
+        parsed.forEach((tg: unknown) => {
           if (typeof tg === 'string' && tg.trim()) tagNames.push(tg.trim());
-          else if (tg && tg.name) tagNames.push(tg.name);
+          else if (tg && typeof tg === 'object' && 'name' in tg && typeof (tg as { name: unknown }).name === 'string') tagNames.push((tg as { name: string }).name);
         });
       }
     } catch {}
@@ -165,9 +165,9 @@ export const TemplateDetailPage: React.FC = () => {
     try {
       const parsed = JSON.parse(template.customFieldsDataJson);
       if (Array.isArray(parsed)) {
-        parsed.forEach((f: any) => {
+        parsed.forEach((f: unknown) => {
           if (typeof f === 'string' && f.trim()) fieldNames.push(f.trim());
-          else if (f && f.name) fieldNames.push(f.name);
+          else if (f && typeof f === 'object' && 'name' in f && typeof (f as { name: unknown }).name === 'string') fieldNames.push((f as { name: string }).name);
         });
       } else if (parsed && typeof parsed === 'object') {
         Object.keys(parsed).forEach((k) => {

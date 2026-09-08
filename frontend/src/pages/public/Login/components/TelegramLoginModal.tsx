@@ -54,9 +54,23 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({
     }
   };
 
+  const startSessionRef = useRef(startSession);
+  startSessionRef.current = startSession;
+
+  const loginRef = useRef(login);
+  loginRef.current = login;
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const tRef = useRef(t);
+  tRef.current = t;
+
   useEffect(() => {
     if (isOpen) {
-      startSession();
+      startSessionRef.current();
     } else {
       if (pollingRef.current) {
         clearInterval(pollingRef.current);
@@ -85,20 +99,20 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({
               pollingRef.current = null;
             }
             setStatus('SUCCESS');
-            login(res.accessToken, res.refreshToken, res.user);
+            loginRef.current(res.accessToken, res.refreshToken, res.user);
 
-            if (onSuccess) {
-              onSuccess();
+            if (onSuccessRef.current) {
+              onSuccessRef.current();
             } else {
               const redirectUrl = localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
               if (redirectUrl) {
                 localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
-                navigate(redirectUrl, { replace: true });
+                navigateRef.current(redirectUrl, { replace: true });
               } else {
-                navigate(ROUTES.DASHBOARD);
+                navigateRef.current(ROUTES.DASHBOARD);
               }
             }
-            onClose();
+            onCloseRef.current();
           } else if (res.status === 'EXPIRED') {
             if (pollingRef.current) {
               clearInterval(pollingRef.current);
@@ -106,7 +120,7 @@ export const TelegramLoginModal: React.FC<TelegramLoginModalProps> = ({
             }
             setStatus('EXPIRED');
             setError(
-              t(
+              tRef.current(
                 'auth.telegram_modal.expired',
                 'The authorization session has expired. Please try again.'
               )

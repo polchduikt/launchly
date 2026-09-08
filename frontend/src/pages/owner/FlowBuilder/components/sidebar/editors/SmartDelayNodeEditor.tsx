@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Info, Clock, Calendar, ChevronDown } from 'lucide-react';
 import type { SmartDelayNodeEditorProps } from '../../../../../../types/bot';
 import { t } from '../../../../../../i18n/config';
@@ -25,9 +25,14 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
     return `${month}/${day}/${year} 09:00`;
   };
 
+  const handleChangeRef = useRef(handleChange);
+  useEffect(() => {
+    handleChangeRef.current = handleChange;
+  }, [handleChange]);
+
   useEffect(() => {
     if (mode === 'date' && !dateTime) {
-      handleChange('dateTime', getTomorrowDateTimeString());
+      handleChangeRef.current('dateTime', getTomorrowDateTimeString());
     }
   }, [mode, dateTime]);
 

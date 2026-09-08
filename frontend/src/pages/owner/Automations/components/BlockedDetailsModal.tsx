@@ -27,7 +27,7 @@ export const BlockedDetailsModal: React.FC<BlockedDetailsModalProps> = ({
         hour: '2-digit',
         minute: '2-digit',
       });
-    } catch (e) {
+    } catch {
       return dateStr;
     }
   };

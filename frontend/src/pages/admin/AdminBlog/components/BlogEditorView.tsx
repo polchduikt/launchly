@@ -21,6 +21,7 @@ import {
   useUpdateBlogArticleMutation,
 } from '../../../../hooks/admin/useAdminBlogQueries';
 import { useMediaUpload } from '../../../../hooks/bot/useMediaUpload';
+import { isAxiosError } from 'axios';
 import type { BlogArticle } from '../../../../const/blogData';
 import type { SaveBlogArticlePayload } from '../../../../api/adminBlog';
 
@@ -112,8 +113,9 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
       onSuccess: (res) => {
         setFormCoverImage(res.url);
       },
-      onError: (err: any) => {
-        setFormError(err?.response?.data?.message || 'Помилка завантаження фото');
+      onError: (err: unknown) => {
+        const msg = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+        setFormError(msg || 'Помилка завантаження фото');
       },
     });
   };
@@ -131,9 +133,10 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
         }
         setUploadingBlockIndex(null);
       },
-      onError: (err: any) => {
+      onError: (err: unknown) => {
         setUploadingBlockIndex(null);
-        setFormError(err?.response?.data?.message || 'Помилка завантаження фото блоку');
+        const msg = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+        setFormError(msg || 'Помилка завантаження фото блоку');
       },
     });
   };
@@ -219,8 +222,9 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
         onSuccess: () => {
           onSuccess();
         },
-        onError: (err: any) => {
-          setFormError(err?.response?.data?.message || t('admin.blog.error_update', 'Помилка оновлення статті'));
+        onError: (err: unknown) => {
+          const msg = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+          setFormError(msg || t('admin.blog.error_update', 'Помилка оновлення статті'));
         },
       });
     } else {
@@ -228,8 +232,9 @@ export const BlogEditorView: React.FC<BlogEditorViewProps> = ({
         onSuccess: () => {
           onSuccess();
         },
-        onError: (err: any) => {
-          setFormError(err?.response?.data?.message || t('admin.blog.error_create', 'Помилка створення статті'));
+        onError: (err: unknown) => {
+          const msg = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+          setFormError(msg || t('admin.blog.error_create', 'Помилка створення статті'));
         },
       });
     }

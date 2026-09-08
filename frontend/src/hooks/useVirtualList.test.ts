@@ -55,7 +55,7 @@ describe('useVirtualList', () => {
     Object.defineProperty(mockElement, 'clientHeight', { value: 500, configurable: true });
     Object.defineProperty(mockElement, 'scrollTop', { value: 200, writable: true, configurable: true });
 
-    (result.current.parentRef as any).current = mockElement;
+    (result.current.parentRef as { current: HTMLDivElement | null }).current = mockElement;
 
     act(() => {
       mockElement.dispatchEvent(new Event('scroll'));

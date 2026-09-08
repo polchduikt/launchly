@@ -19,7 +19,7 @@ const withCollaborationWrapper = <P extends { id: string; data?: Record<string, 
   WrappedComponent: React.ComponentType<P>
 ) => {
   const ComponentWithCollaboration: React.FC<P> = (props) => {
-    const collaborator = (props.data as Record<string, any>)?._collaborator;
+    const collaborator = (props.data as { _collaborator?: { name?: string; avatar?: string } })?._collaborator;
     const isEditing = !!collaborator;
 
     return (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useClickOutside } from '../../../../hooks/useClickOutside';
 import { X, HelpCircle, Check, Plus, ChevronDown } from 'lucide-react';
 import { useBotStore } from '../../../../store/useBotStore';
@@ -94,7 +94,7 @@ export const TeamMembersPanel: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     if (!activeBotId) return;
     try {
       const data = await getTeamMembersApi(activeBotId);
@@ -102,11 +102,11 @@ export const TeamMembersPanel: React.FC = () => {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [activeBotId]);
 
   useEffect(() => {
     fetchMembers();
-  }, [activeBotId]);
+  }, [fetchMembers]);
 
   const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();

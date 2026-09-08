@@ -12,12 +12,16 @@ import { ROUTES } from '../../../../routes/paths';
 import { formatEuroDateTime } from '../../../../utils/date';
 import { formatAuditTitle, formatAuditDescription } from '../../../../utils/auditFormatters';
 import { useTranslation } from '../../../../i18n/config';
+import type {
+  AdminUserDetail,
+  AdminSupportTicket,
+} from '../../../../api/admin';
 
 interface AdminUserDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedTicket: any;
-  userDetailData: any;
+  selectedTicket?: AdminSupportTicket | null;
+  userDetailData?: AdminUserDetail | null;
   isDetailLoading: boolean;
   detailPeriod: 'week' | 'month' | '3months' | 'all';
   setDetailPeriod: (p: 'week' | 'month' | '3months' | 'all') => void;
@@ -231,7 +235,7 @@ export const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
                     {t('admin.no_records')}
                   </div>
                 ) : (
-                  userDetailData.automations.map((auto: any) => (
+                  userDetailData.automations.map((auto) => (
                     <div
                       key={auto.id}
                       onClick={() => {
@@ -289,7 +293,7 @@ export const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
                     {t('admin.no_records')}
                   </div>
                 ) : (
-                  userDetailData.broadcasts.map((b: any) => (
+                  userDetailData.broadcasts.map((b) => (
                     <div
                       key={b.id}
                       onClick={() => {
@@ -347,7 +351,7 @@ export const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
                 </div>
               ) : userDetailData?.activities?.content && userDetailData.activities.content.length > 0 ? (
                 <div className="space-y-2">
-                  {userDetailData.activities.content.map((act: any) => (
+                  {userDetailData.activities.content.map((act) => (
                     <div
                       key={act.id}
                       className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl p-3 flex items-start justify-between text-xs hover:bg-white transition"

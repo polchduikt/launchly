@@ -338,8 +338,11 @@ export const FlowPreviewPanel: React.FC<FlowPreviewPanelProps> = ({
     }
   }, [nodes, edges, isOpen]);
 
+  const restartRef = useRef(restart);
+  restartRef.current = restart;
+
   useEffect(() => {
-    if (isOpen) { nodesSignRef.current = ''; restart(); }
+    if (isOpen) { nodesSignRef.current = ''; restartRef.current(); }
   }, [isOpen]);
 
   useEffect(() => {

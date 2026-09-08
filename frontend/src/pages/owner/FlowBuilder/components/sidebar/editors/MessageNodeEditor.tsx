@@ -56,8 +56,8 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = React.memo(({
   const { data: customFieldsData } = useCustomFieldsQuery(activeBotId);
   const customFields = useMemo(() => {
     return (customFieldsData?.fields || [])
-      .map((f: any) => (typeof f === 'string' ? f : f?.name || ''))
-      .filter(Boolean);
+      .map((f: unknown) => (typeof f === 'string' ? f : (f as { name?: string })?.name || ''))
+      .filter((name): name is string => Boolean(name));
   }, [customFieldsData]);
 
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);

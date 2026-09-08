@@ -12,9 +12,10 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { useTranslation } from '../../../../i18n/config';
+import type { AdminSupportTicket } from '../../../../api/admin';
 
 interface AdminUserProfileSidebarProps {
-  selectedTicket: any;
+  selectedTicket?: AdminSupportTicket | null;
   isProfileCollapsed: boolean;
   setIsProfileCollapsed: (collapsed: boolean) => void;
   onOpenDetails: () => void;

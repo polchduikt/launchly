@@ -47,27 +47,25 @@ export const PaymentsPanel: React.FC = () => {
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const stripeActive = stripeIntegration?.active;
-  const paypalIntegrationId = paypalIntegration?.id;
-
   useEffect(() => {
     setIsStripeConnected(!!stripeActive);
 
     if (paypalIntegration) {
       setIsPaypalConnected(paypalIntegration.active);
-      const cfg = (paypalIntegration.config as Record<string, any>) || {};
-      setPaypalClientId(cfg.paypalClientId || '');
-      setPaypalWebhookId(cfg.paypalWebhookId || '');
-      setPaypalLiveClientId(cfg.paypalLiveClientId || '');
-      setPaypalLiveWebhookId(cfg.paypalLiveWebhookId || '');
-      setCurrency(cfg.currency || 'USD');
+      const cfg = (paypalIntegration.config as Record<string, unknown>) || {};
+      setPaypalClientId(typeof cfg.paypalClientId === 'string' ? cfg.paypalClientId : '');
+      setPaypalWebhookId(typeof cfg.paypalWebhookId === 'string' ? cfg.paypalWebhookId : '');
+      setPaypalLiveClientId(typeof cfg.paypalLiveClientId === 'string' ? cfg.paypalLiveClientId : '');
+      setPaypalLiveWebhookId(typeof cfg.paypalLiveWebhookId === 'string' ? cfg.paypalLiveWebhookId : '');
+      setCurrency(typeof cfg.currency === 'string' ? cfg.currency : 'USD');
       setNotifyMessenger(!!cfg.notifyMessenger);
       setNotifyEmail(!!cfg.notifyEmail);
       setSendReceiptEmail(!!cfg.sendReceiptEmail);
-      setOrders(Array.isArray(cfg.orders) ? cfg.orders : []);
+      setOrders(Array.isArray(cfg.orders) ? (cfg.orders as typeof orders) : []);
     } else {
       setIsPaypalConnected(false);
     }
-  }, [stripeActive, paypalIntegrationId]);
+  }, [stripeActive, paypalIntegration]);
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });

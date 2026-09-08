@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { webhookSchema } from '../../schemas/integration.schema';
 import { t } from '../../i18n/config';
@@ -35,7 +35,7 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
     handleSubmit,
     reset,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<WebhookFields>({
     resolver: zodResolver(webhookSchema),
@@ -89,7 +89,7 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
     }
   };
 
-  const activeWebhookEvents = watch('events') || [];
+  const activeWebhookEvents = useWatch({ control, name: 'events' }) || [];
 
   const handleEventCheckboxChange = (event: 'ORDER_CREATED' | 'LEAD_CREATED', checked: boolean) => {
     if (checked) {

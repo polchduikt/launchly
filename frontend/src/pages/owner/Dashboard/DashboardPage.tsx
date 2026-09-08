@@ -39,8 +39,14 @@ const parseButtons = (text: string) => {
   return { cleanText, buttons };
 };
 
+interface PhonePreviewMessage {
+  id?: string;
+  text: string;
+  isUser?: boolean;
+}
+
 const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
-  const [visibleMessages, setVisibleMessages] = useState<unknown[]>([]);
+  const [visibleMessages, setVisibleMessages] = useState<PhonePreviewMessage[]>([]);
   const [isWaitingInput, setIsWaitingInput] = useState(false);
   const [activeButtons, setActiveButtons] = useState<string[]>([]);
   const [clickedButton, setClickedButton] = useState<string | null>(null);
@@ -72,7 +78,7 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
     }
   }, [visibleMessages, isWaitingInput]);
 
-  const playStep = (msgIndex: number, currentVisible: unknown[]) => {
+  const playStep = (msgIndex: number, currentVisible: PhonePreviewMessage[]) => {
     nextIndexRef.current = msgIndex;
     if (msgIndex >= messages.length) {
       addTimeout(() => {
@@ -109,7 +115,7 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
           setClickedButton(null);
 
           addTimeout(() => {
-            playStep(msgIndex + 1, updatedVisible);
+            playStep(nextIndexRef.current + 1, updatedVisible);
           }, 900);
         }, 350);
       }, 1800);
@@ -124,6 +130,11 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
     }
   };
 
+  const playStepRef = useRef(playStep);
+  playStepRef.current = playStep;
+  const messagesLengthRef = useRef(messages.length);
+  messagesLengthRef.current = messages.length;
+
   useEffect(() => {
     clearTimeouts();
     setVisibleMessages([]);
@@ -132,9 +143,9 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
     setClickedButton(null);
     nextIndexRef.current = 1;
 
-    if (messages.length === 0) return;
+    if (messagesLengthRef.current === 0) return;
 
-    playStep(0, []);
+    playStepRef.current(0, []);
 
     return () => clearTimeouts();
   }, [template, key]);
@@ -197,7 +208,7 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
           }} 
         />
              
-        {visibleMessages.map((msg: any, idx) => {
+        {visibleMessages.map((msg, idx) => {
           if (!msg || !msg.text) return null;
           const isUser = msg.isUser;
           const isLastMessage = idx === visibleMessages.length - 1;

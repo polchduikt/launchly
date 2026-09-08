@@ -48,7 +48,7 @@ const SmartDelayNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
       return `${day} ${monthName} ${year}, ${hours}:${minutes} (UTC +03:00)`;
-    } catch (e) {
+    } catch {
       return dateStr;
     }
   }, [dateTimeStr]);

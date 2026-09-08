@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { isAxiosError } from 'axios';
 import type { ActionItem } from '../../../../../../../types/bot';
 import apiClient from '../../../../../../../api/axios';
 
@@ -48,10 +49,12 @@ export const useGoogleSheetsActions = ({
       });
       setSpreadsheets(res.data);
       return res.data;
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Failed to fetch spreadsheets', e);
       setSpreadsheets([]);
-      const message = e?.response?.data?.message || e?.message || 'Failed to load Google spreadsheets.';
+      const message = isAxiosError(e)
+        ? (e.response?.data?.message || e.message)
+        : (e instanceof Error ? e.message : 'Failed to load Google spreadsheets.');
       setSpreadsheetsError(
         message.includes('No static resource')
           ? 'Google Sheets API endpoint is not available. Restart the backend so the latest integrations routes are loaded.'
@@ -71,10 +74,12 @@ export const useGoogleSheetsActions = ({
         params: { botId: activeBotId },
       });
       setWorksheets(res.data);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Failed to fetch worksheets', e);
       setWorksheets([]);
-      const message = e?.response?.data?.message || e?.message || 'Failed to load worksheets.';
+      const message = isAxiosError(e)
+        ? (e.response?.data?.message || e.message)
+        : (e instanceof Error ? e.message : 'Failed to load worksheets.');
       setWorksheetsError(message);
     } finally {
       setIsLoadingWorksheets(false);

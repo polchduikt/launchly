@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, Loader2, ArrowRight } from 'lucide-react';
 import { ROUTES } from '../../../routes/paths';
@@ -11,6 +11,7 @@ const CheckoutSuccessPage: React.FC = () => {
   const sessionId = searchParams.get('session_id');
 
   const confirmMutation = useConfirmSessionMutation();
+  const hasMutatedRef = useRef(false);
 
   useEffect(() => {
     if (!sessionId) {
@@ -18,8 +19,11 @@ const CheckoutSuccessPage: React.FC = () => {
       return;
     }
 
-    confirmMutation.mutate(sessionId);
-  }, [sessionId, navigate]);
+    if (!hasMutatedRef.current) {
+      hasMutatedRef.current = true;
+      confirmMutation.mutate(sessionId);
+    }
+  }, [sessionId, navigate, confirmMutation]);
 
   return (
     <div className="min-h-screen bg-[#F2EBDD] flex items-center justify-center p-6 font-['JetBrains_Mono',monospace]">

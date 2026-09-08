@@ -57,22 +57,22 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
           ? (customFieldsData as unknown[])
           : []
       : [];
-    const names = list.map((f: any) => typeof f === 'string' ? f : f?.name).filter(Boolean);
+    const names = list.map((f: unknown) => (typeof f === 'string' ? f : (f as { name?: string })?.name)).filter(Boolean) as string[];
     const fieldsSet = new Set<string>(names);
 
-    contacts.forEach((c: any) => {
+    contacts.forEach((c: { metadata?: string | null }) => {
       try {
-        const meta = c.metadata ? JSON.parse(c.metadata) : {};
-        if (meta.customFields) {
+        const meta = c.metadata ? (JSON.parse(c.metadata) as Record<string, unknown>) : {};
+        if (meta.customFields && typeof meta.customFields === 'object') {
           Object.keys(meta.customFields).forEach((k) => fieldsSet.add(k));
         }
-      } catch (e) {
-        void e;
+      } catch {
+        // ignore malformed metadata
       }
     });
 
     return Array.from(fieldsSet);
-  }, [botId, contacts]);
+  }, [customFieldsData, contacts]);
 
   const filteredItems = useMemo(() => {
     const q = dropdownSearch.toLowerCase().trim();

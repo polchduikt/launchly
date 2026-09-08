@@ -14,6 +14,8 @@ export const useFlowAutoSave = (
   const lastSavedKeyRef = useRef<string>('');
   const isInitialLoadDoneRef = useRef<boolean>(false);
   const [isDirty, setIsDirty] = useState(false);
+  const saveMutateRef = useRef(saveMutation.mutate);
+  saveMutateRef.current = saveMutation.mutate;
   
   const getDebounceDelay = useCallback(() => {
     const totalElements = nodes.length + edges.length;
@@ -59,7 +61,7 @@ export const useFlowAutoSave = (
     }
 
     const timer = setTimeout(() => {
-      saveMutation.mutate({ nodes, edges });
+      saveMutateRef.current({ nodes, edges });
       lastSavedKeyRef.current = currentKey;
       setIsDirty(false);
       if (isLocalChangeRef) {
@@ -68,7 +70,7 @@ export const useFlowAutoSave = (
     }, getDebounceDelay());
 
     return () => clearTimeout(timer);
-  }, [nodes, edges, saveMutation.mutate, isLoadingSchema, isLocalChangeRef, getDebounceDelay]);
+  }, [nodes, edges, isLoadingSchema, isLocalChangeRef, getDebounceDelay]);
 
   return {
     isDirty,

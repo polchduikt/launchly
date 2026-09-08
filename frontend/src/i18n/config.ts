@@ -64,7 +64,7 @@ function loadInitialTranslations(lang: 'en' | 'uk'): Record<string, string> {
     if (cached) {
       return { ...fallback, ...JSON.parse(cached) };
     }
-  } catch (e) {
+  } catch {
   }
   return { ...fallback };
 }
@@ -88,7 +88,7 @@ export async function initTranslations() {
       localStorage.setItem(`${STORAGE_KEYS.TRANSLATIONS_CACHE_PREFIX}${lang}`, JSON.stringify(data));
       notifyListeners();
     }
-  } catch (error) {
+  } catch {
   }
 }
 
@@ -111,7 +111,7 @@ export async function changeLanguage(lang: 'en' | 'uk') {
       localStorage.setItem(`${STORAGE_KEYS.TRANSLATIONS_CACHE_PREFIX}${lang}`, JSON.stringify(data));
       notifyListeners();
     }
-  } catch (error) {
+  } catch {
   }
 }
 

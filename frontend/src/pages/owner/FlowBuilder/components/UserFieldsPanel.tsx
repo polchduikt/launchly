@@ -67,17 +67,18 @@ export const UserFieldsPanel: React.FC = () => {
           results.forEach((data) => {
             if (!data || typeof data !== 'object') return;
             const fieldList = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
-            fieldList.forEach((rawField: any) => {
-              const f: UserField = typeof rawField === 'string'
-                ? { name: rawField, type: 'Text' }
+            fieldList.forEach((rawField: unknown) => {
+              const rf = rawField as Partial<UserField> | string | undefined;
+              const f: UserField = typeof rf === 'string'
+                ? { name: rf, type: 'Text' }
                 : {
-                    id: rawField?.id,
-                    name: rawField?.name || '',
-                    type: rawField?.type || 'Text',
-                    value: rawField?.value,
-                    description: rawField?.description,
-                    folderId: rawField?.folderId,
-                    folder: rawField?.folder,
+                    id: rf?.id,
+                    name: rf?.name || '',
+                    type: rf?.type || 'Text',
+                    value: rf?.value,
+                    description: rf?.description,
+                    folderId: rf?.folderId,
+                    folder: rf?.folder,
                   };
               if (f && f.name) {
                 const key = f.name.trim().toLowerCase();
@@ -88,17 +89,18 @@ export const UserFieldsPanel: React.FC = () => {
             });
 
             if (Array.isArray(data.archivedFields)) {
-              data.archivedFields.forEach((rawAf: any) => {
-                const af: UserField = typeof rawAf === 'string'
-                  ? { name: rawAf, type: 'Text' }
+              data.archivedFields.forEach((rawAf: unknown) => {
+                const afObj = rawAf as Partial<UserField> | string | undefined;
+                const af: UserField = typeof afObj === 'string'
+                  ? { name: afObj, type: 'Text' }
                   : {
-                      id: rawAf?.id,
-                      name: rawAf?.name || '',
-                      type: rawAf?.type || 'Text',
-                      value: rawAf?.value,
-                      description: rawAf?.description,
-                      folderId: rawAf?.folderId,
-                      folder: rawAf?.folder,
+                      id: afObj?.id,
+                      name: afObj?.name || '',
+                      type: afObj?.type || 'Text',
+                      value: afObj?.value,
+                      description: afObj?.description,
+                      folderId: afObj?.folderId,
+                      folder: afObj?.folder,
                     };
                 if (af && af.name) {
                   const key = af.name.trim().toLowerCase();
@@ -110,11 +112,12 @@ export const UserFieldsPanel: React.FC = () => {
             }
 
             if (Array.isArray(data.folders)) {
-              data.folders.forEach((rawFld: any) => {
+              data.folders.forEach((rawFld: unknown) => {
+                const fldObj = rawFld as Partial<UserFieldFolder> | undefined;
                 const fld: UserFieldFolder = {
-                  id: String(rawFld?.id ?? ''),
-                  name: rawFld?.name || '',
-                  fieldsCount: rawFld?.fieldsCount,
+                  id: String(fldObj?.id ?? ''),
+                  name: fldObj?.name || '',
+                  fieldsCount: fldObj?.fieldsCount,
                 };
                 if (fld && fld.name) {
                   const key = fld.name.trim().toLowerCase();
@@ -139,24 +142,27 @@ export const UserFieldsPanel: React.FC = () => {
           if (data && typeof data === 'object') {
             const rawFields = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
             setFields(
-              rawFields.map((f: any) =>
+              rawFields.map((f: unknown) =>
                 typeof f === 'string' ? { name: f, type: 'Text' } : (f as UserField)
               )
             );
             if (Array.isArray(data.archivedFields)) {
               setArchivedFields(
-                data.archivedFields.map((af: any) =>
+                data.archivedFields.map((af: unknown) =>
                   typeof af === 'string' ? { name: af, type: 'Text' } : (af as UserField)
                 )
               );
             }
             if (Array.isArray(data.folders)) {
               setFolders(
-                data.folders.map((fld: any) => ({
-                  id: String(fld?.id ?? ''),
-                  name: fld?.name || '',
-                  fieldsCount: fld?.fieldsCount,
-                }))
+                data.folders.map((fld: unknown) => {
+                  const fldObj = fld as Partial<UserFieldFolder> | undefined;
+                  return {
+                    id: String(fldObj?.id ?? ''),
+                    name: fldObj?.name || '',
+                    fieldsCount: fldObj?.fieldsCount,
+                  };
+                })
               );
             }
           } else {

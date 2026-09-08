@@ -50,7 +50,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [campaigns, setCampaigns] = useState<CampaignResponse[]>([]);
   const [tags, setTags] = useState<TagResponse[]>([]);
-  const [customFields, setCustomFields] = useState<any[]>([]);
+  const [customFields, setCustomFields] = useState<Record<string, unknown>[]>([]);
   const [loadingRealData, setLoadingRealData] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -100,31 +100,33 @@ export const CreateTemplateWizardPage: React.FC = () => {
         });
         setTags(mergedTags);
 
-        const mergedFields: any[] = [];
+        const mergedFields: Record<string, unknown>[] = [];
         const seenFieldNames = new Set<string>();
         allFields.forEach((fRes) => {
           if (!fRes) return;
-          let list: any[] = [];
+          let list: unknown[] = [];
           if (Array.isArray(fRes)) {
             list = fRes;
           } else if (typeof fRes === 'object') {
-            if (Array.isArray(fRes.fields)) {
-              list = [...fRes.fields];
+            const obj = fRes as Record<string, unknown>;
+            if (Array.isArray(obj.fields)) {
+              list = [...obj.fields];
             } else {
-              Object.keys(fRes).forEach((k) => {
+              Object.keys(obj).forEach((k) => {
                 if (k !== 'folders' && k !== 'archivedFields') {
-                  const val = (fRes as Record<string, unknown>)[k];
+                  const val = obj[k];
                   list.push({ name: k, label: typeof val === 'string' ? val : k });
                 }
               });
             }
           }
 
-          list.forEach((f: any) => {
-            const name = (typeof f === 'string' ? f : f?.name || f?.label || '').trim();
+          list.forEach((f: unknown) => {
+            const item = f as Record<string, unknown> | string;
+            const name = (typeof item === 'string' ? item : String(item?.name || item?.label || '')).trim();
             if (name && !seenFieldNames.has(name.toLowerCase())) {
               seenFieldNames.add(name.toLowerCase());
-              mergedFields.push(typeof f === 'string' ? { name, type: 'Text' } : f);
+              mergedFields.push(typeof item === 'string' ? { name, type: 'Text' } : (item as Record<string, unknown>));
             }
           });
         });
@@ -291,7 +293,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
         setCreatedTemplate(res);
         setStep(3);
       }
-    } catch (err) {
+    } catch {
       alert(t('template.create.error_create', 'Помилка збереження шаблону. Спробуйте пізніше.'));
     } finally {
       setSubmitting(false);
@@ -313,7 +315,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
       setCreatedTemplate(updated);
       setDetailsSavedMsg(true);
       setTimeout(() => setDetailsSavedMsg(false), 2500);
-    } catch (err) {
+    } catch {
       alert(t('template.create.error_save', 'Помилка збереження даних.'));
     } finally {
       setSavingDetails(false);

@@ -105,10 +105,18 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
   const { data: customFieldsData } = useCustomFieldsQuery(conversation.botId);
   const saveCustomFieldsMutation = useSaveCustomFieldsMutation(conversation.botId);
 
+  interface CustomFieldItem {
+    name: string;
+    value?: string;
+    type?: string;
+    description?: string;
+    folder?: string | null;
+  }
+
   const availableFields = useMemo(() => {
     if (!customFieldsData || typeof customFieldsData !== 'object') return [];
-    if (Array.isArray(customFieldsData.fields)) return customFieldsData.fields;
-    if (Array.isArray(customFieldsData)) return customFieldsData as any[];
+    if (Array.isArray(customFieldsData.fields)) return customFieldsData.fields as CustomFieldItem[];
+    if (Array.isArray(customFieldsData)) return customFieldsData as (CustomFieldItem | string)[];
     return [];
   }, [customFieldsData]);
 
@@ -227,8 +235,8 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
 
     if (conversation.botId) {
       const list = availableFields;
-      if (!list.some((f: any) => f?.name === nameTrimmed)) {
-        const updated = [...list, { name: nameTrimmed, type: 'Text', description: '', folder: null }];
+      if (!list.some((f) => (typeof f === 'string' ? f === nameTrimmed : f?.name === nameTrimmed))) {
+        const updated = [...(list as CustomFieldItem[]), { name: nameTrimmed, type: 'Text', description: '', folder: null }];
         saveCustomFieldsMutation.mutate({ fields: updated });
       }
     }
@@ -242,7 +250,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
   const handleRemoveCustomField = (fieldKey: string) => {
     if (!botUser) return;
     const fields = { ...(meta.customFields || {}) };
-    delete (fields as Record<string, any>)[fieldKey];
+    delete (fields as Record<string, unknown>)[fieldKey];
 
     handleUpdateContactMetadata({
       ...meta,
@@ -418,7 +426,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
                       tagName=""
                       tags={tags}
                       assignedTags={botUser?.tags || []}
-                      onChange={(selectedTag: any) => {
+                      onChange={(selectedTag: { name: string } | null) => {
                         if (selectedTag) {
                           handleAddTag(selectedTag.name);
                         }
@@ -467,9 +475,9 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
 
                     {isFieldDropdownOpen && (
                       <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl overflow-hidden py-1 text-left max-h-40 overflow-y-auto animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]">
-                        {availableFields.map((f: any) => {
-                          const fname = typeof f === 'string' ? f : f.name;
-                          const fval = typeof f === 'object' ? f.value : undefined;
+                        {availableFields.map((f: unknown) => {
+                          const fname = typeof f === 'string' ? f : (f as CustomFieldItem).name;
+                          const fval = typeof f === 'object' && f !== null ? (f as CustomFieldItem).value : undefined;
                           return (
                             <button
                               key={fname}

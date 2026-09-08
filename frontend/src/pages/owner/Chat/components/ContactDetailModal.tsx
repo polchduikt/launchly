@@ -78,10 +78,18 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
   const { data: customFieldsData } = useCustomFieldsQuery(botId);
   const saveCustomFieldsMutation = useSaveCustomFieldsMutation(botId);
 
+  interface CustomFieldItem {
+    name: string;
+    value?: string;
+    type?: string;
+    description?: string;
+    folder?: string | null;
+  }
+
   const availableFields = useMemo(() => {
     if (!customFieldsData || typeof customFieldsData !== 'object') return [];
-    if (Array.isArray(customFieldsData.fields)) return customFieldsData.fields;
-    if (Array.isArray(customFieldsData)) return customFieldsData as any[];
+    if (Array.isArray(customFieldsData.fields)) return customFieldsData.fields as CustomFieldItem[];
+    if (Array.isArray(customFieldsData)) return customFieldsData as (CustomFieldItem | string)[];
     return [];
   }, [customFieldsData]);
 
@@ -129,9 +137,9 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
     handleUpdateContactMetadata({ ...meta, customFields: { ...fields, [nameTrimmed]: customFieldValue } });
     if (botId) {
       const list = availableFields;
-      if (!list.some((f: any) => f?.name === nameTrimmed)) {
+      if (!list.some((f) => (typeof f === 'string' ? f === nameTrimmed : f?.name === nameTrimmed))) {
         saveCustomFieldsMutation.mutate({
-          fields: [...list, { name: nameTrimmed, type: 'Text', value: customFieldValue, description: '', folder: null }]
+          fields: [...(list as CustomFieldItem[]), { name: nameTrimmed, type: 'Text', value: customFieldValue, description: '', folder: null }]
         });
       }
     }
@@ -140,7 +148,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
   const handleRemoveCustomFieldInline = (fieldKey: string) => {
     const fields = { ...(meta.customFields || {}) };
-    delete (fields as Record<string, any>)[fieldKey];
+    delete (fields as Record<string, unknown>)[fieldKey];
     handleUpdateContactMetadata({ ...meta, customFields: { ...fields } });
   };
 
@@ -317,7 +325,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
                         tagName=""
                         tags={tags}
                         assignedTags={selectedContact.tags || []}
-                        onChange={(selectedTag: any) => { if (selectedTag) handleAddTagInline(selectedTag.name); }}
+                        onChange={(selectedTag: { name: string } | null) => { if (selectedTag) handleAddTagInline(selectedTag.name); }}
                         onCreateTag={() => setNewTagVal('NEW_TAG')}
                       />
                     </div>
@@ -406,9 +414,9 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
                       {isFieldDropdownOpen && (
                         <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl overflow-hidden py-1 text-left max-h-40 overflow-y-auto animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]">
-                          {availableFields.map((f: any) => {
-                            const fname = typeof f === 'string' ? f : f.name;
-                            const fval = typeof f === 'object' ? f.value : undefined;
+                          {availableFields.map((f: unknown) => {
+                            const fname = typeof f === 'string' ? f : (f as CustomFieldItem).name;
+                            const fval = typeof f === 'object' && f !== null ? (f as CustomFieldItem).value : undefined;
                             return (
                               <button
                                 key={fname}

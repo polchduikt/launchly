@@ -36,7 +36,7 @@ export const InstallTemplatePage: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [shareCode]);
+  }, [shareCode, t]);
 
   useEffect(() => {
     if (bots.length > 0) {

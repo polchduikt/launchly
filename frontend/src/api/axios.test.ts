@@ -3,16 +3,18 @@ import apiClient from './axios';
 import { useAuthStore } from '../store/useAuthStore';
 import { IDEMPOTENCY_HEADER_NAME } from '../utils/idempotency';
 
+import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios';
+
 describe('apiClient request interceptor', () => {
-  let originalAdapter: any;
-  let capturedConfig: any = null;
+  let originalAdapter: AxiosAdapter | AxiosAdapter[] | undefined;
+  let capturedConfig: InternalAxiosRequestConfig | null = null;
 
   beforeEach(() => {
     vi.restoreAllMocks();
     useAuthStore.setState({ accessToken: null, refreshToken: null, user: null });
     capturedConfig = null;
     originalAdapter = apiClient.defaults.adapter;
-    apiClient.defaults.adapter = async (config: any) => {
+    apiClient.defaults.adapter = (async (config: InternalAxiosRequestConfig) => {
       capturedConfig = config;
       return {
         data: { success: true },
@@ -21,7 +23,7 @@ describe('apiClient request interceptor', () => {
         headers: {},
         config,
       };
-    };
+    }) as unknown as AxiosAdapter;
   });
 
   afterEach(() => {

@@ -60,7 +60,7 @@ export const BroadcastsPage: React.FC = () => {
       queryKey: ['campaigns', bot.id],
       queryFn: () => getCampaignsApi(bot.id),
       enabled: bots.length > 0,
-      refetchInterval: (query: any) => {
+      refetchInterval: (query: { state: { data?: CampaignResponse[] } }) => {
         const data = query.state.data;
         if (!data) return false;
         const hasActive = data.some(

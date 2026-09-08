@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useAiStore } from '../../../store/useAiStore';
 import { useAuthStore } from '../../../store/useAuthStore';
 import {
@@ -37,7 +37,10 @@ const AiPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentSession = sessions.find((s) => s.id === activeSessionId) || sessions[0];
-  const messages = activeSessionDetails?.messages || [];
+  const messages = useMemo(
+    () => activeSessionDetails?.messages || [],
+    [activeSessionDetails?.messages]
+  );
 
   const isLimitReached =
     Boolean(usage && (usage.tokensRemaining <= 0 || usage.remainingPercentage <= 0));

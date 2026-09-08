@@ -198,7 +198,7 @@ export const ContactsPage: React.FC = () => {
         return true;
       });
     });
-  }, [contacts, searchQuery, conditions, hideUnsub]);
+  }, [contacts, debouncedSearchQuery, conditions, hideUnsub]);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {

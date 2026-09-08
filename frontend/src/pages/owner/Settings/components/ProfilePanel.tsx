@@ -81,8 +81,11 @@ export const ProfilePanel: React.FC = () => {
       onSuccess: (data) => {
         setAvatar(data.url);
       },
-      onError: (err: any) => {
-        setErrorMsg(err?.response?.data?.message || t('settings.profile.error_avatar_upload', 'Failed to upload avatar'));
+      onError: (err: unknown) => {
+        const message = isAxiosError(err)
+          ? (err.response?.data?.message || err.message)
+          : (err instanceof Error ? err.message : t('settings.profile.error_avatar_upload', 'Failed to upload avatar'));
+        setErrorMsg(message);
       },
     });
   };

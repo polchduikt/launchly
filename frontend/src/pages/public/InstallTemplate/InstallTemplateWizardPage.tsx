@@ -49,7 +49,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
         setErrorMsg(t('template.install.not_found', 'Шаблон не знайдено або посилання застаріло.'));
       })
       .finally(() => setLoading(false));
-  }, [shareCode]);
+  }, [shareCode, t]);
 
   const handleInstall = async () => {
     if (!shareCode) return;

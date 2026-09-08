@@ -64,8 +64,10 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior });
   }, []);
 
+  const conversationId = conversation?.id;
+
   useEffect(() => {
-    if (!conversation) return;
+    if (!conversationId) return;
 
     scrollToBottom('auto');
     const t1 = setTimeout(() => scrollToBottom('auto'), 50);
@@ -75,7 +77,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [messages.length, conversation?.id, scrollToBottom]);
+  }, [messages.length, conversationId, scrollToBottom]);
 
   const handleImageLoad = useCallback(() => {
     scrollToBottom('auto');

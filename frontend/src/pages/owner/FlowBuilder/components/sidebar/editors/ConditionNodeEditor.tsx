@@ -32,11 +32,14 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
           ? customFieldsData
           : [];
       setUserFields(
-        list.map((f: any) => ({
-          name: typeof f === 'string' ? f : f?.name || '',
-          type: typeof f === 'string' ? 'Text' : f?.type || 'Text',
-          description: typeof f === 'string' ? '' : f?.description || '',
-        })).filter((f: { name: string }) => Boolean(f.name))
+        list.map((f: unknown) => {
+          const item = f as { name?: string; type?: string; description?: string } | string;
+          return {
+            name: typeof item === 'string' ? item : item?.name || '',
+            type: typeof item === 'string' ? 'Text' : item?.type || 'Text',
+            description: typeof item === 'string' ? '' : item?.description || '',
+          };
+        }).filter((f: { name: string }) => Boolean(f.name))
       );
     }
   }, [customFieldsData]);
@@ -55,11 +58,33 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
   };
 
   const rawBranches = data?.branches;
-  const branches = (Array.isArray(rawBranches)
-    ? rawBranches
-    : (data?.variable
-        ? [{ id: 'branch_0', matchType: 'all', conditions: [{ id: 'legacy', variable: data.variable, operator: data.operator, value: data.value, caseSensitive: false }] }]
-        : [{ id: 'branch_0', matchType: 'all', conditions: [] }])) as ConditionBranch[];
+  const variable = data?.variable;
+  const operator = data?.operator;
+  const val = data?.value;
+
+  const branches = useMemo(() => {
+    if (Array.isArray(rawBranches)) {
+      return rawBranches as ConditionBranch[];
+    }
+    if (variable) {
+      return [
+        {
+          id: 'branch_0',
+          matchType: 'all',
+          conditions: [
+            {
+              id: 'legacy',
+              variable: variable as string,
+              operator: operator as string,
+              value: val as string,
+              caseSensitive: false,
+            },
+          ],
+        },
+      ] as ConditionBranch[];
+    }
+    return [{ id: 'branch_0', matchType: 'all', conditions: [] }] as ConditionBranch[];
+  }, [rawBranches, variable, operator, val]);
 
   type ConditionItem = NonNullable<ConditionBranch['conditions']>[number] & { caseSensitive?: boolean };
 

@@ -42,7 +42,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
         connectedEmail = parsedConfig.accountName;
         hasConnectedEmail = true;
       }
-    } catch (e) {
+    } catch {
       connectedEmail = t('settings.integrations.google.reconnect_email');
     }
   }
