@@ -8,6 +8,7 @@ import { getRegisterSchema, type RegisterSchemaType } from '../../schemas/auth.s
 import { useTranslation } from '../../i18n/config';
 import { STORAGE_KEYS } from '../../const/constants';
 import { ROUTES } from '../../routes/paths';
+import { getSafeRedirectUrl } from '../../utils/auth';
 
 export type RegisterFields = RegisterSchemaType;
 
@@ -38,10 +39,11 @@ export const useRegisterForm = () => {
         password: data.password,
         turnstileToken: turnstileToken || undefined,
       });
-      const redirectUrl = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
-      if (redirectUrl) {
-        localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
-        navigate(redirectUrl, { replace: true });
+      const rawRedirect = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
+      const safeRedirect = getSafeRedirectUrl(rawRedirect);
+      if (safeRedirect) {
+        navigate(safeRedirect, { replace: true });
         return;
       }
       navigate(ROUTES.HOME, { replace: true });

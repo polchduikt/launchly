@@ -128,6 +128,15 @@ public class IntegrationController {
                 .body(result.data());
     }
 
+    @Operation(summary = "Get Google OAuth authorization URL", description = "Returns Google OAuth authorization URL for the authenticated user without token query param.")
+    @GetMapping("/google/auth-url")
+    public ResponseEntity<java.util.Map<String, String>> getGoogleAuthUrl(
+            @Parameter(description = "Target Bot ID") @RequestParam Long botId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        String authUrl = googleSheetsService.buildAuthorizationUrl(botId, userDetails.getId());
+        return ResponseEntity.ok(java.util.Map.of("url", authUrl));
+    }
+
     @Operation(summary = "Initiate Google OAuth flow", description = "Redirect to Google authorization screen to authorize Google Sheets API integration.")
     @GetMapping("/google/auth")
     public void googleAuth(

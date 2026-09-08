@@ -11,6 +11,7 @@ import { GOOGLE_OAUTH_URL } from '../../../const/auth';
 import { STORAGE_KEYS } from '../../../const/constants';
 import { useTranslation } from '../../../i18n/config';
 import { useSEO } from '../../../hooks/useSEO';
+import { getSafeRedirectUrl } from '../../../utils/auth';
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
@@ -40,15 +41,18 @@ const LoginPage: React.FC = () => {
   }, [apiError, setTurnstileToken]);
 
   React.useEffect(() => {
-    if (redirectParam) {
-      localStorage.setItem(STORAGE_KEYS.AUTH_REDIRECT_URL, redirectParam);
+    const safeUrl = getSafeRedirectUrl(redirectParam);
+    if (safeUrl) {
+      localStorage.setItem(STORAGE_KEYS.AUTH_REDIRECT_URL, safeUrl);
     }
   }, [redirectParam]);
 
   const handleGoogleLogin = () => {
-    const redirectUrl = redirectParam || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
-    if (redirectUrl) {
-      localStorage.setItem(STORAGE_KEYS.AUTH_REDIRECT_URL, redirectUrl);
+    const safeUrl = getSafeRedirectUrl(redirectParam) || getSafeRedirectUrl(localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL));
+    if (safeUrl) {
+      localStorage.setItem(STORAGE_KEYS.AUTH_REDIRECT_URL, safeUrl);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
     }
     window.location.href = GOOGLE_OAUTH_URL;
   };

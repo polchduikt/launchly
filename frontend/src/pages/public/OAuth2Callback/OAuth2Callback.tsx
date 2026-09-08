@@ -4,7 +4,7 @@ import { useAuthStore } from '../../../store/useAuthStore';
 import { getCurrentUserApi } from '../../../api/auth';
 import { ROUTES } from '../../../routes/paths';
 import { STORAGE_KEYS } from '../../../const/constants';
-import { isAdminOrManager } from '../../../utils/auth';
+import { isAdminOrManager, getSafeRedirectUrl } from '../../../utils/auth';
 import { Loader2 } from 'lucide-react';
 
 const OAuth2Callback: React.FC = () => {
@@ -27,10 +27,11 @@ const OAuth2Callback: React.FC = () => {
         const user = await getCurrentUserApi();
         login(accessToken, refreshToken, user);
 
-        const redirectUrl = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
-        if (redirectUrl) {
-          localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
-          navigate(redirectUrl, { replace: true });
+        const rawRedirect = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
+        localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
+        const safeRedirect = getSafeRedirectUrl(rawRedirect);
+        if (safeRedirect) {
+          navigate(safeRedirect, { replace: true });
           return;
         }
 

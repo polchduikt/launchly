@@ -5,9 +5,10 @@ import { STORAGE_KEYS } from '../const/constants';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
 import { useShallow } from 'zustand/react/shallow';
-import { isAdminOrManager } from '../utils/auth';
+import { isAdminOrManager, getSafeRedirectUrl } from '../utils/auth';
 import { getCurrentUserApi } from '../api/auth';
 import { AuthLayout } from '../components/layout';
+
 
 const LandingPage = lazy(() => import('../pages/public/Landing/LandingPage'));
 const BlogPage = lazy(() => import('../pages/public/Blog/BlogPage'));
@@ -58,10 +59,11 @@ const PublicOnlyRoute = () => {
 
   if (accessToken) {
     const searchParams = new URLSearchParams(location.search);
-    const redirectUrl = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
-    if (redirectUrl) {
-      localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
-      return <Navigate to={redirectUrl} replace />;
+    const rawRedirect = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
+    localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
+    const safeRedirect = getSafeRedirectUrl(rawRedirect);
+    if (safeRedirect) {
+      return <Navigate to={safeRedirect} replace />;
     }
     const role = user?.role;
     return <Navigate to={isAdminOrManager(role) ? ROUTES.ADMIN_HOME : ROUTES.DASHBOARD} replace />;

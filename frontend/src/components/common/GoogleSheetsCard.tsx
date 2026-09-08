@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
    useDeleteIntegrationMutation,
 } from '../../hooks/integration/useIntegrationQueries';
-import { useAuthStore } from '../../store/useAuthStore';
+import { getGoogleAuthUrlApi } from '../../api/integration';
+import { toast } from '../../store/useToastStore';
 import { SiGooglesheets } from '@icons-pack/react-simple-icons';
 import type { IntegrationResponse } from '../../types/integration';
 import { t } from '../../i18n/config';
@@ -14,10 +15,21 @@ interface GoogleSheetsCardProps {
 
 export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integration }) => {
   const deleteMut = useDeleteIntegrationMutation();
+  const [isConnecting, setIsConnecting] = useState(false);
 
-  const handleConnectGoogle = () => {
-    const token = useAuthStore.getState().accessToken;
-    window.location.href = `/api/v1/integrations/google/auth?botId=${botId}&token=${token}`;
+  const handleConnectGoogle = async () => {
+    if (isConnecting) return;
+    setIsConnecting(true);
+    try {
+      const authUrl = await getGoogleAuthUrlApi(botId);
+      if (authUrl) {
+        window.location.href = authUrl;
+      }
+    } catch {
+      toast.error('Failed to initiate Google authorization');
+    } finally {
+      setIsConnecting(false);
+    }
   };
 
   const handleDelete = () => {

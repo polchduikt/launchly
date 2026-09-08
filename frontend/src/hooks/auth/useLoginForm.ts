@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { isAdminOrManager } from '../../utils/auth';
+import { isAdminOrManager, getSafeRedirectUrl } from '../../utils/auth';
 import { useLoginMutation } from './useLoginMutation';
 import { ROUTES } from '../../routes/paths';
 import { getLoginSchema, type LoginSchemaType } from '../../schemas/auth.schema';
@@ -35,10 +35,11 @@ export const useLoginForm = () => {
         ...data,
         turnstileToken: turnstileToken || undefined,
       });
-      const redirectUrl = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
-      if (redirectUrl) {
-        localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
-        navigate(redirectUrl, { replace: true });
+      const rawRedirect = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
+      const safeRedirect = getSafeRedirectUrl(rawRedirect);
+      if (safeRedirect) {
+        navigate(safeRedirect, { replace: true });
         return;
       }
       const role = res?.user?.role;
