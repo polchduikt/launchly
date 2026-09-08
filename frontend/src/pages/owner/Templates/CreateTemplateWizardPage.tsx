@@ -28,6 +28,10 @@ import {
   getTemplateByShareCodeApi,
   type TemplateResponse,
 } from '../../../api/templateApi';
+import { useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { templateWizardSchema, type TemplateWizardFormValues } from '../../../schemas';
+import { toast } from '../../../store/useToastStore';
 import { useTranslation } from '../../../i18n/config';
 import type { CampaignResponse, TagResponse } from '../../../types';
 
@@ -54,15 +58,28 @@ export const CreateTemplateWizardPage: React.FC = () => {
   const [loadingRealData, setLoadingRealData] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
-  const [templateName, setTemplateName] = useState('');
-  const [isProtected, setIsProtected] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<TemplateWizardFormValues>({
+    resolver: zodResolver(templateWizardSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      guideUrl: '',
+      videoUrl: '',
+      isProtected: false,
+    },
+  });
+
+  const templateName = useWatch({ control, name: 'name', defaultValue: '' });
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [createdTemplate, setCreatedTemplate] = useState<TemplateResponse | null>(null);
   const [copied, setCopied] = useState(false);
-  const [aboutText, setAboutText] = useState('');
-  const [guideUrl, setGuideUrl] = useState('');
-  const [videoUrl, setVideoUrl] = useState('');
   const [savingDetails, setSavingDetails] = useState(false);
   const [detailsSavedMsg, setDetailsSavedMsg] = useState(false);
 
@@ -140,15 +157,17 @@ export const CreateTemplateWizardPage: React.FC = () => {
         if (editShareCode) {
           getTemplateByShareCodeApi(editShareCode).then((existingTpl) => {
             if (currentUser && existingTpl.creatorId && existingTpl.creatorId !== currentUser.id) {
-              alert(t('template.error.not_owner', 'Ви не можете редагувати чужий шаблон. Лише власник може вносити зміни.'));
+              toast.error(t('template.error.not_owner', 'Ви не можете редагувати чужий шаблон. Лише власник може вносити зміни.'));
               navigate('/templates');
               return;
             }
-            setTemplateName(existingTpl.name);
-            setAboutText(existingTpl.description || '');
-            setGuideUrl(existingTpl.guideUrl || '');
-            setVideoUrl(existingTpl.videoUrl || '');
-            setIsProtected(existingTpl.isProtected);
+            reset({
+              name: existingTpl.name || '',
+              description: existingTpl.description || '',
+              guideUrl: existingTpl.guideUrl || '',
+              videoUrl: existingTpl.videoUrl || '',
+              isProtected: Boolean(existingTpl.isProtected),
+            });
             if (existingTpl.avatarUrl) {
               setAvatarPreview(existingTpl.avatarUrl);
             }
@@ -173,7 +192,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
         }
       })
       .finally(() => setLoadingRealData(false));
-  }, [bots, editShareCode, currentUser, navigate, t]);
+  }, [bots, editShareCode, currentUser, navigate, t, reset]);
 
   const automationItems: SelectionItem[] = bots.map((b) => ({
     id: `automation_${b.id}`,
@@ -231,8 +250,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
     }
   };
 
-  const handleCreateOrUpdateTemplate = async () => {
-    if (!templateName.trim()) return;
+  const handleCreateOrUpdateTemplate = handleSubmit(async (formData) => {
     setSubmitting(true);
     try {
       const selectedFlows = selectedIds.filter((id) => id.startsWith('automation_'));
@@ -262,65 +280,68 @@ export const CreateTemplateWizardPage: React.FC = () => {
 
       if (isEditMode && editShareCode) {
         const res = await updateTemplateApi(editShareCode, {
-          name: templateName,
-          description: aboutText,
+          name: formData.name,
+          description: formData.description,
           avatarUrl: avatarPreview || undefined,
-          isProtected,
-          guideUrl,
-          videoUrl,
+          isProtected: formData.isProtected,
+          guideUrl: formData.guideUrl || undefined,
+          videoUrl: formData.videoUrl || undefined,
           selectedFlowIds: selectedFlows,
           selectedBroadcastIds: selectedBroadcasts,
           selectedFieldIds: selectedFields,
           selectedTagIds: selectedTags,
         });
         setCreatedTemplate(res);
+        toast.success(t('template.create.updated_success', 'Шаблон успішно оновлено'));
         setStep(3);
       } else {
         if (!targetSourceBotId) return;
         const res = await createTemplateApi({
           botId: targetSourceBotId,
-          name: templateName,
-          description: aboutText,
+          name: formData.name,
+          description: formData.description,
           avatarUrl: avatarPreview || undefined,
-          isProtected,
-          guideUrl,
-          videoUrl,
+          isProtected: formData.isProtected,
+          guideUrl: formData.guideUrl || undefined,
+          videoUrl: formData.videoUrl || undefined,
           selectedFlowIds: selectedFlows,
           selectedBroadcastIds: selectedBroadcasts,
           selectedFieldIds: selectedFields,
           selectedTagIds: selectedTags,
         });
         setCreatedTemplate(res);
+        toast.success(t('template.create.success_sub', 'Шаблон успішно створено'));
         setStep(3);
       }
     } catch {
-      alert(t('template.create.error_create', 'Помилка збереження шаблону. Спробуйте пізніше.'));
+      toast.error(t('template.create.error_create', 'Помилка збереження шаблону. Спробуйте пізніше.'));
     } finally {
       setSubmitting(false);
     }
-  };
+  });
 
-  const handleSaveDetails = async () => {
+  const handleSaveDetails = handleSubmit(async (formData) => {
     if (!createdTemplate?.shareCode) return;
     setSavingDetails(true);
     try {
       const updated = await updateTemplateApi(createdTemplate.shareCode, {
-        name: templateName,
-        description: aboutText,
+        name: formData.name,
+        description: formData.description,
         avatarUrl: avatarPreview || undefined,
-        isProtected,
-        guideUrl,
-        videoUrl,
+        isProtected: formData.isProtected,
+        guideUrl: formData.guideUrl || undefined,
+        videoUrl: formData.videoUrl || undefined,
       });
       setCreatedTemplate(updated);
       setDetailsSavedMsg(true);
+      toast.success(t('template.create.saved_success', 'Налаштування шаблону успішно збережено!'));
       setTimeout(() => setDetailsSavedMsg(false), 2500);
     } catch {
-      alert(t('template.create.error_save', 'Помилка збереження даних.'));
+      toast.error(t('template.create.error_save', 'Помилка збереження даних.'));
     } finally {
       setSavingDetails(false);
     }
-  };
+  });
 
   const handleCopyLink = () => {
     const url = createdTemplate?.shareUrl || (createdTemplate?.shareCode ? `${window.location.origin}/templates/install/${createdTemplate.shareCode}` : '');
@@ -573,11 +594,15 @@ export const CreateTemplateWizardPage: React.FC = () => {
                         </label>
                         <input
                           type="text"
-                          value={templateName}
-                          onChange={(e) => setTemplateName(e.target.value)}
+                          {...register('name')}
                           placeholder={t('template.create.template_name_placeholder', 'Введіть назву шаблону...')}
-                          className="w-full px-3.5 py-2.5 border-2 border-[#0A0A0A] bg-white text-xs font-black focus:outline-none focus:bg-white"
+                          className={`w-full px-3.5 py-2.5 border-2 ${errors.name ? 'border-rose-600 bg-rose-50' : 'border-[#0A0A0A] bg-white'} text-xs font-black focus:outline-none`}
                         />
+                        {errors.name && (
+                          <span className="text-[10px] font-bold text-rose-600 mt-1 block">
+                            {errors.name.message}
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -595,8 +620,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                       </div>
                       <input
                         type="checkbox"
-                        checked={isProtected}
-                        onChange={(e) => setIsProtected(e.target.checked)}
+                        {...register('isProtected')}
                         className="w-5 h-5 border-2 border-[#0A0A0A] accent-indigo-600 cursor-pointer"
                       />
                     </div>
@@ -690,11 +714,15 @@ export const CreateTemplateWizardPage: React.FC = () => {
                     </label>
                     <textarea
                       rows={4}
-                      value={aboutText}
-                      onChange={(e) => setAboutText(e.target.value)}
+                      {...register('description')}
                       placeholder={t('template.create.about_placeholder', 'Опишіть як користуватися цим шаблоном, для якого бізнесу тощо...')}
-                      className="w-full p-3 border-2 border-[#0A0A0A] bg-white text-xs font-bold focus:outline-none resize-none"
+                      className={`w-full p-3 border-2 ${errors.description ? 'border-rose-600 bg-rose-50' : 'border-[#0A0A0A] bg-white'} text-xs font-bold focus:outline-none resize-none`}
                     />
+                    {errors.description && (
+                      <span className="text-[10px] font-bold text-rose-600 mt-1 block">
+                        {errors.description.message}
+                      </span>
+                    )}
                   </div>
 
                   <div>
@@ -703,11 +731,15 @@ export const CreateTemplateWizardPage: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      value={guideUrl}
-                      onChange={(e) => setGuideUrl(e.target.value)}
-                      placeholder={t('template.create.guide_url_placeholder', 'e.g. mysite.com/my-template-guide')}
-                      className="w-full px-3 py-2 border-2 border-[#0A0A0A] bg-white text-xs font-bold focus:outline-none"
+                      {...register('guideUrl')}
+                      placeholder={t('template.create.guide_url_placeholder', 'e.g. https://mysite.com/my-template-guide')}
+                      className={`w-full px-3 py-2 border-2 ${errors.guideUrl ? 'border-rose-600 bg-rose-50' : 'border-[#0A0A0A] bg-white'} text-xs font-bold focus:outline-none`}
                     />
+                    {errors.guideUrl && (
+                      <span className="text-[10px] font-bold text-rose-600 mt-1 block">
+                        {errors.guideUrl.message}
+                      </span>
+                    )}
                   </div>
 
                   <div>
@@ -716,11 +748,15 @@ export const CreateTemplateWizardPage: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      value={videoUrl}
-                      onChange={(e) => setVideoUrl(e.target.value)}
+                      {...register('videoUrl')}
                       placeholder={t('template.create.video_url_placeholder', 'e.g. https://www.youtube.com/watch?v=XXXXXX')}
-                      className="w-full px-3 py-2 border-2 border-[#0A0A0A] bg-white text-xs font-bold focus:outline-none"
+                      className={`w-full px-3 py-2 border-2 ${errors.videoUrl ? 'border-rose-600 bg-rose-50' : 'border-[#0A0A0A] bg-white'} text-xs font-bold focus:outline-none`}
                     />
+                    {errors.videoUrl && (
+                      <span className="text-[10px] font-bold text-rose-600 mt-1 block">
+                        {errors.videoUrl.message}
+                      </span>
+                    )}
                   </div>
 
                   {detailsSavedMsg && (
