@@ -1,250 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { Search, Plus, MoreVertical, HelpCircle, X, Folder, ChevronRight, Edit2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search } from 'lucide-react';
 import { useBotStore } from '../../../../store/useBotStore';
 import { useBotsQuery } from '../../../../hooks/bot/useBotsQuery';
+import { useCustomFieldsData } from '../../../../hooks/bot/useCustomFieldsData';
 import { t } from '../../../../i18n/config';
 import type { UserField, UserFieldFolder } from '../../../../types/bot';
-import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../api/bot';
-import { customFieldSchema, automationFolderSchema } from '../../../../schemas';
-import { CustomSelect } from '../../../../components/ui/CustomSelect';
+import { automationFolderSchema } from '../../../../schemas';
 import { generateId } from '../../../../utils/id';
+import { FieldModal, FolderModal, FolderToolbar, FieldsTable } from './userFields';
 
 export const UserFieldsPanel: React.FC = () => {
   const activeBotId = useBotStore((state) => state?.activeBotId);
   const { data: bots = [] } = useBotsQuery();
   const botId = activeBotId || (bots[0]?.id || 0);
 
-  const [fields, setFields] = useState<UserField[]>([]);
-  const [archivedFields, setArchivedFields] = useState<UserField[]>([]);
-  const [folders, setFolders] = useState<UserFieldFolder[]>([]);
+  const { fields, archivedFields, folders, saveFieldsData } = useCustomFieldsData({ bots, botId });
+
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
-
   const [searchQuery, setSearchQuery] = useState('');
-  const [isFieldModalOpen, setIsFieldModalOpen] = useState(false);
-  const [newFieldName, setNewFieldName] = useState('');
-  const [newFieldType, setNewFieldType] = useState('Text');
-  const [newFieldValue, setNewFieldValue] = useState('');
-  const [newFieldDesc, setNewFieldDesc] = useState('');
 
-  const [isEditFieldModalOpen, setIsEditFieldModalOpen] = useState(false);
-  const [editFieldOriginalName, setEditFieldOriginalName] = useState('');
-  const [editFieldName, setEditFieldName] = useState('');
-  const [editFieldType, setEditFieldType] = useState('Text');
-  const [editFieldValue, setEditFieldValue] = useState('');
-  const [editFieldDesc, setEditFieldDesc] = useState('');
+  const [isFieldModalOpen, setIsFieldModalOpen] = useState(false);
+  const [editingField, setEditingField] = useState<UserField | null>(null);
 
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
-  const [newFolderName, setNewFolderName] = useState('');
+  const [renamingFolder, setRenamingFolder] = useState<UserFieldFolder | null>(null);
 
-  const [isRenameFolderOpen, setIsRenameFolderOpen] = useState(false);
-  const [renameFolderName, setRenameFolderName] = useState('');
-
-  const [activeMenuField, setActiveMenuField] = useState<string | null>(null);
-  const [activeMenuFolder, setActiveMenuFolder] = useState<string | null>(null);
-  const [activeMenuArchivedField, setActiveMenuArchivedField] = useState<string | null>(null);
-  const [menuCoords, setMenuCoords] = useState<{ top: number; right: number } | null>(null);
-  const [archivedMenuCoords, setArchivedMenuCoords] = useState<{ top: number; right: number } | null>(null);
-
-  useEffect(() => {
-    const handleGlobalClick = () => {
-      setActiveMenuField(null);
-      setActiveMenuFolder(null);
-      setActiveMenuArchivedField(null);
-    };
-    document.addEventListener('click', handleGlobalClick);
-    return () => document.removeEventListener('click', handleGlobalClick);
-  }, []);
-
-  useEffect(() => {
-    if (bots.length > 0) {
-      Promise.all(bots.map((b) => getCustomFieldsApi(b.id).catch(() => null)))
-        .then((results) => {
-          const mergedFieldsMap = new Map<string, UserField>();
-          const mergedArchivedMap = new Map<string, UserField>();
-          const mergedFoldersMap = new Map<string, UserFieldFolder>();
-
-          results.forEach((data) => {
-            if (!data || typeof data !== 'object') return;
-            const fieldList = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
-            fieldList.forEach((rawField: unknown) => {
-              const rf = rawField as Partial<UserField> | string | undefined;
-              const f: UserField = typeof rf === 'string'
-                ? { name: rf, type: 'Text' }
-                : {
-                    id: rf?.id,
-                    name: rf?.name || '',
-                    type: rf?.type || 'Text',
-                    value: rf?.value,
-                    description: rf?.description,
-                    folderId: rf?.folderId,
-                    folder: rf?.folder,
-                  };
-              if (f && f.name) {
-                const key = f.name.trim().toLowerCase();
-                if (!mergedFieldsMap.has(key)) {
-                  mergedFieldsMap.set(key, f);
-                }
-              }
-            });
-
-            if (Array.isArray(data.archivedFields)) {
-              data.archivedFields.forEach((rawAf: unknown) => {
-                const afObj = rawAf as Partial<UserField> | string | undefined;
-                const af: UserField = typeof afObj === 'string'
-                  ? { name: afObj, type: 'Text' }
-                  : {
-                      id: afObj?.id,
-                      name: afObj?.name || '',
-                      type: afObj?.type || 'Text',
-                      value: afObj?.value,
-                      description: afObj?.description,
-                      folderId: afObj?.folderId,
-                      folder: afObj?.folder,
-                    };
-                if (af && af.name) {
-                  const key = af.name.trim().toLowerCase();
-                  if (!mergedArchivedMap.has(key)) {
-                    mergedArchivedMap.set(key, af);
-                  }
-                }
-              });
-            }
-
-            if (Array.isArray(data.folders)) {
-              data.folders.forEach((rawFld: unknown) => {
-                const fldObj = rawFld as Partial<UserFieldFolder> | undefined;
-                const fld: UserFieldFolder = {
-                  id: String(fldObj?.id ?? ''),
-                  name: fldObj?.name || '',
-                  fieldsCount: fldObj?.fieldsCount,
-                };
-                if (fld && fld.name) {
-                  const key = fld.name.trim().toLowerCase();
-                  if (!mergedFoldersMap.has(key)) {
-                    mergedFoldersMap.set(key, fld);
-                  }
-                }
-              });
-            }
-          });
-
-          setFields(Array.from(mergedFieldsMap.values()));
-          setArchivedFields(Array.from(mergedArchivedMap.values()));
-          setFolders(Array.from(mergedFoldersMap.values()));
-        })
-        .catch((err) => {
-          console.error('Failed to fetch custom fields:', err);
-        });
-    } else if (botId > 0) {
-      getCustomFieldsApi(botId)
-        .then((data) => {
-          if (data && typeof data === 'object') {
-            const rawFields = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
-            setFields(
-              rawFields.map((f: unknown) =>
-                typeof f === 'string' ? { name: f, type: 'Text' } : (f as UserField)
-              )
-            );
-            if (Array.isArray(data.archivedFields)) {
-              setArchivedFields(
-                data.archivedFields.map((af: unknown) =>
-                  typeof af === 'string' ? { name: af, type: 'Text' } : (af as UserField)
-                )
-              );
-            }
-            if (Array.isArray(data.folders)) {
-              setFolders(
-                data.folders.map((fld: unknown) => {
-                  const fldObj = fld as Partial<UserFieldFolder> | undefined;
-                  return {
-                    id: String(fldObj?.id ?? ''),
-                    name: fldObj?.name || '',
-                    fieldsCount: fldObj?.fieldsCount,
-                  };
-                })
-              );
-            }
-          } else {
-            setFields([]);
-          }
-        })
-        .catch((err) => {
-          console.error('Failed to fetch custom fields:', err);
-        });
-    }
-  }, [bots, botId]);
-
-  const saveFieldsData = (updatedFields: UserField[], updatedArchived: UserField[], updatedFolders: UserFieldFolder[]) => {
-    setFields(updatedFields);
-    setArchivedFields(updatedArchived);
-    setFolders(updatedFolders);
-    const payload = {
-      fields: updatedFields,
-      archivedFields: updatedArchived,
-      folders: updatedFolders,
-    };
-    if (bots.length > 0) {
-      bots.forEach((b) => {
-        saveCustomFieldsApi(b.id, payload).catch((err) => console.error('Failed to save custom fields:', err));
-      });
-    } else if (botId > 0) {
-      saveCustomFieldsApi(botId, payload).catch((err) => console.error('Failed to save custom fields:', err));
+  const handleSaveField = (fieldData: UserField) => {
+    if (editingField) {
+      const updated = fields.map((f) => (f.name === editingField.name ? fieldData : f));
+      saveFieldsData(updated, archivedFields, folders);
+      setEditingField(null);
+    } else {
+      const updated = [...fields.filter((f) => f.name !== fieldData.name), fieldData];
+      saveFieldsData(updated, archivedFields, folders);
+      setIsFieldModalOpen(false);
     }
   };
 
-  const handleCreateField = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFieldName.trim()) return;
-
-    const newField: UserField = {
-      name: newFieldName.trim(),
-      type: newFieldType,
-      value: newFieldValue.trim(),
-      description: newFieldDesc.trim(),
-      folder: activeFolderId,
-    };
-
-    const validation = customFieldSchema.safeParse(newField);
-    if (!validation.success) return;
-
-    const updated = [...fields.filter((f) => f.name !== newField.name), newField];
-    saveFieldsData(updated, archivedFields, folders);
-    setIsFieldModalOpen(false);
-    setNewFieldName('');
-    setNewFieldValue('');
-    setNewFieldDesc('');
-    setNewFieldType('Text');
-  };
-
-  const handleEditField = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editFieldName.trim()) return;
-
-    const originalField = fields.find((f) => f.name === editFieldOriginalName);
-    const updatedField: UserField = {
-      name: editFieldName.trim(),
-      type: editFieldType,
-      value: editFieldValue.trim(),
-      description: editFieldDesc.trim(),
-      folder: originalField?.folder ?? activeFolderId,
-    };
-
-    const validation = customFieldSchema.safeParse(updatedField);
-    if (!validation.success) return;
-
-    const updated = fields.map((f) => (f.name === editFieldOriginalName ? updatedField : f));
-    saveFieldsData(updated, archivedFields, folders);
-    setIsEditFieldModalOpen(false);
-  };
-
-  const handleCreateFolder = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFolderName.trim()) return;
-
+  const handleCreateFolder = (name: string) => {
     const newFolder: UserFieldFolder = {
       id: generateId('folder'),
-      name: newFolderName.trim()
+      name: name.trim(),
     };
 
     const folderValidation = automationFolderSchema.safeParse(newFolder);
@@ -253,83 +49,63 @@ export const UserFieldsPanel: React.FC = () => {
     const updatedFolders = [...folders, newFolder];
     saveFieldsData(fields, archivedFields, updatedFolders);
     setIsFolderModalOpen(false);
-    setNewFolderName('');
   };
 
-  const handleRenameFolder = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!renameFolderName.trim() || !activeFolderId) return;
-
-    const updatedFolders = folders.map(f => f.id === activeFolderId ? { ...f, name: renameFolderName.trim() } : f);
+  const handleRenameFolder = (name: string) => {
+    if (!renamingFolder) return;
+    const updatedFolders = folders.map((f) =>
+      f.id === renamingFolder.id ? { ...f, name: name.trim() } : f
+    );
     saveFieldsData(fields, archivedFields, updatedFolders);
-    setIsRenameFolderOpen(false);
-    setRenameFolderName('');
+    setRenamingFolder(null);
   };
 
   const handleDeleteFolder = (folderId: string) => {
-    const updatedFolders = folders.filter(f => f.id !== folderId);
-    const updatedFields = fields.map(f => f.folder === folderId ? { ...f, folder: null } : f);
+    const updatedFolders = folders.filter((f) => f.id !== folderId);
+    const updatedFields = fields.map((f) => (f.folder === folderId ? { ...f, folder: null } : f));
     saveFieldsData(updatedFields, archivedFields, updatedFolders);
-    setActiveMenuFolder(null);
   };
 
   const handleArchiveField = (name: string) => {
-    const target = fields.find(f => f.name === name);
+    const target = fields.find((f) => f.name === name);
     if (!target) return;
 
-    const updatedFields = fields.filter(f => f.name !== name);
-    const updatedArchived = [...archivedFields.filter(f => f.name !== name), { ...target, folder: null }];
+    const updatedFields = fields.filter((f) => f.name !== name);
+    const updatedArchived = [...archivedFields.filter((f) => f.name !== name), { ...target, folder: null }];
     saveFieldsData(updatedFields, updatedArchived, folders);
-    setActiveMenuField(null);
   };
 
   const handleUnarchiveField = (name: string) => {
-    const target = archivedFields.find(f => f.name === name);
+    const target = archivedFields.find((f) => f.name === name);
     if (!target) return;
 
-    const updatedArchived = archivedFields.filter(f => f.name !== name);
-    const updatedFields = [...fields.filter(f => f.name !== name), { ...target, folder: activeFolderId }];
+    const updatedArchived = archivedFields.filter((f) => f.name !== name);
+    const updatedFields = [...fields.filter((f) => f.name !== name), { ...target, folder: activeFolderId }];
     saveFieldsData(updatedFields, updatedArchived, folders);
-    setActiveMenuArchivedField(null);
   };
 
   const handleDeleteField = (name: string, isArchived: boolean) => {
     if (isArchived) {
-      const updated = archivedFields.filter(f => f.name !== name);
+      const updated = archivedFields.filter((f) => f.name !== name);
       saveFieldsData(fields, updated, folders);
-      setActiveMenuArchivedField(null);
     } else {
-      const updated = fields.filter(f => f.name !== name);
+      const updated = fields.filter((f) => f.name !== name);
       saveFieldsData(updated, archivedFields, folders);
-      setActiveMenuField(null);
     }
   };
 
-  const activeFolder = folders.find(f => f.id === activeFolderId);
-
-  const filteredFields = fields.filter(f => {
+  const filteredFields = fields.filter((f) => {
     const matchesSearch = f.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFolder = (f.folder || null) === (activeFolderId || null);
     return matchesSearch && matchesFolder;
   });
 
-  const filteredArchived = archivedFields.filter(f =>
+  const filteredArchived = archivedFields.filter((f) =>
     f.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="space-y-6 relative font-['JetBrains_Mono',monospace]">
-      {(activeMenuField || activeMenuFolder || activeMenuArchivedField) && (
-        <div
-          className="fixed inset-0 z-40 bg-transparent"
-          onMouseDown={() => {
-            setActiveMenuField(null);
-            setActiveMenuFolder(null);
-            setActiveMenuArchivedField(null);
-          }}
-        />
-      )}
-
       <div className="flex justify-between items-center select-none">
         <div className="relative w-64 text-left">
           <input
@@ -344,231 +120,26 @@ export const UserFieldsPanel: React.FC = () => {
       </div>
 
       <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-left overflow-visible">
-        <div className="p-5 flex justify-between items-center border-b-2 border-[#0A0A0A]">
-          <div className="flex items-center gap-1.5 text-xs font-bold select-none">
-            {activeFolderId && activeFolder ? (
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setActiveFolderId(null)}
-                  className="text-slate-600 hover:text-[#0A0A0A] transition-colors cursor-pointer uppercase"
-                >
-                  {t('settings.fields.user_fields_tab')}
-                </button>
-                <ChevronRight size={14} className="text-[#0A0A0A]" />
-                <div className="flex items-center gap-1">
-                  <span className="text-[#0A0A0A] font-black">{activeFolder.name}</span>
-                  <button
-                    onClick={() => {
-                      setRenameFolderName(activeFolder.name);
-                      setIsRenameFolderOpen(true);
-                    }}
-                    className="p-1 hover:bg-white text-[#0A0A0A] rounded-lg cursor-pointer transition-all border-2 border-transparent hover:border-[#0A0A0A]"
-                  >
-                    <Edit2 size={11} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <span className="font-['Anybody',sans-serif] text-[#0A0A0A] font-black text-sm uppercase">{t('settings.fields.user_fields_tab')}</span>
-            )}
-          </div>
-
-          <button
-            onClick={() => setIsFieldModalOpen(true)}
-            className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all flex items-center gap-1.5 cursor-pointer select-none"
-          >
-            <Plus size={14} />
-            <span>{t('settings.fields.new_field_btn', 'Нове поле користувача')}</span>
-          </button>
-        </div>
+        <FolderToolbar
+          folders={folders}
+          activeFolderId={activeFolderId}
+          onSelectFolder={setActiveFolderId}
+          onOpenNewFieldModal={() => setIsFieldModalOpen(true)}
+          onOpenNewFolderModal={() => setIsFolderModalOpen(true)}
+          onStartRenameFolder={(folder) => setRenamingFolder(folder)}
+          onDeleteFolder={handleDeleteFolder}
+        />
 
         <div className="p-5">
-          {!activeFolderId && (
-            <div className="flex flex-wrap gap-4 mb-5">
-              {folders.map((folder) => (
-                <div
-                  key={folder.id}
-                  className="flex items-center justify-between border-2 border-[#0A0A0A] rounded-xl px-4 py-2.5 bg-white w-48 hover:bg-[#F2EBDD] transition-all relative"
-                >
-                  <button
-                    onClick={() => setActiveFolderId(folder.id)}
-                    className="flex items-center gap-2 text-left flex-1 cursor-pointer"
-                  >
-                    <Folder size={16} className="text-[#0A0A0A] shrink-0" />
-                    <span className="text-xs font-bold text-[#0A0A0A] truncate w-28">{folder.name}</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveMenuFolder(activeMenuFolder === folder.id ? null : folder.id)}
-                    className="p-0.5 hover:bg-[#0A0A0A] rounded text-[#0A0A0A] hover:text-[#F2EBDD] cursor-pointer"
-                  >
-                    <MoreVertical size={14} />
-                  </button>
-
-                  {activeMenuFolder === folder.id && (
-                    <div className="absolute right-3 top-11 z-[100] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-[4px_4px_0px_0px_#0A0A0A] py-1 w-28 text-left animate-in fade-in duration-100">
-                      <button
-                        onClick={() => {
-                          setActiveFolderId(folder.id);
-                          setRenameFolderName(folder.name);
-                          setIsRenameFolderOpen(true);
-                          setActiveMenuFolder(null);
-                        }}
-                        className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase"
-                      >
-                        {t('settings.fields.action_rename', 'Перейменувати')}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteFolder(folder.id)}
-                        className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/15 uppercase"
-                      >
-                        {t('settings.fields.action_delete', 'Видалити')}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              <button
-                onClick={() => setIsFolderModalOpen(true)}
-                className="px-4 py-2.5 border-2 border-dashed border-[#0A0A0A] text-[#0A0A0A] hover:bg-white text-xs font-black uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer select-none"
-              >
-                <Plus size={14} />
-                <span>{t('settings.fields.new_folder_btn', 'Нова папка')}</span>
-              </button>
-            </div>
-          )}
-
-          <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-hidden shadow-sm">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-white border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
-                  <th className="px-5 py-3 w-10">
-                    <input
-                      type="checkbox"
-                      disabled
-                      className="w-4 h-4 accent-[#0A0A0A] cursor-not-allowed"
-                    />
-                  </th>
-                  <th className="px-5 py-3">
-                    <div className="flex items-center gap-1">
-                      <span>{t('settings.fields.table_name')}</span>
-                      <HelpCircle size={12} />
-                    </div>
-                  </th>
-                  <th className="px-5 py-3">
-                    <div className="flex items-center gap-1">
-                      <span>{t('settings.fields.table_type')}</span>
-                      <HelpCircle size={12} />
-                    </div>
-                  </th>
-                  <th className="px-5 py-3">
-                    <div className="flex items-center gap-1">
-                      <span>{t('settings.fields.table_value', 'Значення')}</span>
-                      <HelpCircle size={12} />
-                    </div>
-                  </th>
-                  <th className="px-5 py-3">
-                    <div className="flex items-center gap-1">
-                      <span>{t('settings.fields.table_desc')}</span>
-                      <HelpCircle size={12} />
-                    </div>
-                  </th>
-                  <th className="px-5 py-3 w-12 text-right"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#0A0A0A]/10 text-xs font-bold text-[#0A0A0A]">
-                {filteredFields.map((field) => (
-                  <tr key={field.name} className="hover:bg-slate-50 bg-white transition-colors">
-                    <td className="px-5 py-3.5">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
-                      />
-                    </td>
-                    <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">
-                      {field.name}
-                    </td>
-                    <td className="px-5 py-3.5 text-slate-700">
-                      {field.type}
-                    </td>
-                    <td className="px-5 py-3.5 text-slate-700">
-                      {field.value || '-'}
-                    </td>
-                    <td className="px-5 py-3.5 text-slate-700">
-                      {field.description || '-'}
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          setMenuCoords({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
-                          setActiveMenuField(activeMenuField === field.name ? null : field.name);
-                        }}
-                        className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
-                      >
-                        <MoreVertical size={15} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredFields.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="text-center py-10 text-slate-700 italic bg-white font-bold select-none">
-                      {t('settings.fields.empty_state')}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <FieldsTable
+            fields={filteredFields}
+            isArchived={false}
+            onEdit={(field) => setEditingField(field)}
+            onArchive={handleArchiveField}
+            onDelete={handleDeleteField}
+          />
         </div>
       </div>
-
-      {activeMenuField && menuCoords && createPortal(
-        <div
-          style={{ top: menuCoords.top, right: menuCoords.right }}
-          className="fixed z-[9999] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 w-32 text-left animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={() => {
-              const target = fields.find((f) => f.name === activeMenuField);
-              if (target) {
-                setEditFieldOriginalName(target.name);
-                setEditFieldName(target.name);
-                setEditFieldType(target.type || 'Text');
-                setEditFieldValue(target.value || '');
-                setEditFieldDesc(target.description || '');
-                setIsEditFieldModalOpen(true);
-              }
-              setActiveMenuField(null);
-            }}
-            className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
-          >
-            {t('settings.fields.action_edit', 'Редагувати')}
-          </button>
-          <button
-            onClick={() => {
-              handleArchiveField(activeMenuField);
-              setActiveMenuField(null);
-            }}
-            className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
-          >
-            {t('settings.fields.action_archive')}
-          </button>
-          <button
-            onClick={() => {
-              handleDeleteField(activeMenuField, false);
-              setActiveMenuField(null);
-            }}
-            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
-          >
-            {t('settings.fields.action_delete')}
-          </button>
-        </div>,
-        document.body
-      )}
 
       <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-left overflow-visible">
         <div className="p-5 border-b-2 border-[#0A0A0A]">
@@ -577,415 +148,42 @@ export const UserFieldsPanel: React.FC = () => {
           </h3>
         </div>
         <div className="p-5">
-          <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-hidden shadow-sm">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-white border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
-                  <th className="px-5 py-3 w-10">
-                    <input
-                      type="checkbox"
-                      disabled
-                      className="w-4 h-4 accent-[#0A0A0A] cursor-not-allowed"
-                    />
-                  </th>
-                  <th className="px-5 py-3">{t('settings.fields.table_name')}</th>
-                  <th className="px-5 py-3">{t('settings.fields.table_type')}</th>
-                  <th className="px-5 py-3">{t('settings.fields.table_value', 'Значення')}</th>
-                  <th className="px-5 py-3">{t('settings.fields.table_desc')}</th>
-                  <th className="px-5 py-3 w-12 text-right"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#0A0A0A]/10 text-xs font-bold text-[#0A0A0A]">
-                {filteredArchived.map((field) => (
-                  <tr key={field.name} className="hover:bg-slate-50 bg-white transition-colors">
-                    <td className="px-5 py-3.5">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
-                      />
-                    </td>
-                    <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">
-                      {field.name}
-                    </td>
-                    <td className="px-5 py-3.5 text-slate-700">
-                      {field.type}
-                    </td>
-                    <td className="px-5 py-3.5 text-slate-700">
-                      {field.value || '-'}
-                    </td>
-                    <td className="px-5 py-3.5 text-slate-700">
-                      {field.description || '-'}
-                    </td>
-                    <td className="px-5 py-3.5 text-right relative">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          setArchivedMenuCoords({
-                            top: rect.bottom + 4,
-                            right: window.innerWidth - rect.right,
-                          });
-                          setActiveMenuArchivedField(activeMenuArchivedField === field.name ? null : field.name);
-                        }}
-                        className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
-                      >
-                        <MoreVertical size={15} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredArchived.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="text-center py-10 text-slate-700 italic bg-white font-bold select-none">
-                      {t('settings.fields.empty_state')}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <FieldsTable
+            fields={filteredArchived}
+            isArchived={true}
+            onUnarchive={handleUnarchiveField}
+            onDelete={handleDeleteField}
+          />
         </div>
       </div>
 
-      {activeMenuArchivedField && archivedMenuCoords && createPortal(
-        <div
-          style={{ top: archivedMenuCoords.top, right: archivedMenuCoords.right }}
-          className="fixed z-[9999] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 w-32 text-left animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={() => {
-              handleUnarchiveField(activeMenuArchivedField);
-              setActiveMenuArchivedField(null);
-            }}
-            className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
-          >
-            Unarchive
-          </button>
-          <button
-            onClick={() => {
-              handleDeleteField(activeMenuArchivedField, true);
-              setActiveMenuArchivedField(null);
-            }}
-            className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
-          >
-            Delete
-          </button>
-        </div>,
-        document.body
-      )}
+      <FieldModal
+        isOpen={isFieldModalOpen || editingField !== null}
+        initialField={editingField}
+        activeFolderId={activeFolderId}
+        onClose={() => {
+          setIsFieldModalOpen(false);
+          setEditingField(null);
+        }}
+        onSave={handleSaveField}
+      />
 
-      {isFieldModalOpen && (
-        <div 
-          onClick={() => setIsFieldModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
-        >
-          <form 
-            onSubmit={handleCreateField}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
-          >
-            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
-                {t('settings.fields.create_field_title')}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsFieldModalOpen(false)}
-                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
-              >
-                <X size={16} />
-              </button>
-            </div>
+      <FolderModal
+        isOpen={isFolderModalOpen}
+        title={t('settings.fields.create_folder_title')}
+        submitLabel={t('settings.fields.btn_create_folder')}
+        onClose={() => setIsFolderModalOpen(false)}
+        onSave={handleCreateFolder}
+      />
 
-            <div className="space-y-3.5">
-              <div>
-                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
-                  {t('settings.fields.name_label')}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newFieldName}
-                  onChange={(e) => setNewFieldName(e.target.value)}
-                  placeholder={t('settings.fields.placeholder_field_name')}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
-                  {t('settings.fields.type_label')}
-                </label>
-                <CustomSelect
-                  value={newFieldType}
-                  onChange={setNewFieldType}
-                  options={[
-                    { value: 'Text', label: t('settings.fields.type_text') },
-                    { value: 'Number', label: t('settings.fields.type_number') },
-                    { value: 'Date', label: t('settings.fields.type_date') },
-                    { value: 'Boolean', label: t('settings.fields.type_boolean') },
-                  ]}
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
-                  {t('settings.fields.value_label', 'Значення (необов\'язково)')}
-                </label>
-                <input
-                  type="text"
-                  value={newFieldValue}
-                  onChange={(e) => setNewFieldValue(e.target.value)}
-                  placeholder={t('settings.fields.placeholder_value', 'Введіть значення поля')}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
-                  {t('settings.fields.desc_label')}
-                </label>
-                <input
-                  type="text"
-                  value={newFieldDesc}
-                  onChange={(e) => setNewFieldDesc(e.target.value)}
-                  placeholder={t('settings.fields.placeholder_desc')}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
-              <button
-                type="button"
-                onClick={() => setIsFieldModalOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
-              >
-                {t('settings.fields.btn_cancel')}
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
-              >
-                {t('settings.fields.btn_create_field')}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {isEditFieldModalOpen && (
-        <div 
-          onClick={() => setIsEditFieldModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
-        >
-          <form 
-            onSubmit={handleEditField}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
-          >
-            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
-                {t('settings.fields.edit_field_title', 'Редагувати поле користувача')}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsEditFieldModalOpen(false)}
-                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="space-y-3.5">
-              <div>
-                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
-                  {t('settings.fields.name_label')}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={editFieldName}
-                  onChange={(e) => setEditFieldName(e.target.value)}
-                  placeholder={t('settings.fields.placeholder_field_name')}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
-                  {t('settings.fields.type_label')}
-                </label>
-                <CustomSelect
-                  value={editFieldType}
-                  onChange={setEditFieldType}
-                  options={[
-                    { value: 'Text', label: t('settings.fields.type_text') },
-                    { value: 'Number', label: t('settings.fields.type_number') },
-                    { value: 'Date', label: t('settings.fields.type_date') },
-                    { value: 'Boolean', label: t('settings.fields.type_boolean') },
-                  ]}
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
-                  {t('settings.fields.value_label', 'Значення (необов\'язково)')}
-                </label>
-                <input
-                  type="text"
-                  value={editFieldValue}
-                  onChange={(e) => setEditFieldValue(e.target.value)}
-                  placeholder={t('settings.fields.placeholder_value', 'Введіть значення поля')}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
-                  {t('settings.fields.desc_label')}
-                </label>
-                <input
-                  type="text"
-                  value={editFieldDesc}
-                  onChange={(e) => setEditFieldDesc(e.target.value)}
-                  placeholder={t('settings.fields.placeholder_desc')}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
-              <button
-                type="button"
-                onClick={() => setIsEditFieldModalOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
-              >
-                {t('settings.fields.btn_cancel')}
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
-              >
-                {t('settings.fields.btn_save')}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {isFolderModalOpen && (
-        <div 
-          onClick={() => setIsFolderModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
-        >
-          <form 
-            onSubmit={handleCreateFolder}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
-          >
-            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
-                {t('settings.fields.create_folder_title')}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsFolderModalOpen(false)}
-                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
-                {t('settings.fields.folder_name_label')}
-              </label>
-              <input
-                type="text"
-                required
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                placeholder={t('settings.fields.placeholder_folder_name')}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
-              />
-            </div>
-
-            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
-              <button
-                type="button"
-                onClick={() => setIsFolderModalOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
-              >
-                {t('settings.fields.btn_cancel')}
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
-              >
-                {t('settings.fields.btn_create_folder')}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {isRenameFolderOpen && (
-        <div 
-          onClick={() => setIsRenameFolderOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer"
-        >
-          <form 
-            onSubmit={handleRenameFolder}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-sm flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
-          >
-            <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3 select-none">
-              <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
-                {t('settings.fields.rename_folder_title')}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsRenameFolderOpen(false)}
-                className="p-1 hover:bg-white rounded-lg text-[#0A0A0A] transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
-                {t('settings.fields.folder_name_label')}
-              </label>
-              <input
-                type="text"
-                required
-                value={renameFolderName}
-                onChange={(e) => setRenameFolderName(e.target.value)}
-                placeholder={t('settings.fields.placeholder_folder_name')}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold bg-white text-[#0A0A0A] focus:outline-none"
-              />
-            </div>
-
-            <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
-              <button
-                type="button"
-                onClick={() => setIsRenameFolderOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
-              >
-                {t('settings.fields.btn_cancel')}
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
-              >
-                {t('settings.fields.btn_save')}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      <FolderModal
+        isOpen={renamingFolder !== null}
+        title={t('settings.fields.rename_folder_title')}
+        submitLabel={t('settings.fields.btn_save')}
+        initialName={renamingFolder?.name || ''}
+        onClose={() => setRenamingFolder(null)}
+        onSave={handleRenameFolder}
+      />
     </div>
   );
 };
