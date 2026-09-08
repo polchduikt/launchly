@@ -6,9 +6,10 @@ import { formatMessageTime, parseMessageButtons } from '../../../../utils/crmCha
 interface MessageBubbleProps {
   message: MessageResponse;
   isOwner: boolean;
-  ownerAvatar: React.ReactNode;
-  userAvatar: React.ReactNode;
-  allMessages: MessageResponse[];
+  ownerAvatar?: React.ReactNode;
+  userAvatar?: React.ReactNode;
+  allMessages?: MessageResponse[];
+  clickedButtonLabel?: string | null;
   onButtonClick: (label: string) => void;
   onImageLoad?: () => void;
 }
@@ -19,6 +20,7 @@ const MessageBubbleInner: React.FC<MessageBubbleProps> = ({
   ownerAvatar,
   userAvatar: _userAvatar,
   allMessages,
+  clickedButtonLabel: propClickedButtonLabel,
   onButtonClick,
   onImageLoad,
 }) => {
@@ -44,8 +46,8 @@ const MessageBubbleInner: React.FC<MessageBubbleProps> = ({
 
   const hasButtons = buttons.length > 0;
 
-  let clickedButtonLabel: string | null = null;
-  if (hasButtons) {
+  let clickedButtonLabel: string | null = propClickedButtonLabel ?? null;
+  if (hasButtons && propClickedButtonLabel === undefined && allMessages && allMessages.length > 0) {
     const msgIndex = allMessages.findIndex(msg => msg.id === m.id);
     if (msgIndex !== -1) {
       for (let i = msgIndex + 1; i < allMessages.length; i++) {
@@ -196,4 +198,16 @@ const MessageBubbleInner: React.FC<MessageBubbleProps> = ({
 };
 
 MessageBubbleInner.displayName = 'MessageBubble';
-export const MessageBubble = React.memo(MessageBubbleInner);
+export const MessageBubble = React.memo(MessageBubbleInner, (prev, next) => {
+  return (
+    prev.message.id === next.message.id &&
+    prev.message.content === next.message.content &&
+    prev.message.sent === next.message.sent &&
+    prev.message.scheduledAt === next.message.scheduledAt &&
+    prev.isOwner === next.isOwner &&
+    prev.clickedButtonLabel === next.clickedButtonLabel &&
+    prev.onButtonClick === next.onButtonClick &&
+    prev.onImageLoad === next.onImageLoad
+  );
+});
+

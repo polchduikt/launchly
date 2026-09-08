@@ -9,7 +9,7 @@ import { UserAvatar } from './UserAvatar';
 import { OwnerAvatar } from './OwnerAvatar';
 import { MessageBubble } from './MessageBubble';
 import { ChatToolbar } from './ChatToolbar';
-import { formatDateSeparator, getDateKey } from '../../../../utils/crmChat';
+import { formatDateSeparator, getDateKey, parseMessageButtons } from '../../../../utils/crmChat';
 import { t } from '../../../../i18n/config';
 import { MessageAreaSkeleton } from '../../../../components/common/Skeleton';
 
@@ -99,6 +99,27 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     return groups;
   }, [messages]);
 
+  const clickedButtonMap = useMemo(() => {
+    const map = new Map<number, string>();
+    for (let i = 0; i < messages.length; i++) {
+      const m = messages[i];
+      const { buttons } = parseMessageButtons(m.content);
+      if (buttons.length > 0) {
+        for (let j = i + 1; j < messages.length; j++) {
+          const nextMsg = messages[j];
+          if (nextMsg.senderType === 'BOT_USER') {
+            const cleanNextText = nextMsg.content ? nextMsg.content.replace('🖱️ ', '').trim() : '';
+            if (buttons.some(btn => btn.trim().toLowerCase() === cleanNextText.toLowerCase())) {
+              map.set(m.id, cleanNextText);
+            }
+            break;
+          }
+        }
+      }
+    }
+    return map;
+  }, [messages]);
+
   const ownerAvatar = useMemo(() => <OwnerAvatar size={28} />, []);
   const userAvatar = useMemo(
     () => <UserAvatar name={conversation?.botUserName || ''} photoUrl={conversation?.botUserPhotoUrl} size={28} />,
@@ -174,7 +195,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
                   isOwner={m.senderType === 'OWNER'}
                   ownerAvatar={ownerAvatar}
                   userAvatar={userAvatar}
-                  allMessages={messages}
+                  clickedButtonLabel={clickedButtonMap.get(m.id) ?? null}
                   onButtonClick={onButtonClick}
                   onImageLoad={handleImageLoad}
                 />
