@@ -42,7 +42,6 @@ describe('BlogEditorView', () => {
     const previewTab = screen.getByText('Попередній перегляд');
     fireEvent.click(previewTab);
 
-    // In preview mode, the preview pane is displayed
     expect(screen.getByText('Article Title')).toBeInTheDocument();
 
     const builderTab = screen.getByText('Конструктор');

@@ -67,7 +67,6 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
           Object.keys(meta.customFields).forEach((k) => fieldsSet.add(k));
         }
       } catch {
-        // ignore malformed metadata
       }
     });
 

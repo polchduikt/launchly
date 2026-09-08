@@ -261,6 +261,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             callStackManager.clear(botId, telegramUserId);
             callStackManager.setExecutingBotId(botId, telegramUserId, botId);
 
+
             if (campaignId != null) {
                 stateService.setActiveCampaignId(botId, telegramUserId, campaignId);
             } else {

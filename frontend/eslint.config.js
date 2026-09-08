@@ -19,18 +19,15 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      // TypeScript rules
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
 
-      // JavaScript core rules
       'no-useless-assignment': 'off',
       'no-prototype-builtins': 'off',
       'prefer-const': 'off',
       'no-empty': 'off',
 
-      // React / React Hooks rules
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/refs': 'off',

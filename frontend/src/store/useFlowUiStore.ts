@@ -7,21 +7,17 @@ export interface FlowEditingButtonState {
 }
 
 export interface FlowUiState {
-  // Editing button dialog/drawer
   editingButtonState: FlowEditingButtonState | null;
   openEditButton: (nodeId: string, button: ButtonData) => void;
   closeEditButton: () => void;
 
-  // Automation picker modal
   pickAutomationNodeId: string | null;
   openPickAutomation: (nodeId: string) => void;
   closePickAutomation: () => void;
 
-  // Hovered edge highlight
   hoveredEdgeId: string | null;
   setHoveredEdgeId: (edgeId: string | null) => void;
 
-  // Node/edge action requests
   copyNodeId: string | null;
   requestCopyNode: (nodeId: string) => void;
   clearCopyNode: () => void;

@@ -14,8 +14,7 @@
   --color-tertiary-fixed-dim: #4edea3;
   --color-surface: #f8f9ff;
 
-  /* Neo-brutalist Design System Tokens */
-  --color-brand-dark: #0A0A0A;
+    --color-brand-dark: #0A0A0A;
   --color-brand-dark-hover: #2A2A2A;
   --color-canvas-cream: #F2EBDD;
   --color-canvas-slate: #F8FAFC;
@@ -416,7 +415,6 @@ html, body {
   color: #0F172A !important;
 }
 
-/* Backgrounds: Convert all cream/beige to clean white/slate */
 [data-theme="light"] .bg-\[\#F2EBDD\],
 [data-theme="light"] [class*="bg-\[\#F2EBDD\]"] {
   background-color: #F8FAFC !important;
@@ -436,7 +434,6 @@ html, body {
   border-color: #E2E8F0 !important;
 }
 
-/* Hover & Active states: Convert cream hover to crisp slate-100 hover */
 [data-theme="light"] .hover\:bg-\[\#F2EBDD\]:hover,
 [data-theme="light"] .hover\:bg-\[\#F2EBDD\]\/60:hover,
 [data-theme="light"] .hover\:bg-\[\#F2EBDD\]\/50:hover,
@@ -445,7 +442,6 @@ html, body {
   background-color: #F1F5F9 !important;
 }
 
-/* Borders */
 [data-theme="light"] .border-\[\#0A0A0A\],
 [data-theme="light"] .border-2.border-\[\#0A0A0A\],
 [data-theme="light"] .border-b-2.border-\[\#0A0A0A\],
@@ -458,7 +454,6 @@ html, body {
   border-color: #E2E8F0 !important;
 }
 
-/* Typography & Text */
 [data-theme="light"] .text-\[\#0A0A0A\] {
   color: #0F172A !important;
 }
@@ -474,7 +469,6 @@ html, body {
   color: #64748B !important;
 }
 
-/* Primary Dark Buttons & Elements: Always preserve white text and icons */
 [data-theme="light"] .bg-\[\#0A0A0A\],
 [data-theme="light"] .bg-\[\#0A0A0A\] *,
 [data-theme="light"] button.bg-\[\#0A0A0A\],
@@ -489,7 +483,6 @@ html, body {
   color: #FFFFFF !important;
 }
 
-/* Badges / Counters inside dark elements MUST retain their dark text */
 [data-theme="light"] .bg-\[\#0A0A0A\] .bg-white,
 [data-theme="light"] .bg-\[\#0A0A0A\] .bg-white *,
 [data-theme="light"] button.bg-\[\#0A0A0A\] .bg-white,
@@ -522,7 +515,6 @@ html, body {
   color: #FFFFFF !important;
 }
 
-/* ReactFlow Controls Toolbar: Perfect pixel alignment & uniform button sizing */
 .react-flow__controls.custom-controls-panel,
 .react-flow__controls {
   display: flex !important;
@@ -578,7 +570,6 @@ html, body {
   stroke: #0A0A0A !important;
 }
 
-/* Dark hover states - Pure Solid Black #0A0A0A (not bluish slate) */
 .hover\:bg-\[\#0A0A0A\]:hover,
 .hover\:bg-black:hover,
 .hover\:bg-slate-900:hover,
@@ -604,8 +595,6 @@ a.hover\:bg-\[\#2A2A2A\]:hover,
   color: #FFFFFF !important;
 }
 
-/* Children inside dark-hovered containers/cards/buttons:
-   - Must turn crisp white for text and icons (excluding node icon badges). */
 .hover\:bg-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
 .hover\:bg-\[\#2A2A2A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
 .hover\:bg-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
@@ -624,7 +613,6 @@ a.hover\:bg-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
   color: #FFFFFF !important;
 }
 
-/* Icons inside dark-hovered elements must turn crisp white (excluding node icon badges) */
 .hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
 .hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
 .hover\:bg-\[\#2A2A2A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
@@ -655,7 +643,6 @@ a.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badg
   color: #FFFFFF !important;
 }
 
-/* Preserve colors and background for node-icon-badge in ALL states (hover or non-hover) */
 .node-icon-badge,
 button:hover .node-icon-badge,
 button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge,
@@ -927,7 +914,6 @@ button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="END"] svg 
   color: #475569 !important;
 }
 
-/* Modal / Dialog / Drawer Close Buttons (X) */
 .fixed.inset-0 button:has(> svg.lucide-x):hover,
 [role="dialog"] button:has(> svg.lucide-x):hover,
 button[aria-label="Close"]:hover,
@@ -961,7 +947,6 @@ button[aria-label="Close"]:hover svg *,
   color: #FFFFFF !important;
 }
 
-/* Light Theme Amber/Yellow overrides in Template Pages */
 [data-theme="light"] .bg-amber-50,
 [data-theme="light"] .bg-amber-50\/70,
 [data-theme="light"] .bg-amber-100,
@@ -975,14 +960,12 @@ button[aria-label="Close"]:hover svg *,
   background-color: #F1F5F9 !important;
 }
 
-/* Subtle border inside dark-hovered cards */
 [data-theme="light"] .hover\:bg-\[\#0A0A0A\]:hover .border-t,
 [data-theme="light"] .hover\:bg-\[\#0A0A0A\]:hover .border-b,
 [data-theme="light"] .hover\:bg-\[\#0A0A0A\]:hover [class*="group-hover\:border-"] {
   border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
-/* Tables */
 [data-theme="light"] table {
   background-color: #FFFFFF !important;
 }
@@ -1006,12 +989,10 @@ button[aria-label="Close"]:hover svg *,
   background-color: #F8FAFC !important;
 }
 
-/* Shadows */
 [data-theme="light"] [class*="shadow-"][class*="\#0A0A0A"] {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
 }
 
-/* Modals & Dialogs */
 [data-theme="light"] [role="dialog"],
 [data-theme="light"] .fixed.inset-0 > div {
   background-color: #FFFFFF !important;
@@ -1029,7 +1010,6 @@ button[aria-label="Close"]:hover svg *,
   border-color: #E2E8F0 !important;
 }
 
-/* Form Inputs */
 [data-theme="light"] input:not([type="checkbox"]):not([type="radio"]),
 [data-theme="light"] textarea,
 [data-theme="light"] select {
@@ -1045,7 +1025,6 @@ button[aria-label="Close"]:hover svg *,
   opacity: 1 !important;
 }
 
-/* Chat & Messages in CRM */
 [data-theme="light"] [data-message-id] .bg-white {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
@@ -1061,7 +1040,6 @@ button[aria-label="Close"]:hover svg *,
   background-color: #F1F5F9 !important;
 }
 
-/* Scrollbars */
 [data-theme="light"] ::-webkit-scrollbar-track {
   background: #F8FAFC !important;
   border-left: 1px solid #E2E8F0 !important;
@@ -1217,7 +1195,6 @@ button[aria-label="Close"]:hover svg *,
   color: #CBD5E1 !important;
 }
 
-/* Status Badges and Destructive / Accent Buttons in Dark Theme */
 [data-theme="dark"] .bg-\[\#FCE7E7\],
 [data-theme="dark"] .bg-rose-100,
 [data-theme="dark"] .bg-rose-200,
@@ -1343,7 +1320,6 @@ button[aria-label="Close"]:hover svg *,
   opacity: 1 !important;
 }
 
-/* FlowBuilder Canvas, Nodes, Edges & Controls */
 [data-theme="dark"] .react-flow,
 [data-theme="dark"] .react-flow__pane,
 [data-theme="dark"] .react-flow__background {
@@ -1393,7 +1369,6 @@ button[aria-label="Close"]:hover svg *,
   color: #A1A1AA !important;
 }
 
-/* Node Headers in Dark Theme */
 [data-theme="dark"] .react-flow__node div[class*="bg-sky-100"] {
   background-color: rgba(14, 165, 233, 0.16) !important;
 }
@@ -1451,7 +1426,6 @@ button[aria-label="Close"]:hover svg *,
   border-color: #3F3F46 !important;
 }
 
-/* Edges & Markers in Dark Theme */
 .edge-arrow-default {
   fill: #475569;
 }
@@ -1490,7 +1464,6 @@ button[aria-label="Close"]:hover svg *,
   stroke: #94A3B8 !important;
 }
 
-/* Handles */
 .react-flow__handle {
   width: 10px;
   height: 10px;
@@ -1544,7 +1517,6 @@ button[aria-label="Close"]:hover svg *,
   border-color: #FFFFFF !important;
 }
 
-/* Flow Controls & Minimap */
 [data-theme="dark"] .react-flow__controls {
   background-color: #18181B !important;
   border-color: #27272A !important;

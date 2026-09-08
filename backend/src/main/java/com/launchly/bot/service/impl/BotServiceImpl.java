@@ -349,7 +349,10 @@ public class BotServiceImpl implements BotService {
 
     @Override
     @Transactional
-    @CacheEvict(value = CacheConstants.FLOW_SCHEMAS, key = "#botId")
+    @Caching(evict = {
+            @CacheEvict(value = CacheConstants.BOTS, key = "#userId"),
+            @CacheEvict(value = CacheConstants.FLOW_SCHEMAS, key = "#botId")
+    })
     public FlowSchemaResponse saveFlowSchema(Long botId, FlowSchemaRequest request, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
         botAccessValidator.validateWriteAccess(bot, userId);
@@ -368,6 +371,8 @@ public class BotServiceImpl implements BotService {
         redisTemplate.delete("launchly:bot:schema:" + botId);
 
         userAuditService.logAutomationModified(bot.getUser(), bot.getId(), bot.getName(), LocalDateTime.now());
+        bot.setUpdatedAt(LocalDateTime.now());
+        botRepository.save(bot);
         if (!bot.isActive()) {
             boolean hasRealToken = false;
             try {

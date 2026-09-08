@@ -55,7 +55,6 @@ export const SmartDelayNodeEditor: React.FC<SmartDelayNodeEditorProps> = ({ data
         return `${year}-${month}-${day}T${hours}:${minutes}`;
       }
     } catch {
-      // ignore parsing error
     }
     return '';
   };

@@ -85,25 +85,21 @@ describe('useVirtualList', () => {
 
     (result.current.parentRef as { current: HTMLDivElement | null }).current = mockElement;
 
-    // Test start alignment: item 10 is at offset 500
     act(() => {
       result.current.scrollToIndex(10, 'start');
     });
     expect(mockElement.scrollTop).toBe(500);
 
-    // Test center alignment: offset 500 - (200 / 2) + (50 / 2) = 500 - 100 + 25 = 425
     act(() => {
       result.current.scrollToIndex(10, 'center');
     });
     expect(mockElement.scrollTop).toBe(425);
 
-    // Test end alignment: offset 500 - 200 + 50 = 350
     act(() => {
       result.current.scrollToIndex(10, 'end');
     });
     expect(mockElement.scrollTop).toBe(350);
 
-    // Test ignore invalid index
     act(() => {
       result.current.scrollToIndex(-1);
       result.current.scrollToIndex(200);
