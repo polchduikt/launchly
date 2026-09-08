@@ -35,7 +35,6 @@ describe('useToastStore', () => {
     expect(id1).toBe(id2);
     expect(useToastStore.getState().toasts).toHaveLength(1);
 
-    // After 2 seconds, same message should create a new toast
     vi.advanceTimersByTime(2000);
     const id3 = toast.error('Duplicate error');
     expect(id3).not.toBe(id1);
