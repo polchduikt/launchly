@@ -2,15 +2,19 @@ import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslation } from '../../i18n/config';
 
-interface ConfirmModalProps {
+export interface ConfirmModalProps {
   isOpen: boolean;
   title: string;
   message: string;
   confirmText?: string;
+  confirmLabel?: string;
   cancelText?: string;
+  cancelLabel?: string;
   isDanger?: boolean;
+  variant?: 'danger' | 'warning' | 'default';
   onConfirm: () => void;
-  onClose: () => void;
+  onClose?: () => void;
+  onCancel?: () => void;
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -18,18 +22,39 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   title,
   message,
   confirmText,
+  confirmLabel,
   cancelText,
-  isDanger = true,
+  cancelLabel,
+  isDanger,
+  variant,
   onConfirm,
   onClose,
+  onCancel,
 }) => {
   const { t } = useTranslation();
   if (!isOpen) return null;
 
+  const handleClose = onCancel || onClose || (() => {});
+  const effectiveVariant = variant || (isDanger === false ? 'default' : 'danger');
+
+  const confirmBtnClass =
+    effectiveVariant === 'danger'
+      ? 'bg-[#FCE7E7] hover:bg-rose-200 text-[#0A0A0A] border border-rose-200'
+      : effectiveVariant === 'warning'
+      ? 'bg-amber-100 hover:bg-amber-200 text-[#0A0A0A] border border-amber-200'
+      : 'bg-[#0A0A0A] hover:bg-zinc-800 text-[#F2EBDD] border border-[#0A0A0A]';
+
+  const handleConfirm = () => {
+    onConfirm();
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-start justify-center pt-16 px-4 font-['JetBrains_Mono',monospace] bg-slate-500/30 dark:bg-black/60 backdrop-blur-[1px]"
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         className="bg-white dark:bg-[#18181B] rounded-3xl shadow-2xl border border-slate-200/80 dark:border-[#27272A] w-full max-w-md p-6 overflow-hidden animate-fade-in-down cursor-default"
@@ -53,23 +78,16 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
         <div className="flex items-center justify-end gap-3">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="px-5 py-2.5 text-xs font-bold text-[#0A0A0A] dark:text-[#E4E4E7] bg-white dark:bg-[#18181B] hover:bg-slate-50 dark:hover:bg-[#27272A] border border-slate-200 dark:border-[#27272A] rounded-2xl transition-all cursor-pointer shadow-sm"
           >
-            {cancelText || t('common.cancel', 'Скасувати')}
+            {cancelLabel || cancelText || t('common.cancel', 'Скасувати')}
           </button>
           <button
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
-            className={`px-6 py-2.5 text-xs font-black uppercase rounded-2xl transition-all cursor-pointer shadow-sm ${
-              isDanger
-                ? 'bg-[#FCE7E7] hover:bg-rose-200 border border-rose-200 text-[#0A0A0A]'
-                : 'bg-[#0A0A0A] hover:bg-zinc-800 border border-[#0A0A0A] text-[#F2EBDD]'
-            }`}
+            onClick={handleConfirm}
+            className={`px-6 py-2.5 text-xs font-black uppercase rounded-2xl transition-all cursor-pointer shadow-sm ${confirmBtnClass}`}
           >
-            {confirmText || t('common.confirm', 'Підтвердити')}
+            {confirmLabel || confirmText || t('common.confirm', 'Підтвердити')}
           </button>
         </div>
       </div>
