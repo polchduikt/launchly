@@ -13,107 +13,12 @@ import {
   TrendingDown, 
   ChevronDown,
   MessageSquare,
-  Clock,
   HelpCircle,
   MoreVertical,
   Plus
 } from 'lucide-react';
-import { AiIcon } from '../../../components/ui/AiIcon';
-import { CHART_DIMENSIONS } from '../../../const/constants';
-
-interface MiniBarChartProps {
-  data: number[];
-  color: string;
-}
-
-const MiniBarChart: React.FC<MiniBarChartProps> = ({ data, color }) => {
-  const maxVal = Math.max(...data, 1);
-  const { WIDTH, HEIGHT, GAP, MIN_BAR_HEIGHT } = CHART_DIMENSIONS.MINI_BAR;
-  const barWidth = (WIDTH - GAP * (data.length - 1)) / data.length;
-
-  return (
-    <svg width={WIDTH} height={HEIGHT} className="overflow-visible">
-      {data.map((val, idx) => {
-        const barHeight = Math.max((val / maxVal) * HEIGHT, MIN_BAR_HEIGHT);
-        const x = idx * (barWidth + GAP);
-        const y = HEIGHT - barHeight;
-        return (
-          <rect
-            key={idx}
-            x={x}
-            y={y}
-            width={barWidth}
-            height={barHeight}
-            fill={color}
-            rx={1.5}
-            className="transition-all duration-300 opacity-80 hover:opacity-100"
-          />
-        );
-      })}
-    </svg>
-  );
-};
-
-interface SemiDonutChartProps {
-  data: { name: string; count: number; pct: number; color: string }[];
-  total: number;
-}
-
-const SemiDonutChart: React.FC<SemiDonutChartProps> = ({ data, total }) => {
-  const { SIZE, STROKE_WIDTH, GAP_DEG, START_OFFSET_DEG } = CHART_DIMENSIONS.SEMI_DONUT;
-  const r = (SIZE - STROKE_WIDTH) / 2;
-  const circumference = 2 * Math.PI * r;
-  const cx = SIZE / 2;
-  const cy = SIZE / 2;
-  const totalCounts = data.reduce((sum, item) => sum + item.count, 0);
-
-  let cumulativeOffset = 0;
-  const startOffset = circumference * (START_OFFSET_DEG / 360);
-
-  return (
-    <div className="relative flex items-center justify-center" style={{ width: SIZE, height: SIZE }}>
-      <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{ transform: 'rotate(-90deg)' }}>
-        <circle
-          cx={cx}
-          cy={cy}
-          r={r}
-          fill="none"
-          stroke="#e2e8f0"
-          strokeWidth={STROKE_WIDTH}
-        />
-        {data.map((item, idx) => {
-          const fraction = totalCounts > 0 ? item.count / totalCounts : 0;
-          const gapFraction = (GAP_DEG / 360) * circumference;
-          const segLength = fraction * circumference - gapFraction;
-          const dashArray = `${Math.max(segLength, 0)} ${circumference - Math.max(segLength, 0)}`;
-          const dashOffset = -(cumulativeOffset - startOffset);
-          cumulativeOffset += fraction * circumference;
-
-          return (
-            <circle
-              key={idx}
-              cx={cx}
-              cy={cy}
-              r={r}
-              fill="none"
-              stroke={item.color}
-              strokeWidth={STROKE_WIDTH}
-              strokeDasharray={dashArray}
-              strokeDashoffset={dashOffset}
-              strokeLinecap="round"
-            />
-          );
-        })}
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none font-['JetBrains_Mono',monospace]">
-        <span className="text-[8px] font-extrabold text-[#0A0A0A]/60 uppercase tracking-widest block">Total</span>
-        <span className="text-sm font-black text-[#0A0A0A] tracking-tight block mt-0.5">
-          {total.toLocaleString()}
-        </span>
-      </div>
-    </div>
-  );
-};
+import { MiniBarChart, SemiDonutChart, ActivityAreaChart } from '../../../components/charts';
+import { AiStatsCard } from './components/AiStatsCard';
 
 export const DashboardStatsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -121,7 +26,6 @@ export const DashboardStatsPage: React.FC = () => {
   const [selectedBotId, setSelectedBotId] = useState<number>(0);
   const [days, setDays] = useState<number>(7);
   const [isBotSelectorOpen, setIsBotSelectorOpen] = useState(false);
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
   const { data: stats, isLoading, error } = useDashboardStatsQuery(selectedBotId, days, true);
   const connectedBots = React.useMemo(() => bots.filter((b) => b.hasTelegramToken), [bots]);
@@ -221,8 +125,8 @@ export const DashboardStatsPage: React.FC = () => {
 
   const currentBot = bots.find((b) => b.id === selectedBotId);
 
-  const renderActivityChart = () => {
-    if (!stats) return null;
+  const activityData = React.useMemo(() => {
+    if (!stats) return [];
 
     const rawData = stats.dailyStats || [];
     const today = new Date();
@@ -246,268 +150,8 @@ export const DashboardStatsPage: React.FC = () => {
         });
       }
     }
-
-    const width = 1000;
-    const height = 170;
-    const padding = 28;
-
-    const maxVal = Math.max(
-      ...data.map((d) => Math.max(d.activeUsers, d.clicks, 5))
-    );
-
-    const getX = (index: number) => {
-      if (data.length <= 1) return padding + (width - padding * 2) / 2;
-      return padding + (index / (data.length - 1)) * (width - padding * 2);
-    };
-
-    const getY = (val: number) => {
-      return height - padding - (val / maxVal) * (height - padding * 2);
-    };
-
-    const handleMouseMove = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
-      if (!stats || data.length === 0) return;
-      const svg = e.currentTarget;
-      const rect = svg.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const svgX = (mouseX / rect.width) * width;
-      
-      let closestIdx = 0;
-      let minDiff = Infinity;
-      for (let i = 0; i < data.length; i++) {
-        const diff = Math.abs(getX(i) - svgX);
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestIdx = i;
-        }
-      }
-      setHoveredIdx(closestIdx);
-    };
-
-    const handleMouseLeave = () => {
-      setHoveredIdx(null);
-    };
-
-    let usersPath = '';
-    let clicksPath = '';
-    let usersFillPath = '';
-    let clicksFillPath = '';
-
-    data.forEach((d, idx) => {
-      const x = getX(idx);
-      const yUsers = getY(d.activeUsers);
-      const yClicks = getY(d.clicks);
-
-      if (idx === 0) {
-        usersPath = `M ${x} ${yUsers}`;
-        clicksPath = `M ${x} ${yClicks}`;
-        usersFillPath = `M ${x} ${height - padding} L ${x} ${yUsers}`;
-        clicksFillPath = `M ${x} ${height - padding} L ${x} ${yClicks}`;
-      } else {
-        const prevX = getX(idx - 1);
-        const cpX1 = prevX + (x - prevX) / 2;
-        const cpX2 = cpX1;
-        const prevYUsers = getY(data[idx - 1].activeUsers);
-        const prevYClicks = getY(data[idx - 1].clicks);
-
-        usersPath += ` C ${cpX1} ${prevYUsers}, ${cpX2} ${yUsers}, ${x} ${yUsers}`;
-        clicksPath += ` C ${cpX1} ${prevYClicks}, ${cpX2} ${yClicks}, ${x} ${yClicks}`;
-        usersFillPath += ` C ${cpX1} ${prevYUsers}, ${cpX2} ${yUsers}, ${x} ${yUsers}`;
-        clicksFillPath += ` C ${cpX1} ${prevYClicks}, ${cpX2} ${yClicks}, ${x} ${yClicks}`;
-      }
-
-      if (idx === data.length - 1) {
-        usersFillPath += ` L ${x} ${height - padding} Z`;
-        clicksFillPath += ` L ${x} ${height - padding} Z`;
-      }
-    });
-
-    return (
-      <div className="w-full overflow-x-auto relative">
-        <svg 
-          className="w-full min-w-[650px] overflow-visible" 
-          viewBox={`0 0 ${width} ${height}`}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-        >
-          <defs>
-            <linearGradient id="usersGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#6366f1" stopOpacity="0.22" />
-              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.0" />
-            </linearGradient>
-            <linearGradient id="clicksGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-            </linearGradient>
-          </defs>
-
-          {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
-            const y = padding + ratio * (height - padding * 2);
-            const valLabel = Math.round(maxVal * (1 - ratio));
-            return (
-              <g key={ratio} className="opacity-40">
-                <line
-                  x1={padding}
-                  y1={y}
-                  x2={width - padding}
-                  y2={y}
-                  stroke="#0A0A0A"
-                  strokeWidth="1"
-                  strokeDasharray="4 4"
-                />
-                <text
-                  x={padding - 10}
-                  y={y + 4}
-                  fill="#0A0A0A"
-                  fontSize="9.5"
-                  fontWeight="bold"
-                  textAnchor="end"
-                  className="font-mono"
-                >
-                  {valLabel}
-                </text>
-              </g>
-            );
-          })}
-
-          <path d={usersFillPath} fill="url(#usersGradient)" />
-          <path d={clicksFillPath} fill="url(#clicksGradient)" />
-          
-          <path
-            d={usersPath}
-            fill="none"
-            stroke="#6366f1"
-            strokeWidth="3.2"
-            strokeLinecap="round"
-          />
-          <path
-            d={clicksPath}
-            fill="none"
-            stroke="#10b981"
-            strokeWidth="3.2"
-            strokeLinecap="round"
-          />
-
-          {hoveredIdx !== null && (
-            <line
-              x1={getX(hoveredIdx)}
-              y1={padding}
-              x2={getX(hoveredIdx)}
-              y2={height - padding}
-              stroke="#0A0A0A"
-              strokeWidth="1.5"
-              strokeDasharray="3 3"
-            />
-          )}
-
-          {data.map((d, idx) => {
-            const x = getX(idx);
-            const yUsers = getY(d.activeUsers);
-            const yClicks = getY(d.clicks);
-            const isHovered = idx === hoveredIdx;
-
-            if (!isHovered && data.length > 15) return null;
-
-            return (
-              <g key={idx}>
-                <circle
-                  cx={x}
-                  cy={yUsers}
-                  r={isHovered ? "5.5" : "3.5"}
-                  fill={isHovered ? "#6366f1" : "#ffffff"}
-                  stroke="#6366f1"
-                  strokeWidth={isHovered ? "2.5" : "1.8"}
-                  style={{ transition: 'all 0.15s ease-out' }}
-                />
-                <circle
-                  cx={x}
-                  cy={yClicks}
-                  r={isHovered ? "5.5" : "3.5"}
-                  fill={isHovered ? "#10b981" : "#ffffff"}
-                  stroke="#10b981"
-                  strokeWidth={isHovered ? "2.5" : "1.8"}
-                  style={{ transition: 'all 0.15s ease-out' }}
-                />
-              </g>
-            );
-          })}
-
-          {data.map((d, idx) => {
-            if (idx % Math.ceil(data.length / 7) !== 0 && idx !== data.length - 1) return null;
-            const x = getX(idx);
-            const dateParts = d.date.split('-');
-            const labelStr = dateParts.length >= 3 ? `${dateParts[2]}.${dateParts[1]}` : d.date;
-
-            return (
-              <text
-                key={idx}
-                x={x}
-                y={height - 10}
-                fill="#0A0A0A"
-                fontSize="9.5"
-                fontWeight="bold"
-                textAnchor="middle"
-                className="font-mono"
-              >
-                {labelStr}
-              </text>
-            );
-          })}
-        </svg>
-
-        {hoveredIdx !== null && data[hoveredIdx] && (
-          <div 
-            className="absolute bg-[#0A0A0A] text-[#F2EBDD] px-3.5 py-2.5 rounded-xl border-2 border-[#0A0A0A] pointer-events-none text-left z-30 flex flex-col gap-1 min-w-[160px] font-['JetBrains_Mono',monospace]"
-            style={(() => {
-              const xPercent = (getX(hoveredIdx) / width) * 100;
-              if (xPercent < 20) {
-                return {
-                  left: `${xPercent}%`,
-                  top: `8%`,
-                  transform: `translateX(10px)`,
-                  transition: 'left 0.12s ease-out'
-                };
-              } else if (xPercent > 80) {
-                return {
-                  right: `${100 - xPercent}%`,
-                  top: `8%`,
-                  transform: `translateX(-10px)`,
-                  transition: 'right 0.12s ease-out'
-                };
-              } else {
-                return {
-                  left: `${xPercent}%`,
-                  top: `8%`,
-                  transform: `translateX(-50%)`,
-                  transition: 'left 0.12s ease-out'
-                };
-              }
-            })()}
-          >
-            <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider select-none">
-              {(() => {
-                const dateParts = data[hoveredIdx].date.split('-');
-                return dateParts.length >= 3 ? `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}` : data[hoveredIdx].date;
-              })()}
-            </div>
-            <div className="flex items-center justify-between gap-4 text-xs mt-1 select-none">
-              <span className="flex items-center gap-1.5 font-semibold text-slate-300">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                {t('dashboard.stats.active_users_legend')}
-              </span>
-              <span className="font-extrabold text-white">{data[hoveredIdx].activeUsers}</span>
-            </div>
-            <div className="flex items-center justify-between gap-4 text-xs select-none">
-              <span className="flex items-center gap-1.5 font-semibold text-slate-300">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                {t('dashboard.stats.button_clicks_legend')}
-              </span>
-              <span className="font-extrabold text-white">{data[hoveredIdx].clicks}</span>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
+    return data;
+  }, [stats, days]);
 
   const renderActivityHeatmap = () => {
     if (!stats) return null;
@@ -833,7 +477,7 @@ export const DashboardStatsPage: React.FC = () => {
                       ))}
                     </div>
                   </div>
-                  {renderActivityChart()}
+                  <ActivityAreaChart data={activityData} isLoaded={Boolean(stats)} />
                 </div>
 
                 <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col lg:h-[310px]">
@@ -882,41 +526,7 @@ export const DashboardStatsPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
-                
-                <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between lg:col-span-3 lg:h-[275px]">
-                  <div>
-                    <h2 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-widest block mb-1">{t('dashboard.stats.ai_insights_title')}</h2>
-                    <p className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-700 mb-3 mt-0.5 uppercase">{t('dashboard.stats.ai_insights_desc')}</p>
-                    
-                    <div className="grid grid-cols-2 gap-2.5 font-['JetBrains_Mono',monospace]">
-                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
-                        <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_messages')}</span>
-                        <span className="text-base font-black text-[#0A0A0A] flex items-center gap-1.5">
-                          <AiIcon size={13} className="text-indigo-600" />
-                          {aiStats.messagesProcessed}
-                        </span>
-                      </div>
-                      
-                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
-                        <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_resolution_rate')}</span>
-                        <span className="text-base font-black text-[#0A0A0A]">{aiStats.resolutionRate}%</span>
-                      </div>
-                      
-                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
-                        <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_time_saved')}</span>
-                        <span className="text-base font-black text-emerald-700 flex items-center gap-1.5">
-                          <Clock size={13} className="text-emerald-600" />
-                          {aiStats.timeSavedHours}h
-                        </span>
-                      </div>
-                      
-                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl flex flex-col justify-center min-h-[56px]">
-                        <span className="text-[9px] font-black text-[#0A0A0A]/70 uppercase tracking-wider block mb-0.5">{t('dashboard.stats.ai_response_time')}</span>
-                        <span className="text-base font-black text-[#0A0A0A]">{aiStats.responseTimeSeconds}s</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <AiStatsCard stats={aiStats} />
 
                 <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-5 flex flex-col justify-between lg:col-span-3 lg:h-[275px]">
                   <div>
