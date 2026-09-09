@@ -386,7 +386,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
               <button
                 onClick={() => setStep(2)}
                 disabled={selectedIds.length === 0}
-                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>{t('template.create.next_step', 'Далі')}</span>
                 <ChevronRight size={15} />
@@ -396,7 +396,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
               <button
                 onClick={handleCreateOrUpdateTemplate}
                 disabled={submitting || !templateName.trim()}
-                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <>
@@ -692,7 +692,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                     />
                     <button
                       onClick={handleCopyLink}
-                      className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                      className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
                     >
                       {copied ? (
                         <>
@@ -777,7 +777,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                     <button
                       onClick={handleSaveDetails}
                       disabled={savingDetails}
-                      className="px-5 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-2"
+                      className="px-5 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-2"
                     >
                       {savingDetails ? (
                         <>

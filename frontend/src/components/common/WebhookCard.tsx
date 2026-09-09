@@ -233,7 +233,7 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
                 type="button"
                 onClick={handleDelete}
                 disabled={deleteMut.isPending}
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl transition-all border border-rose-100 cursor-pointer ml-auto"
+                className="flex items-center gap-1.5 px-4 py-2.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl transition-all cursor-pointer ml-auto"
               >
                 <Trash2 size={14} />
                 <span>{t('settings.integrations.webhook.btn_remove')}</span>

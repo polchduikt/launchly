@@ -39,10 +39,10 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
   const confirmBtnClass =
     effectiveVariant === 'danger'
-      ? 'bg-[#FCE7E7] hover:bg-rose-200 text-[#0A0A0A] border border-rose-200'
+      ? 'border border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800'
       : effectiveVariant === 'warning'
-      ? 'bg-amber-100 hover:bg-amber-200 text-[#0A0A0A] border border-amber-200'
-      : 'bg-[#0A0A0A] hover:bg-zinc-800 text-[#F2EBDD] border border-[#0A0A0A]';
+      ? 'border border-amber-200 bg-amber-100 hover:bg-amber-200 text-[#0A0A0A]'
+      : 'border border-[#0A0A0A] bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white';
 
   const handleConfirm = () => {
     onConfirm();
@@ -53,7 +53,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-start justify-center pt-16 px-4 font-['JetBrains_Mono',monospace] bg-slate-500/30 dark:bg-black/60 backdrop-blur-[1px]"
+      className="fixed inset-0 z-[9999] flex items-start justify-center pt-16 px-4 bg-slate-500/30 dark:bg-black/60 backdrop-blur-[1px]"
       onClick={handleClose}
     >
       <div
@@ -76,16 +76,16 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
         <div className="h-px bg-slate-200 dark:bg-[#27272A] my-5" />
 
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3">
           <button
             onClick={handleClose}
-            className="px-5 py-2.5 text-xs font-bold text-[#0A0A0A] dark:text-[#E4E4E7] bg-white dark:bg-[#18181B] hover:bg-slate-50 dark:hover:bg-[#27272A] border border-slate-200 dark:border-[#27272A] rounded-2xl transition-all cursor-pointer shadow-sm"
+            className="w-full sm:w-auto px-5 py-2.5 text-xs font-bold text-[#0A0A0A] dark:text-[#E4E4E7] bg-white dark:bg-[#18181B] hover:bg-[#0A0A0A] hover:text-white dark:hover:bg-white dark:hover:text-[#0A0A0A] border border-slate-200 dark:border-[#27272A] rounded-2xl transition-all cursor-pointer shadow-sm text-center"
           >
             {cancelLabel || cancelText || t('common.cancel', 'Скасувати')}
           </button>
           <button
             onClick={handleConfirm}
-            className={`px-6 py-2.5 text-xs font-black uppercase rounded-2xl transition-all cursor-pointer shadow-sm ${confirmBtnClass}`}
+            className={`w-full sm:w-auto px-5 py-2.5 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm text-center ${confirmBtnClass}`}
           >
             {confirmLabel || confirmText || t('common.confirm', 'Підтвердити')}
           </button>

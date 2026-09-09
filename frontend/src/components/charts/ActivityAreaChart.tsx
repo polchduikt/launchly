@@ -271,7 +271,7 @@ export const ActivityAreaChart: React.FC<ActivityAreaChartProps> = ({ data, isLo
           <div className="flex items-center justify-between gap-4 text-xs select-none">
             <span className="flex items-center gap-1.5 font-semibold text-slate-300">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              {t('dashboard.stats.clicks_legend')}
+              {t('dashboard.stats.button_clicks_legend')}
             </span>
             <span className="font-extrabold text-white">{data[hoveredIdx].clicks}</span>
           </div>

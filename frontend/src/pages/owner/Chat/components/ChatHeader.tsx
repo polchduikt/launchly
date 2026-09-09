@@ -10,8 +10,8 @@ interface ChatHeaderProps {
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ searchQuery, onSearchChange, onOpenSettings }) => {
   return (
-    <header className="h-[56px] min-h-[56px] border-b-2 border-[#0A0A0A] flex items-center justify-between px-6 bg-[#F2EBDD] shrink-0 font-['JetBrains_Mono',monospace]">
-      <div className="font-['Anybody',sans-serif] text-xl font-black uppercase text-[#0A0A0A] tracking-tight">{t('common.nav.chat')}</div>
+    <header className="h-16 border-b-2 border-[#0A0A0A] flex items-center justify-between px-6 bg-[#F2EBDD] shrink-0">
+      <h1 className="font-['Anybody',sans-serif] text-2xl font-black uppercase text-[#0A0A0A] tracking-tight select-none">{t('common.nav.chat')}</h1>
       <div className="w-[400px] relative">
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#0A0A0A]" />
         <input

@@ -73,7 +73,7 @@ export const GeneralPanel: React.FC = () => {
       <div className="pt-4 flex flex-col gap-3">
         <h3 className="text-sm font-semibold text-rose-600">Видалити акаунт</h3>
         <p className="text-xs text-slate-500">Продовжити видалення акаунту</p>
-        <button className="w-fit px-4 py-2 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold rounded-lg transition-all">
+        <button className="w-fit px-4 py-2 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-lg transition-all cursor-pointer">
           Видалити
         </button>
       </div>

@@ -210,7 +210,7 @@ export const ChatPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace] overflow-hidden w-full max-w-full">
+      <div className="h-full flex flex-col bg-[#F2EBDD] font-['Geist',sans-serif] overflow-hidden w-full max-w-full">
         <style>{`
           .scrollbar-none::-webkit-scrollbar { display: none; }
           .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }

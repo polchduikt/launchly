@@ -837,7 +837,7 @@ const FlowBuilderInner: React.FC = () => {
             <div className="p-4 border-t-2 border-[#0A0A0A] bg-[#F2EBDD] flex justify-end gap-3">
               <button
                 onClick={() => setIsConnectModalOpen(false)}
-                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] hover:bg-white rounded-xl border border-transparent hover:border-[#0A0A0A] transition-all cursor-pointer"
+                className="px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-white rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 Скасувати
               </button>
@@ -858,7 +858,7 @@ const FlowBuilderInner: React.FC = () => {
                     setTokenError(message || 'Не вдалося підключити бота. Перевірте токен.');
                   }
                 }}
-                className="px-6 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] transition-all cursor-pointer disabled:opacity-50"
+                className="px-6 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] transition-all cursor-pointer disabled:opacity-50"
               >
                 {updateBotMutation.isPending ? 'Підключення...' : 'Підключити та активувати'}
               </button>

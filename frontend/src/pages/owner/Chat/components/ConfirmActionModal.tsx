@@ -53,11 +53,11 @@ export const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
         <div className="p-6 space-y-5">
           <p className="text-xs text-[#0A0A0A] leading-relaxed font-bold uppercase">{message}</p>
 
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-xs font-black uppercase text-[#0A0A0A] bg-white border-2 border-[#0A0A0A] rounded-xl hover:bg-[#F2EBDD] transition-all cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 text-xs font-bold text-[#0A0A0A] bg-white border-2 border-[#0A0A0A] rounded-xl hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer text-center"
             >
               {cancelText || t('broadcast.dialog.cancel') || 'Cancel'}
             </button>
@@ -65,10 +65,10 @@ export const ConfirmActionModal: React.FC<ConfirmActionModalProps> = ({
               type="button"
               onClick={onConfirm}
               disabled={isLoading}
-              className={`flex items-center gap-1.5 px-5 py-2.5 text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-5 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-center ${
                 isDanger
-                  ? 'bg-rose-500 text-white hover:bg-rose-600'
-                  : 'bg-[#0A0A0A] text-[#F2EBDD] hover:bg-[#2A2A2A]'
+                  ? 'border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800'
+                  : 'border-2 border-[#0A0A0A] bg-[#0A0A0A] text-white hover:bg-white hover:text-[#0A0A0A]'
               }`}
             >
               {isLoading ? (

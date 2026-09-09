@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Loader2, X, User, Save } from 'lucide-react';
+import { AlertTriangle, Loader2, X, User } from 'lucide-react';
 import { useTranslation } from '../../../../i18n/config';
 import type { CampaignResponse } from '../../../../types';
 import type { BotResponse } from '../../../../types/bot';
@@ -141,25 +141,22 @@ export const EditBroadcastDialog: React.FC<EditBroadcastDialogProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-xs font-bold text-[#0A0A0A] hover:bg-white border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+              className="px-5 py-2.5 text-xs font-bold text-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
             >
               {t('broadcast.dialog.cancel')}
             </button>
             <button
               type="submit"
               disabled={updateMut.isPending || !name.trim()}
-              className="flex items-center gap-1.5 px-5 py-2.5 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-indigo-700 rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2.5 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {updateMut.isPending ? (
-                <>
+                <span className="flex items-center gap-1.5">
                   <Loader2 size={12} className="animate-spin" />
                   <span>{t('broadcast.dialog.saving')}</span>
-                </>
+                </span>
               ) : (
-                <>
-                  <Save size={12} />
-                  <span>{t('broadcast.dialog.save_changes')}</span>
-                </>
+                <span>{t('broadcast.dialog.save_changes')}</span>
               )}
             </button>
           </div>

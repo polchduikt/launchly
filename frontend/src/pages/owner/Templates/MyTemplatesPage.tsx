@@ -96,8 +96,8 @@ export const MyTemplatesPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col min-h-full font-['JetBrains_Mono',monospace] text-[#0A0A0A] bg-[#F2EBDD]">
-        <div className="w-full h-16 min-h-[64px] max-h-[64px] bg-white border-b-2 border-[#0A0A0A] px-6 flex items-center justify-between gap-4 sticky top-0 z-20">
+      <div className="flex flex-col min-h-full font-['Geist',sans-serif] text-[#0A0A0A] bg-[#F2EBDD]">
+        <div className="w-full h-16 min-h-[64px] max-h-[64px] bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-6 flex items-center justify-between gap-4 sticky top-0 z-20">
           <div className="flex items-center gap-6">
             <button
               onClick={() => handleTabChange('my')}
@@ -130,7 +130,7 @@ export const MyTemplatesPage: React.FC = () => {
 
           <button
             onClick={() => navigate('/templates/create')}
-            className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-2"
+            className="px-4 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-2"
           >
             <Plus size={15} />
             <span>{t('template.my.create_btn', 'Новий темплейт')}</span>
@@ -165,7 +165,7 @@ export const MyTemplatesPage: React.FC = () => {
                 </p>
                 <button
                   onClick={() => navigate('/templates/create')}
-                  className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer inline-flex items-center gap-2 rounded-xl"
+                  className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer inline-flex items-center gap-2 rounded-xl"
                 >
                   <Plus size={15} />
                   <span>{t('template.my.create_btn', 'Новий темплейт')}</span>
@@ -257,17 +257,17 @@ export const MyTemplatesPage: React.FC = () => {
                             )}
                           </td>
 
-                          <td className="py-3.5 px-4 whitespace-nowrap text-xs text-slate-600 font-bold text-center">
+                          <td className="py-3.5 px-4 whitespace-nowrap text-xs text-slate-600 font-bold text-center font-['JetBrains_Mono',monospace]">
                             {new Date(tpl.createdAt).toLocaleDateString()}
                           </td>
 
                           <td className="py-3.5 px-4 whitespace-nowrap text-center" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-center gap-2">
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-300">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-300 font-['JetBrains_Mono',monospace]">
                                 <Eye size={12} className="text-slate-600" />
                                 <span>{tpl.viewsCount ?? 0}</span>
                               </span>
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-1 rounded border border-emerald-300">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-1 rounded border border-emerald-300 font-['JetBrains_Mono',monospace]">
                                 <Download size={12} className="text-emerald-700" />
                                 <span>{tpl.installsCount ?? 0}</span>
                               </span>
@@ -296,7 +296,7 @@ export const MyTemplatesPage: React.FC = () => {
                                   shareCode: tpl.shareCode,
                                   isInstalled: false,
                                 })}
-                                className="p-1.5 bg-rose-100 hover:bg-rose-600 hover:text-white border border-[#0A0A0A] text-rose-700 rounded-lg transition-all cursor-pointer shadow-[1px_1px_0px_#0A0A0A]"
+                                className="p-1.5 bg-rose-100 hover:bg-rose-600 hover:text-white border border-rose-600 text-rose-800 rounded-lg transition-all cursor-pointer"
                                 title={t('common.delete', 'Видалити')}
                               >
                                 <Trash2 size={13} />
@@ -434,7 +434,7 @@ export const MyTemplatesPage: React.FC = () => {
                                   shareCode: tpl.shareCode,
                                   isInstalled: true,
                                 })}
-                                className="p-1.5 bg-rose-100 hover:bg-rose-600 hover:text-white border border-[#0A0A0A] text-rose-700 rounded-lg transition-all cursor-pointer shadow-[1px_1px_0px_#0A0A0A]"
+                                className="p-1.5 bg-rose-100 hover:bg-rose-600 hover:text-white border border-rose-600 text-rose-800 rounded-lg transition-all cursor-pointer"
                                 title={t('common.delete', 'Видалити')}
                               >
                                 <Trash2 size={13} />

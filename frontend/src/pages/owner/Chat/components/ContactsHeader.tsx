@@ -8,12 +8,10 @@ interface ContactsHeaderProps {
 
 export const ContactsHeader: React.FC<ContactsHeaderProps> = ({ onCreateContact }) => {
   return (
-    <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-6 py-4 flex justify-between items-center shrink-0 z-20">
-      <div>
-        <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight select-none">
-          {t('crm.contacts.title')}
-        </h1>
-      </div>
+    <header className="h-16 border-b-2 border-[#0A0A0A] px-6 flex justify-between items-center shrink-0 z-20 bg-[#F2EBDD]">
+      <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight select-none">
+        {t('crm.contacts.title')}
+      </h1>
       <div className="flex items-center gap-3">
         <button
           onClick={onCreateContact}

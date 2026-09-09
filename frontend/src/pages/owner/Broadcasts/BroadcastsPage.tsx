@@ -178,14 +178,14 @@ export const BroadcastsPage: React.FC = () => {
         <div className="flex items-center justify-between pb-6 border-b-2 border-[#0A0A0A]">
           <div>
             <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight select-none">{t('broadcasts.title')}</h1>
-            <p className="font-['JetBrains_Mono',monospace] text-xs text-slate-700 font-bold mt-1 uppercase">
+            <p className="font-['Geist',sans-serif] text-xs text-slate-700 font-bold mt-1">
               {t('broadcasts.subtitle')}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-white bg-[#0A0A0A] hover:bg-[#2A2A2A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] select-none"
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] select-none"
             >
               <Plus size={14} />
               <span>{t('broadcasts.btn.new')}</span>
@@ -476,7 +476,7 @@ export const BroadcastsPage: React.FC = () => {
               <div className="pt-2">
                 <button
                   onClick={() => setBlockedDetailsCampaign(null)}
-                  className="w-full py-3 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                  className="w-full py-3 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] border-2 border-[#0A0A0A] text-[#F2EBDD] font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
                 >
                   {t('common.close') || 'Зрозуміло'}
                 </button>

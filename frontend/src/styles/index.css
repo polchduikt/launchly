@@ -24,6 +24,10 @@
   --shadow-brutal-md: 6px 6px 0px #0A0A0A;
   --shadow-brutal-lg: 8px 8px 0px #0A0A0A;
   --shadow-brutal-white: 4px 4px 0px #FFFFFF;
+
+  --font-display: 'Anybody', sans-serif;
+  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
 :root {
@@ -63,6 +67,7 @@ html, body, #root {
   padding: 0;
   background-color: #F8FAFC;
   min-height: 100vh;
+  font-family: var(--font-sans);
 }
 
 [data-theme="yellow"] html,
@@ -449,9 +454,22 @@ html, body {
 [data-theme="light"] .border-t-2.border-\[\#0A0A0A\],
 [data-theme="light"] .border-l-2.border-\[\#0A0A0A\],
 [data-theme="light"] .border-4.border-\[\#0A0A0A\],
+[data-theme="light"] .border-b-4.border-\[\#0A0A0A\],
+[data-theme="light"] .border-l-4.border-\[\#0A0A0A\],
 [data-theme="light"] [class*="border-\[\#0A0A0A\]"],
-[data-theme="light"] [class*="divide-\[\#0A0A0A\]"] {
+[data-theme="light"] [class*="divide-\[\#0A0A0A\]"],
+[data-theme="light"] [class*="divide-"] > *,
+[data-theme="light"] [class*="divide-"] > :not([hidden]) ~ :not([hidden]) {
   border-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] thead tr,
+[data-theme="light"] thead th,
+[data-theme="light"] thead [class*="bg-\[\#F2EBDD\]"],
+[data-theme="light"] thead .bg-\[\#F2EBDD\] {
+  background-color: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
 }
 
 [data-theme="light"] .text-\[\#0A0A0A\] {
@@ -469,16 +487,16 @@ html, body {
   color: #64748B !important;
 }
 
-[data-theme="light"] .bg-\[\#0A0A0A\],
-[data-theme="light"] .bg-\[\#0A0A0A\] *,
-[data-theme="light"] button.bg-\[\#0A0A0A\],
-[data-theme="light"] button.bg-\[\#0A0A0A\] *,
-[data-theme="light"] a.bg-\[\#0A0A0A\],
-[data-theme="light"] a.bg-\[\#0A0A0A\] *,
-[data-theme="light"] .bg-slate-900,
-[data-theme="light"] .bg-slate-900 *,
-[data-theme="light"] .bg-black,
-[data-theme="light"] .bg-black *,
+[data-theme="light"] .bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover),
+[data-theme="light"] .bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) *:not(.bg-white):not([class*="bg-white"]):not(.text-\[\#0A0A0A\]):not(.text-black):not([class*="bg-slate"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-indigo"]):not([class*="bg-purple"]):not([class*="bg-blue"]):not([class*="bg-red"]):not([class*="bg-rose"]),
+[data-theme="light"] button.bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover),
+[data-theme="light"] button.bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) *:not(.bg-white):not([class*="bg-white"]):not(.text-\[\#0A0A0A\]):not(.text-black):not([class*="bg-slate"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-indigo"]):not([class*="bg-purple"]):not([class*="bg-blue"]):not([class*="bg-red"]):not([class*="bg-rose"]),
+[data-theme="light"] a.bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover),
+[data-theme="light"] a.bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) *:not(.bg-white):not([class*="bg-white"]):not(.text-\[\#0A0A0A\]):not(.text-black):not([class*="bg-slate"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-indigo"]):not([class*="bg-purple"]):not([class*="bg-blue"]):not([class*="bg-red"]):not([class*="bg-rose"]),
+[data-theme="light"] .bg-slate-900:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover),
+[data-theme="light"] .bg-slate-900:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) *:not(.bg-white):not([class*="bg-white"]):not(.text-\[\#0A0A0A\]):not(.text-black):not([class*="bg-slate"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-indigo"]):not([class*="bg-purple"]):not([class*="bg-blue"]):not([class*="bg-red"]):not([class*="bg-rose"]),
+[data-theme="light"] .bg-black:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover),
+[data-theme="light"] .bg-black:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) *:not(.bg-white):not([class*="bg-white"]):not(.text-\[\#0A0A0A\]):not(.text-black):not([class*="bg-slate"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-indigo"]):not([class*="bg-purple"]):not([class*="bg-blue"]):not([class*="bg-red"]):not([class*="bg-rose"]),
 [data-theme="light"] .text-\[\#F2EBDD\] {
   color: #FFFFFF !important;
 }
@@ -491,10 +509,10 @@ html, body {
 [data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-white"] *,
 [data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-white"],
 [data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-white"] *,
-[data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-slate-100"],
-[data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-slate-100"] *,
-[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-slate-100"],
-[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-slate-100"] *,
+[data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-slate-"],
+[data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-slate-"] *,
+[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-slate-"],
+[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-slate-"] *,
 [data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-emerald-"],
 [data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-emerald-"] *,
 [data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-emerald-"],
@@ -502,15 +520,35 @@ html, body {
 [data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-amber-"],
 [data-theme="light"] .bg-\[\#0A0A0A\] [class*="bg-amber-"] *,
 [data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-amber-"],
-[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-amber-"] * {
-  color: #0F172A !important;
+[data-theme="light"] button.bg-\[\#0A0A0A\] [class*="bg-amber-"] *,
+[data-theme="light"] .bg-\[\#0A0A0A\] .text-\[\#0A0A0A\],
+[data-theme="light"] .bg-\[\#0A0A0A\] .text-\[\#0A0A0A\] *,
+[data-theme="light"] button.bg-\[\#0A0A0A\] .text-\[\#0A0A0A\],
+[data-theme="light"] button.bg-\[\#0A0A0A\] .text-\[\#0A0A0A\] *,
+[data-theme="light"] .bg-\[\#0A0A0A\] .text-black,
+[data-theme="light"] .bg-\[\#0A0A0A\] .text-black *,
+[data-theme="light"] button.bg-\[\#0A0A0A\] .text-black,
+[data-theme="light"] button.bg-\[\#0A0A0A\] .text-black *,
+[data-theme="light"] button.bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) .bg-white,
+[data-theme="light"] button.bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) .bg-white *,
+[data-theme="light"] button.bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) [class*="bg-white"],
+[data-theme="light"] button.bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) [class*="bg-white"] *,
+[data-theme="light"] button.bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) .text-\[\#0A0A0A\],
+[data-theme="light"] button.bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) .text-\[\#0A0A0A\] *,
+[data-theme="light"] .bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) .bg-white,
+[data-theme="light"] .bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) .bg-white *,
+[data-theme="light"] .bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) [class*="bg-white"],
+[data-theme="light"] .bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) [class*="bg-white"] *,
+[data-theme="light"] .bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) .text-\[\#0A0A0A\],
+[data-theme="light"] .bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) .text-\[\#0A0A0A\] * {
+  color: #0A0A0A !important;
 }
 
-[data-theme="light"] .bg-\[\#0A0A0A\] svg,
-[data-theme="light"] button.bg-\[\#0A0A0A\] svg,
-[data-theme="light"] a.bg-\[\#0A0A0A\] svg,
-[data-theme="light"] .bg-slate-900 svg,
-[data-theme="light"] .bg-black svg {
+[data-theme="light"] .bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) svg,
+[data-theme="light"] button.bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) svg,
+[data-theme="light"] a.bg-\[\#0A0A0A\]:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) svg,
+[data-theme="light"] .bg-slate-900:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) svg,
+[data-theme="light"] .bg-black:not(.hover\:bg-white:hover):not(.hover\:text-\[\#0A0A0A\]:hover):not(.hover\:text-black:hover) svg {
   stroke: #FFFFFF !important;
   color: #FFFFFF !important;
 }
@@ -641,6 +679,128 @@ a.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badg
 [data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) * {
   stroke: #FFFFFF !important;
   color: #FFFFFF !important;
+}
+
+/* Invert to white background and black text on hover */
+.hover\:bg-white:hover,
+button.hover\:bg-white:hover,
+a.hover\:bg-white:hover,
+.hover\:text-\[\#0A0A0A\]:hover,
+button.hover\:text-\[\#0A0A0A\]:hover,
+a.hover\:text-\[\#0A0A0A\]:hover,
+.hover\:text-black:hover,
+button.hover\:text-black:hover,
+a.hover\:text-black:hover,
+button.bg-\[\#0A0A0A\].hover\:bg-white:hover,
+button.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover,
+button.bg-\[\#0A0A0A\].hover\:text-black:hover,
+a.bg-\[\#0A0A0A\].hover\:bg-white:hover,
+a.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover,
+a.bg-\[\#0A0A0A\].hover\:text-black:hover,
+[data-theme="light"] .hover\:bg-white:hover,
+[data-theme="light"] button.hover\:bg-white:hover,
+[data-theme="light"] a.hover\:bg-white:hover,
+[data-theme="light"] .hover\:text-\[\#0A0A0A\]:hover,
+[data-theme="light"] button.hover\:text-\[\#0A0A0A\]:hover,
+[data-theme="light"] a.hover\:text-\[\#0A0A0A\]:hover,
+[data-theme="light"] .hover\:text-black:hover,
+[data-theme="light"] button.hover\:text-black:hover,
+[data-theme="light"] a.hover\:text-black:hover,
+[data-theme="light"] button.bg-\[\#0A0A0A\].hover\:bg-white:hover,
+[data-theme="light"] button.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover,
+[data-theme="light"] button.bg-\[\#0A0A0A\].hover\:text-black:hover,
+[data-theme="light"] a.bg-\[\#0A0A0A\].hover\:bg-white:hover,
+[data-theme="light"] a.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover,
+[data-theme="light"] a.bg-\[\#0A0A0A\].hover\:text-black:hover {
+  background-color: #FFFFFF !important;
+  color: #0A0A0A !important;
+  border-color: #0A0A0A !important;
+}
+
+.hover\:bg-white:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+button.hover\:bg-white:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+a.hover\:bg-white:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+.hover\:text-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+button.hover\:text-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+a.hover\:text-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+.hover\:text-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+button.hover\:text-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+a.hover\:text-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+button.bg-\[\#0A0A0A\].hover\:bg-white:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+button.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+button.bg-\[\#0A0A0A\].hover\:text-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+a.bg-\[\#0A0A0A\].hover\:bg-white:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+a.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+a.bg-\[\#0A0A0A\].hover\:text-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] .hover\:bg-white:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] button.hover\:bg-white:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] a.hover\:bg-white:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] .hover\:text-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] button.hover\:text-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] a.hover\:text-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] .hover\:text-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] button.hover\:text-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] a.hover\:text-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] button.bg-\[\#0A0A0A\].hover\:bg-white:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] button.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] button.bg-\[\#0A0A0A\].hover\:text-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] a.bg-\[\#0A0A0A\].hover\:bg-white:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] a.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] a.bg-\[\#0A0A0A\].hover\:text-black:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] .group.hover\:bg-white:hover *:not(.node-icon-badge):not(.node-icon-badge *),
+[data-theme="light"] .group:hover .group-hover\:text-\[\#0A0A0A\],
+[data-theme="light"] .group:hover .group-hover\:text-black {
+  color: #0A0A0A !important;
+}
+
+.hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+.hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+button.hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+button.hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+a.hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+a.hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+.hover\:text-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+.hover\:text-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+button.hover\:text-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+button.hover\:text-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+.hover\:text-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+.hover\:text-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+button.hover\:text-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+button.hover\:text-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+button.bg-\[\#0A0A0A\].hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+button.bg-\[\#0A0A0A\].hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+button.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+button.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+button.bg-\[\#0A0A0A\].hover\:text-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+button.bg-\[\#0A0A0A\].hover\:text-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+a.bg-\[\#0A0A0A\].hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+a.bg-\[\#0A0A0A\].hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+a.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+a.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+a.bg-\[\#0A0A0A\].hover\:text-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+a.bg-\[\#0A0A0A\].hover\:text-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] .hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] .hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] button.hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] button.hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] a.hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] a.hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] button.bg-\[\#0A0A0A\].hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] button.bg-\[\#0A0A0A\].hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] button.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] button.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] button.bg-\[\#0A0A0A\].hover\:text-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] button.bg-\[\#0A0A0A\].hover\:text-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] a.bg-\[\#0A0A0A\].hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] a.bg-\[\#0A0A0A\].hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] a.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] a.bg-\[\#0A0A0A\].hover\:text-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] a.bg-\[\#0A0A0A\].hover\:text-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] a.bg-\[\#0A0A0A\].hover\:text-black:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) *,
+[data-theme="light"] .group.hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *),
+[data-theme="light"] .group.hover\:bg-white:hover svg:not(.node-icon-badge svg):not(.node-icon-badge *) * {
+  stroke: #0A0A0A !important;
+  color: #0A0A0A !important;
 }
 
 .node-icon-badge,
@@ -1125,8 +1285,12 @@ button[aria-label="Close"]:hover svg *,
 [data-theme="dark"] .border-t-2.border-\[\#0A0A0A\],
 [data-theme="dark"] .border-l-2.border-\[\#0A0A0A\],
 [data-theme="dark"] .border-4.border-\[\#0A0A0A\],
+[data-theme="dark"] .border-b-4.border-\[\#0A0A0A\],
+[data-theme="dark"] .border-l-4.border-\[\#0A0A0A\],
 [data-theme="dark"] [class*="border-\[\#0A0A0A\]"],
-[data-theme="dark"] [class*="divide-\[\#0A0A0A\]"] {
+[data-theme="dark"] [class*="divide-\[\#0A0A0A\]"],
+[data-theme="dark"] [class*="divide-"] > *,
+[data-theme="dark"] [class*="divide-"] > :not([hidden]) ~ :not([hidden]) {
   border-color: #27272A !important;
 }
 

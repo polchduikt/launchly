@@ -226,8 +226,8 @@ export const PaymentsPanel: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pb-10 font-['JetBrains_Mono',monospace]">
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden">
+    <div className="space-y-6 pb-10">
+      <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl divide-y divide-slate-200 overflow-hidden shadow-sm">
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between">
           <div className="w-full md:w-1/4">
             <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">{t('settings.payments.stripe.title')}</h3>
@@ -236,17 +236,17 @@ export const PaymentsPanel: React.FC = () => {
             {isStripeConnected ? (
               <div className="p-4 rounded-2xl bg-white border-2 border-[#0A0A0A] flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-[#0A0A0A] text-[#F2EBDD] flex items-center justify-center border-2 border-[#0A0A0A]">
+                  <div className="w-9 h-9 rounded-xl bg-[#0A0A0A] text-white flex items-center justify-center border-2 border-[#0A0A0A]">
                     <CreditCard size={18} />
                   </div>
                   <div>
                     <div className="text-xs font-bold text-[#0A0A0A]">{t('settings.payments.stripe.connected')}</div>
-                    <div className="text-[10px] text-slate-700 font-bold mt-0.5">{t('settings.payments.stripe.mode')}</div>
+                    <div className="text-[10px] text-slate-700 font-medium mt-0.5">{t('settings.payments.stripe.mode')}</div>
                   </div>
                 </div>
                 <button
                   onClick={handleConnectStripe}
-                  className="px-3 py-1.5 bg-rose-200 hover:bg-rose-600 hover:text-white border-2 border-[#0A0A0A] text-[#0A0A0A] text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer"
+                  className="px-3 py-1.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer"
                 >
                   {t('settings.payments.stripe.btn_disconnect')}
                 </button>
@@ -255,7 +255,7 @@ export const PaymentsPanel: React.FC = () => {
               <button
                 onClick={handleConnectStripe}
                 disabled={isStripeConnecting}
-                className="w-fit px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] disabled:opacity-50 text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer flex items-center gap-2"
+                className="w-fit px-4 py-2.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] disabled:opacity-50 text-white text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer flex items-center gap-2"
               >
                 {isStripeConnecting ? (
                   <>
@@ -268,7 +268,7 @@ export const PaymentsPanel: React.FC = () => {
               </button>
             )}
           </div>
-          <div className="w-full md:w-1/3 text-xs text-slate-700 font-bold leading-relaxed text-balance">
+          <div className="w-full md:w-1/3 text-xs text-slate-700 font-medium leading-relaxed text-balance">
             {t('settings.payments.stripe.desc')}
           </div>
         </div>
@@ -290,17 +290,17 @@ export const PaymentsPanel: React.FC = () => {
             {isPaypalConnected ? (
               <div className="p-4 rounded-2xl bg-white border-2 border-[#0A0A0A] flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-[#0A0A0A] text-[#F2EBDD] flex items-center justify-center font-black text-xs border-2 border-[#0A0A0A]">
+                  <div className="w-9 h-9 rounded-xl bg-[#0A0A0A] text-white flex items-center justify-center font-black text-xs border-2 border-[#0A0A0A]">
                     PP
                   </div>
                   <div>
                     <div className="text-xs font-bold text-[#0A0A0A]">{t('settings.payments.paypal.connected')}</div>
-                    <div className="text-[10px] text-slate-700 font-bold mt-0.5">{t('settings.payments.paypal.mode')}</div>
+                    <div className="text-[10px] text-slate-700 font-medium mt-0.5">{t('settings.payments.paypal.mode')}</div>
                   </div>
                 </div>
                 <button
                   onClick={handleConnectPaypal}
-                  className="px-3 py-1.5 bg-rose-200 hover:bg-rose-600 hover:text-white border-2 border-[#0A0A0A] text-[#0A0A0A] text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer"
+                  className="px-3 py-1.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer"
                 >
                   {t('settings.payments.stripe.btn_disconnect')}
                 </button>
@@ -343,7 +343,7 @@ export const PaymentsPanel: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isPaypalConnecting}
-                  className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] disabled:opacity-50 text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer flex items-center gap-2 mt-1"
+                  className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] disabled:opacity-50 text-white text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer flex items-center gap-2 mt-1"
                 >
                   {isPaypalConnecting ? (
                     <>
@@ -357,7 +357,7 @@ export const PaymentsPanel: React.FC = () => {
               </form>
             )}
           </div>
-          <div className="w-full md:w-1/3 text-xs text-slate-700 font-bold leading-relaxed text-balance">
+          <div className="w-full md:w-1/3 text-xs text-slate-700 font-medium leading-relaxed text-balance">
             {t('settings.payments.paypal.desc')}
           </div>
         </div>
@@ -382,7 +382,7 @@ export const PaymentsPanel: React.FC = () => {
             </button>
 
             {isCurrencyOpen && (
-              <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl overflow-hidden py-1 text-left animate-in fade-in duration-100">
+              <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl overflow-hidden py-1 text-left animate-in fade-in duration-100">
                 {[
                   { code: 'USD', key: 'settings.payments.currency.usd', fallback: 'Долар США' },
                   { code: 'EUR', key: 'settings.payments.currency.eur', fallback: 'Євро' },
@@ -399,8 +399,8 @@ export const PaymentsPanel: React.FC = () => {
                     }}
                     className={`w-full px-4 py-2 text-xs font-bold text-left cursor-pointer transition-colors ${
                       currency === item.code
-                        ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                        : 'text-[#0A0A0A] hover:bg-white'
+                        ? 'bg-[#0A0A0A] text-white'
+                        : 'text-[#0A0A0A] hover:bg-slate-100'
                     }`}
                   >
                     {t(item.key, item.fallback)}
@@ -409,7 +409,7 @@ export const PaymentsPanel: React.FC = () => {
               </div>
             )}
           </div>
-          <div className="w-full md:w-1/3 text-xs text-slate-700 font-bold leading-relaxed text-balance">
+          <div className="w-full md:w-1/3 text-xs text-slate-700 font-medium leading-relaxed text-balance">
             {t('settings.payments.currency.desc')}
           </div>
         </div>
@@ -484,18 +484,18 @@ export const PaymentsPanel: React.FC = () => {
       <div className="space-y-4">
         <div className="space-y-2 select-none">
           <span className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider">{t('settings.payments.history.total_orders')}</span>
-          <div className="w-fit px-10 py-3.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-center">
+          <div className="w-fit px-10 py-3.5 bg-white border-2 border-[#0A0A0A] rounded-2xl text-center shadow-sm">
             <span className="text-3xl font-black text-[#0A0A0A] leading-none">
               {orders.length}
             </span>
           </div>
         </div>
 
-        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-6 md:p-8 space-y-4">
+        <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-6 md:p-8 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-['Anybody',sans-serif] text-md font-black text-[#0A0A0A] uppercase tracking-tight">{t('settings.payments.history.title')}</h2>
-              <p className="text-xs text-slate-700 font-bold mt-0.5">{t('settings.payments.history.subtitle')}</p>
+              <p className="text-xs text-slate-700 font-medium mt-0.5">{t('settings.payments.history.subtitle')}</p>
             </div>
             
             {(isStripeConnected || isPaypalConnected) && (
@@ -503,14 +503,14 @@ export const PaymentsPanel: React.FC = () => {
                 {orders.length > 0 && (
                   <button 
                     onClick={handleClearOrders}
-                    className="px-3 py-1.5 bg-white hover:bg-rose-600 hover:text-white border-2 border-[#0A0A0A] text-[#0A0A0A] text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer"
+                    className="px-3 py-1.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer"
                   >
                     {t('settings.payments.history.btn_clear')}
                   </button>
                 )}
                 <button
                   onClick={handleGenerateTestOrder}
-                  className="px-3.5 py-1.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                  className="px-3.5 py-1.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border-2 border-[#0A0A0A] text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer flex items-center gap-1"
                 >
                   <Plus size={11} />
                   <span>{t('settings.payments.history.btn_simulate')}</span>
@@ -519,10 +519,10 @@ export const PaymentsPanel: React.FC = () => {
             )}
           </div>
 
-          <div className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
+          <div className="border-2 border-[#0A0A0A] rounded-xl overflow-hidden">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-black uppercase tracking-wider">
+                <tr className="bg-slate-100 border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-black uppercase tracking-wider">
                   <th className="px-5 py-3 select-none">{t('settings.payments.history.col.avatar')}</th>
                   <th className="px-5 py-3 select-none">{t('settings.payments.history.col.name')}</th>
                   <th className="px-5 py-3 select-none">{t('settings.payments.history.col.date')}</th>
@@ -533,16 +533,16 @@ export const PaymentsPanel: React.FC = () => {
                   <th className="px-5 py-3 select-none">{t('settings.payments.history.col.info')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y-2 divide-[#0A0A0A]/15 bg-white">
+              <tbody className="divide-y divide-slate-200 bg-white">
                 {orders.map((order) => (
-                  <tr key={order.orderId} className="hover:bg-[#F2EBDD]/50 transition-colors">
+                  <tr key={order.orderId} className="hover:bg-slate-50 transition-colors">
                     <td className="px-5 py-3">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[#F2EBDD] text-[10px] font-black border-2 border-[#0A0A0A] bg-[#0A0A0A]`}>
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black border-2 border-[#0A0A0A] bg-[#0A0A0A]`}>
                         {order.avatarText}
                       </div>
                     </td>
                     <td className="px-5 py-3 font-bold text-[#0A0A0A]">{order.name}</td>
-                    <td className="px-5 py-3 text-slate-700 font-bold">{order.date}</td>
+                    <td className="px-5 py-3 text-slate-700 font-medium">{order.date}</td>
                     <td className="px-5 py-3 font-mono text-[10px] text-[#0A0A0A] font-bold">{order.orderId}</td>
                     <td className="px-5 py-3 font-bold text-[#0A0A0A]">{order.itemPrice}</td>
                     <td className="px-5 py-3">
@@ -551,13 +551,13 @@ export const PaymentsPanel: React.FC = () => {
                         {order.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-slate-700 font-bold">{order.itemName}</td>
-                    <td className="px-5 py-3 text-slate-700 font-bold">{order.additionalInfo}</td>
+                    <td className="px-5 py-3 text-slate-700 font-medium">{order.itemName}</td>
+                    <td className="px-5 py-3 text-slate-700 font-medium">{order.additionalInfo}</td>
                   </tr>
                 ))}
                 {orders.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="text-center py-12 text-slate-700 font-bold italic bg-white">
+                    <td colSpan={8} className="text-center py-12 text-slate-700 font-medium italic bg-white">
                       {t('settings.payments.history.empty')}
                     </td>
                   </tr>

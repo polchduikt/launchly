@@ -37,7 +37,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
     <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-hidden shadow-sm">
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="bg-white border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
+          <tr className="bg-slate-100 border-b-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] uppercase tracking-wider select-none">
             <th className="px-5 py-3 w-10">
               <input
                 type="checkbox"
@@ -72,7 +72,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
             <th className="px-5 py-3 w-12 text-right"></th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#0A0A0A]/10 text-xs font-bold text-[#0A0A0A]">
+        <tbody className="divide-y divide-slate-200 text-xs font-bold text-[#0A0A0A]">
           {fields.map((field) => (
             <tr key={field.name} className="hover:bg-slate-50 bg-white transition-colors">
               <td className="px-5 py-3.5">
@@ -82,14 +82,14 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
                 />
               </td>
               <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">{field.name}</td>
-              <td className="px-5 py-3.5 text-slate-700">{field.type}</td>
-              <td className="px-5 py-3.5 text-slate-700">{field.value || '-'}</td>
-              <td className="px-5 py-3.5 text-slate-700">{field.description || '-'}</td>
+              <td className="px-5 py-3.5 text-slate-700 font-medium">{field.type}</td>
+              <td className="px-5 py-3.5 text-slate-700 font-medium">{field.value || '-'}</td>
+              <td className="px-5 py-3.5 text-slate-700 font-medium">{field.description || '-'}</td>
               <td className="px-5 py-3.5 text-right">
                 <button
                   type="button"
                   onClick={(e) => handleOpenMenu(e, field.name)}
-                  className="p-1 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
+                  className="p-1 hover:bg-[#0A0A0A] hover:text-white rounded-lg text-[#0A0A0A] cursor-pointer transition-all"
                 >
                   <MoreVertical size={15} />
                 </button>
@@ -100,7 +100,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
             <tr>
               <td
                 colSpan={6}
-                className="text-center py-10 text-slate-700 italic bg-white font-bold select-none"
+                className="text-center py-10 text-slate-700 italic bg-white font-medium select-none"
               >
                 {t('settings.fields.empty_state')}
               </td>
@@ -117,7 +117,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
           />
           <div
             style={{ top: menuCoords.top, right: menuCoords.right }}
-            className="fixed z-[9999] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 w-32 text-left animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]"
+            className="fixed z-[9999] bg-white border-2 border-[#0A0A0A] rounded-xl shadow-xl py-1 w-32 text-left animate-in fade-in duration-100"
             onClick={(e) => e.stopPropagation()}
           >
             {!isArchived ? (
@@ -129,7 +129,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
                       onEdit(activeField);
                       setActiveMenuField(null);
                     }}
-                    className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
+                    className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-white text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
                   >
                     {t('settings.fields.action_edit', 'Редагувати')}
                   </button>
@@ -141,7 +141,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
                       onArchive(activeMenuField);
                       setActiveMenuField(null);
                     }}
-                    className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
+                    className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-white text-[#0A0A0A] text-xs font-bold text-left cursor-pointer border-t border-slate-200 uppercase select-none transition-colors"
                   >
                     {t('settings.fields.action_archive')}
                   </button>
@@ -152,7 +152,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
                     onDelete(activeMenuField, false);
                     setActiveMenuField(null);
                   }}
-                  className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
+                  className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t border-slate-200 uppercase select-none transition-colors"
                 >
                   {t('settings.fields.action_delete')}
                 </button>
@@ -166,7 +166,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
                       onUnarchive(activeMenuField);
                       setActiveMenuField(null);
                     }}
-                    className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
+                    className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-white text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
                   >
                     Unarchive
                   </button>
@@ -177,7 +177,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
                     onDelete(activeMenuField, true);
                     setActiveMenuField(null);
                   }}
-                  className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t-2 border-[#0A0A0A]/10 uppercase select-none transition-colors"
+                  className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t border-slate-200 uppercase select-none transition-colors"
                 >
                   Delete
                 </button>

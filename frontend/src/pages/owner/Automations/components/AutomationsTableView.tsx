@@ -114,13 +114,13 @@ export const AutomationsTableView: React.FC<AutomationsTableViewProps> = ({
                   </div>
                 </div>
               </td>
-              {showRuns && <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">{bot.runs ?? 1}</td>}
+              {showRuns && <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center font-['JetBrains_Mono',monospace]">{bot.runs ?? 1}</td>}
               {showCtr && (
-                <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center">
+                <td className="py-4 px-2 w-28 text-xs font-bold text-[#0A0A0A] text-center font-['JetBrains_Mono',monospace]">
                   {(bot.runs ?? 0) === 0 ? '0%' : `${(12.5 + ((bot.id * 7) % 36) + ((bot.id * 3) % 10) / 10).toFixed(1)}%`}
                 </td>
               )}
-              <td className="py-4 px-2 w-40 text-xs font-bold text-slate-700">{formatRelativeTime(bot.updatedAt || bot.createdAt)}</td>
+              <td className="py-4 px-2 w-40 text-xs font-bold text-slate-700 font-['JetBrains_Mono',monospace]">{formatRelativeTime(bot.updatedAt || bot.createdAt)}</td>
               <td className="py-4 px-4 w-12 text-right" onClick={(e) => e.stopPropagation()}>
                 {bot.role !== 'Viewer' && (
                   <button

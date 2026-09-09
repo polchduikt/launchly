@@ -100,7 +100,7 @@ export const BlockedDetailsModal: React.FC<BlockedDetailsModalProps> = ({
         <div className="pt-2 border-t-2 border-[#0A0A0A] flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] font-black text-xs uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+            className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] font-black text-xs uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
           >
             {t('broadcast.blocked_modal_close')}
           </button>

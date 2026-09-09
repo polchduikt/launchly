@@ -57,7 +57,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({ botId, onO
   }
 
   return (
-    <div className="space-y-8 pb-10 font-['JetBrains_Mono',monospace]">
+    <div className="space-y-8 pb-10">
       <GoogleSheetsCard botId={botId} integration={googleIntegration} />
 
       <HotmartCard botId={botId} integration={hotmartIntegration} onOpenPricing={handleUpgradeClick} />

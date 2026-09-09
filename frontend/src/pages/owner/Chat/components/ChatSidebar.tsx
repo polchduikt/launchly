@@ -42,7 +42,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   return (
     <>
       <div
-        className="border-r-2 border-[#0A0A0A] flex flex-col bg-[#F2EBDD] shrink-0 transition-all duration-200 font-['JetBrains_Mono',monospace]"
+        className="border-r-2 border-[#0A0A0A] flex flex-col bg-[#F2EBDD] shrink-0 transition-all duration-200"
         style={{ width: collapsed ? 0 : 200, overflow: 'hidden' }}
       >
         <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
@@ -51,7 +51,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-black uppercase transition-all cursor-pointer ${sidebarTab === 'all' ? 'bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A]' : 'text-[#0A0A0A] hover:bg-white border-2 border-transparent'}`}
           >
             <span className="flex items-center gap-2"><MessageSquare size={14} /> {t('crm.sidebar.all_chats')}</span>
-            {conversationsCount > 0 && <span className="bg-white text-[#0A0A0A] border border-[#0A0A0A] text-[10px] font-black px-1.5 py-0.5 rounded-md min-w-[20px] text-center">{conversationsCount}</span>}
+            {conversationsCount > 0 && <span className="bg-white text-[#0A0A0A] border border-[#0A0A0A] text-[10px] font-black px-1.5 py-0.5 rounded-md min-w-[20px] text-center font-['JetBrains_Mono',monospace]">{conversationsCount}</span>}
           </button>
           <button
             onClick={() => onTabChange('reminders')}

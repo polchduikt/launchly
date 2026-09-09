@@ -60,7 +60,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
   }
 
   return (
-    <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between font-['JetBrains_Mono',monospace]">
+    <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between shadow-sm">
       
       <div className="w-full md:w-1/4 shrink-0">
         <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">
@@ -90,12 +90,12 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
           </div>
           
           {isConnected ? (
-            <div className="flex gap-2 shrink-0">
+            <div className="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
               {!hasConnectedEmail && (
                 <button
                   type="button"
                   onClick={handleConnectGoogle}
-                  className="px-4 py-2 bg-emerald-200 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none shrink-0"
+                  className="w-full sm:w-auto px-4 py-2 bg-emerald-200 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer select-none shrink-0 text-center"
                 >
                   {t('settings.integrations.google.reconnect')}
                 </button>
@@ -104,7 +104,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
                 type="button"
                 onClick={handleDelete}
                 disabled={deleteMut.isPending}
-                className="px-4 py-2 bg-rose-200 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none shrink-0"
+                className="w-full sm:w-auto px-4 py-2 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl transition-all cursor-pointer select-none shrink-0 text-center"
               >
                 {deleteMut.isPending ? t('settings.integrations.google.disconnecting') : t('settings.integrations.google.disconnect')}
               </button>
@@ -113,7 +113,7 @@ export const GoogleSheetsCard: React.FC<GoogleSheetsCardProps> = ({ botId, integ
             <button
               type="button"
               onClick={handleConnectGoogle}
-              className="px-4 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none shrink-0"
+              className="w-full sm:w-auto px-4 py-2 bg-white hover:bg-[#0A0A0A] hover:text-white border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer select-none shrink-0 text-center"
             >
               {t('settings.integrations.google.connect', 'Connect')}
             </button>

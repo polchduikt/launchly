@@ -143,7 +143,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
             <div className="flex items-center justify-center pt-3">
               <button
                 onClick={() => navigate('/templates?tab=installed')}
-                className="px-8 py-3.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer inline-flex items-center gap-2"
+                className="px-8 py-3.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer inline-flex items-center gap-2"
               >
                 <span>{t('template.tab_installed_templates', 'Завантажені темплейти')}</span>
                 <ArrowRight size={15} />
@@ -331,7 +331,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                   <button
                     onClick={handleInstall}
                     disabled={submitting}
-                    className="px-10 py-3.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase tracking-wider transition-all cursor-pointer inline-flex items-center gap-2 disabled:opacity-50"
+                    className="px-10 py-3.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase tracking-wider transition-all cursor-pointer inline-flex items-center gap-2 disabled:opacity-50"
                   >
                     {submitting ? (
                       <>
@@ -359,7 +359,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                       localStorage.setItem('auth_redirect_url', `/templates/install/${shareCode}`);
                     }
                   }}
-                  className="inline-flex items-center justify-center py-3.5 px-8 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all gap-2 cursor-pointer"
+                  className="inline-flex items-center justify-center py-3.5 px-8 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all gap-2 cursor-pointer"
                 >
                   <span>{t('template.install.login_btn', 'Увійти для встановлення')}</span>
                   <ArrowRight size={15} />

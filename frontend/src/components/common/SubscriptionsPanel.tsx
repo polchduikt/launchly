@@ -63,9 +63,9 @@ export const SubscriptionsPanel: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 font-['JetBrains_Mono',monospace]">
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 md:p-8">
-        <div className="flex items-start justify-between pb-6 border-b-2 border-[#0A0A0A]">
+    <div className="space-y-6">
+      <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-6 md:p-8 shadow-sm">
+        <div className="flex items-start justify-between pb-6 border-b border-slate-200">
           <div className="space-y-1.5 text-left">
             <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider">
               {t('settings.billing.your_plan')}
@@ -75,11 +75,11 @@ export const SubscriptionsPanel: React.FC = () => {
             </h2>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             {!isFree && (
               <button
                 onClick={() => setIsPricingModalOpen(true)}
-                className="px-4 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
+                className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-white border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold uppercase rounded-xl transition-all cursor-pointer text-center"
               >
                 {t('settings.billing.change_plan')}
               </button>
@@ -88,7 +88,7 @@ export const SubscriptionsPanel: React.FC = () => {
             {isFree ? (
               <button
                 onClick={() => setIsPricingModalOpen(true)}
-                className="px-5 py-2.5 bg-emerald-200 hover:bg-emerald-300 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
+                className="w-full sm:w-auto px-5 py-2.5 bg-emerald-200 hover:bg-emerald-300 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold uppercase rounded-xl transition-all cursor-pointer text-center"
               >
                 {t('settings.billing.activate_trial')}
               </button>
@@ -96,7 +96,7 @@ export const SubscriptionsPanel: React.FC = () => {
               <button
                 onClick={handleResume}
                 disabled={resumeMutation.isPending}
-                className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-indigo-700 disabled:opacity-50 text-[#F2EBDD] border-2 border-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                className="w-full sm:w-auto px-5 py-2.5 bg-[#0A0A0A] hover:bg-indigo-700 disabled:opacity-50 text-white border-2 border-[#0A0A0A] text-xs font-bold uppercase rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center"
               >
                 {resumeMutation.isPending && <Loader2 size={12} className="animate-spin" />}
                 {t('settings.billing.restore')}
@@ -105,9 +105,9 @@ export const SubscriptionsPanel: React.FC = () => {
               <button
                 onClick={handleCancel}
                 disabled={cancelMutation.isPending}
-                className="px-5 py-2.5 bg-rose-200 hover:bg-rose-300 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                className="w-full sm:w-auto px-5 py-2.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold uppercase rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center"
               >
-                {cancelMutation.isPending && <Loader2 size={12} className="animate-spin text-[#0A0A0A]" />}
+                {cancelMutation.isPending && <Loader2 size={12} className="animate-spin text-rose-800" />}
                 {t('settings.billing.cancel')}
               </button>
             )}
@@ -151,14 +151,14 @@ export const SubscriptionsPanel: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6 pt-6 border-t-2 border-[#0A0A0A]/15 text-left">
+          <div className="grid grid-cols-2 gap-6 pt-6 border-t border-slate-200 text-left">
             <div className="space-y-1">
               <span className="text-xs font-black text-slate-700 uppercase">{t('settings.billing.price')}</span>
               <p className="text-sm font-black text-[#0A0A0A]">
                 {isFree ? '$0' : `$${plan.price}`}
               </p>
             </div>
-            <div className="space-y-1 border-l-2 border-[#0A0A0A]/15 pl-6">
+            <div className="space-y-1 border-l border-slate-200 pl-6">
               <span className="text-xs font-black text-slate-700 uppercase">{t('settings.billing.contacts')}</span>
               <p className="text-sm font-black text-[#0A0A0A]">
                 {activeContactsCount}/{maxContactsLimit}

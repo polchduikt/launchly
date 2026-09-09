@@ -125,7 +125,7 @@ const AiPage: React.FC = () => {
         <aside className="w-64 sm:w-72 md:w-80 shrink-0 bg-[#F2EBDD] border-r-2 border-[#0A0A0A] flex flex-col justify-between h-full font-['JetBrains_Mono',monospace] select-none z-10">
           
           <div className="h-16 border-b-2 border-[#0A0A0A] px-6 flex items-center shrink-0">
-            <h1 className="font-['Anybody',sans-serif] text-xl font-black text-[#0A0A0A] uppercase tracking-tight select-none">
+            <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight select-none">
               LAUNCHLY AI
             </h1>
           </div>
@@ -240,7 +240,7 @@ const AiPage: React.FC = () => {
 
         <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0 bg-[#F2EBDD]">
           
-          <header className="h-16 border-b-2 border-[#0A0A0A] px-6 flex items-center justify-between shrink-0 z-10 font-['JetBrains_Mono',monospace]">
+          <header className="h-16 border-b-2 border-[#0A0A0A] px-6 flex items-center justify-between shrink-0 z-10">
             <div className="flex items-center gap-2">
               <span className="text-xs font-black uppercase text-[#0A0A0A] tracking-wider truncate max-w-md">
                 {getSessionTitle(currentSession)}
@@ -248,7 +248,7 @@ const AiPage: React.FC = () => {
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-5 flex flex-col font-['JetBrains_Mono',monospace]">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-5 flex flex-col font-['Geist',sans-serif]">
             {messages.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-6 max-w-2xl mx-auto">
                 <div className="space-y-2 select-none">
@@ -333,7 +333,7 @@ const AiPage: React.FC = () => {
             )}
           </div>
 
-          <footer className="bg-transparent px-4 sm:px-6 pb-6 pt-2 shrink-0 relative font-['JetBrains_Mono',monospace]">
+          <footer className="bg-transparent px-4 sm:px-6 pb-6 pt-2 shrink-0 relative font-['Geist',sans-serif]">
             <div className="max-w-4xl mx-auto space-y-2.5">
               {isLimitReached && (
                 <div className="flex items-start gap-2 text-rose-800 bg-rose-200 border-2 border-[#0A0A0A] p-2.5 rounded-xl">

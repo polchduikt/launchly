@@ -20,8 +20,8 @@ function useDisplayToggle(storageKey: string, defaultVal: boolean) {
 }
 
 const SectionHeader: React.FC<{ label: string }> = ({ label }) => (
-  <div className="px-6 pt-5 pb-2">
-    <span className="text-[10px] font-black text-[#0A0A0A]/40 uppercase tracking-[0.15em] font-['JetBrains_Mono',monospace]">
+  <div className="px-6 py-3 bg-slate-100 border-b border-slate-200">
+    <span className="text-[11px] font-black text-slate-700 uppercase tracking-wider">
       {label}
     </span>
   </div>
@@ -66,8 +66,8 @@ export const DisplayPanel: React.FC = () => {
   const [hideUnsub, setHideUnsub] = useDisplayToggle(DISPLAY_KEY_CONTACTS_HIDE_UNSUB, false);
 
   return (
-    <div className="space-y-6 font-['JetBrains_Mono',monospace]">
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden text-left">
+    <div className="space-y-6">
+      <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl divide-y divide-slate-200 overflow-hidden text-left shadow-sm">
 
         <SectionHeader label={t('settings.display.section_home')} />
 

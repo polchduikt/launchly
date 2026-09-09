@@ -81,7 +81,7 @@ export const ChatFilterBar: React.FC<ChatFilterBarProps> = ({
   onShowAutomationDrop,
   automationRef,
 }) => (
-  <div className="h-12 border-b-2 border-[#0A0A0A] flex items-center justify-between px-4 bg-[#F2EBDD] shrink-0 select-none font-['JetBrains_Mono',monospace]">
+  <div className="h-12 border-b-2 border-[#0A0A0A] flex items-center justify-between px-4 bg-[#F2EBDD] shrink-0 select-none">
     <div className="flex items-center gap-2 py-1">
 
       <div ref={filterRef} className="shrink-0">

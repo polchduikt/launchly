@@ -78,18 +78,20 @@ const ContactTableRow = React.memo<ContactTableRowProps>(({
           )}
         </div>
       </td>
-      <td className="py-4 px-6">
-        <span
-          className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border-2 border-[#0A0A0A] ${
-            isUnsubscribed
-              ? 'bg-rose-200 text-[#0A0A0A]'
-              : isPaused
-              ? 'bg-amber-200 text-[#0A0A0A]'
-              : 'bg-emerald-200 text-[#0A0A0A]'
-          }`}
-        >
-          {statusText}
-        </span>
+      <td className="py-4 px-6 text-center">
+        <div className="flex justify-center">
+          <span
+            className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase ${
+              isUnsubscribed
+                ? 'bg-rose-50 text-rose-700 border border-rose-100 shadow-sm shadow-rose-50'
+                : isPaused
+                ? 'bg-amber-50 text-amber-700 border border-amber-100 shadow-sm shadow-amber-50'
+                : 'bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm shadow-emerald-50'
+            }`}
+          >
+            {statusText}
+          </span>
+        </div>
       </td>
       <td className="py-4 px-6 text-slate-700 text-[11px] font-bold">
         {formatRelativeTime(c.createdAt)}
@@ -181,7 +183,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
               </th>
               <th className="py-4 px-2 w-16">{t('crm.contacts.table.avatar')}</th>
               <th className="py-4 px-2">{t('crm.contacts.table.name')}</th>
-              <th className="py-4 px-6">{t('crm.contacts.table.status')}</th>
+              <th className="py-4 px-6 text-center">{t('crm.contacts.table.status')}</th>
               <th className="py-4 px-6">{t('crm.contacts.table.subscribed')}</th>
             </tr>
           </thead>

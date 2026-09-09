@@ -43,35 +43,35 @@ export const BulkActionModal: React.FC<BulkActionModalProps> = ({
           title: t('crm.contacts.bulk.remove_tag'),
           icon: <Tag size={18} className="text-rose-500" />,
           btnText: t('crm.contacts.bulk.delete'),
-          btnBg: 'bg-rose-600 hover:bg-rose-700 focus:ring-rose-500 shadow-rose-100',
+          btnBg: 'border border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800',
         };
       case 'pause':
         return {
           title: t('crm.contacts.bulk.pause_title'),
           icon: <Pause size={18} className="text-amber-500" />,
           btnText: t('crm.contacts.bulk.pause'),
-          btnBg: 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-400 shadow-amber-100',
+          btnBg: 'text-white bg-amber-500 hover:bg-amber-600 focus:ring-amber-400 shadow-amber-100',
         };
       case 'resume':
         return {
           title: t('crm.contacts.bulk.resume'),
           icon: <Play size={18} className="text-emerald-500" />,
           btnText: t('crm.contacts.bulk.resume'),
-          btnBg: 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 shadow-emerald-100',
+          btnBg: 'text-white bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 shadow-emerald-100',
         };
       case 'set-field':
         return {
           title: t('crm.contacts.bulk.set_field'),
           icon: <Bookmark size={18} className="text-indigo-500" />,
           btnText: t('crm.contacts.bulk.btn_apply'),
-          btnBg: 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 shadow-indigo-100',
+          btnBg: 'text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 shadow-indigo-100',
         };
       case 'clear-field':
         return {
           title: t('crm.contacts.bulk.clear_field'),
           icon: <Bookmark size={18} className="text-rose-500" />,
           btnText: t('crm.contacts.bulk.clear_field'),
-          btnBg: 'bg-rose-600 hover:bg-rose-700 focus:ring-rose-500 shadow-rose-100',
+          btnBg: 'border border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800',
         };
       case 'unsub-acc':
         return {
@@ -84,8 +84,11 @@ export const BulkActionModal: React.FC<BulkActionModalProps> = ({
         return {
           title: t('crm.contacts.bulk.delete_title'),
           icon: <Trash2 size={18} className="text-rose-500" />,
-          btnText: t('crm.contacts.bulk.delete'),
-          btnBg: 'bg-rose-600 hover:bg-rose-700 focus:ring-rose-500 shadow-rose-100',
+          btnText:
+            selectedCount > 1
+              ? t('crm.contacts.bulk.delete_plural', 'Видалити контакти')
+              : t('crm.contacts.bulk.delete', 'Видалити контакт'),
+          btnBg: 'border border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800',
         };
       default:
         return {
@@ -145,7 +148,7 @@ export const BulkActionModal: React.FC<BulkActionModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="text-xs font-bold text-slate-500 uppercase tracking-wider select-none">
-            {t('crm.contacts.bulk.selected_contacts_count', `Selected contacts: ${selectedCount}`)}
+            {t('crm.contacts.bulk.selected_contacts_count', `ВИБРАНО КОНТАКТІВ: ${selectedCount}`, { count: selectedCount })}
           </div>
 
           {actionType === 'add-tag' && (
@@ -267,17 +270,17 @@ export const BulkActionModal: React.FC<BulkActionModalProps> = ({
             </div>
           )}
 
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-xl transition-all cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 text-xs font-bold text-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-white border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer text-center"
             >
               {t('crm.contacts.bulk.btn_cancel')}
             </button>
             <button
               type="submit"
-              className={`px-5 py-2.5 text-xs font-bold text-white rounded-xl transition-all shadow-sm cursor-pointer ${details.btnBg}`}
+              className={`w-full sm:w-auto px-5 py-2.5 text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer text-center ${details.btnBg}`}
             >
               {details.btnText}
             </button>

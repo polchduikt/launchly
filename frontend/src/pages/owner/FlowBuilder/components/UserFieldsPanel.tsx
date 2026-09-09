@@ -105,7 +105,7 @@ export const UserFieldsPanel: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 relative font-['JetBrains_Mono',monospace]">
+    <div className="space-y-6 relative">
       <div className="flex justify-between items-center select-none">
         <div className="relative w-64 text-left">
           <input
@@ -119,7 +119,7 @@ export const UserFieldsPanel: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-left overflow-visible">
+      <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl text-left overflow-visible shadow-sm">
         <FolderToolbar
           folders={folders}
           activeFolderId={activeFolderId}
@@ -141,7 +141,7 @@ export const UserFieldsPanel: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl text-left overflow-visible">
+      <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl text-left overflow-visible shadow-sm">
         <div className="p-5 border-b-2 border-[#0A0A0A]">
           <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
             {t('settings.fields.archived_header')}

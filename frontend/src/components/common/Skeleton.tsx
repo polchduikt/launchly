@@ -77,13 +77,13 @@ interface TableSkeletonProps {
 
 export const TableSkeleton: React.FC<TableSkeletonProps> = ({ rows = 5, columns = 5 }) => {
   return (
-    <div className="w-full bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden animate-pulse">
+    <div className="w-full bg-white border-2 border-[#0A0A0A] rounded-2xl overflow-hidden animate-pulse">
       <div className="h-12 bg-white border-b-2 border-[#0A0A0A] flex items-center px-6 gap-4">
         {Array.from({ length: columns }).map((_, i) => (
           <div key={i} className="flex-1 h-3 bg-slate-200 rounded" />
         ))}
       </div>
-      <div className="divide-y divide-[#0A0A0A]/10">
+      <div className="divide-y divide-slate-200">
         {Array.from({ length: rows }).map((_, r) => (
           <div key={r} className="h-16 px-6 flex items-center gap-4">
             <div className="w-9 h-9 rounded-xl bg-white border border-[#0A0A0A]/20 shrink-0" />

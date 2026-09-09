@@ -84,7 +84,7 @@ export const AutomationsGridView: React.FC<AutomationsGridViewProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center justify-between border-t-2 border-[#0A0A0A] pt-3 mt-4 text-[11px] text-[#0A0A0A] font-bold">
+          <div className="flex items-center justify-between border-t-2 border-[#0A0A0A] pt-3 mt-4 text-[11px] text-[#0A0A0A] font-bold font-['JetBrains_Mono',monospace]">
             <div className="flex items-center gap-3">
               {showRuns && (
                 <span>

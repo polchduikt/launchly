@@ -145,18 +145,18 @@ export const NotificationsPanel: React.FC = () => {
   const isTelegramSubscribed = !!user?.telegramUserId;
 
   return (
-    <div className="space-y-6 pb-10 font-['JetBrains_Mono',monospace]">
+    <div className="space-y-6 pb-10">
       {successMsg && (
         <div className="bg-emerald-200 border-2 border-[#0A0A0A] text-[#0A0A0A] p-4 rounded-2xl text-xs font-bold animate-in fade-in duration-200">
           {successMsg}
         </div>
       )}
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden text-left">
+      <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl divide-y divide-slate-200 overflow-hidden text-left shadow-sm">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
           <div className="lg:col-span-3">
             <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase flex items-center gap-1.5">
               <span>{t('settings.notifications.notify_assignees')}</span>
-              <span className="text-[9px] font-black bg-[#0A0A0A] text-[#F2EBDD] px-1.5 py-0.5 rounded uppercase tracking-wider">
+              <span className="text-[9px] font-black bg-[#0A0A0A] text-white px-1.5 py-0.5 rounded uppercase tracking-wider">
                 PRO
               </span>
             </h3>
@@ -194,7 +194,7 @@ export const NotificationsPanel: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden text-left">
+      <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl overflow-hidden text-left shadow-sm">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
           <div className="lg:col-span-3">
             <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase flex items-center gap-1.5">
@@ -309,7 +309,7 @@ export const NotificationsPanel: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden text-left">
+      <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl overflow-hidden text-left shadow-sm">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
           <div className="lg:col-span-3">
             <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
@@ -366,7 +366,7 @@ export const NotificationsPanel: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden text-left">
+      <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl overflow-hidden text-left shadow-sm">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
           <div className="lg:col-span-3">
             <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
@@ -399,7 +399,7 @@ export const NotificationsPanel: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden text-left">
+      <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl divide-y divide-slate-200 overflow-hidden text-left shadow-sm">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-center">
           <div className="lg:col-span-3">
             <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
@@ -418,7 +418,7 @@ export const NotificationsPanel: React.FC = () => {
                       className="w-10 h-10 rounded-full object-cover border-2 border-[#0A0A0A] shrink-0 bg-white"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-[#0A0A0A] text-[#F2EBDD] flex items-center justify-center font-bold text-sm shrink-0 select-none border-2 border-[#0A0A0A]">
+                    <div className="w-10 h-10 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center font-bold text-sm shrink-0 select-none border-2 border-[#0A0A0A]">
                       {getInitials(user?.telegramName || user?.name, 'T')}
                     </div>
                   )}
@@ -429,7 +429,7 @@ export const NotificationsPanel: React.FC = () => {
                 </div>
                 <button
                   onClick={handleUnsubscribeTelegram}
-                  className="px-5 py-2 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
+                  className="px-5 py-2.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
                 >
                   {t('settings.notifications.unsubscribe')}
                 </button>
@@ -437,7 +437,7 @@ export const NotificationsPanel: React.FC = () => {
             ) : (
               <button
                 onClick={() => setIsTelegramModalOpen(true)}
-                className="px-5 py-2.5 rounded-xl text-xs font-black uppercase bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] transition-all cursor-pointer select-none w-64"
+                className="px-5 py-2.5 rounded-xl text-xs font-black uppercase bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] transition-all cursor-pointer select-none w-64"
               >
                 {t('settings.notifications.subscribe_telegram')}
               </button>
@@ -468,7 +468,7 @@ export const NotificationsPanel: React.FC = () => {
               />
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer shrink-0"
+                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer shrink-0"
               >
                 {t('settings.notifications.update')}
               </button>

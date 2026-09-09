@@ -201,7 +201,7 @@ export const TemplateDetailPage: React.FC = () => {
             {isCreator && (
               <button
                 onClick={() => navigate(`/templates/edit/${template.shareCode}`)}
-                className="px-3.5 py-1.5 bg-white hover:bg-slate-100 border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase cursor-pointer flex items-center gap-1.5 transition-all"
+                className="px-3.5 py-1.5 bg-white hover:bg-slate-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase cursor-pointer flex items-center gap-1.5 transition-all"
               >
                 <Edit size={14} />
                 <span>{t('template.detail.edit_btn', 'Редагувати шаблон')}</span>
@@ -210,7 +210,7 @@ export const TemplateDetailPage: React.FC = () => {
 
             <button
               onClick={() => setIsDeleteModalOpen(true)}
-              className="px-3.5 py-1.5 bg-rose-100 hover:bg-rose-600 hover:text-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-1.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 rounded-xl text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5"
             >
               <Trash2 size={14} />
               <span>{isCreator ? t('template.delete_template', 'Видалити шаблон') : t('template.delete_installed', 'Видалити зі встановлених')}</span>
@@ -236,7 +236,7 @@ export const TemplateDetailPage: React.FC = () => {
 
           <button
             onClick={handleCopyLink}
-            className="px-5 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+            className="px-5 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
           >
             {copied ? (
               <>

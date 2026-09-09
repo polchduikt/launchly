@@ -170,9 +170,9 @@ export const ProfilePanel: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden font-['JetBrains_Mono',monospace] shadow-[4px_4px_0px_#0A0A0A]">
+    <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl divide-y divide-slate-200 overflow-hidden shadow-sm">
       <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
-        <div className="border-b-2 border-[#0A0A0A]/15 pb-6">
+        <div className="border-b border-slate-200 pb-6">
           <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black uppercase text-[#0A0A0A] tracking-tight">
             {t('settings.profile.title', 'Edit Profile')}
           </h2>
@@ -195,7 +195,7 @@ export const ProfilePanel: React.FC = () => {
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between pb-6 border-b-2 border-[#0A0A0A]/15">
+        <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between pb-6 border-b border-slate-200">
           <div className="w-full md:w-1/3">
             <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.profile.avatar_title', 'Profile Avatar')}</h3>
             <p className="text-xs text-slate-600 font-bold mt-1">
@@ -230,7 +230,7 @@ export const ProfilePanel: React.FC = () => {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={avatarUploadMutation.isPending}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-100 text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-slate-100 text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
               >
                 <Camera size={14} />
                 <span>{t('settings.profile.btn_upload_avatar', 'Upload new photo')}</span>
@@ -241,7 +241,7 @@ export const ProfilePanel: React.FC = () => {
                   type="button"
                   onClick={handleRemoveAvatar}
                   disabled={avatarUploadMutation.isPending}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                 >
                   <Trash2 size={14} />
                   <span>{t('settings.profile.btn_delete_avatar', 'Remove')}</span>
@@ -251,7 +251,7 @@ export const ProfilePanel: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6 md:items-start justify-between pb-6 border-b-2 border-[#0A0A0A]/15">
+        <div className="flex flex-col md:flex-row gap-6 md:items-start justify-between pb-6 border-b border-slate-200">
           <div className="w-full md:w-1/3">
             <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.profile.details_title', 'Personal Details')}</h3>
             <p className="text-xs text-slate-600 font-bold mt-1">
@@ -312,7 +312,7 @@ export const ProfilePanel: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6 md:items-start justify-between pb-6 border-b-2 border-[#0A0A0A]/15">
+        <div className="flex flex-col md:flex-row gap-6 md:items-start justify-between pb-6 border-b border-slate-200">
           <div className="w-full md:w-1/3">
             <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">
               {hasPassword
@@ -413,7 +413,7 @@ export const ProfilePanel: React.FC = () => {
           <button
             type="submit"
             disabled={!hasChanges || isSaving || avatarUploadMutation.isPending}
-            className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-[#0A0A0A] text-[#F2EBDD] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] rounded-xl transition-all shadow-[4px_4px_0px_#0A0A0A] enabled:cursor-pointer enabled:hover:translate-x-0.5 enabled:hover:translate-y-0.5 enabled:hover:shadow-[2px_2px_0px_#0A0A0A] enabled:active:translate-x-1 enabled:active:translate-y-1 enabled:active:shadow-none disabled:opacity-40 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-[#0A0A0A] text-white text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] rounded-xl transition-all shadow-[4px_4px_0px_#0A0A0A] enabled:cursor-pointer enabled:hover:translate-x-0.5 enabled:hover:translate-y-0.5 enabled:hover:shadow-[2px_2px_0px_#0A0A0A] enabled:active:translate-x-1 enabled:active:translate-y-1 enabled:active:shadow-none disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {isSaving ? (
               <>

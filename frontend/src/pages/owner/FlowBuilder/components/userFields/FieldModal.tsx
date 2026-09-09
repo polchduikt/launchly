@@ -142,17 +142,17 @@ export const FieldModal: React.FC<FieldModalProps> = ({
           </div>
         </div>
 
-        <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
+        <div className="flex gap-2.5 justify-end pt-2 border-t border-slate-200 select-none">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+            className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-white text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
           >
             {t('settings.fields.btn_cancel')}
           </button>
           <button
             type="submit"
-            className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+            className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
           >
             {initialField ? t('settings.fields.btn_save') : t('settings.fields.btn_create_field')}
           </button>

@@ -259,7 +259,7 @@ export const ReplyBar: React.FC<ReplyBarProps> = ({
               <button
                 onClick={onSend}
                 disabled={(!typedMessage.trim() && !pendingImage) || isSending}
-                className="flex items-center gap-2 px-5 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] disabled:opacity-50 text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] cursor-pointer transition-all"
+                className="flex items-center gap-2 px-5 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] disabled:opacity-50 text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] cursor-pointer transition-all"
               >
                 {isSending ? <Loader2 className="animate-spin" size={14} /> : <>{t('crm.reply.btn_send')}</>}
               </button>

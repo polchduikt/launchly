@@ -168,9 +168,9 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
     return (
       <ConfirmModal
         isOpen={true}
-        title={t('crm.contact.delete_tooltip', 'Видалити контакт').toUpperCase()}
+        title={t('crm.contact.delete_tooltip', 'Видалити контакт')}
         message={t('crm.contact.delete_confirm', 'Ви впевнені, що хочете видалити цього контакту?')}
-        confirmText={t('common.delete', 'ВИДАЛИТИ').toUpperCase()}
+        confirmText={t('crm.contact.delete_tooltip', 'Видалити контакт')}
         cancelText={t('common.cancel', 'Скасувати')}
         isDanger
         onConfirm={() => {
@@ -249,7 +249,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
             <button
               onClick={handleStartChat}
-              className="w-full py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-2.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <MessageSquare size={13} />
               <span>{t('crm.contact.start_chat')}</span>
@@ -461,7 +461,7 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
                     <button
                       onClick={handleAddCustomFieldInline}
                       disabled={!customFieldName.trim()}
-                      className="w-8 h-8 flex items-center justify-center bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl cursor-pointer hover:bg-[#2A2A2A] disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
+                      className="w-8 h-8 flex items-center justify-center bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl cursor-pointer hover:bg-white hover:text-[#0A0A0A] disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
                     >
                       <Check size={13} />
                     </button>

@@ -93,7 +93,7 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
               ) : (
                 <button
                   onClick={handleConnectGoogle}
-                  className="px-5 py-1.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
+                  className="px-5 py-1.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
                 >
                   {t('auth.signin.connect')}
                 </button>
@@ -134,7 +134,7 @@ export const ManageSignInOptionsModal: React.FC<ManageSignInOptionsModalProps> =
               ) : (
                 <button
                   onClick={() => setIsTelegramOpen(true)}
-                  className="px-5 py-1.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
+                  className="px-5 py-1.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
                 >
                   {t('auth.signin.connect')}
                 </button>

@@ -454,7 +454,7 @@ export const AutomationsPage: React.FC = () => {
         onConfirm={() => confirmDialog?.onConfirm()}
         onCancel={() => setConfirmDialog(null)}
       />
-      <div className="flex h-full min-h-screen bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
+      <div className="flex h-full min-h-screen bg-[#F2EBDD] font-['Geist',sans-serif]">
         <AutomationsSidebar
           folders={folders}
           selectedFolderId={selectedFolderId}
@@ -480,14 +480,14 @@ export const AutomationsPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsNewFolderModalOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] bg-white hover:bg-slate-100 border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
+                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-white border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <FolderPlus size={14} />
                   <span>{t('automations.btn.new_folder')}</span>
                 </button>
                 <button
                   onClick={() => setIsNewBotModalOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-white bg-[#0A0A0A] hover:bg-[#2A2A2A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
+                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-white bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A]"
                 >
                   <Plus size={14} />
                   <span>{t('automations.btn.new_automation')}</span>

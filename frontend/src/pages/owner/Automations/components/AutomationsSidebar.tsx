@@ -55,7 +55,7 @@ export const AutomationsSidebar: React.FC<AutomationsSidebarProps> = ({
               <FolderOpen size={14} className="mr-2 shrink-0" />
               <span>{t('automations.sidebar.all_automations')}</span>
             </div>
-            <span className="text-[10px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-1.5 py-0.5 rounded-md">
+            <span className="text-[10px] font-black !text-[#0A0A0A] bg-white border border-[#0A0A0A] px-1.5 py-0.5 rounded-md">
               {getFolderBotCount(null)}
             </span>
           </button>
@@ -74,7 +74,7 @@ export const AutomationsSidebar: React.FC<AutomationsSidebarProps> = ({
               >
                 <FolderIcon size={14} className="mr-2 shrink-0" />
                 <span className="truncate mr-1">{folder.name}</span>
-                <span className="ml-auto text-[10px] font-black text-[#0A0A0A] bg-white border border-[#0A0A0A] px-1.5 py-0.5 rounded-md">
+                <span className="ml-auto text-[10px] font-black !text-[#0A0A0A] bg-white border border-[#0A0A0A] px-1.5 py-0.5 rounded-md">
                   {getFolderBotCount(folder.id)}
                 </span>
               </button>

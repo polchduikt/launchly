@@ -439,7 +439,7 @@ interface AudienceFilterItem {
                                       setIsDirty(true);
                                       setActiveDropdownId(null);
                                     }}
-                                    className="w-full py-1.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] font-black uppercase rounded-lg text-xs transition-all cursor-pointer text-center border-2 border-[#0A0A0A]"
+                                    className="w-full py-1.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] font-black uppercase rounded-lg text-xs transition-all cursor-pointer text-center border-2 border-[#0A0A0A]"
                                   >
                                     {t('editor.condition.apply')}
                                   </button>

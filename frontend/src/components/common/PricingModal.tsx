@@ -203,7 +203,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                             disabled={upgradingPlanId !== null}
                             className={`w-full py-2.5 text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer flex items-center justify-center gap-2 ${
                               isPro
-                                ? 'bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD]'
+                                ? 'bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white'
                                 : 'bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A]'
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                           >

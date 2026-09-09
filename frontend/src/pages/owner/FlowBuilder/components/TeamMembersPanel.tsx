@@ -39,7 +39,7 @@ const CustomRoleDropdown: React.FC<{
       </button>
 
       {isOpen && !disabled && (
-        <div className="absolute top-full left-0 mt-1.5 w-full bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-2xl z-50 py-1.5 overflow-hidden animate-in fade-in duration-150">
+        <div className="absolute top-full left-0 mt-1.5 w-full bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-2xl z-50 py-1.5 overflow-hidden animate-in fade-in duration-150">
           {roles.map((role) => {
             const isSelected = role === currentRole;
             return (
@@ -52,8 +52,8 @@ const CustomRoleDropdown: React.FC<{
                 }}
                 className={`w-full text-left px-4 py-2 text-xs font-extrabold transition-all cursor-pointer flex items-center justify-between ${
                   isSelected
-                    ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                    : 'text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD]'
+                    ? 'bg-[#0A0A0A] text-white'
+                    : 'text-[#0A0A0A] hover:bg-slate-100'
                 }`}
               >
                 <span>{role}</span>
@@ -191,7 +191,7 @@ export const TeamMembersPanel: React.FC = () => {
         src={avatarUrl}
         name={name}
         className={`${sizeClass} rounded-full object-cover border-2 border-[#0A0A0A] shrink-0`}
-        fallbackClassName={`${sizeClass} rounded-full bg-[#0A0A0A] text-[#F2EBDD] font-black flex items-center justify-center text-xs shrink-0 select-none border-2 border-[#0A0A0A]`}
+        fallbackClassName={`${sizeClass} rounded-full bg-[#0A0A0A] text-white font-black flex items-center justify-center text-xs shrink-0 select-none border-2 border-[#0A0A0A]`}
       />
     );
   };
@@ -203,7 +203,7 @@ export const TeamMembersPanel: React.FC = () => {
     const isOwner = editingMember.role === 'Owner';
 
     return (
-      <div className="space-y-6 text-left font-['JetBrains_Mono',monospace]">
+      <div className="space-y-6 text-left">
         <div className="flex items-center gap-1.5 text-xs font-black text-slate-600 select-none">
           <button
             onClick={() => setEditingMemberId(null)}
@@ -215,7 +215,7 @@ export const TeamMembersPanel: React.FC = () => {
           <span className="text-[#0A0A0A] uppercase">{getMemberName(editingMember)}</span>
         </div>
 
-        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl divide-y-2 divide-[#0A0A0A]/15 overflow-hidden">
+        <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl divide-y divide-slate-200 overflow-hidden shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 items-center">
             <div className="lg:col-span-3">
               <span className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase">{t('settings.members.name')}</span>
@@ -330,7 +330,7 @@ export const TeamMembersPanel: React.FC = () => {
                 type="button"
                 onClick={() => handleRemoveMemberOrInvite(editingMember)}
                 disabled={isOwner || (isMe && editingMember.role === 'Owner')}
-                className="w-full py-2 bg-rose-200 hover:bg-rose-300 border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-black uppercase rounded-xl select-none cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-2.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl select-none cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed text-center"
               >
                 {editingMember.isPending ? t('settings.members.btn.cancel_inv') : isMe ? t('settings.members.btn.leave_ws') : t('settings.members.btn.remove_mem')}
               </button>
@@ -353,9 +353,9 @@ export const TeamMembersPanel: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 font-['JetBrains_Mono',monospace]">
+    <div className="space-y-6">
       <div className="space-y-6 text-left animate-in fade-in duration-150">
-        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl overflow-hidden">
+        <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-sm">
           <div className="p-5 flex justify-between items-center border-b-2 border-[#0A0A0A]">
             <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase">
               {t('settings.members.title', 'Члени команди')}
@@ -365,7 +365,7 @@ export const TeamMembersPanel: React.FC = () => {
                 setErrorMsg('');
                 setIsInviteOpen(true);
               }}
-              className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Plus size={14} />
               <span>{t('settings.members.btn.invite', 'Запросити учасника')}</span>
@@ -392,7 +392,7 @@ export const TeamMembersPanel: React.FC = () => {
                     <th className="px-6 py-3.5 text-right"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y border-[#0A0A0A]/10 font-bold">
+                <tbody className="divide-y divide-slate-200 font-bold">
                   {members.map((m) => (
                     <tr key={m.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4 flex items-center gap-3">
@@ -401,7 +401,7 @@ export const TeamMembersPanel: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <span className="font-extrabold text-[#0A0A0A]">{getMemberName(m)}</span>
                             {m.userId === currentUser?.id && (
-                              <span className="bg-[#0A0A0A] text-[#F2EBDD] text-[9px] px-1.5 py-0.5 rounded uppercase font-black">
+                              <span className="bg-[#0A0A0A] text-white text-[9px] px-1.5 py-0.5 rounded uppercase font-black">
                                 {t('settings.members.badge.me', 'Це я')}
                               </span>
                             )}
@@ -455,7 +455,7 @@ export const TeamMembersPanel: React.FC = () => {
           <form 
             onSubmit={handleSendInvite}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-md flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
+            className="bg-white border-2 border-[#0A0A0A] rounded-3xl p-6 shadow-[8px_8px_0px_0px_#0A0A0A] w-full max-w-md flex flex-col gap-4 animate-in zoom-in-95 duration-200 text-left cursor-default"
           >
             <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3">
               <h3 className="font-['Anybody',sans-serif] text-sm font-black text-[#0A0A0A] uppercase tracking-wide">
@@ -518,7 +518,7 @@ export const TeamMembersPanel: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between py-2 border-t-2 border-b-2 border-[#0A0A0A]/15">
+              <div className="flex items-center justify-between py-2 border-t border-b border-slate-200">
                 <span className="text-xs font-bold text-[#0A0A0A]">{t('settings.members.invite.assign_inbox')}</span>
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
@@ -530,7 +530,7 @@ export const TeamMembersPanel: React.FC = () => {
                 </label>
               </div>
 
-              <div className="flex items-center justify-between pb-2 border-b-2 border-[#0A0A0A]/15">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                 <span className="text-xs font-bold text-[#0A0A0A]">{t('settings.members.invite.grant_billing')}</span>
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
@@ -547,18 +547,18 @@ export const TeamMembersPanel: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-2 border-t-2 border-[#0A0A0A]/15 select-none">
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-200 select-none">
               <button
                 type="button"
                 onClick={() => setIsInviteOpen(false)}
-                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-white text-[#0A0A0A] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {t('settings.members.invite.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={loading || !inviteEmail.trim()}
-                className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] disabled:opacity-55 text-[#F2EBDD] text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
+                className="px-5 py-2.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] disabled:opacity-55 text-white text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer"
               >
                 {loading ? t('settings.members.invite.sending') : t('settings.members.invite.send_btn')}
               </button>

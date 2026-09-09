@@ -25,7 +25,7 @@ vi.mock('../../../hooks/dashboard/useDashboardStatsQuery', () => ({
 }));
 
 vi.mock('../../../hooks/bot/useBotsQuery', () => ({
-  useBotsQuery: () => ({ data: [{ id: 1, name: 'Bot 1' }], isLoading: false }),
+  useBotsQuery: () => ({ data: [{ id: 1, name: 'Bot 1', hasTelegramToken: true }], isLoading: false }),
 }));
 
 vi.mock('../../../components/layout/DashboardLayout', () => ({
@@ -46,5 +46,19 @@ describe('DashboardStatsPage', () => {
     render(<DashboardStatsPage />, { wrapper: Wrapper });
 
     expect(screen.getByTestId('dashboard-layout')).toBeInTheDocument();
+  });
+
+  it('renders stat card tooltips with info descriptions', () => {
+    render(<DashboardStatsPage />, { wrapper: Wrapper });
+
+    expect(screen.getByLabelText('dashboard.stats.tooltip.total_subscribers')).toBeInTheDocument();
+    expect(screen.getByLabelText('dashboard.stats.tooltip.active_users')).toBeInTheDocument();
+    expect(screen.getByLabelText('dashboard.stats.tooltip.total_clicks')).toBeInTheDocument();
+    expect(screen.getByLabelText('dashboard.stats.tooltip.active_automations')).toBeInTheDocument();
+    expect(screen.getByLabelText('dashboard.stats.tooltip.interaction_history')).toBeInTheDocument();
+    expect(screen.getByLabelText('dashboard.stats.tooltip.top_clicked_buttons')).toBeInTheDocument();
+    expect(screen.getByLabelText('dashboard.stats.tooltip.ai_insights')).toBeInTheDocument();
+    expect(screen.getByLabelText('dashboard.stats.tooltip.tags_breakdown')).toBeInTheDocument();
+    expect(screen.getByLabelText('dashboard.stats.tooltip.activity_heatmap')).toBeInTheDocument();
   });
 });

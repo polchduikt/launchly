@@ -49,9 +49,9 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
           onClose();
         }
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/40 animate-fade-in font-['JetBrains_Mono',monospace]"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/40 animate-fade-in"
     >
-      <div className="bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[10px_10px_0px_#0A0A0A] rounded-3xl max-w-lg w-full overflow-hidden text-[#0A0A0A] relative">
+      <div className="bg-white border-2 border-[#0A0A0A] shadow-sm rounded-2xl max-w-lg w-full overflow-hidden text-[#0A0A0A] relative">
         
         <div className="p-6 border-b-2 border-[#0A0A0A] flex items-center justify-between bg-rose-100">
           <div className="flex items-center gap-3">
@@ -113,11 +113,11 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
           </div>
         </div>
 
-        <div className="p-5 border-t-2 border-[#0A0A0A] bg-white flex items-center justify-end gap-3">
+        <div className="p-5 border-t border-slate-200 bg-white flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3">
           <button
             onClick={onClose}
             disabled={submitting}
-            className="px-5 py-2.5 bg-white hover:bg-slate-100 text-[#0A0A0A] border-2 border-[#0A0A0A] text-xs font-extrabold rounded-xl transition-all cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-[#0A0A0A] hover:text-white text-[#0A0A0A] border-2 border-[#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer text-center"
           >
             {t('common.cancel', 'Скасувати')}
           </button>
@@ -125,7 +125,7 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
           <button
             onClick={handleDeleteAccount}
             disabled={submitting || !isConfirmed}
-            className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto px-5 py-2.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-center"
           >
             {submitting ? (
               <>

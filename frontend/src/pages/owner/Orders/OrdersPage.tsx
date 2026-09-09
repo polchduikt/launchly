@@ -51,13 +51,10 @@ export const OrdersPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="min-h-full h-full flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
+      <div className="min-h-full h-full flex flex-col bg-[#F2EBDD] font-['Geist',sans-serif]">
 
-        <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
-          <div>
-            <h1 className="font-['Anybody',sans-serif] text-xl font-black text-[#0A0A0A] uppercase tracking-tight">Orders</h1>
-            <p className="text-xs text-[#0A0A0A]/70 font-bold">Track and manage your product orders</p>
-          </div>
+        <header className="h-16 border-b-2 border-[#0A0A0A] px-6 flex items-center justify-between bg-[#F2EBDD] shrink-0 z-20">
+          <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight select-none">Orders</h1>
         </header>
 
         <div className="flex-1 overflow-hidden">
@@ -139,12 +136,12 @@ export const OrdersPage: React.FC = () => {
                       ) : (
                         orders.map((o) => (
                           <tr key={o.id} className="hover:bg-slate-50/50">
-                            <td className="py-4 px-6 font-bold text-slate-900">{o.orderNumber}</td>
+                            <td className="py-4 px-6 font-bold text-slate-900 font-['JetBrains_Mono',monospace]">{o.orderNumber}</td>
                             <td className="py-4 px-6">{o.botUserName}</td>
                             <td className="py-4 px-6 max-w-xs truncate" title={o.items || ''}>
                               {o.items || '—'}
                             </td>
-                            <td className="py-4 px-6">
+                            <td className="py-4 px-6 font-['JetBrains_Mono',monospace]">
                               {o.totalAmount} {o.currency}
                             </td>
                             <td className="py-4 px-6">
@@ -173,7 +170,7 @@ export const OrdersPage: React.FC = () => {
                                 <option value="CANCELLED">Cancelled</option>
                               </select>
                             </td>
-                            <td className="py-4 px-6 text-slate-400 text-[11px]">
+                            <td className="py-4 px-6 text-slate-400 text-[11px] font-['JetBrains_Mono',monospace]">
                               {new Date(o.createdAt).toLocaleDateString()}
                             </td>
                             <td className="py-4 px-6">
