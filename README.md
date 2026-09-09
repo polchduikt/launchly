@@ -48,8 +48,6 @@ It serves as a full-scale technical showcase of building resilient, high-concurr
   <img src="docs/images/preview.gif" alt="Launchly Platform Overview" width="100%" />
 </p>
 
----
-
 ## Tech Stack
 
 ### Backend — `backend/`
