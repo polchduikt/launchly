@@ -26,7 +26,10 @@ const BotsConnectPage = lazy(() => import('../pages/owner/BotsConnect/BotsConnec
 const AutomationsPage = lazy(() => import('../pages/owner/Automations/AutomationsPage').then(m => ({ default: m.AutomationsPage })));
 const SettingsPage = lazy(() => import('../pages/owner/Settings/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const FlowBuilderPage = lazy(() => import('../pages/owner/FlowBuilder/FlowBuilderPage').then(m => ({ default: m.FlowBuilderPage })));
-const ChatPage = lazy(() => import('../pages/owner/Chat/ChatPage').then(m => ({ default: m.ChatPage })));
+import { ChatPageSkeleton } from '../pages/owner/Chat/components/ChatPageSkeleton';
+
+export const preloadChatPage = () => import('../pages/owner/Chat/ChatPage');
+const ChatPage = lazy(() => preloadChatPage().then(m => ({ default: m.ChatPage })));
 const ContactsPage = lazy(() => import('../pages/owner/Contacts/ContactsPage').then(m => ({ default: m.ContactsPage })));
 const AiPage = lazy(() => import('../pages/owner/Ai/AiPage'));
 const OrdersPage = lazy(() => import('../pages/owner/Orders/OrdersPage').then(m => ({ default: m.OrdersPage })));
@@ -221,7 +224,14 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.TEMPLATES_EDIT} element={<CreateTemplateWizardPage />} />
             <Route path={ROUTES.TEMPLATES} element={<MyTemplatesPage />} />
             <Route path={ROUTES.TEMPLATES_DETAIL} element={<TemplateDetailPage />} />
-            <Route path={ROUTES.CHAT} element={<ChatPage />} />
+            <Route
+              path={ROUTES.CHAT}
+              element={
+                <Suspense fallback={<ChatPageSkeleton />}>
+                  <ChatPage />
+                </Suspense>
+              }
+            />
             <Route path={ROUTES.CONTACTS} element={<ContactsPage />} />
             <Route path={ROUTES.AI} element={<AiPage />} />
             <Route path={ROUTES.ORDERS} element={<OrdersPage />} />

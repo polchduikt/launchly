@@ -16,6 +16,8 @@ import { PricingModal } from '../common/PricingModal';
 import { ManageSignInOptionsModal } from '../common/ManageSignInOptionsModal';
 import { SafeAvatar } from '../common/SafeAvatar';
 import { ROUTES } from '../../routes/paths';
+import { useQueryClient } from '@tanstack/react-query';
+import { getAllConversationsApi } from '../../api/crm';
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
@@ -35,6 +37,48 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const { data: subscription } = useSubscriptionQuery();
   const { data: userTicketsData } = useUserTicketsQuery();
   const hasUnreadSupport = userTicketsData?.content?.some((t) => Boolean(t.unreadForUser)) || false;
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const preloadChat = () => {
+      import('../../pages/owner/Chat/ChatPage');
+      queryClient.prefetchQuery({
+        queryKey: ['conversations', 'all'],
+        queryFn: () => getAllConversationsApi(),
+        staleTime: 1000 * 30,
+      });
+    };
+
+    if (typeof window !== 'undefined') {
+      if ('requestIdleCallback' in window) {
+        const id = (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(
+          preloadChat,
+          { timeout: 1500 }
+        );
+        return () => {
+          (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(id);
+        };
+      } else {
+        const timer = setTimeout(preloadChat, 1000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [queryClient]);
+
+  const handleNavPrefetch = (path: string) => {
+    if (path === ROUTES.CHAT) {
+      import('../../pages/owner/Chat/ChatPage');
+      queryClient.prefetchQuery({
+        queryKey: ['conversations', 'all'],
+        queryFn: () => getAllConversationsApi(),
+        staleTime: 1000 * 30,
+      });
+    } else if (path === ROUTES.CONTACTS) {
+      import('../../pages/owner/Contacts/ContactsPage');
+    } else if (path === ROUTES.AUTOMATIONS) {
+      import('../../pages/owner/Automations/AutomationsPage');
+    }
+  };
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -90,6 +134,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <button
                   key={item.label}
                   onClick={() => navigate(item.path)}
+                  onMouseEnter={() => handleNavPrefetch(item.path)}
+                  onFocus={() => handleNavPrefetch(item.path)}
                   title={localizedLabel}
                   className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all cursor-pointer ${
                     isActive
