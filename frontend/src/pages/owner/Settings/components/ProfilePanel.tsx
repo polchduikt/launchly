@@ -15,9 +15,7 @@ import {
   EyeOff, 
   User as UserIcon, 
   Mail, 
-  Lock, 
-  ShieldCheck,
-  Check
+  Lock
 } from 'lucide-react';
 
 export const ProfilePanel: React.FC = () => {
@@ -171,8 +169,8 @@ export const ProfilePanel: React.FC = () => {
 
   return (
     <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl divide-y divide-slate-200 overflow-hidden shadow-sm">
-      <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
-        <div className="border-b border-slate-200 pb-6">
+      <form onSubmit={handleSubmit}>
+        <div className="p-6 md:p-8 border-b border-slate-200">
           <h2 className="font-['Anybody',sans-serif] text-xl md:text-2xl font-black uppercase text-[#0A0A0A] tracking-tight">
             {t('settings.profile.title', 'Edit Profile')}
           </h2>
@@ -182,29 +180,31 @@ export const ProfilePanel: React.FC = () => {
         </div>
 
         {errorMsg && (
-          <div className="p-4 bg-rose-100 border-2 border-rose-500 rounded-2xl flex items-center gap-3 text-xs font-bold text-rose-800 shadow-[2px_2px_0px_#0A0A0A]">
+          <div className="m-6 md:m-8 p-4 bg-rose-100 border-2 border-rose-500 rounded-2xl flex items-center gap-3 text-xs font-bold text-rose-800 shadow-[2px_2px_0px_#0A0A0A]">
             <AlertCircle size={18} className="shrink-0 text-rose-600" />
             <span className="flex-1">{errorMsg}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="p-4 bg-emerald-100 border-2 border-emerald-500 rounded-2xl flex items-center gap-3 text-xs font-bold text-emerald-800 shadow-[2px_2px_0px_#0A0A0A]">
+          <div className="m-6 md:m-8 p-4 bg-emerald-100 border-2 border-emerald-500 rounded-2xl flex items-center gap-3 text-xs font-bold text-emerald-800 shadow-[2px_2px_0px_#0A0A0A]">
             <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
             <span className="flex-1">{successMsg}</span>
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between pb-6 border-b border-slate-200">
-          <div className="w-full md:w-1/3">
-            <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.profile.avatar_title', 'Profile Avatar')}</h3>
-            <p className="text-xs text-slate-600 font-bold mt-1">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 md:p-8 items-center border-b border-slate-200">
+          <div className="lg:col-span-4">
+            <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">
+              {t('settings.profile.avatar_title', 'Profile Avatar')}
+            </h3>
+            <p className="text-xs text-slate-600 font-bold mt-1.5 leading-relaxed">
               {t('settings.profile.avatar_desc', 'Formats: PNG, JPG, WEBP (up to 5 MB)')}
             </p>
           </div>
 
-          <div className="w-full md:w-2/3 flex flex-wrap items-center gap-6">
-            <div className="relative group">
+          <div className="lg:col-span-8 flex flex-wrap items-center gap-6">
+            <div className="relative group shrink-0">
               <SafeAvatar
                 src={avatar}
                 name={name || user?.name}
@@ -230,7 +230,7 @@ export const ProfilePanel: React.FC = () => {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={avatarUploadMutation.isPending}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-slate-100 text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white hover:bg-slate-100 text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
               >
                 <Camera size={14} />
                 <span>{t('settings.profile.btn_upload_avatar', 'Upload new photo')}</span>
@@ -241,7 +241,7 @@ export const ProfilePanel: React.FC = () => {
                   type="button"
                   onClick={handleRemoveAvatar}
                   disabled={avatarUploadMutation.isPending}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                 >
                   <Trash2 size={14} />
                   <span>{t('settings.profile.btn_delete_avatar', 'Remove')}</span>
@@ -251,89 +251,85 @@ export const ProfilePanel: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6 md:items-start justify-between pb-6 border-b border-slate-200">
-          <div className="w-full md:w-1/3">
-            <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.profile.details_title', 'Personal Details')}</h3>
-            <p className="text-xs text-slate-600 font-bold mt-1">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 md:p-8 items-start border-b border-slate-200">
+          <div className="lg:col-span-4">
+            <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">
+              {t('settings.profile.details_title', 'Personal Details')}
+            </h3>
+            <p className="text-xs text-slate-600 font-bold mt-1.5 leading-relaxed">
               {t('settings.profile.details_desc', 'Your public name and sign-in email address')}
             </p>
           </div>
 
-          <div className="w-full md:w-2/3 space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-[#0A0A0A] uppercase mb-1.5 flex items-center gap-1.5">
-                <UserIcon size={13} />
-                {t('settings.profile.name_label', 'Name')}
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={100}
-                required
-                className="w-full max-w-md px-4 py-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]"
-                placeholder={t('settings.profile.placeholder_name', 'Your name')}
-              />
-            </div>
+          <div className="lg:col-span-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-bold text-[#0A0A0A] uppercase mb-1.5 flex items-center gap-1.5">
+                  <UserIcon size={13} />
+                  {t('settings.profile.name_label', 'Name')}
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  maxLength={100}
+                  required
+                  className="w-full px-4 py-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]"
+                  placeholder={t('settings.profile.placeholder_name', 'Your name')}
+                />
+              </div>
 
-            <div>
-              <div className="flex items-center justify-between max-w-md mb-1.5">
-                <label className="block text-xs font-bold text-[#0A0A0A] uppercase flex items-center gap-1.5">
+              <div>
+                <label className="block text-xs font-bold text-[#0A0A0A] uppercase mb-1.5 flex items-center gap-1.5">
                   <Mail size={13} />
                   {t('settings.profile.email_label', 'Email')}
                 </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isGoogle}
+                  required
+                  className={`w-full px-4 py-2.5 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold shadow-[2px_2px_0px_#0A0A0A] ${
+                    isGoogle
+                      ? 'bg-slate-100 text-slate-500 cursor-not-allowed select-none'
+                      : 'bg-white text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]'
+                  }`}
+                  placeholder={t('settings.profile.placeholder_email', 'youremail@example.com')}
+                />
                 {isGoogle && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 border border-amber-400 text-amber-900 rounded-md text-[10px] font-black uppercase tracking-wider">
-                    <ShieldCheck size={11} className="text-amber-700" />
-                    {t('settings.profile.google_badge', 'Google Account')}
-                  </span>
+                  <p className="text-[11px] text-slate-500 font-bold mt-1.5 flex items-center gap-1.5">
+                    <Lock size={12} className="text-slate-400 shrink-0" />
+                    <span>{t('settings.profile.email_managed_by_google', 'Email is linked to your Google account and cannot be changed')}</span>
+                  </p>
                 )}
               </div>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isGoogle}
-                required
-                className={`w-full max-w-md px-4 py-2.5 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold shadow-[2px_2px_0px_#0A0A0A] ${
-                  isGoogle
-                    ? 'bg-slate-100 text-slate-500 cursor-not-allowed select-none'
-                    : 'bg-white text-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]'
-                }`}
-                placeholder={t('settings.profile.placeholder_email', 'youremail@example.com')}
-              />
-              {isGoogle && (
-                <p className="text-[11px] text-slate-500 font-bold mt-1.5 flex items-center gap-1.5">
-                  <Lock size={12} className="text-slate-400 shrink-0" />
-                  <span>{t('settings.profile.email_managed_by_google', 'Email is linked to your Google account and cannot be changed')}</span>
-                </p>
-              )}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6 md:items-start justify-between pb-6 border-b border-slate-200">
-          <div className="w-full md:w-1/3">
-            <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 md:p-8 items-start">
+          <div className="lg:col-span-4">
+            <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">
               {hasPassword
                 ? t('settings.profile.password_title', 'Change Password')
                 : t('settings.profile.password_set_title', 'Set Password')}
             </h3>
-            <p className="text-xs text-slate-600 font-bold mt-1">
+            <p className="text-xs text-slate-600 font-bold mt-1.5 leading-relaxed">
               {hasPassword
                 ? t('settings.profile.password_desc', 'Leave fields blank if you do not wish to change your password')
                 : t('settings.profile.password_set_desc', 'Create a password to enable sign-in with email and password')}
             </p>
           </div>
 
-          <div className="w-full md:w-2/3 space-y-4">
+          <div className="lg:col-span-8 space-y-6">
             {hasPassword && (
               <div>
                 <label className="block text-xs font-bold text-[#0A0A0A] uppercase mb-1.5 flex items-center gap-1.5">
                   <Lock size={13} />
                   {t('settings.profile.current_password_label', 'Current Password')}
                 </label>
-                <div className="relative w-full max-w-md">
+                <div className="relative max-w-md">
                   <input
                     type={showCurrentPass ? 'text' : 'password'}
                     value={currentPassword}
@@ -352,7 +348,7 @@ export const ProfilePanel: React.FC = () => {
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-xs font-bold text-[#0A0A0A] uppercase mb-1.5">
                   {t('settings.profile.new_password_label', 'New Password')}
@@ -401,7 +397,7 @@ export const ProfilePanel: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4">
+        <div className="p-6 md:p-8 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200">
           <div className="text-xs text-slate-600 font-bold">
             {isSaving && (
               <span className="flex items-center gap-2 text-[#0A0A0A]">
@@ -413,18 +409,15 @@ export const ProfilePanel: React.FC = () => {
           <button
             type="submit"
             disabled={!hasChanges || isSaving || avatarUploadMutation.isPending}
-            className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-[#0A0A0A] text-white text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] rounded-xl transition-all shadow-[4px_4px_0px_#0A0A0A] enabled:cursor-pointer enabled:hover:translate-x-0.5 enabled:hover:translate-y-0.5 enabled:hover:shadow-[2px_2px_0px_#0A0A0A] enabled:active:translate-x-1 enabled:active:translate-y-1 enabled:active:shadow-none disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 bg-[#0A0A0A] text-white text-xs font-['Anybody',sans-serif] font-black uppercase tracking-wider border-2 border-[#0A0A0A] rounded-xl transition-all shadow-[4px_4px_0px_#0A0A0A] enabled:cursor-pointer enabled:hover:translate-x-0.5 enabled:hover:translate-y-0.5 enabled:hover:shadow-[2px_2px_0px_#0A0A0A] enabled:active:translate-x-1 enabled:active:translate-y-1 enabled:active:shadow-none disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {isSaving ? (
-              <>
+              <span className="flex items-center gap-2">
                 <Loader2 size={14} className="animate-spin" />
                 <span>{t('settings.profile.btn_saving', 'Saving...')}</span>
-              </>
+              </span>
             ) : (
-              <>
-                <Check size={15} />
-                <span>{t('settings.profile.btn_save', 'Save Changes')}</span>
-              </>
+              <span>{t('settings.profile.btn_save', 'Save Changes')}</span>
             )}
           </button>
         </div>

@@ -84,7 +84,7 @@ export const AutomationsTableView: React.FC<AutomationsTableViewProps> = ({
                   />
                   <div className="flex flex-col min-w-0">
                     <div className="flex items-center space-x-2">
-                      <span className="font-bold text-xs text-[#0A0A0A] uppercase hover:underline truncate max-w-xs md:max-w-md">
+                      <span className="font-bold text-sm text-[#0A0A0A] group-hover:underline truncate max-w-xs md:max-w-md">
                         {bot.name}
                       </span>
                       {bot.blocked ? (
@@ -103,11 +103,11 @@ export const AutomationsTableView: React.FC<AutomationsTableViewProps> = ({
                       ) : null}
                     </div>
                     {bot.blocked ? (
-                      <span className="text-[11px] text-slate-700 font-bold truncate max-w-xs md:max-w-md mt-0.5">
+                      <span className="text-xs text-rose-700 font-medium truncate max-w-xs md:max-w-md mt-0.5">
                         {translateBlockReason(bot.blockReason)}
                       </span>
                     ) : bot.description ? (
-                      <span className="text-[11px] text-slate-600 font-medium line-clamp-1 max-w-xs md:max-w-md mt-0.5">
+                      <span className="text-xs text-slate-500 font-normal line-clamp-1 max-w-xs md:max-w-md mt-0.5">
                         {bot.description}
                       </span>
                     ) : null}

@@ -36,6 +36,16 @@ public class TeamServiceImpl implements TeamService {
     private final BotInvitationRepository botInvitationRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final PlanRepository planRepository;
+    private final org.springframework.cache.CacheManager cacheManager;
+
+    private void evictBotsCache(Long userId) {
+        if (userId != null && cacheManager != null) {
+            org.springframework.cache.Cache cache = cacheManager.getCache(com.launchly.common.constant.CacheConstants.BOTS);
+            if (cache != null) {
+                cache.evict(userId);
+            }
+        }
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -221,6 +231,7 @@ public class TeamServiceImpl implements TeamService {
                 firstUpdated = saved;
             }
         }
+        evictBotsCache(userId);
 
         return new TeamMemberResponse(
                 firstUpdated.getId(),
@@ -255,6 +266,7 @@ public class TeamServiceImpl implements TeamService {
         for (BotMember member : members) {
             botMemberRepository.delete(member);
         }
+        evictBotsCache(userId);
     }
 
     @Override
@@ -298,17 +310,33 @@ public class TeamServiceImpl implements TeamService {
         invite.setAccepted(true);
         botInvitationRepository.save(invite);
 
-        Optional<BotMember> existingMember = botMemberRepository.findByBotIdAndUserId(invite.getBot().getId(), user.getId());
-        if (existingMember.isEmpty()) {
-            BotMember member = BotMember.builder()
-                    .bot(invite.getBot())
-                    .user(user)
-                    .role(invite.getRole())
-                    .inboxSeat(invite.isInboxSeat())
-                    .billingPermission(invite.isBillingPermission())
-                    .build();
-            botMemberRepository.save(member);
+        User owner = invite.getBot().getUser();
+        List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
+        if (ownerBots.isEmpty()) {
+            ownerBots = List.of(invite.getBot());
         }
+
+        for (Bot b : ownerBots) {
+            Optional<BotMember> existingMember = botMemberRepository.findByBotIdAndUserId(b.getId(), user.getId());
+            if (existingMember.isEmpty()) {
+                BotMember member = BotMember.builder()
+                        .bot(b)
+                        .user(user)
+                        .role(invite.getRole())
+                        .inboxSeat(invite.isInboxSeat())
+                        .billingPermission(invite.isBillingPermission())
+                        .build();
+                botMemberRepository.save(member);
+            } else {
+                BotMember member = existingMember.get();
+                member.setRole(invite.getRole());
+                member.setInboxSeat(invite.isInboxSeat());
+                member.setBillingPermission(invite.isBillingPermission());
+                botMemberRepository.save(member);
+            }
+        }
+
+        evictBotsCache(user.getId());
     }
 
     @Override
@@ -392,6 +420,9 @@ public class TeamServiceImpl implements TeamService {
                 }
             });
         }
+
+        evictBotsCache(oldOwner.getId());
+        evictBotsCache(newOwnerUserId);
     }
 
     @Override
@@ -413,6 +444,7 @@ public class TeamServiceImpl implements TeamService {
                 botMemberRepository.delete(member);
             }
         }
+        evictBotsCache(currentUserId);
     }
 
 }

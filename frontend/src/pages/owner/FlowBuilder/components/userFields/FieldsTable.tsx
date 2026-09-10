@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { HelpCircle, MoreVertical } from 'lucide-react';
+import { MoreVertical } from 'lucide-react';
 import { t } from '../../../../../i18n/config';
 import type { UserField } from '../../../../../types/bot';
 
@@ -46,28 +46,16 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
               />
             </th>
             <th className="px-5 py-3">
-              <div className="flex items-center gap-1">
-                <span>{t('settings.fields.table_name')}</span>
-                {!isArchived && <HelpCircle size={12} />}
-              </div>
+              <span>{t('settings.fields.table_name')}</span>
             </th>
             <th className="px-5 py-3">
-              <div className="flex items-center gap-1">
-                <span>{t('settings.fields.table_type')}</span>
-                {!isArchived && <HelpCircle size={12} />}
-              </div>
+              <span>{t('settings.fields.table_type')}</span>
             </th>
             <th className="px-5 py-3">
-              <div className="flex items-center gap-1">
-                <span>{t('settings.fields.table_value', 'Значення')}</span>
-                {!isArchived && <HelpCircle size={12} />}
-              </div>
+              <span>{t('settings.fields.table_value', 'Значення')}</span>
             </th>
             <th className="px-5 py-3">
-              <div className="flex items-center gap-1">
-                <span>{t('settings.fields.table_desc')}</span>
-                {!isArchived && <HelpCircle size={12} />}
-              </div>
+              <span>{t('settings.fields.table_desc')}</span>
             </th>
             <th className="px-5 py-3 w-12 text-right"></th>
           </tr>

@@ -100,7 +100,7 @@ export const SettingsPage: React.FC = () => {
           <div className="sticky top-4 space-y-6 pb-20 select-none">
             {SETTINGS_SECTIONS.map((section) => (
               <div key={section.title}>
-                <h3 className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-2 px-2 select-none">
+                <h3 className="font-['Anybody',sans-serif] text-xs font-black text-[#0A0A0A] uppercase tracking-wider mb-2 px-2 select-none">
                   {t('settings.section.' + section.title.toLowerCase())}
                 </h3>
                 <nav className="space-y-1">
@@ -153,28 +153,30 @@ export const SettingsPage: React.FC = () => {
               <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl divide-y divide-slate-200 overflow-hidden shadow-sm">
 
                 <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between">
-                  <div className="w-full md:w-1/3">
-                    <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.account_timezone')}</h3>
+                  <div className="w-full md:w-1/3 shrink-0">
+                    <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">{t('settings.general.account_timezone')}</h3>
                   </div>
-                  <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
-                    <div className="w-full md:max-w-[300px]">
-                      <TimezoneSelect
-                        value={timeZone}
-                        onChange={handleTimezoneChange}
-                        disabled={timezoneMutation.isPending}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {timezoneMutation.isPending && (
-                        <span className="flex items-center gap-1.5 text-xs font-bold text-[#0A0A0A]/50">
-                          <Loader2 size={11} className="animate-spin" /> Збереження...
-                        </span>
-                      )}
-                      {timezoneSaved && !timezoneMutation.isPending && (
-                        <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
-                          <Check size={11} /> Збережено
-                        </span>
-                      )}
+                  <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-6 md:items-center">
+                    <div className="w-full md:w-[300px] shrink-0 flex items-center gap-2">
+                      <div className="flex-1">
+                        <TimezoneSelect
+                          value={timeZone}
+                          onChange={handleTimezoneChange}
+                          disabled={timezoneMutation.isPending}
+                        />
+                      </div>
+                      <div className="shrink-0 min-w-[20px] flex items-center">
+                        {timezoneMutation.isPending && (
+                          <span className="flex items-center gap-1.5 text-xs font-bold text-[#0A0A0A]/50">
+                            <Loader2 size={11} className="animate-spin" />
+                          </span>
+                        )}
+                        {timezoneSaved && !timezoneMutation.isPending && (
+                          <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
+                            <Check size={11} />
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <p className="text-xs text-slate-700 font-medium leading-relaxed flex-1">
                       {t('settings.general.timezone_desc')}
@@ -182,78 +184,85 @@ export const SettingsPage: React.FC = () => {
                   </div>
                 </div>
 
-
-                <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-                  <div className="w-full md:w-1/3">
-                    <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.use_template')}</h3>
+                <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between">
+                  <div className="w-full md:w-1/3 shrink-0">
+                    <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">{t('settings.general.use_template')}</h3>
                   </div>
-                  <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
-                    <button
-                      onClick={() => navigate('/templates/create')}
-                      className="w-full sm:w-auto inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-white text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
-                    >
-                      {t('settings.general.template_btn')}
-                    </button>
-                    <p className="text-xs text-slate-700 font-medium leading-relaxed md:max-w-xs">
+                  <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-6 md:items-center">
+                    <div className="w-full md:w-[300px] shrink-0">
+                      <button
+                        onClick={() => navigate('/templates/create')}
+                        className="w-full sm:w-auto inline-flex items-center justify-center text-center whitespace-nowrap min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-white text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+                      >
+                        {t('settings.general.template_btn')}
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-700 font-medium leading-relaxed flex-1">
                       {t('settings.general.template_desc')}
                     </p>
                   </div>
                 </div>
 
-                <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-                  <div className="w-full md:w-1/3">
-                    <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.leave_account')}</h3>
+                <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between">
+                  <div className="w-full md:w-1/3 shrink-0">
+                    <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">{t('settings.general.leave_account')}</h3>
                   </div>
-                  <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
-                    <button
-                      onClick={() => setIsLeaveModalOpen(true)}
-                      className="w-full sm:w-auto inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-white text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
-                    >
-                      {t('settings.general.leave_btn')}
-                    </button>
-                    <p className="text-xs text-slate-700 font-medium leading-relaxed md:max-w-xs">
+                  <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-6 md:items-center">
+                    <div className="w-full md:w-[300px] shrink-0">
+                      <button
+                        onClick={() => setIsLeaveModalOpen(true)}
+                        className="w-full sm:w-auto inline-flex items-center justify-center text-center whitespace-nowrap min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-white text-[#0A0A0A] text-xs font-bold border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+                      >
+                        {t('settings.general.leave_btn')}
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-700 font-medium leading-relaxed flex-1">
                       {t('settings.general.leave_desc')}
                     </p>
                   </div>
                 </div>
 
-                <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-                  <div className="w-full md:w-1/3">
-                    <h3 className="font-bold text-sm text-[#0A0A0A] uppercase">{t('settings.general.sign_out')}</h3>
+                <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between">
+                  <div className="w-full md:w-1/3 shrink-0">
+                    <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">{t('settings.general.sign_out')}</h3>
                   </div>
-                  <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
-                    <button
-                      onClick={handleLogout}
-                      disabled={logoutMutation.isPending}
-                      className="w-full sm:w-auto inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-white border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer gap-2 disabled:opacity-75 disabled:cursor-not-allowed"
-                    >
-                      {logoutMutation.isPending ? (
-                        <>
-                          <Loader2 className="animate-spin" size={14} />
-                          <span>Signing out...</span>
-                        </>
-                      ) : (
-                        <span>{t('settings.general.sign_out')}</span>
-                      )}
-                    </button>
-                    <p className="text-xs text-slate-700 font-medium leading-relaxed md:max-w-xs">
+                  <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-6 md:items-center">
+                    <div className="w-full md:w-[300px] shrink-0">
+                      <button
+                        onClick={handleLogout}
+                        disabled={logoutMutation.isPending}
+                        className="w-full sm:w-auto inline-flex items-center justify-center text-center whitespace-nowrap min-w-[200px] h-10 px-5 bg-white hover:bg-[#0A0A0A] hover:text-white border-2 border-[#0A0A0A] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer gap-2 disabled:opacity-75 disabled:cursor-not-allowed"
+                      >
+                        {logoutMutation.isPending ? (
+                          <>
+                            <Loader2 className="animate-spin" size={14} />
+                            <span>Signing out...</span>
+                          </>
+                        ) : (
+                          <span>{t('settings.general.sign_out')}</span>
+                        )}
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-700 font-medium leading-relaxed flex-1">
                       {t('settings.general.sign_out_desc')}
                     </p>
                   </div>
                 </div>
 
-                <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-                  <div className="w-full md:w-1/3">
-                    <h3 className="font-bold text-sm text-rose-700 uppercase">{t('settings.general.delete_account')}</h3>
+                <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between">
+                  <div className="w-full md:w-1/3 shrink-0">
+                    <h3 className="font-['Anybody',sans-serif] font-black text-sm text-rose-700 uppercase tracking-tight leading-snug">{t('settings.general.delete_account')}</h3>
                   </div>
-                  <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-4 items-center">
-                    <button
-                      onClick={() => setIsDeleteModalOpen(true)}
-                      className="w-full sm:w-auto inline-flex items-center justify-center text-center whitespace-nowrap shrink-0 min-w-[200px] h-10 px-5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl transition-all cursor-pointer"
-                    >
-                      {t('settings.general.delete_btn')}
-                    </button>
-                    <p className="text-xs text-slate-700 font-medium leading-relaxed md:max-w-xs">
+                  <div className="w-full md:w-2/3 flex flex-col md:flex-row gap-6 md:items-center">
+                    <div className="w-full md:w-[300px] shrink-0">
+                      <button
+                        onClick={() => setIsDeleteModalOpen(true)}
+                        className="w-full sm:w-auto inline-flex items-center justify-center text-center whitespace-nowrap min-w-[200px] h-10 px-5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                      >
+                        {t('settings.general.delete_btn')}
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-700 font-medium leading-relaxed flex-1">
                       {t('settings.general.delete_desc')}
                     </p>
                   </div>

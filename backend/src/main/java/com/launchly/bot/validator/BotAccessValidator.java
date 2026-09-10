@@ -21,7 +21,7 @@ public class BotAccessValidator {
     public Bot getBotWithAccess(Long botId, Long userId) {
         Bot bot = botRepository.findById(botId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
-        if (!bot.getUser().getId().equals(userId) && !botMemberRepository.existsByBotIdAndUserId(botId, userId)) {
+        if (!bot.getUser().getId().equals(userId) && !botMemberRepository.existsByBotOwnerIdAndUserId(bot.getUser().getId(), userId)) {
             throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
         }
         return bot;

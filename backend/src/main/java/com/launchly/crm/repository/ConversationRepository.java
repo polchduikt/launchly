@@ -14,7 +14,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     List<Conversation> findByBotIdOrderByUpdatedAtDesc(Long botId);
 
     @EntityGraph(attributePaths = {"bot", "botUser"})
-    @Query("SELECT c FROM Conversation c WHERE c.bot.user.id = :userId ORDER BY c.updatedAt DESC")
+    @Query("SELECT c FROM Conversation c WHERE (c.bot.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.user.id = c.bot.user.id AND bm.user.id = :userId)) ORDER BY c.updatedAt DESC")
     List<Conversation> findByBotUserIdOrderByUpdatedAtDesc(@Param("userId") Long userId);
 
     @EntityGraph(attributePaths = {"bot", "botUser"})

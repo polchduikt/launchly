@@ -244,6 +244,8 @@
   "settings.members.badge.pending": "Pending",
   "settings.members.role.owner": "Owner",
   "settings.members.role.admin": "Admin",
+  "settings.members.role.editor": "Editor",
+  "settings.members.role.agent": "Inbox Agent",
   "settings.members.role.viewer": "Viewer",
   "settings.members.table.name": "Name",
   "settings.members.table.role": "Role",

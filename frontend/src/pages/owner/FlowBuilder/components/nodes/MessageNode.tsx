@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { t } from '../../../../../i18n/config';
-import { Handle, Position, useReactFlow, useNodeConnections, useUpdateNodeInternals, useConnection } from '@xyflow/react';
+import { Handle, Position, useReactFlow, useNodeConnections, useUpdateNodeInternals, useConnection, useStore } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Send, Plus, Image as ImageIcon, Paperclip, Volume2, Video, Clock, MessageSquare, Zap, AlertCircle } from 'lucide-react';
 import type { ButtonData, CustomNodeData } from '../../../../../types/bot';
@@ -23,13 +23,18 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
   const isReplyHandle = useConnection((s) => s.fromHandle?.id === 'reply');
   const isGrayedOut = isConnecting && (isSelfSource || isReplyHandle);
   const { showToolbar, bindHover } = useNodeHover();
+  const isZoomedOut = useStore((s) => s.transform[2] < 0.6);
 
 
   const hasDataCollection = blocks.some((b) => b.type === 'data_collection');
-  const buttonsSerialized = JSON.stringify(buttons);
+  const prevHandlesRef = React.useRef<string | null>(null);
   useEffect(() => {
-    updateNodeInternals(id);
-  }, [id, buttonsSerialized, hasDataCollection, updateNodeInternals]);
+    const handleSig = `${buttons.length}:${hasDataCollection}`;
+    if (prevHandlesRef.current !== null && prevHandlesRef.current !== handleSig) {
+      updateNodeInternals(id);
+    }
+    prevHandlesRef.current = handleSig;
+  }, [id, buttons.length, hasDataCollection, updateNodeInternals]);
   useEffect(() => {
     if (!selected) {
       setTimeout(() => {
@@ -228,216 +233,258 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
       </div>
 
       <div className="p-3.5 space-y-3">
-        {blocks.length === 0 ? (
-          <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-xs text-slate-400 italic text-center select-none">
-            Empty Message Node. Click to edit.
+        {isZoomedOut ? (
+          <div className="space-y-2 select-none pointer-events-none">
+            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-2.5 text-xs text-slate-700 truncate font-medium">
+              {blocks.find((b) => b.type === 'text')?.text || t('flow_builder.add_a_text')}
+            </div>
+            {buttons.length > 0 && (
+              <div className="space-y-1.5 pt-1">
+                {buttons.map((btn, btnIdx) => (
+                  <div
+                    key={btn.value + btnIdx}
+                    className="relative border border-slate-250 py-1.5 pl-3 pr-8 rounded-xl text-left text-[11px] font-bold bg-white text-slate-600 truncate flex items-center justify-between"
+                  >
+                    <span className="truncate flex-1">{btn.label}</span>
+                    {btn.actionType !== 'URL' && btn.actionType !== 'BUY' && (
+                      <Handle
+                        type="source"
+                        position={Position.Right}
+                        id={btn.value}
+                        style={{
+                          position: 'absolute',
+                          left: 'calc(100% - 20px)',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          width: '8px',
+                          height: '8px',
+                        }}
+                        className={`!rounded-full !border-[1.5px] !z-20 ${
+                          data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')
+                            ? 'handle-connected'
+                            : 'handle-unconnected'
+                        }`}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
-          <div className="space-y-3">
-            {blocks.map((block, bIdx) => {
-              const blockBtns = (block.buttons || []) as ButtonData[];
-              return (
-                <div key={block.id || bIdx} className="space-y-2">
-                  {block.type === 'text' && (
-                    block.text ? (
-                      <div className="bg-slate-50 border border-slate-150 rounded-2xl p-3 text-xs text-slate-800 leading-relaxed break-words whitespace-pre-wrap font-medium">
-                        {renderTextWithBadges(block.text)}
-                      </div>
-                    ) : (
-                      <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-400 italic text-center bg-slate-50/20">
-                        {t('flow_builder.add_a_text')}
-                      </div>
-                    )
-                  )}
+          <>
+            {blocks.length === 0 ? (
+              <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-xs text-slate-400 italic text-center select-none">
+                Empty Message Node. Click to edit.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {blocks.map((block, bIdx) => {
+                  const blockBtns = (block.buttons || []) as ButtonData[];
+                  return (
+                    <div key={block.id || bIdx} className="space-y-2">
+                      {block.type === 'text' && (
+                        block.text ? (
+                          <div className="bg-slate-50 border border-slate-150 rounded-2xl p-3 text-xs text-slate-800 leading-relaxed break-words whitespace-pre-wrap font-medium">
+                            {renderTextWithBadges(block.text)}
+                          </div>
+                        ) : (
+                          <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-400 italic text-center bg-slate-50/20">
+                            {t('flow_builder.add_a_text')}
+                          </div>
+                        )
+                      )}
 
-                  {block.type === 'image' && (
-                    block.imageUrl ? (
-                      <div className="rounded-2xl overflow-hidden border border-slate-200/60 max-h-40 flex items-center justify-center bg-slate-50 relative group">
-                        <img src={block.imageUrl} alt="Attachment" className="w-full h-full object-cover select-none" />
-                      </div>
-                    ) : (
-                      <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-400 italic text-center flex items-center justify-center gap-1.5 bg-slate-50/20">
-                        <ImageIcon size={14} className="text-slate-400" />
-                        <span>Image</span>
-                      </div>
-                    )
-                  )}
+                      {block.type === 'image' && (
+                        block.imageUrl ? (
+                          <div className="rounded-2xl overflow-hidden border border-slate-200/60 max-h-40 flex items-center justify-center bg-slate-50 relative group">
+                            <img src={block.imageUrl} alt="Attachment" className="w-full h-full object-cover select-none" />
+                          </div>
+                        ) : (
+                          <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-400 italic text-center flex items-center justify-center gap-1.5 bg-slate-50/20">
+                            <ImageIcon size={14} className="text-slate-400" />
+                            <span>Image</span>
+                          </div>
+                        )
+                      )}
 
-                  {block.type === 'file' && (
-                    <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-500 bg-slate-50/20 flex flex-col items-center justify-center gap-1.5">
-                      <Paperclip size={14} className="text-slate-400" />
-                      <span className="truncate max-w-full text-center">
-                        {block.fileUrl ? (block.fileName || 'File uploaded') : 'File'}
-                      </span>
-                    </div>
-                  )}
-
-                  {block.type === 'audio' && (
-                    <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-500 bg-slate-50/20 flex flex-col items-center justify-center gap-1.5">
-                      <Volume2 size={14} className="text-slate-400" />
-                      <span className="truncate max-w-full text-center">
-                        {block.audioUrl ? 'Audio snippet' : 'Audio'}
-                      </span>
-                    </div>
-                  )}
-
-                  {block.type === 'video' && (
-                    <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-500 bg-slate-50/20 flex flex-col items-center justify-center gap-1.5">
-                      <Video size={14} className="text-slate-400" />
-                      <span className="truncate max-w-full text-center">
-                        {block.videoUrl ? 'Video clip' : 'Video'}
-                      </span>
-                    </div>
-                  )}
-
-                  {block.type === 'delay' && (
-                    <div className="border border-dashed border-slate-250 rounded-2xl p-2.5 text-[10px] font-bold text-slate-500 bg-slate-50/10 flex items-center justify-center gap-1.5">
-                      <Clock size={12} className="text-cyan-500" />
-                      <span>Delay: {block.delaySeconds || 3}s</span>
-                    </div>
-                  )}
-
-                  {block.type === 'data_collection' && (
-                    <div className="space-y-2">
-                      {block.text && (
-                        <div className="bg-slate-100/60 border border-slate-200/40 rounded-2xl px-4 py-2.5 text-xs text-slate-800 font-medium">
-                          {typeof block.text === 'string' ? block.text : ''}
+                      {block.type === 'file' && (
+                        <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-500 bg-slate-50/20 flex flex-col items-center justify-center gap-1.5">
+                          <Paperclip size={14} className="text-slate-400" />
+                          <span className="truncate max-w-full text-center">
+                            {block.fileUrl ? (block.fileName || 'File uploaded') : 'File'}
+                          </span>
                         </div>
                       )}
-                      <div className="bg-indigo-50/50 border border-indigo-150 rounded-2xl px-4 py-2.5 text-[11px] font-bold text-indigo-700 flex items-center gap-2 animate-pulse justify-center">
-                        <MessageSquare size={13} className="text-indigo-500 shrink-0" />
-                        <span>Waiting for {typeof block.replyType === 'string' ? block.replyType : 'Text'} from contact...</span>
-                      </div>
-                    </div>
-                  )}
 
-                  {block.type === 'telegram_menu' && (
-                    <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex flex-col gap-2">
-                      <div className="text-center text-xs font-bold text-slate-500 pb-1.5 border-b border-slate-200/55">
-                        {t('flow_builder.btn_telegram_menu')}
-                      </div>
-                      {(() => {
-                        const groups = groupButtonsByRow(blockBtns);
-                        const sortedRowKeys = Object.keys(groups).sort((a, b) => Number(a) - Number(b));
+                      {block.type === 'audio' && (
+                        <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-500 bg-slate-50/20 flex flex-col items-center justify-center gap-1.5">
+                          <Volume2 size={14} className="text-slate-400" />
+                          <span className="truncate max-w-full text-center">
+                            {block.audioUrl ? 'Audio snippet' : 'Audio'}
+                          </span>
+                        </div>
+                      )}
 
-                        return (
-                          <div className="space-y-2 pt-1 nodrag">
-                            {sortedRowKeys.map((rowKey) => {
-                              const rowBtns = groups[rowKey];
-                              return (
-                                <div key={rowKey} className="flex gap-2 w-full">
-                                  {rowBtns.map((btn, btnIdx) => {
-                                    const isActive = activeButtonValue === btn.value;
-                                    return (
-                                      <div
-                                        key={btn.value + btnIdx}
-                                        onClick={(e) => handleButtonClick(e, btn)}
-                                        className={`relative border py-1.5 px-3 pr-7 rounded-xl text-left text-xs font-semibold transition-all cursor-pointer shadow-sm select-none flex-1 truncate ${
-                                          isActive
-                                            ? 'bg-emerald-50/40 border-emerald-500 text-emerald-700 font-extrabold'
-                                            : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-350'
-                                        }`}
-                                        title={btn.label}
-                                      >
-                                        <div className="flex items-center justify-between gap-1 w-full">
-                                          <span className="block truncate flex-1">{btn.label}</span>
-                                          {btn.actionType === 'BUY' && (
-                                            <span className="w-4.5 h-4.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-black text-[9px] shrink-0 ml-1 select-none leading-none">
-                                              $
-                                            </span>
-                                          )}
-                                        </div>
-                                        {btn.actionType !== 'URL' && btn.actionType !== 'BUY' && (
-                                          <Handle
-                                            type="source"
-                                            position={Position.Right}
-                                            id={btn.value}
-                                            style={{
-                                              position: 'absolute',
-                                              right: '8px',
-                                              top: '50%',
-                                              transform: 'translateY(-50%)',
-                                              width: '9px',
-                                              height: '9px',
-                                            }}
-                                            className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
-                                              data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')
-                                                ? '!bg-[#7b8794] !border-[#7b8794]'
-                                                : '!bg-white !border-slate-300 hover:!border-slate-400'
+                      {block.type === 'video' && (
+                        <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-500 bg-slate-50/20 flex flex-col items-center justify-center gap-1.5">
+                          <Video size={14} className="text-slate-400" />
+                          <span className="truncate max-w-full text-center">
+                            {block.videoUrl ? 'Video clip' : 'Video'}
+                          </span>
+                        </div>
+                      )}
+
+                      {block.type === 'delay' && (
+                        <div className="border border-dashed border-slate-250 rounded-2xl p-2.5 text-[10px] font-bold text-slate-500 bg-slate-50/10 flex items-center justify-center gap-1.5">
+                          <Clock size={12} className="text-cyan-500" />
+                          <span>Delay: {block.delaySeconds || 3}s</span>
+                        </div>
+                      )}
+
+                      {block.type === 'data_collection' && (
+                        <div className="space-y-2">
+                          {block.text && (
+                            <div className="bg-slate-100/60 border border-slate-200/40 rounded-2xl px-4 py-2.5 text-xs text-slate-800 font-medium">
+                              {typeof block.text === 'string' ? block.text : ''}
+                            </div>
+                          )}
+                          <div className="bg-indigo-50/50 border border-indigo-150 rounded-2xl px-4 py-2.5 text-[11px] font-bold text-indigo-700 flex items-center gap-2 animate-pulse justify-center">
+                            <MessageSquare size={13} className="text-indigo-500 shrink-0" />
+                            <span>Waiting for {typeof block.replyType === 'string' ? block.replyType : 'Text'} from contact...</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {block.type === 'telegram_menu' && (
+                        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex flex-col gap-2">
+                          <div className="text-center text-xs font-bold text-slate-500 pb-1.5 border-b border-slate-200/55">
+                            {t('flow_builder.btn_telegram_menu')}
+                          </div>
+                          {(() => {
+                            const groups = groupButtonsByRow(blockBtns);
+                            const sortedRowKeys = Object.keys(groups).sort((a, b) => Number(a) - Number(b));
+
+                            return (
+                              <div className="space-y-2 pt-1 nodrag">
+                                {sortedRowKeys.map((rowKey) => {
+                                  const rowBtns = groups[rowKey];
+                                  return (
+                                    <div key={rowKey} className="flex gap-2 w-full">
+                                      {rowBtns.map((btn, btnIdx) => {
+                                        const isActive = activeButtonValue === btn.value;
+                                        return (
+                                          <div
+                                            key={btn.value + btnIdx}
+                                            onClick={(e) => handleButtonClick(e, btn)}
+                                            className={`relative border py-1.5 px-3 pr-7 rounded-xl text-left text-xs font-semibold transition-all cursor-pointer shadow-sm select-none flex-1 truncate ${
+                                              isActive
+                                                ? 'bg-emerald-50/40 border-emerald-500 text-emerald-700 font-extrabold'
+                                                : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-350'
                                             }`}
-                                          />
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  )}
+                                            title={btn.label}
+                                          >
+                                            <div className="flex items-center justify-between gap-1 w-full">
+                                              <span className="block truncate flex-1">{btn.label}</span>
+                                              {btn.actionType === 'BUY' && (
+                                                <span className="w-4.5 h-4.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-black text-[9px] shrink-0 ml-1 select-none leading-none">
+                                                  $
+                                                </span>
+                                              )}
+                                            </div>
+                                            {btn.actionType !== 'URL' && btn.actionType !== 'BUY' && (
+                                              <Handle
+                                                type="source"
+                                                position={Position.Right}
+                                                id={btn.value}
+                                                style={{
+                                                  position: 'absolute',
+                                                  right: '8px',
+                                                  top: '50%',
+                                                  transform: 'translateY(-50%)',
+                                                  width: '9px',
+                                                  height: '9px',
+                                                }}
+                                                className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
+                                                  data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')
+                                                    ? '!bg-[#7b8794] !border-[#7b8794]'
+                                                    : '!bg-white !border-slate-300 hover:!border-slate-400'
+                                                }`}
+                                              />
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
 
-                  {block.type !== 'telegram_menu' && blockBtns.length > 0 && (
-                    <div className="space-y-2 pt-1 nodrag">
-                      {blockBtns.map((btn, btnIdx) => {
-                        const isActive = activeButtonValue === btn.value;
-                        return (
-                          <div
-                            key={btn.value + btnIdx}
-                            onClick={(e) => handleButtonClick(e, btn)}
-                            className={`relative border py-2.5 pl-4 pr-10 rounded-2xl text-left text-xs font-bold transition-all cursor-pointer shadow-sm select-none flex items-center justify-between gap-1 ${
-                              isActive
-                                ? 'bg-emerald-50/40 border-emerald-500 text-emerald-700 font-extrabold'
-                                : 'bg-white hover:bg-slate-50 border-slate-250 text-slate-700 hover:border-slate-350'
-                            }`}
-                          >
-                            <span className="truncate flex-1">{btn.label}</span>
-                            {btn.actionType === 'BUY' && (
-                              <span className="w-4.5 h-4.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-black text-[9px] shrink-0 mr-1.5 select-none leading-none">
-                                $
-                              </span>
-                            )}
-                            {btn.actionType !== 'URL' && btn.actionType !== 'BUY' && (
-                              <Handle
-                                type="source"
-                                position={Position.Right}
-                                id={btn.value}
-                                style={{
-                                  position: 'absolute',
-                                  left: 'calc(100% - 26px)',
-                                  top: '50%',
-                                  transform: 'translateY(-50%)',
-                                  width: '10px',
-                                  height: '10px',
-                                }}
-                                className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
-                                  data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')
-                                    ? 'handle-connected'
-                                    : 'handle-unconnected'
+                      {block.type !== 'telegram_menu' && blockBtns.length > 0 && (
+                        <div className="space-y-2 pt-1 nodrag">
+                          {blockBtns.map((btn, btnIdx) => {
+                            const isActive = activeButtonValue === btn.value;
+                            return (
+                              <div
+                                key={btn.value + btnIdx}
+                                onClick={(e) => handleButtonClick(e, btn)}
+                                className={`relative border py-2.5 pl-4 pr-10 rounded-2xl text-left text-xs font-bold transition-all cursor-pointer shadow-sm select-none flex items-center justify-between gap-1 ${
+                                  isActive
+                                    ? 'bg-emerald-50/40 border-emerald-500 text-emerald-700 font-extrabold'
+                                    : 'bg-white hover:bg-slate-50 border-slate-250 text-slate-700 hover:border-slate-350'
                                 }`}
-                              />
-                            )}
-                          </div>
-                        );
-                      })}
+                              >
+                                <span className="truncate flex-1">{btn.label}</span>
+                                {btn.actionType === 'BUY' && (
+                                  <span className="w-4.5 h-4.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-black text-[9px] shrink-0 mr-1.5 select-none leading-none">
+                                    $
+                                  </span>
+                                )}
+                                {btn.actionType !== 'URL' && btn.actionType !== 'BUY' && (
+                                  <Handle
+                                    type="source"
+                                    position={Position.Right}
+                                    id={btn.value}
+                                    style={{
+                                      position: 'absolute',
+                                      left: 'calc(100% - 26px)',
+                                      top: '50%',
+                                      transform: 'translateY(-50%)',
+                                      width: '10px',
+                                      height: '10px',
+                                    }}
+                                    className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
+                                      data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')
+                                        ? 'handle-connected'
+                                        : 'handle-unconnected'
+                                    }`}
+                                  />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+                  );
+                })}
+              </div>
+            )}
 
-        <button
-          onClick={handleAddButtonInNode}
-          disabled={buttons.length >= 10}
-          className="w-full py-2 border border-dashed border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 nodrag shadow-sm"
-        >
-          <Plus size={13} />
-          <span>{t('flow_builder.btn_add_button')}</span>
-        </button>
+            <button
+              onClick={handleAddButtonInNode}
+              disabled={buttons.length >= 10}
+              className="w-full py-2 border border-dashed border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 nodrag shadow-sm"
+            >
+              <Plus size={13} />
+              <span>{t('flow_builder.btn_add_button')}</span>
+            </button>
+          </>
+        )}
       </div>
 
       {hasDataCollection && (

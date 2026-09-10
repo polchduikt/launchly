@@ -53,20 +53,13 @@ export const AiAssistantDrawer: React.FC = () => {
       <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-[#F2EBDD] border-l-2 border-[#0A0A0A] shadow-2xl flex flex-col z-50 transition-transform duration-300 ease-out animate-slideIn font-['JetBrains_Mono',monospace] text-[#0A0A0A]">
         <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-6 py-4 flex flex-col gap-3.5 shrink-0">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-purple-200 border-2 border-[#0A0A0A] flex items-center justify-center text-[#0A0A0A]">
-                <AiIcon size={18} />
-              </div>
-              <div>
-                <h3 className="text-sm font-black text-[#0A0A0A] uppercase tracking-wider font-['Anybody',sans-serif]">
-                  {onGenerate ? t('ai.drawer.title.generator') : t('ai.drawer.title.copilot')}
-                </h3>
-                <p className="text-[10px] text-[#0A0A0A]/70 font-bold uppercase">{t('ai.drawer.online_status')}</p>
-              </div>
-            </div>
+            <h1 className="font-['Anybody',sans-serif] text-xl sm:text-2xl font-black text-[#0A0A0A] uppercase tracking-tight select-none">
+              LAUNCHLY AI
+            </h1>
             <button
               onClick={() => setIsOpen(false)}
-              className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
+              className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer shadow-sm"
+              title="Close"
             >
               <X size={16} />
             </button>
@@ -335,9 +328,8 @@ export const AiAssistantDrawer: React.FC = () => {
               <button
                 disabled={!description.trim() || isLimitReached}
                 onClick={handleGenerate}
-                className="flex items-center gap-1.5 px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 disabled:bg-[#0A0A0A]/20 disabled:text-[#0A0A0A]/40 text-[#F2EBDD] text-xs font-black rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer disabled:cursor-not-allowed uppercase tracking-wider font-['Anybody',sans-serif]"
+                className="flex items-center justify-center px-5 py-2.5 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 disabled:bg-[#0A0A0A]/20 disabled:text-[#0A0A0A]/40 text-[#F2EBDD] text-xs font-black rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer disabled:cursor-not-allowed uppercase tracking-wider font-['Anybody',sans-serif]"
               >
-                <AiIcon size={14} />
                 <span>{t('ai.drawer.generate_btn')}</span>
               </button>
             </footer>

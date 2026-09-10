@@ -302,7 +302,7 @@ export const NotificationsPanel: React.FC = () => {
             )}
           </div>
           <div className="lg:col-span-4">
-            <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+            <p className="text-xs text-slate-700 font-bold leading-relaxed">
               {t('settings.notifications.stats_report_desc')}
             </p>
           </div>
@@ -429,7 +429,7 @@ export const NotificationsPanel: React.FC = () => {
                 </div>
                 <button
                   onClick={handleUnsubscribeTelegram}
-                  className="px-5 py-2.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-black uppercase rounded-xl transition-all cursor-pointer"
+                  className="w-[136px] h-10 flex items-center justify-center border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-black uppercase rounded-xl transition-all cursor-pointer shrink-0 text-center"
                 >
                   {t('settings.notifications.unsubscribe')}
                 </button>
@@ -437,7 +437,7 @@ export const NotificationsPanel: React.FC = () => {
             ) : (
               <button
                 onClick={() => setIsTelegramModalOpen(true)}
-                className="px-5 py-2.5 rounded-xl text-xs font-black uppercase bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] transition-all cursor-pointer select-none w-64"
+                className="w-full max-w-md h-10 flex items-center justify-center text-xs font-black uppercase bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer select-none"
               >
                 {t('settings.notifications.subscribe_telegram')}
               </button>
@@ -457,18 +457,18 @@ export const NotificationsPanel: React.FC = () => {
             </h3>
           </div>
           <div className="lg:col-span-5">
-            <form onSubmit={handleUpdateEmail} className="flex gap-2 w-64">
+            <form onSubmit={handleUpdateEmail} className="flex gap-2 w-full max-w-md items-center">
               <input
                 type="email"
                 required
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
                 placeholder={t('settings.notifications.enter_email')}
-                className="flex-1 px-4 py-2 border-2 border-[#0A0A0A] focus:outline-none rounded-xl text-xs font-bold bg-white text-[#0A0A0A]"
+                className="flex-1 h-10 px-4 border-2 border-[#0A0A0A] focus:outline-none rounded-xl text-xs font-bold bg-white text-[#0A0A0A]"
               />
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer shrink-0"
+                className="w-[136px] h-10 flex items-center justify-center bg-[#0A0A0A] hover:bg-[#2A2A2A] text-white text-xs font-black uppercase rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer shrink-0 text-center"
               >
                 {t('settings.notifications.update')}
               </button>

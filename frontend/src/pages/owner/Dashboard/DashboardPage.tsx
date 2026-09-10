@@ -714,18 +714,18 @@ export const DashboardPage: React.FC = () => {
                                       setSelectedTemplate(tmpl);
                                       setIsOpenedFromList(true);
                                     }}
-                                    className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
+                                    className="bg-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
                                   >
                                     <div className="space-y-1.5">
                                       <h3 className="font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-[15px] leading-snug transition-colors">
                                         {getTemplateTitle(tmpl)}
                                       </h3>
-                                      <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2">
+                                      <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2 transition-colors">
                                         {getTemplateDesc(tmpl)}
                                       </p>
                                     </div>
-                                    <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
-                                      <Workflow size={13} />
+                                    <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors">
+                                      <Workflow size={13} className="text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors shrink-0" />
                                       <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                                     </div>
                                   </div>
@@ -745,18 +745,18 @@ export const DashboardPage: React.FC = () => {
                                       setSelectedTemplate(tmpl);
                                       setIsOpenedFromList(true);
                                     }}
-                                    className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
+                                    className="bg-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
                                   >
                                     <div className="space-y-1.5">
                                       <h3 className="font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-[15px] leading-snug transition-colors">
                                         {getTemplateTitle(tmpl)}
                                       </h3>
-                                      <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2">
+                                      <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2 transition-colors">
                                         {getTemplateDesc(tmpl)}
                                       </p>
                                     </div>
-                                    <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
-                                      <Workflow size={13} />
+                                    <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors">
+                                      <Workflow size={13} className="text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors shrink-0" />
                                       <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                                     </div>
                                   </div>
@@ -776,18 +776,18 @@ export const DashboardPage: React.FC = () => {
                                   setSelectedTemplate(tmpl);
                                   setIsOpenedFromList(true);
                                 }}
-                                className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
+                                className="bg-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
                               >
                                 <div className="space-y-1.5">
                                   <h3 className="font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-[15px] leading-snug transition-colors">
                                     {getTemplateTitle(tmpl)}
                                   </h3>
-                                  <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2">
+                                  <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2 transition-colors">
                                     {getTemplateDesc(tmpl)}
                                   </p>
                                 </div>
-                                <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
-                                  <Workflow size={13} />
+                                <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors">
+                                  <Workflow size={13} className="text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors shrink-0" />
                                   <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                                 </div>
                               </div>

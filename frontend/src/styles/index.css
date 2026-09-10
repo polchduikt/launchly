@@ -1627,6 +1627,16 @@ button[aria-label="Close"]:hover svg *,
 [data-theme="dark"] .react-flow__connection-path {
   stroke: #94A3B8 !important;
 }
+.react-flow__node {
+  contain: layout style;
+}
+
+.react-flow.react-flow--dragging-pane .react-flow__node,
+.react-flow.react-flow--dragging-pane .react-flow__edge,
+.react-flow__pane.dragging ~ .react-flow__viewport .react-flow__node,
+.react-flow__pane.dragging ~ .react-flow__viewport .react-flow__edge {
+  pointer-events: none !important;
+}
 
 .react-flow__handle {
   width: 10px;

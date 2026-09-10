@@ -14,6 +14,25 @@ import {
 import type { TeamMemberResponse } from '../../../../api/teamApi';
 import { SafeAvatar } from '../../../../components/common/SafeAvatar';
 
+const getRoleLabel = (role: string) => {
+  if (!role) return '';
+  switch (role.toLowerCase()) {
+    case 'owner':
+      return t('settings.members.role.owner', 'Власник');
+    case 'admin':
+      return t('settings.members.role.admin', 'Адміністратор');
+    case 'editor':
+      return t('settings.members.role.editor', 'Редактор');
+    case 'inbox agent':
+    case 'agent':
+      return t('settings.members.role.agent', 'Агент Inbox');
+    case 'viewer':
+      return t('settings.members.role.viewer', 'Спостерігач');
+    default:
+      return role;
+  }
+};
+
 const CustomRoleDropdown: React.FC<{
   currentRole: string;
   disabled?: boolean;
@@ -34,14 +53,14 @@ const CustomRoleDropdown: React.FC<{
         onClick={() => setIsOpen(!isOpen)}
         className="w-full px-3.5 py-2 bg-white text-[#0A0A0A] text-xs font-bold rounded-xl border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] flex items-center justify-between transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        <span>{currentRole}</span>
+        <span>{getRoleLabel(currentRole)}</span>
         <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && !disabled && (
         <div className="absolute top-full left-0 mt-1.5 w-full bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-2xl z-50 py-1.5 overflow-hidden animate-in fade-in duration-150">
           {roles.map((role) => {
-            const isSelected = role === currentRole;
+            const isSelected = role.toLowerCase() === (currentRole || '').toLowerCase();
             return (
               <button
                 key={role}
@@ -56,7 +75,7 @@ const CustomRoleDropdown: React.FC<{
                     : 'text-[#0A0A0A] hover:bg-slate-100'
                 }`}
               >
-                <span>{role}</span>
+                <span>{getRoleLabel(role)}</span>
                 {isSelected && <Check size={12} />}
               </button>
             );
@@ -68,12 +87,14 @@ const CustomRoleDropdown: React.FC<{
 };
 
 const getRoleDescription = (role: string) => {
-  switch (role) {
-    case 'Owner': return t('settings.members.role.owner_desc');
-    case 'Admin': return t('settings.members.role.admin_desc');
-    case 'Editor': return t('settings.members.role.editor_desc');
-    case 'Inbox Agent': return t('settings.members.role.agent_desc');
-    case 'Viewer': return t('settings.members.role.viewer_desc');
+  switch (role?.toLowerCase()) {
+    case 'owner': return t('settings.members.role.owner_desc');
+    case 'admin': return t('settings.members.role.admin_desc');
+    case 'editor': return t('settings.members.role.editor_desc');
+    case 'inbox agent':
+    case 'agent':
+      return t('settings.members.role.agent_desc');
+    case 'viewer': return t('settings.members.role.viewer_desc');
     default: return '';
   }
 };
@@ -145,6 +166,13 @@ export const TeamMembersPanel: React.FC = () => {
   ) => {
     if (!activeBotId) return;
     try {
+      setMembers((prev) =>
+        prev.map((m) =>
+          (m.userId === targetUserId || m.id === targetUserId)
+            ? { ...m, role: updatedRole, inboxSeat: updatedInboxSeat, billingPermission: updatedBilling }
+            : m
+        )
+      );
       await updateMemberApi(activeBotId, targetUserId, {
         role: updatedRole,
         inboxSeat: updatedInboxSeat,
@@ -153,6 +181,7 @@ export const TeamMembersPanel: React.FC = () => {
       fetchMembers();
     } catch (err) {
       console.error(err);
+      fetchMembers();
     }
   };
 
@@ -415,11 +444,7 @@ export const TeamMembersPanel: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-slate-700">
-                        {m.role === 'Owner'
-                          ? t('settings.members.role.owner', 'Owner')
-                          : m.role === 'Admin'
-                          ? t('settings.members.role.admin', 'Admin')
-                          : t('settings.members.role.viewer', 'Viewer')}
+                        {getRoleLabel(m.role)}
                       </td>
                       <td className="px-6 py-4">
                         {m.inboxSeat && <Check size={16} className="text-[#0A0A0A]" />}
@@ -512,7 +537,7 @@ export const TeamMembersPanel: React.FC = () => {
                         }}
                         className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
                       />
-                      <span className="text-xs font-bold text-[#0A0A0A]">{role}</span>
+                      <span className="text-xs font-bold text-[#0A0A0A]">{getRoleLabel(role)}</span>
                     </label>
                   ))}
                 </div>

@@ -67,7 +67,6 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
   const edgeTypeRef = useRef<'default' | 'smoothstep'>('default');
 
   const {
-    hoveredEdgeId,
     isValidConnection,
     onConnect,
     onConnectStart,
@@ -112,7 +111,6 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
     takeSnapshot,
     fitView,
     contextMenu,
-    hoveredEdgeId,
     isLocalChangeRef,
   });
 

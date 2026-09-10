@@ -73,7 +73,7 @@ public class TemplateServiceImpl implements TemplateService {
         if (request.botId() != null) {
             bot = botRepository.findById(request.botId()).orElse(null);
             if (bot != null) {
-                if (!bot.getUser().getId().equals(userId) && !botMemberRepository.existsByBotIdAndUserId(request.botId(), userId)) {
+                if (!bot.getUser().getId().equals(userId) && !botMemberRepository.existsByBotOwnerIdAndUserId(bot.getUser().getId(), userId)) {
                     throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
                 }
 
@@ -298,7 +298,7 @@ public class TemplateServiceImpl implements TemplateService {
         Bot targetBot = null;
         if (targetBotId != null) {
             Optional<Bot> botOpt = botRepository.findById(targetBotId);
-            if (botOpt.isPresent() && (botOpt.get().getUser().getId().equals(userId) || botMemberRepository.existsByBotIdAndUserId(targetBotId, userId))) {
+            if (botOpt.isPresent() && (botOpt.get().getUser().getId().equals(userId) || botMemberRepository.existsByBotOwnerIdAndUserId(botOpt.get().getUser().getId(), userId))) {
                 targetBot = botOpt.get();
             }
         }

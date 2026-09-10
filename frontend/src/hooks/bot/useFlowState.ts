@@ -12,7 +12,6 @@ interface UseFlowStateParams {
   takeSnapshot: () => void;
   fitView: (opts?: Record<string, unknown>) => void;
   contextMenu: FlowContextMenuState | null;
-  hoveredEdgeId: string | null;
   isLocalChangeRef?: MutableRefObject<boolean>;
 }
 
@@ -23,7 +22,6 @@ export const useFlowState = ({
   takeSnapshot,
   fitView,
   contextMenu,
-  hoveredEdgeId,
   isLocalChangeRef,
 }: UseFlowStateParams) => {
   const [nodes, setNodesRaw, onNodesChangeState] = useNodesState<Node>([]);
@@ -245,15 +243,6 @@ export const useFlowState = ({
   }, [nodes, contextMenu]);
 
   const displayEdges = useMemo(() => {
-    let resultEdges = edges;
-    if (hoveredEdgeId) {
-      resultEdges = edges.map((edge) => {
-        if (edge.id === hoveredEdgeId) {
-          return { ...edge, zIndex: 1000 };
-        }
-        return edge;
-      });
-    }
     if (contextMenu) {
       const { source } = contextMenu;
       let sourceHandle = source.handleType === 'source' ? source.handleId : null;
@@ -271,10 +260,10 @@ export const useFlowState = ({
         type: edgeType,
         selectable: false,
       };
-      return [...resultEdges, tempEdge];
+      return [...edges, tempEdge];
     }
-    return resultEdges;
-  }, [edges, contextMenu, edgeType, nodes, hoveredEdgeId]);
+    return edges;
+  }, [edges, contextMenu, edgeType, nodes]);
 
   return {
     nodes,

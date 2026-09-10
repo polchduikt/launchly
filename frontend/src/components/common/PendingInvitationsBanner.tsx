@@ -5,6 +5,25 @@ import { getMyPendingInvitationsApi, acceptInvitationApi, declineInvitationApi }
 import { useBotStore } from '../../store/useBotStore';
 import { t } from '../../i18n/config';
 
+const getRoleLabel = (role: string) => {
+  if (!role) return '';
+  switch (role.toLowerCase()) {
+    case 'owner':
+      return t('settings.members.role.owner', 'Власник');
+    case 'admin':
+      return t('settings.members.role.admin', 'Адміністратор');
+    case 'editor':
+      return t('settings.members.role.editor', 'Редактор');
+    case 'inbox agent':
+    case 'agent':
+      return t('settings.members.role.agent', 'Агент Inbox');
+    case 'viewer':
+      return t('settings.members.role.viewer', 'Спостерігач');
+    default:
+      return role;
+  }
+};
+
 export const PendingInvitationsBanner: React.FC = () => {
   const queryClient = useQueryClient();
   const [processingId, setProcessingId] = useState<number | null>(null);
@@ -65,7 +84,7 @@ export const PendingInvitationsBanner: React.FC = () => {
                     <strong className="text-[#0A0A0A] underline">{invite.name || invite.email || 'Користувач'}</strong>{' '}
                     {t('invitations.banner.invited_you', 'запросив вас приєднатися до команди у ролі')}{' '}
                     <span className="bg-white px-1.5 py-0.5 rounded border border-[#0A0A0A] font-extrabold text-xs">
-                      {invite.role}
+                      {getRoleLabel(invite.role)}
                     </span>
                   </p>
                 </div>

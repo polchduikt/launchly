@@ -50,7 +50,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.launchly.admin.service.UserAuditService;
 
 @Slf4j
@@ -78,6 +80,7 @@ public class BotServiceImpl implements BotService {
     private final BotResponseFactory botResponseFactory;
     private final RestTemplate restTemplate;
     private final org.springframework.transaction.support.TransactionTemplate transactionTemplate;
+    private final org.springframework.cache.CacheManager cacheManager;
 
     private record TelegramBotInfo(String username, String firstName) {}
 
@@ -161,6 +164,28 @@ public class BotServiceImpl implements BotService {
                     .build();
             flowSchemaRepository.save(schema);
 
+            List<BotMember> ownerMembers = botMemberRepository.findByBotOwnerId(userId);
+            java.util.Map<Long, BotMember> uniqueMembers = new java.util.HashMap<>();
+            for (BotMember m : ownerMembers) {
+                uniqueMembers.putIfAbsent(m.getUser().getId(), m);
+            }
+            for (BotMember m : uniqueMembers.values()) {
+                BotMember member = BotMember.builder()
+                        .bot(newBot)
+                        .user(m.getUser())
+                        .role(m.getRole())
+                        .inboxSeat(m.isInboxSeat())
+                        .billingPermission(m.isBillingPermission())
+                        .build();
+                botMemberRepository.save(member);
+                if (cacheManager != null) {
+                    org.springframework.cache.Cache cache = cacheManager.getCache(CacheConstants.BOTS);
+                    if (cache != null) {
+                        cache.evict(m.getUser().getId());
+                    }
+                }
+            }
+
             userAuditService.logBotConnected(user, newBot.getId(), newBot.getName(), newBot.getCreatedAt());
 
             return newBot;
@@ -173,24 +198,9 @@ public class BotServiceImpl implements BotService {
     @Transactional(readOnly = true)
     @Cacheable(value = CacheConstants.BOTS, key = "#userId")
     public List<BotResponse> getBotsByUser(Long userId) {
-        List<Bot> ownedBots = botRepository.findAllByUserId(userId);
-        List<BotMember> memberships = botMemberRepository.findByUserId(userId);
-        List<Bot> memberBots = new ArrayList<>();
-
-        for (BotMember bm : memberships) {
-            if (bm.getBot() != null) {
-                memberBots.add(bm.getBot());
-            }
-        }
-
-        List<Bot> allBots = new ArrayList<>(ownedBots);
-        for (Bot b : memberBots) {
-            if (allBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
-                allBots.add(b);
-            }
-        }
+        List<Bot> allBots = new ArrayList<>(botRepository.findAllAccessibleByUserId(userId));
         allBots.sort(Comparator.comparing(Bot::getId));
-
+        List<BotMember> memberships = botMemberRepository.findByUserId(userId);
         return botResponseFactory.toBotResponseListWithStats(allBots, userId, memberships);
     }
 

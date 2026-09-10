@@ -13,7 +13,7 @@ export const GeneralPanel: React.FC = () => {
   return (
     <div className="space-y-4 divide-y divide-slate-100">
       <div className="pb-4 flex flex-col gap-3">
-        <h3 className="text-sm font-semibold text-slate-900">Часовий пояс акаунту</h3>
+        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight">Часовий пояс акаунту</h3>
         <p className="text-xs text-slate-500">Усі дані в Launchly будуть відображатися та експортуватися відповідно до цього часового поясу.</p>
         <select
           value={timeZone}
@@ -28,7 +28,7 @@ export const GeneralPanel: React.FC = () => {
       </div>
 
       <div className="py-4 flex flex-col gap-3">
-        <h3 className="text-sm font-semibold text-slate-900">Клонувати в інший акаунт</h3>
+        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight">Клонувати в інший акаунт</h3>
         <p className="text-xs text-slate-500">Копіювати весь вміст в інший акаунт</p>
         <button className="w-fit px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-all">
           Клонувати цей акаунт
@@ -36,7 +36,7 @@ export const GeneralPanel: React.FC = () => {
       </div>
 
       <div className="py-4 flex flex-col gap-3">
-        <h3 className="text-sm font-semibold text-slate-900">Використовувати як шаблон</h3>
+        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight">Використовувати як шаблон</h3>
         <p className="text-xs text-slate-500">Створити шаблон та поділитися ним за посиланням</p>
         <button className="w-fit px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-all">
           Створити шаблон
@@ -44,7 +44,7 @@ export const GeneralPanel: React.FC = () => {
       </div>
 
       <div className="py-4 flex flex-col gap-3">
-        <h3 className="text-sm font-semibold text-slate-900">Залишити акаунт</h3>
+        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight">Залишити акаунт</h3>
         <p className="text-xs text-slate-500">Передайте право власності іншому члену команди, якщо хочете залишити цей акаунт</p>
         <button className="w-fit px-4 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-lg border border-slate-200 cursor-not-allowed">
           Вийти з акаунту
@@ -52,7 +52,7 @@ export const GeneralPanel: React.FC = () => {
       </div>
 
       <div className="py-4 flex flex-col gap-3">
-        <h3 className="text-sm font-semibold text-slate-900">Вийти з профілю</h3>
+        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight">Вийти з профілю</h3>
         <p className="text-xs text-slate-500">Вийти з акаунту Launchly на цьому пристрої</p>
         <button
           onClick={handleLogout}
@@ -71,7 +71,7 @@ export const GeneralPanel: React.FC = () => {
       </div>
 
       <div className="pt-4 flex flex-col gap-3">
-        <h3 className="text-sm font-semibold text-rose-600">Видалити акаунт</h3>
+        <h3 className="font-['Anybody',sans-serif] font-black text-sm text-rose-600 uppercase tracking-tight">Видалити акаунт</h3>
         <p className="text-xs text-slate-500">Продовжити видалення акаунту</p>
         <button className="w-fit px-4 py-2 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-lg transition-all cursor-pointer">
           Видалити

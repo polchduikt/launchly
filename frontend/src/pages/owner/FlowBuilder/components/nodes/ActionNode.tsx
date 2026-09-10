@@ -1,5 +1,5 @@
 import React from 'react';
-import { Position, useNodeConnections, useConnection } from '@xyflow/react';
+import { Position, useNodeConnections, useConnection, useStore } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Sliders } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -17,6 +17,7 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
   const isTimeoutHandle = useConnection((s) => s.fromHandle?.id === 'timeout');
   const isGrayedOut = isConnecting && (isSelfSource || isTimeoutHandle);
   const { showToolbar, bindHover } = useNodeHover();
+  const isZoomedOut = useStore((s) => s.transform[2] < 0.6);
 
   const getActionLabelForCanvas = (type: string) => {
     switch (type) {
@@ -99,26 +100,42 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
       </div>
 
       <div className="p-4 space-y-3">
-        <div className="space-y-3">
-          {actions.length === 0 ? (
-            <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-center text-[11px] text-slate-400 font-medium select-none italic bg-slate-50/50">
-              {t('node.action.no_actions')}
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2.5 max-h-56 overflow-y-auto pr-0.5 custom-scrollbar">
-              {actions.map((act, index) => {
-                const label = getActionLabelForCanvas(act.type);
-                const value = getActionValueForCanvas(act);
-                return (
-                  <div key={index} className="bg-slate-50/75 border border-slate-150 rounded-xl p-2.5 flex flex-col gap-0.5">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">{label}</span>
-                    <span className="text-[11px] font-extrabold text-slate-700 leading-normal">{value}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        {isZoomedOut ? (
+          <div className="space-y-1.5 select-none pointer-events-none">
+            {actions.length === 0 ? (
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-2 text-[11px] text-slate-400 font-medium text-center">
+                {t('node.action.no_actions')}
+              </div>
+            ) : (
+              actions.slice(0, 3).map((act, index) => (
+                <div key={index} className="bg-slate-50 border border-slate-200/80 rounded-xl px-2.5 py-1 text-[11px] font-bold text-slate-700 truncate">
+                  {getActionLabelForCanvas(act.type)}
+                </div>
+              ))
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {actions.length === 0 ? (
+              <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-center text-[11px] text-slate-400 font-medium select-none italic bg-slate-50/50">
+                {t('node.action.no_actions')}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2.5 max-h-56 overflow-y-auto pr-0.5 custom-scrollbar">
+                {actions.map((act, index) => {
+                  const label = getActionLabelForCanvas(act.type);
+                  const value = getActionValueForCanvas(act);
+                  return (
+                    <div key={index} className="bg-slate-50/75 border border-slate-150 rounded-xl p-2.5 flex flex-col gap-0.5">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">{label}</span>
+                      <span className="text-[11px] font-extrabold text-slate-700 leading-normal">{value}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end items-center px-4 py-2 bg-transparent select-none relative rounded-b-[22px]">

@@ -48,7 +48,7 @@ export const AutomationsGridView: React.FC<AutomationsGridViewProps> = ({
                       : 'bg-slate-300'
                   }`}
                 />
-                <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] group-hover:underline text-sm uppercase truncate">
+                <h3 className="font-bold text-sm text-[#0A0A0A] group-hover:underline truncate">
                   {bot.name}
                 </h3>
                 {bot.blocked ? (
@@ -77,7 +77,7 @@ export const AutomationsGridView: React.FC<AutomationsGridViewProps> = ({
                 </div>
               )}
             </div>
-            <p className="text-xs text-slate-700 font-medium mt-2 line-clamp-2">
+            <p className="text-xs text-slate-500 font-normal mt-2 line-clamp-2 leading-relaxed">
               {bot.blocked
                 ? translateBlockReason(bot.blockReason)
                 : bot.description || t('automations.no_description')}

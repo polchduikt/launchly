@@ -15,7 +15,7 @@ import {
   AiNode,
 } from '../pages/owner/FlowBuilder/components/nodes';
 
-const withCollaborationWrapper = <P extends { id: string; data?: Record<string, unknown>; selected?: boolean }>(
+const withCollaborationWrapper = <P extends { id: string; data?: Record<string, unknown>; selected?: boolean; dragging?: boolean }>(
   WrappedComponent: React.ComponentType<P>
 ) => {
   const ComponentWithCollaboration: React.FC<P> = (props) => {
@@ -41,7 +41,7 @@ const withCollaborationWrapper = <P extends { id: string; data?: Record<string, 
           </div>
         )}
         <div
-          className={`transition-all duration-200 rounded-[24px] ${
+          className={`transition-shadow duration-200 rounded-[24px] ${
             isEditing
               ? 'ring-4 ring-violet-500 ring-offset-2 shadow-lg shadow-violet-500/25'
               : ''
@@ -52,7 +52,14 @@ const withCollaborationWrapper = <P extends { id: string; data?: Record<string, 
       </div>
     );
   };
-  const MemoizedComponentWithCollaboration = React.memo(ComponentWithCollaboration);
+  const MemoizedComponentWithCollaboration = React.memo(ComponentWithCollaboration, (prev: P, next: P) => {
+    return (
+      prev.id === next.id &&
+      prev.selected === next.selected &&
+      prev.dragging === next.dragging &&
+      prev.data === next.data
+    );
+  });
   MemoizedComponentWithCollaboration.displayName = `withCollaborationWrapper(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
   return MemoizedComponentWithCollaboration;
 };
@@ -135,5 +142,3 @@ export const NODE_TYPES = {
   TEMP: TempNode,
   temp: TempNode,
 };
-
-

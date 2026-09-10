@@ -94,10 +94,14 @@ public class BotResponseFactory {
         }
 
         java.util.Map<Long, String> rolesByBotId = new java.util.HashMap<>();
+        java.util.Map<Long, String> rolesByOwnerId = new java.util.HashMap<>();
         if (memberships != null) {
             for (BotMember bm : memberships) {
                 if (bm.getBot() != null && bm.getRole() != null) {
                     rolesByBotId.put(bm.getBot().getId(), bm.getRole());
+                    if (bm.getBot().getUser() != null) {
+                        rolesByOwnerId.put(bm.getBot().getUser().getId(), bm.getRole());
+                    }
                 }
             }
         }
@@ -117,7 +121,8 @@ public class BotResponseFactory {
 
             String role = WorkspaceRole.OWNER.getValue();
             if (currentUserId != null && !bot.getUser().getId().equals(currentUserId)) {
-                role = rolesByBotId.getOrDefault(bot.getId(), WorkspaceRole.VIEWER.getValue());
+                role = rolesByBotId.getOrDefault(bot.getId(),
+                        rolesByOwnerId.getOrDefault(bot.getUser().getId(), WorkspaceRole.VIEWER.getValue()));
             }
 
             result.add(new BotResponse(

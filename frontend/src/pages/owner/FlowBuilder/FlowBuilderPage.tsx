@@ -338,19 +338,30 @@ const FlowBuilderInner: React.FC = () => {
             viewBox="0 0 10 10"
             refX="8"
             refY="5"
-            markerWidth="7"
-            markerHeight="7"
+            markerWidth="6.5"
+            markerHeight="6.5"
             orient="auto-start-reverse"
           >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#7b8794" />
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
           </marker>
           <marker
             id="arrow-indigo"
             viewBox="0 0 10 10"
             refX="8"
             refY="5"
-            markerWidth="7"
-            markerHeight="7"
+            markerWidth="6.5"
+            markerHeight="6.5"
+            orient="auto-start-reverse"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0A0A0A" />
+          </marker>
+          <marker
+            id="arrow-black"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6.5"
+            markerHeight="6.5"
             orient="auto-start-reverse"
           >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#0A0A0A" />
@@ -540,6 +551,8 @@ const FlowBuilderInner: React.FC = () => {
                 nodesConnectable={!isViewer}
                 elementsSelectable={!isViewer}
                 deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
+                elevateNodesOnSelect={false}
+                elevateEdgesOnSelect={false}
                 fitView
                 fitViewOptions={{ maxZoom: 1, padding: 0.2 }}
                 proOptions={{ hideAttribution: true }}
@@ -547,7 +560,7 @@ const FlowBuilderInner: React.FC = () => {
                 zoomOnDoubleClick={false}
                 multiSelectionKeyCode="Control"
                 selectionKeyCode="Control"
-                onlyRenderVisibleElements={nodes.length > 100}
+                onlyRenderVisibleElements={true}
               >
                 <Controls
                   position="bottom-right"
