@@ -62,11 +62,16 @@ const mapActionToNodeType = (actionType?: string): string | null => {
     case 'DELAY':
       return 'SMART_DELAY';
     case 'AUTOMATION':
-      return 'MESSAGE';
     case 'START_AUTOMATION':
       return 'START_AUTOMATION';
     case 'ACTIONS':
       return 'ACTION';
+    case 'COOLDOWN':
+      return 'COOLDOWN';
+    case 'MATH':
+      return 'MATH';
+    case 'LEADERBOARD':
+      return 'LEADERBOARD';
     default:
       return null;
   }

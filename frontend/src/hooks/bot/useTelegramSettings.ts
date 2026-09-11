@@ -6,7 +6,7 @@ import {
   useDeleteBotMutation,
   useUpdateBotMutation,
 } from './useBotMutations';
-import type { BotResponse } from '../../types/bot';
+import type { BotResponse, BotResponseMode } from '../../types/bot';
 
 export interface BotTelegramSettingsState {
   defaultReplyFlow: string | null;
@@ -32,6 +32,9 @@ export const useTelegramSettings = () => {
   const [activeTokenBot, setActiveTokenBot] = useState<BotResponse | null>(null);
   const [newTokenValue, setNewTokenValue] = useState('');
   const [tokenError, setTokenError] = useState<string | null>(null);
+
+  const [activeResponseModeBot, setActiveResponseModeBot] = useState<BotResponse | null>(null);
+  const [selectedResponseMode, setSelectedResponseMode] = useState<BotResponseMode>('ALL');
 
   const [activeDeleteBot, setActiveDeleteBot] = useState<BotResponse | null>(null);
   const [deleteConfirmationName, setDeleteConfirmationName] = useState('');
@@ -132,18 +135,37 @@ export const useTelegramSettings = () => {
     }
   };
 
+  const handleUpdateResponseMode = async (bot: BotResponse, mode: BotResponseMode) => {
+    try {
+      await updateBotMutation.mutateAsync({
+        id: bot.id,
+        data: {
+          name: bot.name,
+          responseMode: mode,
+        },
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return {
     bots,
     isLoading,
     getBotSettings,
     updateBotSetting,
     handleToggleBot,
+    handleUpdateResponseMode,
     activeTokenBot,
     setActiveTokenBot,
     newTokenValue,
     setNewTokenValue,
     tokenError,
     setTokenError,
+    activeResponseModeBot,
+    setActiveResponseModeBot,
+    selectedResponseMode,
+    setSelectedResponseMode,
     activeDeleteBot,
     setActiveDeleteBot,
     deleteConfirmationName,

@@ -18,12 +18,17 @@ export const TelegramSettingsPanel: React.FC = () => {
     getBotSettings,
     updateBotSetting,
     handleToggleBot,
+    handleUpdateResponseMode,
     activeTokenBot,
     setActiveTokenBot,
     newTokenValue,
     setNewTokenValue,
     tokenError,
     setTokenError,
+    activeResponseModeBot,
+    setActiveResponseModeBot,
+    selectedResponseMode,
+    setSelectedResponseMode,
     activeDeleteBot,
     setActiveDeleteBot,
     deleteConfirmationName,
@@ -179,6 +184,28 @@ export const TelegramSettingsPanel: React.FC = () => {
                   <div className="md:col-span-4">
                     <p className="text-xs text-slate-700 font-bold leading-relaxed">
                       {t('settings.telegram.bot_name_desc')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b border-slate-200 items-center">
+                  <div className="md:col-span-3">
+                    <h4 className="font-black text-xs text-[#0A0A0A] uppercase tracking-wider">{t('settings.telegram.response_mode_title')}</h4>
+                  </div>
+                  <div className="md:col-span-5">
+                    <button
+                      onClick={() => {
+                        setActiveResponseModeBot(bot);
+                        setSelectedResponseMode(bot.responseMode || 'ALL');
+                      }}
+                      className="bg-white hover:bg-[#0A0A0A] hover:text-white border-2 border-[#0A0A0A] px-6 py-2 rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
+                    >
+                      {t('settings.telegram.btn_edit')}
+                    </button>
+                  </div>
+                  <div className="md:col-span-4">
+                    <p className="text-xs text-slate-700 font-bold leading-relaxed">
+                      {t('settings.telegram.response_mode_desc')}
                     </p>
                   </div>
                 </div>
@@ -490,6 +517,107 @@ export const TelegramSettingsPanel: React.FC = () => {
                 className="px-6 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
               >
                 {t('settings.telegram.modal.btn_close')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeResponseModeBot && (
+        <div 
+          onClick={() => setActiveResponseModeBot(null)}
+          className="fixed inset-0 bg-[#0A0A0A]/40 z-50 flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border-2 border-[#0A0A0A] w-full max-w-md rounded-2xl p-6 shadow-sm relative space-y-5 cursor-default text-left"
+          >
+            <button
+              onClick={() => setActiveResponseModeBot(null)}
+              className="absolute top-4 right-4 text-[#0A0A0A] hover:bg-slate-100 p-1 rounded-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#0A0A0A]"
+            >
+              <X size={16} />
+            </button>
+            <div className="space-y-1">
+              <h3 className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-base uppercase">
+                {t('settings.telegram.response_mode_title')}
+              </h3>
+              <p className="text-xs text-slate-700 font-bold">
+                {t('settings.telegram.response_mode_desc')}
+              </p>
+            </div>
+
+            <div className="space-y-2.5">
+              {[
+                {
+                  value: 'ALL' as const,
+                  title: t('settings.telegram.response_mode_all'),
+                  desc: t('settings.telegram.response_mode_all_desc'),
+                },
+                {
+                  value: 'PRIVATE_ONLY' as const,
+                  title: t('settings.telegram.response_mode_private_only'),
+                  desc: t('settings.telegram.response_mode_private_only_desc'),
+                },
+                {
+                  value: 'GROUPS_ONLY' as const,
+                  title: t('settings.telegram.response_mode_groups_only'),
+                  desc: t('settings.telegram.response_mode_groups_only_desc'),
+                },
+              ].map((opt) => {
+                const isSelected = selectedResponseMode === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSelectedResponseMode(opt.value)}
+                    className={`w-full p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex items-start justify-between gap-3 ${
+                      isSelected
+                        ? 'border-[#0A0A0A] bg-[#0A0A0A] text-white shadow-[2px_2px_0px_0px_#0A0A0A]'
+                        : 'border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-slate-50'
+                    }`}
+                  >
+                    <div>
+                      <div className="text-xs font-black uppercase">{opt.title}</div>
+                      <div className={`text-[11px] font-bold mt-0.5 ${isSelected ? 'text-slate-200' : 'text-slate-600'}`}>
+                        {opt.desc}
+                      </div>
+                    </div>
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 mt-0.5 flex items-center justify-center shrink-0 ${
+                        isSelected ? 'border-white bg-white' : 'border-[#0A0A0A] bg-white'
+                      }`}
+                    >
+                      {isSelected && <div className="w-2 h-2 rounded-full bg-[#0A0A0A]" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-3 justify-end pt-2 border-t border-slate-200">
+              <button
+                onClick={() => setActiveResponseModeBot(null)}
+                className="px-4 py-2 bg-white hover:bg-[#0A0A0A] hover:text-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase transition-all cursor-pointer"
+              >
+                {t('settings.telegram.modal.btn_cancel')}
+              </button>
+              <button
+                onClick={async () => {
+                  if (activeResponseModeBot) {
+                    await handleUpdateResponseMode(activeResponseModeBot, selectedResponseMode);
+                    setShowSuccessBanner(t('settings.updated'));
+                    setActiveResponseModeBot(null);
+                  }
+                }}
+                disabled={updateBotMutation.isPending}
+                className="px-5 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-75"
+              >
+                {updateBotMutation.isPending ? (
+                  <Loader2 className="animate-spin" size={12} />
+                ) : (
+                  <span>{t('settings.telegram.modal.btn_save')}</span>
+                )}
               </button>
             </div>
           </div>

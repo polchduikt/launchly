@@ -41,10 +41,11 @@ export const useCustomFieldsData = ({ bots = [], botId = 0 }: UseCustomFieldsDat
                     value: rf?.value,
                     description: rf?.description,
                     folderId: rf?.folderId,
-                    folder: rf?.folder,
+                    folder: rf?.folder ?? rf?.folderId ?? null,
                   };
               if (f && f.name) {
                 const key = f.name.trim().toLowerCase();
+                if (key.includes('cooldown')) return;
                 if (!mergedFieldsMap.has(key)) {
                   mergedFieldsMap.set(key, f);
                 }
@@ -63,10 +64,11 @@ export const useCustomFieldsData = ({ bots = [], botId = 0 }: UseCustomFieldsDat
                       value: afObj?.value,
                       description: afObj?.description,
                       folderId: afObj?.folderId,
-                      folder: afObj?.folder,
+                      folder: afObj?.folder ?? afObj?.folderId ?? null,
                     };
                 if (af && af.name) {
                   const key = af.name.trim().toLowerCase();
+                  if (key.includes('cooldown')) return;
                   if (!mergedArchivedMap.has(key)) {
                     mergedArchivedMap.set(key, af);
                   }
@@ -108,16 +110,39 @@ export const useCustomFieldsData = ({ bots = [], botId = 0 }: UseCustomFieldsDat
         .then((data) => {
           if (data && typeof data === 'object') {
             const rawFields = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
-            setFields(
-              rawFields.map((f: unknown) =>
-                typeof f === 'string' ? { name: f, type: 'Text' } : (f as UserField)
-              )
-            );
+            const parsedFields = rawFields.map((rf: unknown) => {
+              const f = typeof rf === 'string'
+                ? { name: rf, type: 'Text' }
+                : {
+                    id: (rf as Partial<UserField>)?.id,
+                    name: (rf as Partial<UserField>)?.name || '',
+                    type: (rf as Partial<UserField>)?.type || 'Text',
+                    value: (rf as Partial<UserField>)?.value,
+                    description: (rf as Partial<UserField>)?.description,
+                    folderId: (rf as Partial<UserField>)?.folderId,
+                    folder: (rf as Partial<UserField>)?.folder ?? (rf as Partial<UserField>)?.folderId ?? null,
+                  };
+              return f as UserField;
+            }).filter((f) => Boolean(f.name) && !f.name.toLowerCase().includes('cooldown'));
+            setFields(parsedFields);
+
             if (Array.isArray(data.archivedFields)) {
               setArchivedFields(
-                data.archivedFields.map((af: unknown) =>
-                  typeof af === 'string' ? { name: af, type: 'Text' } : (af as UserField)
-                )
+                data.archivedFields.map((rawAf: unknown) => {
+                  const afObj = rawAf as Partial<UserField> | string | undefined;
+                  const af: UserField = typeof afObj === 'string'
+                    ? { name: afObj, type: 'Text' }
+                    : {
+                        id: afObj?.id,
+                        name: afObj?.name || '',
+                        type: afObj?.type || 'Text',
+                        value: afObj?.value,
+                        description: afObj?.description,
+                        folderId: afObj?.folderId,
+                        folder: afObj?.folder ?? afObj?.folderId ?? null,
+                      };
+                  return af;
+                }).filter((af) => Boolean(af.name) && !af.name.toLowerCase().includes('cooldown'))
               );
             }
             if (Array.isArray(data.folders)) {

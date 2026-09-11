@@ -36,5 +36,10 @@
   "flow_builder.telegram_menu": "Telegram Menu",
   "flow_builder.telegram_menu_block": "Telegram Menu",
   "flow_builder.text_block": "Text Block",
-  "flow_builder.video_block": "Video Block"
+  "flow_builder.video_block": "Video Block",
+  "flow_builder.cat_messaging": "Messaging",
+  "flow_builder.cat_logic": "Logic & Timing",
+  "flow_builder.cat_operations": "Actions & Gamification",
+  "flow_builder.cat_integrations": "Integrations",
+  "flow_builder.cat_utilities": "Utilities"
 }

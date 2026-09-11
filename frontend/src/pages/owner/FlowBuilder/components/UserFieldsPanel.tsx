@@ -96,12 +96,15 @@ export const UserFieldsPanel: React.FC = () => {
 
   const filteredFields = fields.filter((f) => {
     const matchesSearch = f.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFolder = (f.folder || null) === (activeFolderId || null);
-    return matchesSearch && matchesFolder;
+    const isFolderField = Boolean(f.folder && folders.some((fld) => fld.id === f.folder));
+    const matchesFolder = activeFolderId
+      ? f.folder === activeFolderId
+      : !isFolderField;
+    return matchesSearch && matchesFolder && !f.name.toLowerCase().includes('cooldown');
   });
 
   const filteredArchived = archivedFields.filter((f) =>
-    f.name.toLowerCase().includes(searchQuery.toLowerCase())
+    f.name.toLowerCase().includes(searchQuery.toLowerCase()) && !f.name.toLowerCase().includes('cooldown')
   );
 
   return (

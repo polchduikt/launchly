@@ -8,6 +8,8 @@ export interface FlowSchemaResponse {
   edges: Edge[];
 }
 
+export type BotResponseMode = 'ALL' | 'PRIVATE_ONLY' | 'GROUPS_ONLY';
+
 export interface BotResponse {
   id: number;
   name: string;
@@ -33,6 +35,7 @@ export interface BotResponse {
   role?: string | null;
   isTemplate?: boolean;
   templateName?: string | null;
+  responseMode?: BotResponseMode;
 }
 
 export interface BotDetailResponse extends BotResponse {
@@ -47,13 +50,15 @@ export interface BotCreateRequest {
   description?: string;
   telegramToken?: string;
   copyTokenFromBotId?: number;
+  responseMode?: BotResponseMode;
 }
 
 export interface BotUpdateRequest {
-  name: string;
+  name?: string;
   description?: string;
   telegramToken?: string;
   copyTokenFromBotId?: number;
+  responseMode?: BotResponseMode;
 }
 
 export interface AutomationFlow {
@@ -170,6 +175,22 @@ export interface CustomNodeData {
   variations?: Array<{ id: string; label: string; percentage: number; color: string; }>;
   noteSize?: 'S' | 'M' | 'L';
   fontSize?: 'S' | 'L';
+  command?: string;
+  description?: string;
+  targetField?: string;
+  operationMode?: 'RANDOM' | 'STATIC';
+  operationType?: 'ADD' | 'SUBTRACT' | 'SET' | 'MULTIPLY' | 'DIVIDE';
+  staticValue?: number | string;
+  randomMin?: number | string;
+  randomMax?: number | string;
+  randomStep?: number | string;
+  resultVariable?: string;
+  limit?: number;
+  sortOrder?: 'DESC' | 'ASC';
+  outputVariable?: string;
+  userRankVariable?: string;
+  userScoreVariable?: string;
+  customHeader?: string;
   [key: string]: unknown;
 }
 
@@ -294,6 +315,24 @@ export interface SmartDelayNodeEditorProps {
 }
 
 export interface ActionNodeEditorProps {
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+}
+
+export interface MathNodeEditorProps {
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+}
+
+export interface LeaderboardNodeEditorProps {
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+}
+
+export interface CooldownNodeEditorProps {
   data: CustomNodeData;
   handleChange: (key: string, value: unknown) => void;
   editorState?: EditorState;

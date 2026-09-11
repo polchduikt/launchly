@@ -19,6 +19,7 @@ export const NodeType = {
   Randomizer: 'RANDOMIZER',
   Comment: 'COMMENT',
   StartAutomation: 'START_AUTOMATION',
+  Command: 'COMMAND',
   Ai: 'AI',
 } as const;
 

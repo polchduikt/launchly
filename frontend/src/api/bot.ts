@@ -2,6 +2,7 @@ import apiClient from './axios';
 import type { Node, Edge } from '@xyflow/react';
 import type {
   BotCreateRequest,
+  BotUpdateRequest,
   BotResponse,
   BotUserCreateRequest,
   BotUserResponse,
@@ -23,7 +24,7 @@ export const createBotApi = async (data: BotCreateRequest): Promise<BotResponse>
   return response.data;
 };
 
-export const updateBotApi = async (id: number, data: BotCreateRequest): Promise<BotResponse> => {
+export const updateBotApi = async (id: number, data: BotUpdateRequest): Promise<BotResponse> => {
   const response = await apiClient.put<BotResponse>(`/bots/${id}`, data);
   return response.data;
 };

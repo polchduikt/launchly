@@ -17,6 +17,9 @@ export const textToHtml = (text: string): string => {
     else if (rawName === 'telegram_user_id') displayName = 'Telegram User ID';
     else if (rawName === 'contact_id') displayName = 'Contact Id';
     else if (rawName === 'subscribed') displayName = 'Subscribed';
+    else if (rawName === 'chat_type') displayName = 'Chat Type';
+    else if (rawName === 'chat_title') displayName = 'Chat Title';
+    else if (rawName === 'chat_id') displayName = 'Chat ID';
 
     return `<span class="inline-flex items-center bg-blue-600 text-white rounded px-1.5 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline" contenteditable="false" data-type="variable" data-val="${rawName}">${displayName}</span>`;
   });

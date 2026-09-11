@@ -11,8 +11,12 @@ import {
   RandomizerNode,
   CommentNode,
   StartAutomationNode,
+  CommandNode,
   StartBroadcastNode,
   AiNode,
+  MathNode,
+  LeaderboardNode,
+  CooldownNode,
 } from '../pages/owner/FlowBuilder/components/nodes';
 
 const withCollaborationWrapper = <P extends { id: string; data?: Record<string, unknown>; selected?: boolean; dragging?: boolean }>(
@@ -84,9 +88,13 @@ const ConditionNodeWrapped = withCollaborationWrapper(ConditionNode);
 const ApiCallNodeWrapped = withCollaborationWrapper(ApiCallNode);
 const EndNodeWrapped = withCollaborationWrapper(EndNode);
 const ActionNodeWrapped = withCollaborationWrapper(ActionNode);
+const MathNodeWrapped = withCollaborationWrapper(MathNode);
+const LeaderboardNodeWrapped = withCollaborationWrapper(LeaderboardNode);
+const CooldownNodeWrapped = withCollaborationWrapper(CooldownNode);
 const SmartDelayNodeWrapped = withCollaborationWrapper(SmartDelayNode);
 const RandomizerNodeWrapped = withCollaborationWrapper(RandomizerNode);
 const StartAutomationNodeWrapped = withCollaborationWrapper(StartAutomationNode);
+const CommandNodeWrapped = withCollaborationWrapper(CommandNode);
 const CommentNodeWrapped = withCollaborationWrapper(CommentNode);
 const AiNodeWrapped = withCollaborationWrapper(AiNode);
 
@@ -119,6 +127,18 @@ export const NODE_TYPES = {
   action: ActionNodeWrapped,
   Action: ActionNodeWrapped,
 
+  MATH: MathNodeWrapped,
+  math: MathNodeWrapped,
+  Math: MathNodeWrapped,
+
+  LEADERBOARD: LeaderboardNodeWrapped,
+  leaderboard: LeaderboardNodeWrapped,
+  Leaderboard: LeaderboardNodeWrapped,
+
+  COOLDOWN: CooldownNodeWrapped,
+  cooldown: CooldownNodeWrapped,
+  Cooldown: CooldownNodeWrapped,
+
   SMART_DELAY: SmartDelayNodeWrapped,
   smart_delay: SmartDelayNodeWrapped,
   SmartDelay: SmartDelayNodeWrapped,
@@ -130,6 +150,10 @@ export const NODE_TYPES = {
   START_AUTOMATION: StartAutomationNodeWrapped,
   start_automation: StartAutomationNodeWrapped,
   StartAutomation: StartAutomationNodeWrapped,
+
+  COMMAND: CommandNodeWrapped,
+  command: CommandNodeWrapped,
+  Command: CommandNodeWrapped,
 
   COMMENT: CommentNodeWrapped,
   comment: CommentNodeWrapped,

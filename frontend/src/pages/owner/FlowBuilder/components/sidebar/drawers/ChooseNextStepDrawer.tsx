@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, ArrowLeft } from 'lucide-react';
 import type { ChooseNextStepDrawerProps } from '../../../../../../types/bot';
-import { STEP_OPTIONS } from '../../../../../../const/stepOptions';
+import { STEP_OPTIONS, STEP_OPTION_GROUPS } from '../../../../../../const/stepOptions';
 import { t } from '../../../../../../i18n/config';
 
 export const ChooseNextStepDrawer: React.FC<ChooseNextStepDrawerProps> = ({ onClose, onSelectStep, isNested }) => {
@@ -21,34 +21,47 @@ export const ChooseNextStepDrawer: React.FC<ChooseNextStepDrawerProps> = ({ onCl
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 pb-24 space-y-3.5 custom-scrollbar">
-        {STEP_OPTIONS.map((opt) => {
-          const Icon = opt.icon;
+      <div className="flex-1 overflow-y-auto p-5 pb-24 space-y-5 custom-scrollbar">
+        {STEP_OPTION_GROUPS.map((group) => {
+          const groupOptions = STEP_OPTIONS.filter((opt) => group.types.includes(opt.type));
+          if (groupOptions.length === 0) return null;
           return (
-            <button
-              key={opt.type}
-              type="button"
-              onClick={() => {
-                onSelectStep(opt.type);
-                onClose();
-              }}
-              className="w-full flex items-start gap-4 p-4 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl cursor-pointer transition-all text-left group shadow-sm select-none"
-            >
-              <span
-                data-block-type={opt.type}
-                className={`node-icon-badge w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border-2 border-[#0A0A0A] ${opt.color} group-hover:scale-105 transition-transform`}
-              >
-                <Icon size={18} />
-              </span>
-              <div className="space-y-0.5">
-                <p className="text-xs font-black group-hover:text-[#F2EBDD] text-[#0A0A0A] transition-colors font-['Anybody',sans-serif]">
-                  {t(`step_option.${opt.type}.label`)}
-                </p>
-                <p className="text-[10px] text-[#0A0A0A]/70 group-hover:text-[#F2EBDD]/80 font-bold leading-relaxed">
-                  {t(`step_option.${opt.type}.desc`)}
-                </p>
+            <div key={group.id} className="space-y-2">
+              <div className="text-[10px] font-black text-[#0A0A0A]/50 uppercase tracking-widest px-1 font-['Anybody',sans-serif]">
+                {t(group.titleKey, group.defaultTitle)}
               </div>
-            </button>
+              <div className="space-y-2.5">
+                {groupOptions.map((opt) => {
+                  const Icon = opt.icon;
+                  return (
+                    <button
+                      key={opt.type}
+                      type="button"
+                      onClick={() => {
+                        onSelectStep(opt.type);
+                        onClose();
+                      }}
+                      className="w-full flex items-start gap-4 p-4 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl cursor-pointer transition-all text-left group shadow-sm select-none"
+                    >
+                      <span
+                        data-block-type={opt.type}
+                        className={`node-icon-badge w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border-2 border-[#0A0A0A] ${opt.color} group-hover:scale-105 transition-transform`}
+                      >
+                        <Icon size={18} />
+                      </span>
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-black group-hover:text-[#F2EBDD] text-[#0A0A0A] transition-colors font-['Anybody',sans-serif]">
+                          {t(`step_option.${opt.type}.label`)}
+                        </p>
+                        <p className="text-[10px] text-[#0A0A0A]/70 group-hover:text-[#F2EBDD]/80 font-bold leading-relaxed">
+                          {t(`step_option.${opt.type}.desc`)}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </div>

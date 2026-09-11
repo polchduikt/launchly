@@ -14,7 +14,8 @@ import {
   Search,
   Plus,
   Check,
-  Sparkles
+  Sparkles,
+  Trophy
 } from 'lucide-react';
 
 import type { TagResponse } from '../../../../../../types/broadcast';
@@ -76,6 +77,10 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
   useClickOutside([containerRef, dropdownRef], () => setIsOpen(false), isOpen);
 
   const systemFields = useMemo(() => [
+    { key: 'leaderboard', name: '🏆 ' + t('node.leaderboard.var_list', 'Список рейтингу (ТОП)'), val: 'leaderboard', icon: <Trophy size={13} className="text-amber-500" /> },
+    { key: 'user_rank', name: '🥇 ' + t('node.leaderboard.var_rank', 'Позиція в рейтингу'), val: 'user_rank', icon: <Trophy size={13} className="text-amber-500" /> },
+    { key: 'user_score', name: '⭐ ' + t('node.leaderboard.var_score', 'Бали в рейтингу'), val: 'user_score', icon: <Sparkles size={13} className="text-fuchsia-500" /> },
+    { key: 'awarded_points', name: '✨ ' + t('node.math.result_variable', 'Нараховані бали'), val: 'awarded_points', icon: <Sparkles size={13} className="text-cyan-500" /> },
     { key: 'first_name', name: t('editor.gs.fields.first_name'), val: 'first_name', icon: <User size={13} className="text-slate-400" /> },
     { key: 'last_name', name: t('editor.gs.fields.last_name'), val: 'last_name', icon: <User size={13} className="text-slate-400" /> },
     { key: 'phone', name: t('editor.gs.fields.phone'), val: 'phone', icon: <Phone size={13} className="text-slate-400" /> },
@@ -85,7 +90,10 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
     { key: 'last_reply_type', name: t('editor.gs.fields.last_reply_type'), val: 'last_reply_type', icon: <MessageSquare size={13} className="text-slate-400" /> },
     { key: 'telegram_user_id', name: t('editor.gs.fields.tg_id'), val: 'telegram_user_id', icon: <Hash size={13} className="text-slate-400" /> },
     { key: 'telegram_username', name: t('editor.gs.fields.username'), val: 'telegram_username', icon: <Send size={13} className="text-sky-500" /> },
-    { key: 'opted_in_telegram', name: t('editor.gs.fields.opted_in_telegram'), val: 'telegram_opt_in', icon: <CheckSquare size={13} className="text-slate-400" /> }
+    { key: 'opted_in_telegram', name: t('editor.gs.fields.opted_in_telegram'), val: 'telegram_opt_in', icon: <CheckSquare size={13} className="text-slate-400" /> },
+    { key: 'chat_type', name: 'Chat Type', val: 'chat_type', icon: <MessageSquare size={13} className="text-teal-500" /> },
+    { key: 'chat_title', name: 'Chat Title', val: 'chat_title', icon: <MessageSquare size={13} className="text-teal-500" /> },
+    { key: 'chat_id', name: 'Chat ID', val: 'chat_id', icon: <Hash size={13} className="text-teal-500" /> }
   ], []);
 
   
@@ -224,7 +232,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                     <button
                       key={field.key}
                       type="button"
-                      onClick={() => handleItemSelect(field.name, 'system')}
+                      onClick={() => handleItemSelect(field.val || field.key, 'system')}
                       className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
                     >
                       {field.icon}

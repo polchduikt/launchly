@@ -356,7 +356,13 @@ export const DashboardPage: React.FC = () => {
           type: 'START',
           position: { x: 100, y: 150 },
           data: {},
-        }
+        },
+        {
+          id: 'node_command_1',
+          type: 'COMMAND',
+          position: { x: 100, y: 340 },
+          data: { command: '/start', description: '' },
+        },
       ];
       await saveFlowSchemaApi(newBot.id, defaultNodes, []);
       await queryClient.refetchQueries({ queryKey: ['bots'] });

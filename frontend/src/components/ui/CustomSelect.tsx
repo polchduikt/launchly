@@ -13,6 +13,7 @@ interface CustomSelectProps {
   options: SelectOption[];
   disabled?: boolean;
   className?: string;
+  buttonClassName?: string;
   'data-testid'?: string;
 }
 
@@ -22,6 +23,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   options,
   disabled = false,
   className = '',
+  buttonClassName,
   'data-testid': testId,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,9 +39,12 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setIsOpen((prev) => !prev)}
-        className={`w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold text-[#0A0A0A] bg-white flex items-center justify-between transition-all cursor-pointer ${
-          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-[#0A0A0A]'
-        } ${isOpen ? 'ring-2 ring-[#0A0A0A]/20' : ''}`}
+        className={
+          buttonClassName ||
+          `w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold text-[#0A0A0A] bg-white flex items-center justify-between transition-all cursor-pointer ${
+            disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-[#0A0A0A]'
+          } ${isOpen ? 'ring-2 ring-[#0A0A0A]/20' : ''}`
+        }
       >
         <span className="truncate">{selectedOption?.label || value}</span>
         <ChevronDown

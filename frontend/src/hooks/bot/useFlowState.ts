@@ -174,6 +174,12 @@ export const useFlowState = ({
               position: { x: 100, y: 150 },
               data: {},
             },
+            {
+              id: 'node_command_1',
+              type: 'COMMAND',
+              position: { x: 100, y: 340 },
+              data: { command: '/start', description: '' },
+            },
           ];
           parsedEdges = [];
         }
@@ -192,6 +198,12 @@ export const useFlowState = ({
             type: 'START',
             position: { x: 100, y: 150 },
             data: {},
+          },
+          {
+            id: 'node_command_1',
+            type: 'COMMAND',
+            position: { x: 100, y: 340 },
+            data: { command: '/start', description: '' },
           },
         ]);
         setEdges([]);

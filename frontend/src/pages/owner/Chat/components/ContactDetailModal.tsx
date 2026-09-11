@@ -88,9 +88,15 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
 
   const availableFields = useMemo(() => {
     if (!customFieldsData || typeof customFieldsData !== 'object') return [];
-    if (Array.isArray(customFieldsData.fields)) return customFieldsData.fields as CustomFieldItem[];
-    if (Array.isArray(customFieldsData)) return customFieldsData as (CustomFieldItem | string)[];
-    return [];
+    const list = Array.isArray(customFieldsData.fields)
+      ? (customFieldsData.fields as CustomFieldItem[])
+      : Array.isArray(customFieldsData)
+        ? (customFieldsData as (CustomFieldItem | string)[])
+        : [];
+    return list.filter((f) => {
+      const name = typeof f === 'string' ? f : f?.name;
+      return name && !name.toLowerCase().includes('cooldown');
+    });
   }, [customFieldsData]);
 
   const parseMetadata = (metaStr: string | null): BotUserMetadata => {
@@ -470,23 +476,25 @@ export const ContactDetailModal: React.FC<ContactDetailModalProps> = ({
               )}
 
               <div className="space-y-2">
-                {!(meta.customFields) || Object.keys(meta.customFields).length === 0 ? (
+                {Object.entries(meta.customFields || {}).filter(([k]) => !k.toLowerCase().includes('cooldown')).length === 0 ? (
                   <span className="text-xs text-[#0A0A0A]/40 italic font-bold">{t('crm.contact.no_custom_fields')}</span>
                 ) : (
-                  Object.entries(meta.customFields).map(([k, v]) => (
-                    <div key={k} className="flex items-center justify-between py-2 px-3 bg-white border-2 border-[#0A0A0A] rounded-xl">
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-[10px] font-black text-[#0A0A0A]/50 uppercase tracking-wider">{k}</span>
-                        <span className="text-xs font-bold text-[#0A0A0A] truncate">{v}</span>
+                  Object.entries(meta.customFields || {})
+                    .filter(([k]) => !k.toLowerCase().includes('cooldown'))
+                    .map(([k, v]) => (
+                      <div key={k} className="flex items-center justify-between py-2 px-3 bg-white border-2 border-[#0A0A0A] rounded-xl">
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[10px] font-black text-[#0A0A0A]/50 uppercase tracking-wider">{k}</span>
+                          <span className="text-xs font-bold text-[#0A0A0A] truncate">{v}</span>
+                        </div>
+                        <button
+                          onClick={() => handleRemoveCustomFieldInline(k)}
+                          className="w-7 h-7 flex items-center justify-center text-[#0A0A0A]/40 hover:text-rose-600 hover:bg-rose-50 border-2 border-transparent hover:border-rose-200 rounded-lg transition-all cursor-pointer shrink-0"
+                        >
+                          <X size={13} />
+                        </button>
                       </div>
-                      <button
-                        onClick={() => handleRemoveCustomFieldInline(k)}
-                        className="w-7 h-7 flex items-center justify-center text-[#0A0A0A]/40 hover:text-rose-600 hover:bg-rose-50 border-2 border-transparent hover:border-rose-200 rounded-lg transition-all cursor-pointer shrink-0"
-                      >
-                        <X size={13} />
-                      </button>
-                    </div>
-                  ))
+                    ))
                 )}
               </div>
             </section>

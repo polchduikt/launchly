@@ -36,5 +36,10 @@
   "flow_builder.telegram_menu": "Меню Telegram",
   "flow_builder.telegram_menu_block": "Меню Telegram",
   "flow_builder.text_block": "Текстовий блок",
-  "flow_builder.video_block": "Блок відео"
+  "flow_builder.video_block": "Блок відео",
+  "flow_builder.cat_messaging": "Повідомлення",
+  "flow_builder.cat_logic": "Логіка та затримки",
+  "flow_builder.cat_operations": "Операції та рейтинг",
+  "flow_builder.cat_integrations": "Інтеграції",
+  "flow_builder.cat_utilities": "Службові"
 }

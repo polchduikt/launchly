@@ -8,8 +8,44 @@ import {
   Shuffle,
   StickyNote,
   Power,
-  SquareArrowRight
+  SquareArrowRight,
+  Terminal,
+  Calculator,
+  Trophy,
 } from 'lucide-react';
+
+export const STEP_OPTION_GROUPS = [
+  {
+    id: 'messaging',
+    titleKey: 'flow_builder.cat_messaging',
+    defaultTitle: 'Повідомлення',
+    types: ['MESSAGE'],
+  },
+  {
+    id: 'logic',
+    titleKey: 'flow_builder.cat_logic',
+    defaultTitle: 'Логіка та затримки',
+    types: ['CONDITION', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN'],
+  },
+  {
+    id: 'operations',
+    titleKey: 'flow_builder.cat_operations',
+    defaultTitle: 'Операції та рейтинг',
+    types: ['ACTION', 'MATH', 'LEADERBOARD'],
+  },
+  {
+    id: 'integrations',
+    titleKey: 'flow_builder.cat_integrations',
+    defaultTitle: 'Інтеграції',
+    types: ['API_CALL', 'START_AUTOMATION'],
+  },
+  {
+    id: 'utilities',
+    titleKey: 'flow_builder.cat_utilities',
+    defaultTitle: 'Службові',
+    types: ['COMMAND', 'COMMENT', 'END'],
+  },
+];
 
 export const STEP_OPTIONS = [
   {
@@ -31,6 +67,27 @@ export const STEP_OPTIONS = [
     get label() { return t('step_option.ACTION.label'); },
     get description() { return t('step_option.ACTION.desc'); },
     icon: Sliders,
+    color: 'text-amber-600 bg-amber-50 border-amber-100',
+  },
+  {
+    type: 'MATH',
+    get label() { return t('step_option.MATH.label', 'Calculation'); },
+    get description() { return t('step_option.MATH.desc', 'Random or static points calculation and score management'); },
+    icon: Calculator,
+    color: 'text-cyan-600 bg-cyan-50 border-cyan-100',
+  },
+  {
+    type: 'LEADERBOARD',
+    get label() { return t('step_option.LEADERBOARD.label', 'Leaderboard'); },
+    get description() { return t('step_option.LEADERBOARD.desc', 'Rank users and generate leaderboard list text'); },
+    icon: Trophy,
+    color: 'text-fuchsia-600 bg-fuchsia-50 border-fuchsia-100',
+  },
+  {
+    type: 'COOLDOWN',
+    get label() { return t('step_option.COOLDOWN.label', 'Cooldown'); },
+    get description() { return t('step_option.COOLDOWN.desc', 'Limit action frequency and send timeout warning'); },
+    icon: Clock,
     color: 'text-amber-600 bg-amber-50 border-amber-100',
   },
   {
@@ -60,6 +117,13 @@ export const STEP_OPTIONS = [
     get description() { return t('step_option.START_AUTOMATION.desc'); },
     icon: SquareArrowRight,
     color: 'text-lime-600 bg-lime-50 border-lime-100',
+  },
+  {
+    type: 'COMMAND',
+    get label() { return t('step_option.COMMAND.label'); },
+    get description() { return t('step_option.COMMAND.desc'); },
+    icon: Terminal,
+    color: 'text-teal-600 bg-teal-50 border-teal-100',
   },
   {
     type: 'COMMENT',

@@ -27,7 +27,7 @@ import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { NODE_TYPES } from '../../../const/nodeTypes';
 import { FLOW_EDGE_DEFAULTS, EDGE_TYPES } from '../../../const/flowEdges';
 import { useCustomFieldsQuery } from '../../../hooks/bot/useCustomFieldsQuery';
-import { BROADCAST_BLOCKS, BROADCAST_CONTEXT_MENU_OPTIONS } from '../../../const/broadcastBlocks';
+import { BROADCAST_BLOCKS, BROADCAST_CONTEXT_MENU_OPTIONS, BROADCAST_CONTEXT_MENU_GROUPS } from '../../../const/broadcastBlocks';
 import { FLOW_BLOCK_COLORS } from '../../../const/flowBlocks';
 import { NODE_ICON_COMPONENTS } from '../../../const/nodeDisplay';
 import { ROUTES } from '../../../routes/paths';
@@ -677,31 +677,33 @@ const BroadcastBuilderInner: React.FC = () => {
                     className="fixed inset-0 z-10"
                     onClick={() => setIsAddDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 mt-2.5 w-56 bg-[#F2EBDD] border-2 border-[#0A0A0A] p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
-                    <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-1 font-['Anybody',sans-serif]">
+                  <div className="absolute right-0 mt-2.5 w-[440px] bg-[#F2EBDD] border-2 border-[#0A0A0A] p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-150">
+                    <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider px-1 font-['Anybody',sans-serif]">
                       {t('broadcast.builder.add_standalone_node')}
                     </span>
-                    {BROADCAST_BLOCKS.map((item) => {
-                      const IconComp = NODE_ICON_COMPONENTS[item.type] || Plus;
-                      return (
-                        <button
-                          key={item.type}
-                          onClick={() => {
-                            handleAddNode(item.type);
-                            setIsAddDropdownOpen(false);
-                          }}
-                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A]/10 hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group"
-                        >
-                          <span
-                            data-block-type={item.type}
-                            className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${item.color}`}
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {BROADCAST_BLOCKS.map((item) => {
+                        const IconComp = NODE_ICON_COMPONENTS[item.type] || Plus;
+                        return (
+                          <button
+                            key={item.type}
+                            onClick={() => {
+                              handleAddNode(item.type);
+                              setIsAddDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A]/10 hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group min-w-0"
                           >
-                            <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
-                          </span>
-                          <span>{item.label}</span>
-                        </button>
-                      );
-                    })}
+                            <span
+                              data-block-type={item.type}
+                              className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${item.color}`}
+                            >
+                              <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+                            </span>
+                            <span className="truncate">{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </>
               )}
@@ -793,50 +795,65 @@ const BroadcastBuilderInner: React.FC = () => {
               onClick={() => setContextMenu(null)}
             >
               <div
-                className="absolute bg-[#F2EBDD] border-2 border-[#0A0A0A] p-2.5 rounded-2xl shadow-xl w-60 flex flex-col gap-1 select-none pointer-events-auto animate-in fade-in zoom-in-95 duration-150 z-50"
+                className="absolute bg-[#F2EBDD] border-2 border-[#0A0A0A] p-3 rounded-2xl shadow-xl w-[440px] max-h-[80vh] overflow-y-auto custom-scrollbar flex flex-col gap-2.5 select-none pointer-events-auto animate-in fade-in zoom-in-95 duration-150 z-50 font-['JetBrains_Mono',monospace]"
                 style={{
-                  left: Math.min(contextMenu.x, window.innerWidth - 250),
-                  top: Math.min(contextMenu.y, window.innerHeight - 380),
+                  left: Math.min(contextMenu.x, window.innerWidth - 470),
+                  top: Math.min(contextMenu.y, window.innerHeight - 450),
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-3 pt-1 select-none font-['Anybody',sans-serif]">
+                <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider px-1 pt-0.5 select-none font-['Anybody',sans-serif]">
                   {t('flow_builder.connect_to')}
                 </span>
-                {filteredContextMenuOptions.map((opt, idx) => {
-                  const IconComp = NODE_ICON_COMPONENTS[opt.type] || Plus;
-                  const colorClass = FLOW_BLOCK_COLORS[opt.type] || 'text-slate-500 bg-slate-50';
-                  const cleanLabel = opt.label.replace(/^\+\s*/, '');
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => handleCreateAndConnectNode(opt.type)}
-                      className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-transparent hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group select-none"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span
-                          data-block-type={opt.type}
-                          className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${colorClass}`}
-                        >
-                          <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
-                        </span>
-                        <span className="font-bold truncate">{cleanLabel}</span>
+                <div className="flex flex-col gap-2.5">
+                  {BROADCAST_CONTEXT_MENU_GROUPS.map((group) => {
+                    const groupOptions = filteredContextMenuOptions.filter((opt) => group.types.includes(opt.type));
+                    if (groupOptions.length === 0) return null;
+                    return (
+                      <div key={group.id} className="space-y-1">
+                        <div className="text-[9px] font-black text-[#0A0A0A]/50 uppercase tracking-widest px-1 font-['Anybody',sans-serif]">
+                          {t(group.titleKey, group.defaultTitle)}
+                        </div>
+                        <div className="grid grid-cols-2 gap-1">
+                          {groupOptions.map((opt, idx) => {
+                            const IconComp = NODE_ICON_COMPONENTS[opt.type] || Plus;
+                            const colorClass = FLOW_BLOCK_COLORS[opt.type] || 'text-slate-500 bg-slate-50';
+                            const cleanLabel = opt.label.replace(/^\+\s*/, '');
+                            return (
+                              <button
+                                key={idx}
+                                onClick={() => handleCreateAndConnectNode(opt.type)}
+                                className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-transparent hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group select-none min-w-0"
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span
+                                    data-block-type={opt.type}
+                                    className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${colorClass}`}
+                                  >
+                                    <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+                                  </span>
+                                  <span className="font-bold truncate">{cleanLabel}</span>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0 ml-1">
+                                  {opt.isPro && (
+                                    <span className="text-[8px] font-black bg-amber-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                      PRO
+                                    </span>
+                                  )}
+                                  {opt.isAi && (
+                                    <span className="text-[8px] font-black bg-purple-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                      AI
+                                    </span>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        {opt.isPro && (
-                          <span className="text-[8px] font-black bg-amber-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
-                            PRO
-                          </span>
-                        )}
-                        {opt.isAi && (
-                          <span className="text-[8px] font-black bg-purple-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
-                            AI
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
+                    );
+                  })}
+                </div>
                 <button
                   onClick={() => setContextMenu(null)}
                   className="w-full text-center py-2 text-xs font-black text-[#0A0A0A]/60 hover:text-[#0A0A0A] hover:bg-[#0A0A0A]/10 rounded-xl transition-all border-t-2 border-[#0A0A0A]/20 mt-1 cursor-pointer select-none uppercase tracking-wider font-['JetBrains_Mono',monospace]"

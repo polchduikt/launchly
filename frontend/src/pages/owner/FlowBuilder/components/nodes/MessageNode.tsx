@@ -113,6 +113,9 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
       else if (rawName === 'telegram_user_id') displayName = 'Telegram User ID';
       else if (rawName === 'contact_id') displayName = 'Contact Id';
       else if (rawName === 'subscribed') displayName = 'Subscribed';
+      else if (rawName === 'chat_type') displayName = 'Chat Type';
+      else if (rawName === 'chat_title') displayName = 'Chat Title';
+      else if (rawName === 'chat_id') displayName = 'Chat ID';
 
       matches.push({
         index: m.index,

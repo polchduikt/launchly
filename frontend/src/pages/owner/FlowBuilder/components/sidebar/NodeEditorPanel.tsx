@@ -13,7 +13,11 @@ import { SmartDelayNodeEditor } from './editors/SmartDelayNodeEditor';
 import { RandomizerNodeEditor } from './editors/RandomizerNodeEditor';
 import { CommentNodeEditor } from './editors/CommentNodeEditor';
 import { StartAutomationNodeEditor } from './editors/StartAutomationNodeEditor';
+import { CommandNodeEditor } from './editors/CommandNodeEditor';
 import { AiNodeEditor } from './editors/AiNodeEditor';
+import { MathNodeEditor } from './editors/MathNodeEditor';
+import { LeaderboardNodeEditor } from './editors/LeaderboardNodeEditor';
+import { CooldownNodeEditor } from './editors/CooldownNodeEditor';
 
 
 interface NodeEditorPanelProps {
@@ -45,6 +49,15 @@ const NODE_EDITORS: Record<string, NodeEditorComponent> = {
   ACTION: ({ data, handleChange, editorState }) => (
     <ActionNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
   ),
+  MATH: ({ data, handleChange, editorState }) => (
+    <MathNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
+  ),
+  LEADERBOARD: ({ data, handleChange, editorState }) => (
+    <LeaderboardNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
+  ),
+  COOLDOWN: ({ data, handleChange, editorState }) => (
+    <CooldownNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
+  ),
   SMART_DELAY: ({ data, handleChange, editorState }) => (
     <SmartDelayNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
   ),
@@ -56,6 +69,9 @@ const NODE_EDITORS: Record<string, NodeEditorComponent> = {
   ),
   START_AUTOMATION: ({ node, data, handleChange, editorState }) => (
     <StartAutomationNodeEditor node={node} data={data} handleChange={handleChange} editorState={editorState} />
+  ),
+  COMMAND: ({ data, handleChange }) => (
+    <CommandNodeEditor data={data} handleChange={handleChange} />
   ),
   AI: ({ data, handleChange, editorState }) => (
     <AiNodeEditor data={data} handleChange={handleChange} editorState={editorState} />

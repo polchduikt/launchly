@@ -6,6 +6,33 @@ export const BROADCAST_BLOCKS = [
   ...FLOW_BLOCKS,
 ];
 
+export const BROADCAST_CONTEXT_MENU_GROUPS = [
+  {
+    id: 'messaging',
+    titleKey: 'flow_builder.cat_messaging',
+    defaultTitle: 'Повідомлення',
+    types: ['MESSAGE', 'AI'],
+  },
+  {
+    id: 'logic',
+    titleKey: 'flow_builder.cat_logic',
+    defaultTitle: 'Логіка та затримки',
+    types: ['CONDITION', 'RANDOMIZER', 'SMART_DELAY'],
+  },
+  {
+    id: 'operations',
+    titleKey: 'flow_builder.cat_operations',
+    defaultTitle: 'Операції та рейтинг',
+    types: ['ACTION'],
+  },
+  {
+    id: 'integrations',
+    titleKey: 'flow_builder.cat_integrations',
+    defaultTitle: 'Інтеграції',
+    types: ['API_CALL', 'START_AUTOMATION'],
+  },
+];
+
 export const BROADCAST_CONTEXT_MENU_OPTIONS = [
   { type: 'MESSAGE', get label() { return t('context_menu.MESSAGE').replace(/^\+\s*/, ''); }, isPro: false, isAi: false, color: FLOW_BLOCK_COLORS.MESSAGE, icon: NODE_ICON_COMPONENTS.MESSAGE },
   { type: 'API_CALL', get label() { return t('context_menu.API_CALL').replace(/^\+\s*/, ''); }, isPro: false, isAi: false, color: FLOW_BLOCK_COLORS.API_CALL, icon: NODE_ICON_COMPONENTS.API_CALL },

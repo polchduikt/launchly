@@ -115,9 +115,15 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
 
   const availableFields = useMemo(() => {
     if (!customFieldsData || typeof customFieldsData !== 'object') return [];
-    if (Array.isArray(customFieldsData.fields)) return customFieldsData.fields as CustomFieldItem[];
-    if (Array.isArray(customFieldsData)) return customFieldsData as (CustomFieldItem | string)[];
-    return [];
+    const list = Array.isArray(customFieldsData.fields)
+      ? (customFieldsData.fields as CustomFieldItem[])
+      : Array.isArray(customFieldsData)
+        ? (customFieldsData as (CustomFieldItem | string)[])
+        : [];
+    return list.filter((f) => {
+      const name = typeof f === 'string' ? f : f?.name;
+      return name && !name.toLowerCase().includes('cooldown');
+    });
   }, [customFieldsData]);
 
   const [isFieldDropdownOpen, setIsFieldDropdownOpen] = useState(false);
@@ -528,23 +534,25 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
               </div>
             )}
             <div className="space-y-1.5 max-h-[180px] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
-              {!(meta.customFields) || Object.keys(meta.customFields).length === 0 ? (
+              {Object.entries(meta.customFields || {}).filter(([k]) => !k.toLowerCase().includes('cooldown')).length === 0 ? (
                 <span className="text-xs text-slate-700 font-bold italic">{t('crm.panel.fields.no_fields')}</span>
               ) : (
-                Object.entries(meta.customFields).map(([k, v]) => (
-                  <div key={k} className="flex items-center justify-between py-1.5 px-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl shadow-[2px_2px_0px_0px_#0A0A0A]">
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider">{k}</span>
-                      <span className="text-xs font-bold text-slate-800 truncate">{v}</span>
+                Object.entries(meta.customFields || {})
+                  .filter(([k]) => !k.toLowerCase().includes('cooldown'))
+                  .map(([k, v]) => (
+                    <div key={k} className="flex items-center justify-between py-1.5 px-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl shadow-[2px_2px_0px_0px_#0A0A0A]">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider">{k}</span>
+                        <span className="text-xs font-bold text-slate-800 truncate">{v}</span>
+                      </div>
+                      <button
+                        onClick={() => handleRemoveCustomField(k)}
+                        className="p-0.5 text-[#0A0A0A] hover:text-rose-600 rounded transition-all cursor-pointer"
+                      >
+                        <X size={12} />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleRemoveCustomField(k)}
-                      className="p-0.5 text-[#0A0A0A] hover:text-rose-600 rounded transition-all cursor-pointer"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                ))
+                  ))
               )}
             </div>
           </div>
