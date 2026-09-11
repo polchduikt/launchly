@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -151,6 +150,12 @@ public class ActionPlaceholderResolver {
         result = replacePlaceholder(result, "contact_id", botUser.getId() != null ? String.valueOf(botUser.getId()) : null);
 
         if (variables != null) {
+            for (Map.Entry<String, String> entry : variables.entrySet()) {
+                if (entry.getKey() != null && entry.getValue() != null) {
+                    result = replacePlaceholder(result, entry.getKey(), entry.getValue());
+                }
+            }
+
             result = replacePlaceholder(result, "Phone", variables.get("phone"));
             result = replacePlaceholder(result, "phone", variables.get("phone"));
 
@@ -173,6 +178,17 @@ public class ActionPlaceholderResolver {
                     for (Map.Entry<String, Object> entry : customFields.entrySet()) {
                         String valStr = entry.getValue() != null ? String.valueOf(entry.getValue()) : "";
                         result = replacePlaceholder(result, entry.getKey(), valStr);
+                    }
+                }
+                Map<String, Object> chatCustomFields = (Map<String, Object>) metaMap.get("chatCustomFields");
+                if (chatCustomFields != null) {
+                    for (Object groupVal : chatCustomFields.values()) {
+                        if (groupVal instanceof Map<?, ?> scopeMap) {
+                            for (Map.Entry<?, ?> entry : scopeMap.entrySet()) {
+                                String valStr = entry.getValue() != null ? String.valueOf(entry.getValue()) : "";
+                                result = replacePlaceholder(result, String.valueOf(entry.getKey()), valStr);
+                            }
+                        }
                     }
                 }
             }

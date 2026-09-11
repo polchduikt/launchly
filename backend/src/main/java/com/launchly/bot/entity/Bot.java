@@ -4,6 +4,8 @@ import com.launchly.auth.entity.User;
 import com.launchly.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Index;
@@ -88,6 +90,11 @@ public class Bot extends BaseEntity {
     @Builder.Default
     private int runsCount = 1;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "response_mode", nullable = false)
+    @Builder.Default
+    private BotResponseMode responseMode = BotResponseMode.ALL;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -129,6 +136,10 @@ public class Bot extends BaseEntity {
             this.avatar = avatar;
             this.avatarPublicId = avatarPublicId;
         }
+    }
+
+    public BotResponseMode getResponseMode() {
+        return responseMode != null ? responseMode : BotResponseMode.ALL;
     }
 }
 

@@ -29,9 +29,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import tools.jackson.databind.ObjectMapper;
-
 import java.util.List;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -149,7 +147,7 @@ class BotControllerTest {
     @Test
     @DisplayName("PUT /api/v1/bots/{id} - Should update bot and return 200 OK")
     void updateBot_Success_ReturnsOk() throws Exception {
-        BotUpdateRequest request = new BotUpdateRequest("Updated Name", "New Desc", null, null, null, null);
+        BotUpdateRequest request = new BotUpdateRequest("Updated Name", "New Desc", null, null, null, null, null);
         BotResponse mockResponse = mock(BotResponse.class);
         when(mockResponse.name()).thenReturn("Updated Name");
 

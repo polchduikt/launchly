@@ -119,6 +119,8 @@ databaseChangeLog:
       file: db/changelog/changes/V059__create_ai_chat_sessions_and_messages.sql
   - include:
       file: db/changelog/changes/V060__add_idx_orders_bot_user_bot.sql
+  - include:
+      file: db/changelog/changes/V061__add_response_mode_to_bots.sql
 
 
 

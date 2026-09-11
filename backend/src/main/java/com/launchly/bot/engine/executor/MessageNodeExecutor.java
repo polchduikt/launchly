@@ -1,6 +1,16 @@
 package com.launchly.bot.engine.executor;
 
-import com.launchly.bot.engine.executor.block.*;
+import com.launchly.bot.engine.executor.block.AudioMessageBlockHandler;
+import com.launchly.bot.engine.executor.block.DataCollectionMessageBlockHandler;
+import com.launchly.bot.engine.executor.block.DelayMessageBlockHandler;
+import com.launchly.bot.engine.executor.block.FileMessageBlockHandler;
+import com.launchly.bot.engine.executor.block.ImageMessageBlockHandler;
+import com.launchly.bot.engine.executor.block.MessageBlockContext;
+import com.launchly.bot.engine.executor.block.MessageBlockHandler;
+import com.launchly.bot.engine.executor.block.MessageBlockHelper;
+import com.launchly.bot.engine.executor.block.MessageBlockResult;
+import com.launchly.bot.engine.executor.block.TextMessageBlockHandler;
+import com.launchly.bot.engine.executor.block.VideoMessageBlockHandler;
 import com.launchly.bot.engine.model.FlowEdge;
 import com.launchly.bot.engine.model.FlowNode;
 import com.launchly.bot.entity.BotUser;
@@ -18,8 +28,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -83,7 +95,7 @@ public class MessageNodeExecutor implements NodeExecutor {
         if (data != null && data.get("blocks") instanceof List) {
             blocks = (List<Map<String, Object>>) data.get("blocks");
         }
-        String chatId = botUser.getTelegramId().toString();
+        String chatId = resolveChatId(update, botUser);
 
         if (update != null && update.hasCallbackQuery()) {
             String callbackData = update.getCallbackQuery().getData();
@@ -213,8 +225,12 @@ public class MessageNodeExecutor implements NodeExecutor {
             InlineKeyboardMarkup markup = helper.buildMarkup(buttonsList);
             if (markup != null) hasButtons = true;
 
+            Long botId = botUser.getBot() != null ? botUser.getBot().getId() : null;
+            Map<String, String> sessionData = botId != null ? stateService.getSessionData(botId, botUser.getTelegramId()) : Map.of();
+
             if (hasImage) {
-                String sanitizedText = hasText ? SanitizationUtil.sanitizeForTelegram(text) : "";
+                String resolvedText = hasText ? helper.resolvePlaceholders(text, sessionData, botUser) : "";
+                String sanitizedText = !resolvedText.isEmpty() ? SanitizationUtil.sanitizeForTelegram(resolvedText) : "";
                 try {
                     SendPhoto sendPhoto = SendPhoto.builder()
                             .chatId(chatId)
@@ -227,11 +243,14 @@ public class MessageNodeExecutor implements NodeExecutor {
                     log.error("Failed to send photo for node {}: {}", node.id(), e.getMessage());
                 }
             } else if (hasText || markup != null) {
-                String sanitizedText = hasText ? SanitizationUtil.sanitizeForTelegram(text) : "...";
+                String resolvedText = hasText ? helper.resolvePlaceholders(text, sessionData, botUser) : "...";
+                String escapedText = helper.escapeHtml(resolvedText);
+                String htmlText = helper.convertMarkdownLinksToHtml(escapedText);
                 try {
                     SendMessage message = SendMessage.builder()
                             .chatId(chatId)
-                            .text(sanitizedText)
+                            .text(htmlText)
+                            .parseMode("HTML")
                             .replyMarkup(markup)
                             .build();
                     client.execute(message);
@@ -252,5 +271,26 @@ public class MessageNodeExecutor implements NodeExecutor {
                 .findFirst()
                 .map(FlowEdge::target)
                 .orElse(null);
+    }
+
+    private String resolveChatId(Update update, BotUser botUser) {
+        if (update != null) {
+            if (update.hasMessage() && update.getMessage().getChat() != null) {
+                return update.getMessage().getChatId().toString();
+            }
+            if (update.hasCallbackQuery() && update.getCallbackQuery().getMessage() != null && update.getCallbackQuery().getMessage().getChat() != null) {
+                return update.getCallbackQuery().getMessage().getChatId().toString();
+            }
+            if (update.hasChannelPost() && update.getChannelPost().getChat() != null) {
+                return update.getChannelPost().getChatId().toString();
+            }
+            if (update.hasEditedMessage() && update.getEditedMessage().getChat() != null) {
+                return update.getEditedMessage().getChatId().toString();
+            }
+            if (update.hasEditedChannelPost() && update.getEditedChannelPost().getChat() != null) {
+                return update.getEditedChannelPost().getChatId().toString();
+            }
+        }
+        return botUser != null && botUser.getTelegramId() != null ? botUser.getTelegramId().toString() : null;
     }
 }

@@ -14,6 +14,7 @@ import com.launchly.bot.engine.persister.BotMessagePersister;
 import com.launchly.bot.engine.router.FlowNodeRouter;
 import com.launchly.bot.engine.validator.BotInputValidator;
 import com.launchly.bot.entity.Bot;
+import com.launchly.bot.entity.BotResponseMode;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.entity.FlowSchema;
 import com.launchly.bot.entity.NodeType;
@@ -115,6 +116,40 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 return;
             }
 
+            String chatType = "private";
+            String chatTitle = "";
+            Long incomingChatId = telegramUserId;
+            if (update.hasMessage() && update.getMessage().getChat() != null) {
+                incomingChatId = update.getMessage().getChatId();
+                chatType = update.getMessage().getChat().getType();
+                if (update.getMessage().getChat().getTitle() != null) {
+                    chatTitle = update.getMessage().getChat().getTitle();
+                }
+            } else if (update.hasCallbackQuery() && update.getCallbackQuery().getMessage() != null && update.getCallbackQuery().getMessage().getChat() != null) {
+                incomingChatId = update.getCallbackQuery().getMessage().getChatId();
+                chatType = update.getCallbackQuery().getMessage().getChat().getType();
+                if (update.getCallbackQuery().getMessage().getChat().getTitle() != null) {
+                    chatTitle = update.getCallbackQuery().getMessage().getChat().getTitle();
+                }
+            } else if (update.hasChannelPost() && update.getChannelPost().getChat() != null) {
+                incomingChatId = update.getChannelPost().getChatId();
+                chatType = update.getChannelPost().getChat().getType();
+                if (update.getChannelPost().getChat().getTitle() != null) {
+                    chatTitle = update.getChannelPost().getChat().getTitle();
+                }
+            }
+
+            BotResponseMode responseMode = bot.getResponseMode() != null ? bot.getResponseMode() : BotResponseMode.ALL;
+            boolean isPrivate = "private".equalsIgnoreCase(chatType);
+            if (responseMode == BotResponseMode.PRIVATE_ONLY && !isPrivate) {
+                log.info("Bot {} is set to PRIVATE_ONLY, skipping update from chat type {}", botId, chatType);
+                return;
+            }
+            if (responseMode == BotResponseMode.GROUPS_ONLY && isPrivate) {
+                log.info("Bot {} is set to GROUPS_ONLY, skipping private update from user {}", botId, telegramUserId);
+                return;
+            }
+
             BotUser botUser = botUserProvisioningService.getOrCreateBotUser(bot, update, telegramUserId, client);
             if (stateService.isAutomationPaused(botUser)) {
                 log.info("Automation is paused for user {}, skipping processUpdate", botUser.getId());
@@ -127,6 +162,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 String buttonLabel = router.resolveButtonLabel(botId, callbackData);
                 analyticsService.logEvent(botId, botUser, AnalyticsEventType.CLICK, buttonLabel);
             }
+
+            stateService.setSessionData(botId, telegramUserId, "chat_type", chatType != null ? chatType : "private");
+            stateService.setSessionData(botId, telegramUserId, "chat_id", incomingChatId != null ? String.valueOf(incomingChatId) : String.valueOf(telegramUserId));
+            stateService.setSessionData(botId, telegramUserId, "chat_title", chatTitle != null ? chatTitle : "");
 
             if (update.hasMessage() && update.getMessage().hasText()
                     && update.getMessage().getText().trim().startsWith("/start")) {
@@ -186,6 +225,25 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
 
             String dcKey = "launchly:bot:data_collection:" + botId + ":" + telegramUserId;
+            if (update.hasMessage() && update.getMessage().hasText()) {
+                String msgText = update.getMessage().getText().trim();
+                if (msgText.startsWith("/")) {
+                    FlowNode commandNode = router.findMatchingCommandNode(nodes, msgText);
+                    if (commandNode != null) {
+                        redisTemplate.delete(dcKey);
+                        stateService.clearActiveCampaignId(botId, telegramUserId);
+                        callStackManager.clear(botId, telegramUserId);
+                        callStackManager.setExecutingBotId(botId, telegramUserId, botId);
+                        String currentNodeId = commandNode.id();
+                        stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
+                        botUser.setCurrentNodeId(currentNodeId);
+                        botUser = botUserRepository.save(botUser);
+                        executeNodeLoop(botId, botUser, telegramUserId, currentNodeId, nodes, edges, botId, update, client);
+                        return;
+                    }
+                }
+            }
+
             String dcStateStr = redisTemplate.opsForValue().get(dcKey);
             if (dcStateStr != null && !dcStateStr.trim().isEmpty()) {
                 DataCollectionState dcState = objectMapper.readValue(dcStateStr, DataCollectionState.class);

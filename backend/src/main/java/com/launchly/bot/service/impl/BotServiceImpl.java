@@ -48,11 +48,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
 import com.launchly.admin.service.UserAuditService;
 
 @Slf4j
@@ -165,7 +162,7 @@ public class BotServiceImpl implements BotService {
             flowSchemaRepository.save(schema);
 
             List<BotMember> ownerMembers = botMemberRepository.findByBotOwnerId(userId);
-            java.util.Map<Long, BotMember> uniqueMembers = new java.util.HashMap<>();
+            Map<Long, BotMember> uniqueMembers = new HashMap<>();
             for (BotMember m : ownerMembers) {
                 uniqueMembers.putIfAbsent(m.getUser().getId(), m);
             }
@@ -225,7 +222,8 @@ public class BotServiceImpl implements BotService {
                 schemaResponse,
                 bot.getCreatedAt(),
                 bot.isTemplate(),
-                bot.getTemplateName()
+                bot.getTemplateName(),
+                bot.getResponseMode()
         );
     }
 
@@ -258,6 +256,10 @@ public class BotServiceImpl implements BotService {
             Bot bot = findBotByIdAndUser(id, userId);
             if (request.name() != null) {
                 bot.setName(request.name());
+            }
+
+            if (request.responseMode() != null) {
+                bot.setResponseMode(request.responseMode());
             }
 
             if (finalRawToken != null) {

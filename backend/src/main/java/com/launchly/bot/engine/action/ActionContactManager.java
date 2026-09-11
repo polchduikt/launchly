@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +20,7 @@ public class ActionContactManager {
     private final ObjectMapper objectMapper;
 
     @SuppressWarnings("unchecked")
-    public void updateContactCustomField(BotUser botUser, String fieldName, String fieldValue) {
+    public void updateContactCooldown(BotUser botUser, String cooldownKey, String timestampStr) {
         try {
             Map<String, Object> metaMap = new HashMap<>();
             if (botUser.getMetadata() != null && !botUser.getMetadata().trim().isEmpty()) {
@@ -31,16 +30,83 @@ public class ActionContactManager {
                     log.error("Failed to parse metadata: {}", e.getMessage());
                 }
             }
-            Map<String, Object> customFields = (Map<String, Object>) metaMap.get("customFields");
-            if (customFields == null) {
-                customFields = new HashMap<>();
+
+            Map<String, Object> cooldowns = (Map<String, Object>) metaMap.get("cooldowns");
+            if (cooldowns == null) {
+                cooldowns = new HashMap<>();
             }
-            if (fieldValue == null) {
-                customFields.remove(fieldName);
+            if (timestampStr == null) {
+                cooldowns.remove(cooldownKey);
             } else {
-                customFields.put(fieldName, fieldValue);
+                cooldowns.put(cooldownKey, timestampStr);
             }
-            metaMap.put("customFields", customFields);
+            metaMap.put("cooldowns", cooldowns);
+
+            cleanupCooldownsFromCustomFields(metaMap);
+
+            botUser.setMetadata(objectMapper.writeValueAsString(metaMap));
+            botUserRepository.save(botUser);
+        } catch (Exception e) {
+            log.error("Failed to update contact cooldown: {}", e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void updateContactCustomField(BotUser botUser, String fieldName, String fieldValue) {
+        updateContactCustomField(botUser, "private", fieldName, fieldValue);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void updateContactCustomField(BotUser botUser, String chatScope, String fieldName, String fieldValue) {
+        if (fieldName != null && fieldName.toLowerCase().contains("cooldown")) {
+            String scopedKey = (chatScope != null && !chatScope.isEmpty() && !"private".equalsIgnoreCase(chatScope))
+                    ? chatScope + "_" + fieldName
+                    : fieldName;
+            updateContactCooldown(botUser, scopedKey, fieldValue);
+            return;
+        }
+
+        try {
+            Map<String, Object> metaMap = new HashMap<>();
+            if (botUser.getMetadata() != null && !botUser.getMetadata().trim().isEmpty()) {
+                try {
+                    metaMap = objectMapper.readValue(botUser.getMetadata(), Map.class);
+                } catch (Exception e) {
+                    log.error("Failed to parse metadata: {}", e.getMessage());
+                }
+            }
+
+            cleanupCooldownsFromCustomFields(metaMap);
+
+            if (chatScope != null && !chatScope.isEmpty() && !"private".equalsIgnoreCase(chatScope)) {
+                Map<String, Object> chatCustomFields = (Map<String, Object>) metaMap.get("chatCustomFields");
+                if (chatCustomFields == null) {
+                    chatCustomFields = new HashMap<>();
+                }
+                Map<String, Object> groupFields = (Map<String, Object>) chatCustomFields.get(chatScope);
+                if (groupFields == null) {
+                    groupFields = new HashMap<>();
+                }
+                if (fieldValue == null) {
+                    groupFields.remove(fieldName);
+                } else {
+                    groupFields.put(fieldName, fieldValue);
+                }
+                chatCustomFields.put(chatScope, groupFields);
+                metaMap.put("chatCustomFields", chatCustomFields);
+            } else {
+                Map<String, Object> customFields = (Map<String, Object>) metaMap.get("customFields");
+                if (customFields == null) {
+                    customFields = new HashMap<>();
+                }
+                if (fieldValue == null) {
+                    customFields.remove(fieldName);
+                } else {
+                    customFields.put(fieldName, fieldValue);
+                }
+                metaMap.put("customFields", customFields);
+            }
+
             botUser.setMetadata(objectMapper.writeValueAsString(metaMap));
             botUserRepository.save(botUser);
         } catch (Exception e) {
@@ -59,11 +125,37 @@ public class ActionContactManager {
                     log.error("Failed to parse metadata: {}", e.getMessage());
                 }
             }
+            cleanupCooldownsFromCustomFields(metaMap);
             metaMap.put(key, value);
             botUser.setMetadata(objectMapper.writeValueAsString(metaMap));
             botUserRepository.save(botUser);
         } catch (Exception e) {
             log.error("Failed to update contact metadata field: {}", e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void cleanupCooldownsFromCustomFields(Map<String, Object> metaMap) {
+        if (metaMap == null) return;
+
+        Object cfObj = metaMap.get("customFields");
+        if (cfObj instanceof Map<?, ?> cfMap) {
+            Map<String, Object> customFields = new HashMap<>((Map<String, Object>) cfMap);
+            customFields.keySet().removeIf(k -> k != null && k.toLowerCase().contains("cooldown"));
+            metaMap.put("customFields", customFields);
+        }
+
+        Object ccfObj = metaMap.get("chatCustomFields");
+        if (ccfObj instanceof Map<?, ?> ccfMap) {
+            Map<String, Object> chatCustomFields = new HashMap<>((Map<String, Object>) ccfMap);
+            for (Map.Entry<String, Object> entry : chatCustomFields.entrySet()) {
+                if (entry.getValue() instanceof Map<?, ?> groupMap) {
+                    Map<String, Object> cleanedGroup = new HashMap<>((Map<String, Object>) groupMap);
+                    cleanedGroup.keySet().removeIf(k -> k != null && k.toLowerCase().contains("cooldown"));
+                    entry.setValue(cleanedGroup);
+                }
+            }
+            metaMap.put("chatCustomFields", chatCustomFields);
         }
     }
 
@@ -84,6 +176,9 @@ public class ActionContactManager {
         } else if (trimmed.equalsIgnoreCase("email") || trimmed.equalsIgnoreCase("Email")) {
             stateService.setSessionData(botId, telegramUserId, "email", value);
             updateContactMetadataField(botUser, "email", value);
+        } else if (trimmed.toLowerCase().contains("cooldown")) {
+            stateService.setSessionData(botId, telegramUserId, trimmed, value);
+            updateContactCooldown(botUser, trimmed, value);
         } else {
             stateService.setSessionData(botId, telegramUserId, trimmed, value);
             updateContactCustomField(botUser, trimmed, value);

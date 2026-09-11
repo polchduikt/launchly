@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,6 +54,26 @@ public class FlowNodeRouter {
                 .filter(e -> e.source().equals(sourceNodeId) && sourceHandle.equals(e.sourceHandle()))
                 .findFirst()
                 .map(FlowEdge::target)
+                .orElse(null);
+    }
+
+    public FlowNode findMatchingCommandNode(List<FlowNode> nodes, String text) {
+        if (text == null || !text.trim().startsWith("/") || nodes == null) {
+            return null;
+        }
+        String cmdToken = text.trim().split("\\s+")[0].split("@")[0].replaceAll("^/+", "").trim();
+        if (cmdToken.isEmpty()) {
+            return null;
+        }
+        return nodes.stream()
+                .filter(n -> n.type() == NodeType.COMMAND && n.data() != null)
+                .filter(n -> {
+                    Object cmdObj = n.data().get("command");
+                    if (cmdObj == null) return false;
+                    String configuredCmd = cmdObj.toString().trim().split("\\s+")[0].split("@")[0].replaceAll("^/+", "").trim();
+                    return cmdToken.equalsIgnoreCase(configuredCmd);
+                })
+                .findFirst()
                 .orElse(null);
     }
 

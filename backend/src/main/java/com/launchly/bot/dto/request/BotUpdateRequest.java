@@ -1,5 +1,6 @@
 package com.launchly.bot.dto.request;
 
+import com.launchly.bot.entity.BotResponseMode;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Request payload to update Telegram bot settings")
@@ -20,6 +21,9 @@ public record BotUpdateRequest(
         String telegramToken,
 
         @Schema(description = "Bot ID to copy token from", example = "3")
-        Long copyTokenFromBotId
+        Long copyTokenFromBotId,
+
+        @Schema(description = "Chat response mode: ALL, PRIVATE_ONLY, GROUPS_ONLY", example = "ALL")
+        BotResponseMode responseMode
 ) {}
 

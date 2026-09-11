@@ -129,6 +129,15 @@ public class ConditionNodeExecutor implements NodeExecutor {
         if (varName.equalsIgnoreCase("Contact Id") || varName.equalsIgnoreCase("contact_id")) {
             return botUser.getId() != null ? String.valueOf(botUser.getId()) : "";
         }
+        if (varName.equalsIgnoreCase("chat_type") || varName.equalsIgnoreCase("Chat Type")) {
+            return sessionData.getOrDefault("chat_type", "private");
+        }
+        if (varName.equalsIgnoreCase("chat_id") || varName.equalsIgnoreCase("Chat Id") || varName.equalsIgnoreCase("Chat ID")) {
+            return sessionData.getOrDefault("chat_id", botUser.getTelegramId() != null ? String.valueOf(botUser.getTelegramId()) : "");
+        }
+        if (varName.equalsIgnoreCase("chat_title") || varName.equalsIgnoreCase("Chat Title")) {
+            return sessionData.getOrDefault("chat_title", "");
+        }
         return sessionData.getOrDefault(varName, "");
     }
 

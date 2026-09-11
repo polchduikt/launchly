@@ -32,11 +32,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import tools.jackson.databind.ObjectMapper;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -207,7 +205,7 @@ class BotServiceImplTest {
     @Test
     @DisplayName("Should successfully update bot details")
     void updateBot_Success() {
-        BotUpdateRequest request = new BotUpdateRequest("Renamed Bot", "Updated description", null, null, null, null);
+        BotUpdateRequest request = new BotUpdateRequest("Renamed Bot", "Updated description", null, null, null, null, null);
         when(botRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(testBot));
         when(botRepository.save(any(Bot.class))).thenReturn(testBot);
         when(botResponseFactory.toBotResponseWithStats(any(Bot.class))).thenReturn(mockBotResponse);
@@ -221,7 +219,7 @@ class BotServiceImplTest {
     @Test
     @DisplayName("Should throw Forbidden when updating bot without write permissions")
     void updateBot_WhenAccessDenied_ThrowsForbidden() {
-        BotUpdateRequest request = new BotUpdateRequest("Renamed Bot", "Updated description", null, null, null, null);
+        BotUpdateRequest request = new BotUpdateRequest("Renamed Bot", "Updated description", null, null, null, null, null);
         when(botRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(testBot));
         doThrow(new AppException(HttpStatus.FORBIDDEN, "common.error.access_denied"))
                 .when(botAccessValidator).validateWriteAccess(testBot, 1L);

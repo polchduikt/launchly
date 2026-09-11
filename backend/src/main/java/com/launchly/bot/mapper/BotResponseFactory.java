@@ -14,6 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -71,19 +75,20 @@ public class BotResponseFactory {
                 role,
                 bot.isTemplate(),
                 bot.getTemplateName(),
-                bot.getRunsCount()
+                bot.getRunsCount(),
+                bot.getResponseMode()
         );
     }
 
-    public java.util.List<BotResponse> toBotResponseListWithStats(java.util.List<Bot> bots, Long currentUserId, java.util.List<BotMember> memberships) {
+    public List<BotResponse> toBotResponseListWithStats(List<Bot> bots, Long currentUserId, List<BotMember> memberships) {
         if (bots == null || bots.isEmpty()) {
-            return java.util.List.of();
+            return List.of();
         }
 
-        java.util.List<Long> botIds = bots.stream().map(Bot::getId).toList();
-        java.util.Map<Long, Long> countsByBotId = new java.util.HashMap<>();
+        List<Long> botIds = bots.stream().map(Bot::getId).toList();
+        Map<Long, Long> countsByBotId = new HashMap<>();
         try {
-            java.util.List<Object[]> groupedCounts = botUserRepository.countGroupedByBotIdIn(botIds);
+            List<Object[]> groupedCounts = botUserRepository.countGroupedByBotIdIn(botIds);
             for (Object[] row : groupedCounts) {
                 Long bId = (Long) row[0];
                 Long count = ((Number) row[1]).longValue();
@@ -93,8 +98,8 @@ public class BotResponseFactory {
             log.error("Failed to load grouped bot user counts: {}", e.getMessage());
         }
 
-        java.util.Map<Long, String> rolesByBotId = new java.util.HashMap<>();
-        java.util.Map<Long, String> rolesByOwnerId = new java.util.HashMap<>();
+        Map<Long, String> rolesByBotId = new HashMap<>();
+        Map<Long, String> rolesByOwnerId = new HashMap<>();
         if (memberships != null) {
             for (BotMember bm : memberships) {
                 if (bm.getBot() != null && bm.getRole() != null) {
@@ -106,7 +111,7 @@ public class BotResponseFactory {
             }
         }
 
-        java.util.List<BotResponse> result = new java.util.ArrayList<>(bots.size());
+        List<BotResponse> result = new ArrayList<>(bots.size());
         for (Bot bot : bots) {
             BotResponse response = botMapper.toBotResponse(bot);
             boolean hasToken = false;
@@ -142,7 +147,8 @@ public class BotResponseFactory {
                     role,
                     bot.isTemplate(),
                     bot.getTemplateName(),
-                    bot.getRunsCount()
+                    bot.getRunsCount(),
+                    bot.getResponseMode()
             ));
         }
 

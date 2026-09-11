@@ -1,7 +1,9 @@
 package com.launchly.bot.engine.persister;
 
+import com.launchly.bot.engine.executor.block.MessageBlockHelper;
 import com.launchly.bot.engine.model.FlowNode;
 import com.launchly.bot.entity.BotUser;
+import com.launchly.bot.service.BotDialogStateService;
 import com.launchly.crm.service.CrmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +18,18 @@ import java.util.Map;
 public class BotMessagePersister {
 
     private final CrmService crmService;
+    private final MessageBlockHelper messageBlockHelper;
+    private final BotDialogStateService stateService;
 
     @SuppressWarnings("unchecked")
     public void saveBotNodeMessage(Long botId, BotUser botUser, FlowNode node) {
         try {
             Map<String, Object> data = node.data();
             if (data == null) return;
+
+            Map<String, String> sessionData = (botId != null && botUser != null && botUser.getTelegramId() != null)
+                    ? stateService.getSessionData(botId, botUser.getTelegramId())
+                    : Map.of();
 
             Object blocksObj = data.get("blocks");
             if (blocksObj instanceof List<?> blocks && !blocks.isEmpty()) {
@@ -32,7 +40,8 @@ public class BotMessagePersister {
                             StringBuilder text = new StringBuilder();
                             Object t = block.get("text");
                             if (t instanceof String s && !s.isBlank()) {
-                                text.append(s);
+                                String resolved = messageBlockHelper.resolvePlaceholders(s, sessionData, botUser);
+                                text.append(resolved);
                             }
                             Object btns = block.get("buttons");
                             if (btns instanceof List<?> btnList) {
@@ -54,11 +63,11 @@ public class BotMessagePersister {
                                 StringBuilder caption = new StringBuilder();
                                 Object t = block.get("text");
                                 if (t instanceof String s && !s.isBlank()) {
-                                    caption.append(s);
+                                    caption.append(messageBlockHelper.resolvePlaceholders(s, sessionData, botUser));
                                 } else {
                                     Object cap = block.get("caption");
                                     if (cap instanceof String c && !c.isBlank()) {
-                                        caption.append(c);
+                                        caption.append(messageBlockHelper.resolvePlaceholders(c, sessionData, botUser));
                                     }
                                 }
                                 crmService.saveBotMessage(botId, botUser.getId(), caption.length() > 0 ? caption.toString() : "[Image]", imageUrl, "IMAGE");
@@ -69,11 +78,11 @@ public class BotMessagePersister {
                                 StringBuilder caption = new StringBuilder();
                                 Object t = block.get("text");
                                 if (t instanceof String s && !s.isBlank()) {
-                                    caption.append(s);
+                                    caption.append(messageBlockHelper.resolvePlaceholders(s, sessionData, botUser));
                                 } else {
                                     Object cap = block.get("caption");
                                     if (cap instanceof String c && !c.isBlank()) {
-                                        caption.append(c);
+                                        caption.append(messageBlockHelper.resolvePlaceholders(c, sessionData, botUser));
                                     }
                                 }
                                 crmService.saveBotMessage(botId, botUser.getId(), caption.length() > 0 ? caption.toString() : "[Video]", videoUrl, "VIDEO");
@@ -84,11 +93,11 @@ public class BotMessagePersister {
                                 StringBuilder caption = new StringBuilder();
                                 Object t = block.get("text");
                                 if (t instanceof String s && !s.isBlank()) {
-                                    caption.append(s);
+                                    caption.append(messageBlockHelper.resolvePlaceholders(s, sessionData, botUser));
                                 } else {
                                     Object cap = block.get("caption");
                                     if (cap instanceof String c && !c.isBlank()) {
-                                        caption.append(c);
+                                        caption.append(messageBlockHelper.resolvePlaceholders(c, sessionData, botUser));
                                     }
                                 }
                                 crmService.saveBotMessage(botId, botUser.getId(), caption.length() > 0 ? caption.toString() : "[Audio]", audioUrl, "AUDIO");
@@ -104,7 +113,7 @@ public class BotMessagePersister {
                                 Object t = block.get("text");
                                 if (t instanceof String s && !s.isBlank()) {
                                     if (caption.length() > 0) caption.append(": ");
-                                    caption.append(s);
+                                    caption.append(messageBlockHelper.resolvePlaceholders(s, sessionData, botUser));
                                 }
                                 crmService.saveBotMessage(botId, botUser.getId(), caption.length() > 0 ? caption.toString() : "[File]", fileUrl, "FILE");
                             }
@@ -118,7 +127,8 @@ public class BotMessagePersister {
 
                 StringBuilder content = new StringBuilder();
                 if (text != null && !text.isBlank()) {
-                    content.append(text);
+                    String resolved = messageBlockHelper.resolvePlaceholders(text, sessionData, botUser);
+                    content.append(resolved);
                 }
                 if (buttonsList != null) {
                     for (Object btn : buttonsList) {

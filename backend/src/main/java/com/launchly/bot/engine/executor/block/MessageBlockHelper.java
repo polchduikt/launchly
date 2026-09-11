@@ -8,7 +8,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
 import tools.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -25,7 +24,6 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class MessageBlockHelper {
 
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{\\{([^}]+)\\}\\}");
     private static final Pattern MARKDOWN_LINK_PATTERN = Pattern.compile("\\[([^\\]]+)\\]\\(([^\\s)]+)\\)");
 
     private final ObjectMapper objectMapper;
@@ -92,6 +90,8 @@ public class MessageBlockHelper {
         return connection.getInputStream();
     }
 
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{+([^{}]+)\\}+");
+
     public String resolvePlaceholders(String text, Map<String, String> variables, BotUser botUser) {
         if (text == null) return "";
         String result = text;
@@ -100,61 +100,126 @@ public class MessageBlockHelper {
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             String rawName = matcher.group(1).trim();
+            String cleanName = rawName.replaceAll("^\\{+|\\}+$", "").trim();
+            String strippedName = cleanName.replaceFirst("^(?i)(custom_fields|customFields|fields|custom_field|field)\\.", "").trim();
             String replacement = "";
-            if (rawName.equalsIgnoreCase("first_name") || rawName.equalsIgnoreCase("First Name")) {
-                replacement = botUser.getFirstName() != null ? botUser.getFirstName() : "";
-            } else if (rawName.equalsIgnoreCase("last_name") || rawName.equalsIgnoreCase("Last Name")) {
-                replacement = botUser.getLastName() != null ? botUser.getLastName() : "";
-            } else if (rawName.equalsIgnoreCase("username") || rawName.equalsIgnoreCase("telegram_username") || rawName.equalsIgnoreCase("Telegram Username")) {
-                String username = botUser.getUsername();
+            boolean found = false;
+
+            if (cleanName.equalsIgnoreCase("chat_type") || cleanName.equalsIgnoreCase("Chat Type")) {
+                replacement = variables != null ? variables.getOrDefault("chat_type", "private") : "private";
+                found = true;
+            } else if (cleanName.equalsIgnoreCase("chat_id") || cleanName.equalsIgnoreCase("Chat Id") || cleanName.equalsIgnoreCase("Chat ID")) {
+                replacement = variables != null && variables.get("chat_id") != null
+                        ? variables.get("chat_id")
+                        : (botUser != null && botUser.getTelegramId() != null ? String.valueOf(botUser.getTelegramId()) : "");
+                found = true;
+            } else if (cleanName.equalsIgnoreCase("chat_title") || cleanName.equalsIgnoreCase("Chat Title")) {
+                replacement = variables != null ? variables.getOrDefault("chat_title", "") : "";
+                found = true;
+            } else if (cleanName.equalsIgnoreCase("first_name") || cleanName.equalsIgnoreCase("First Name")) {
+                replacement = (botUser != null && botUser.getFirstName() != null) ? botUser.getFirstName() : "";
+                found = true;
+            } else if (cleanName.equalsIgnoreCase("last_name") || cleanName.equalsIgnoreCase("Last Name")) {
+                replacement = (botUser != null && botUser.getLastName() != null) ? botUser.getLastName() : "";
+                found = true;
+            } else if (cleanName.equalsIgnoreCase("username") || cleanName.equalsIgnoreCase("telegram_username") || cleanName.equalsIgnoreCase("Telegram Username")) {
+                String username = botUser != null ? botUser.getUsername() : null;
                 if (username != null && !username.trim().isEmpty()) {
                     replacement = username.startsWith("@") ? username : "@" + username;
                 } else {
                     replacement = "";
                 }
-            } else if (rawName.equalsIgnoreCase("telegram_user_id") || rawName.equalsIgnoreCase("Telegram User ID")) {
-                replacement = botUser.getTelegramId() != null ? String.valueOf(botUser.getTelegramId()) : "";
-            } else if (rawName.equalsIgnoreCase("contact_id") || rawName.equalsIgnoreCase("Contact Id")) {
-                replacement = botUser.getId() != null ? String.valueOf(botUser.getId()) : "";
-            } else if (rawName.equalsIgnoreCase("phone") || rawName.equalsIgnoreCase("Phone")) {
-                replacement = variables.getOrDefault("phone", "");
-            } else if (rawName.equalsIgnoreCase("email") || rawName.equalsIgnoreCase("Email")) {
-                replacement = variables.getOrDefault("email", "");
-            } else if (rawName.equalsIgnoreCase("subscribed") || rawName.equalsIgnoreCase("Subscribed")) {
-                replacement = variables.getOrDefault("telegram_opt_in", "false");
-            } else if (rawName.equalsIgnoreCase("last_reply_type") || rawName.equalsIgnoreCase("Last Reply Type")) {
-                replacement = variables.getOrDefault("last_reply_type", "text");
-            } else {
-                boolean found = false;
+                found = true;
+            } else if (cleanName.equalsIgnoreCase("telegram_user_id") || cleanName.equalsIgnoreCase("Telegram User ID")) {
+                replacement = (botUser != null && botUser.getTelegramId() != null) ? String.valueOf(botUser.getTelegramId()) : "";
+                found = true;
+            } else if (cleanName.equalsIgnoreCase("contact_id") || cleanName.equalsIgnoreCase("Contact Id")) {
+                replacement = (botUser != null && botUser.getId() != null) ? String.valueOf(botUser.getId()) : "";
+                found = true;
+            } else if (cleanName.equalsIgnoreCase("phone") || cleanName.equalsIgnoreCase("Phone")) {
+                replacement = variables != null ? variables.getOrDefault("phone", "") : "";
+                found = true;
+            } else if (cleanName.equalsIgnoreCase("email") || cleanName.equalsIgnoreCase("Email")) {
+                replacement = variables != null ? variables.getOrDefault("email", "") : "";
+                found = true;
+            } else if (cleanName.equalsIgnoreCase("subscribed") || cleanName.equalsIgnoreCase("Subscribed")) {
+                replacement = variables != null ? variables.getOrDefault("telegram_opt_in", "false") : "false";
+                found = true;
+            } else if (cleanName.equalsIgnoreCase("last_reply_type") || cleanName.equalsIgnoreCase("Last Reply Type")) {
+                replacement = variables != null ? variables.getOrDefault("last_reply_type", "text") : "text";
+                found = true;
+            }
+
+            if (!found && variables != null) {
                 for (Map.Entry<String, String> entry : variables.entrySet()) {
-                    if (entry.getKey().equalsIgnoreCase(rawName)) {
+                    if (entry.getKey().equalsIgnoreCase(cleanName) || entry.getKey().equalsIgnoreCase(strippedName)) {
                         replacement = entry.getValue() != null ? entry.getValue() : "";
                         found = true;
                         break;
                     }
                 }
-                if (!found) {
-                    try {
-                        if (botUser.getMetadata() != null && !botUser.getMetadata().trim().isEmpty()) {
-                            Map<String, Object> metaMap = this.objectMapper.readValue(botUser.getMetadata(), Map.class);
-                            Map<String, Object> customFields = (Map<String, Object>) metaMap.get("customFields");
-                            if (customFields != null) {
-                                for (Map.Entry<String, Object> entry : customFields.entrySet()) {
-                                    if (entry.getKey().equalsIgnoreCase(rawName)) {
+            }
+
+            if (!found && botUser != null && botUser.getMetadata() != null && !botUser.getMetadata().trim().isEmpty()) {
+                try {
+                    Map<String, Object> metaMap = this.objectMapper.readValue(botUser.getMetadata(), Map.class);
+                    Map<String, Object> customFields = (Map<String, Object>) metaMap.get("customFields");
+                    if (customFields != null) {
+                        for (Map.Entry<String, Object> entry : customFields.entrySet()) {
+                            if (entry.getKey().equalsIgnoreCase(cleanName) || entry.getKey().equalsIgnoreCase(strippedName)) {
+                                replacement = entry.getValue() != null ? String.valueOf(entry.getValue()) : "";
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!found) {
+                        Map<String, Object> chatCustomFields = (Map<String, Object>) metaMap.get("chatCustomFields");
+                        if (chatCustomFields != null) {
+                            String targetScope = variables != null ? variables.get("chat_id") : null;
+                            if (targetScope != null && chatCustomFields.get(targetScope) instanceof Map<?, ?> scopeMap) {
+                                for (Map.Entry<?, ?> entry : scopeMap.entrySet()) {
+                                    if (String.valueOf(entry.getKey()).equalsIgnoreCase(cleanName) || String.valueOf(entry.getKey()).equalsIgnoreCase(strippedName)) {
                                         replacement = entry.getValue() != null ? String.valueOf(entry.getValue()) : "";
                                         found = true;
                                         break;
                                     }
                                 }
                             }
+                            if (!found) {
+                                for (Object groupVal : chatCustomFields.values()) {
+                                    if (groupVal instanceof Map<?, ?> scopeMap) {
+                                        for (Map.Entry<?, ?> entry : scopeMap.entrySet()) {
+                                            if (String.valueOf(entry.getKey()).equalsIgnoreCase(cleanName) || String.valueOf(entry.getKey()).equalsIgnoreCase(strippedName)) {
+                                                replacement = entry.getValue() != null ? String.valueOf(entry.getValue()) : "";
+                                                found = true;
+                                                break;
+                                            }
+                                        }
+                                        if (found) break;
+                                    }
+                                }
+                            }
                         }
-                    } catch (Exception e) {
-                        log.warn("Failed to parse customFields from botUser metadata: {}", e.getMessage());
                     }
+
+                    if (!found) {
+                        for (Map.Entry<String, Object> entry : metaMap.entrySet()) {
+                            if (entry.getKey().equalsIgnoreCase(cleanName) || entry.getKey().equalsIgnoreCase(strippedName)) {
+                                replacement = entry.getValue() != null ? String.valueOf(entry.getValue()) : "";
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to parse metadata for placeholder {}: {}", cleanName, e.getMessage());
                 }
-                if (!found) {
-                    replacement = matcher.group(0);
-                }
+            }
+
+            if (!found) {
+                replacement = "";
             }
             matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
         }

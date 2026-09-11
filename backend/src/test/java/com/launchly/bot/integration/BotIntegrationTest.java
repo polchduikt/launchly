@@ -65,7 +65,7 @@ class BotIntegrationTest extends BaseIntegrationTest {
         User user = createTestUser("updbot", Role.ROLE_OWNER);
         Bot bot = createTestBot(user, "Original Bot");
 
-        BotUpdateRequest updateRequest = new BotUpdateRequest("Renamed Bot", "New Description", null, null, null, null);
+        BotUpdateRequest updateRequest = new BotUpdateRequest("Renamed Bot", "New Description", null, null, null, null, null);
 
         mockMvc.perform(put("/api/v1/bots/" + bot.getId())
                         .header("Authorization", getAuthHeader(user))
