@@ -45,7 +45,7 @@ public class ActionContactManager {
             cleanupCooldownsFromCustomFields(metaMap);
 
             botUser.setMetadata(objectMapper.writeValueAsString(metaMap));
-            botUserRepository.save(botUser);
+            botUserRepository.saveAndFlush(botUser);
         } catch (Exception e) {
             log.error("Failed to update contact cooldown: {}", e.getMessage(), e);
         }
@@ -78,7 +78,22 @@ public class ActionContactManager {
 
             cleanupCooldownsFromCustomFields(metaMap);
 
-            if (chatScope != null && !chatScope.isEmpty() && !"private".equalsIgnoreCase(chatScope)) {
+            if (fieldValue == null || fieldValue.trim().isEmpty()) {
+                Map<String, Object> customFields = (Map<String, Object>) metaMap.get("customFields");
+                if (customFields != null) {
+                    customFields.remove(fieldName);
+                    metaMap.put("customFields", customFields);
+                }
+                Map<String, Object> chatCustomFields = (Map<String, Object>) metaMap.get("chatCustomFields");
+                if (chatCustomFields != null) {
+                    for (Object groupObj : chatCustomFields.values()) {
+                        if (groupObj instanceof Map<?, ?> groupMap) {
+                            ((Map<String, Object>) groupMap).remove(fieldName);
+                        }
+                    }
+                    metaMap.put("chatCustomFields", chatCustomFields);
+                }
+            } else if (chatScope != null && !chatScope.isEmpty() && !"private".equalsIgnoreCase(chatScope)) {
                 Map<String, Object> chatCustomFields = (Map<String, Object>) metaMap.get("chatCustomFields");
                 if (chatCustomFields == null) {
                     chatCustomFields = new HashMap<>();
@@ -87,11 +102,7 @@ public class ActionContactManager {
                 if (groupFields == null) {
                     groupFields = new HashMap<>();
                 }
-                if (fieldValue == null) {
-                    groupFields.remove(fieldName);
-                } else {
-                    groupFields.put(fieldName, fieldValue);
-                }
+                groupFields.put(fieldName, fieldValue);
                 chatCustomFields.put(chatScope, groupFields);
                 metaMap.put("chatCustomFields", chatCustomFields);
             } else {
@@ -99,16 +110,12 @@ public class ActionContactManager {
                 if (customFields == null) {
                     customFields = new HashMap<>();
                 }
-                if (fieldValue == null) {
-                    customFields.remove(fieldName);
-                } else {
-                    customFields.put(fieldName, fieldValue);
-                }
+                customFields.put(fieldName, fieldValue);
                 metaMap.put("customFields", customFields);
             }
 
             botUser.setMetadata(objectMapper.writeValueAsString(metaMap));
-            botUserRepository.save(botUser);
+            botUserRepository.saveAndFlush(botUser);
         } catch (Exception e) {
             log.error("Failed to update contact custom field: {}", e.getMessage(), e);
         }
@@ -128,7 +135,7 @@ public class ActionContactManager {
             cleanupCooldownsFromCustomFields(metaMap);
             metaMap.put(key, value);
             botUser.setMetadata(objectMapper.writeValueAsString(metaMap));
-            botUserRepository.save(botUser);
+            botUserRepository.saveAndFlush(botUser);
         } catch (Exception e) {
             log.error("Failed to update contact metadata field: {}", e.getMessage(), e);
         }

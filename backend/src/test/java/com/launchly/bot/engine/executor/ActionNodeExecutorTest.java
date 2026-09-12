@@ -163,4 +163,32 @@ class ActionNodeExecutorTest {
         verify(stateService).setSessionData(1L, 100L, "subscription_status", "active");
         verify(stateService).setSessionData(1L, 100L, "temp_code", "");
     }
+
+    @Test
+    @DisplayName("Should clear field from both customFields and chatCustomFields")
+    void execute_ClearUserField_ClearsBothCustomFieldsAndChatCustomFields() {
+        Bot bot = Bot.builder().name("TestBot").build();
+        bot.setId(1L);
+        BotUser botUser = BotUser.builder()
+                .bot(bot)
+                .telegramId(100L)
+                .metadata("{\"customFields\":{\"iq\":\"10\",\"other\":\"val\"},\"chatCustomFields\":{\"-5534533581\":{\"iq\":\"25\",\"other\":\"gval\"}}}")
+                .build();
+
+        List<Map<String, Object>> actions = List.of(
+                Map.of("type", "CLEAR_USER_FIELD", "fieldName", "iq")
+        );
+
+        FlowNode node = new FlowNode("act-clear", NodeType.ACTION, Map.of("actions", actions), pos);
+        List<FlowEdge> edges = List.of(new FlowEdge("e-clear", "act-clear", "next-step", null));
+
+        String nextNode = executor.execute(node, edges, botUser, null, telegramClient);
+
+        assertThat(nextNode).isEqualTo("next-step");
+        verify(stateService).setSessionData(1L, 100L, "iq", "");
+        verify(botUserRepository).saveAndFlush(botUser);
+        assertThat(botUser.getMetadata()).doesNotContain("\"iq\"");
+        assertThat(botUser.getMetadata()).contains("\"other\":\"val\"");
+        assertThat(botUser.getMetadata()).contains("\"other\":\"gval\"");
+    }
 }

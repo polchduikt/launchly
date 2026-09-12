@@ -18,5 +18,7 @@ public interface BotMapper {
     BotResponse toBotResponse(Bot bot);
 
     @Mapping(target = "tags", ignore = true)
+    @Mapping(target = "botId", source = "bot.id")
+    @Mapping(target = "botName", source = "bot.name")
     BotUserResponse toBotUserResponse(BotUser botUser);
 }

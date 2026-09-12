@@ -14,6 +14,16 @@ public record FlowSchemaResponse(
         Object nodes,
 
         @Schema(description = "JSON array of visual connection edges")
-        Object edges
-) {}
+        Object edges,
+
+        @Schema(description = "JSON array of published visual nodes")
+        Object publishedNodes,
+
+        @Schema(description = "JSON array of published visual connection edges")
+        Object publishedEdges
+) {
+    public FlowSchemaResponse(Long id, int version, Object nodes, Object edges) {
+        this(id, version, nodes, edges, nodes, edges);
+    }
+}
 

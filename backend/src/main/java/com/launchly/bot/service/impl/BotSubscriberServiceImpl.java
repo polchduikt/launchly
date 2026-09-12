@@ -68,7 +68,9 @@ public class BotSubscriberServiceImpl implements BotSubscriberService {
                         bu.getPhotoUrl(),
                         bu.getMetadata(),
                         tagsByBotUserId.getOrDefault(bu.getId(), List.of()),
-                        bu.getCreatedAt()
+                        bu.getCreatedAt(),
+                        bu.getBot() != null ? bu.getBot().getId() : bot.getId(),
+                        bu.getBot() != null ? bu.getBot().getName() : bot.getName()
                 ))
                 .toList();
     }
@@ -131,7 +133,9 @@ public class BotSubscriberServiceImpl implements BotSubscriberService {
                 botUser.getPhotoUrl(),
                 botUser.getMetadata(),
                 tags,
-                botUser.getCreatedAt()
+                botUser.getCreatedAt(),
+                bot.getId(),
+                bot.getName()
         );
     }
 
@@ -214,7 +218,9 @@ public class BotSubscriberServiceImpl implements BotSubscriberService {
                 botUser.getPhotoUrl(),
                 botUser.getMetadata(),
                 tags,
-                botUser.getCreatedAt()
+                botUser.getCreatedAt(),
+                bot.getId(),
+                bot.getName()
         );
     }
 

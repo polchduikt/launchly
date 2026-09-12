@@ -95,7 +95,6 @@ public class MessageNodeExecutor implements NodeExecutor {
         if (data != null && data.get("blocks") instanceof List) {
             blocks = (List<Map<String, Object>>) data.get("blocks");
         }
-        String chatId = resolveChatId(update, botUser);
 
         if (update != null && update.hasCallbackQuery()) {
             String callbackData = update.getCallbackQuery().getData();
@@ -163,102 +162,109 @@ public class MessageNodeExecutor implements NodeExecutor {
             }
         }
 
-        if (blocks != null && !blocks.isEmpty()) {
-            Long botId = botUser.getBot() != null ? botUser.getBot().getId() : null;
-            Map<String, String> sessionData = botId != null ? stateService.getSessionData(botId, botUser.getTelegramId()) : Map.of();
-            int blockIdx = 0;
+        List<String> targetChatIds = resolveTargetChatIds(update, botUser, node);
+        if (targetChatIds.isEmpty()) {
+            return null;
+        }
 
-            for (Map<String, Object> block : blocks) {
-                String type = (String) block.get("type");
-                if (type == null) {
+        for (String chatId : targetChatIds) {
+            if (blocks != null && !blocks.isEmpty()) {
+                Long botId = botUser.getBot() != null ? botUser.getBot().getId() : null;
+                Map<String, String> sessionData = botId != null ? stateService.getSessionData(botId, botUser.getTelegramId()) : Map.of();
+                int blockIdx = 0;
+
+                for (Map<String, Object> block : blocks) {
+                    String type = (String) block.get("type");
+                    if (type == null) {
+                        blockIdx++;
+                        continue;
+                    }
+
+                    List<?> blockButtons = (List<?>) block.get("buttons");
+                    if (blockIdx == lastSendableIdx && menuButtons != null && !menuButtons.isEmpty()) {
+                        blockButtons = menuButtons;
+                    }
+                    InlineKeyboardMarkup markup = helper.buildMarkup(blockButtons);
+
+                    MessageBlockHandler handler = handlerMap.get(type);
+                    if (handler != null) {
+                        MessageBlockContext context = new MessageBlockContext(
+                                block, node, botUser, chatId, sessionData, markup, client, blockIdx, lastSendableIdx
+                        );
+                        MessageBlockResult result = handler.handle(context);
+                        if (result.haltFlow()) {
+                            return null;
+                        }
+                        if (result.hasButtons()) {
+                            hasButtons = true;
+                        }
+                    } else if (!"telegram_menu".equals(type)) {
+                        log.warn("Unknown message block type '{}' in node {}", type, node.id());
+                    }
+
                     blockIdx++;
-                    continue;
                 }
 
-                List<?> blockButtons = (List<?>) block.get("buttons");
-                if (blockIdx == lastSendableIdx && menuButtons != null && !menuButtons.isEmpty()) {
-                    blockButtons = menuButtons;
-                }
-                InlineKeyboardMarkup markup = helper.buildMarkup(blockButtons);
-
-                MessageBlockHandler handler = handlerMap.get(type);
-                if (handler != null) {
-                    MessageBlockContext context = new MessageBlockContext(
-                            block, node, botUser, chatId, sessionData, markup, client, blockIdx, lastSendableIdx
-                    );
-                    MessageBlockResult result = handler.handle(context);
-                    if (result.haltFlow()) {
-                        return null;
+                if (lastSendableIdx == -1 && menuButtons != null && !menuButtons.isEmpty()) {
+                    String sanitized = SanitizationUtil.sanitizeForTelegram("...");
+                    InlineKeyboardMarkup markup = helper.buildMarkup(menuButtons);
+                    if (markup != null) hasButtons = true;
+                    try {
+                        SendMessage message = SendMessage.builder()
+                                .chatId(chatId)
+                                .text(sanitized)
+                                .replyMarkup(markup)
+                                .build();
+                        client.execute(message);
+                    } catch (TelegramApiException e) {
+                        log.error("Failed to send fallback block for telegram_menu: {}", e.getMessage());
                     }
-                    if (result.hasButtons()) {
-                        hasButtons = true;
-                    }
-                } else if (!"telegram_menu".equals(type)) {
-                    log.warn("Unknown message block type '{}' in node {}", type, node.id());
-                }
-
-                blockIdx++;
-            }
-
-            if (lastSendableIdx == -1 && menuButtons != null && !menuButtons.isEmpty()) {
-                String sanitized = SanitizationUtil.sanitizeForTelegram("...");
-                InlineKeyboardMarkup markup = helper.buildMarkup(menuButtons);
-                if (markup != null) hasButtons = true;
-                try {
-                    SendMessage message = SendMessage.builder()
-                            .chatId(chatId)
-                            .text(sanitized)
-                            .replyMarkup(markup)
-                            .build();
-                    client.execute(message);
-                } catch (TelegramApiException e) {
-                    log.error("Failed to send fallback block for telegram_menu: {}", e.getMessage());
-                }
-            }
-        } else {
-            String text = data != null ? (String) data.get("text") : null;
-            String imageUrl = data != null ? (String) data.get("imageUrl") : null;
-            List<?> buttonsList = data != null ? (List<?>) data.get("buttons") : null;
-
-            boolean hasText = text != null && !text.trim().isEmpty();
-            boolean hasImage = imageUrl != null && !imageUrl.trim().isEmpty();
-            InlineKeyboardMarkup markup = helper.buildMarkup(buttonsList);
-            if (markup != null) hasButtons = true;
-
-            Long botId = botUser.getBot() != null ? botUser.getBot().getId() : null;
-            Map<String, String> sessionData = botId != null ? stateService.getSessionData(botId, botUser.getTelegramId()) : Map.of();
-
-            if (hasImage) {
-                String resolvedText = hasText ? helper.resolvePlaceholders(text, sessionData, botUser) : "";
-                String sanitizedText = !resolvedText.isEmpty() ? SanitizationUtil.sanitizeForTelegram(resolvedText) : "";
-                try {
-                    SendPhoto sendPhoto = SendPhoto.builder()
-                            .chatId(chatId)
-                            .photo(new InputFile(imageUrl))
-                            .caption(sanitizedText)
-                            .replyMarkup(markup)
-                            .build();
-                    client.execute(sendPhoto);
-                } catch (TelegramApiException e) {
-                    log.error("Failed to send photo for node {}: {}", node.id(), e.getMessage());
-                }
-            } else if (hasText || markup != null) {
-                String resolvedText = hasText ? helper.resolvePlaceholders(text, sessionData, botUser) : "...";
-                String escapedText = helper.escapeHtml(resolvedText);
-                String htmlText = helper.convertMarkdownLinksToHtml(escapedText);
-                try {
-                    SendMessage message = SendMessage.builder()
-                            .chatId(chatId)
-                            .text(htmlText)
-                            .parseMode("HTML")
-                            .replyMarkup(markup)
-                            .build();
-                    client.execute(message);
-                } catch (TelegramApiException e) {
-                    log.error("Failed to send legacy flat message for node {}: {}", node.id(), e.getMessage());
                 }
             } else {
-                log.debug("Message node {} is empty (no text/image/buttons), skipping sending.", node.id());
+                String text = data != null ? (String) data.get("text") : null;
+                String imageUrl = data != null ? (String) data.get("imageUrl") : null;
+                List<?> buttonsList = data != null ? (List<?>) data.get("buttons") : null;
+
+                boolean hasText = text != null && !text.trim().isEmpty();
+                boolean hasImage = imageUrl != null && !imageUrl.trim().isEmpty();
+                InlineKeyboardMarkup markup = helper.buildMarkup(buttonsList);
+                if (markup != null) hasButtons = true;
+
+                Long botId = botUser.getBot() != null ? botUser.getBot().getId() : null;
+                Map<String, String> sessionData = botId != null ? stateService.getSessionData(botId, botUser.getTelegramId()) : Map.of();
+
+                if (hasImage) {
+                    String resolvedText = hasText ? helper.resolvePlaceholders(text, sessionData, botUser) : "";
+                    String sanitizedText = !resolvedText.isEmpty() ? SanitizationUtil.sanitizeForTelegram(resolvedText) : "";
+                    try {
+                        SendPhoto sendPhoto = SendPhoto.builder()
+                                .chatId(chatId)
+                                .photo(new InputFile(imageUrl))
+                                .caption(sanitizedText)
+                                .replyMarkup(markup)
+                                .build();
+                        client.execute(sendPhoto);
+                    } catch (TelegramApiException e) {
+                        log.error("Failed to send photo for node {}: {}", node.id(), e.getMessage());
+                    }
+                } else if (hasText || markup != null) {
+                    String resolvedText = hasText ? helper.resolvePlaceholders(text, sessionData, botUser) : "...";
+                    String escapedText = helper.escapeHtml(resolvedText);
+                    String htmlText = helper.convertMarkdownLinksToHtml(escapedText);
+                    try {
+                        SendMessage message = SendMessage.builder()
+                                .chatId(chatId)
+                                .text(htmlText)
+                                .parseMode("HTML")
+                                .replyMarkup(markup)
+                                .build();
+                        client.execute(message);
+                    } catch (TelegramApiException e) {
+                        log.error("Failed to send legacy flat message for node {}: {}", node.id(), e.getMessage());
+                    }
+                } else {
+                    log.debug("Message node {} is empty (no text/image/buttons), skipping sending.", node.id());
+                }
             }
         }
 
@@ -292,5 +298,42 @@ public class MessageNodeExecutor implements NodeExecutor {
             }
         }
         return botUser != null && botUser.getTelegramId() != null ? botUser.getTelegramId().toString() : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> resolveTargetChatIds(Update update, BotUser botUser, FlowNode node) {
+        if (update != null) {
+            String singleId = resolveChatId(update, botUser);
+            return singleId != null ? List.of(singleId) : List.of();
+        }
+
+        List<String> chatIds = new ArrayList<>();
+        if (botUser != null && botUser.getTelegramId() != null) {
+            chatIds.add(botUser.getTelegramId().toString());
+        }
+
+        if (botUser != null && botUser.getMetadata() != null && !botUser.getMetadata().isBlank()) {
+            try {
+                Map<String, Object> meta = objectMapper.readValue(botUser.getMetadata(), Map.class);
+                Object ccf = meta.get("chatCustomFields");
+                if (ccf instanceof Map<?, ?> ccfMap) {
+                    for (Object k : ccfMap.keySet()) {
+                        if (k != null) {
+                            String groupId = k.toString().trim();
+                            if (groupId.startsWith("-")) {
+                                Long botId = botUser.getBot() != null ? botUser.getBot().getId() : 0L;
+                                String groupLockKey = "flow:scheduler:group_msg:" + botId + ":" + node.id() + ":" + groupId;
+                                Boolean canSend = redisTemplate.opsForValue().setIfAbsent(groupLockKey, "1", java.time.Duration.ofSeconds(60));
+                                if (Boolean.TRUE.equals(canSend)) {
+                                    chatIds.add(groupId);
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
+        return chatIds;
     }
 }

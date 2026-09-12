@@ -34,6 +34,12 @@ public record BotUserResponse(
         List<String> tags,
 
         @Schema(description = "Subscribed timestamp")
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+
+        @Schema(description = "Bot / Automation ID", example = "1")
+        Long botId,
+
+        @Schema(description = "Bot / Automation Name", example = "Sales Bot")
+        String botName
 ) {}
 

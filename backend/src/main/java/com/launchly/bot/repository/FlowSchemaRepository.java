@@ -16,7 +16,11 @@ public interface FlowSchemaRepository extends JpaRepository<FlowSchema, Long>, J
 
     @Override
     @EntityGraph(attributePaths = {"bot"})
-    Optional<FlowSchema> findById(Long id);
+    List<FlowSchema> findAll();
+
+    @EntityGraph(attributePaths = {"bot"})
+    @Query("SELECT fs FROM FlowSchema fs WHERE fs.bot.active = true")
+    List<FlowSchema> findAllByBotActiveTrue();
 
     @Query("SELECT COUNT(fs) FROM FlowSchema fs WHERE fs.bot.user.id = :userId")
     long countByUserId(@Param("userId") Long userId);

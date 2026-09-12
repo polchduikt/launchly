@@ -20,6 +20,7 @@ public enum NodeType {
     COMMAND,
     MATH,
     LEADERBOARD,
-    COOLDOWN
+    COOLDOWN,
+    SCHEDULER
 }
 

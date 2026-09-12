@@ -69,8 +69,14 @@ public class FlowDelayScheduler {
             return;
         }
 
-        List<FlowNode> nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-        List<FlowEdge> edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+        String pubNodes = schema.getEffectivePublishedNodes();
+        String pubEdges = schema.getEffectivePublishedEdges();
+        if (pubNodes == null || pubNodes.isBlank()) {
+            return;
+        }
+
+        List<FlowNode> nodes = objectMapper.readValue(pubNodes, new TypeReference<>() {});
+        List<FlowEdge> edges = objectMapper.readValue(pubEdges, new TypeReference<>() {});
 
         FlowNode currentNode = nodes.stream()
                 .filter(n -> n.id().equals(currentNodeId))

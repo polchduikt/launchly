@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
-
 import java.time.Duration;
 import java.util.Optional;
 
@@ -49,14 +48,24 @@ public class FlowSchemaCache {
         }
 
         FlowSchema schema = schemaOpt.get();
+        String pubNodes = schema.getEffectivePublishedNodes();
+        String pubEdges = schema.getEffectivePublishedEdges();
         try {
-            CachedSchema cachedSchema = new CachedSchema(schema.getId(), schema.getVersion(), schema.getNodes(), schema.getEdges());
+            CachedSchema cachedSchema = new CachedSchema(schema.getId(), schema.getVersion(), pubNodes, pubEdges);
             redisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(cachedSchema), SCHEMA_TTL);
         } catch (Exception e) {
             log.error("Failed to serialize schema for bot {}: {}", botId, e.getMessage(), e);
         }
 
-        return schema;
+        FlowSchema effectiveSchema = new FlowSchema();
+        effectiveSchema.setId(schema.getId());
+        effectiveSchema.setVersion(schema.getVersion());
+        effectiveSchema.setNodes(pubNodes);
+        effectiveSchema.setEdges(pubEdges);
+        effectiveSchema.setPublishedNodes(pubNodes);
+        effectiveSchema.setPublishedEdges(pubEdges);
+        effectiveSchema.setBot(schema.getBot());
+        return effectiveSchema;
     }
 
     public void evictSchema(Long botId) {

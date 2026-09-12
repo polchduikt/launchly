@@ -18,6 +18,9 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.launchly.bot.entity.FlowSchema;
+import com.launchly.bot.repository.FlowSchemaRepository;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,6 +34,8 @@ public class BotLifecycleServiceImpl implements BotLifecycleService {
     private final BotAccessValidator botAccessValidator;
     private final EncryptionUtil encryptionUtil;
     private final BotResponseFactory botResponseFactory;
+    private final FlowSchemaRepository flowSchemaRepository;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     @CacheEvict(value = CacheConstants.BOTS, key = "#userId")
@@ -67,6 +72,16 @@ public class BotLifecycleServiceImpl implements BotLifecycleService {
             bot.setActive(true);
             bot.setRunsCount(bot.getRunsCount() + 1);
             bot = botRepository.save(bot);
+
+            FlowSchema schema = flowSchemaRepository.findByBotId(bot.getId()).orElse(null);
+            if (schema != null) {
+                if (schema.getPublishedNodes() == null || schema.getPublishedNodes().isBlank() || "[]".equals(schema.getPublishedNodes().trim())) {
+                    schema.setPublishedNodes(schema.getNodes());
+                    schema.setPublishedEdges(schema.getEdges());
+                    flowSchemaRepository.save(schema);
+                }
+                redisTemplate.delete("launchly:bot:schema:" + id);
+            }
         } catch (Exception e) {
             try {
                 telegramBotManager.unregisterBot(bot.getId());
@@ -91,6 +106,16 @@ public class BotLifecycleServiceImpl implements BotLifecycleService {
 
         bot.setRunsCount(bot.getRunsCount() + 1);
         bot.setUpdatedAt(LocalDateTime.now());
+
+        FlowSchema schema = flowSchemaRepository.findByBotId(bot.getId()).orElse(null);
+        if (schema != null) {
+            schema.setPublishedNodes(schema.getNodes());
+            schema.setPublishedEdges(schema.getEdges());
+            schema.setVersion(schema.getVersion() + 1);
+            flowSchemaRepository.save(schema);
+            redisTemplate.delete("launchly:bot:schema:" + id);
+            log.info("Published flow schema version {} for botId={}", schema.getVersion(), id);
+        }
 
         if (!bot.isActive()) {
             boolean hasRealToken = false;

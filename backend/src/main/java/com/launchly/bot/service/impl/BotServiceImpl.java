@@ -379,40 +379,14 @@ public class BotServiceImpl implements BotService {
         schema.setNodes(toJsonString(nodesNode));
         schema.setEdges(toJsonString(edgesNode));
 
+        if (schema.getPublishedNodes() == null || schema.getPublishedNodes().isBlank() || "[]".equals(schema.getPublishedNodes().trim())) {
+            schema.setPublishedNodes(toJsonString(nodesNode));
+            schema.setPublishedEdges(toJsonString(edgesNode));
+        }
+
         schema = flowSchemaRepository.save(schema);
-        redisTemplate.delete("launchly:bot:schema:" + botId);
 
         userAuditService.logAutomationModified(bot.getUser(), bot.getId(), bot.getName(), LocalDateTime.now());
-        bot.setUpdatedAt(LocalDateTime.now());
-        botRepository.save(bot);
-        if (!bot.isActive()) {
-            boolean hasRealToken = false;
-            try {
-                if (bot.getTelegramToken() != null && !bot.getTelegramToken().isBlank()) {
-                    String decrypted = encryptionUtil.decrypt(bot.getTelegramToken());
-                    if (decrypted != null && !decrypted.isBlank() && 
-                        !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decrypted)) {
-                        hasRealToken = true;
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("Failed to decrypt bot token during flow save: {}", e.getMessage());
-            }
-
-            if (hasRealToken) {
-                try {
-                    botLifecycleService.registerBot(bot);
-                    bot.setActive(true);
-                    bot.setUpdatedAt(LocalDateTime.now());
-                    botRepository.save(bot);
-                } catch (Exception e) {
-                    bot.setActive(false);
-                    botRepository.save(bot);
-                    log.error("Failed to register bot during flow schema save: {}", e.getMessage(), e);
-                    throw new AppException(HttpStatus.BAD_REQUEST, "bot.error.registration_failed");
-                }
-            }
-        }
 
         return toFlowSchemaResponse(schema);
     }
@@ -467,7 +441,9 @@ public class BotServiceImpl implements BotService {
                 schema.getId(),
                 schema.getVersion(),
                 parseJson(schema.getNodes()),
-                parseJson(schema.getEdges())
+                parseJson(schema.getEdges()),
+                parseJson(schema.getEffectivePublishedNodes()),
+                parseJson(schema.getEffectivePublishedEdges())
         );
     }
 

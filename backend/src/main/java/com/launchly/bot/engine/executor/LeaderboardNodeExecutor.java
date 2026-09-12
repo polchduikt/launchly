@@ -129,13 +129,7 @@ public class LeaderboardNodeExecutor implements NodeExecutor {
                 StringBuilder line = new StringBuilder();
 
                 if (showRank) {
-                    String medal = switch (rank) {
-                        case 1 -> "🥇 1. ";
-                        case 2 -> "🥈 2. ";
-                        case 3 -> "🥉 3. ";
-                        default -> rank + ". ";
-                    };
-                    line.append(medal);
+                    line.append(rank).append(". ");
                 }
 
                 line.append(entry.displayName());
