@@ -17,6 +17,7 @@ import {
   MathNode,
   LeaderboardNode,
   CooldownNode,
+  SchedulerNode,
 } from '../pages/owner/FlowBuilder/components/nodes';
 
 const withCollaborationWrapper = <P extends { id: string; data?: Record<string, unknown>; selected?: boolean; dragging?: boolean }>(
@@ -91,6 +92,7 @@ const ActionNodeWrapped = withCollaborationWrapper(ActionNode);
 const MathNodeWrapped = withCollaborationWrapper(MathNode);
 const LeaderboardNodeWrapped = withCollaborationWrapper(LeaderboardNode);
 const CooldownNodeWrapped = withCollaborationWrapper(CooldownNode);
+const SchedulerNodeWrapped = withCollaborationWrapper(SchedulerNode);
 const SmartDelayNodeWrapped = withCollaborationWrapper(SmartDelayNode);
 const RandomizerNodeWrapped = withCollaborationWrapper(RandomizerNode);
 const StartAutomationNodeWrapped = withCollaborationWrapper(StartAutomationNode);
@@ -138,6 +140,10 @@ export const NODE_TYPES = {
   COOLDOWN: CooldownNodeWrapped,
   cooldown: CooldownNodeWrapped,
   Cooldown: CooldownNodeWrapped,
+
+  SCHEDULER: SchedulerNodeWrapped,
+  scheduler: SchedulerNodeWrapped,
+  Scheduler: SchedulerNodeWrapped,
 
   SMART_DELAY: SmartDelayNodeWrapped,
   smart_delay: SmartDelayNodeWrapped,

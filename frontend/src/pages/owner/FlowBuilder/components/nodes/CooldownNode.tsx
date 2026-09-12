@@ -88,7 +88,7 @@ const CooldownNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
                 <span className="text-[10px] font-black uppercase text-[#0A0A0A]/60">
                   {t('node.cooldown.key_label', 'Ключ:')}
                 </span>
-                <span className="px-1.5 py-0.5 bg-white border border-[#0A0A0A]/30 rounded text-[10px] font-bold text-[#0A0A0A]">
+                <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-lg text-xs font-black text-[#0A0A0A]">
                   {cooldownKey}
                 </span>
               </div>
@@ -98,7 +98,7 @@ const CooldownNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
               <span className="text-[9px] font-black uppercase text-[#0A0A0A]/60 block mb-1">
                 {t('node.cooldown.block_msg_label', 'Якщо зарано:')}
               </span>
-              <div className="p-1.5 bg-white/80 border border-[#0A0A0A]/20 rounded-lg text-[10px] font-medium text-[#0A0A0A] line-clamp-2 leading-snug">
+              <div className="p-2 bg-white border border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] line-clamp-2 leading-snug">
                 {blockMessage}
               </div>
             </div>

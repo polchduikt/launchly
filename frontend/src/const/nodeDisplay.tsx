@@ -15,6 +15,7 @@ import {
   Calculator,
   Trophy,
   Hourglass,
+  CalendarClock,
 } from 'lucide-react';
 import { AiIcon } from '../components/ui/AiIcon';
 
@@ -27,6 +28,7 @@ export const NODE_TITLES: Record<string, string> = {
   MATH: 'Calculation',
   LEADERBOARD: 'Leaderboard',
   COOLDOWN: 'Cooldown (Timeout)',
+  SCHEDULER: 'Scheduler',
   END: 'End Session',
   SMART_DELAY: 'Smart Delay',
   RANDOMIZER: 'Randomizer',
@@ -45,6 +47,7 @@ export const NODE_ICON_COMPONENTS: Record<string, LucideIcon | React.ComponentTy
   MATH: Calculator,
   LEADERBOARD: Trophy,
   COOLDOWN: Hourglass,
+  SCHEDULER: CalendarClock,
   END: Octagon,
   SMART_DELAY: Clock,
   RANDOMIZER: Shuffle,
@@ -63,6 +66,7 @@ export const NODE_ICONS: Record<string, React.ReactNode> = {
   MATH: <Calculator size={16} className="text-cyan-600" />,
   LEADERBOARD: <Trophy size={16} className="text-fuchsia-600" />,
   COOLDOWN: <Hourglass size={16} className="text-amber-600" />,
+  SCHEDULER: <CalendarClock size={16} className="text-orange-600" />,
   END: <Octagon size={16} className="text-slate-500" />,
   SMART_DELAY: <Clock size={16} className="text-rose-400" />,
   RANDOMIZER: <Shuffle size={16} className="text-purple-500" />,

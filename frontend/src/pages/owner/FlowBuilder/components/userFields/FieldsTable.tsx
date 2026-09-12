@@ -13,6 +13,21 @@ interface FieldsTableProps {
   onDelete: (name: string, isArchived: boolean) => void;
 }
 
+const getFieldTypeLabel = (type: string) => {
+  switch (type?.toLowerCase()) {
+    case 'text':
+      return t('settings.fields.type_text', 'Текст');
+    case 'number':
+      return t('settings.fields.type_number', 'Число');
+    case 'date':
+      return t('settings.fields.type_date', 'Дата');
+    case 'boolean':
+      return t('settings.fields.type_boolean', 'Логічне (Boolean)');
+    default:
+      return type || '-';
+  }
+};
+
 export const FieldsTable: React.FC<FieldsTableProps> = ({
   fields,
   isArchived = false,
@@ -70,7 +85,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
                 />
               </td>
               <td className="px-5 py-3.5 font-bold text-[#0A0A0A]">{field.name}</td>
-              <td className="px-5 py-3.5 text-slate-700 font-medium">{field.type}</td>
+              <td className="px-5 py-3.5 text-slate-700 font-medium">{getFieldTypeLabel(field.type)}</td>
               <td className="px-5 py-3.5 text-slate-700 font-medium">{field.value || '-'}</td>
               <td className="px-5 py-3.5 text-slate-700 font-medium">{field.description || '-'}</td>
               <td className="px-5 py-3.5 text-right">
@@ -156,7 +171,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
                     }}
                     className="w-full px-3 py-1.5 hover:bg-[#0A0A0A] hover:text-white text-[#0A0A0A] text-xs font-bold text-left cursor-pointer uppercase select-none transition-colors"
                   >
-                    Unarchive
+                    {t('settings.fields.action_unarchive', 'Розархівувати')}
                   </button>
                 )}
                 <button
@@ -167,7 +182,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
                   }}
                   className="w-full px-3 py-1.5 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold text-left cursor-pointer border-t border-slate-200 uppercase select-none transition-colors"
                 >
-                  Delete
+                  {t('settings.fields.action_delete')}
                 </button>
               </>
             )}

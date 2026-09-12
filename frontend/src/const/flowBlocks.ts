@@ -22,10 +22,11 @@ export const FLOW_BLOCK_COLORS: Record<string, string> = {
   COMMAND: 'text-teal-700 bg-teal-100',
   COMMENT: 'text-amber-600 bg-amber-100',
   AI: 'text-emerald-700 bg-emerald-100',
+  SCHEDULER: 'text-orange-700 bg-orange-100',
   END: 'text-slate-600 bg-slate-200',
 };
 
-export const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'ACTION', 'MATH', 'LEADERBOARD', 'COOLDOWN', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMAND', 'COMMENT', 'AI', 'END'];
+export const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'ACTION', 'MATH', 'LEADERBOARD', 'COOLDOWN', 'SCHEDULER', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMAND', 'COMMENT', 'AI', 'END'];
 
 export const getFlowBlocks = (): Array<{ type: string; label: string; color: string; icon?: LucideIcon | React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }> }> =>
   FLOW_BLOCK_TYPES.map((type) => ({
@@ -46,7 +47,7 @@ export const FLOW_BLOCK_GROUPS = [
     id: 'logic',
     titleKey: 'flow_builder.cat_logic',
     defaultTitle: 'Логіка та затримки',
-    types: ['CONDITION', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN'],
+    types: ['CONDITION', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN', 'SCHEDULER'],
   },
   {
     id: 'operations',
@@ -117,6 +118,20 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
         unit: 'MINUTES',
         blockMessage: 'Зачекайте ще {remaining} перед повторною спробою!',
         cooldownKey: '',
+      };
+    case 'SCHEDULER':
+      return {
+        frequency: 'daily',
+        time: '00:00',
+        daysOfWeek: ['MONDAY'],
+        dayOfMonth: 1,
+        intervalValue: 1,
+        intervalUnit: 'hours',
+        cronExpression: '0 0 9 * * *',
+        targetScope: 'system',
+        targetTag: '',
+        timezone: 'Europe/Kyiv',
+        isActive: true,
       };
     case 'API_CALL':
       return { url: 'https://api.example.com/endpoint', method: 'GET' };

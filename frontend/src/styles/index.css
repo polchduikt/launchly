@@ -681,7 +681,6 @@ a.hover\:bg-\[\#0A0A0A\]:hover svg:not(.node-icon-badge svg):not(.node-icon-badg
   color: #FFFFFF !important;
 }
 
-/* Invert to white background and black text on hover */
 .hover\:bg-white:hover,
 button.hover\:bg-white:hover,
 a.hover\:bg-white:hover,
@@ -1597,10 +1596,18 @@ button[aria-label="Close"]:hover svg *,
   fill: #0A0A0A;
 }
 .edge-path-default {
-  stroke: #475569;
+  stroke: #64748b !important;
 }
 .edge-path-highlight {
-  stroke: #0A0A0A;
+  stroke: #0A0A0A !important;
+}
+
+.react-flow__edges svg:has(.edge-path-highlight) {
+  z-index: 1001 !important;
+}
+
+.react-flow__edgelabel-renderer {
+  z-index: 1002 !important;
 }
 
 [data-theme="dark"] .edge-arrow-default {
@@ -1654,6 +1661,13 @@ button[aria-label="Close"]:hover svg *,
 .react-flow__handle.handle-connected {
   background-color: #7b8794 !important;
   border-color: #7b8794 !important;
+}
+
+.react-flow__handle.handle-connected:hover,
+.react-flow__handle.handle-highlighted,
+.react-flow__handle.handle-connected.handle-highlighted {
+  background-color: #0A0A0A !important;
+  border-color: #0A0A0A !important;
 }
 
 .react-flow__handle.handle-unconnected {

@@ -46,19 +46,17 @@ const ApiCallNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
         </div>
       </div>
 
-      <div className="p-4">
-        <div className="space-y-3">
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 leading-relaxed font-semibold">
-            <div className="flex justify-between items-center text-[10px] text-slate-400 uppercase tracking-wider mb-2.5">
-              <span>{t('node.api_call.request_info')}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={`text-[10px] uppercase font-extrabold tracking-wider px-2.5 py-1 rounded border shrink-0 ${API_METHOD_COLORS[method.toUpperCase()] || 'bg-slate-50 text-slate-500 border-slate-100'}`}>
-                {method}
-              </span>
-              <div className="flex-1 text-slate-850 truncate text-[11px] font-mono select-all bg-white border border-slate-100 p-1.5 rounded-lg leading-tight" title={url}>
-                {url || 'https://api.example.com/endpoint'}
-              </div>
+      <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace]">
+        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 space-y-2">
+          <div className="flex justify-between items-center text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider">
+            <span>{t('node.api_call.request_info')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`text-[10px] uppercase font-black tracking-wider px-2 py-0.5 rounded-lg border border-[#0A0A0A] shrink-0 ${API_METHOD_COLORS[method.toUpperCase()] || 'bg-white text-[#0A0A0A] border-[#0A0A0A]'}`}>
+              {method}
+            </span>
+            <div className="flex-1 text-[#0A0A0A] truncate text-[11px] font-bold select-all bg-white border border-[#0A0A0A] px-2 py-1 rounded-lg leading-tight" title={url}>
+              {url || 'https://api.example.com/endpoint'}
             </div>
           </div>
         </div>

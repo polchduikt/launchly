@@ -72,6 +72,8 @@ const mapActionToNodeType = (actionType?: string): string | null => {
       return 'MATH';
     case 'LEADERBOARD':
       return 'LEADERBOARD';
+    case 'SCHEDULER':
+      return 'SCHEDULER';
     default:
       return null;
   }

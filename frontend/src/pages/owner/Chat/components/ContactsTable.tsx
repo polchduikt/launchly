@@ -78,6 +78,9 @@ const ContactTableRow = React.memo<ContactTableRowProps>(({
           )}
         </div>
       </td>
+      <td className="py-4 px-4 text-center font-bold text-xs text-[#0A0A0A]">
+        {c.botName || '—'}
+      </td>
       <td className="py-4 px-6 text-center">
         <div className="flex justify-center">
           <span
@@ -128,7 +131,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
   if (isContactsLoading || isBotsLoading) {
     return (
       <div className="flex-1 overflow-auto p-6 font-['JetBrains_Mono',monospace]">
-        <TableSkeleton rows={7} columns={5} />
+        <TableSkeleton rows={7} columns={6} />
       </div>
     );
   }
@@ -183,6 +186,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
               </th>
               <th className="py-4 px-2 w-16">{t('crm.contacts.table.avatar')}</th>
               <th className="py-4 px-2">{t('crm.contacts.table.name')}</th>
+              <th className="py-4 px-4 text-center">{t('crm.contacts.table.automation')}</th>
               <th className="py-4 px-6 text-center">{t('crm.contacts.table.status')}</th>
               <th className="py-4 px-6">{t('crm.contacts.table.subscribed')}</th>
             </tr>
@@ -190,7 +194,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
           <tbody className="divide-y divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A]">
             {paddingTop > 0 && (
               <tr>
-                <td style={{ height: `${paddingTop}px` }} colSpan={5} />
+                <td style={{ height: `${paddingTop}px` }} colSpan={6} />
               </tr>
             )}
             {virtualItems.map(({ index }) => {
@@ -209,7 +213,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
             })}
             {paddingBottom > 0 && (
               <tr>
-                <td style={{ height: `${paddingBottom}px` }} colSpan={5} />
+                <td style={{ height: `${paddingBottom}px` }} colSpan={6} />
               </tr>
             )}
           </tbody>

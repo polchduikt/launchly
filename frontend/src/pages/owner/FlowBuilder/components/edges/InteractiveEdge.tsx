@@ -6,6 +6,8 @@ import { useFlowUiStore } from '../../../../../store/useFlowUiStore';
 export const InteractiveEdge = React.memo<EdgeProps>(
   ({
     id,
+    source,
+    sourceHandleId,
     sourceX,
     sourceY,
     targetX,
@@ -113,7 +115,59 @@ export const InteractiveEdge = React.memo<EdgeProps>(
     const displayX = deletePos ? deletePos.x : labelX;
     const displayY = deletePos ? deletePos.y - 20 : labelY - 20;
 
+    const pathRef = useRef<SVGPathElement | null>(null);
+
     const highlighted = isHighlighted || selected;
+
+    useEffect(() => {
+      const el = pathRef.current;
+      if (!el) return;
+      const svg = el.ownerSVGElement;
+      if (svg) {
+        svg.style.zIndex = highlighted ? '1001' : '';
+      }
+    }, [highlighted]);
+
+    useEffect(() => {
+      if (!source) return;
+      const getSourceHandle = (): Element | null => {
+        if (sourceHandleId) {
+          const el = document.querySelector(
+            `.react-flow__handle[data-nodeid="${source}"][data-handleid="${sourceHandleId}"]`
+          );
+          if (el) return el;
+        }
+        return (
+          document.querySelector(`.react-flow__handle-source[data-nodeid="${source}"]`) ||
+          document.querySelector(`.react-flow__handle[data-nodeid="${source}"][data-handlepos="${sourcePosition}"]`) ||
+          document.querySelector(`.react-flow__handle[data-nodeid="${source}"]`)
+        );
+      };
+
+      const handleEl = getSourceHandle();
+      if (handleEl) {
+        if (highlighted) {
+          handleEl.classList.add('handle-highlighted');
+        } else {
+          handleEl.classList.remove('handle-highlighted');
+        }
+      }
+
+      return () => {
+        if (handleEl) {
+          handleEl.classList.remove('handle-highlighted');
+        }
+      };
+    }, [source, sourceHandleId, sourcePosition, highlighted]);
+
+    const edgeStyle = React.useMemo(() => {
+      const base = style || {};
+      return {
+        ...base,
+        stroke: highlighted ? '#0A0A0A' : (base.stroke || '#64748b'),
+        strokeWidth: highlighted ? 2.8 : (base.strokeWidth || 2.4),
+      };
+    }, [style, highlighted]);
 
     return (
       <>
@@ -128,12 +182,24 @@ export const InteractiveEdge = React.memo<EdgeProps>(
           onMouseLeave={handleMouseLeave}
         />
 
+        {highlighted && (
+          <path
+            d={edgePath}
+            fill="none"
+            stroke="#F2EBDD"
+            strokeWidth={5.5}
+            className="pointer-events-none"
+            style={{ opacity: 0.95 }}
+          />
+        )}
+
         <path
+          ref={pathRef}
           id={id}
           d={edgePath}
           fill="none"
-          style={style}
-          strokeWidth={highlighted ? 2.8 : (style.strokeWidth || 2.4)}
+          style={edgeStyle}
+          strokeWidth={edgeStyle.strokeWidth}
           markerEnd={highlighted ? 'url(#arrow-indigo)' : 'url(#arrow-grey)'}
           className={`react-flow__edge-path transition-colors duration-150 ${
             highlighted ? 'edge-path-highlight' : 'edge-path-default'
@@ -168,6 +234,10 @@ export const InteractiveEdge = React.memo<EdgeProps>(
   (prev, next) => {
     return (
       prev.id === next.id &&
+      prev.source === next.source &&
+      prev.target === next.target &&
+      prev.sourceHandleId === next.sourceHandleId &&
+      prev.targetHandleId === next.targetHandleId &&
       prev.sourceX === next.sourceX &&
       prev.sourceY === next.sourceY &&
       prev.targetX === next.targetX &&

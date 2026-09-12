@@ -14,8 +14,7 @@ import {
   Search,
   Plus,
   Check,
-  Sparkles,
-  Trophy
+  Sparkles
 } from 'lucide-react';
 
 import type { TagResponse } from '../../../../../../types/broadcast';
@@ -77,10 +76,6 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
   useClickOutside([containerRef, dropdownRef], () => setIsOpen(false), isOpen);
 
   const systemFields = useMemo(() => [
-    { key: 'leaderboard', name: '🏆 ' + t('node.leaderboard.var_list', 'Список рейтингу (ТОП)'), val: 'leaderboard', icon: <Trophy size={13} className="text-amber-500" /> },
-    { key: 'user_rank', name: '🥇 ' + t('node.leaderboard.var_rank', 'Позиція в рейтингу'), val: 'user_rank', icon: <Trophy size={13} className="text-amber-500" /> },
-    { key: 'user_score', name: '⭐ ' + t('node.leaderboard.var_score', 'Бали в рейтингу'), val: 'user_score', icon: <Sparkles size={13} className="text-fuchsia-500" /> },
-    { key: 'awarded_points', name: '✨ ' + t('node.math.result_variable', 'Нараховані бали'), val: 'awarded_points', icon: <Sparkles size={13} className="text-cyan-500" /> },
     { key: 'first_name', name: t('editor.gs.fields.first_name'), val: 'first_name', icon: <User size={13} className="text-slate-400" /> },
     { key: 'last_name', name: t('editor.gs.fields.last_name'), val: 'last_name', icon: <User size={13} className="text-slate-400" /> },
     { key: 'phone', name: t('editor.gs.fields.phone'), val: 'phone', icon: <Phone size={13} className="text-slate-400" /> },

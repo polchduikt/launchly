@@ -18,6 +18,7 @@ import { AiNodeEditor } from './editors/AiNodeEditor';
 import { MathNodeEditor } from './editors/MathNodeEditor';
 import { LeaderboardNodeEditor } from './editors/LeaderboardNodeEditor';
 import { CooldownNodeEditor } from './editors/CooldownNodeEditor';
+import { SchedulerNodeEditor } from './editors/SchedulerNodeEditor';
 
 
 interface NodeEditorPanelProps {
@@ -57,6 +58,9 @@ const NODE_EDITORS: Record<string, NodeEditorComponent> = {
   ),
   COOLDOWN: ({ data, handleChange, editorState }) => (
     <CooldownNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
+  ),
+  SCHEDULER: ({ data, handleChange, editorState }) => (
+    <SchedulerNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
   ),
   SMART_DELAY: ({ data, handleChange, editorState }) => (
     <SmartDelayNodeEditor data={data} handleChange={handleChange} editorState={editorState} />

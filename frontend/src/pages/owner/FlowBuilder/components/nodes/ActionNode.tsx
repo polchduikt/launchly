@@ -36,6 +36,10 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
       case 'GS_GET_ROW':
       case 'GS_UPDATE_ROW':
         return t('node.action.sheets_actions');
+      case 'MARK_DONE':
+        return t('action.name.MARK_DONE');
+      case 'ASSIGN_AGENT':
+        return t('action.name.ASSIGN_AGENT');
       default:
         return t('node.title.action');
     }
@@ -45,25 +49,30 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
     switch (action.type) {
       case 'ADD_TAG':
       case 'REMOVE_TAG':
-        return action.tagName || 'Unknown tag';
+        return action.tagName || t('node.action.unknown_tag');
       case 'SET_USER_FIELD':
-        return action.fieldName
-          ? `Set ${action.fieldName} to ${action.fieldValue || ''}`
-          : 'Unknown field';
+        if (!action.fieldName) return t('node.action.unknown_field');
+        return action.fieldValue
+          ? t('node.action.value_set_field', { field: action.fieldName, val: action.fieldValue })
+          : t('node.action.value_set_field_only', { field: action.fieldName });
       case 'CLEAR_USER_FIELD':
         return action.fieldName
-          ? `Clear ${action.fieldName}`
-          : 'Unknown field';
+          ? t('node.action.value_clear_field', { field: action.fieldName })
+          : t('node.action.unknown_field');
       case 'TELEGRAM_SUBSCRIBE':
-        return 'Subscribe to Telegram';
+        return t('node.action.value_subscribe_tg');
       case 'TELEGRAM_UNSUBSCRIBE':
-        return 'Unsubscribe Telegram';
+        return t('node.action.value_unsubscribe_tg');
       case 'GS_INSERT_ROW':
-        return 'Insert Row';
+        return t('node.action.value_gs_insert');
       case 'GS_GET_ROW':
-        return 'Get Row by Value';
+        return t('node.action.value_gs_get');
       case 'GS_UPDATE_ROW':
-        return 'Update Row';
+        return t('node.action.value_gs_update');
+      case 'MARK_DONE':
+        return t('action.name.MARK_DONE');
+      case 'ASSIGN_AGENT':
+        return t('action.name.ASSIGN_AGENT');
       default:
         return action.type || '';
     }
@@ -99,11 +108,11 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
         </div>
       </div>
 
-      <div className="p-4 space-y-3">
+      <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace]">
         {isZoomedOut ? (
           <div className="space-y-1.5 select-none pointer-events-none">
             {actions.length === 0 ? (
-              <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-2 text-[11px] text-slate-400 font-medium text-center">
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-2 text-[11px] font-bold text-amber-800 text-center">
                 {t('node.action.no_actions')}
               </div>
             ) : (
@@ -115,20 +124,20 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
             )}
           </div>
         ) : (
-          <div className="space-y-3">
+          <div>
             {actions.length === 0 ? (
-              <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-center text-[11px] text-slate-400 font-medium select-none italic bg-slate-50/50">
+              <div className="border-2 border-dashed border-[#0A0A0A]/40 rounded-2xl p-3 text-center text-xs text-[#0A0A0A]/60 font-black select-none italic bg-[#F2EBDD]/40">
                 {t('node.action.no_actions')}
               </div>
             ) : (
-              <div className="flex flex-col gap-2.5 max-h-56 overflow-y-auto pr-0.5 custom-scrollbar">
+              <div className="flex flex-col gap-2 max-h-56 overflow-y-auto pr-0.5 custom-scrollbar">
                 {actions.map((act, index) => {
                   const label = getActionLabelForCanvas(act.type);
                   const value = getActionValueForCanvas(act);
                   return (
-                    <div key={index} className="bg-slate-50/75 border border-slate-150 rounded-xl p-2.5 flex flex-col gap-0.5">
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">{label}</span>
-                      <span className="text-[11px] font-extrabold text-slate-700 leading-normal">{value}</span>
+                    <div key={index} className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-2.5 flex flex-col gap-0.5 select-none">
+                      <span className="text-[9px] font-black uppercase tracking-wider text-[#0A0A0A]/60 leading-none">{label}</span>
+                      <span className="text-xs font-black text-[#0A0A0A] leading-normal break-words">{value}</span>
                     </div>
                   );
                 })}

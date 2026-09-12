@@ -21,7 +21,7 @@ const StartBroadcastNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id
         </span>
         <span className="font-extrabold text-xs text-[#0A0A0A] uppercase tracking-wider">{t('broadcast.builder.node.when')}</span>
       </div>
-      <div className="bg-white border border-[#0A0A0A]/25 rounded-2xl py-2.5 px-3 text-xs font-bold text-[#0A0A0A]/70 text-center">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 text-xs font-black text-[#0A0A0A] text-center font-['JetBrains_Mono',monospace]">
         {t('broadcast.builder.node.you_send_broadcast')}
       </div>
       <div className="flex justify-end items-center mt-3 pt-2 border-t border-[#0A0A0A]/15 relative">

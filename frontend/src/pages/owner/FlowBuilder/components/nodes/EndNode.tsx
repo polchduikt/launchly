@@ -41,8 +41,8 @@ const EndNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected 
         </div>
       </div>
 
-      <div className="p-4">
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-600 leading-relaxed text-center font-semibold select-none">
+      <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace]">
+        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 text-xs text-[#0A0A0A] font-bold leading-relaxed text-center select-none">
           {t('node.end.description')}
         </div>
       </div>

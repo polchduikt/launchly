@@ -21,6 +21,10 @@ export const NodeType = {
   StartAutomation: 'START_AUTOMATION',
   Command: 'COMMAND',
   Ai: 'AI',
+  Math: 'MATH',
+  Leaderboard: 'LEADERBOARD',
+  Cooldown: 'COOLDOWN',
+  Scheduler: 'SCHEDULER',
 } as const;
 
 export type NodeType = (typeof NodeType)[keyof typeof NodeType];

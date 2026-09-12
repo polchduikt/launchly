@@ -383,7 +383,7 @@ export const ContactsPage: React.FC = () => {
 
       {selectedContact && (
         <ContactDetailModal
-          botId={botId}
+          botId={selectedContact.botId || botId}
           selectedContact={selectedContact}
           conversations={conversations}
           tags={tags}

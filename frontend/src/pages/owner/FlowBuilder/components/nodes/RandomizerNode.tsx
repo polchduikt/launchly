@@ -52,33 +52,49 @@ const RandomizerNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
         </div>
       </div>
 
-      <div className="rounded-b-[22px] divide-y divide-slate-100/70">
-        {variations.map((v) => {
-          const isVarConnected = sourceConns.some((c) => c.sourceHandle === v.id);
+      <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace]">
+        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 space-y-2">
+          {variations.map((v, index) => {
+            const isVarConnected = sourceConns.some((c) => c.sourceHandle === v.id);
 
-          return (
-            <div key={v.id} className="relative flex justify-between items-center px-4 py-3 select-none last:rounded-b-[22px]">
-              <span className="text-xs font-bold" style={{ color: v.color }}>
-                {v.label}
-              </span>
-              <span className="text-xs font-semibold text-slate-500 mr-2">
-                {v.percentage}%
-              </span>
-              <NodeHandle
-                type="source"
-                position={Position.Right}
-                id={v.id}
-                isConnected={isVarConnected}
-                style={{
-                  borderColor: v.color,
-                  borderWidth: '1.5px',
-                  backgroundColor: isVarConnected ? v.color : '#ffffff'
-                }}
-                className="!w-2.5 !h-2.5 hover:scale-110"
-              />
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={v.id}
+                className={`relative flex justify-between items-center select-none ${
+                  index > 0 ? 'pt-2 border-t border-[#0A0A0A]/10' : ''
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full border border-[#0A0A0A] shrink-0"
+                    style={{ backgroundColor: v.color }}
+                  />
+                  <span className="text-xs font-black" style={{ color: v.color }}>
+                    {v.label}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 pr-1">
+                  <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-lg text-xs font-black text-[#0A0A0A]">
+                    {v.percentage}%
+                  </span>
+                </div>
+                <NodeHandle
+                  type="source"
+                  position={Position.Right}
+                  id={v.id}
+                  isConnected={isVarConnected}
+                  style={{
+                    right: '-31px',
+                    borderColor: v.color,
+                    borderWidth: '1.5px',
+                    backgroundColor: isVarConnected ? v.color : '#ffffff',
+                  }}
+                  className="!w-2.5 !h-2.5 hover:scale-110"
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -17,3 +17,4 @@ export { StartBroadcastNode } from './StartBroadcastNode';
 export { MathNode } from './MathNode';
 export { LeaderboardNode } from './LeaderboardNode';
 export { CooldownNode } from './CooldownNode';
+export { SchedulerNode } from './SchedulerNode';

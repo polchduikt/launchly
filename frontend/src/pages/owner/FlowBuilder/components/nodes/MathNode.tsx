@@ -85,7 +85,7 @@ const MathNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected
                 <span className="text-[10px] font-black uppercase text-[#0A0A0A]/60">
                   {t('node.math.field_val', 'Поточне в:')}
                 </span>
-                <span className="px-2 py-0.5 bg-cyan-50 border border-cyan-700/30 rounded-lg text-xs font-black text-cyan-950">
+                <span className="px-2 py-0.5 bg-cyan-50 border border-[#0A0A0A] rounded-lg text-xs font-black text-cyan-950">
                   {valueField}
                 </span>
               </div>

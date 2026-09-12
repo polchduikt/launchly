@@ -50,14 +50,14 @@ const AiNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, 
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace]">
         {generated && prompt ? (
-          <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3 select-none text-xs text-slate-700 font-semibold leading-relaxed">
+          <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 select-none text-xs text-[#0A0A0A] font-bold leading-relaxed">
             {prompt}
           </div>
         ) : (
-          <div className="border border-dashed border-slate-250 rounded-2xl p-4 flex items-center justify-center text-center select-none">
-            <span className="text-xs text-slate-400 font-bold">
+          <div className="border-2 border-dashed border-[#0A0A0A]/40 rounded-2xl p-4 bg-[#F2EBDD]/40 flex items-center justify-center text-center select-none">
+            <span className="text-xs text-[#0A0A0A]/60 font-black">
               {t('node.ai.define_instructions')}
             </span>
           </div>

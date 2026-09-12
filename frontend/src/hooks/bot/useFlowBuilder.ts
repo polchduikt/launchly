@@ -191,10 +191,16 @@ export const useFlowBuilder = (isLocalChangeRef?: MutableRefObject<boolean>) => 
     if (!isLoadingSchema && nodes.length > 0) {
       if (!isInitialPublishedKeySetRef.current) {
         isInitialPublishedKeySetRef.current = true;
-        setPublishedKey(getFlowLogicKey(nodes, edges));
+        const pubNodes = (schema?.publishedNodes && Array.isArray(schema.publishedNodes) && schema.publishedNodes.length > 0)
+          ? schema.publishedNodes
+          : nodes;
+        const pubEdges = (schema?.publishedEdges && Array.isArray(schema.publishedEdges))
+          ? schema.publishedEdges
+          : edges;
+        setPublishedKey(getFlowLogicKey(pubNodes, pubEdges));
       }
     }
-  }, [isLoadingSchema, nodes, edges]);
+  }, [isLoadingSchema, nodes, edges, schema]);
 
   const currentFlowLogicKey = useMemo(() => getFlowLogicKey(nodes, edges), [nodes, edges]);
   const hasUnpublishedChanges = useMemo(() => {

@@ -277,7 +277,7 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
         ) : (
           <>
             {blocks.length === 0 ? (
-              <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-xs text-slate-400 italic text-center select-none">
+              <div className="border-2 border-dashed border-[#0A0A0A]/40 rounded-2xl p-3 text-xs text-[#0A0A0A]/60 italic text-center select-none bg-white/40">
                 Empty Message Node. Click to edit.
               </div>
             ) : (
@@ -288,11 +288,11 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                     <div key={block.id || bIdx} className="space-y-2">
                       {block.type === 'text' && (
                         block.text ? (
-                          <div className="bg-slate-50 border border-slate-150 rounded-2xl p-3 text-xs text-slate-800 leading-relaxed break-words whitespace-pre-wrap font-medium">
+                          <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 text-xs text-[#0A0A0A] leading-relaxed break-words whitespace-pre-wrap font-bold font-['JetBrains_Mono',monospace]">
                             {renderTextWithBadges(block.text)}
                           </div>
                         ) : (
-                          <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-400 italic text-center bg-slate-50/20">
+                          <div className="border-2 border-dashed border-[#0A0A0A]/40 rounded-2xl p-3 text-[11px] font-black text-[#0A0A0A]/60 italic text-center bg-[#F2EBDD]/40">
                             {t('flow_builder.add_a_text')}
                           </div>
                         )
@@ -300,20 +300,20 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
 
                       {block.type === 'image' && (
                         block.imageUrl ? (
-                          <div className="rounded-2xl overflow-hidden border border-slate-200/60 max-h-40 flex items-center justify-center bg-slate-50 relative group">
+                          <div className="rounded-2xl overflow-hidden border-2 border-[#0A0A0A] max-h-40 flex items-center justify-center bg-[#F2EBDD] relative group">
                             <img src={block.imageUrl} alt="Attachment" className="w-full h-full object-cover select-none" />
                           </div>
                         ) : (
-                          <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-400 italic text-center flex items-center justify-center gap-1.5 bg-slate-50/20">
-                            <ImageIcon size={14} className="text-slate-400" />
+                          <div className="border-2 border-dashed border-[#0A0A0A]/40 rounded-2xl p-3 text-[11px] font-bold text-[#0A0A0A]/60 italic text-center flex items-center justify-center gap-1.5 bg-[#F2EBDD]/40">
+                            <ImageIcon size={14} className="text-[#0A0A0A]/60" />
                             <span>Image</span>
                           </div>
                         )
                       )}
 
                       {block.type === 'file' && (
-                        <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-500 bg-slate-50/20 flex flex-col items-center justify-center gap-1.5">
-                          <Paperclip size={14} className="text-slate-400" />
+                        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 text-[11px] font-bold text-[#0A0A0A] flex flex-col items-center justify-center gap-1.5">
+                          <Paperclip size={14} className="text-[#0A0A0A]/60" />
                           <span className="truncate max-w-full text-center">
                             {block.fileUrl ? (block.fileName || 'File uploaded') : 'File'}
                           </span>
@@ -321,8 +321,8 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                       )}
 
                       {block.type === 'audio' && (
-                        <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-500 bg-slate-50/20 flex flex-col items-center justify-center gap-1.5">
-                          <Volume2 size={14} className="text-slate-400" />
+                        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 text-[11px] font-bold text-[#0A0A0A] flex flex-col items-center justify-center gap-1.5">
+                          <Volume2 size={14} className="text-[#0A0A0A]/60" />
                           <span className="truncate max-w-full text-center">
                             {block.audioUrl ? 'Audio snippet' : 'Audio'}
                           </span>
@@ -330,8 +330,8 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                       )}
 
                       {block.type === 'video' && (
-                        <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-[11px] font-semibold text-slate-500 bg-slate-50/20 flex flex-col items-center justify-center gap-1.5">
-                          <Video size={14} className="text-slate-400" />
+                        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 text-[11px] font-bold text-[#0A0A0A] flex flex-col items-center justify-center gap-1.5">
+                          <Video size={14} className="text-[#0A0A0A]/60" />
                           <span className="truncate max-w-full text-center">
                             {block.videoUrl ? 'Video clip' : 'Video'}
                           </span>
@@ -339,8 +339,8 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                       )}
 
                       {block.type === 'delay' && (
-                        <div className="border border-dashed border-slate-250 rounded-2xl p-2.5 text-[10px] font-bold text-slate-500 bg-slate-50/10 flex items-center justify-center gap-1.5">
-                          <Clock size={12} className="text-cyan-500" />
+                        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-2.5 text-[10px] font-black text-[#0A0A0A] flex items-center justify-center gap-1.5">
+                          <Clock size={12} className="text-cyan-700" />
                           <span>Delay: {block.delaySeconds || 3}s</span>
                         </div>
                       )}
@@ -348,20 +348,20 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                       {block.type === 'data_collection' && (
                         <div className="space-y-2">
                           {block.text && (
-                            <div className="bg-slate-100/60 border border-slate-200/40 rounded-2xl px-4 py-2.5 text-xs text-slate-800 font-medium">
+                            <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl px-4 py-2.5 text-xs text-[#0A0A0A] font-bold font-['JetBrains_Mono',monospace]">
                               {typeof block.text === 'string' ? block.text : ''}
                             </div>
                           )}
-                          <div className="bg-indigo-50/50 border border-indigo-150 rounded-2xl px-4 py-2.5 text-[11px] font-bold text-indigo-700 flex items-center gap-2 animate-pulse justify-center">
-                            <MessageSquare size={13} className="text-indigo-500 shrink-0" />
+                          <div className="bg-indigo-50 border-2 border-[#0A0A0A] rounded-2xl px-4 py-2.5 text-[11px] font-black text-indigo-900 flex items-center gap-2 animate-pulse justify-center">
+                            <MessageSquare size={13} className="text-indigo-700 shrink-0" />
                             <span>Waiting for {typeof block.replyType === 'string' ? block.replyType : 'Text'} from contact...</span>
                           </div>
                         </div>
                       )}
 
                       {block.type === 'telegram_menu' && (
-                        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex flex-col gap-2">
-                          <div className="text-center text-xs font-bold text-slate-500 pb-1.5 border-b border-slate-200/55">
+                        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 flex flex-col gap-2 font-['JetBrains_Mono',monospace]">
+                          <div className="text-center text-xs font-black text-[#0A0A0A]/60 pb-1.5 border-b border-[#0A0A0A]/15 uppercase tracking-wider">
                             {t('flow_builder.btn_telegram_menu')}
                           </div>
                           {(() => {
@@ -380,17 +380,17 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                                           <div
                                             key={btn.value + btnIdx}
                                             onClick={(e) => handleButtonClick(e, btn)}
-                                            className={`relative border py-1.5 px-3 pr-7 rounded-xl text-left text-xs font-semibold transition-all cursor-pointer shadow-sm select-none flex-1 truncate ${
+                                            className={`relative border-2 border-[#0A0A0A] py-1.5 px-3 pr-7 rounded-xl text-left text-xs font-bold transition-all cursor-pointer shadow-xs select-none flex-1 truncate ${
                                               isActive
-                                                ? 'bg-emerald-50/40 border-emerald-500 text-emerald-700 font-extrabold'
-                                                : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-350'
+                                                ? 'bg-emerald-100 text-emerald-950 font-black'
+                                                : 'bg-white hover:bg-[#F2EBDD] text-[#0A0A0A]'
                                             }`}
                                             title={btn.label}
                                           >
                                             <div className="flex items-center justify-between gap-1 w-full">
                                               <span className="block truncate flex-1">{btn.label}</span>
                                               {btn.actionType === 'BUY' && (
-                                                <span className="w-4.5 h-4.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-black text-[9px] shrink-0 ml-1 select-none leading-none">
+                                                <span className="w-4.5 h-4.5 rounded-full bg-emerald-100 text-emerald-900 border border-[#0A0A0A] flex items-center justify-center font-black text-[9px] shrink-0 ml-1 select-none leading-none">
                                                   $
                                                 </span>
                                               )}
@@ -411,7 +411,7 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                                                 className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
                                                   data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')
                                                     ? '!bg-[#7b8794] !border-[#7b8794]'
-                                                    : '!bg-white !border-slate-300 hover:!border-slate-400'
+                                                    : '!bg-white !border-[#0A0A0A] hover:!border-slate-400'
                                                 }`}
                                               />
                                             )}
@@ -428,22 +428,22 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                       )}
 
                       {block.type !== 'telegram_menu' && blockBtns.length > 0 && (
-                        <div className="space-y-2 pt-1 nodrag">
+                        <div className="space-y-2 pt-1 nodrag font-['JetBrains_Mono',monospace]">
                           {blockBtns.map((btn, btnIdx) => {
                             const isActive = activeButtonValue === btn.value;
                             return (
                               <div
                                 key={btn.value + btnIdx}
                                 onClick={(e) => handleButtonClick(e, btn)}
-                                className={`relative border py-2.5 pl-4 pr-10 rounded-2xl text-left text-xs font-bold transition-all cursor-pointer shadow-sm select-none flex items-center justify-between gap-1 ${
+                                className={`relative border-2 border-[#0A0A0A] py-2.5 pl-4 pr-10 rounded-2xl text-left text-xs font-bold transition-all cursor-pointer shadow-xs select-none flex items-center justify-between gap-1 ${
                                   isActive
-                                    ? 'bg-emerald-50/40 border-emerald-500 text-emerald-700 font-extrabold'
-                                    : 'bg-white hover:bg-slate-50 border-slate-250 text-slate-700 hover:border-slate-350'
+                                    ? 'bg-emerald-100 text-emerald-950 font-black'
+                                    : 'bg-white hover:bg-[#F2EBDD] text-[#0A0A0A]'
                                 }`}
                               >
                                 <span className="truncate flex-1">{btn.label}</span>
                                 {btn.actionType === 'BUY' && (
-                                  <span className="w-4.5 h-4.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-black text-[9px] shrink-0 mr-1.5 select-none leading-none">
+                                  <span className="w-4.5 h-4.5 rounded-full bg-emerald-100 text-emerald-900 border border-[#0A0A0A] flex items-center justify-center font-black text-[9px] shrink-0 mr-1.5 select-none leading-none">
                                     $
                                   </span>
                                 )}
@@ -481,9 +481,9 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
             <button
               onClick={handleAddButtonInNode}
               disabled={buttons.length >= 10}
-              className="w-full py-2 border border-dashed border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 nodrag shadow-sm"
+              className="w-full py-2.5 border-2 border-dashed border-[#0A0A0A]/40 hover:border-[#0A0A0A] hover:bg-[#F2EBDD]/60 text-[#0A0A0A] text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 nodrag shadow-xs font-['JetBrains_Mono',monospace]"
             >
-              <Plus size={13} />
+              <Plus size={13} strokeWidth={2.5} />
               <span>{t('flow_builder.btn_add_button')}</span>
             </button>
           </>

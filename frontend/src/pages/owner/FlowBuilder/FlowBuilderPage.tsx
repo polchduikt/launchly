@@ -285,11 +285,19 @@ const FlowBuilderInner: React.FC = () => {
   const handleLaunchOrUpdate = () => {
     const saved = handleSaveFlow();
     if (saved && activeBotId) {
-      publishBotMutation.mutate(activeBotId, {
-        onSuccess: () => {
-          setPublishedKey(getFlowLogicKey(nodes, edges));
-        },
-      });
+      if (!isBotLive) {
+        startBotMutation.mutate(activeBotId, {
+          onSuccess: () => {
+            setPublishedKey(getFlowLogicKey(nodes, edges));
+          },
+        });
+      } else {
+        publishBotMutation.mutate(activeBotId, {
+          onSuccess: () => {
+            setPublishedKey(getFlowLogicKey(nodes, edges));
+          },
+        });
+      }
     }
   };
 
@@ -552,7 +560,7 @@ const FlowBuilderInner: React.FC = () => {
                 elementsSelectable={!isViewer}
                 deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
                 elevateNodesOnSelect={false}
-                elevateEdgesOnSelect={false}
+                elevateEdgesOnSelect={true}
                 fitView
                 fitViewOptions={{ maxZoom: 1, padding: 0.2 }}
                 proOptions={{ hideAttribution: true }}

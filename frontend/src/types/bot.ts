@@ -6,6 +6,8 @@ export interface FlowSchemaResponse {
   version: number;
   nodes: Node[];
   edges: Edge[];
+  publishedNodes?: Node[];
+  publishedEdges?: Edge[];
 }
 
 export type BotResponseMode = 'ALL' | 'PRIVATE_ONLY' | 'GROUPS_ONLY';
@@ -247,6 +249,8 @@ export interface BotUserResponse {
   metadata: string;
   tags: string[];
   createdAt: string;
+  botId?: number;
+  botName?: string;
 }
 
 export interface BotUserUpdateRequest {
@@ -333,6 +337,12 @@ export interface LeaderboardNodeEditorProps {
 }
 
 export interface CooldownNodeEditorProps {
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+}
+
+export interface SchedulerNodeEditorProps {
   data: CustomNodeData;
   handleChange: (key: string, value: unknown) => void;
   editorState?: EditorState;

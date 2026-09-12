@@ -83,17 +83,28 @@ const SmartDelayNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
         </div>
       </div>
 
-      <div className="p-4">
-        {mode === 'date' ? (
-          <div className="space-y-1 select-none">
-            <p className="text-xs font-extrabold text-slate-800 leading-normal">{t('node.smart_delay.wait_until')}</p>
-            <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">{formattedDateTime}</p>
-          </div>
-        ) : (
-          <div className="text-xs text-slate-650 leading-relaxed font-semibold select-none">
-            {t('node.smart_delay.wait', { amount: String(waitAmount), unit: waitUnit })}
-          </div>
-        )}
+      <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace]">
+        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 space-y-2">
+          {mode === 'date' ? (
+            <div className="space-y-1 select-none">
+              <span className="text-[10px] font-black uppercase text-[#0A0A0A]/60 block leading-none">
+                {t('node.smart_delay.wait_until')}
+              </span>
+              <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-lg text-xs font-black text-[#0A0A0A] block truncate">
+                {formattedDateTime}
+              </span>
+            </div>
+          ) : (
+            <div className="space-y-1 select-none">
+              <span className="text-[10px] font-black uppercase text-[#0A0A0A]/60 block leading-none">
+                {t('node.smart_delay.category')}
+              </span>
+              <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-lg text-xs font-black text-[#0A0A0A] block leading-normal break-words">
+                {t('node.smart_delay.wait', { amount: String(waitAmount), unit: waitUnit })}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex justify-end items-center px-4 py-2 bg-transparent select-none relative rounded-b-[22px]">

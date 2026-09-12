@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { HelpCircle } from 'lucide-react';
 import { useAuthStore } from '../../../../store/useAuthStore';
 import { updateNotificationsApi, unlinkTelegramApi } from '../../../../api/auth';
 import { TelegramLoginModal } from '../../../public/Login/components/TelegramLoginModal';
@@ -178,12 +177,7 @@ export const NotificationsPanel: React.FC = () => {
                 onChange={(e) => handleToggleTelegram(e.target.checked)}
                 className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
               />
-              <div className="flex items-center gap-1">
-                <span className="text-xs font-bold text-[#0A0A0A]">{t('settings.notifications.telegram')}</span>
-                <span title={t('settings.notifications.telegram_help')}>
-                  <HelpCircle size={13} className="text-[#0A0A0A] cursor-help" />
-                </span>
-              </div>
+              <span className="text-xs font-bold text-[#0A0A0A]">{t('settings.notifications.telegram')}</span>
             </label>
           </div>
           <div className="lg:col-span-4">

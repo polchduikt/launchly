@@ -255,18 +255,16 @@ export const useAllBotUsersQuery = (enabled: boolean = true) => {
   });
 
   const contacts = useMemo(() => {
-    const list = queries.flatMap((q) => q.data || []);
-    const uniqueMap = new Map<string | number, BotUserResponse>();
-    list.forEach((u) => {
-      if (u) {
-        const key = u.telegramId ? String(u.telegramId) : u.id;
-        if (!uniqueMap.has(key)) {
-          uniqueMap.set(key, u);
-        }
-      }
+    const list = queries.flatMap((q, idx) => {
+      const currentBot = bots[idx];
+      return (q.data || []).map((u) => ({
+        ...u,
+        botId: u.botId || currentBot?.id,
+        botName: u.botName || currentBot?.name || '',
+      }));
     });
-    return Array.from(uniqueMap.values());
-  }, [queries]);
+    return list;
+  }, [queries, bots]);
 
   const isLoading = isBotsLoading || queries.some((q) => q.isLoading);
 

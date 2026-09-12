@@ -19,6 +19,7 @@ const CONTEXT_MENU_CONFIGS = [
   { type: 'MATH', isPro: false, isAi: false },
   { type: 'LEADERBOARD', isPro: false, isAi: false },
   { type: 'COOLDOWN', isPro: false, isAi: false },
+  { type: 'SCHEDULER', isPro: false, isAi: false },
   { type: 'API_CALL', isPro: false, isAi: false },
   { type: 'RANDOMIZER', isPro: true, isAi: false },
   { type: 'SMART_DELAY', isPro: true, isAi: false },
@@ -38,7 +39,7 @@ export const CONTEXT_MENU_GROUPS = [
     id: 'logic',
     titleKey: 'flow_builder.cat_logic',
     defaultTitle: 'Логіка та затримки',
-    types: ['CONDITION', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN'],
+    types: ['CONDITION', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN', 'SCHEDULER'],
   },
   {
     id: 'operations',

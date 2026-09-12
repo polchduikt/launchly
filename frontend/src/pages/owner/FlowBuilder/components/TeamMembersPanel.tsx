@@ -99,6 +99,19 @@ const getRoleDescription = (role: string) => {
   }
 };
 
+const TableHeaderTooltip: React.FC<{ label: string; tooltip: string }> = ({ label, tooltip }) => (
+  <div className="relative group inline-flex items-center gap-1.5 cursor-default select-none">
+    <span>{label}</span>
+    <span className="relative flex items-center justify-center">
+      <HelpCircle size={12} className="text-slate-400 group-hover:text-[#0A0A0A] transition-colors shrink-0" />
+      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 hidden group-hover:flex flex-col items-center w-52 p-2.5 bg-[#0A0A0A] text-white text-[11px] font-bold leading-snug rounded-xl shadow-xl z-50 pointer-events-none normal-case tracking-normal text-center animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#0A0A0A] rotate-45" />
+        {tooltip}
+      </div>
+    </span>
+  </div>
+);
+
 export const TeamMembersPanel: React.FC = () => {
   const activeBotId = useBotStore((state) => state.activeBotId);
   const currentUser = useAuthStore((s) => s.user);
@@ -402,21 +415,28 @@ export const TeamMembersPanel: React.FC = () => {
           </div>
 
           <div className="p-6">
-            <div className="bg-white border-2 border-[#0A0A0A] rounded-xl overflow-hidden text-xs">
-              <table className="w-full text-left">
+            <div className="border-2 border-[#0A0A0A] rounded-2xl bg-white overflow-hidden shadow-sm text-xs">
+              <table className="w-full text-left border-collapse">
                 <thead className="bg-slate-100 border-b-2 border-[#0A0A0A] font-extrabold uppercase text-[#0A0A0A]">
                   <tr>
                     <th className="px-6 py-3.5">{t('settings.members.table.name', "Ім'я")}</th>
-                    <th className="px-6 py-3.5">{t('settings.members.table.role', 'Роль')}</th>
-                    <th className="px-6 py-3.5 flex items-center gap-1">
-                      {t('settings.members.table.inbox', 'Доступ до Inbox')}
-                      <HelpCircle size={12} className="text-slate-400 cursor-help" />
+                    <th className="px-6 py-3.5">
+                      <TableHeaderTooltip
+                        label={t('settings.members.table.role', 'Роль')}
+                        tooltip={t('settings.members.table.role_desc', 'Визначає рівень прав та доступу учасника до функцій робочого простору')}
+                      />
                     </th>
                     <th className="px-6 py-3.5">
-                      <div className="flex items-center gap-1">
-                        {t('settings.members.table.billing', 'Оплата')}
-                        <HelpCircle size={12} className="text-slate-400 cursor-help" />
-                      </div>
+                      <TableHeaderTooltip
+                        label={t('settings.members.table.inbox', 'Доступ до Inbox')}
+                        tooltip={t('settings.members.table.inbox_desc', 'Дозволяє учаснику переглядати та вести діалоги в розділі Inbox')}
+                      />
+                    </th>
+                    <th className="px-6 py-3.5">
+                      <TableHeaderTooltip
+                        label={t('settings.members.table.billing', 'Оплата')}
+                        tooltip={t('settings.members.table.billing_desc', 'Дозволяє учаснику керувати підпискою, платіжними картками та переглядати рахунки')}
+                      />
                     </th>
                     <th className="px-6 py-3.5 text-right"></th>
                   </tr>
@@ -429,11 +449,6 @@ export const TeamMembersPanel: React.FC = () => {
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-extrabold text-[#0A0A0A]">{getMemberName(m)}</span>
-                            {m.userId === currentUser?.id && (
-                              <span className="bg-[#0A0A0A] text-white text-[9px] px-1.5 py-0.5 rounded uppercase font-black">
-                                {t('settings.members.badge.me', 'Це я')}
-                              </span>
-                            )}
                             {m.isPending && (
                               <span className="bg-amber-200 text-[#0A0A0A] text-[9px] px-1.5 py-0.5 rounded uppercase font-black border border-[#0A0A0A]">
                                 {t('settings.members.badge.pending', 'Очікує')}
@@ -453,12 +468,14 @@ export const TeamMembersPanel: React.FC = () => {
                         {m.billingPermission && <Check size={16} className="text-[#0A0A0A]" />}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => setEditingMemberId(m.id)}
-                          className="text-[#0A0A0A] hover:underline font-black uppercase cursor-pointer"
-                        >
-                          {t('settings.members.table.edit', 'Редагувати')}
-                        </button>
+                        {m.role?.toLowerCase() !== 'owner' && (
+                          <button
+                            onClick={() => setEditingMemberId(m.id)}
+                            className="text-[#0A0A0A] hover:underline font-black uppercase cursor-pointer"
+                          >
+                            {t('settings.members.table.edit', 'Редагувати')}
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

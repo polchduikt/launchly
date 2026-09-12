@@ -103,10 +103,10 @@ export const MessageTextBlock: React.FC<MessageTextBlockProps> = ({
                   : val === 'chat_type' ? 'Chat Type'
                   : val === 'chat_title' ? 'Chat Title'
                   : val === 'chat_id' ? 'Chat ID'
-                  : val === 'leaderboard' ? '🏆 Leaderboard (ТОП)'
-                  : val === 'user_rank' ? '🥇 User Rank (Місце)'
-                  : val === 'user_score' ? '⭐ User Score (Бали)'
-                  : val === 'awarded_points' ? '✨ Awarded Points (+Бали)'
+                  : val === 'leaderboard' ? 'Leaderboard (ТОП)'
+                  : val === 'user_rank' ? 'User Rank (Місце)'
+                  : val === 'user_score' ? 'User Score (Бали)'
+                  : val === 'awarded_points' ? 'Awarded Points (+Бали)'
                   : val;
                 const html = `<span class="inline-flex items-center bg-[#0A0A0A] text-[#F2EBDD] rounded-lg px-2 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline border border-[#0A0A0A]" contenteditable="false" data-type="variable" data-val="${val}">${displayName}</span>`;
                 onInsertHtml(html, block.id || '');

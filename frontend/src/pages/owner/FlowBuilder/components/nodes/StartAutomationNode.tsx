@@ -92,27 +92,27 @@ const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ i
         </div>
       </div>
 
-      <div className="p-4 select-none">
+      <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace] select-none">
         {targetBotName ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div 
               onClick={handleSelectClick}
-              className="relative flex items-center justify-between px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-100/50 transition-colors"
+              className="relative flex items-center justify-between px-3 py-2.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl cursor-pointer hover:bg-[#eae1d0] transition-colors"
             >
-              <span className="text-xs font-bold text-slate-800 truncate pr-6 select-all">
+              <span className="text-xs font-black text-[#0A0A0A] truncate pr-6 select-all">
                 {targetBotName}
               </span>
               <button
                 onClick={handleClear}
-                className="absolute right-2 p-1 text-slate-400 hover:text-slate-655 hover:bg-slate-150/50 rounded-md transition-colors cursor-pointer"
+                className="absolute right-2.5 p-1 text-[#0A0A0A]/60 hover:text-[#0A0A0A] hover:bg-[#0A0A0A]/10 rounded-lg transition-colors cursor-pointer"
               >
-                <X size={14} />
+                <X size={14} strokeWidth={2.5} />
               </button>
             </div>
             
             <button
               onClick={handleOpenAutomation}
-              className="w-full py-2 bg-white hover:bg-slate-50 border border-slate-200 text-[11px] font-bold text-slate-700 rounded-xl transition-all cursor-pointer shadow-xs"
+              className="w-full py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] rounded-xl transition-all cursor-pointer"
             >
               {t('node.start_automation.open')}
             </button>
@@ -120,10 +120,10 @@ const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ i
         ) : (
           <div 
             onClick={handleSelectClick}
-            className="flex flex-col items-center justify-center p-4 border border-dashed border-slate-300 rounded-2xl bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer text-slate-400 hover:text-slate-500"
+            className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-[#0A0A0A]/40 rounded-2xl bg-[#F2EBDD]/40 hover:bg-[#F2EBDD]/70 transition-colors cursor-pointer text-[#0A0A0A]/70 text-center"
           >
-            <SquareArrowRight size={20} className="stroke-[1.5] mb-1.5" />
-            <span className="text-[11px] font-bold tracking-tight">{t('node.start_automation.click_to_select')}</span>
+            <SquareArrowRight size={20} className="stroke-[2] mb-1.5" />
+            <span className="text-xs font-black tracking-tight text-center block w-full">{t('node.start_automation.click_to_select')}</span>
           </div>
         )}
       </div>

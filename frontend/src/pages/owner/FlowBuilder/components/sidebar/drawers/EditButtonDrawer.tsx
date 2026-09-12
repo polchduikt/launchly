@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Trash2, Send, Globe, CreditCard, Zap, GitFork, Shuffle, Clock, Play, Hourglass, Calculator, Trophy } from 'lucide-react';
+import { X, Trash2, Send, Globe, CreditCard, Zap, GitFork, Shuffle, Clock, Play, Hourglass, Calculator, Trophy, CalendarClock } from 'lucide-react';
 import { AiIcon } from '../../../../../../components/ui/AiIcon';
 import type { EditButtonDrawerProps } from '../../../../../../types/bot';
 import type { Node, Edge } from '@xyflow/react';
@@ -18,6 +18,7 @@ const mapNodeTypeToActionType = (nodeType?: string): string => {
     case 'CooldownNode': case 'COOLDOWN': return 'COOLDOWN';
     case 'MathNode': case 'MATH': return 'MATH';
     case 'LeaderboardNode': case 'LEADERBOARD': return 'LEADERBOARD';
+    case 'SchedulerNode': case 'SCHEDULER': return 'SCHEDULER';
     default: return 'TELEGRAM';
   }
 };
@@ -116,10 +117,9 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
     { type: 'COOLDOWN', label: t('editor.edit_button.action.cooldown', 'Таймаут'), icon: Hourglass, blockType: 'COOLDOWN', color: 'text-amber-700 bg-amber-100' },
     { type: 'MATH', label: t('editor.edit_button.action.math', 'Обчислення'), icon: Calculator, blockType: 'MATH', color: 'text-cyan-700 bg-cyan-100' },
     { type: 'LEADERBOARD', label: t('editor.edit_button.action.leaderboard', 'Рейтинг'), icon: Trophy, blockType: 'LEADERBOARD', color: 'text-fuchsia-700 bg-fuchsia-100' },
+    { type: 'SCHEDULER', label: t('editor.edit_button.action.scheduler', 'Планувальник'), icon: CalendarClock, blockType: 'SCHEDULER', color: 'text-emerald-700 bg-emerald-100' },
     { type: 'AUTOMATION', label: t('editor.edit_button.action.start_automation', 'Запустити іншу автоматизацію'), icon: Play, blockType: 'START_AUTOMATION', color: 'text-lime-700 bg-lime-100' },
   ];
-
-
 
   const actionCategoryGroups = [
     {
@@ -130,7 +130,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
     {
       id: 'logic',
       title: t('editor.edit_button.cat_logic', 'Логіка та затримки'),
-      types: ['CONDITION', 'RANDOM', 'DELAY', 'COOLDOWN'],
+      types: ['CONDITION', 'RANDOM', 'DELAY', 'COOLDOWN', 'SCHEDULER'],
     },
     {
       id: 'operations',

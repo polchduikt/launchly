@@ -27,12 +27,14 @@ export const getFlowKey = (nodes: Node[], edges: Edge[]) => {
 export const getFlowLogicKey = (nodes: Node[], edges: Edge[]): string => {
   if (!nodes || nodes.length === 0) return '';
 
-  const startNodes = nodes.filter(n => n.type === 'START' || n.type === 'START_BROADCAST');
-  if (startNodes.length === 0) return '';
+  const triggerNodes = nodes.filter(
+    (n) => n.type === 'START' || n.type === 'START_BROADCAST' || n.type === 'COMMAND' || n.type === 'SCHEDULER'
+  );
+  if (triggerNodes.length === 0) return '';
 
   const reachableNodeIds = new Set<string>();
-  const queue: string[] = startNodes.map(n => n.id);
-  startNodes.forEach(n => reachableNodeIds.add(n.id));
+  const queue: string[] = triggerNodes.map((n) => n.id);
+  triggerNodes.forEach((n) => reachableNodeIds.add(n.id));
 
   const adj = new Map<string, string[]>();
   edges.forEach(e => {
