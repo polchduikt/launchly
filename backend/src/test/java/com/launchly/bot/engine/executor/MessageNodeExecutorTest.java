@@ -103,4 +103,38 @@ class MessageNodeExecutorTest {
 
         assertThat(nextNode).isEqualTo("checkout-node");
     }
+
+    @Test
+    @DisplayName("Should combine image block and adjacent text block into single SendPhoto with caption")
+    void execute_ImageAndTextBlock_CombinesIntoSingleSendPhoto() throws Exception {
+        MessageNodeExecutor executor = new MessageNodeExecutor(stateService, redisTemplate, objectMapper);
+
+        Bot bot = Bot.builder().name("MessageBot").build();
+        bot.setId(1L);
+        BotUser botUser = BotUser.builder().bot(bot).telegramId(123456L).firstName("Elijah").build();
+
+        List<Map<String, Object>> blocks = List.of(
+                Map.of("type", "image", "imageUrl", "AgACAgIAAxk..."),
+                Map.of(
+                        "type", "text",
+                        "text", "{{First Name}}, 18\nAbout text\nCity",
+                        "buttons", List.of(Map.of("label", "Search", "value", "btn_search"))
+                )
+        );
+
+        FlowNode node = new FlowNode("msg-combined", NodeType.MESSAGE, Map.of("blocks", blocks), pos);
+        List<FlowEdge> edges = List.of(new FlowEdge("e1", "msg-combined", "next-step", null));
+
+        String nextNode = executor.execute(node, edges, botUser, new Update(), telegramClient);
+
+        assertThat(nextNode).isNull();
+        org.mockito.ArgumentCaptor<org.telegram.telegrambots.meta.api.methods.send.SendPhoto> captor =
+                org.mockito.ArgumentCaptor.forClass(org.telegram.telegrambots.meta.api.methods.send.SendPhoto.class);
+        verify(telegramClient).execute(captor.capture());
+        verify(telegramClient, never()).execute(any(SendMessage.class));
+
+        org.telegram.telegrambots.meta.api.methods.send.SendPhoto photo = captor.getValue();
+        assertThat(photo.getCaption()).contains("Elijah, 18");
+        assertThat(photo.getReplyMarkup()).isNotNull();
+    }
 }

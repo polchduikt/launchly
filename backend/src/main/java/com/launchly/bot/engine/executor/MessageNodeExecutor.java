@@ -69,7 +69,7 @@ public class MessageNodeExecutor implements NodeExecutor {
         MessageBlockHelper helper = new MessageBlockHelper(objectMapper);
         return List.of(
                 new TextMessageBlockHandler(helper),
-                new ImageMessageBlockHandler(),
+                new ImageMessageBlockHandler(helper),
                 new DelayMessageBlockHandler(),
                 new DataCollectionMessageBlockHandler(helper, redisTemplate, objectMapper),
                 new FileMessageBlockHandler(helper),
@@ -171,17 +171,95 @@ public class MessageNodeExecutor implements NodeExecutor {
             if (blocks != null && !blocks.isEmpty()) {
                 Long botId = botUser.getBot() != null ? botUser.getBot().getId() : null;
                 Map<String, String> sessionData = botId != null ? stateService.getSessionData(botId, botUser.getTelegramId()) : Map.of();
-                int blockIdx = 0;
-
-                for (Map<String, Object> block : blocks) {
+                for (int i = 0; i < blocks.size(); i++) {
+                    Map<String, Object> block = blocks.get(i);
                     String type = (String) block.get("type");
                     if (type == null) {
-                        blockIdx++;
                         continue;
                     }
 
+                    if ("image".equals(type) && i + 1 < blocks.size()) {
+                        Map<String, Object> nextBlock = blocks.get(i + 1);
+                        if ("text".equals(nextBlock.get("type"))) {
+                            String textContent = (String) nextBlock.getOrDefault("text", "");
+                            if (textContent != null && !textContent.trim().isEmpty()) {
+                                String resolvedText = helper.resolvePlaceholders(textContent, sessionData, botUser);
+                                String escapedText = helper.escapeHtml(resolvedText);
+                                String htmlText = helper.convertMarkdownLinksToHtml(escapedText);
+                                if (htmlText.length() <= 1024) {
+                                    List<?> combinedButtons = (List<?>) nextBlock.get("buttons");
+                                    if ((i + 1 == lastSendableIdx || i == lastSendableIdx) && menuButtons != null && !menuButtons.isEmpty()) {
+                                        combinedButtons = menuButtons;
+                                    } else if ((combinedButtons == null || combinedButtons.isEmpty()) && block.get("buttons") instanceof List<?> imgBtns && !imgBtns.isEmpty()) {
+                                        combinedButtons = imgBtns;
+                                    }
+                                    InlineKeyboardMarkup combinedMarkup = helper.buildMarkup(combinedButtons);
+
+                                    Map<String, Object> mergedBlock = new HashMap<>(block);
+                                    mergedBlock.put("caption", htmlText);
+
+                                    MessageBlockContext context = new MessageBlockContext(
+                                            mergedBlock, node, botUser, chatId, sessionData, combinedMarkup, client, i, lastSendableIdx
+                                    );
+                                    MessageBlockHandler handler = handlerMap.get("image");
+                                    if (handler != null) {
+                                        MessageBlockResult result = handler.handle(context);
+                                        if (result.haltFlow()) {
+                                            return null;
+                                        }
+                                        if (result.hasButtons()) {
+                                            hasButtons = true;
+                                        }
+                                    }
+                                    i++;
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                    if ("text".equals(type) && i + 1 < blocks.size()) {
+                        Map<String, Object> nextBlock = blocks.get(i + 1);
+                        if ("image".equals(nextBlock.get("type"))) {
+                            String textContent = (String) block.getOrDefault("text", "");
+                            if (textContent != null && !textContent.trim().isEmpty()) {
+                                String resolvedText = helper.resolvePlaceholders(textContent, sessionData, botUser);
+                                String escapedText = helper.escapeHtml(resolvedText);
+                                String htmlText = helper.convertMarkdownLinksToHtml(escapedText);
+                                if (htmlText.length() <= 1024) {
+                                    List<?> combinedButtons = (List<?>) block.get("buttons");
+                                    if ((i + 1 == lastSendableIdx || i == lastSendableIdx) && menuButtons != null && !menuButtons.isEmpty()) {
+                                        combinedButtons = menuButtons;
+                                    } else if ((combinedButtons == null || combinedButtons.isEmpty()) && nextBlock.get("buttons") instanceof List<?> imgBtns && !imgBtns.isEmpty()) {
+                                        combinedButtons = imgBtns;
+                                    }
+                                    InlineKeyboardMarkup combinedMarkup = helper.buildMarkup(combinedButtons);
+
+                                    Map<String, Object> mergedBlock = new HashMap<>(nextBlock);
+                                    mergedBlock.put("caption", htmlText);
+
+                                    MessageBlockContext context = new MessageBlockContext(
+                                            mergedBlock, node, botUser, chatId, sessionData, combinedMarkup, client, i + 1, lastSendableIdx
+                                    );
+                                    MessageBlockHandler handler = handlerMap.get("image");
+                                    if (handler != null) {
+                                        MessageBlockResult result = handler.handle(context);
+                                        if (result.haltFlow()) {
+                                            return null;
+                                        }
+                                        if (result.hasButtons()) {
+                                            hasButtons = true;
+                                        }
+                                    }
+                                    i++;
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
                     List<?> blockButtons = (List<?>) block.get("buttons");
-                    if (blockIdx == lastSendableIdx && menuButtons != null && !menuButtons.isEmpty()) {
+                    if (i == lastSendableIdx && menuButtons != null && !menuButtons.isEmpty()) {
                         blockButtons = menuButtons;
                     }
                     InlineKeyboardMarkup markup = helper.buildMarkup(blockButtons);
@@ -189,7 +267,7 @@ public class MessageNodeExecutor implements NodeExecutor {
                     MessageBlockHandler handler = handlerMap.get(type);
                     if (handler != null) {
                         MessageBlockContext context = new MessageBlockContext(
-                                block, node, botUser, chatId, sessionData, markup, client, blockIdx, lastSendableIdx
+                                block, node, botUser, chatId, sessionData, markup, client, i, lastSendableIdx
                         );
                         MessageBlockResult result = handler.handle(context);
                         if (result.haltFlow()) {
@@ -201,8 +279,6 @@ public class MessageNodeExecutor implements NodeExecutor {
                     } else if (!"telegram_menu".equals(type)) {
                         log.warn("Unknown message block type '{}' in node {}", type, node.id());
                     }
-
-                    blockIdx++;
                 }
 
                 if (lastSendableIdx == -1 && menuButtons != null && !menuButtons.isEmpty()) {
@@ -234,12 +310,13 @@ public class MessageNodeExecutor implements NodeExecutor {
                 Map<String, String> sessionData = botId != null ? stateService.getSessionData(botId, botUser.getTelegramId()) : Map.of();
 
                 if (hasImage) {
+                    String resolvedImageUrl = helper.resolvePlaceholders(imageUrl, sessionData, botUser);
                     String resolvedText = hasText ? helper.resolvePlaceholders(text, sessionData, botUser) : "";
                     String sanitizedText = !resolvedText.isEmpty() ? SanitizationUtil.sanitizeForTelegram(resolvedText) : "";
                     try {
                         SendPhoto sendPhoto = SendPhoto.builder()
                                 .chatId(chatId)
-                                .photo(new InputFile(imageUrl))
+                                .photo(new InputFile(resolvedImageUrl))
                                 .caption(sanitizedText)
                                 .replyMarkup(markup)
                                 .build();

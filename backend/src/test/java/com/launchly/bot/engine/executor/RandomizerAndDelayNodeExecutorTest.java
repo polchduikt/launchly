@@ -79,7 +79,7 @@ class RandomizerAndDelayNodeExecutorTest {
 
         String nextNode = executor.execute(node, edges, botUser, new Update(), telegramClient);
 
-        assertThat(nextNode).isNull(); // Suspended flow execution
+        assertThat(nextNode).isNull();
         verify(stateService).setSessionData(eq(1L), eq(111L), eq("delay_start_delay-1"), anyString());
     }
 }

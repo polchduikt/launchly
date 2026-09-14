@@ -27,6 +27,7 @@ import com.launchly.bot.service.SystemBotAuthService;
 import com.launchly.bot.telegram.TelegramClientProvider;
 import com.launchly.broadcast.dto.response.CampaignResponse;
 import com.launchly.broadcast.service.BroadcastService;
+import com.launchly.common.utils.SanitizationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -256,11 +257,67 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                     stateService.setCurrentNodeId(botId, telegramUserId, timeoutNodeId);
                     botUser.setCurrentNodeId(timeoutNodeId);
                     botUser = botUserRepository.save(botUser);
-                } else if (update.hasMessage() && update.getMessage().hasText()) {
-                    String text = update.getMessage().getText().trim();
-                    boolean isValid = inputValidator.validate(text, dcState.getReplyType());
-                    if (isValid) {
-                        saveCustomField(botUser, dcState.getSaveToField(), text);
+                } else {
+                    boolean isImageExpected = "image".equalsIgnoreCase(dcState.getReplyType()) || "photo".equalsIgnoreCase(dcState.getReplyType());
+                    boolean isValid = false;
+                    String valueToSave = null;
+                    String customErrorMessage = null;
+
+                    if (isImageExpected) {
+                        if (update.hasMessage() && update.getMessage().hasPhoto()) {
+                            var photos = update.getMessage().getPhoto();
+                            if (photos != null && !photos.isEmpty()) {
+                                var largestPhoto = photos.get(photos.size() - 1);
+                                if (largestPhoto.getFileSize() != null && largestPhoto.getFileSize() > BotInputValidator.MAX_IMAGE_SIZE_BYTES) {
+                                    isValid = false;
+                                    customErrorMessage = inputValidator.getImageSizeErrorMessage();
+                                } else {
+                                    valueToSave = largestPhoto.getFileId();
+                                    isValid = true;
+                                }
+                            }
+                        } else if (update.hasMessage() && update.getMessage().hasDocument()) {
+                            var doc = update.getMessage().getDocument();
+                            if (doc != null) {
+                                String mime = doc.getMimeType();
+                                String fileName = doc.getFileName() != null ? doc.getFileName().toLowerCase() : "";
+                                boolean isImageMime = mime != null && mime.toLowerCase().startsWith("image/");
+                                boolean isImageExt = fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")
+                                        || fileName.endsWith(".png") || fileName.endsWith(".webp")
+                                        || fileName.endsWith(".bmp") || fileName.endsWith(".gif");
+
+                                if (!isImageMime && !isImageExt) {
+                                    isValid = false;
+                                    customErrorMessage = inputValidator.getImageFormatErrorMessage();
+                                } else if (doc.getFileSize() != null && doc.getFileSize() > BotInputValidator.MAX_IMAGE_SIZE_BYTES) {
+                                    isValid = false;
+                                    customErrorMessage = inputValidator.getImageSizeErrorMessage();
+                                } else {
+                                    valueToSave = doc.getFileId();
+                                    isValid = true;
+                                }
+                            }
+                        } else {
+                            isValid = false;
+                            customErrorMessage = inputValidator.getValidationErrorMessage(dcState.getReplyType());
+                        }
+                    } else if (update.hasMessage() && update.getMessage().hasText()) {
+                        String text = update.getMessage().getText().trim();
+                        if (text.length() > BotInputValidator.MAX_TEXT_LENGTH) {
+                            isValid = false;
+                            customErrorMessage = inputValidator.getTextLengthErrorMessage();
+                        } else if (inputValidator.validate(text, dcState.getReplyType())) {
+                            valueToSave = text;
+                            isValid = true;
+                        }
+                    }
+
+                    if (isValid && valueToSave != null) {
+                        saveCustomField(botUser, dcState.getSaveToField(), valueToSave);
+                        if (isImageExpected) {
+                            botUser.setPhotoUrl(valueToSave);
+                            botUser = botUserRepository.save(botUser);
+                        }
                         redisTemplate.delete(dcKey);
                         String successNodeId = router.findTargetNodeId(edges, dcState.getNodeId(), "reply");
                         if (successNodeId == null) {
@@ -274,7 +331,11 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                         if (retriesLeft >= 0) {
                             dcState.setRetryCount(retriesLeft);
                             redisTemplate.opsForValue().set(dcKey, objectMapper.writeValueAsString(dcState));
-                            inputValidator.sendValidationErrorMessage(telegramUserId.toString(), dcState.getReplyType(), client);
+                            if (customErrorMessage != null) {
+                                inputValidator.sendCustomErrorMessage(telegramUserId.toString(), customErrorMessage, client);
+                            } else {
+                                inputValidator.sendValidationErrorMessage(telegramUserId.toString(), dcState.getReplyType(), client);
+                            }
                             return;
                         } else {
                             redisTemplate.delete(dcKey);
@@ -287,8 +348,6 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                             botUser = botUserRepository.save(botUser);
                         }
                     }
-                } else {
-                    return;
                 }
             }
 
@@ -528,8 +587,25 @@ public class FlowEngineServiceImpl implements FlowEngineService {
 
     @SuppressWarnings("unchecked")
     private void saveCustomField(BotUser botUser, String fieldName, String fieldValue) {
-        if (fieldName == null || fieldName.trim().isEmpty()) return;
+        if (fieldName == null || fieldName.trim().isEmpty() || fieldValue == null) return;
+        String cleanFieldName = fieldName.trim();
+        if (cleanFieldName.length() > 50) {
+            cleanFieldName = cleanFieldName.substring(0, 50);
+        }
+        cleanFieldName = cleanFieldName.replaceAll("[^a-zA-Z0-9_\\-\\.]", "");
+        if (cleanFieldName.isEmpty()) return;
+
+        String sanitizedValue = fieldValue.trim();
+        if (sanitizedValue.length() > BotInputValidator.MAX_TEXT_LENGTH) {
+            sanitizedValue = sanitizedValue.substring(0, BotInputValidator.MAX_TEXT_LENGTH);
+        }
+        sanitizedValue = SanitizationUtil.sanitizeForTelegram(sanitizedValue);
+
         try {
+            if ("photo_url".equalsIgnoreCase(cleanFieldName) || "photo".equalsIgnoreCase(cleanFieldName)
+                    || "image".equalsIgnoreCase(cleanFieldName) || "avatar".equalsIgnoreCase(cleanFieldName)) {
+                botUser.setPhotoUrl(sanitizedValue);
+            }
             Map<String, Object> metaMap = new HashMap<>();
             if (botUser.getMetadata() != null && !botUser.getMetadata().trim().isEmpty()) {
                 metaMap = objectMapper.readValue(botUser.getMetadata(), Map.class);
@@ -538,7 +614,9 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             if (customFields == null) {
                 customFields = new HashMap<>();
             }
-            customFields.put(fieldName, fieldValue);
+            if (customFields.size() < 100 || customFields.containsKey(cleanFieldName)) {
+                customFields.put(cleanFieldName, sanitizedValue);
+            }
             metaMap.put("customFields", customFields);
             botUser.setMetadata(objectMapper.writeValueAsString(metaMap));
             botUserRepository.save(botUser);

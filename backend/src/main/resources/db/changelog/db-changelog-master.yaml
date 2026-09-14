@@ -123,6 +123,8 @@ databaseChangeLog:
       file: db/changelog/changes/V061__add_response_mode_to_bots.sql
   - include:
       file: db/changelog/changes/V062__add_published_schema_to_flow_schemas.sql
+  - include:
+      file: db/changelog/changes/V063__create_bot_user_interactions_table.sql
 
 
 

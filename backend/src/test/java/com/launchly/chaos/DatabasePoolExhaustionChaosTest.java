@@ -13,7 +13,7 @@ class DatabasePoolExhaustionChaosTest {
     @Test
     @DisplayName("Chaos: HikariCP connection timeout under pool exhaustion throws SQLTimeoutException cleanly")
     void hikariConnectionTimeout_UnderPoolExhaustion_ThrowsCleanly() {
-        AtomicInteger activeConnections = new AtomicInteger(10); // max pool size = 10
+        AtomicInteger activeConnections = new AtomicInteger(10);
 
         assertThatThrownBy(() -> {
             int current = activeConnections.get();
@@ -28,7 +28,7 @@ class DatabasePoolExhaustionChaosTest {
     @Test
     @DisplayName("Chaos: HikariCP pool recovers when busy connections are returned")
     void hikariPoolRecovery_WhenConnectionsReturned() {
-        AtomicInteger activeConnections = new AtomicInteger(10); // full pool
+        AtomicInteger activeConnections = new AtomicInteger(10);
         activeConnections.addAndGet(-2);
         assertThat(activeConnections.get()).isEqualTo(8);
         boolean acquired = activeConnections.incrementAndGet() <= 10;

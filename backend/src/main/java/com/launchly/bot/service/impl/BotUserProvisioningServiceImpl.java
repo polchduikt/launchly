@@ -1,12 +1,10 @@
 package com.launchly.bot.service.impl;
 
 import com.launchly.billing.service.PlanLimitService;
-import com.launchly.bot.constant.TelegramConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.service.BotUserProvisioningService;
-import com.launchly.bot.service.UserAvatarService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,11 +18,10 @@ public class BotUserProvisioningServiceImpl implements BotUserProvisioningServic
 
     private final BotUserRepository botUserRepository;
     private final PlanLimitService planLimitService;
-    private final UserAvatarService userAvatarService;
 
     @Override
     public BotUser getOrCreateBotUser(Bot bot, Update update, Long telegramUserId, TelegramClient telegramClient) {
-        BotUser botUser = botUserRepository.findByTelegramIdAndBotId(telegramUserId, bot.getId())
+        return botUserRepository.findByTelegramIdAndBotId(telegramUserId, bot.getId())
                 .orElseGet(() -> {
                     planLimitService.checkBotUserLimit(bot.getId());
                     String username = null;
@@ -52,11 +49,5 @@ public class BotUserProvisioningServiceImpl implements BotUserProvisioningServic
                             .build();
                     return botUserRepository.save(newUser);
                 });
-
-        if ((botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith(TelegramConstants.API_BASE_URL)) && telegramClient != null) {
-            userAvatarService.fetchAndSetPhotoUrl(botUser, bot, telegramClient);
-        }
-
-        return botUser;
     }
 }

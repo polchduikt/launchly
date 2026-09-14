@@ -94,7 +94,18 @@ public class BotSubscriberServiceImpl implements BotSubscriberService {
             botUser.setLastName(request.lastName());
         }
         if (request.metadata() != null) {
-            botUser.setMetadata(request.metadata());
+            String metaStr = request.metadata().trim();
+            if (!metaStr.isEmpty()) {
+                if (metaStr.length() > 50_000) {
+                    throw new AppException(HttpStatus.BAD_REQUEST, "bot.error.metadata_too_large");
+                }
+                try {
+                    objectMapper.readTree(metaStr);
+                } catch (Exception e) {
+                    throw new AppException(HttpStatus.BAD_REQUEST, "bot.error.invalid_json");
+                }
+            }
+            botUser.setMetadata(metaStr);
         }
 
         botUser = botUserRepository.save(botUser);

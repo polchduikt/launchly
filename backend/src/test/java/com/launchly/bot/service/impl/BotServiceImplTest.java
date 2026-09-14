@@ -169,7 +169,7 @@ class BotServiceImplTest {
     @Test
     @DisplayName("Should return all bots owned or shared with the user")
     void getBotsByUser_Success() {
-        when(botRepository.findAllByUserId(1L)).thenReturn(List.of(testBot));
+        when(botRepository.findAllAccessibleByUserId(1L)).thenReturn(List.of(testBot));
         when(botMemberRepository.findByUserId(1L)).thenReturn(Collections.emptyList());
         when(botResponseFactory.toBotResponseListWithStats(any(), eq(1L), any())).thenReturn(List.of(mockBotResponse));
 

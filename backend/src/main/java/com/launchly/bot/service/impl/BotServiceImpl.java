@@ -479,6 +479,16 @@ public class BotServiceImpl implements BotService {
     public String saveCustomFields(Long botId, String customFieldsJson, Long userId) {
         Bot bot = findBotByIdAndUser(botId, userId);
         botAccessValidator.validateWriteAccess(bot, userId);
+        if (customFieldsJson != null && !customFieldsJson.trim().isEmpty()) {
+            if (customFieldsJson.length() > 100_000) {
+                throw new AppException(HttpStatus.BAD_REQUEST, "bot.error.custom_fields_payload_too_large");
+            }
+            try {
+                objectMapper.readTree(customFieldsJson);
+            } catch (Exception e) {
+                throw new AppException(HttpStatus.BAD_REQUEST, "bot.error.invalid_json");
+            }
+        }
         bot.setCustomFieldsData(customFieldsJson);
         botRepository.save(bot);
         return bot.getCustomFieldsData();

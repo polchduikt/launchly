@@ -21,6 +21,8 @@ public enum NodeType {
     MATH,
     LEADERBOARD,
     COOLDOWN,
-    SCHEDULER
+    SCHEDULER,
+    QUERY,
+    INTERACTION
 }
 

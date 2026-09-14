@@ -71,7 +71,7 @@ public class CooldownNodeExecutor implements NodeExecutor {
             case "SECONDS" -> duration * 1000L;
             case "HOURS" -> duration * 3600 * 1000L;
             case "DAYS" -> duration * 86400 * 1000L;
-            default -> duration * 60 * 1000L; // MINUTES
+            default -> duration * 60 * 1000L;
         };
 
         Map<String, String> sessionData = stateService.getSessionData(botId, telegramUserId);

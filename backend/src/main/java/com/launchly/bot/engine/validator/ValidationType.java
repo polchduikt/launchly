@@ -3,9 +3,11 @@ package com.launchly.bot.engine.validator;
 import java.util.regex.Pattern;
 
 public enum ValidationType {
-    NUMBER(Pattern.compile("-?\\d+(\\.\\d+)?")),
-    EMAIL(Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$")),
-    PHONE(Pattern.compile("^\\+?[0-9\\s\\-\\(\\)]+$")),
+    NUMBER(Pattern.compile("^-?\\d{1,15}(\\.\\d{1,10})?$")),
+    EMAIL(Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")),
+    PHONE(Pattern.compile("^\\+?[0-9\\s\\-\\(\\)]{5,25}$")),
+    IMAGE(null),
+    PHOTO(null),
     TEXT(null);
 
     private final Pattern pattern;
@@ -27,3 +29,4 @@ public enum ValidationType {
         }
     }
 }
+

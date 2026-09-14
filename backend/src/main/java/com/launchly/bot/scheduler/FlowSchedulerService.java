@@ -185,7 +185,7 @@ public class FlowSchedulerService {
                 long intervalMs = switch (intervalUnit.toLowerCase()) {
                     case "minutes" -> intervalVal * 60_000L;
                     case "days" -> intervalVal * 86_400_000L;
-                    default -> intervalVal * 3_600_000L; // hours
+                    default -> intervalVal * 3_600_000L;
                 };
                 String lastRunStr = redisTemplate.opsForValue().get(lastRunKey);
                 if (lastRunStr == null || lastRunStr.isBlank()) {
@@ -278,7 +278,6 @@ public class FlowSchedulerService {
 
     private void dispatchFlowExecution(Long botId, String startNodeId, String targetScope, String targetTag) {
         if ("system".equalsIgnoreCase(targetScope)) {
-            // Run once in context of any active bot subscriber or minimum telegramId user
             botUserRepository.findAllByBotId(botId).stream().findFirst().ifPresentOrElse(
                     user -> flowEngineService.runFlow(botId, user, startNodeId, null),
                     () -> log.warn("Cannot run system scheduler on botId={} because bot has 0 subscribers", botId)

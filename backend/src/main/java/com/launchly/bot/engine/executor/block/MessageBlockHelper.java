@@ -109,23 +109,45 @@ public class MessageBlockHelper {
                 replacement = variables != null ? variables.getOrDefault("chat_type", "private") : "private";
                 found = true;
             } else if (cleanName.equalsIgnoreCase("chat_id") || cleanName.equalsIgnoreCase("Chat Id") || cleanName.equalsIgnoreCase("Chat ID")) {
-                replacement = variables != null && variables.get("chat_id") != null
-                        ? variables.get("chat_id")
-                        : (botUser != null && botUser.getTelegramId() != null ? String.valueOf(botUser.getTelegramId()) : "");
+                replacement = (botUser != null && botUser.getTelegramId() != null)
+                        ? String.valueOf(botUser.getTelegramId())
+                        : (variables != null ? variables.getOrDefault("chat_id", "") : "");
                 found = true;
             } else if (cleanName.equalsIgnoreCase("chat_title") || cleanName.equalsIgnoreCase("Chat Title")) {
                 replacement = variables != null ? variables.getOrDefault("chat_title", "") : "";
                 found = true;
             } else if (cleanName.equalsIgnoreCase("first_name") || cleanName.equalsIgnoreCase("First Name")) {
-                replacement = (botUser != null && botUser.getFirstName() != null) ? botUser.getFirstName() : "";
+                if (botUser != null && botUser.getFirstName() != null && !botUser.getFirstName().trim().isEmpty()) {
+                    replacement = botUser.getFirstName();
+                } else if (variables != null && variables.containsKey("first_name")) {
+                    replacement = variables.get("first_name");
+                } else if (variables != null && variables.containsKey("First Name")) {
+                    replacement = variables.get("First Name");
+                } else {
+                    replacement = "";
+                }
                 found = true;
             } else if (cleanName.equalsIgnoreCase("last_name") || cleanName.equalsIgnoreCase("Last Name")) {
-                replacement = (botUser != null && botUser.getLastName() != null) ? botUser.getLastName() : "";
+                if (botUser != null && botUser.getLastName() != null && !botUser.getLastName().trim().isEmpty()) {
+                    replacement = botUser.getLastName();
+                } else if (variables != null && variables.containsKey("last_name")) {
+                    replacement = variables.get("last_name");
+                } else if (variables != null && variables.containsKey("Last Name")) {
+                    replacement = variables.get("Last Name");
+                } else {
+                    replacement = "";
+                }
                 found = true;
             } else if (cleanName.equalsIgnoreCase("username") || cleanName.equalsIgnoreCase("telegram_username") || cleanName.equalsIgnoreCase("Telegram Username")) {
                 String username = botUser != null ? botUser.getUsername() : null;
                 if (username != null && !username.trim().isEmpty()) {
                     replacement = username.startsWith("@") ? username : "@" + username;
+                } else if (variables != null && variables.containsKey("username") && variables.get("username") != null && !variables.get("username").trim().isEmpty()) {
+                    String u = variables.get("username").trim();
+                    replacement = u.startsWith("@") ? u : "@" + u;
+                } else if (variables != null && variables.containsKey("telegram_username") && variables.get("telegram_username") != null && !variables.get("telegram_username").trim().isEmpty()) {
+                    String u = variables.get("telegram_username").trim();
+                    replacement = u.startsWith("@") ? u : "@" + u;
                 } else {
                     replacement = "";
                 }
@@ -148,15 +170,18 @@ public class MessageBlockHelper {
             } else if (cleanName.equalsIgnoreCase("last_reply_type") || cleanName.equalsIgnoreCase("Last Reply Type")) {
                 replacement = variables != null ? variables.getOrDefault("last_reply_type", "text") : "text";
                 found = true;
-            }
-
-            if (!found && variables != null) {
-                for (Map.Entry<String, String> entry : variables.entrySet()) {
-                    if (entry.getKey().equalsIgnoreCase(cleanName) || entry.getKey().equalsIgnoreCase(strippedName)) {
-                        replacement = entry.getValue() != null ? entry.getValue() : "";
-                        found = true;
-                        break;
-                    }
+            } else if (cleanName.equalsIgnoreCase("photo_url") || cleanName.equalsIgnoreCase("Photo Url")
+                    || cleanName.equalsIgnoreCase("photo") || cleanName.equalsIgnoreCase("Photo")
+                    || cleanName.equalsIgnoreCase("avatar") || cleanName.equalsIgnoreCase("Avatar")) {
+                if (botUser != null && botUser.getPhotoUrl() != null && !botUser.getPhotoUrl().trim().isEmpty()) {
+                    replacement = botUser.getPhotoUrl();
+                    found = true;
+                } else if (variables != null && variables.containsKey("photo_url")) {
+                    replacement = variables.get("photo_url");
+                    found = true;
+                } else if (variables != null && variables.containsKey("found_photo_url")) {
+                    replacement = variables.get("found_photo_url");
+                    found = true;
                 }
             }
 
@@ -215,6 +240,32 @@ public class MessageBlockHelper {
                     }
                 } catch (Exception e) {
                     log.warn("Failed to parse metadata for placeholder {}: {}", cleanName, e.getMessage());
+                }
+            }
+
+            if (!found && variables != null) {
+                for (Map.Entry<String, String> entry : variables.entrySet()) {
+                    if (entry.getKey().equalsIgnoreCase(cleanName) || entry.getKey().equalsIgnoreCase(strippedName)) {
+                        replacement = entry.getValue() != null ? entry.getValue() : "";
+                        if (cleanName.toLowerCase().contains("username") && replacement != null && !replacement.isEmpty() && !replacement.startsWith("@")) {
+                            replacement = "@" + replacement;
+                        }
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found && cleanName.toLowerCase().startsWith("found_user.")) {
+                    String subKey = cleanName.substring("found_user.".length());
+                    for (Map.Entry<String, String> entry : variables.entrySet()) {
+                        if (entry.getKey().equalsIgnoreCase("found_" + subKey) || entry.getKey().equalsIgnoreCase(cleanName)) {
+                            replacement = entry.getValue() != null ? entry.getValue() : "";
+                            if (subKey.toLowerCase().contains("username") && replacement != null && !replacement.isEmpty() && !replacement.startsWith("@")) {
+                                replacement = "@" + replacement;
+                            }
+                            found = true;
+                            break;
+                        }
+                    }
                 }
             }
 
