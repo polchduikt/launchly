@@ -98,6 +98,7 @@
   "settings.fields.table_value": "Value",
   "settings.fields.type_boolean": "Boolean",
   "settings.fields.type_date": "Date",
+  "settings.fields.type_image": "Image / Photo",
   "settings.fields.type_label": "Type",
   "settings.fields.type_number": "Number",
   "settings.fields.type_text": "Text",

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import type { CustomNodeData } from '../../../../../../types/bot';
 import { t } from '../../../../../../i18n/config';
 
@@ -32,7 +32,7 @@ export const CommandNodeEditor: React.FC<CommandNodeEditorProps> = ({ data, hand
             value={rawCommand}
             onChange={handleCommandChange}
             placeholder="/command"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-teal-600 text-sm font-bold transition-all bg-white font-mono text-slate-800"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-sm font-bold transition-all bg-white font-mono text-slate-800"
           />
         </div>
         <p className="text-[11px] text-slate-400 mt-1.5 font-medium leading-relaxed">
@@ -50,12 +50,8 @@ export const CommandNodeEditor: React.FC<CommandNodeEditorProps> = ({ data, hand
           value={description}
           onChange={(e) => handleChange('description', e.target.value)}
           placeholder={t('editor.command.description_placeholder')}
-          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-teal-600 text-xs font-semibold transition-all resize-none bg-white text-slate-800"
+          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold transition-all resize-none bg-white text-slate-800"
         />
-      </div>
-
-      <div className="bg-teal-50/70 border border-teal-200/70 rounded-2xl p-3.5 text-xs text-teal-800 leading-relaxed font-semibold">
-        <p>{t('editor.command.info_tip')}</p>
       </div>
     </div>
   );

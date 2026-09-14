@@ -16,8 +16,12 @@ import {
   Trophy,
   Hourglass,
   CalendarClock,
+  Search,
+  HeartHandshake,
 } from 'lucide-react';
 import { AiIcon } from '../components/ui/AiIcon';
+
+import { t } from '../i18n/config';
 
 export const NODE_TITLES: Record<string, string> = {
   START: 'Trigger Settings',
@@ -27,7 +31,9 @@ export const NODE_TITLES: Record<string, string> = {
   ACTION: 'Actions',
   MATH: 'Calculation',
   LEADERBOARD: 'Leaderboard',
-  COOLDOWN: 'Cooldown (Timeout)',
+  QUERY: 'Data Query',
+  INTERACTION: 'Interaction',
+  COOLDOWN: 'Cooldown',
   SCHEDULER: 'Scheduler',
   END: 'End Session',
   SMART_DELAY: 'Smart Delay',
@@ -38,6 +44,17 @@ export const NODE_TITLES: Record<string, string> = {
   AI: 'AI Step',
 };
 
+export const getNodeTitle = (type?: string): string => {
+  if (!type) return '';
+  const normalized = type.toUpperCase().replace(/^NODE_?/, '');
+  const key = `node.title.${normalized.toLowerCase()}`;
+  const translated = t(key);
+  if (translated && translated !== key) {
+    return translated;
+  }
+  return NODE_TITLES[normalized] || type;
+};
+
 export const NODE_ICON_COMPONENTS: Record<string, LucideIcon | React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>> = {
   START: Zap,
   MESSAGE: Send,
@@ -46,6 +63,8 @@ export const NODE_ICON_COMPONENTS: Record<string, LucideIcon | React.ComponentTy
   ACTION: Sliders,
   MATH: Calculator,
   LEADERBOARD: Trophy,
+  QUERY: Search,
+  INTERACTION: HeartHandshake,
   COOLDOWN: Hourglass,
   SCHEDULER: CalendarClock,
   END: Octagon,
@@ -65,6 +84,8 @@ export const NODE_ICONS: Record<string, React.ReactNode> = {
   ACTION: <Sliders size={16} className="text-amber-600" />,
   MATH: <Calculator size={16} className="text-cyan-600" />,
   LEADERBOARD: <Trophy size={16} className="text-fuchsia-600" />,
+  QUERY: <Search size={16} className="text-indigo-600" />,
+  INTERACTION: <HeartHandshake size={16} className="text-rose-600" />,
   COOLDOWN: <Hourglass size={16} className="text-amber-600" />,
   SCHEDULER: <CalendarClock size={16} className="text-orange-600" />,
   END: <Octagon size={16} className="text-slate-500" />,

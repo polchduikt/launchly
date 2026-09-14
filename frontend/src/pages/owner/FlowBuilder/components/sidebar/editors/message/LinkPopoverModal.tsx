@@ -118,7 +118,7 @@ export const LinkPopoverModal: React.FC<LinkPopoverModalProps> = ({
 
             <div className="space-y-1">
               <label className="text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider block font-['Anybody',sans-serif]">
-                Website URL
+                {t('editor.message.link_website_url', 'URL веб-сайту')}
               </label>
               <input
                 type="text"
@@ -133,7 +133,7 @@ export const LinkPopoverModal: React.FC<LinkPopoverModalProps> = ({
 
             <div className="space-y-1">
               <label className="text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider block font-['Anybody',sans-serif]">
-                Link text
+                {t('editor.message.link_text_label', 'Текст посилання')}
               </label>
               <input
                 type="text"
@@ -141,7 +141,7 @@ export const LinkPopoverModal: React.FC<LinkPopoverModalProps> = ({
                 onChange={(e) => setLinkText(e.target.value)}
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
-                placeholder="Click here"
+                placeholder={t('editor.message.link_text_placeholder', 'Натисніть тут')}
                 className="w-full border-2 border-[#0A0A0A] rounded-xl px-3 py-2 text-xs font-bold focus:outline-none bg-white text-[#0A0A0A] placeholder:text-[#0A0A0A]/40"
               />
             </div>
@@ -160,7 +160,7 @@ export const LinkPopoverModal: React.FC<LinkPopoverModalProps> = ({
                   }}
                   className="flex-1 py-2 bg-white hover:bg-rose-50 border-2 border-rose-600 text-rose-600 rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
                 >
-                  Delete
+                  {t('editor.message.link_delete', 'Видалити')}
                 </button>
               )}
               <button
@@ -176,7 +176,7 @@ export const LinkPopoverModal: React.FC<LinkPopoverModalProps> = ({
                 }}
                 className="flex-1 py-2.5 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 disabled:bg-[#0A0A0A]/20 text-[#F2EBDD] text-xs font-black rounded-xl border-2 border-[#0A0A0A] transition-all cursor-pointer disabled:cursor-not-allowed uppercase tracking-wider font-['Anybody',sans-serif]"
               >
-                Save link
+                {t('editor.message.link_save', 'Зберегти посилання')}
               </button>
             </div>
           </div>

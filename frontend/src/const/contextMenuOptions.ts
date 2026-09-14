@@ -18,6 +18,8 @@ const CONTEXT_MENU_CONFIGS = [
   { type: 'ACTION', isPro: false, isAi: false },
   { type: 'MATH', isPro: false, isAi: false },
   { type: 'LEADERBOARD', isPro: false, isAi: false },
+  { type: 'QUERY', isPro: false, isAi: false },
+  { type: 'INTERACTION', isPro: false, isAi: false },
   { type: 'COOLDOWN', isPro: false, isAi: false },
   { type: 'SCHEDULER', isPro: false, isAi: false },
   { type: 'API_CALL', isPro: false, isAi: false },
@@ -45,7 +47,7 @@ export const CONTEXT_MENU_GROUPS = [
     id: 'operations',
     titleKey: 'flow_builder.cat_operations',
     defaultTitle: 'Операції та рейтинг',
-    types: ['ACTION', 'MATH', 'LEADERBOARD'],
+    types: ['ACTION', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION'],
   },
   {
     id: 'integrations',

@@ -280,6 +280,10 @@ export interface ActionItem {
   columnMappings?: Array<{ column: string; value: string }>;
   lookupColumn?: string;
   lookupValue?: string;
+  targetUserId?: string;
+  targetTelegramId?: string;
+  text?: string;
+  photoUrl?: string;
 }
 
 export type ConditionBranch = {

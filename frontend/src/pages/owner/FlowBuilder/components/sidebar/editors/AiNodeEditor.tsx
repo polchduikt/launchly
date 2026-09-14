@@ -422,7 +422,7 @@ export const AiNodeEditor: React.FC<AiNodeEditorProps> = ({ data, handleChange, 
                   editorState.setIsNextStepDrawerOpen?.(true);
                 }
               }}
-              className="w-full py-3.5 bg-white hover:bg-emerald-50/10 border border-dashed border-emerald-200 hover:border-emerald-400 text-emerald-700 hover:text-emerald-800 text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"
+              className="w-full py-2.5 bg-white hover:bg-indigo-50/30 border border-indigo-200 hover:border-indigo-450 text-indigo-650 hover:text-indigo-700 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm select-none"
             >
               {t('editor.ai.choose_next_step')}
             </button>

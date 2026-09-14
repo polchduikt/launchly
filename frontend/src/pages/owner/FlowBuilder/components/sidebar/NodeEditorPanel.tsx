@@ -19,7 +19,8 @@ import { MathNodeEditor } from './editors/MathNodeEditor';
 import { LeaderboardNodeEditor } from './editors/LeaderboardNodeEditor';
 import { CooldownNodeEditor } from './editors/CooldownNodeEditor';
 import { SchedulerNodeEditor } from './editors/SchedulerNodeEditor';
-
+import { QueryNodeEditor } from './editors/QueryNodeEditor';
+import { InteractionNodeEditor } from './editors/InteractionNodeEditor';
 
 interface NodeEditorPanelProps {
   node?: Node;
@@ -55,6 +56,12 @@ const NODE_EDITORS: Record<string, NodeEditorComponent> = {
   ),
   LEADERBOARD: ({ data, handleChange, editorState }) => (
     <LeaderboardNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
+  ),
+  QUERY: ({ node, data, handleChange, editorState, onSelectNode }) => (
+    <QueryNodeEditor nodeId={node.id} data={data} handleChange={handleChange} editorState={editorState} onSelectNode={onSelectNode} />
+  ),
+  INTERACTION: ({ node, data, handleChange, editorState, onSelectNode }) => (
+    <InteractionNodeEditor nodeId={node.id} data={data} handleChange={handleChange} editorState={editorState} onSelectNode={onSelectNode} />
   ),
   COOLDOWN: ({ data, handleChange, editorState }) => (
     <CooldownNodeEditor data={data} handleChange={handleChange} editorState={editorState} />

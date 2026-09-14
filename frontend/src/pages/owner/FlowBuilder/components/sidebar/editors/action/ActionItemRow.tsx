@@ -6,6 +6,7 @@ import {
   User,
   CheckSquare,
   FileSpreadsheet,
+  MessageSquare,
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
@@ -13,6 +14,7 @@ import type { ActionItem } from '../../../../../../../types/bot';
 import { t } from '../../../../../../../i18n/config';
 import { TagSearchSelect } from '../TagSearchSelect';
 import { SetUserFieldPopover } from '../SetUserFieldPopover';
+import { RichActionMessageEditor } from './RichActionMessageEditor';
 
 export interface ActionItemRowProps {
   action: ActionItem;
@@ -20,6 +22,8 @@ export interface ActionItemRowProps {
   totalActions: number;
   tags: Array<{ id: number | string; name: string }>;
   userFields: Array<{ name: string; type: string; description: string }>;
+  customFields?: string[];
+  nodeVariables?: Array<{ key: string; name: string; val: string; icon?: React.ReactNode }>;
   activePopoverIndex: number | null;
   setActivePopoverIndex: (index: number | null) => void;
   onMoveUp: (index: number) => void;
@@ -37,6 +41,8 @@ export const ActionItemRow: React.FC<ActionItemRowProps> = ({
   totalActions,
   tags,
   userFields,
+  customFields = [],
+  nodeVariables = [],
   activePopoverIndex,
   setActivePopoverIndex,
   onMoveUp,
@@ -72,6 +78,9 @@ export const ActionItemRow: React.FC<ActionItemRowProps> = ({
         return <CheckSquare size={14} className="text-emerald-500" />;
       case 'ASSIGN_AGENT':
         return <User size={14} className="text-blue-500" />;
+      case 'NOTIFY_CONTACT':
+      case 'NOTIFY_USER':
+        return <MessageSquare size={14} className="text-indigo-500" />;
       default:
         return <Plus size={14} className="text-slate-500" />;
     }
@@ -116,7 +125,7 @@ export const ActionItemRow: React.FC<ActionItemRowProps> = ({
         </div>
       </div>
 
-      <div className="pl-6 select-none">
+      <div className={`${(act.type === 'NOTIFY_CONTACT' || act.type === 'NOTIFY_USER') ? 'w-full' : 'pl-6'} select-none`}>
         {(act.type === 'ADD_TAG' || act.type === 'REMOVE_TAG') && (
           <div className="max-w-xs">
             <TagSearchSelect
@@ -219,6 +228,16 @@ export const ActionItemRow: React.FC<ActionItemRowProps> = ({
               ? t('editor.action.tg_sub_desc')
               : t('editor.action.tg_unsub_desc')}
           </div>
+        )}
+
+        {(act.type === 'NOTIFY_CONTACT' || act.type === 'NOTIFY_USER') && (
+          <RichActionMessageEditor
+            value={act.text || ''}
+            onChange={(newText) => onModify(index, { text: newText })}
+            customFields={customFields}
+            tags={tags}
+            nodeVariables={nodeVariables}
+          />
         )}
 
         {act.type === 'MARK_DONE' && (

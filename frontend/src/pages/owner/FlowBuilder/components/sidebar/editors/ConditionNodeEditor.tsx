@@ -268,7 +268,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
               <button
                 type="button"
                 onClick={() => addCondition(branch.id!)}
-                className="w-full py-2.5 bg-white hover:bg-teal-50/30 border border-dashed border-teal-200 hover:border-teal-400 text-teal-650 hover:text-teal-700 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 select-none shadow-xs"
+                className="w-full py-2.5 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 select-none shadow-xs"
               >
                 <Plus size={13} />
                 <span>{t('editor.condition.add_condition')}</span>
@@ -285,7 +285,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                     (editorState as EditorStateLocal).setIsNextStepDrawerOpen(true);
                   }
                 }}
-                className="w-full py-2.5 bg-white hover:bg-blue-50/20 border border-dashed border-blue-200 hover:border-blue-400 text-blue-600 hover:text-blue-700 text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"
+                className="w-full py-2.5 bg-white hover:bg-indigo-50/30 border border-indigo-200 hover:border-indigo-450 text-indigo-650 hover:text-indigo-700 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm select-none"
               >
                 {t('editor.condition.choose_next_step')}
               </button>
@@ -304,7 +304,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
         <button
           type="button"
           onClick={addBranch}
-          className="w-full py-2.5 bg-white hover:bg-teal-50/30 border border-dashed border-teal-200 hover:border-teal-400 text-teal-650 hover:text-teal-700 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 select-none shadow-xs"
+          className="w-full py-2.5 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 select-none shadow-xs"
         >
           <Plus size={13} />
           <span>{t('editor.condition.add_another')}</span>
@@ -318,7 +318,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
               (editorState as EditorStateLocal).setIsNextStepDrawerOpen(true);
             }
           }}
-          className="w-full py-2.5 bg-white hover:bg-blue-50/20 border border-dashed border-blue-200 hover:border-blue-400 text-blue-600 hover:text-blue-700 text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"
+          className="w-full py-2.5 bg-white hover:bg-indigo-50/30 border border-indigo-200 hover:border-indigo-450 text-indigo-650 hover:text-indigo-700 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm select-none"
         >
           {t('editor.condition.choose_next_step')}
         </button>

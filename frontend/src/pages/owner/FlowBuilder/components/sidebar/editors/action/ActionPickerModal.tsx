@@ -41,6 +41,7 @@ export const ActionPickerModal: React.FC<ActionPickerModalProps> = ({
     { type: 'REMOVE_TAG', title: t('editor.action.remove_tag_title'), desc: t('editor.action.remove_tag_desc'), icon: <Tag size={18} className="text-amber-500" />, category: 'contact' },
     { type: 'SET_USER_FIELD', title: t('editor.action.set_field_title'), desc: t('editor.action.set_field_desc'), icon: <User size={18} className="text-sky-500" />, category: 'contact' },
     { type: 'CLEAR_USER_FIELD', title: t('editor.action.clear_field_title'), desc: t('editor.action.clear_field_desc'), icon: <User size={18} className="text-sky-500" />, category: 'contact' },
+    { type: 'NOTIFY_CONTACT', title: t('editor.action.notify_contact_title', 'Сповістити контакт'), desc: t('editor.action.notify_contact_desc', 'Надіслати сповіщення знайденому або обраному контакту'), icon: <MessageSquare size={18} className="text-indigo-500" />, category: 'contact' },
 
     { type: 'TELEGRAM_SUBSCRIBE', title: t('editor.action.tg_subscribe_title'), desc: t('editor.action.tg_subscribe_desc'), icon: <CheckSquare size={18} className="text-indigo-500" />, category: 'automation' },
     { type: 'TELEGRAM_UNSUBSCRIBE', title: t('editor.action.tg_unsubscribe_title'), desc: t('editor.action.tg_unsubscribe_desc'), icon: <CheckSquare size={18} className="text-indigo-500" />, category: 'automation' },

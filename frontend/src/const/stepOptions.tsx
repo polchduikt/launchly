@@ -12,6 +12,8 @@ import {
   Terminal,
   Calculator,
   Trophy,
+  Search,
+  HeartHandshake,
 } from 'lucide-react';
 
 export const STEP_OPTION_GROUPS = [
@@ -31,7 +33,7 @@ export const STEP_OPTION_GROUPS = [
     id: 'operations',
     titleKey: 'flow_builder.cat_operations',
     defaultTitle: 'Операції та рейтинг',
-    types: ['ACTION', 'MATH', 'LEADERBOARD'],
+    types: ['ACTION', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION'],
   },
   {
     id: 'integrations',
@@ -82,6 +84,20 @@ export const STEP_OPTIONS = [
     get description() { return t('step_option.LEADERBOARD.desc', 'Rank users and generate leaderboard list text'); },
     icon: Trophy,
     color: 'text-fuchsia-600 bg-fuchsia-50 border-fuchsia-100',
+  },
+  {
+    type: 'QUERY',
+    get label() { return t('step_option.QUERY.label', 'Data Query'); },
+    get description() { return t('step_option.QUERY.desc', 'Search and filter contacts or catalog items'); },
+    icon: Search,
+    color: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+  },
+  {
+    type: 'INTERACTION',
+    get label() { return t('step_option.INTERACTION.label', 'Interaction'); },
+    get description() { return t('step_option.INTERACTION.desc', 'Record user reactions and check mutual matches'); },
+    icon: HeartHandshake,
+    color: 'text-rose-600 bg-rose-50 border-rose-100',
   },
   {
     type: 'COOLDOWN',

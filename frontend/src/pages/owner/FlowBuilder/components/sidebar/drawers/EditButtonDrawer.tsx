@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { X, Trash2, Send, Globe, CreditCard, Zap, GitFork, Shuffle, Clock, Play, Hourglass, Calculator, Trophy, CalendarClock } from 'lucide-react';
+import { X, Trash2, Send, Globe, CreditCard, Zap, GitFork, Shuffle, Clock, Play, Hourglass, Calculator, Trophy, CalendarClock, Search, HeartHandshake } from 'lucide-react';
 import { AiIcon } from '../../../../../../components/ui/AiIcon';
 import type { EditButtonDrawerProps } from '../../../../../../types/bot';
 import type { Node, Edge } from '@xyflow/react';
-import { NODE_TITLES } from '../../../../../../const/nodeDisplay';
+import { getNodeTitle } from '../../../../../../const/nodeDisplay';
 import { t } from '../../../../../../i18n/config';
 
 const mapNodeTypeToActionType = (nodeType?: string): string => {
@@ -18,6 +18,8 @@ const mapNodeTypeToActionType = (nodeType?: string): string => {
     case 'CooldownNode': case 'COOLDOWN': return 'COOLDOWN';
     case 'MathNode': case 'MATH': return 'MATH';
     case 'LeaderboardNode': case 'LEADERBOARD': return 'LEADERBOARD';
+    case 'QueryNode': case 'QUERY': return 'QUERY';
+    case 'InteractionNode': case 'INTERACTION': return 'INTERACTION';
     case 'SchedulerNode': case 'SCHEDULER': return 'SCHEDULER';
     default: return 'TELEGRAM';
   }
@@ -40,35 +42,35 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   const isStripeConnected = integrations.some((i: IntegrationResponse) => i.type === 'STRIPE' && i.active);
   const isPaypalConnected = integrations.some((i: IntegrationResponse) => i.type === 'PAYPAL' && i.active);
   const isPaymentConnected = isStripeConnected || isPaypalConnected;
-  const [label, setLabel] = useState('');
+  const [label, setLabel] = useState(button?.label || '');
   const [actionType, setActionType] = useState('');
   const [actionTarget, setActionTarget] = useState('');
   const [productName, setProductName] = useState('');
   const [price, setPrice] = useState('');
   const [currency, setCurrency] = useState('UAH');
 
-  const [prevButtonValue, setPrevButtonValue] = useState<string | null>(null);
-  if (button && button.value !== prevButtonValue) {
-    setPrevButtonValue(button.value);
-    setLabel(button.label || '');
-    const connectionEdge = (edges as Edge[]).find(
-      (e) => e.source === nodeId && e.sourceHandle === button.value
-    );
-    const targetNode = connectionEdge
-      ? (nodes as Node[]).find((n) => n.id === connectionEdge.target)
-      : null;
-      
-    let initialActionType = button.actionType || '';
-    if (!initialActionType && targetNode) {
-      initialActionType = mapNodeTypeToActionType(targetNode.type);
+  React.useEffect(() => {
+    if (button) {
+      setLabel(button.label || '');
+      const connectionEdge = (edges as Edge[]).find(
+        (e) => e.source === nodeId && e.sourceHandle === button.value
+      );
+      const targetNode = connectionEdge
+        ? (nodes as Node[]).find((n) => n.id === connectionEdge.target)
+        : null;
+
+      let initialActionType = button.actionType || '';
+      if (!initialActionType && targetNode) {
+        initialActionType = mapNodeTypeToActionType(targetNode.type);
+      }
+
+      setActionType(initialActionType);
+      setActionTarget(button.actionTarget || '');
+      setProductName(button.productName || '');
+      setPrice(button.price || '');
+      setCurrency(button.currency || 'UAH');
     }
-    
-    setActionType(initialActionType);
-    setActionTarget(button.actionTarget || '');
-    setProductName(button.productName || '');
-    setPrice(button.price || '');
-    setCurrency(button.currency || 'UAH');
-  }
+  }, [button?.value, button?.label, nodeId]);
 
   const typedEdges = edges as Edge[];
   const typedNodes = nodes as Node[];
@@ -85,7 +87,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   const getTargetNodeDisplayName = (tn: Node) => {
     const typedNodesFiltered = typedNodes.filter((n) => n.type === tn.type);
     const idx = typedNodesFiltered.findIndex((n) => n.id === tn.id);
-    const baseTitle = NODE_TITLES[tn.type || ''] || tn.type || '';
+    const baseTitle = getNodeTitle(tn.type);
     return idx !== -1 ? `${baseTitle} #${idx + 1}` : baseTitle;
   };
 
@@ -117,6 +119,8 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
     { type: 'COOLDOWN', label: t('editor.edit_button.action.cooldown', 'Таймаут'), icon: Hourglass, blockType: 'COOLDOWN', color: 'text-amber-700 bg-amber-100' },
     { type: 'MATH', label: t('editor.edit_button.action.math', 'Обчислення'), icon: Calculator, blockType: 'MATH', color: 'text-cyan-700 bg-cyan-100' },
     { type: 'LEADERBOARD', label: t('editor.edit_button.action.leaderboard', 'Рейтинг'), icon: Trophy, blockType: 'LEADERBOARD', color: 'text-fuchsia-700 bg-fuchsia-100' },
+    { type: 'QUERY', label: t('editor.edit_button.action.query', 'Запит даних'), icon: Search, blockType: 'QUERY', color: 'text-indigo-700 bg-indigo-100' },
+    { type: 'INTERACTION', label: t('editor.edit_button.action.interaction', 'Взаємодія'), icon: HeartHandshake, blockType: 'INTERACTION', color: 'text-rose-700 bg-rose-100' },
     { type: 'SCHEDULER', label: t('editor.edit_button.action.scheduler', 'Планувальник'), icon: CalendarClock, blockType: 'SCHEDULER', color: 'text-emerald-700 bg-emerald-100' },
     { type: 'AUTOMATION', label: t('editor.edit_button.action.start_automation', 'Запустити іншу автоматизацію'), icon: Play, blockType: 'START_AUTOMATION', color: 'text-lime-700 bg-lime-100' },
   ];
@@ -135,7 +139,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
     {
       id: 'operations',
       title: t('editor.edit_button.cat_operations', 'Операції та рейтинг'),
-      types: ['ACTIONS', 'MATH', 'LEADERBOARD'],
+      types: ['ACTIONS', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION'],
     },
     {
       id: 'integrations',
@@ -165,6 +169,12 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                 type="text"
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  }
+                }}
                 placeholder={t('editor.edit_button.title_placeholder')}
                 maxLength={25}
                 className="w-full px-4 py-2.5 pr-12 rounded-xl border-2 border-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/15 text-xs font-bold transition-all bg-white text-[#0A0A0A]"

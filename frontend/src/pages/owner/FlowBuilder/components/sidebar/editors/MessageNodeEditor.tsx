@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { useEdges, useReactFlow } from '@xyflow/react';
+import { useNodes, useEdges, useReactFlow } from '@xyflow/react';
 import type { ButtonData, FlowBlock } from '../../../../../../types/bot';
 import { useNodeEditor, getBlocks } from '../../../../../../hooks/bot/useNodeEditor';
 import { useBotStore } from '../../../../../../store/useBotStore';
@@ -48,6 +48,7 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = React.memo(({
   } = editorState;
 
   const { setNodes, fitView } = useReactFlow();
+  const nodes = useNodes();
   const edges = useEdges();
   const blocks = getBlocks(data);
 
@@ -59,6 +60,22 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = React.memo(({
       .map((f: unknown) => (typeof f === 'string' ? f : (f as { name?: string })?.name || ''))
       .filter((name): name is string => Boolean(name));
   }, [customFieldsData]);
+
+  const nodeVariables = useMemo(() => {
+    const hasQueryNode = nodes.some((n) => n.type?.toUpperCase() === 'QUERY' || n.type?.toLowerCase() === 'query');
+    if (!hasQueryNode) return [];
+
+    return [
+      { key: 'found_user.first_name', name: "Ім'я", val: 'found_user.first_name' },
+      { key: 'found_user.telegram_username', name: "Username", val: 'found_user.telegram_username' },
+      { key: 'found_user.telegram_id', name: "Telegram ID", val: 'found_user.telegram_id' },
+      ...customFields.map((cf) => ({
+        key: `found_user.${cf}`,
+        name: cf,
+        val: `found_user.${cf}`
+      }))
+    ];
+  }, [nodes, customFields]);
 
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
   const [activeLinkBlockId, setActiveLinkBlockId] = useState<string | null>(null);
@@ -402,6 +419,8 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = React.memo(({
                   hasTelegramMenu={blocks.some((b) => b.type === 'telegram_menu')}
                   customFields={customFields}
                   tags={tags}
+                  nodeVariables={nodeVariables}
+                  nodeCategoryLabel="Дані пошуку"
                 />
               )}
 
@@ -417,6 +436,9 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = React.memo(({
                   onOpenEditButton={handleOpenEditButton}
                   onAddButton={handleAddButton}
                   onJumpToNode={handleJumpToNode}
+                  tags={tags}
+                  customFields={customFields}
+                  nodeVariables={nodeVariables}
                 />
               )}
 
@@ -447,6 +469,9 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = React.memo(({
                   onOpenEditButton={handleOpenEditButton}
                   onAddButton={handleAddButton}
                   onJumpToNode={handleJumpToNode}
+                  tags={tags}
+                  customFields={customFields}
+                  nodeVariables={nodeVariables}
                 />
               )}
 
@@ -462,6 +487,9 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = React.memo(({
                   onOpenEditButton={handleOpenEditButton}
                   onAddButton={handleAddButton}
                   onJumpToNode={handleJumpToNode}
+                  tags={tags}
+                  customFields={customFields}
+                  nodeVariables={nodeVariables}
                 />
               )}
 
@@ -477,6 +505,9 @@ export const MessageNodeEditor: React.FC<MessageNodeEditorProps> = React.memo(({
                   onOpenEditButton={handleOpenEditButton}
                   onAddButton={handleAddButton}
                   onJumpToNode={handleJumpToNode}
+                  tags={tags}
+                  customFields={customFields}
+                  nodeVariables={nodeVariables}
                 />
               )}
 

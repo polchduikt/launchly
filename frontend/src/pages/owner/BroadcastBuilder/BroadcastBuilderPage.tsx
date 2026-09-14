@@ -958,7 +958,10 @@ const BroadcastBuilderInner: React.FC = () => {
                 />
               ) : activeNode && editorState.isBtnDialogOpen && editorState.editingButton ? (
                 <EditButtonDrawer
-                  onClose={() => editorState.setIsBtnDialogOpen(false)}
+                  onClose={() => {
+                    editorState.setIsBtnDialogOpen(false);
+                    useFlowUiStore.getState().closeEditButton();
+                  }}
                   button={editorState.editingButton}
                   onSave={editorState.handleSaveButton}
                   onRemove={editorState.handleRemoveButton}

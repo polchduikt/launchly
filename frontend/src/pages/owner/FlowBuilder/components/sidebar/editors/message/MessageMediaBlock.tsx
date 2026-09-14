@@ -3,6 +3,9 @@ import type { FlowBlock, ButtonData } from '../../../../../../../types/bot';
 import { MessageMediaUploader } from './MessageMediaUploader';
 import { BlockActionButtons } from './BlockActionButtons';
 
+import type { TagResponse } from '../../../../../../../types/broadcast';
+import type { NodeVariableItem } from '../FieldVariableSelector';
+
 export interface MessageMediaBlockProps {
   block: FlowBlock;
   type: 'image' | 'file' | 'audio' | 'video';
@@ -14,6 +17,9 @@ export interface MessageMediaBlockProps {
   onOpenEditButton: (btn: ButtonData, blockId: string) => void;
   onAddButton: (blockId: string) => void;
   onJumpToNode: (targetNodeId: string) => void;
+  tags?: TagResponse[];
+  customFields?: string[];
+  nodeVariables?: NodeVariableItem[];
 }
 
 export const MessageMediaBlock: React.FC<MessageMediaBlockProps> = ({
@@ -27,6 +33,9 @@ export const MessageMediaBlock: React.FC<MessageMediaBlockProps> = ({
   onOpenEditButton,
   onAddButton,
   onJumpToNode,
+  tags,
+  customFields,
+  nodeVariables,
 }) => {
   const blockBtns = (block.buttons || []) as ButtonData[];
 
@@ -76,6 +85,9 @@ export const MessageMediaBlock: React.FC<MessageMediaBlockProps> = ({
         onUploadClick={() => onUploadClick(getAccept())}
         onUrlChange={handleUrlChange}
         onDeleteMedia={handleDeleteMedia}
+        tags={tags}
+        customFields={customFields}
+        nodeVariables={nodeVariables}
       />
 
       <BlockActionButtons

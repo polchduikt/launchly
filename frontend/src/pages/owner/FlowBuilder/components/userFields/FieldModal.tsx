@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { t } from '../../../../../i18n/config';
 import type { UserField } from '../../../../../types/bot';
@@ -59,10 +60,10 @@ export const FieldModal: React.FC<FieldModalProps> = ({
     onSave(fieldData);
   };
 
-  return (
+  return createPortal(
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer font-['JetBrains_Mono',monospace]"
+      className="fixed inset-0 z-[99999] flex items-center justify-center bg-[#0A0A0A]/40 p-4 animate-in fade-in duration-200 cursor-pointer font-['JetBrains_Mono',monospace]"
     >
       <form
         onSubmit={handleSubmit}
@@ -111,6 +112,7 @@ export const FieldModal: React.FC<FieldModalProps> = ({
                 { value: 'Number', label: t('settings.fields.type_number') },
                 { value: 'Date', label: t('settings.fields.type_date') },
                 { value: 'Boolean', label: t('settings.fields.type_boolean') },
+                { value: 'Image', label: t('settings.fields.type_image', 'Зображення / Фото') },
               ]}
             />
           </div>
@@ -158,6 +160,7 @@ export const FieldModal: React.FC<FieldModalProps> = ({
           </button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body
   );
 };

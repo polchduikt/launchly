@@ -72,6 +72,10 @@ const mapActionToNodeType = (actionType?: string): string | null => {
       return 'MATH';
     case 'LEADERBOARD':
       return 'LEADERBOARD';
+    case 'QUERY':
+      return 'QUERY';
+    case 'INTERACTION':
+      return 'INTERACTION';
     case 'SCHEDULER':
       return 'SCHEDULER';
     default:
@@ -112,15 +116,28 @@ export const useNodeEditor = (
   useEffect(() => {
     if (editingButtonState && node && editingButtonState.nodeId === node.id) {
       const btn = editingButtonState.button;
-      setEditingButton(btn);
       const blocksList = getBlocks(node.data || {});
-      const parentBlock = blocksList.find((b) => 
-        ((b.buttons || []) as ButtonData[]).some((button) => button.value === btn.value)
-      );
-      setEditingButtonBlockId(parentBlock ? (parentBlock.id as string) : null);
+      let latestBtn = btn;
+      let foundBlockId: string | null = null;
+      for (const b of blocksList) {
+        const matching = ((b.buttons || []) as ButtonData[]).find((button) => button.value === btn.value);
+        if (matching) {
+          latestBtn = matching;
+          foundBlockId = b.id as string;
+          break;
+        }
+      }
+      if (!foundBlockId && Array.isArray(node.data?.buttons)) {
+        const matching = (node.data.buttons as ButtonData[]).find((button) => button.value === btn.value);
+        if (matching) {
+          latestBtn = matching;
+        }
+      }
+      setEditingButton(latestBtn);
+      setEditingButtonBlockId(foundBlockId);
       setIsBtnDialogOpen(true);
     }
-  }, [node, editingButtonState]);
+  }, [editingButtonState]);
 
   const data = (node?.data || {}) as CustomNodeData;
   const buttons = (data.buttons || []) as ButtonData[];
@@ -230,6 +247,8 @@ export const useNodeEditor = (
     }
     setEditingButton(null);
     setEditingButtonBlockId(null);
+    setIsBtnDialogOpen(false);
+    useFlowUiStore.getState().closeEditButton();
 
     const mappedType = mapActionToNodeType(updated.actionType);
     if (mappedType && node && onAddAndConnectNode) {
@@ -256,6 +275,8 @@ export const useNodeEditor = (
     }
     setEditingButton(null);
     setEditingButtonBlockId(null);
+    setIsBtnDialogOpen(false);
+    useFlowUiStore.getState().closeEditButton();
   };
 
   const [uploadAccept, setUploadAccept] = useState('image/*');

@@ -5,23 +5,27 @@ export const textToHtml = (text: string): string => {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
-  const varRegex = /\{\{\{?(.*?)\}?\}\}/g;
+  const varRegex = /\{{1,2}([^{}]+)\}{1,2}/g;
   escaped = escaped.replace(varRegex, (_match, p1) => {
     const rawName = p1.trim();
     let displayName = rawName;
-    if (rawName === 'first_name') displayName = 'First Name';
-    else if (rawName === 'last_name') displayName = 'Last Name';
-    else if (rawName === 'phone') displayName = 'Phone';
-    else if (rawName === 'email') displayName = 'Email';
-    else if (rawName === 'telegram_username') displayName = 'Telegram Username';
-    else if (rawName === 'telegram_user_id') displayName = 'Telegram User ID';
+    if (rawName === 'first_name' || rawName === 'found_user.first_name') displayName = 'First Name';
+    else if (rawName === 'last_name' || rawName === 'found_user.last_name') displayName = 'Last Name';
+    else if (rawName === 'phone' || rawName === 'found_user.phone') displayName = 'Phone';
+    else if (rawName === 'email' || rawName === 'found_user.email') displayName = 'Email';
+    else if (rawName === 'telegram_username' || rawName === 'found_user.telegram_username') displayName = 'Telegram Username';
+    else if (rawName === 'telegram_user_id' || rawName === 'found_user.telegram_id' || rawName === 'found_user.telegram_user_id') displayName = 'Telegram User ID';
     else if (rawName === 'contact_id') displayName = 'Contact Id';
     else if (rawName === 'subscribed') displayName = 'Subscribed';
     else if (rawName === 'chat_type') displayName = 'Chat Type';
     else if (rawName === 'chat_title') displayName = 'Chat Title';
     else if (rawName === 'chat_id') displayName = 'Chat ID';
+    else if (rawName === 'remaining') displayName = 'remaining';
+    else if (rawName === 'photo' || rawName === 'found_user.photo') displayName = 'photo';
+    else if (rawName === 'photo_url' || rawName === 'found_user.photo_url') displayName = 'photo_url';
+    else if (rawName.startsWith('found_user.')) displayName = rawName.substring('found_user.'.length);
 
-    return `<span class="inline-flex items-center bg-blue-600 text-white rounded px-1.5 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline" contenteditable="false" data-type="variable" data-val="${rawName}">${displayName}</span>`;
+    return `<span class="inline-flex items-center bg-[#0A0A0A] text-[#F2EBDD] rounded-lg px-2 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline border border-[#0A0A0A] font-mono" contenteditable="false" data-type="variable" data-val="${rawName}">${displayName}</span>`;
   });
 
   const mdLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
@@ -44,7 +48,7 @@ export const htmlToText = (html: string): string => {
       const el = node as HTMLElement;
       if (el.getAttribute('data-type') === 'variable') {
         const val = el.getAttribute('data-val') || '';
-        return `{{${val}}}`;
+        return val === 'remaining' ? '{remaining}' : `{{${val}}}`;
       }
       if (el.getAttribute('data-type') === 'link') {
         const url = el.getAttribute('data-url') || '';

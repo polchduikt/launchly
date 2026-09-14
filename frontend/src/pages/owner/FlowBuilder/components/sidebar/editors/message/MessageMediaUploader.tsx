@@ -1,6 +1,10 @@
 import React from 'react';
 import { Trash2, Loader2, Image as ImageIcon, Volume2, Video, Paperclip } from 'lucide-react';
 import { t } from '../../../../../../../i18n/config';
+import { FieldVariableSelector } from '../FieldVariableSelector';
+import { renderTextWithBadges } from '../../../../utils/textBadgeRenderer';
+import type { TagResponse } from '../../../../../../../types/broadcast';
+import type { NodeVariableItem } from '../FieldVariableSelector';
 
 interface MessageMediaUploaderProps {
   type: 'image' | 'audio' | 'video' | 'file';
@@ -10,6 +14,9 @@ interface MessageMediaUploaderProps {
   onUploadClick: () => void;
   onUrlChange: (newUrl: string) => void;
   onDeleteMedia: () => void;
+  tags?: TagResponse[];
+  customFields?: string[];
+  nodeVariables?: NodeVariableItem[];
 }
 
 export const MessageMediaUploader: React.FC<MessageMediaUploaderProps> = ({
@@ -20,10 +27,37 @@ export const MessageMediaUploader: React.FC<MessageMediaUploaderProps> = ({
   onUploadClick,
   onUrlChange,
   onDeleteMedia,
+  tags = [],
+  customFields = [],
+  nodeVariables,
 }) => {
   const renderPreview = () => {
     switch (type) {
       case 'image':
+        if (url && url.includes('{')) {
+          return (
+            <div className="relative group rounded-2xl p-3.5 border border-slate-200 bg-slate-50 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 overflow-hidden">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                  <ImageIcon size={15} />
+                </div>
+                <div className="overflow-hidden">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Динамічне фото</p>
+                  <div className="flex items-center flex-wrap gap-1">
+                    {renderTextWithBadges(url)}
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onDeleteMedia}
+                className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-xl transition-all cursor-pointer border border-slate-200 shrink-0"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          );
+        }
         return (
           <div className="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
             <img src={url} alt="Media" className="w-full h-32 object-cover" />
@@ -136,13 +170,26 @@ export const MessageMediaUploader: React.FC<MessageMediaUploaderProps> = ({
           <span>{t('editor.message.upload_file')}</span>
         </button>
       </div>
-      <input
-        type="text"
-        placeholder={getPlaceholder()}
-        value={url || ''}
-        onChange={(e) => onUrlChange(e.target.value)}
-        className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
-      />
+      <div className="relative flex items-center">
+        <input
+          type="text"
+          placeholder={getPlaceholder()}
+          value={url || ''}
+          onChange={(e) => onUrlChange(e.target.value)}
+          className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-semibold bg-slate-50/20"
+        />
+        <div className="absolute right-2.5">
+          <FieldVariableSelector
+            mode="variable"
+            tags={tags || []}
+            customFields={customFields}
+            nodeVariables={nodeVariables}
+            onSelect={(selectedVar) => {
+              onUrlChange(`{${selectedVar}}`);
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

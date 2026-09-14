@@ -9,6 +9,7 @@ import {
 import type { FlowBlock, ButtonData } from '../../../../../../../types/bot';
 import { t } from '../../../../../../../i18n/config';
 import { FieldVariableSelector } from '../FieldVariableSelector';
+import { textToHtml, htmlToText } from './contentEditableUtils';
 
 export interface MessageTextBlockProps {
   block: FlowBlock;
@@ -29,6 +30,8 @@ export interface MessageTextBlockProps {
   hasTelegramMenu: boolean;
   customFields: string[];
   tags: Array<{ id: number | string; name: string }>;
+  nodeVariables?: Array<{ key: string; name: string; val: string; icon?: React.ReactNode }>;
+  nodeCategoryLabel?: string;
 }
 
 export const MessageTextBlock: React.FC<MessageTextBlockProps> = ({
@@ -50,29 +53,48 @@ export const MessageTextBlock: React.FC<MessageTextBlockProps> = ({
   hasTelegramMenu,
   customFields,
   tags,
+  nodeVariables,
+  nodeCategoryLabel,
 }) => {
   const blockBtns = (block.buttons || []) as ButtonData[];
+  const editableRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (editableRef.current) {
+      editableRef.current.innerHTML = textToHtml(block.text || '');
+    }
+  }, [block.id]);
+
+  React.useEffect(() => {
+    if (editableRef.current && document.activeElement !== editableRef.current) {
+      const currentText = htmlToText(editableRef.current.innerHTML);
+      if (currentText !== (block.text || '')) {
+        editableRef.current.innerHTML = textToHtml(block.text || '');
+      }
+    }
+  }, [block.text]);
 
   return (
     <div className="flex flex-col">
       <div
         className="bg-white p-4 pb-2 relative flex flex-col min-h-[110px]"
         onFocus={() => setActiveBlockId(block.id || '')}
+        onClick={(e) => onContentEditableClick(e, block.id || '')}
       >
         <div
-          id={`contenteditable-block-${block.id || ''}`}
+          id={`contenteditable-block-${block.id}`}
+          ref={editableRef}
           contentEditable
+          suppressContentEditableWarning
+          className="text-xs leading-relaxed focus:outline-none min-h-[60px] pb-6 break-words whitespace-pre-wrap select-text font-sans font-medium"
           onInput={() => onContentEditableInput(block.id || '')}
+          onBlur={() => onSaveSelectionRange(block.id || '')}
           onKeyUp={() => onSaveSelectionRange(block.id || '')}
           onMouseUp={() => onSaveSelectionRange(block.id || '')}
-          onFocus={() => setActiveBlockId(block.id || '')}
-          onClick={(e) => onContentEditableClick(e, block.id || '')}
-          data-placeholder={t('editor.message.text_placeholder')}
-          className="w-full text-xs font-bold text-[#0A0A0A] focus:outline-none bg-transparent min-h-[80px] cursor-text break-words outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-[#0A0A0A]/40 empty:before:pointer-events-none font-['JetBrains_Mono',monospace]"
         />
 
         {activeBlockId === block.id && (
-          <div className="absolute bottom-2.5 right-3 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] px-3 py-1.5 rounded-full flex items-center gap-2.5 shadow-md z-30 font-['JetBrains_Mono',monospace]">
+          <div className="absolute bottom-2 right-2 bg-[#0A0A0A] text-[#F2EBDD] px-2.5 py-1 rounded-xl shadow-lg border-2 border-[#0A0A0A] flex items-center gap-2 z-10 animate-in fade-in zoom-in-95">
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
@@ -92,12 +114,12 @@ export const MessageTextBlock: React.FC<MessageTextBlockProps> = ({
             <FieldVariableSelector
               onSelect={(val) => {
                 const displayName =
-                  val === 'first_name' ? 'First Name'
-                  : val === 'last_name' ? 'Last Name'
-                  : val === 'phone' ? 'Phone'
-                  : val === 'email' ? 'Email'
-                  : val === 'telegram_username' ? 'Telegram Username'
-                  : val === 'telegram_user_id' ? 'Telegram User ID'
+                  val === 'first_name' || val === 'found_user.first_name' ? 'First Name'
+                  : val === 'last_name' || val === 'found_user.last_name' ? 'Last Name'
+                  : val === 'phone' || val === 'found_user.phone' ? 'Phone'
+                  : val === 'email' || val === 'found_user.email' ? 'Email'
+                  : val === 'telegram_username' || val === 'found_user.telegram_username' ? 'Telegram Username'
+                  : val === 'telegram_user_id' || val === 'found_user.telegram_id' || val === 'found_user.telegram_user_id' ? 'Telegram User ID'
                   : val === 'contact_id' ? 'Contact Id'
                   : val === 'subscribed' ? 'Subscribed'
                   : val === 'chat_type' ? 'Chat Type'
@@ -107,12 +129,17 @@ export const MessageTextBlock: React.FC<MessageTextBlockProps> = ({
                   : val === 'user_rank' ? 'User Rank (Місце)'
                   : val === 'user_score' ? 'User Score (Бали)'
                   : val === 'awarded_points' ? 'Awarded Points (+Бали)'
+                  : val === 'photo' || val === 'found_user.photo' ? 'photo'
+                  : val === 'photo_url' || val === 'found_user.photo_url' ? 'photo_url'
+                  : val.startsWith('found_user.') ? val.substring('found_user.'.length)
                   : val;
-                const html = `<span class="inline-flex items-center bg-[#0A0A0A] text-[#F2EBDD] rounded-lg px-2 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline border border-[#0A0A0A]" contenteditable="false" data-type="variable" data-val="${val}">${displayName}</span>`;
+                const html = `<span class="inline-flex items-center bg-[#0A0A0A] text-[#F2EBDD] rounded-lg px-2 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline border border-[#0A0A0A] font-mono" contenteditable="false" data-type="variable" data-val="${val}">${displayName}</span>`;
                 onInsertHtml(html, block.id || '');
               }}
               customFields={customFields}
               tags={tags}
+              nodeVariables={nodeVariables}
+              nodeCategoryLabel={nodeCategoryLabel}
               mode="variable"
               position="bottom"
               trigger={

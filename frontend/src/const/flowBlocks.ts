@@ -15,6 +15,8 @@ export const FLOW_BLOCK_COLORS: Record<string, string> = {
   MATH: 'text-cyan-700 bg-cyan-100',
   LEADERBOARD: 'text-fuchsia-700 bg-fuchsia-100',
   COOLDOWN: 'text-amber-700 bg-amber-100',
+  QUERY: 'text-indigo-700 bg-indigo-100',
+  INTERACTION: 'text-rose-700 bg-rose-100',
   API_CALL: 'text-indigo-600 bg-indigo-100',
   SMART_DELAY: 'text-rose-600 bg-rose-100',
   RANDOMIZER: 'text-purple-700 bg-purple-100',
@@ -26,7 +28,7 @@ export const FLOW_BLOCK_COLORS: Record<string, string> = {
   END: 'text-slate-600 bg-slate-200',
 };
 
-export const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'ACTION', 'MATH', 'LEADERBOARD', 'COOLDOWN', 'SCHEDULER', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMAND', 'COMMENT', 'AI', 'END'];
+export const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'ACTION', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION', 'COOLDOWN', 'SCHEDULER', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMAND', 'COMMENT', 'AI', 'END'];
 
 export const getFlowBlocks = (): Array<{ type: string; label: string; color: string; icon?: LucideIcon | React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }> }> =>
   FLOW_BLOCK_TYPES.map((type) => ({
@@ -53,7 +55,7 @@ export const FLOW_BLOCK_GROUPS = [
     id: 'operations',
     titleKey: 'flow_builder.cat_operations',
     defaultTitle: 'Операції та рейтинг',
-    types: ['ACTION', 'MATH', 'LEADERBOARD'],
+    types: ['ACTION', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION'],
   },
   {
     id: 'integrations',
@@ -111,6 +113,21 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
         showScores: true,
         sortOrder: 'DESC',
         customHeader: '',
+      };
+    case 'QUERY':
+      return {
+        outputPrefix: 'found_user',
+        sortOrder: 'RANDOM',
+        excludeSelf: true,
+        excludeInteractions: ['like', 'dislike'],
+        filters: [],
+      };
+    case 'INTERACTION':
+      return {
+        targetUserId: '{found_user.telegram_id}',
+        interactionType: 'like',
+        checkMutual: true,
+        mutualType: 'like',
       };
     case 'COOLDOWN':
       return {

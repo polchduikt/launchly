@@ -119,7 +119,7 @@ export const LeaderboardNodeEditor: React.FC<LeaderboardNodeEditorProps> = ({
             type="text"
             value={customHeader}
             onChange={(e) => handleChange('customHeader', e.target.value)}
-            placeholder="🏆 Рейтинг гравців:"
+            placeholder={t('node.leaderboard.custom_header_placeholder', 'Рейтинг гравців:')}
             className="w-full px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] placeholder:text-[#0A0A0A]/40 focus:outline-none"
           />
         </div>

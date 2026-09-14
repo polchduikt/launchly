@@ -35,4 +35,17 @@ describe('EditButtonDrawer', () => {
     );
     expect(screen.getByText('editor.edit_button.title')).toBeInTheDocument();
   });
+
+  it('renders query and interaction action options', () => {
+    render(
+      <EditButtonDrawer
+        onClose={vi.fn()}
+        button={{ label: 'Click Me', value: 'val_1', actionType: '' }}
+        onSave={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+    expect(screen.getByText('Запит даних')).toBeInTheDocument();
+    expect(screen.getByText("Взаємодія")).toBeInTheDocument();
+  });
 });

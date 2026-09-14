@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useNodes } from '@xyflow/react';
 import { Plus } from 'lucide-react';
 import type { ActionItem, ActionNodeEditorProps } from '../../../../../../types/bot';
 import { t } from '../../../../../../i18n/config';
@@ -26,6 +27,13 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = React.memo(({ d
   const createTagMutation = useCreateTagMutation(activeBotId || 0);
   const { data: integrations = [] } = useIntegrationsQuery();
 
+  let nodes: Array<{ id: string; type?: string }> = [];
+  try {
+    nodes = useNodes();
+  } catch {
+    nodes = [];
+  }
+
   const { data: customFieldsData } = useCustomFieldsQuery(activeBotId);
   const saveCustomFieldsMutation = useSaveCustomFieldsMutation(activeBotId);
   const [userFields, setUserFields] = useState<Array<{ name: string; type: string; description: string }>>([]);
@@ -50,6 +58,22 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = React.memo(({ d
   const customFields = useMemo(() => {
     return userFields.map(f => f.name);
   }, [userFields]);
+
+  const nodeVariables = useMemo(() => {
+    const hasQueryNode = nodes.some((n) => n.type?.toUpperCase() === 'QUERY' || n.type?.toLowerCase() === 'query');
+    if (!hasQueryNode) return [];
+
+    return [
+      { key: 'found_user.first_name', name: "Ім'я", val: 'found_user.first_name' },
+      { key: 'found_user.telegram_username', name: "Username", val: 'found_user.telegram_username' },
+      { key: 'found_user.telegram_id', name: "Telegram ID", val: 'found_user.telegram_id' },
+      ...customFields.map((cf) => ({
+        key: `found_user.${cf}`,
+        name: cf,
+        val: `found_user.${cf}`
+      }))
+    ];
+  }, [nodes, customFields]);
 
   const isGoogleSheetsConnected = integrations.some(
     (i) => i.type === 'GOOGLE_SHEETS' && i.active
@@ -187,6 +211,8 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = React.memo(({ d
                 totalActions={actions.length}
                 tags={tags}
                 userFields={userFields}
+                customFields={customFields}
+                nodeVariables={nodeVariables}
                 activePopoverIndex={activePopoverIndex}
                 setActivePopoverIndex={setActivePopoverIndex}
                 onMoveUp={handleMoveActionUp}
@@ -210,8 +236,9 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = React.memo(({ d
 
       <div className="space-y-3 mt-3">
         <button
+          type="button"
           onClick={() => setIsActionPickerOpen(true)}
-          className="w-full py-2.5 border border-dashed border-[#EED796] hover:border-[#ffb200] hover:bg-amber-50/30 text-[#ffb200] hover:text-[#ff9f00] text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+          className="w-full py-2.5 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
         >
           <Plus size={14} />
           <span>{t('editor.action.add_action')}</span>
@@ -219,8 +246,9 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = React.memo(({ d
 
         {!!editorState && (
           <button
+            type="button"
             onClick={() => (editorState as EditorStateLocal).setIsNextStepDrawerOpen(true)}
-            className="w-full py-2.5 border border-[#407BFF] hover:bg-blue-50/10 text-[#407BFF] hover:text-[#2d6ae5] text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+            className="w-full py-2.5 bg-white hover:bg-indigo-50/30 border border-indigo-200 hover:border-indigo-450 text-indigo-650 hover:text-indigo-700 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm select-none"
           >
             <span>{t('editor.action.choose_next_step')}</span>
           </button>

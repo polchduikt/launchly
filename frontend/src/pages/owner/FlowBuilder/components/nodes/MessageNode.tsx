@@ -9,6 +9,7 @@ import { getBlocks } from '../../../../../hooks/bot/useNodeEditor';
 import { useNodeHover } from '../../../../../hooks/bot/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 import { useFlowUiStore } from '../../../../../store/useFlowUiStore';
+import { renderTextWithBadges } from '../../utils/textBadgeRenderer';
 
 const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const { setNodes } = useReactFlow();
@@ -88,124 +89,6 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
     return groups;
   };
 
-  const renderTextWithBadges = (text: string) => {
-    if (!text) return '';
-
-    interface TokenMatch {
-      index: number;
-      length: number;
-      type: 'variable' | 'linkWithText' | 'rawUrl';
-      displayName: string;
-      url?: string;
-    }
-
-    const matches: TokenMatch[] = [];
-    const varRegex = /\{\{\{?(.*?)\}?\}\}/g;
-    let m;
-    while ((m = varRegex.exec(text)) !== null) {
-      const rawName = m[1].trim();
-      let displayName = rawName;
-      if (rawName === 'first_name') displayName = 'First Name';
-      else if (rawName === 'last_name') displayName = 'Last Name';
-      else if (rawName === 'phone') displayName = 'Phone';
-      else if (rawName === 'email') displayName = 'Email';
-      else if (rawName === 'telegram_username') displayName = 'Telegram Username';
-      else if (rawName === 'telegram_user_id') displayName = 'Telegram User ID';
-      else if (rawName === 'contact_id') displayName = 'Contact Id';
-      else if (rawName === 'subscribed') displayName = 'Subscribed';
-      else if (rawName === 'chat_type') displayName = 'Chat Type';
-      else if (rawName === 'chat_title') displayName = 'Chat Title';
-      else if (rawName === 'chat_id') displayName = 'Chat ID';
-
-      matches.push({
-        index: m.index,
-        length: m[0].length,
-        type: 'variable',
-        displayName
-      });
-    }
-
-    const mdLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
-    while ((m = mdLinkRegex.exec(text)) !== null) {
-      matches.push({
-        index: m.index,
-        length: m[0].length,
-        type: 'linkWithText',
-        displayName: m[1].trim(),
-        url: m[2].trim()
-      });
-    }
-
-    const rawUrlRegex = /(https?:\/\/[^\s()]+)/g;
-    while ((m = rawUrlRegex.exec(text)) !== null) {
-      const isPart = matches.some(existing => 
-        m!.index >= existing.index && 
-        (m!.index + m![0].length) <= (existing.index + existing.length)
-      );
-      if (!isPart) {
-        matches.push({
-          index: m.index,
-          length: m[0].length,
-          type: 'rawUrl',
-          displayName: m[1].trim(),
-          url: m[1].trim()
-        });
-      }
-    }
-
-    matches.sort((a, b) => a.index - b.index);
-
-    const filteredMatches: TokenMatch[] = [];
-    let lastEnd = 0;
-    for (const match of matches) {
-      if (match.index >= lastEnd) {
-        filteredMatches.push(match);
-        lastEnd = match.index + match.length;
-      }
-    }
-
-    const parts = [];
-    let currentIndex = 0;
-
-    for (const match of filteredMatches) {
-      if (match.index > currentIndex) {
-        parts.push(text.substring(currentIndex, match.index));
-      }
-
-      if (match.type === 'variable') {
-        parts.push(
-          <span 
-            key={match.index} 
-            className="inline-flex items-center bg-[#0A0A0A] text-[#F2EBDD] rounded-lg px-2 py-0.5 mx-0.5 font-bold text-[10px] select-none align-baseline shrink-0 border border-[#0A0A0A] font-mono"
-          >
-            {match.displayName}
-          </span>
-        );
-      } else if (match.type === 'linkWithText' || match.type === 'rawUrl') {
-        parts.push(
-          <a
-            key={match.index}
-            href={match.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline cursor-pointer font-bold inline-flex items-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {match.displayName}
-          </a>
-        );
-      }
-
-      currentIndex = match.index + match.length;
-    }
-
-    if (currentIndex < text.length) {
-      parts.push(text.substring(currentIndex));
-    }
-
-    return parts.length > 0 ? parts : text;
-  };
-
   return (
     <div
       {...bindHover}
@@ -246,27 +129,15 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                 {buttons.map((btn, btnIdx) => (
                   <div
                     key={btn.value + btnIdx}
-                    className="relative border border-slate-250 py-1.5 pl-3 pr-8 rounded-xl text-left text-[11px] font-bold bg-white text-slate-600 truncate flex items-center justify-between"
+                    className="relative border border-slate-250 py-1.5 px-3 rounded-xl text-left text-[11px] font-bold bg-white text-slate-600 truncate flex items-center justify-between"
                   >
                     <span className="truncate flex-1">{btn.label}</span>
                     {btn.actionType !== 'URL' && btn.actionType !== 'BUY' && (
-                      <Handle
+                      <NodeHandle
                         type="source"
                         position={Position.Right}
                         id={btn.value}
-                        style={{
-                          position: 'absolute',
-                          left: 'calc(100% - 20px)',
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          width: '8px',
-                          height: '8px',
-                        }}
-                        className={`!rounded-full !border-[1.5px] !z-20 ${
-                          data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')
-                            ? 'handle-connected'
-                            : 'handle-unconnected'
-                        }`}
+                        isConnected={data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')}
                       />
                     )}
                   </div>
@@ -300,9 +171,18 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
 
                       {block.type === 'image' && (
                         block.imageUrl ? (
-                          <div className="rounded-2xl overflow-hidden border-2 border-[#0A0A0A] max-h-40 flex items-center justify-center bg-[#F2EBDD] relative group">
-                            <img src={block.imageUrl} alt="Attachment" className="w-full h-full object-cover select-none" />
-                          </div>
+                          block.imageUrl.includes('{') ? (
+                            <div className="rounded-2xl border-2 border-[#0A0A0A] p-3 text-[11px] font-black text-[#0A0A0A] bg-[#F2EBDD] flex items-center gap-2 select-none">
+                              <ImageIcon size={14} className="text-[#0A0A0A] shrink-0" />
+                              <div className="flex items-center flex-wrap gap-1">
+                                {renderTextWithBadges(block.imageUrl)}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="rounded-2xl overflow-hidden border-2 border-[#0A0A0A] max-h-40 flex items-center justify-center bg-[#F2EBDD] relative group">
+                              <img src={block.imageUrl} alt="Attachment" className="w-full h-full object-cover select-none" />
+                            </div>
+                          )
                         ) : (
                           <div className="border-2 border-dashed border-[#0A0A0A]/40 rounded-2xl p-3 text-[11px] font-bold text-[#0A0A0A]/60 italic text-center flex items-center justify-center gap-1.5 bg-[#F2EBDD]/40">
                             <ImageIcon size={14} className="text-[#0A0A0A]/60" />
@@ -314,27 +194,27 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                       {block.type === 'file' && (
                         <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 text-[11px] font-bold text-[#0A0A0A] flex flex-col items-center justify-center gap-1.5">
                           <Paperclip size={14} className="text-[#0A0A0A]/60" />
-                          <span className="truncate max-w-full text-center">
-                            {block.fileUrl ? (block.fileName || 'File uploaded') : 'File'}
-                          </span>
+                          <div className="truncate max-w-full text-center">
+                            {block.fileUrl && block.fileUrl.includes('{') ? renderTextWithBadges(block.fileUrl) : (block.fileName || 'File')}
+                          </div>
                         </div>
                       )}
 
                       {block.type === 'audio' && (
                         <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 text-[11px] font-bold text-[#0A0A0A] flex flex-col items-center justify-center gap-1.5">
                           <Volume2 size={14} className="text-[#0A0A0A]/60" />
-                          <span className="truncate max-w-full text-center">
-                            {block.audioUrl ? 'Audio snippet' : 'Audio'}
-                          </span>
+                          <div className="truncate max-w-full text-center">
+                            {block.audioUrl && block.audioUrl.includes('{') ? renderTextWithBadges(block.audioUrl) : 'Audio'}
+                          </div>
                         </div>
                       )}
 
                       {block.type === 'video' && (
                         <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 text-[11px] font-bold text-[#0A0A0A] flex flex-col items-center justify-center gap-1.5">
                           <Video size={14} className="text-[#0A0A0A]/60" />
-                          <span className="truncate max-w-full text-center">
-                            {block.videoUrl ? 'Video clip' : 'Video'}
-                          </span>
+                          <div className="truncate max-w-full text-center">
+                            {block.videoUrl && block.videoUrl.includes('{') ? renderTextWithBadges(block.videoUrl) : 'Video'}
+                          </div>
                         </div>
                       )}
 
@@ -376,11 +256,12 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                                     <div key={rowKey} className="flex gap-2 w-full">
                                       {rowBtns.map((btn, btnIdx) => {
                                         const isActive = activeButtonValue === btn.value;
+                                        const isConnected = data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node');
                                         return (
                                           <div
                                             key={btn.value + btnIdx}
                                             onClick={(e) => handleButtonClick(e, btn)}
-                                            className={`relative border-2 border-[#0A0A0A] py-1.5 px-3 pr-7 rounded-xl text-left text-xs font-bold transition-all cursor-pointer shadow-xs select-none flex-1 truncate ${
+                                            className={`relative border-2 border-[#0A0A0A] py-1.5 px-3 rounded-xl text-left text-xs font-bold transition-all cursor-pointer shadow-xs select-none flex-1 min-w-0 ${
                                               isActive
                                                 ? 'bg-emerald-100 text-emerald-950 font-black'
                                                 : 'bg-white hover:bg-[#F2EBDD] text-[#0A0A0A]'
@@ -396,23 +277,11 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                                               )}
                                             </div>
                                             {btn.actionType !== 'URL' && btn.actionType !== 'BUY' && (
-                                              <Handle
+                                              <NodeHandle
                                                 type="source"
                                                 position={Position.Right}
                                                 id={btn.value}
-                                                style={{
-                                                  position: 'absolute',
-                                                  right: '8px',
-                                                  top: '50%',
-                                                  transform: 'translateY(-50%)',
-                                                  width: '9px',
-                                                  height: '9px',
-                                                }}
-                                                className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
-                                                  data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')
-                                                    ? '!bg-[#7b8794] !border-[#7b8794]'
-                                                    : '!bg-white !border-[#0A0A0A] hover:!border-slate-400'
-                                                }`}
+                                                isConnected={isConnected}
                                               />
                                             )}
                                           </div>
@@ -431,11 +300,12 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                         <div className="space-y-2 pt-1 nodrag font-['JetBrains_Mono',monospace]">
                           {blockBtns.map((btn, btnIdx) => {
                             const isActive = activeButtonValue === btn.value;
+                            const isConnected = data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node');
                             return (
                               <div
                                 key={btn.value + btnIdx}
                                 onClick={(e) => handleButtonClick(e, btn)}
-                                className={`relative border-2 border-[#0A0A0A] py-2.5 pl-4 pr-10 rounded-2xl text-left text-xs font-bold transition-all cursor-pointer shadow-xs select-none flex items-center justify-between gap-1 ${
+                                className={`relative border-2 border-[#0A0A0A] py-2 pl-3.5 pr-4 rounded-2xl text-left text-xs font-bold transition-all cursor-pointer shadow-xs select-none flex items-center justify-between gap-1 ${
                                   isActive
                                     ? 'bg-emerald-100 text-emerald-950 font-black'
                                     : 'bg-white hover:bg-[#F2EBDD] text-[#0A0A0A]'
@@ -448,23 +318,11 @@ const MessageNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
                                   </span>
                                 )}
                                 {btn.actionType !== 'URL' && btn.actionType !== 'BUY' && (
-                                  <Handle
+                                  <NodeHandle
                                     type="source"
                                     position={Position.Right}
                                     id={btn.value}
-                                    style={{
-                                      position: 'absolute',
-                                      left: 'calc(100% - 26px)',
-                                      top: '50%',
-                                      transform: 'translateY(-50%)',
-                                      width: '10px',
-                                      height: '10px',
-                                    }}
-                                    className={`!rounded-full !border-[1.5px] !transition-all !z-20 ${
-                                      data?._tempSourceHandle !== btn.value && sourceConns.some((c) => c.sourceHandle === btn.value && c.target !== 'temp_menu_node')
-                                        ? 'handle-connected'
-                                        : 'handle-unconnected'
-                                    }`}
+                                    isConnected={isConnected}
                                   />
                                 )}
                               </div>

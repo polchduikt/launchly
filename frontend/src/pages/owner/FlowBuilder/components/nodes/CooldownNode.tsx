@@ -7,6 +7,7 @@ import type { CustomNodeData } from '../../../../../types/bot';
 import { useNodeHover } from '../../../../../hooks/bot/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 import { t } from '../../../../../i18n/config';
+import { renderTextWithBadges } from '../../utils/textBadgeRenderer';
 
 const CooldownNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const sourceConns = useNodeConnections({ id, handleType: 'source' });
@@ -99,7 +100,7 @@ const CooldownNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
                 {t('node.cooldown.block_msg_label', 'Якщо зарано:')}
               </span>
               <div className="p-2 bg-white border border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] line-clamp-2 leading-snug">
-                {blockMessage}
+                {renderTextWithBadges(blockMessage)}
               </div>
             </div>
           </div>

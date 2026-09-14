@@ -40,6 +40,9 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
         return t('action.name.MARK_DONE');
       case 'ASSIGN_AGENT':
         return t('action.name.ASSIGN_AGENT');
+      case 'NOTIFY_CONTACT':
+      case 'NOTIFY_USER':
+        return t('action.name.NOTIFY_CONTACT', 'Сповістити контакт');
       default:
         return t('node.title.action');
     }
@@ -73,6 +76,9 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
         return t('action.name.MARK_DONE');
       case 'ASSIGN_AGENT':
         return t('action.name.ASSIGN_AGENT');
+      case 'NOTIFY_CONTACT':
+      case 'NOTIFY_USER':
+        return action.text ? action.text : t('action.name.NOTIFY_CONTACT', 'Сповістити контакт');
       default:
         return action.type || '';
     }

@@ -18,3 +18,5 @@ export { MathNode } from './MathNode';
 export { LeaderboardNode } from './LeaderboardNode';
 export { CooldownNode } from './CooldownNode';
 export { SchedulerNode } from './SchedulerNode';
+export { QueryNode } from './QueryNode';
+export { InteractionNode } from './InteractionNode';

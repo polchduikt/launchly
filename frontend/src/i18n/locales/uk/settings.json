@@ -98,6 +98,7 @@
   "settings.fields.table_value": "Значення",
   "settings.fields.type_boolean": "Логічне (Boolean)",
   "settings.fields.type_date": "Дата",
+  "settings.fields.type_image": "Зображення / Фото",
   "settings.fields.type_label": "Тип",
   "settings.fields.type_number": "Число",
   "settings.fields.type_text": "Текст",

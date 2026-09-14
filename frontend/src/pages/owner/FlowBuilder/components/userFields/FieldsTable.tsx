@@ -23,6 +23,9 @@ const getFieldTypeLabel = (type: string) => {
       return t('settings.fields.type_date', 'Дата');
     case 'boolean':
       return t('settings.fields.type_boolean', 'Логічне (Boolean)');
+    case 'image':
+    case 'photo':
+      return t('settings.fields.type_image', 'Зображення / Фото');
     default:
       return type || '-';
   }

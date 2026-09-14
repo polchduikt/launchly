@@ -233,7 +233,7 @@ export const RandomizerNodeEditor: React.FC<RandomizerNodeEditorProps> = ({
                         e.preventDefault();
                       }
                     }}
-                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-center text-xs font-bold text-slate-700 focus:outline-none focus:border-purple-500 transition-colors shadow-2xs"
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-center text-xs font-bold text-slate-700 focus:outline-none focus:border-indigo-500 transition-colors shadow-2xs"
                   />
                   <span className="text-xs font-bold text-slate-400 select-none">%</span>
                 </div>
@@ -247,10 +247,10 @@ export const RandomizerNodeEditor: React.FC<RandomizerNodeEditorProps> = ({
                     (editorState as EditorStateLocal).setIsNextStepDrawerOpen(true);
                   }
                 }}
-                className={`w-full py-2.5 border border-dashed rounded-xl text-xs font-bold transition-all cursor-pointer text-center select-none shadow-2xs ${
+                className={`w-full py-2.5 border rounded-2xl text-xs font-bold transition-all cursor-pointer text-center select-none shadow-sm ${
                   isConnected
-                    ? 'bg-purple-50/20 border-purple-250 text-purple-650 hover:border-purple-400'
-                    : 'bg-white border-slate-200 hover:border-slate-350 text-slate-500 hover:text-slate-700'
+                    ? 'bg-indigo-50/40 border-indigo-200 text-indigo-700 hover:border-indigo-300'
+                    : 'bg-white border-indigo-200 hover:border-indigo-450 text-indigo-650 hover:text-indigo-700'
                 }`}
               >
                 {isConnected ? t('flow_builder.step_connected') : t('flow_builder.choose_next_step')}
@@ -264,10 +264,10 @@ export const RandomizerNodeEditor: React.FC<RandomizerNodeEditorProps> = ({
         <button
           type="button"
           onClick={handleAddVariation}
-          className="w-full py-3.5 bg-white hover:bg-purple-50/10 border border-dashed border-purple-200 hover:border-purple-400 text-purple-600 hover:text-purple-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 select-none shadow-xs"
+          className="w-full py-2.5 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 select-none shadow-xs"
         >
           <Plus size={14} />
-          {t('node.randomizer.new_variation')}
+          <span>{t('node.randomizer.new_variation')}</span>
         </button>
       )}
     </div>
