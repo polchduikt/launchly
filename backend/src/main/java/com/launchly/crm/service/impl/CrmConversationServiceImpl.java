@@ -161,6 +161,12 @@ public class CrmConversationServiceImpl implements CrmConversationService {
 
     private ConversationResponse toConversationResponseWithLastMessage(Conversation conversation, Message last) {
         BotUser botUser = conversation.getBotUser();
+        if (botUser.getPhotoUrl() == null && botUser.getTelegramId() != null && botUser.getTelegramId() > 0) {
+            try {
+                userAvatarService.fetchAndSetPhotoUrl(botUser);
+            } catch (Exception ignored) {
+            }
+        }
         String botUserName = botUser.getFirstName() + (botUser.getLastName() != null ? " " + botUser.getLastName() : "");
 
         String lastMessage = null;

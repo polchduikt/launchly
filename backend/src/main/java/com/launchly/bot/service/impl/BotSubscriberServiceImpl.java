@@ -38,6 +38,7 @@ public class BotSubscriberServiceImpl implements BotSubscriberService {
     private final BotAccessValidator botAccessValidator;
     private final PlanLimitService planLimitService;
     private final ObjectMapper objectMapper;
+    private final com.launchly.bot.service.UserAvatarService userAvatarService;
 
     @Override
     @Transactional(readOnly = true)
@@ -58,20 +59,28 @@ public class BotSubscriberServiceImpl implements BotSubscriberService {
                 ));
 
         return botUsers.stream()
-                .map(bu -> new BotUserResponse(
-                        bu.getId(),
-                        bu.getTelegramId(),
-                        bu.getUsername(),
-                        bu.getFirstName(),
-                        bu.getLastName(),
-                        bu.getCurrentNodeId(),
-                        bu.getPhotoUrl(),
-                        bu.getMetadata(),
-                        tagsByBotUserId.getOrDefault(bu.getId(), List.of()),
-                        bu.getCreatedAt(),
-                        bu.getBot() != null ? bu.getBot().getId() : bot.getId(),
-                        bu.getBot() != null ? bu.getBot().getName() : bot.getName()
-                ))
+                .map(bu -> {
+                    if (bu.getPhotoUrl() == null && bu.getTelegramId() != null && bu.getTelegramId() > 0) {
+                        try {
+                            userAvatarService.fetchAndSetPhotoUrl(bu);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    return new BotUserResponse(
+                            bu.getId(),
+                            bu.getTelegramId(),
+                            bu.getUsername(),
+                            bu.getFirstName(),
+                            bu.getLastName(),
+                            bu.getCurrentNodeId(),
+                            bu.getPhotoUrl(),
+                            bu.getMetadata(),
+                            tagsByBotUserId.getOrDefault(bu.getId(), List.of()),
+                            bu.getCreatedAt(),
+                            bu.getBot() != null ? bu.getBot().getId() : bot.getId(),
+                            bu.getBot() != null ? bu.getBot().getName() : bot.getName()
+                    );
+                })
                 .toList();
     }
 

@@ -23,6 +23,7 @@ public enum NodeType {
     COOLDOWN,
     SCHEDULER,
     QUERY,
-    INTERACTION
+    INTERACTION,
+    SUBSCRIPTION_CHECK
 }
 

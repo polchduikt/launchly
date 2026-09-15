@@ -5,6 +5,7 @@ import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.service.BotUserProvisioningService;
+import com.launchly.bot.service.UserAvatarService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,21 @@ public class BotUserProvisioningServiceImpl implements BotUserProvisioningServic
 
     private final BotUserRepository botUserRepository;
     private final PlanLimitService planLimitService;
+    private final UserAvatarService userAvatarService;
 
     @Override
     public BotUser getOrCreateBotUser(Bot bot, Update update, Long telegramUserId, TelegramClient telegramClient) {
         return botUserRepository.findByTelegramIdAndBotId(telegramUserId, bot.getId())
+                .map(existingUser -> {
+                    if (existingUser.getPhotoUrl() == null && telegramClient != null) {
+                        try {
+                            userAvatarService.fetchAndSetPhotoUrl(existingUser, bot, telegramClient);
+                        } catch (Exception e) {
+                            log.debug("Could not fetch avatar for existing user {}: {}", existingUser.getTelegramId(), e.getMessage());
+                        }
+                    }
+                    return existingUser;
+                })
                 .orElseGet(() -> {
                     planLimitService.checkBotUserLimit(bot.getId());
                     String username = null;
@@ -47,7 +59,15 @@ public class BotUserProvisioningServiceImpl implements BotUserProvisioningServic
                             .lastName(lastName)
                             .bot(bot)
                             .build();
-                    return botUserRepository.save(newUser);
+                    BotUser savedUser = botUserRepository.save(newUser);
+                    if (telegramClient != null) {
+                        try {
+                            userAvatarService.fetchAndSetPhotoUrl(savedUser, bot, telegramClient);
+                        } catch (Exception e) {
+                            log.debug("Could not fetch avatar for new user {}: {}", savedUser.getTelegramId(), e.getMessage());
+                        }
+                    }
+                    return savedUser;
                 });
     }
 }
