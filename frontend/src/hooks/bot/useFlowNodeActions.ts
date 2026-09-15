@@ -4,7 +4,7 @@ import type { Edge, Node } from '@xyflow/react';
 import { FLOW_EDGE_DEFAULTS } from '../../const/flowEdges';
 import { createDefaultNodeData } from '../../const/flowBlocks';
 import { getAutoLayoutedElements } from '../../utils/flowLayout';
-import { getNodesAfterRemovingEdges } from '../../utils/flowHelpers';
+import { getNodesAfterRemovingEdges, isStartNode } from '../../utils/flowHelpers';
 import type { FlowContextMenuState } from './useFlowContextMenu';
 
 interface UseFlowNodeActionsParams {
@@ -239,7 +239,7 @@ export const useFlowNodeActions = ({
   const handleDeleteSelectedNode = useCallback(() => {
     if (!selectedNodeId) return;
     const nodeToDelete = nodes.find((n) => n.id === selectedNodeId);
-    if (nodeToDelete?.type === 'START') {
+    if (!nodeToDelete || isStartNode(nodeToDelete)) {
       triggerSaveError('You cannot delete the START node');
       return;
     }

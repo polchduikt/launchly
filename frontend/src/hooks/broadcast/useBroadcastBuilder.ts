@@ -17,7 +17,7 @@ import { useBotsQuery } from '../bot/useBotsQuery';
 import type { CampaignResponse } from '../../types';
 import type { CustomNode } from '../../types/broadcast';
 import { useFlowHistory } from '../bot/useFlowHistory';
-import { getFlowKey, getNodesAfterRemovingEdges } from '../../utils/flowHelpers';
+import { getFlowKey, getNodesAfterRemovingEdges, isStartNode } from '../../utils/flowHelpers';
 import { getBlocks } from '../bot/useNodeEditor';
 import { FLOW_EDGE_DEFAULTS } from '../../const/flowEdges';
 import type { ButtonData } from '../../types/bot';
@@ -473,7 +473,7 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
   const handleDeleteNode = useCallback(
     (nodeId: string) => {
       const nodeToDelete = nodes.find((n) => n.id === nodeId);
-      if (!nodeToDelete || nodeToDelete.type === 'START_BROADCAST') return;
+      if (!nodeToDelete || isStartNode(nodeToDelete)) return;
 
       takeSnapshot();
       setNodes((nds) => nds.filter((n) => n.id !== nodeId));
@@ -583,13 +583,25 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      const hasRemoval = changes.some((c) => c.type === 'remove');
+      const safeChanges = changes.filter((c) => {
+        if (c.type === 'remove') {
+          const node = nodes.find((n) => n.id === c.id);
+          if (isStartNode(node) || c.id === 'start' || c.id === 'node_start' || c.id === 'start_broadcast') {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (safeChanges.length === 0) return;
+
+      const hasRemoval = safeChanges.some((c) => c.type === 'remove');
       if (hasRemoval) {
         takeSnapshot();
       }
-      onNodesChangeState(changes);
+      onNodesChangeState(safeChanges);
     },
-    [onNodesChangeState, takeSnapshot]
+    [nodes, onNodesChangeState, takeSnapshot]
   );
 
   const onEdgesChange = useCallback(
@@ -627,28 +639,28 @@ export const useBroadcastBuilder = (isLocalChangeRef?: MutableRefObject<boolean>
       hidden: !contextMenu,
     };
 
-    if (contextMenu) {
-      const { source } = contextMenu;
-      const mappedNodes = nodes.map((node) => {
-        if (node.id === source.nodeId) {
-          let sourceHandle = source.handleType === 'source' ? source.handleId : null;
-          if (!sourceHandle) {
-            sourceHandle = node.type === 'START_BROADCAST' ? 'then' : 'next';
+    const baseNodes = contextMenu
+      ? nodes.map((node) => {
+          if (node.id === contextMenu.source.nodeId) {
+            let sourceHandle = contextMenu.source.handleType === 'source' ? contextMenu.source.handleId : null;
+            if (!sourceHandle) {
+              sourceHandle = isStartNode(node) ? 'then' : 'next';
+            }
+            return {
+              ...node,
+              deletable: isStartNode(node) ? false : node.deletable,
+              data: {
+                ...node.data,
+                _hasTempConnection: true,
+                _tempSourceHandle: sourceHandle,
+              },
+            };
           }
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              _hasTempConnection: true,
-              _tempSourceHandle: sourceHandle,
-            },
-          };
-        }
-        return node;
-      });
-      return [...mappedNodes, tempNode];
-    }
-    return [...nodes, tempNode];
+          return isStartNode(node) ? { ...node, deletable: false } : node;
+        })
+      : nodes.map((node) => (isStartNode(node) ? { ...node, deletable: false } : node));
+
+    return [...baseNodes, tempNode];
   }, [nodes, contextMenu]);
 
   const displayEdges = useMemo(() => {

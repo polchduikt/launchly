@@ -64,7 +64,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = React.memo(({ d
     if (!hasQueryNode) return [];
 
     return [
-      { key: 'found_user.first_name', name: "Ім'я", val: 'found_user.first_name' },
+      { key: 'found_user.first_name', name: t('editor.action.var_first_name', "Ім'я"), val: 'found_user.first_name' },
       { key: 'found_user.telegram_username', name: "Username", val: 'found_user.telegram_username' },
       { key: 'found_user.telegram_id', name: "Telegram ID", val: 'found_user.telegram_id' },
       ...customFields.map((cf) => ({

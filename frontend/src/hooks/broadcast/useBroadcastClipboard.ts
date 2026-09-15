@@ -5,6 +5,7 @@ import type { ButtonData } from '../../types/bot';
 import { STORAGE_KEYS } from '../../const/constants';
 import { generateId } from '../../utils/id';
 import { getBlocks } from '../bot/useNodeEditor';
+import { isStartNode } from '../../utils/flowHelpers';
 
 interface UseBroadcastClipboardProps {
   nodes: CustomNode[];
@@ -63,7 +64,7 @@ export const useBroadcastClipboard = ({
     const centerY = window.innerHeight / 2;
     const flowCenter = screenToFlowPosition({ x: centerX, y: centerY });
 
-    const validNodes = copiedNodes.filter((n) => n.type !== 'START');
+    const validNodes = copiedNodes.filter((n) => !isStartNode(n));
     let minX = Infinity;
     let maxX = -Infinity;
     let minY = Infinity;
@@ -89,7 +90,7 @@ export const useBroadcastClipboard = ({
 
     const newNodes = copiedNodes
       .map((node) => {
-        if (node.type === 'START') return null;
+        if (isStartNode(node)) return null;
 
         const newId = generateId(`node_${node.type?.toLowerCase() || 'msg'}`);
         nodeIdMap[node.id] = newId;

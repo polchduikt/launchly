@@ -171,6 +171,21 @@ function getNodeInfo(node: Node): NodeInfo {
     };
   }
 
+  if (t === 'SUBSCRIPTION_CHECK') {
+    return {
+      kind: 'path',
+      pathChoice: {
+        title: 'Choose the path to continue',
+        subtitle: 'Subscription Check: In real conversation the path is verified via Telegram API.',
+        options: [
+          { label: '✅ Subscribed', value: 'subscribed', color: '#16a34a' },
+          { label: '❌ Not Subscribed', value: 'not_subscribed', color: '#dc2626' },
+        ],
+        sourceNodeId: node.id,
+      },
+    };
+  }
+
   return { kind: 'skip' };
 }
 

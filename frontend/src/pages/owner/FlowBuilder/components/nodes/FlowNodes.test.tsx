@@ -5,6 +5,7 @@ import { StartNode } from './StartNode';
 import { EndNode } from './EndNode';
 import { CommentNode } from './CommentNode';
 import { AiNode } from './AiNode';
+import { SubscriptionCheckNode } from './SubscriptionCheckNode';
 
 const defaultNodeProps = {
   selected: false,
@@ -77,5 +78,23 @@ describe('FlowBuilder Node Components', () => {
     );
 
     expect(screen.getByText('Recommend top 3 bestselling products')).toBeInTheDocument();
+  });
+
+  it('renders SubscriptionCheckNode with configured channels and handles', () => {
+    render(
+      <ReactFlowProvider>
+        <SubscriptionCheckNode
+          id="sub-1"
+          type="SUBSCRIPTION_CHECK"
+          data={{
+            mode: 'all',
+            channels: [{ id: 'ch1', channelId: '@sponsor_channel', name: 'Main Sponsor', isRequired: true }],
+          }}
+          {...defaultNodeProps}
+        />
+      </ReactFlowProvider>
+    );
+
+    expect(screen.getByText(/Main Sponsor/i)).toBeInTheDocument();
   });
 });

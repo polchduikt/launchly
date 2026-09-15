@@ -21,6 +21,7 @@ import { CooldownNodeEditor } from './editors/CooldownNodeEditor';
 import { SchedulerNodeEditor } from './editors/SchedulerNodeEditor';
 import { QueryNodeEditor } from './editors/QueryNodeEditor';
 import { InteractionNodeEditor } from './editors/InteractionNodeEditor';
+import { SubscriptionCheckNodeEditor } from './editors/SubscriptionCheckNodeEditor';
 
 interface NodeEditorPanelProps {
   node?: Node;
@@ -44,6 +45,9 @@ const NODE_EDITORS: Record<string, NodeEditorComponent> = {
   ),
   CONDITION: ({ data, handleChange, editorState }) => (
     <ConditionNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
+  ),
+  SUBSCRIPTION_CHECK: ({ data, handleChange, editorState }) => (
+    <SubscriptionCheckNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
   ),
   API_CALL: ({ data, handleChange }) => (
     <ApiCallNodeEditor data={data} handleChange={handleChange} />

@@ -26,13 +26,13 @@ const InteractionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, s
   const getInteractionBadge = () => {
     switch (interactionType) {
       case 'like':
-        return { label: 'Лайк', bg: 'bg-rose-100 text-rose-800 border-rose-300' };
+        return { label: t('editor.interaction.type_like', 'Лайк'), bg: 'bg-rose-100 text-rose-800 border-rose-300' };
       case 'dislike':
-        return { label: 'Пропустити', bg: 'bg-slate-100 text-slate-800 border-slate-300' };
+        return { label: t('editor.interaction.type_dislike', 'Пропустити'), bg: 'bg-slate-100 text-slate-800 border-slate-300' };
       case 'favorite':
-        return { label: 'В обране', bg: 'bg-amber-100 text-amber-800 border-amber-300' };
+        return { label: t('editor.interaction.type_favorite', 'В обране'), bg: 'bg-amber-100 text-amber-800 border-amber-300' };
       case 'viewed':
-        return { label: 'Переглянуто', bg: 'bg-sky-100 text-sky-800 border-sky-300' };
+        return { label: t('editor.interaction.type_viewed', 'Переглянуто'), bg: 'bg-sky-100 text-sky-800 border-sky-300' };
       default:
         return { label: interactionType, bg: 'bg-indigo-100 text-indigo-800 border-indigo-300' };
     }

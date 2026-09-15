@@ -873,6 +873,31 @@ button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="CONDITION"
   color: #7E22CE !important;
 }
 
+.node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"],
+button:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"],
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"],
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"],
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"],
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] {
+  background-color: #CCFBF1 !important;
+  color: #0F766E !important;
+}
+.node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] svg,
+.node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] svg *,
+button:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] svg,
+button:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] svg *,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] svg,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SUBSCRIPTION_CHECK"] svg * {
+  stroke: #0F766E !important;
+  color: #0F766E !important;
+}
+
 .node-icon-badge[data-block-type="ACTION"],
 button:hover .node-icon-badge[data-block-type="ACTION"],
 button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="ACTION"],

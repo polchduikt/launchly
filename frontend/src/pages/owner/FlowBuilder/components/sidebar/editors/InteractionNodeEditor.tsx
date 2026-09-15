@@ -70,10 +70,10 @@ export const InteractionNodeEditor: React.FC<InteractionNodeEditorProps> = ({
         </label>
         <div className="grid grid-cols-2 gap-1.5 bg-white border-2 border-[#0A0A0A] p-1.5 rounded-2xl select-none">
           {[
-            { key: 'like', label: 'Лайк' },
-            { key: 'dislike', label: 'Пропустити' },
-            { key: 'favorite', label: 'В обране' },
-            { key: 'viewed', label: 'Переглянуто' },
+            { key: 'like', label: t('editor.interaction.type_like', 'Лайк') },
+            { key: 'dislike', label: t('editor.interaction.type_dislike', 'Пропустити') },
+            { key: 'favorite', label: t('editor.interaction.type_favorite', 'В обране') },
+            { key: 'viewed', label: t('editor.interaction.type_viewed', 'Переглянуто') },
           ].map((item) => {
             const isSelected = interactionType === item.key;
             return (
@@ -128,7 +128,7 @@ export const InteractionNodeEditor: React.FC<InteractionNodeEditorProps> = ({
             }}
             className="w-full p-2.5 bg-rose-50 hover:bg-rose-100 border-2 border-rose-600 rounded-xl text-xs font-black text-rose-900 flex items-center justify-between cursor-pointer transition-colors shadow-xs select-none"
           >
-            <span>Якщо взаємно</span>
+            <span>{t('editor.interaction.if_mutual', 'Якщо взаємно')}</span>
             <button
               type="button"
               onClick={(e) => {
@@ -161,7 +161,7 @@ export const InteractionNodeEditor: React.FC<InteractionNodeEditorProps> = ({
           }}
           className="w-full p-2.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-500 rounded-xl text-xs font-black text-slate-900 flex items-center justify-between cursor-pointer transition-colors shadow-xs select-none"
         >
-          <span>Збережено</span>
+          <span>{t('editor.interaction.saved', 'Збережено')}</span>
           <button
             type="button"
             onClick={(e) => {

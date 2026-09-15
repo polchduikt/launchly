@@ -76,6 +76,10 @@ const mapActionToNodeType = (actionType?: string): string | null => {
       return 'QUERY';
     case 'INTERACTION':
       return 'INTERACTION';
+    case 'SUBSCRIPTION_CHECK':
+    case 'SUBSCRIPTION':
+    case 'GATEKEEPING':
+      return 'SUBSCRIPTION_CHECK';
     case 'SCHEDULER':
       return 'SCHEDULER';
     default:

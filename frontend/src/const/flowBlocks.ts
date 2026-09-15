@@ -25,10 +25,11 @@ export const FLOW_BLOCK_COLORS: Record<string, string> = {
   COMMENT: 'text-amber-600 bg-amber-100',
   AI: 'text-emerald-700 bg-emerald-100',
   SCHEDULER: 'text-orange-700 bg-orange-100',
+  SUBSCRIPTION_CHECK: 'text-teal-700 bg-teal-100',
   END: 'text-slate-600 bg-slate-200',
 };
 
-export const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'ACTION', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION', 'COOLDOWN', 'SCHEDULER', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMAND', 'COMMENT', 'AI', 'END'];
+export const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'SUBSCRIPTION_CHECK', 'ACTION', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION', 'COOLDOWN', 'SCHEDULER', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMAND', 'COMMENT', 'AI', 'END'];
 
 export const getFlowBlocks = (): Array<{ type: string; label: string; color: string; icon?: LucideIcon | React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }> }> =>
   FLOW_BLOCK_TYPES.map((type) => ({
@@ -48,8 +49,8 @@ export const FLOW_BLOCK_GROUPS = [
   {
     id: 'logic',
     titleKey: 'flow_builder.cat_logic',
-    defaultTitle: 'Логіка та затримки',
-    types: ['CONDITION', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN', 'SCHEDULER'],
+    defaultTitle: 'Логіка та перевірки',
+    types: ['CONDITION', 'SUBSCRIPTION_CHECK', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN', 'SCHEDULER'],
   },
   {
     id: 'operations',
@@ -92,6 +93,21 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
           }
         ]
       };
+    case 'SUBSCRIPTION_CHECK':
+      return {
+        mode: 'all',
+        channels: [
+          {
+            id: 'channel_0',
+            channelId: '',
+            name: '',
+            url: '',
+            isRequired: true,
+          }
+        ],
+        passVariable: 'is_subscribed',
+        unsubscribedVariable: 'unsubscribed_channels',
+      };
     case 'ACTION':
       return { actions: [] };
     case 'MATH':
@@ -133,7 +149,7 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
       return {
         duration: 1,
         unit: 'MINUTES',
-        blockMessage: 'Зачекайте ще {remaining} перед повторною спробою!',
+        blockMessage: t('editor.cooldown.default_message', 'Зачекайте ще {remaining} перед повторною спробою!'),
         cooldownKey: '',
       };
     case 'SCHEDULER':

@@ -15,6 +15,7 @@ export interface ContextMenuOption {
 const CONTEXT_MENU_CONFIGS = [
   { type: 'MESSAGE', isPro: false, isAi: false },
   { type: 'CONDITION', isPro: true, isAi: false },
+  { type: 'SUBSCRIPTION_CHECK', isPro: false, isAi: false },
   { type: 'ACTION', isPro: false, isAi: false },
   { type: 'MATH', isPro: false, isAi: false },
   { type: 'LEADERBOARD', isPro: false, isAi: false },
@@ -40,8 +41,8 @@ export const CONTEXT_MENU_GROUPS = [
   {
     id: 'logic',
     titleKey: 'flow_builder.cat_logic',
-    defaultTitle: 'Логіка та затримки',
-    types: ['CONDITION', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN', 'SCHEDULER'],
+    defaultTitle: 'Логіка та перевірки',
+    types: ['CONDITION', 'SUBSCRIPTION_CHECK', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN', 'SCHEDULER'],
   },
   {
     id: 'operations',

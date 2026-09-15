@@ -20,6 +20,7 @@ import {
   SchedulerNode,
   QueryNode,
   InteractionNode,
+  SubscriptionCheckNode,
 } from '../pages/owner/FlowBuilder/components/nodes';
 
 const withCollaborationWrapper = <P extends { id: string; data?: Record<string, unknown>; selected?: boolean; dragging?: boolean }>(
@@ -85,6 +86,7 @@ const CooldownNodeWrapped = withCollaborationWrapper(CooldownNode);
 const SchedulerNodeWrapped = withCollaborationWrapper(SchedulerNode);
 const QueryNodeWrapped = withCollaborationWrapper(QueryNode);
 const InteractionNodeWrapped = withCollaborationWrapper(InteractionNode);
+const SubscriptionCheckNodeWrapped = withCollaborationWrapper(SubscriptionCheckNode);
 const SmartDelayNodeWrapped = withCollaborationWrapper(SmartDelayNode);
 const RandomizerNodeWrapped = withCollaborationWrapper(RandomizerNode);
 const StartAutomationNodeWrapped = withCollaborationWrapper(StartAutomationNode);
@@ -108,6 +110,10 @@ export const NODE_TYPES = {
   CONDITION: ConditionNodeWrapped,
   condition: ConditionNodeWrapped,
   Condition: ConditionNodeWrapped,
+
+  SUBSCRIPTION_CHECK: SubscriptionCheckNodeWrapped,
+  subscription_check: SubscriptionCheckNodeWrapped,
+  SubscriptionCheck: SubscriptionCheckNodeWrapped,
 
   API_CALL: ApiCallNodeWrapped,
   api_call: ApiCallNodeWrapped,

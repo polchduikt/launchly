@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Trash2, Send, Globe, CreditCard, Zap, GitFork, Shuffle, Clock, Play, Hourglass, Calculator, Trophy, CalendarClock, Search, HeartHandshake } from 'lucide-react';
+import { X, Trash2, Send, Globe, CreditCard, Zap, GitFork, Shuffle, Clock, Play, Hourglass, Calculator, Trophy, CalendarClock, Search, HeartHandshake, ShieldCheck } from 'lucide-react';
 import { AiIcon } from '../../../../../../components/ui/AiIcon';
 import type { EditButtonDrawerProps } from '../../../../../../types/bot';
 import type { Node, Edge } from '@xyflow/react';
@@ -12,6 +12,7 @@ const mapNodeTypeToActionType = (nodeType?: string): string => {
     case 'AiNode': case 'AI': return 'AI_STEP';
     case 'ActionNode': case 'ACTION': return 'ACTIONS';
     case 'ConditionNode': case 'CONDITION': return 'CONDITION';
+    case 'SubscriptionCheckNode': case 'SUBSCRIPTION_CHECK': return 'SUBSCRIPTION_CHECK';
     case 'RandomNode': case 'RANDOMIZER': return 'RANDOM';
     case 'DelayNode': case 'SMART_DELAY': return 'DELAY';
     case 'StartAutomationNode': case 'START_AUTOMATION': return 'AUTOMATION';
@@ -114,6 +115,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
     { type: 'BUY', label: t('editor.edit_button.action.buy_button', 'Кнопка купівлі'), icon: CreditCard, color: 'text-amber-600 bg-amber-100', pro: true },
     { type: 'ACTIONS', label: t('editor.edit_button.action.perform_actions', 'Виконати дії'), icon: Zap, blockType: 'ACTION', color: 'text-amber-700 bg-amber-100' },
     { type: 'CONDITION', label: t('editor.edit_button.action.condition', 'Умова'), icon: GitFork, blockType: 'CONDITION', color: 'text-purple-700 bg-purple-100', pro: true },
+    { type: 'SUBSCRIPTION_CHECK', label: t('flow_block.SUBSCRIPTION_CHECK', 'Перевірка підписки'), icon: ShieldCheck, blockType: 'SUBSCRIPTION_CHECK', color: 'text-teal-700 bg-teal-100' },
     { type: 'RANDOM', label: t('editor.edit_button.action.randomizer', 'Рандомізатор'), icon: Shuffle, blockType: 'RANDOMIZER', color: 'text-purple-700 bg-purple-100', pro: true },
     { type: 'DELAY', label: t('editor.edit_button.action.smart_delay', 'Розумна затримка'), icon: Clock, blockType: 'SMART_DELAY', color: 'text-rose-600 bg-rose-100', pro: true },
     { type: 'COOLDOWN', label: t('editor.edit_button.action.cooldown', 'Таймаут'), icon: Hourglass, blockType: 'COOLDOWN', color: 'text-amber-700 bg-amber-100' },
@@ -133,8 +135,8 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
     },
     {
       id: 'logic',
-      title: t('editor.edit_button.cat_logic', 'Логіка та затримки'),
-      types: ['CONDITION', 'RANDOM', 'DELAY', 'COOLDOWN', 'SCHEDULER'],
+      title: t('editor.edit_button.cat_logic', 'Логіка та перевірки'),
+      types: ['CONDITION', 'SUBSCRIPTION_CHECK', 'RANDOM', 'DELAY', 'COOLDOWN', 'SCHEDULER'],
     },
     {
       id: 'operations',

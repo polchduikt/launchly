@@ -346,6 +346,23 @@ export interface CooldownNodeEditorProps {
   editorState?: EditorState;
 }
 
+export interface TelegramChannelCheckItem {
+  id: string;
+  channelId: string;
+  name?: string;
+  url?: string;
+  isRequired?: boolean;
+}
+
+export interface SubscriptionCheckNodeEditorProps {
+  nodeId?: string;
+  node?: Node;
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+  onSelectNode?: (nodeId: string | null) => void;
+}
+
 export interface SchedulerNodeEditorProps {
   data: CustomNodeData;
   handleChange: (key: string, value: unknown) => void;

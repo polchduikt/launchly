@@ -5,6 +5,7 @@ import { getBlocks } from './useNodeEditor';
 import type { ButtonData } from '../../types/bot';
 import { STORAGE_KEYS } from '../../const/constants';
 import { useFlowUiStore } from '../../store/useFlowUiStore';
+import { isStartNode } from '../../utils/flowHelpers';
 
 interface UseFlowClipboardParams {
   nodes: Node[];
@@ -65,7 +66,7 @@ export const useFlowClipboard = ({
     const centerY = window.innerHeight / 2;
     const flowCenter = screenToFlowPosition({ x: centerX, y: centerY });
 
-    const validNodes = copiedNodes.filter((n) => n.type !== 'START');
+    const validNodes = copiedNodes.filter((n) => !isStartNode(n));
     let minX = Infinity;
     let maxX = -Infinity;
     let minY = Infinity;
@@ -91,7 +92,7 @@ export const useFlowClipboard = ({
 
     const newNodes = copiedNodes
       .map((node) => {
-        if (node.type === 'START') return null;
+        if (isStartNode(node)) return null;
 
         const newId = generateId(`node_${node.type?.toLowerCase() || 'msg'}`);
         nodeIdMap[node.id] = newId;
@@ -173,7 +174,7 @@ export const useFlowClipboard = ({
   const handleCopyNode = useCallback(
     (nodeId: string) => {
       const nodeToCopy = nodes.find((n) => n.id === nodeId);
-      if (!nodeToCopy || nodeToCopy.type === 'START') return;
+      if (!nodeToCopy || isStartNode(nodeToCopy)) return;
 
       takeSnapshot();
       const newId = `node_${nodeToCopy.type?.toLowerCase()}_${Date.now()}`;
@@ -223,7 +224,7 @@ export const useFlowClipboard = ({
   const handleDeleteNode = useCallback(
     (nodeId: string) => {
       const nodeToDelete = nodes.find((n) => n.id === nodeId);
-      if (!nodeToDelete || nodeToDelete.type === 'START') return;
+      if (!nodeToDelete || isStartNode(nodeToDelete)) return;
 
       takeSnapshot();
       setNodes((nds) => nds.filter((n) => n.id !== nodeId));

@@ -25,6 +25,7 @@ export const NodeType = {
   Leaderboard: 'LEADERBOARD',
   Cooldown: 'COOLDOWN',
   Scheduler: 'SCHEDULER',
+  SubscriptionCheck: 'SUBSCRIPTION_CHECK',
 } as const;
 
 export type NodeType = (typeof NodeType)[keyof typeof NodeType];

@@ -33,7 +33,7 @@ export const CooldownNodeEditor: React.FC<CooldownNodeEditorProps> = ({
   const unit = (data?.unit as string) || 'MINUTES';
   const blockMessage = (data?.blockMessage as string) !== undefined
     ? (data?.blockMessage as string)
-    : 'Зачекайте ще {remaining} перед повторною спробою!';
+    : t('editor.cooldown.default_message', 'Зачекайте ще {remaining} перед повторною спробою!');
 
   const activeBotId = useBotStore((state) => state.activeBotId);
   const { data: tags = [] } = useTagsQuery(activeBotId || 0);

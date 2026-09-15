@@ -14,6 +14,7 @@ import {
   Trophy,
   Search,
   HeartHandshake,
+  ShieldCheck,
 } from 'lucide-react';
 
 export const STEP_OPTION_GROUPS = [
@@ -26,8 +27,8 @@ export const STEP_OPTION_GROUPS = [
   {
     id: 'logic',
     titleKey: 'flow_builder.cat_logic',
-    defaultTitle: 'Логіка та затримки',
-    types: ['CONDITION', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN'],
+    defaultTitle: 'Логіка та перевірки',
+    types: ['CONDITION', 'SUBSCRIPTION_CHECK', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN'],
   },
   {
     id: 'operations',
@@ -63,6 +64,13 @@ export const STEP_OPTIONS = [
     get description() { return t('step_option.CONDITION.desc'); },
     icon: GitFork,
     color: 'text-purple-600 bg-purple-50 border-purple-100',
+  },
+  {
+    type: 'SUBSCRIPTION_CHECK',
+    get label() { return t('step_option.SUBSCRIPTION_CHECK.label', 'Subscription Check'); },
+    get description() { return t('step_option.SUBSCRIPTION_CHECK.desc', 'Check membership in channels/sponsors'); },
+    icon: ShieldCheck,
+    color: 'text-teal-600 bg-teal-50 border-teal-100',
   },
   {
     type: 'ACTION',

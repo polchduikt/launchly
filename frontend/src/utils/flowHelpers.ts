@@ -1,6 +1,19 @@
 import type { Node, Edge } from '@xyflow/react';
 import type { ButtonData, FlowBlock } from '../types/bot';
 
+export const isStartNode = (node: { id?: string; type?: string } | null | undefined): boolean => {
+  if (!node) return false;
+  const id = node.id?.toLowerCase();
+  const type = node.type?.toUpperCase();
+  return (
+    id === 'start' ||
+    id === 'node_start' ||
+    id === 'start_broadcast' ||
+    type === 'START' ||
+    type === 'START_BROADCAST'
+  );
+};
+
 export const getFlowKey = (nodes: Node[], edges: Edge[]) => {
   if (nodes.length > 50) {
     const nodeSummary = nodes.map(n => `${n.id}:${n.type}:${Math.round(n.position.x)},${Math.round(n.position.y)}:${JSON.stringify(n.data).length}`).join('|');

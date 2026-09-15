@@ -96,13 +96,13 @@ const MathNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected
                 {t('node.math.operation', 'Action')}
               </span>
               <span className="text-xs font-bold text-[#0A0A0A]">
-                {opSymbol} {operationMode === 'RANDOM' ? `Рандом (${randomMin}..${randomMax})` : `${staticValue}`}
+                {opSymbol} {operationMode === 'RANDOM' ? `${t('node.math.random', 'Рандом')} (${randomMin}..${randomMax})` : `${staticValue}`}
               </span>
             </div>
 
             {operationMode === 'RANDOM' && Number(randomStep) > 1 && (
               <div className="flex items-center justify-between text-[10px] text-[#0A0A0A]/60 font-bold">
-                <span>Крок:</span>
+                <span>{t('node.math.step', 'Крок')}:</span>
                 <span>{randomStep}</span>
               </div>
             )}

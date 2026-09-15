@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo, type MutableRefObjec
 import { useNodesState, useEdgesState } from '@xyflow/react';
 import type { Node, Edge, NodeChange, EdgeChange } from '@xyflow/react';
 import { FLOW_EDGE_DEFAULTS } from '../../const/flowEdges';
-import { getNodesAfterRemovingEdges } from '../../utils/flowHelpers';
+import { getNodesAfterRemovingEdges, isStartNode } from '../../utils/flowHelpers';
 import type { FlowContextMenuState } from './useFlowContextMenu';
 
 interface UseFlowStateParams {
@@ -78,21 +78,33 @@ export const useFlowState = ({
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
+      const safeChanges = changes.filter((c) => {
+        if (c.type === 'remove') {
+          const node = nodes.find((n) => n.id === c.id);
+          if (isStartNode(node) || c.id === 'start' || c.id === 'node_start' || c.id === 'start_broadcast') {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (safeChanges.length === 0) return;
+
       if (isLocalChangeRef) {
-        const hasRelevantChange = changes.some(
+        const hasRelevantChange = safeChanges.some(
           (c) => c.type !== 'select' && c.type !== 'dimensions'
         );
         if (hasRelevantChange) {
           isLocalChangeRef.current = true;
         }
       }
-      const hasRemoval = changes.some((c) => c.type === 'remove');
+      const hasRemoval = safeChanges.some((c) => c.type === 'remove');
       if (hasRemoval) {
         takeSnapshot();
       }
-      onNodesChangeState(changes);
+      onNodesChangeState(safeChanges);
     },
-    [onNodesChangeState, takeSnapshot, isLocalChangeRef]
+    [nodes, onNodesChangeState, takeSnapshot, isLocalChangeRef]
   );
 
   const onEdgesChange = useCallback(
@@ -230,28 +242,28 @@ export const useFlowState = ({
       hidden: !contextMenu,
     };
 
-    if (contextMenu) {
-      const { source } = contextMenu;
-      const mappedNodes = nodes.map((node) => {
-        if (node.id === source.nodeId) {
-          let sourceHandle = source.handleType === 'source' ? source.handleId : null;
-          if (!sourceHandle) {
-            sourceHandle = node.type === 'START' ? 'then' : 'next';
+    const baseNodes = contextMenu
+      ? nodes.map((node) => {
+          if (node.id === contextMenu.source.nodeId) {
+            let sourceHandle = contextMenu.source.handleType === 'source' ? contextMenu.source.handleId : null;
+            if (!sourceHandle) {
+              sourceHandle = isStartNode(node) ? 'then' : 'next';
+            }
+            return {
+              ...node,
+              deletable: isStartNode(node) ? false : node.deletable,
+              data: {
+                ...node.data,
+                _hasTempConnection: true,
+                _tempSourceHandle: sourceHandle,
+              },
+            };
           }
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              _hasTempConnection: true,
-              _tempSourceHandle: sourceHandle,
-            },
-          };
-        }
-        return node;
-      });
-      return [...mappedNodes, tempNode];
-    }
-    return [...nodes, tempNode];
+          return isStartNode(node) ? { ...node, deletable: false } : node;
+        })
+      : nodes.map((node) => (isStartNode(node) ? { ...node, deletable: false } : node));
+
+    return [...baseNodes, tempNode];
   }, [nodes, contextMenu]);
 
   const displayEdges = useMemo(() => {

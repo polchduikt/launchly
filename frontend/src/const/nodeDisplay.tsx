@@ -18,6 +18,7 @@ import {
   CalendarClock,
   Search,
   HeartHandshake,
+  ShieldCheck,
 } from 'lucide-react';
 import { AiIcon } from '../components/ui/AiIcon';
 
@@ -27,6 +28,7 @@ export const NODE_TITLES: Record<string, string> = {
   START: 'Trigger Settings',
   MESSAGE: 'Send Message',
   CONDITION: 'Condition Rule',
+  SUBSCRIPTION_CHECK: 'Subscription Check',
   API_CALL: 'API Integration',
   ACTION: 'Actions',
   MATH: 'Calculation',
@@ -59,6 +61,7 @@ export const NODE_ICON_COMPONENTS: Record<string, LucideIcon | React.ComponentTy
   START: Zap,
   MESSAGE: Send,
   CONDITION: Filter,
+  SUBSCRIPTION_CHECK: ShieldCheck,
   API_CALL: Globe,
   ACTION: Sliders,
   MATH: Calculator,
@@ -80,6 +83,7 @@ export const NODE_ICONS: Record<string, React.ReactNode> = {
   START: <Zap size={16} className="text-emerald-600" />,
   MESSAGE: <Send size={16} className="text-sky-500" />,
   CONDITION: <Filter size={16} className="text-purple-600" />,
+  SUBSCRIPTION_CHECK: <ShieldCheck size={16} className="text-teal-600" />,
   API_CALL: <Globe size={16} className="text-indigo-500" />,
   ACTION: <Sliders size={16} className="text-amber-600" />,
   MATH: <Calculator size={16} className="text-cyan-600" />,

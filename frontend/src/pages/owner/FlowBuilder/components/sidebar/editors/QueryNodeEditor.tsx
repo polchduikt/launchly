@@ -27,16 +27,16 @@ interface QueryNodeEditorProps {
 }
 
 const OPERATOR_OPTIONS = [
-  { value: 'equals', symbol: '=', label: 'Дорівнює' },
-  { value: 'not_equals', symbol: '!=', label: 'Не дорівнює' },
-  { value: 'greater_than', symbol: '>', label: 'Більше' },
-  { value: 'greater_than_or_equals', symbol: '>=', label: 'Більше або дорівнює' },
-  { value: 'less_than', symbol: '<', label: 'Менше' },
-  { value: 'less_than_or_equals', symbol: '<=', label: 'Менше або дорівнює' },
-  { value: 'contains', symbol: '~', label: 'Містить' },
-  { value: 'not_contains', symbol: '!~', label: 'Не містить' },
-  { value: 'exists', symbol: 'Є', label: 'Встановлено' },
-  { value: 'not_exists', symbol: '∅', label: 'Не встановлено' },
+  { value: 'equals', symbol: '=', labelKey: 'editor.query.op_equals', defaultLabel: 'Дорівнює' },
+  { value: 'not_equals', symbol: '!=', labelKey: 'editor.query.op_not_equals', defaultLabel: 'Не дорівнює' },
+  { value: 'greater_than', symbol: '>', labelKey: 'editor.query.op_greater_than', defaultLabel: 'Більше' },
+  { value: 'greater_than_or_equals', symbol: '>=', labelKey: 'editor.query.op_greater_than_or_equals', defaultLabel: 'Більше або дорівнює' },
+  { value: 'less_than', symbol: '<', labelKey: 'editor.query.op_less_than', defaultLabel: 'Менше' },
+  { value: 'less_than_or_equals', symbol: '<=', labelKey: 'editor.query.op_less_than_or_equals', defaultLabel: 'Менше або дорівнює' },
+  { value: 'contains', symbol: '~', labelKey: 'editor.query.op_contains', defaultLabel: 'Містить' },
+  { value: 'not_contains', symbol: '!~', labelKey: 'editor.query.op_not_contains', defaultLabel: 'Не містить' },
+  { value: 'exists', symbol: 'Є', labelKey: 'editor.query.op_exists', defaultLabel: 'Встановлено' },
+  { value: 'not_exists', symbol: '∅', labelKey: 'editor.query.op_not_exists', defaultLabel: 'Не встановлено' },
 ];
 
 const OperatorDropdown: React.FC<{
@@ -60,7 +60,7 @@ const OperatorDropdown: React.FC<{
           <span className="min-w-[24px] px-1 text-center font-black bg-[#0A0A0A] text-[#F2EBDD] rounded py-0.5 text-[10px] shrink-0">
             {selectedOp.symbol}
           </span>
-          <span className="text-xs font-bold text-[#0A0A0A] truncate">{selectedOp.label}</span>
+          <span className="text-xs font-bold text-[#0A0A0A] truncate">{t(selectedOp.labelKey, selectedOp.defaultLabel)}</span>
         </span>
         <span className="p-1 rounded-lg hover:bg-[#0A0A0A]/10 transition-colors flex items-center justify-center shrink-0 ml-1">
           <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -88,7 +88,7 @@ const OperatorDropdown: React.FC<{
                 <span className={`min-w-[24px] px-1 text-center font-black rounded py-0.5 text-[10px] shrink-0 ${isSel ? 'bg-[#F2EBDD] text-[#0A0A0A]' : 'bg-[#0A0A0A] text-[#F2EBDD]'}`}>
                   {op.symbol}
                 </span>
-                <span className="truncate text-xs">{op.label}</span>
+                <span className="truncate text-xs">{t(op.labelKey, op.defaultLabel)}</span>
               </button>
             );
           })}
@@ -231,13 +231,13 @@ export const QueryNodeEditor: React.FC<QueryNodeEditorProps> = ({
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[9px] font-black uppercase tracking-wider text-[#0A0A0A]/60">
-                      Поле контакту
+                      {t('editor.query.contact_field', 'Поле контакту')}
                     </span>
                     <button
                       type="button"
                       onClick={() => removeFilter(index)}
                       className="p-1 text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-600 rounded-lg cursor-pointer transition-colors"
-                      title="Видалити фільтр"
+                      title={t('editor.query.delete_filter', 'Видалити фільтр')}
                     >
                       <Trash2 size={13} />
                     </button>
@@ -263,7 +263,7 @@ export const QueryNodeEditor: React.FC<QueryNodeEditorProps> = ({
 
                 <div className="space-y-1">
                   <span className="text-[9px] font-black uppercase tracking-wider text-[#0A0A0A]/60 block">
-                    Оператор
+                    {t('editor.query.operator', 'Оператор')}
                   </span>
                   <OperatorDropdown
                     value={filter.operator}
@@ -274,14 +274,14 @@ export const QueryNodeEditor: React.FC<QueryNodeEditorProps> = ({
                 {filter.operator !== 'exists' && filter.operator !== 'not_exists' && (
                   <div className="space-y-1">
                     <span className="text-[9px] font-black uppercase tracking-wider text-[#0A0A0A]/60 block">
-                      Значення
+                      {t('editor.query.value', 'Значення')}
                     </span>
                     <div className="relative flex items-center">
                       <input
                         type="text"
                         value={filter.value}
                         onChange={(e) => updateFilter(index, 'value', e.target.value)}
-                        placeholder="Значення"
+                        placeholder={t('editor.query.value_placeholder', 'Значення')}
                         className="w-full pl-3 pr-8 py-2 bg-white hover:bg-slate-50 focus:bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none placeholder:text-[#0A0A0A]/40"
                       />
                       <div className="absolute right-1.5">
@@ -294,7 +294,7 @@ export const QueryNodeEditor: React.FC<QueryNodeEditorProps> = ({
                           trigger={
                             <button
                               type="button"
-                              title="Вставити змінну"
+                              title={t('editor.query.insert_var', 'Вставити змінну')}
                               className="p-1 px-1.5 text-[10px] font-black text-[#0A0A0A] hover:bg-[#0A0A0A]/10 rounded-lg cursor-pointer transition-colors"
                             >
                               {`{ }`}
@@ -317,9 +317,9 @@ export const QueryNodeEditor: React.FC<QueryNodeEditorProps> = ({
         </label>
         <div className="grid grid-cols-3 gap-1 bg-white border-2 border-[#0A0A0A] p-1 rounded-xl select-none">
           {[
-            { key: 'like', label: 'Лайкнуті' },
-            { key: 'dislike', label: 'Пропущені' },
-            { key: 'viewed', label: 'Переглянуті' },
+            { key: 'like', label: t('editor.query.type_like_past', 'Лайкнуті') },
+            { key: 'dislike', label: t('editor.query.type_dislike_past', 'Пропущені') },
+            { key: 'viewed', label: t('editor.query.type_viewed_past', 'Переглянуті') },
           ].map((item) => {
             const isSelected = excludeInteractions.includes(item.key);
             return (
@@ -355,7 +355,7 @@ export const QueryNodeEditor: React.FC<QueryNodeEditorProps> = ({
             }`}
           >
             <Shuffle size={13} />
-            <span>Випадковий</span>
+            <span>{t('editor.query.sort_random', 'Випадковий')}</span>
           </button>
           <button
             type="button"
@@ -367,7 +367,7 @@ export const QueryNodeEditor: React.FC<QueryNodeEditorProps> = ({
             }`}
           >
             <Clock size={13} />
-            <span>Найновіші</span>
+            <span>{t('editor.query.sort_newest', 'Найновіші')}</span>
           </button>
         </div>
       </div>
@@ -401,7 +401,7 @@ export const QueryNodeEditor: React.FC<QueryNodeEditorProps> = ({
           }}
           className="w-full p-2.5 bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-600 rounded-xl text-xs font-black text-emerald-900 flex items-center justify-between cursor-pointer transition-colors shadow-xs select-none"
         >
-          <span>Якщо знайдено кандидата</span>
+          <span>{t('editor.query.if_found', 'Якщо знайдено кандидата')}</span>
           <button
             type="button"
             onClick={(e) => {
@@ -434,7 +434,7 @@ export const QueryNodeEditor: React.FC<QueryNodeEditorProps> = ({
           }}
           className="w-full p-2.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-500 rounded-xl text-xs font-black text-slate-900 flex items-center justify-between cursor-pointer transition-colors shadow-xs select-none"
         >
-          <span>Якщо не знайдено</span>
+          <span>{t('editor.query.if_not_found', 'Якщо не знайдено')}</span>
           <button
             type="button"
             onClick={(e) => {

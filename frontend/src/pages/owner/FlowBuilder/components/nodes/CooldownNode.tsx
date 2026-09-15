@@ -6,7 +6,7 @@ import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../../types/bot';
 import { useNodeHover } from '../../../../../hooks/bot/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
-import { t } from '../../../../../i18n/config';
+import { t, getLanguage } from '../../../../../i18n/config';
 import { renderTextWithBadges } from '../../utils/textBadgeRenderer';
 
 const CooldownNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
@@ -20,10 +20,23 @@ const CooldownNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
 
   const duration = data?.duration !== undefined ? Number(data.duration) : 1;
   const unit = (data?.unit as string) || 'MINUTES';
-  const blockMessage = (data?.blockMessage as string) || 'Зачекайте ще {remaining} перед повторною спробою!';
+  const blockMessage = (data?.blockMessage as string) || t('editor.cooldown.default_message', 'Зачекайте ще {remaining} перед повторною спробою!');
   const cooldownKey = (data?.cooldownKey as string) || '';
 
   const getUnitLabel = (u: string, d: number) => {
+    const lang = getLanguage();
+    if (lang === 'en') {
+      switch (u.toUpperCase()) {
+        case 'SECONDS':
+          return d === 1 ? 'second' : 'seconds';
+        case 'HOURS':
+          return d === 1 ? 'hour' : 'hours';
+        case 'DAYS':
+          return d === 1 ? 'day' : 'days';
+        default:
+          return d === 1 ? 'minute' : 'minutes';
+      }
+    }
     switch (u.toUpperCase()) {
       case 'SECONDS':
         return d === 1 ? 'секунда' : d >= 2 && d <= 4 ? 'секунди' : 'секунд';

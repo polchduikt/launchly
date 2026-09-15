@@ -20,3 +20,4 @@ export { CooldownNode } from './CooldownNode';
 export { SchedulerNode } from './SchedulerNode';
 export { QueryNode } from './QueryNode';
 export { InteractionNode } from './InteractionNode';
+export { SubscriptionCheckNode } from './SubscriptionCheckNode';
