@@ -1,5 +1,6 @@
 package com.launchly.auth.service.impl;
 
+import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.repository.UserRepository;
 import com.launchly.auth.service.UserQueryService;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,6 +71,36 @@ public class UserQueryServiceImpl implements UserQueryService {
     @Override
     public long countActiveUsers() {
         return userRepository.countByActiveTrue();
+    }
+
+    @Override
+    public long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end) {
+        return userRepository.countByCreatedAtBetween(start, end);
+    }
+
+    @Override
+    public long countByRoleInAndCreatedAtBetween(Collection<Role> roles, LocalDateTime start, LocalDateTime end) {
+        return userRepository.countByRoleInAndCreatedAtBetween(roles, start, end);
+    }
+
+    @Override
+    public long countByRoleAndCreatedAtBetween(Role role, LocalDateTime start, LocalDateTime end) {
+        return userRepository.countByRoleAndCreatedAtBetween(role, start, end);
+    }
+
+    @Override
+    public long countByRoleIn(Collection<Role> roles) {
+        return userRepository.countByRoleIn(roles);
+    }
+
+    @Override
+    public long countByActiveTrueAndUpdatedAtAfter(LocalDateTime date) {
+        return userRepository.countByActiveTrueAndUpdatedAtAfter(date);
+    }
+
+    @Override
+    public List<User> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end) {
+        return userRepository.findByCreatedAtBetween(start, end);
     }
 
     @Override

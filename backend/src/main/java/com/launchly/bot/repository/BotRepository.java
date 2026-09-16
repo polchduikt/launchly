@@ -19,6 +19,15 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
 
     long countByUserId(Long userId);
 
+    long countByActiveTrue();
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    long countByActiveTrueAndCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    @EntityGraph(attributePaths = {"user"})
+    List<Bot> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
     @EntityGraph(attributePaths = {"user"})
     List<Bot> findAllByActiveTrue();
 

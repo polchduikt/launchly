@@ -24,6 +24,14 @@ public interface BotUserRepository extends JpaRepository<BotUser, Long> {
 
     long countByBotId(Long botId);
 
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    @EntityGraph(attributePaths = {"bot"})
+    List<BotUser> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    @Query("SELECT bu.metadata, bu.createdAt FROM BotUser bu WHERE bu.metadata IS NOT NULL")
+    List<Object[]> findAllMetadataAndCreatedAt();
+
     long countByBotIdIn(List<Long> botIds);
 
     long countByBotIdAndCreatedAtBefore(Long botId, LocalDateTime date);
