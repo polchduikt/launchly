@@ -144,6 +144,7 @@ export const saveAutomationFoldersApi = async (data: AutomationFoldersResponse |
 
 export type MediaMode = 'ALL' | 'TEXT_ONLY' | 'MEDIA_ONLY';
 export type ViolationAction = 'DELETE_ONLY' | 'DELETE_AND_WARN' | 'DELETE_AND_MUTE' | 'DELETE_AND_KICK';
+export type CaptchaMode = 'BUTTON' | 'MATH';
 
 export interface BotModerationRuleDto {
   id?: number;
@@ -160,6 +161,10 @@ export interface BotModerationRuleDto {
   actionOnViolation: ViolationAction;
   warningTemplate?: string;
   warnTtlSeconds?: number;
+  captchaEnabled?: boolean;
+  captchaMode?: CaptchaMode;
+  captchaTimeoutSeconds?: number;
+  captchaMessageTemplate?: string;
 }
 
 export interface UpdateBotModerationRuleRequest {
@@ -175,6 +180,10 @@ export interface UpdateBotModerationRuleRequest {
   actionOnViolation: ViolationAction;
   warningTemplate?: string;
   warnTtlSeconds?: number;
+  captchaEnabled?: boolean;
+  captchaMode?: CaptchaMode;
+  captchaTimeoutSeconds?: number;
+  captchaMessageTemplate?: string;
 }
 
 export interface TestModerationRequest {

@@ -23,6 +23,9 @@ const ModerationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
   const antiLink = data?.antiLinkEnabled ?? false;
   const mediaMode = (data?.mediaMode as string) || 'ALL';
   const actionOnViolation = (data?.actionOnViolation as string) || 'DELETE_AND_WARN';
+  const captchaEnabled = Boolean(data?.captchaEnabled);
+  const captchaMode = (data?.captchaMode as string) || 'BUTTON';
+  const captchaTimeout = data?.captchaTimeoutSeconds || 60;
 
   const isCleanConnected = data?._tempSourceHandle !== 'clean' && sourceConns.some((c) => c.sourceHandle === 'clean' || c.sourceHandle === 'passed' || c.sourceHandle === 'true');
   const isViolatedConnected = data?._tempSourceHandle !== 'violated' && sourceConns.some((c) => c.sourceHandle === 'violated' || c.sourceHandle === 'blocked' || c.sourceHandle === 'false');
@@ -106,6 +109,15 @@ const ModerationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
                 </span>
               </div>
             </div>
+
+            {captchaEnabled && (
+              <div className="flex items-center justify-between text-[10px] font-black uppercase text-[#0A0A0A]/70 pt-1 border-t border-[#0A0A0A]/10">
+                <span>{t('node.moderation.captcha_label', 'Капча')}:</span>
+                <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-md text-[10px] font-bold text-[#0A0A0A]">
+                  {captchaMode === 'MATH' ? t('node.moderation.captcha_math', '3+2=5') : t('node.moderation.captcha_button', 'Кнопка')} ({captchaTimeout}s)
+                </span>
+              </div>
+            )}
           </div>
         )}
 

@@ -22,6 +22,7 @@ import {
   InteractionNode,
   SubscriptionCheckNode,
   ModerationNode,
+  JoinRequestNode,
 } from '../pages/owner/FlowBuilder/components/nodes';
 
 const withCollaborationWrapper = <P extends { id: string; data?: Record<string, unknown>; selected?: boolean; dragging?: boolean }>(
@@ -93,6 +94,7 @@ const SmartDelayNodeWrapped = withCollaborationWrapper(SmartDelayNode);
 const RandomizerNodeWrapped = withCollaborationWrapper(RandomizerNode);
 const StartAutomationNodeWrapped = withCollaborationWrapper(StartAutomationNode);
 const CommandNodeWrapped = withCollaborationWrapper(CommandNode);
+const JoinRequestNodeWrapped = withCollaborationWrapper(JoinRequestNode);
 const CommentNodeWrapped = withCollaborationWrapper(CommentNode);
 const AiNodeWrapped = withCollaborationWrapper(AiNode);
 
@@ -172,6 +174,10 @@ export const NODE_TYPES = {
   COMMAND: CommandNodeWrapped,
   command: CommandNodeWrapped,
   Command: CommandNodeWrapped,
+
+  JOIN_REQUEST: JoinRequestNodeWrapped,
+  join_request: JoinRequestNodeWrapped,
+  JoinRequest: JoinRequestNodeWrapped,
 
   COMMENT: CommentNodeWrapped,
   comment: CommentNodeWrapped,

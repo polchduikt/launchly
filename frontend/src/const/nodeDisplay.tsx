@@ -20,6 +20,7 @@ import {
   HeartHandshake,
   ShieldCheck,
   ShieldAlert,
+  UserCheck,
 } from 'lucide-react';
 import { AiIcon } from '../components/ui/AiIcon';
 
@@ -44,6 +45,7 @@ export const NODE_TITLES: Record<string, string> = {
   RANDOMIZER: 'Randomizer',
   START_AUTOMATION: 'Start Automation',
   COMMAND: 'Command Trigger',
+  JOIN_REQUEST: 'Join Request',
   COMMENT: 'Comment',
   AI: 'AI Step',
 };
@@ -78,6 +80,7 @@ export const NODE_ICON_COMPONENTS: Record<string, LucideIcon | React.ComponentTy
   RANDOMIZER: Shuffle,
   START_AUTOMATION: SquareArrowRight,
   COMMAND: Terminal,
+  JOIN_REQUEST: UserCheck,
   COMMENT: StickyNote,
   AI: AiIcon,
 };
@@ -101,6 +104,7 @@ export const NODE_ICONS: Record<string, React.ReactNode> = {
   RANDOMIZER: <Shuffle size={16} className="text-purple-500" />,
   START_AUTOMATION: <SquareArrowRight size={16} className="text-lime-600" />,
   COMMAND: <Terminal size={16} className="text-teal-600" />,
+  JOIN_REQUEST: <UserCheck size={16} className="text-amber-600" />,
   COMMENT: <StickyNote size={16} className="text-amber-500" />,
   AI: <AiIcon size={16} className="text-emerald-600" />,
 };

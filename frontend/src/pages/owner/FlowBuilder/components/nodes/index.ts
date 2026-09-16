@@ -22,3 +22,4 @@ export { QueryNode } from './QueryNode';
 export { InteractionNode } from './InteractionNode';
 export { SubscriptionCheckNode } from './SubscriptionCheckNode';
 export { ModerationNode } from './ModerationNode';
+export { JoinRequestNode } from './JoinRequestNode';

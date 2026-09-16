@@ -16,6 +16,7 @@ import {
   HeartHandshake,
   ShieldCheck,
   ShieldAlert,
+  UserCheck,
 } from 'lucide-react';
 
 export const STEP_OPTION_GROUPS = [
@@ -47,7 +48,7 @@ export const STEP_OPTION_GROUPS = [
     id: 'utilities',
     titleKey: 'flow_builder.cat_utilities',
     defaultTitle: 'Службові',
-    types: ['COMMAND', 'COMMENT', 'END'],
+    types: ['COMMAND', 'JOIN_REQUEST', 'COMMENT', 'END'],
   },
 ];
 
@@ -156,6 +157,13 @@ export const STEP_OPTIONS = [
     get description() { return t('step_option.COMMAND.desc'); },
     icon: Terminal,
     color: 'text-teal-600 bg-teal-50 border-teal-100',
+  },
+  {
+    type: 'JOIN_REQUEST',
+    get label() { return t('step_option.JOIN_REQUEST.label', 'Join Request'); },
+    get description() { return t('step_option.JOIN_REQUEST.desc', 'Auto-approve channel join requests & start flow'); },
+    icon: UserCheck,
+    color: 'text-amber-600 bg-amber-50 border-amber-100',
   },
   {
     type: 'COMMENT',

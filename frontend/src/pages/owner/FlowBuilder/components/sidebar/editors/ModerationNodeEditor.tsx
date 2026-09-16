@@ -94,6 +94,11 @@ export const ModerationNodeEditor: React.FC<ModerationNodeEditorProps> = ({
   const warnAutoDeleteSeconds = Number(data?.warnAutoDeleteSeconds ?? 10);
   const muteDurationMinutes = Number(data?.muteDurationMinutes ?? 60);
 
+  const captchaEnabled = Boolean(data?.captchaEnabled);
+  const captchaMode = (data?.captchaMode as string) || 'BUTTON';
+  const captchaTimeoutSeconds = Number(data?.captchaTimeoutSeconds ?? 60);
+  const captchaMessageTemplate = (data?.captchaMessageTemplate as string) || '';
+
   const [isFocused, setIsFocused] = useState(false);
   const contentEditableRef = useRef<HTMLDivElement | null>(null);
 
@@ -263,6 +268,94 @@ export const ModerationNodeEditor: React.FC<ModerationNodeEditorProps> = ({
               className="w-4 h-4 accent-[#0A0A0A] cursor-pointer rounded"
             />
           </label>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
+          {t('editor.moderation.captcha_section_title', 'Захист від ботів (Captcha)')}
+        </label>
+
+        <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-3 space-y-2.5 shadow-xs">
+          <label className="flex items-center justify-between cursor-pointer select-none">
+            <div>
+              <span className="text-xs font-bold text-[#0A0A0A] block">
+                {t('editor.moderation.captcha_enabled', 'Капча для нових учасників')}
+              </span>
+              <span className="text-[10px] font-bold text-[#0A0A0A]/60 block mt-0.5">
+                {t('editor.moderation.captcha_desc', 'Новий учасник мутиться, поки не пройде перевірку капчею')}
+              </span>
+            </div>
+            <input
+              type="checkbox"
+              checked={captchaEnabled}
+              onChange={(e) => handleChange('captchaEnabled', e.target.checked)}
+              className="w-4 h-4 accent-[#0A0A0A] cursor-pointer rounded shrink-0 ml-2"
+            />
+          </label>
+
+          {captchaEnabled && (
+            <>
+              <hr className="border-[#0A0A0A]/10" />
+
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">
+                  {t('editor.moderation.captcha_mode_label', 'Тип капчі')}
+                </label>
+                <div className="grid grid-cols-2 gap-1.5 bg-[#F2EBDD]/40 border-2 border-[#0A0A0A] p-1 rounded-xl select-none shadow-xs">
+                  <button
+                    type="button"
+                    onClick={() => handleChange('captchaMode', 'BUTTON')}
+                    className={`py-1.5 text-xs font-black rounded-lg transition-all cursor-pointer border-none flex items-center justify-center ${
+                      captchaMode === 'BUTTON'
+                        ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                        : 'text-[#0A0A0A] hover:bg-[#F2EBDD] bg-transparent'
+                    }`}
+                  >
+                    <span>{t('editor.moderation.captcha_mode_button', 'Кнопка')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleChange('captchaMode', 'MATH')}
+                    className={`py-1.5 text-xs font-black rounded-lg transition-all cursor-pointer border-none flex items-center justify-center ${
+                      captchaMode === 'MATH'
+                        ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                        : 'text-[#0A0A0A] hover:bg-[#F2EBDD] bg-transparent'
+                    }`}
+                  >
+                    <span>{t('editor.moderation.captcha_mode_math', 'Математика (3+2=5)')}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 pt-1">
+                <span className="text-[11px] font-bold text-[#0A0A0A]">
+                  {t('editor.moderation.captcha_timeout_label', "Час на розв'язання (сек)")}
+                </span>
+                <input
+                  type="number"
+                  min={10}
+                  max={600}
+                  value={captchaTimeoutSeconds}
+                  onChange={(e) => handleChange('captchaTimeoutSeconds', Number(e.target.value))}
+                  className="w-20 px-2 py-1 text-xs font-bold bg-[#F2EBDD]/30 border-2 border-[#0A0A0A]/40 rounded-lg text-center focus:outline-none focus:border-[#0A0A0A]"
+                />
+              </div>
+
+              <div className="space-y-1 pt-1">
+                <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">
+                  {t('editor.moderation.captcha_template_label', 'Повідомлення капчі (опціонально)')}
+                </label>
+                <input
+                  type="text"
+                  value={captchaMessageTemplate}
+                  onChange={(e) => handleChange('captchaMessageTemplate', e.target.value)}
+                  placeholder={t('editor.moderation.captcha_template_placeholder', 'Вітаємо, {first_name}! Підтвердіть, що ви людина протягом {timeout} сек.')}
+                  className="w-full px-3 py-2 text-xs font-bold bg-[#F2EBDD]/30 border-2 border-[#0A0A0A]/40 rounded-xl focus:outline-none focus:border-[#0A0A0A] placeholder:text-[#0A0A0A]/40"
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
 

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '../../../../i18n/config';
 import type { BotResponse } from '../../../../types/bot';
-import type { MediaMode, ViolationAction } from '../../../../api/bot';
+import type { MediaMode, ViolationAction, CaptchaMode } from '../../../../api/bot';
 import {
   useBotModerationQuery,
   useUpdateBotModerationMutation
@@ -37,8 +37,12 @@ export const BotModerationModal: React.FC<BotModerationModalProps> = ({
   const [defaultProfanityFilter, setDefaultProfanityFilter] = useState(true);
   const [mediaMode, setMediaMode] = useState<MediaMode>('ALL');
   const [actionOnViolation, setActionOnViolation] = useState<ViolationAction>('DELETE_AND_WARN');
-  const [warningTemplate, setWarningTemplate] = useState('⚠️ {user}, ваше повідомлення було видалено через порушення правил чату!');
+  const [warningTemplate, setWarningTemplate] = useState('{user}, ваше повідомлення було видалено через порушення правил чату!');
   const [warnTtlSeconds, setWarnTtlSeconds] = useState(5);
+  const [captchaEnabled, setCaptchaEnabled] = useState(false);
+  const [captchaMode, setCaptchaMode] = useState<CaptchaMode>('BUTTON');
+  const [captchaTimeoutSeconds, setCaptchaTimeoutSeconds] = useState(60);
+  const [captchaMessageTemplate, setCaptchaMessageTemplate] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
@@ -63,6 +67,10 @@ export const BotModerationModal: React.FC<BotModerationModalProps> = ({
       setActionOnViolation(moderationRule.actionOnViolation ?? 'DELETE_AND_WARN');
       if (moderationRule.warningTemplate) setWarningTemplate(moderationRule.warningTemplate);
       if (moderationRule.warnTtlSeconds) setWarnTtlSeconds(moderationRule.warnTtlSeconds);
+      setCaptchaEnabled(moderationRule.captchaEnabled ?? false);
+      setCaptchaMode(moderationRule.captchaMode ?? 'BUTTON');
+      setCaptchaTimeoutSeconds(moderationRule.captchaTimeoutSeconds ?? 60);
+      setCaptchaMessageTemplate(moderationRule.captchaMessageTemplate ?? '');
     }
   }, [moderationRule]);
 
@@ -81,7 +89,11 @@ export const BotModerationModal: React.FC<BotModerationModalProps> = ({
         mediaMode,
         actionOnViolation,
         warningTemplate,
-        warnTtlSeconds
+        warnTtlSeconds,
+        captchaEnabled,
+        captchaMode,
+        captchaTimeoutSeconds,
+        captchaMessageTemplate
       });
       setSaveSuccess(true);
       setTimeout(() => {
@@ -289,6 +301,100 @@ export const BotModerationModal: React.FC<BotModerationModalProps> = ({
                       placeholder="launchly.app, youtube.com, google.com"
                       className="w-full px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none placeholder:text-slate-400 font-mono"
                     />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-4 bg-slate-50 border-2 border-[#0A0A0A] rounded-xl">
+                  <div>
+                    <div className="text-xs font-black uppercase text-[#0A0A0A]">
+                      {t('settings.moderation.captcha_title', 'Капча та захист від спам-ботів у групах')}
+                    </div>
+                    <div className="text-[11px] text-slate-600 font-bold mt-0.5">
+                      {t('settings.moderation.captcha_desc', 'Нові учасники мутяться до успішного проходження капчі')}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={captchaEnabled}
+                    onClick={() => setCaptchaEnabled(!captchaEnabled)}
+                    className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ease-in-out cursor-pointer border-2 border-[#0A0A0A] ${
+                      captchaEnabled ? 'bg-[#0A0A0A]' : 'bg-white'
+                    }`}
+                  >
+                    <div
+                      className={`w-3.5 h-3.5 rounded-full transition-transform duration-200 ease-in-out ${
+                        captchaEnabled ? 'transform translate-x-6 bg-white' : 'bg-[#0A0A0A]'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {captchaEnabled && (
+                  <div className="space-y-3 pl-1">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black uppercase text-[#0A0A0A]">
+                        {t('settings.moderation.captcha_mode_label', 'Тип перевірки')}
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => setCaptchaMode('BUTTON')}
+                          className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-1 ${
+                            captchaMode === 'BUTTON'
+                              ? 'border-[#0A0A0A] bg-[#0A0A0A] text-white shadow-[2px_2px_0px_0px_#0A0A0A]'
+                              : 'border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="text-xs font-black uppercase">
+                            {t('settings.moderation.captcha_mode_button', 'Кнопка «Я людина»')}
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setCaptchaMode('MATH')}
+                          className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-1 ${
+                            captchaMode === 'MATH'
+                              ? 'border-[#0A0A0A] bg-[#0A0A0A] text-white shadow-[2px_2px_0px_0px_#0A0A0A]'
+                              : 'border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="text-xs font-black uppercase">
+                            {t('settings.moderation.captcha_mode_math', 'Математичний приклад (3 + 2 = 5)')}
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-1">
+                      <label className="text-[10px] font-black uppercase text-[#0A0A0A] whitespace-nowrap">
+                        {t('settings.moderation.captcha_timeout', "Час на розв'язання (сек):")}
+                      </label>
+                      <input
+                        type="number"
+                        min={10}
+                        max={600}
+                        value={captchaTimeoutSeconds}
+                        onChange={(e) => setCaptchaTimeoutSeconds(Number(e.target.value) || 60)}
+                        className="w-20 px-3 py-1.5 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 pt-1">
+                      <label className="text-[10px] font-black uppercase text-[#0A0A0A]">
+                        {t('settings.moderation.captcha_template', 'Шаблон повідомлення капчі (опціонально)')}
+                      </label>
+                      <input
+                        type="text"
+                        value={captchaMessageTemplate}
+                        onChange={(e) => setCaptchaMessageTemplate(e.target.value)}
+                        placeholder="Вітаємо, {first_name}! Підтвердіть, що ви людина протягом {timeout} сек."
+                        className="w-full px-3 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] focus:outline-none placeholder:text-slate-400 font-mono"
+                      />
+                    </div>
                   </div>
                 )}
               </div>

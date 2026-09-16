@@ -23,6 +23,7 @@ import { QueryNodeEditor } from './editors/QueryNodeEditor';
 import { InteractionNodeEditor } from './editors/InteractionNodeEditor';
 import { SubscriptionCheckNodeEditor } from './editors/SubscriptionCheckNodeEditor';
 import { ModerationNodeEditor } from './editors/ModerationNodeEditor';
+import { JoinRequestNodeEditor } from './editors/JoinRequestNodeEditor';
 
 interface NodeEditorPanelProps {
   node?: Node;
@@ -91,6 +92,9 @@ const NODE_EDITORS: Record<string, NodeEditorComponent> = {
   ),
   COMMAND: ({ data, handleChange }) => (
     <CommandNodeEditor data={data} handleChange={handleChange} />
+  ),
+  JOIN_REQUEST: ({ data, handleChange }) => (
+    <JoinRequestNodeEditor data={data} handleChange={handleChange} />
   ),
   AI: ({ data, handleChange, editorState }) => (
     <AiNodeEditor data={data} handleChange={handleChange} editorState={editorState} />

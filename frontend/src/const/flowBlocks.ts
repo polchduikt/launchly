@@ -27,10 +27,11 @@ export const FLOW_BLOCK_COLORS: Record<string, string> = {
   SCHEDULER: 'text-orange-700 bg-orange-100',
   SUBSCRIPTION_CHECK: 'text-green-700 bg-green-100',
   MODERATION: 'text-red-700 bg-red-100',
+  JOIN_REQUEST: 'text-amber-700 bg-amber-100',
   END: 'text-slate-600 bg-slate-200',
 };
 
-export const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'SUBSCRIPTION_CHECK', 'MODERATION', 'ACTION', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION', 'COOLDOWN', 'SCHEDULER', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMAND', 'COMMENT', 'AI', 'END'];
+export const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'SUBSCRIPTION_CHECK', 'MODERATION', 'ACTION', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION', 'COOLDOWN', 'SCHEDULER', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMAND', 'JOIN_REQUEST', 'COMMENT', 'AI', 'END'];
 
 export const getFlowBlocks = (): Array<{ type: string; label: string; color: string; icon?: LucideIcon | React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }> }> =>
   FLOW_BLOCK_TYPES.map((type) => ({
@@ -69,7 +70,7 @@ export const FLOW_BLOCK_GROUPS = [
     id: 'utilities',
     titleKey: 'flow_builder.cat_utilities',
     defaultTitle: 'Службові',
-    types: ['COMMAND', 'COMMENT', 'END'],
+    types: ['COMMAND', 'JOIN_REQUEST', 'COMMENT', 'END'],
   },
 ];
 
@@ -218,6 +219,11 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
       return {
         command: '/start',
         description: ''
+      };
+    case 'JOIN_REQUEST':
+      return {
+        autoApprove: true,
+        channelId: '',
       };
     case 'AI':
       return {
