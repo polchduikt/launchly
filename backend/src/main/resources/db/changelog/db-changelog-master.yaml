@@ -115,9 +115,17 @@ databaseChangeLog:
       file: db/changelog/changes/V057__add_version_to_broadcast_support_blog_templates.sql
   - include:
       file: db/changelog/changes/V058__create_outbox_events_table.sql
-
-
-
-
-
-
+  - include:
+      file: db/changelog/changes/V059__create_ai_chat_sessions_and_messages.sql
+  - include:
+      file: db/changelog/changes/V060__add_idx_orders_bot_user_bot.sql
+  - include:
+      file: db/changelog/changes/V061__add_response_mode_to_bots.sql
+  - include:
+      file: db/changelog/changes/V062__add_published_schema_to_flow_schemas.sql
+  - include:
+      file: db/changelog/changes/V063__create_bot_user_interactions_table.sql
+  - include:
+      file: db/changelog/changes/V064__create_bot_moderation_rules_table.sql
+  - include:
+      file: db/changelog/changes/V065__add_captcha_to_bot_moderation_rules.sql

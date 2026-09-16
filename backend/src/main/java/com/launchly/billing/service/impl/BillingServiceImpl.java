@@ -1,10 +1,12 @@
 package com.launchly.billing.service.impl;
 
+import com.launchly.common.constant.CacheConstants;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.service.UserQueryService;
 import com.launchly.billing.dto.response.CheckoutResponse;
 import com.launchly.billing.dto.response.PlanResponse;
 import com.launchly.billing.dto.response.SubscriptionResponse;
+import com.launchly.billing.constant.BillingConstants;
 import com.launchly.billing.entity.Plan;
 import com.launchly.billing.entity.Subscription;
 import com.launchly.billing.entity.SubscriptionStatus;
@@ -31,9 +33,12 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -48,6 +53,8 @@ import java.util.Map;
 @Slf4j
 public class BillingServiceImpl implements BillingService {
 
+    private static final Duration WEBHOOK_DEDUP_TTL = Duration.ofDays(3);
+
     private final SubscriptionRepository subscriptionRepository;
     private final PlanRepository planRepository;
     private final UserQueryService userQueryService;
@@ -55,6 +62,7 @@ public class BillingServiceImpl implements BillingService {
     private final CacheManager cacheManager;
     private final PlanLimitService planLimitService;
     private final StringRedisTemplate stringRedisTemplate;
+    private final TransactionTemplate transactionTemplate;
 
     @Value("${stripe.api.key:}")
     private String apiKey;
@@ -83,8 +91,8 @@ public class BillingServiceImpl implements BillingService {
 
         User user = userQueryService.getUserOrThrow(userId);
 
-        Plan freePlan = planRepository.findByName("FREE")
-                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found"));
+        Plan freePlan = planRepository.findByName(BillingConstants.PLAN_FREE)
+                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.default_plan_not_found"));
 
         Subscription subscription = Subscription.builder()
                 .status(SubscriptionStatus.ACTIVE)
@@ -99,7 +107,7 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "plans", key = "'all'")
+    @Cacheable(value = CacheConstants.PLANS, key = "'all'")
     public List<PlanResponse> getAvailablePlans() {
         return billingMapper.toPlanResponseList(
                 planRepository.findAll().stream().filter(Plan::isActive).toList()
@@ -108,47 +116,64 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     @Transactional
-    @Cacheable(value = "subscription", key = "#userId")
+    @Cacheable(value = CacheConstants.SUBSCRIPTION, key = "#userId")
     public SubscriptionResponse getSubscriptionByUser(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseGet(() -> {
                     createFreeSubscription(userId);
                     return subscriptionRepository.findByUserId(userId)
-                            .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to resolve subscription"));
+                            .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.resolve_subscription_failed"));
                 });
         return billingMapper.toSubscriptionResponse(subscription);
     }
 
     @Override
-    @Transactional
     @CircuitBreaker(name = "stripe", fallbackMethod = "createCheckoutSessionFallback")
     @Retry(name = "stripe")
     public CheckoutResponse createCheckoutSession(Long planId, Long userId) {
-        User user = userQueryService.getUserOrThrow(userId);
+        String[] checkoutInfo = transactionTemplate.execute(status -> {
+            User user = userQueryService.getUserOrThrow(userId);
 
-        Plan plan = planLimitService.getPlan(planId);
-        if ("FREE".equalsIgnoreCase(plan.getName())) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "billing.error.cannot_checkout_free");
-        }
+            Plan plan = planLimitService.getPlan(planId);
+            if (BillingConstants.PLAN_FREE.equalsIgnoreCase(plan.getName())) {
+                throw new AppException(HttpStatus.BAD_REQUEST, "billing.error.cannot_checkout_free");
+            }
 
-        Subscription subscription = subscriptionRepository.findByUserId(userId)
-                .orElseGet(() -> {
-                    createFreeSubscription(userId);
-                    return subscriptionRepository.findByUserId(userId)
-                            .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to resolve subscription"));
-                });
+            Subscription subscription = subscriptionRepository.findByUserId(userId)
+                    .orElseGet(() -> {
+                        createFreeSubscription(userId);
+                        return subscriptionRepository.findByUserId(userId)
+                                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.resolve_subscription_failed"));
+                    });
+
+            return new String[]{
+                subscription.getStripeCustomerId(),
+                user.getEmail(),
+                user.getName(),
+                plan.getStripePriceId()
+            };
+        });
+
+        String customerId = checkoutInfo[0];
+        String email = checkoutInfo[1];
+        String name = checkoutInfo[2];
+        String priceId = checkoutInfo[3];
 
         try {
-            String customerId = subscription.getStripeCustomerId();
             if (customerId == null || customerId.isEmpty()) {
                 CustomerCreateParams customerParams = CustomerCreateParams.builder()
-                        .setEmail(user.getEmail())
-                        .setName(user.getName())
+                        .setEmail(email)
+                        .setName(name)
                         .build();
                 Customer customer = Customer.create(customerParams);
                 customerId = customer.getId();
-                subscription.setStripeCustomerId(customerId);
-                subscriptionRepository.save(subscription);
+                
+                final String finalCustomerId = customerId;
+                transactionTemplate.executeWithoutResult(status -> {
+                    Subscription subscription = subscriptionRepository.findByUserId(userId).orElseThrow();
+                    subscription.setStripeCustomerId(finalCustomerId);
+                    subscriptionRepository.save(subscription);
+                });
             }
 
             SessionCreateParams.Builder sessionBuilder = SessionCreateParams.builder()
@@ -160,7 +185,7 @@ public class BillingServiceImpl implements BillingService {
                     .putMetadata("planId", String.valueOf(planId))
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
-                                    .setPrice(plan.getStripePriceId())
+                                    .setPrice(priceId)
                                     .setQuantity(1L)
                                     .build()
                     );
@@ -174,16 +199,15 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    @Transactional
-    @org.springframework.cache.annotation.Caching(evict = {
-        @CacheEvict(value = "subscription", key = "#userId"),
-        @CacheEvict(value = "subscription", key = "'plan:' + #userId")
+    @Caching(evict = {
+        @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "#userId"),
+        @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "'plan:' + #userId")
     })
     @CircuitBreaker(name = "stripe", fallbackMethod = "cancelSubscriptionFallback")
     @Retry(name = "stripe")
     public SubscriptionResponse cancelSubscription(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "billing.error.subscription_not_found"));
 
         String stripeSubId = subscription.getStripeSubscriptionId();
         if (stripeSubId == null || stripeSubId.isEmpty()) {
@@ -196,11 +220,14 @@ public class BillingServiceImpl implements BillingService {
             params.put("cancel_at_period_end", true);
             stripeSub.update(params);
 
-            subscription.setCancelAtPeriodEnd(true);
-            subscription.setStatus(SubscriptionStatus.CANCELLED);
-            subscription = subscriptionRepository.save(subscription);
+            Subscription updatedSubscription = transactionTemplate.execute(status -> {
+                Subscription sub = subscriptionRepository.findByUserId(userId).orElseThrow();
+                sub.setCancelAtPeriodEnd(true);
+                sub.setStatus(SubscriptionStatus.CANCELLED);
+                return subscriptionRepository.save(sub);
+            });
 
-            return billingMapper.toSubscriptionResponse(subscription);
+            return billingMapper.toSubscriptionResponse(updatedSubscription);
         } catch (Exception e) {
             log.error("Stripe cancel error for subscriptionId={}: {}", stripeSubId, e.getMessage(), e);
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.cancel_failed");
@@ -208,16 +235,15 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    @Transactional
-    @org.springframework.cache.annotation.Caching(evict = {
-        @CacheEvict(value = "subscription", key = "#userId"),
-        @CacheEvict(value = "subscription", key = "'plan:' + #userId")
+    @Caching(evict = {
+        @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "#userId"),
+        @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "'plan:' + #userId")
     })
     @CircuitBreaker(name = "stripe", fallbackMethod = "resumeSubscriptionFallback")
     @Retry(name = "stripe")
     public SubscriptionResponse resumeSubscription(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "billing.error.subscription_not_found"));
 
         String stripeSubId = subscription.getStripeSubscriptionId();
         if (stripeSubId == null || stripeSubId.isEmpty()) {
@@ -230,11 +256,14 @@ public class BillingServiceImpl implements BillingService {
             params.put("cancel_at_period_end", false);
             stripeSub.update(params);
 
-            subscription.setCancelAtPeriodEnd(false);
-            subscription.setStatus(SubscriptionStatus.ACTIVE);
-            subscription = subscriptionRepository.save(subscription);
+            Subscription updatedSubscription = transactionTemplate.execute(status -> {
+                Subscription sub = subscriptionRepository.findByUserId(userId).orElseThrow();
+                sub.setCancelAtPeriodEnd(false);
+                sub.setStatus(SubscriptionStatus.ACTIVE);
+                return subscriptionRepository.save(sub);
+            });
 
-            return billingMapper.toSubscriptionResponse(subscription);
+            return billingMapper.toSubscriptionResponse(updatedSubscription);
         } catch (Exception e) {
             log.error("Stripe resume error for subscriptionId={}: {}", stripeSubId, e.getMessage(), e);
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.resume_failed");
@@ -279,20 +308,8 @@ public class BillingServiceImpl implements BillingService {
                 handleCheckoutCompleted(session);
             }
         } catch (Exception e) {
-            log.error("Error retrieving Stripe Checkout Session {}: {}", sessionId, e.getMessage());
-            if (sessionId.startsWith("cs_test")) {
-                planRepository.findByName("PRO").ifPresent(proPlan -> {
-                    Subscription sub = subscriptionRepository.findByUserId(userId)
-                            .orElseGet(() -> {
-                                createFreeSubscription(userId);
-                                return subscriptionRepository.findByUserId(userId).orElseThrow();
-                            });
-                    sub.setPlan(proPlan);
-                    sub.setStatus(SubscriptionStatus.ACTIVE);
-                    subscriptionRepository.save(sub);
-                    evictSubscriptionCache(userId);
-                });
-            }
+            log.error("Error retrieving Stripe Checkout Session {}: {}", sessionId, e.getMessage(), e);
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.session_retrieval_failed");
         }
 
         evictSubscriptionCache(userId);
@@ -313,7 +330,6 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    @Transactional
     public void handleStripeWebhook(String payload, String sigHeader) {
         Event event;
         try {
@@ -327,7 +343,7 @@ public class BillingServiceImpl implements BillingService {
 
         if (event.getId() != null) {
             String dedupKey = "stripe:event:" + event.getId();
-            Boolean isNew = stringRedisTemplate.opsForValue().setIfAbsent(dedupKey, "1", Duration.ofDays(3));
+            Boolean isNew = stringRedisTemplate.opsForValue().setIfAbsent(dedupKey, "1", WEBHOOK_DEDUP_TTL);
             if (Boolean.FALSE.equals(isNew)) {
                 log.info("Duplicate Stripe webhook event ignored: {}", event.getId());
                 return;
@@ -392,7 +408,7 @@ public class BillingServiceImpl implements BillingService {
         Long planId = Long.valueOf(planIdStr);
         Plan plan = planLimitService.getPlan(planId);
         Subscription subscription = subscriptionRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "billing.error.subscription_not_found"));
 
         String stripeSubId = session.getSubscription();
         com.stripe.model.Subscription stripeSub = com.stripe.model.Subscription.retrieve(stripeSubId);
@@ -447,8 +463,8 @@ public class BillingServiceImpl implements BillingService {
             return;
         }
 
-        Plan freePlan = planRepository.findByName("FREE")
-                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found"));
+        Plan freePlan = planRepository.findByName(BillingConstants.PLAN_FREE)
+                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.default_plan_not_found"));
 
         subscription.setPlan(freePlan);
         subscription.setStatus(SubscriptionStatus.ACTIVE);
@@ -459,7 +475,7 @@ public class BillingServiceImpl implements BillingService {
 
         subscriptionRepository.save(subscription);
         evictSubscriptionCache(subscription.getUser().getId());
-        log.info("Subscription deleted in Stripe. Downgraded user {} to FREE plan", subscription.getUser().getId());
+        log.info("Subscription deleted in Stripe. Downgraded user {} to {} plan", subscription.getUser().getId(), BillingConstants.PLAN_FREE);
     }
 
     private void handleSubscriptionUpdated(com.stripe.model.Subscription stripeSub) {
@@ -469,9 +485,9 @@ public class BillingServiceImpl implements BillingService {
             return;
         }
 
-        subscription.setStatus(com.launchly.billing.util.StripeUtils.mapStripeStatus(stripeSub.getStatus()));
-        subscription.setCurrentPeriodStart(com.launchly.billing.util.StripeUtils.mapEpoch(stripeSub.getCurrentPeriodStart()));
-        subscription.setCurrentPeriodEnd(com.launchly.billing.util.StripeUtils.mapEpoch(stripeSub.getCurrentPeriodEnd()));
+        subscription.setStatus(StripeUtils.mapStripeStatus(stripeSub.getStatus()));
+        subscription.setCurrentPeriodStart(StripeUtils.mapEpoch(stripeSub.getCurrentPeriodStart()));
+        subscription.setCurrentPeriodEnd(StripeUtils.mapEpoch(stripeSub.getCurrentPeriodEnd()));
         subscription.setCancelAtPeriodEnd(stripeSub.getCancelAtPeriodEnd());
 
         subscriptionRepository.save(subscription);
@@ -482,11 +498,17 @@ public class BillingServiceImpl implements BillingService {
 
     private void evictSubscriptionCache(Long userId) {
         if (userId != null) {
-            org.springframework.cache.Cache cache = cacheManager.getCache("subscription");
+            Cache cache = cacheManager.getCache("subscription");
             if (cache != null) {
                 cache.evict(userId);
                 cache.evict("plan:" + userId);
             }
         }
+    }
+
+    @Override
+    @Transactional
+    public void deleteSubscription(Long userId) {
+        subscriptionRepository.findByUserId(userId).ifPresent(subscriptionRepository::delete);
     }
 }

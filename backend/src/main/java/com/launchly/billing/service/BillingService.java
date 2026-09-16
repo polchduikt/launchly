@@ -14,4 +14,5 @@ public interface BillingService {
     SubscriptionResponse resumeSubscription(Long userId);
     SubscriptionResponse confirmCheckoutSession(String sessionId, Long userId);
     void handleStripeWebhook(String payload, String sigHeader);
+    void deleteSubscription(Long userId);
 }

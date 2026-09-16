@@ -1,9 +1,9 @@
 package com.launchly.support.mapper;
 
-import com.launchly.admin.dto.SupportMessageDto;
-import com.launchly.admin.dto.SupportTicketDto;
-import com.launchly.admin.entity.SupportMessage;
-import com.launchly.admin.entity.SupportTicket;
+import com.launchly.support.dto.SupportMessageDto;
+import com.launchly.support.dto.SupportTicketDto;
+import com.launchly.support.entity.SupportMessage;
+import com.launchly.support.entity.SupportTicket;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;

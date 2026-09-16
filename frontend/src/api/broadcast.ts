@@ -54,6 +54,15 @@ export const createTagApi = async (
   return response.data;
 };
 
+export const updateTagApi = async (
+  botId: number,
+  tagId: number,
+  req: CreateTagRequest
+): Promise<TagResponse> => {
+  const response = await apiClient.put<TagResponse>(`/broadcast/bots/${botId}/tags/${tagId}`, req);
+  return response.data;
+};
+
 export const deleteTagApi = async (botId: number, tagId: number): Promise<void> => {
   await apiClient.delete(`/broadcast/bots/${botId}/tags/${tagId}`);
 };

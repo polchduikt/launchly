@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Position, useNodeConnections, useConnection, useReactFlow } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { SquareArrowRight, X } from 'lucide-react';
@@ -8,37 +8,18 @@ import type { CustomNodeData } from '../../../../../types/bot';
 import { useNodeHover } from '../../../../../hooks/bot/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 import { useBotStore } from '../../../../../store/useBotStore';
+import { useFlowUiStore } from '../../../../../store/useFlowUiStore';
 import { t } from '../../../../../i18n/config';
 
 const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  let sourceConns: any[] = [];
-  try {
-    sourceConns = useNodeConnections({ handleType: 'source' }) || [];
-  } catch (e) {
-    sourceConns = [];
-  }
-  let targetConns: any[] = [];
-  try {
-    targetConns = useNodeConnections({ handleType: 'target' }) || [];
-  } catch (e) {
-    targetConns = [];
-  }
+  const sourceConns = useNodeConnections({ id, handleType: 'source' });
+  const targetConns = useNodeConnections({ id, handleType: 'target' });
   const navigate = useNavigate();
   const setActiveBotId = useBotStore((state) => state.setActiveBotId);
   const { setNodes } = useReactFlow();
-
-  let connection: any = { inProgress: false };
-  try {
-    connection = useConnection() || { inProgress: false };
-  } catch (e) {
-    connection = { inProgress: false };
-  }
-  const isConnecting = connection.inProgress;
-  const isGrayedOut = useMemo(() => {
-    if (!isConnecting) return false;
-    if (connection.fromNode?.id === id) return true;
-    return false;
-  }, [isConnecting, id]);
+  const isConnecting = useConnection((s) => s.inProgress);
+  const isSelfSource = useConnection((s) => s.fromNode?.id === id);
+  const isGrayedOut = isConnecting && isSelfSource;
 
   const { showToolbar, bindHover } = useNodeHover();
 
@@ -78,13 +59,13 @@ const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ i
 
   const handleSelectClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.dispatchEvent(new CustomEvent('open-pick-automation', { detail: { nodeId: id } }));
+    useFlowUiStore.getState().openPickAutomation(id);
   };
 
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected
           ? 'shadow-lg ring-2 ring-[#0A0A0A]'
           : 'shadow-md'
@@ -92,7 +73,7 @@ const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ i
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 
-      <div className="relative flex items-center gap-2 bg-lime-200 rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-lime-200/75 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
@@ -111,27 +92,27 @@ const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ i
         </div>
       </div>
 
-      <div className="p-4 select-none">
+      <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace] select-none">
         {targetBotName ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div 
               onClick={handleSelectClick}
-              className="relative flex items-center justify-between px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-100/50 transition-colors"
+              className="relative flex items-center justify-between px-3 py-2.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl cursor-pointer hover:bg-[#eae1d0] transition-colors"
             >
-              <span className="text-xs font-bold text-slate-800 truncate pr-6 select-all">
+              <span className="text-xs font-black text-[#0A0A0A] truncate pr-6 select-all">
                 {targetBotName}
               </span>
               <button
                 onClick={handleClear}
-                className="absolute right-2 p-1 text-slate-400 hover:text-slate-655 hover:bg-slate-150/50 rounded-md transition-colors cursor-pointer"
+                className="absolute right-2.5 p-1 text-[#0A0A0A]/60 hover:text-[#0A0A0A] hover:bg-[#0A0A0A]/10 rounded-lg transition-colors cursor-pointer"
               >
-                <X size={14} />
+                <X size={14} strokeWidth={2.5} />
               </button>
             </div>
             
             <button
               onClick={handleOpenAutomation}
-              className="w-full py-2 bg-white hover:bg-slate-50 border border-slate-200 text-[11px] font-bold text-slate-700 rounded-xl transition-all cursor-pointer shadow-xs"
+              className="w-full py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-xs font-black text-[#0A0A0A] rounded-xl transition-all cursor-pointer"
             >
               {t('node.start_automation.open')}
             </button>
@@ -139,16 +120,16 @@ const StartAutomationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ i
         ) : (
           <div 
             onClick={handleSelectClick}
-            className="flex flex-col items-center justify-center p-4 border border-dashed border-slate-300 rounded-2xl bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer text-slate-400 hover:text-slate-500"
+            className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-[#0A0A0A]/40 rounded-2xl bg-[#F2EBDD]/40 hover:bg-[#F2EBDD]/70 transition-colors cursor-pointer text-[#0A0A0A]/70 text-center"
           >
-            <SquareArrowRight size={20} className="stroke-[1.5] mb-1.5" />
-            <span className="text-[11px] font-bold tracking-tight">{t('node.start_automation.click_to_select')}</span>
+            <SquareArrowRight size={20} className="stroke-[2] mb-1.5" />
+            <span className="text-xs font-black tracking-tight text-center block w-full">{t('node.start_automation.click_to_select')}</span>
           </div>
         )}
       </div>
 
-      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">{t('node.start_automation.next_step')}</span>
+      <div className="flex justify-end items-center px-4 py-2 bg-transparent select-none relative rounded-b-[22px]">
+        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-2 select-none">{t('node.start_automation.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}

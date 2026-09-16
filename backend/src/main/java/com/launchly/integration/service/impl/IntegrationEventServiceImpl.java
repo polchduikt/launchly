@@ -11,6 +11,7 @@ import com.launchly.integration.entity.IntegrationType;
 import com.launchly.integration.repository.IntegrationRepository;
 import com.launchly.integration.service.GoogleSheetsService;
 import com.launchly.integration.service.IntegrationEventService;
+import com.launchly.integration.service.MailchimpService;
 import com.launchly.integration.dto.request.WebhookConfig;
 import com.launchly.integration.service.WebhookService;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class IntegrationEventServiceImpl implements IntegrationEventService {
     private final LeadRepository leadRepository;
     private final GoogleSheetsService googleSheetsService;
     private final WebhookService webhookService;
-    private final com.launchly.integration.service.MailchimpService mailchimpService;
+    private final MailchimpService mailchimpService;
     private final ObjectMapper objectMapper;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -132,12 +133,7 @@ public class IntegrationEventServiceImpl implements IntegrationEventService {
         String dataType = configNode.path("dataType").asText(null);
 
         if ("ORDERS".equalsIgnoreCase(dataType)) {
-            String customerName = "";
-            if (order.getBotUser() != null) {
-                String firstName = order.getBotUser().getFirstName() != null ? order.getBotUser().getFirstName() : "";
-                String lastName = order.getBotUser().getLastName() != null ? order.getBotUser().getLastName() : "";
-                customerName = (firstName + " " + lastName).trim();
-            }
+            String customerName = order.getBotUser() != null ? order.getBotUser().getDisplayName() : "";
 
             List<Object> row = List.of(
                     order.getId() != null ? order.getId() : 0L,

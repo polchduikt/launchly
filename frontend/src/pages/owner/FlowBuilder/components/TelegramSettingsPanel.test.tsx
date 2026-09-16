@@ -10,6 +10,7 @@ vi.mock('../../../../hooks/bot/useTelegramSettings', () => ({
     getBotSettings: vi.fn(() => ({})),
     updateBotSetting: vi.fn(),
     handleToggleBot: vi.fn(),
+    handleUpdateResponseMode: vi.fn(),
     activeTokenBot: null,
     setActiveTokenBot: vi.fn(),
     newTokenValue: '',

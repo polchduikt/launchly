@@ -40,3 +40,11 @@ export const exportExcelApi = async (
   });
   return response.data;
 };
+
+export const getGoogleAuthUrlApi = async (botId: number): Promise<string> => {
+  const response = await apiClient.get<{ url: string }>('/integrations/google/auth-url', {
+    params: { botId },
+  });
+  return response.data.url;
+};
+

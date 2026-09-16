@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { t } from '../../../../../i18n/config';
 import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
@@ -9,34 +9,12 @@ import { useNodeHover } from '../../../../../hooks/bot/useNodeHover';
 import { NodeToolbar } from './NodeToolbar';
 
 const RandomizerNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  let sourceConns: any[] = [];
-  try {
-    sourceConns = useNodeConnections({ handleType: 'source' }) || [];
-  } catch (e) {
-    sourceConns = [];
-  }
-  let targetConns: any[] = [];
-  try {
-    targetConns = useNodeConnections({ handleType: 'target' }) || [];
-  } catch (e) {
-    targetConns = [];
-  }
-  let connection: any = { inProgress: false };
-  try {
-    connection = useConnection() || { inProgress: false };
-  } catch (e) {
-    connection = { inProgress: false };
-  }
-  const isConnecting = connection.inProgress;
-  const isGrayedOut = useMemo(() => {
-    if (!isConnecting) return false;
-    if (connection.fromNode?.id === id) return true;
-    const sourceHandleId = connection.fromHandle?.id;
-    if (sourceHandleId === 'reply') {
-      return true;
-    }
-    return false;
-  }, [isConnecting, connection, id]);
+  const sourceConns = useNodeConnections({ id, handleType: 'source' });
+  const targetConns = useNodeConnections({ id, handleType: 'target' });
+  const isConnecting = useConnection((s) => s.inProgress);
+  const isSelfSource = useConnection((s) => s.fromNode?.id === id);
+  const isReplyHandle = useConnection((s) => s.fromHandle?.id === 'reply');
+  const isGrayedOut = isConnecting && (isSelfSource || isReplyHandle);
   const { showToolbar, bindHover } = useNodeHover();
 
   const variations = data.variations || [
@@ -47,7 +25,7 @@ const RandomizerNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected
           ? 'shadow-lg ring-2 ring-[#0A0A0A]'
           : 'shadow-md'
@@ -55,7 +33,7 @@ const RandomizerNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 
-      <div className="relative flex items-center gap-2 bg-[#EBE5FB] rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-[#EBE5FB]/75 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
@@ -74,18 +52,29 @@ const RandomizerNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
         </div>
       </div>
 
-      <div className="rounded-b-[22px] divide-y divide-slate-100/70">
+      <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace]">
         {variations.map((v) => {
           const isVarConnected = sourceConns.some((c) => c.sourceHandle === v.id);
 
           return (
-            <div key={v.id} className="relative flex justify-between items-center px-4 py-3 select-none last:rounded-b-[22px]">
-              <span className="text-xs font-bold" style={{ color: v.color }}>
-                {v.label}
-              </span>
-              <span className="text-xs font-semibold text-slate-500 mr-2">
-                {v.percentage}%
-              </span>
+            <div
+              key={v.id}
+              className="relative flex justify-between items-center bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl px-3.5 py-2 select-none shadow-xs"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2.5 h-2.5 rounded-full border border-[#0A0A0A] shrink-0"
+                  style={{ backgroundColor: v.color }}
+                />
+                <span className="text-xs font-black" style={{ color: v.color }}>
+                  {v.label}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 mr-1">
+                <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-lg text-xs font-black text-[#0A0A0A]">
+                  {v.percentage}%
+                </span>
+              </div>
               <NodeHandle
                 type="source"
                 position={Position.Right}
@@ -94,9 +83,9 @@ const RandomizerNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
                 style={{
                   borderColor: v.color,
                   borderWidth: '1.5px',
-                  backgroundColor: isVarConnected ? v.color : '#ffffff'
+                  backgroundColor: isVarConnected ? v.color : '#ffffff',
                 }}
-                className="!w-2.5 !h-2.5 hover:scale-110"
+                className="hover:scale-110"
               />
             </div>
           );

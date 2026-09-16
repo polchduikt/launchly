@@ -1,11 +1,11 @@
 package com.launchly.support.service.impl;
 
-import com.launchly.admin.dto.SupportMessageDto;
-import com.launchly.admin.dto.SupportTicketDto;
-import com.launchly.admin.entity.SupportMessage;
-import com.launchly.admin.entity.SupportTicket;
-import com.launchly.admin.repository.SupportMessageRepository;
-import com.launchly.admin.repository.SupportTicketRepository;
+import com.launchly.support.dto.SupportMessageDto;
+import com.launchly.support.dto.SupportTicketDto;
+import com.launchly.support.entity.SupportMessage;
+import com.launchly.support.entity.SupportTicket;
+import com.launchly.support.repository.SupportMessageRepository;
+import com.launchly.support.repository.SupportTicketRepository;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.service.UserQueryService;
 import com.launchly.common.exception.AppException;

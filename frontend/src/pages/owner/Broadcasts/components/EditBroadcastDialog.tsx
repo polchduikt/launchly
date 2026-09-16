@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Loader2, X, User, Save } from 'lucide-react';
-import { t } from '../../../../i18n/config';
+import { AlertTriangle, Loader2, X, User } from 'lucide-react';
+import { useTranslation } from '../../../../i18n/config';
 import type { CampaignResponse } from '../../../../types';
 import type { BotResponse } from '../../../../types/bot';
 import { useUpdateCampaignMutation } from '../../../../hooks/broadcast/useBroadcastQueries';
+import { CustomSelect } from '../../../../components/ui/CustomSelect';
 
 interface EditBroadcastDialogProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const EditBroadcastDialog: React.FC<EditBroadcastDialogProps> = ({
   bots,
   botId,
 }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [selectedAutomation, setSelectedAutomation] = useState<string>('ALL');
@@ -36,6 +38,11 @@ export const EditBroadcastDialog: React.FC<EditBroadcastDialogProps> = ({
   if (!isOpen || !campaign) return null;
 
   const connectedBots = bots.filter((b) => b.hasTelegramToken);
+
+  const automationOptions = [
+    { value: 'ALL', label: t('broadcast.dialog.all_automations') },
+    ...connectedBots.map((b) => ({ value: String(b.id), label: b.name })),
+  ];
 
   const selectedAutomationCount =
     selectedAutomation === 'ALL'
@@ -81,9 +88,9 @@ export const EditBroadcastDialog: React.FC<EditBroadcastDialogProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-[#0A0A0A] hover:bg-white p-1 rounded-xl border-2 border-transparent hover:border-[#0A0A0A] transition-all cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
@@ -107,18 +114,11 @@ export const EditBroadcastDialog: React.FC<EditBroadcastDialogProps> = ({
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-black text-[#0A0A0A] uppercase tracking-wider">{t('broadcast.dialog.automation')}</label>
-            <select
+            <CustomSelect
               value={selectedAutomation}
-              onChange={(e) => setSelectedAutomation(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border-2 border-[#0A0A0A] text-xs font-bold text-[#0A0A0A] bg-white focus:outline-none cursor-pointer"
-            >
-              <option value="ALL">{t('broadcast.dialog.all_automations')}</option>
-              {connectedBots.map((b) => (
-                <option key={b.id} value={String(b.id)}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
+              onChange={setSelectedAutomation}
+              options={automationOptions}
+            />
             <div className="flex items-center gap-1.5 px-3 py-2 bg-indigo-100 border-2 border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] mt-1">
               <User size={13} className="text-[#0A0A0A]" />
               <span>
@@ -141,25 +141,22 @@ export const EditBroadcastDialog: React.FC<EditBroadcastDialogProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-xs font-bold text-[#0A0A0A] hover:bg-white border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
+              className="px-5 py-2.5 text-xs font-bold text-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer"
             >
               {t('broadcast.dialog.cancel')}
             </button>
             <button
               type="submit"
               disabled={updateMut.isPending || !name.trim()}
-              className="flex items-center gap-1.5 px-5 py-2.5 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-indigo-700 rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2.5 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {updateMut.isPending ? (
-                <>
+                <span className="flex items-center gap-1.5">
                   <Loader2 size={12} className="animate-spin" />
                   <span>{t('broadcast.dialog.saving')}</span>
-                </>
+                </span>
               ) : (
-                <>
-                  <Save size={12} />
-                  <span>{t('broadcast.dialog.save_changes')}</span>
-                </>
+                <span>{t('broadcast.dialog.save_changes')}</span>
               )}
             </button>
           </div>

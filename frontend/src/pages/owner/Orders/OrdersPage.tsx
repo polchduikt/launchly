@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
+import { ErrorBoundary } from '../../../components/common/ErrorBoundary';
 import { useTranslation } from '../../../i18n/config';
 import {
   useOrdersQuery,
@@ -16,12 +17,15 @@ import {
 } from 'lucide-react';
 import type { OrderStatus } from '../../../types/crm';
 import { exportExcelApi } from '../../../api/integration';
+import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
+import { TableSkeleton } from '../../../components/common/Skeleton';
 
 export const OrdersPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
-  const botId = activeBotId || 0;
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
+  const botId = activeBotId || (bots[0]?.id || 0);
   const { data: orders = [], isLoading: isOrdersLoading } = useOrdersQuery(botId);
   const updateOrderMut = useUpdateOrderMutation(botId);
 
@@ -47,17 +51,19 @@ export const OrdersPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-4rem)] flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace]">
+      <div className="min-h-full h-full flex flex-col bg-[#F2EBDD] font-['Geist',sans-serif]">
 
-        <header className="bg-[#F2EBDD] border-b-2 border-[#0A0A0A] px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
-          <div>
-            <h1 className="font-['Anybody',sans-serif] text-xl font-black text-[#0A0A0A] uppercase tracking-tight">Orders</h1>
-            <p className="text-xs text-[#0A0A0A]/70 font-bold">Track and manage your product orders</p>
-          </div>
+        <header className="h-16 border-b-2 border-[#0A0A0A] px-6 flex items-center justify-between bg-[#F2EBDD] shrink-0 z-20">
+          <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight select-none">Orders</h1>
         </header>
 
         <div className="flex-1 overflow-hidden">
-          {botId === 0 ? (
+          <ErrorBoundary inline fallbackTitle="Orders Error">
+            {isOrdersLoading || isBotsLoading ? (
+              <div className="h-full overflow-y-auto p-6 font-['JetBrains_Mono',monospace]">
+              <TableSkeleton rows={6} columns={5} />
+            </div>
+          ) : botId === 0 ? (
             <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">
               <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
                 <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
@@ -130,12 +136,12 @@ export const OrdersPage: React.FC = () => {
                       ) : (
                         orders.map((o) => (
                           <tr key={o.id} className="hover:bg-slate-50/50">
-                            <td className="py-4 px-6 font-bold text-slate-900">{o.orderNumber}</td>
+                            <td className="py-4 px-6 font-bold text-slate-900 font-['JetBrains_Mono',monospace]">{o.orderNumber}</td>
                             <td className="py-4 px-6">{o.botUserName}</td>
                             <td className="py-4 px-6 max-w-xs truncate" title={o.items || ''}>
                               {o.items || '—'}
                             </td>
-                            <td className="py-4 px-6">
+                            <td className="py-4 px-6 font-['JetBrains_Mono',monospace]">
                               {o.totalAmount} {o.currency}
                             </td>
                             <td className="py-4 px-6">
@@ -164,7 +170,7 @@ export const OrdersPage: React.FC = () => {
                                 <option value="CANCELLED">Cancelled</option>
                               </select>
                             </td>
-                            <td className="py-4 px-6 text-slate-400 text-[11px]">
+                            <td className="py-4 px-6 text-slate-400 text-[11px] font-['JetBrains_Mono',monospace]">
                               {new Date(o.createdAt).toLocaleDateString()}
                             </td>
                             <td className="py-4 px-6">
@@ -193,6 +199,7 @@ export const OrdersPage: React.FC = () => {
               </div>
             </div>
           )}
+          </ErrorBoundary>
         </div>
       </div>
     </DashboardLayout>

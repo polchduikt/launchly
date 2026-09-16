@@ -171,6 +171,36 @@ function getNodeInfo(node: Node): NodeInfo {
     };
   }
 
+  if (t === 'SUBSCRIPTION_CHECK') {
+    return {
+      kind: 'path',
+      pathChoice: {
+        title: 'Choose the path to continue',
+        subtitle: 'Subscription Check: In real conversation the path is verified via Telegram API.',
+        options: [
+          { label: '✅ Subscribed', value: 'subscribed', color: '#16a34a' },
+          { label: '❌ Not Subscribed', value: 'not_subscribed', color: '#dc2626' },
+        ],
+        sourceNodeId: node.id,
+      },
+    };
+  }
+
+  if (t === 'MODERATION') {
+    return {
+      kind: 'path',
+      pathChoice: {
+        title: 'Choose the path to continue',
+        subtitle: 'Moderation: In real conversation message content is checked for stop words and links.',
+        options: [
+          { label: '✅ Clean / Passed', value: 'clean', color: '#16a34a' },
+          { label: '🚫 Violated / Blocked', value: 'violated', color: '#dc2626' },
+        ],
+        sourceNodeId: node.id,
+      },
+    };
+  }
+
   return { kind: 'skip' };
 }
 
@@ -338,8 +368,11 @@ export const FlowPreviewPanel: React.FC<FlowPreviewPanelProps> = ({
     }
   }, [nodes, edges, isOpen]);
 
+  const restartRef = useRef(restart);
+  restartRef.current = restart;
+
   useEffect(() => {
-    if (isOpen) { nodesSignRef.current = ''; restart(); }
+    if (isOpen) { nodesSignRef.current = ''; restartRef.current(); }
   }, [isOpen]);
 
   useEffect(() => {

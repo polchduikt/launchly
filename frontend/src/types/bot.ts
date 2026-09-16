@@ -6,7 +6,11 @@ export interface FlowSchemaResponse {
   version: number;
   nodes: Node[];
   edges: Edge[];
+  publishedNodes?: Node[];
+  publishedEdges?: Edge[];
 }
+
+export type BotResponseMode = 'ALL' | 'PRIVATE_ONLY' | 'GROUPS_ONLY';
 
 export interface BotResponse {
   id: number;
@@ -33,6 +37,7 @@ export interface BotResponse {
   role?: string | null;
   isTemplate?: boolean;
   templateName?: string | null;
+  responseMode?: BotResponseMode;
 }
 
 export interface BotDetailResponse extends BotResponse {
@@ -47,13 +52,15 @@ export interface BotCreateRequest {
   description?: string;
   telegramToken?: string;
   copyTokenFromBotId?: number;
+  responseMode?: BotResponseMode;
 }
 
 export interface BotUpdateRequest {
-  name: string;
+  name?: string;
   description?: string;
   telegramToken?: string;
   copyTokenFromBotId?: number;
+  responseMode?: BotResponseMode;
 }
 
 export interface AutomationFlow {
@@ -170,6 +177,22 @@ export interface CustomNodeData {
   variations?: Array<{ id: string; label: string; percentage: number; color: string; }>;
   noteSize?: 'S' | 'M' | 'L';
   fontSize?: 'S' | 'L';
+  command?: string;
+  description?: string;
+  targetField?: string;
+  operationMode?: 'RANDOM' | 'STATIC';
+  operationType?: 'ADD' | 'SUBTRACT' | 'SET' | 'MULTIPLY' | 'DIVIDE';
+  staticValue?: number | string;
+  randomMin?: number | string;
+  randomMax?: number | string;
+  randomStep?: number | string;
+  resultVariable?: string;
+  limit?: number;
+  sortOrder?: 'DESC' | 'ASC';
+  outputVariable?: string;
+  userRankVariable?: string;
+  userScoreVariable?: string;
+  customHeader?: string;
   [key: string]: unknown;
 }
 
@@ -226,6 +249,8 @@ export interface BotUserResponse {
   metadata: string;
   tags: string[];
   createdAt: string;
+  botId?: number;
+  botName?: string;
 }
 
 export interface BotUserUpdateRequest {
@@ -255,6 +280,10 @@ export interface ActionItem {
   columnMappings?: Array<{ column: string; value: string }>;
   lookupColumn?: string;
   lookupValue?: string;
+  targetUserId?: string;
+  targetTelegramId?: string;
+  text?: string;
+  photoUrl?: string;
 }
 
 export type ConditionBranch = {
@@ -294,6 +323,56 @@ export interface SmartDelayNodeEditorProps {
 }
 
 export interface ActionNodeEditorProps {
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+}
+
+export interface MathNodeEditorProps {
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+}
+
+export interface LeaderboardNodeEditorProps {
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+}
+
+export interface CooldownNodeEditorProps {
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+}
+
+export interface TelegramChannelCheckItem {
+  id: string;
+  channelId: string;
+  name?: string;
+  url?: string;
+  isRequired?: boolean;
+}
+
+export interface SubscriptionCheckNodeEditorProps {
+  nodeId?: string;
+  node?: Node;
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+  onSelectNode?: (nodeId: string | null) => void;
+}
+
+export interface ModerationNodeEditorProps {
+  nodeId?: string;
+  node?: Node;
+  data: CustomNodeData;
+  handleChange: (key: string, value: unknown) => void;
+  editorState?: EditorState;
+  onSelectNode?: (nodeId: string | null) => void;
+}
+
+export interface SchedulerNodeEditorProps {
   data: CustomNodeData;
   handleChange: (key: string, value: unknown) => void;
   editorState?: EditorState;
@@ -363,6 +442,7 @@ export interface UserField {
   id?: number | string;
   name: string;
   type: string;
+  value?: string;
   description?: string;
   folderId?: string | null;
   folder?: string | null;

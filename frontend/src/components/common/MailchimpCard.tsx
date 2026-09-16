@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { isAxiosError } from 'axios';
 import { HelpCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { SiMailchimp } from '@icons-pack/react-simple-icons';
 import { t } from '../../i18n/config';
@@ -31,8 +32,8 @@ export const MailchimpCard: React.FC<MailchimpCardProps> = ({
     if (integration) {
       setIsConnected(integration.active);
       if (integration.config) {
-        setApiKey(integration.config.apiKey || '');
-        setListId(integration.config.listId || '');
+        setApiKey(String(integration.config.apiKey || ''));
+        setListId(String(integration.config.listId || ''));
         if (Array.isArray(integration.config.tags) && integration.config.tags.length > 0) {
           setTag(integration.config.tags.join(', '));
         }
@@ -75,9 +76,10 @@ export const MailchimpCard: React.FC<MailchimpCardProps> = ({
         },
       });
       setIsConnected(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setErrorMsg(err?.response?.data?.message || 'Failed to connect Mailchimp');
+      const message = isAxiosError(err) ? (err.response?.data as { message?: string })?.message : undefined;
+      setErrorMsg(message || 'Failed to connect Mailchimp');
     }
   };
 
@@ -97,7 +99,7 @@ export const MailchimpCard: React.FC<MailchimpCardProps> = ({
   };
 
   return (
-    <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between transition-all font-['JetBrains_Mono',monospace]">
+    <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start justify-between transition-all shadow-sm">
       <div className="w-full md:w-1/4 shrink-0">
         <h3 className="font-['Anybody',sans-serif] font-black text-sm text-[#0A0A0A] uppercase tracking-tight leading-snug">
           {t('settings.integrations.mailchimp.title', 'Mailchimp Email Marketing')}
@@ -141,7 +143,7 @@ export const MailchimpCard: React.FC<MailchimpCardProps> = ({
                 type="button"
                 onClick={handleDisconnect}
                 disabled={deleteMutation.isPending}
-                className="w-full px-4 py-2 border-2 border-[#0A0A0A] bg-rose-200 hover:bg-rose-300 text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center flex items-center justify-center gap-2"
+                className="w-full px-4 py-2.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl transition-all cursor-pointer select-none text-center flex items-center justify-center gap-2"
               >
                 {deleteMutation.isPending && <Loader2 size={14} className="animate-spin" />}
                 <span>{t('settings.integrations.premium.disconnect', 'Disconnect')}</span>
@@ -198,7 +200,7 @@ export const MailchimpCard: React.FC<MailchimpCardProps> = ({
               <button
                 type="submit"
                 disabled={createMutation.isPending}
-                className="w-full px-4 py-2.5 border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer select-none text-center flex items-center justify-center gap-2"
+                className="w-full px-4 py-2.5 border-2 border-[#0A0A0A] bg-white hover:bg-[#0A0A0A] hover:text-white text-[#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer select-none text-center flex items-center justify-center gap-2"
               >
                 {createMutation.isPending && <Loader2 size={14} className="animate-spin" />}
                 <span>{t('settings.integrations.premium.connect', { name: 'Mailchimp' })}</span>

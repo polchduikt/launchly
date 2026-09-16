@@ -6,24 +6,13 @@ import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData } from '../../../../../types/bot';
 import { t } from '../../../../../i18n/config';
 
-const StartBroadcastNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ data = {} }) => {
-  let connection: any = { inProgress: false };
-  try {
-    connection = useConnection() || { inProgress: false };
-  } catch (e) {
-    connection = { inProgress: false };
-  }
-  const isConnecting = connection.inProgress;
-  let sourceConns: any[] = [];
-  try {
-    sourceConns = useNodeConnections({ handleType: 'source' }) || [];
-  } catch (e) {
-    sourceConns = [];
-  }
+const StartBroadcastNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, data = {} }) => {
+  const isConnecting = useConnection((s) => s.inProgress);
+  const sourceConns = useNodeConnections({ id, handleType: 'source' });
   const isConnected = data?._tempSourceHandle !== 'then' && sourceConns.some((c) => c.sourceHandle === 'then');
 
   return (
-    <div className={`w-64 bg-white/75 backdrop-blur-[2px] border-2 rounded-3xl p-4 shadow-md select-none transition-all border-[#0A0A0A] relative overflow-visible isolate ${
+    <div className={`w-64 bg-white/70 backdrop-blur-[2px] border-2 rounded-3xl p-4 shadow-md select-none transition-all border-[#0A0A0A] relative overflow-visible isolate ${
       isConnecting ? 'opacity-40 grayscale pointer-events-none' : ''
     }`}>
       <div className="flex items-center gap-2 mb-3">
@@ -32,7 +21,7 @@ const StartBroadcastNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ da
         </span>
         <span className="font-extrabold text-xs text-[#0A0A0A] uppercase tracking-wider">{t('broadcast.builder.node.when')}</span>
       </div>
-      <div className="bg-white border border-[#0A0A0A]/25 rounded-2xl py-2.5 px-3 text-xs font-bold text-[#0A0A0A]/70 text-center">
+      <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 text-xs font-black text-[#0A0A0A] text-center font-['JetBrains_Mono',monospace]">
         {t('broadcast.builder.node.you_send_broadcast')}
       </div>
       <div className="flex justify-end items-center mt-3 pt-2 border-t border-[#0A0A0A]/15 relative">

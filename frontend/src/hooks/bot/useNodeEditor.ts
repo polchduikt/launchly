@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Node } from '@xyflow/react';
 import type { CustomNodeData, ButtonData, FlowBlock } from '../../types/bot';
+import { useFlowUiStore } from '../../store/useFlowUiStore';
 import apiClient from '../../api/axios';
 
 export const getBlocks = (data: CustomNodeData): FlowBlock[] => {
@@ -61,11 +62,30 @@ const mapActionToNodeType = (actionType?: string): string | null => {
     case 'DELAY':
       return 'SMART_DELAY';
     case 'AUTOMATION':
-      return 'MESSAGE';
     case 'START_AUTOMATION':
       return 'START_AUTOMATION';
     case 'ACTIONS':
       return 'ACTION';
+    case 'COOLDOWN':
+      return 'COOLDOWN';
+    case 'MATH':
+      return 'MATH';
+    case 'LEADERBOARD':
+      return 'LEADERBOARD';
+    case 'QUERY':
+      return 'QUERY';
+    case 'INTERACTION':
+      return 'INTERACTION';
+    case 'SUBSCRIPTION_CHECK':
+    case 'SUBSCRIPTION':
+    case 'GATEKEEPING':
+      return 'SUBSCRIPTION_CHECK';
+    case 'MODERATION':
+    case 'MODERATOR':
+    case 'STOP_WORDS':
+      return 'MODERATION';
+    case 'SCHEDULER':
+      return 'SCHEDULER';
     default:
       return null;
   }
@@ -99,25 +119,33 @@ export const useNodeEditor = (
     setEditingDataCollectionBlock(null);
   }, [node?.id]);
 
+  const editingButtonState = useFlowUiStore((s) => s.editingButtonState);
+
   useEffect(() => {
-    const handleEditButtonFromNode = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (node && customEvent.detail.nodeId === node.id) {
-        const btn = customEvent.detail.button;
-        setEditingButton(btn);
-        const blocksList = getBlocks(node.data || {});
-        const parentBlock = blocksList.find((b) => 
-          ((b.buttons || []) as ButtonData[]).some((button) => button.value === btn.value)
-        );
-        setEditingButtonBlockId(parentBlock ? (parentBlock.id as string) : null);
-        setIsBtnDialogOpen(true);
+    if (editingButtonState && node && editingButtonState.nodeId === node.id) {
+      const btn = editingButtonState.button;
+      const blocksList = getBlocks(node.data || {});
+      let latestBtn = btn;
+      let foundBlockId: string | null = null;
+      for (const b of blocksList) {
+        const matching = ((b.buttons || []) as ButtonData[]).find((button) => button.value === btn.value);
+        if (matching) {
+          latestBtn = matching;
+          foundBlockId = b.id as string;
+          break;
+        }
       }
-    };
-    window.addEventListener('edit-flow-button', handleEditButtonFromNode);
-    return () => {
-      window.removeEventListener('edit-flow-button', handleEditButtonFromNode);
-    };
-  }, [node]);
+      if (!foundBlockId && Array.isArray(node.data?.buttons)) {
+        const matching = (node.data.buttons as ButtonData[]).find((button) => button.value === btn.value);
+        if (matching) {
+          latestBtn = matching;
+        }
+      }
+      setEditingButton(latestBtn);
+      setEditingButtonBlockId(foundBlockId);
+      setIsBtnDialogOpen(true);
+    }
+  }, [editingButtonState]);
 
   const data = (node?.data || {}) as CustomNodeData;
   const buttons = (data.buttons || []) as ButtonData[];
@@ -227,6 +255,8 @@ export const useNodeEditor = (
     }
     setEditingButton(null);
     setEditingButtonBlockId(null);
+    setIsBtnDialogOpen(false);
+    useFlowUiStore.getState().closeEditButton();
 
     const mappedType = mapActionToNodeType(updated.actionType);
     if (mappedType && node && onAddAndConnectNode) {
@@ -253,6 +283,8 @@ export const useNodeEditor = (
     }
     setEditingButton(null);
     setEditingButtonBlockId(null);
+    setIsBtnDialogOpen(false);
+    useFlowUiStore.getState().closeEditButton();
   };
 
   const [uploadAccept, setUploadAccept] = useState('image/*');

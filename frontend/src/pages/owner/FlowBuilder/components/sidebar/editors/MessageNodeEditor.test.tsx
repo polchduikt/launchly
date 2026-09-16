@@ -19,6 +19,10 @@ vi.mock('../../../../../../hooks/broadcast/useBroadcastQueries', () => ({
   useTagsQuery: () => ({ data: [] }),
 }));
 
+vi.mock('../../../../../../hooks/bot/useCustomFieldsQuery', () => ({
+  useCustomFieldsQuery: () => ({ data: { fields: [] } }),
+}));
+
 vi.mock('../../../../../../hooks/bot/useNodeEditor', () => ({
   getBlocks: () => [
     { id: 'b1', type: 'text', text: 'Hello' },

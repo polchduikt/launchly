@@ -11,9 +11,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "bot_members", indexes = {
@@ -21,8 +23,10 @@ import lombok.NoArgsConstructor;
     @Index(name = "idx_bot_members_user_id", columnList = "user_id"),
     @Index(name = "idx_bot_members_user_bot", columnList = "user_id, bot_id")
 })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@ToString(exclude = {"bot", "user"})
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDown, Search, Globe } from 'lucide-react';
 import { getAllTimezones } from '../../../utils/timezones';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 
 interface TimezoneSelectProps {
   value: string;
@@ -10,6 +10,7 @@ interface TimezoneSelectProps {
 }
 
 export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({ value, onChange, disabled }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,10 +41,15 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({ value, onChange,
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+  const filteredRef = useRef(filtered);
+  filteredRef.current = filtered;
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
   useEffect(() => {
     if (open) {
       setTimeout(() => searchRef.current?.focus(), 50);
-      const idx = filtered.findIndex((t) => t.value === value);
+      const idx = filteredRef.current.findIndex((t) => t.value === valueRef.current);
       if (idx >= 0 && listRef.current) {
         const item = listRef.current.children[idx] as HTMLElement;
         item?.scrollIntoView({ block: 'nearest' });

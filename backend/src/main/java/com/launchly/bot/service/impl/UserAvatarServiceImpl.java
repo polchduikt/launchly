@@ -1,0 +1,156 @@
+package com.launchly.bot.service.impl;
+
+import com.cloudinary.Cloudinary;
+import com.launchly.bot.constant.TelegramConstants;
+import com.launchly.bot.entity.Bot;
+import com.launchly.bot.entity.BotUser;
+import com.launchly.bot.repository.BotRepository;
+import com.launchly.bot.repository.BotUserRepository;
+import com.launchly.bot.service.UserAvatarService;
+import com.launchly.bot.telegram.TelegramBotManager;
+import com.launchly.common.utils.EncryptionUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
+import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+import org.telegram.telegrambots.meta.api.objects.UserProfilePhotos;
+import org.telegram.telegrambots.meta.generics.TelegramClient;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+
+@Slf4j
+@Service
+public class UserAvatarServiceImpl implements UserAvatarService {
+
+    private static final String CLOUDINARY_AVATAR_TRANSFORMATION = "c_limit,w_400,h_400,q_auto,f_auto";
+
+    private final BotRepository botRepository;
+    private final BotUserRepository botUserRepository;
+    private final EncryptionUtil encryptionUtil;
+    private final Cloudinary cloudinary;
+    private final TelegramBotManager botManager;
+    private final HttpClient httpClient;
+
+    public UserAvatarServiceImpl(BotRepository botRepository,
+                                  BotUserRepository botUserRepository,
+                                  EncryptionUtil encryptionUtil,
+                                  Cloudinary cloudinary,
+                                  @Lazy TelegramBotManager botManager,
+                                  HttpClient httpClient) {
+        this.botRepository = botRepository;
+        this.botUserRepository = botUserRepository;
+        this.encryptionUtil = encryptionUtil;
+        this.cloudinary = cloudinary;
+        this.botManager = botManager;
+        this.httpClient = httpClient;
+    }
+
+    @Override
+    public void fetchAndSetPhotoUrl(BotUser botUser) {
+        if (botUser == null || botUser.getBot() == null) {
+            return;
+        }
+        Long botId = botUser.getBot().getId();
+        TelegramClient telegramClient = botManager.getTelegramClient(botId);
+        if (telegramClient == null) {
+            return;
+        }
+        Bot bot = botRepository.findById(botId).orElse(null);
+        if (bot == null) {
+            return;
+        }
+        fetchAndSetPhotoUrl(botUser, bot, telegramClient);
+    }
+
+    @Override
+    public void fetchAndSetPhotoUrl(BotUser botUser, Bot bot, TelegramClient telegramClient) {
+        if (botUser == null || bot == null || telegramClient == null) {
+            return;
+        }
+        if (botUser.getTelegramId() == null || botUser.getTelegramId() <= 0) {
+            return;
+        }
+        try {
+            log.info("Fetching profile photo from Telegram for user {} in bot {}", botUser.getTelegramId(), bot.getName());
+            GetUserProfilePhotos getUserProfilePhotos = GetUserProfilePhotos.builder()
+                    .userId(botUser.getTelegramId())
+                    .limit(1)
+                    .build();
+            UserProfilePhotos photos = telegramClient.execute(getUserProfilePhotos);
+            if (photos == null || photos.getTotalCount() == 0 || photos.getPhotos() == null || photos.getPhotos().isEmpty()) {
+                log.info("Telegram returned 0 profile photos for user {} (possibly due to privacy settings or no avatar set)", botUser.getTelegramId());
+                return;
+            }
+
+            List<PhotoSize> photoSizes = photos.getPhotos().getFirst();
+            PhotoSize largest = photoSizes.stream()
+                    .max(Comparator.comparingInt(size -> size.getWidth() * size.getHeight()))
+                    .orElse(null);
+            if (largest == null) {
+                return;
+            }
+
+            GetFile getFile = GetFile.builder()
+                    .fileId(largest.getFileId())
+                    .build();
+            File file = telegramClient.execute(getFile);
+            if (file == null || file.getFilePath() == null) {
+                log.warn("Could not get file path from Telegram for user {}", botUser.getTelegramId());
+                return;
+            }
+
+            String botToken = encryptionUtil.decrypt(bot.getTelegramToken());
+            String fileUrl = String.format(TelegramConstants.FILE_DOWNLOAD_URL_TEMPLATE, botToken, file.getFilePath());
+
+            try {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(fileUrl))
+                        .GET()
+                        .build();
+                HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+                byte[] fileBytes = response.statusCode() == HttpStatus.OK.value() ? response.body() : null;
+
+                if (fileBytes != null && fileBytes.length > 0) {
+                    String folder = "launchly/contacts";
+                    try {
+                        if (bot.getUser() != null && bot.getUser().getId() != null) {
+                            folder = "launchly/" + bot.getUser().getId() + "/contacts";
+                        }
+                    } catch (Exception ignored) {
+                    }
+
+                    Map<String, Object> params = Map.of(
+                            "folder", folder,
+                            "transformation", CLOUDINARY_AVATAR_TRANSFORMATION
+                    );
+                    Map<?, ?> result = cloudinary.uploader().upload(fileBytes, params);
+                    String secureUrl = (String) result.get("secure_url");
+                    if (secureUrl != null && !secureUrl.isBlank()) {
+                        botUser.setPhotoUrl(secureUrl);
+                        log.info("Successfully uploaded profile photo to Cloudinary for user {}: {}", botUser.getTelegramId(), secureUrl);
+                    } else {
+                        botUser.setPhotoUrl(fileUrl);
+                    }
+                } else {
+                    botUser.setPhotoUrl(fileUrl);
+                }
+            } catch (Exception uploadEx) {
+                log.warn("Failed to upload profile photo to Cloudinary for user {}: {}", botUser.getTelegramId(), uploadEx.getMessage());
+                botUser.setPhotoUrl(fileUrl);
+            }
+            botUserRepository.save(botUser);
+        } catch (Exception e) {
+            log.warn("Could not fetch profile photo for user {}: {}", botUser.getTelegramId(), e.getMessage());
+        }
+    }
+}

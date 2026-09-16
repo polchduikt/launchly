@@ -2,14 +2,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, ArrowRight, Home } from 'lucide-react';
 import { ROUTES } from '../../../routes/paths';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 
 const CheckoutCancelPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[#F2EBDD] flex items-center justify-center p-6 font-['JetBrains_Mono',monospace]">
-      <div className="max-w-lg w-full bg-[#F2EBDD] border-4 border-[#0A0A0A] shadow-[12px_12px_0px_#0A0A0A] rounded-3xl p-8 text-center space-y-6 text-[#0A0A0A]">
+      <div className="max-w-lg w-full bg-white border-4 border-[#0A0A0A] shadow-[12px_12px_0px_#0A0A0A] rounded-3xl p-8 text-center space-y-6 text-[#0A0A0A]">
         
         <div className="w-16 h-16 bg-rose-300 text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-2xl flex items-center justify-center mx-auto shadow-[3px_3px_0px_#0A0A0A]">
           <X size={32} strokeWidth={3} />

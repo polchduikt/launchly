@@ -5,13 +5,13 @@ export const FLOW_EDGE_DEFAULTS = {
   type: 'default',
   markerEnd: {
     type: MarkerType.ArrowClosed,
-    width: 15,
-    height: 15,
-    color: '#7b8794',
+    width: 16,
+    height: 16,
+    color: '#64748b',
   },
   style: {
-    strokeWidth: 2.2,
-    stroke: '#7b8794',
+    strokeWidth: 2.4,
+    stroke: '#64748b',
   },
 };
 

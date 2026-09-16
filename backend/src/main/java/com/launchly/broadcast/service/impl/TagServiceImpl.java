@@ -14,6 +14,8 @@ import com.launchly.broadcast.service.TagService;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.launchly.common.constant.CacheConstants;
+import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
@@ -96,6 +98,28 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
+    public TagResponse updateTag(Long tagId, Long userId, CreateTagRequest request) {
+        Tag tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "broadcast.error.tag_not_found"));
+        Long botId = tag.getBot().getId();
+        validateBotOwnership(botId, userId);
+
+        String trimmedName = request.name().trim();
+        tagRepository.findByBotIdAndName(botId, trimmedName)
+                .filter(existing -> !existing.getId().equals(tagId))
+                .ifPresent(existing -> {
+                    throw new AppException(HttpStatus.CONFLICT, "broadcast.error.tag_already_exists");
+                });
+
+        tag.setName(trimmedName);
+        tag = tagRepository.save(tag);
+        evictTagsCache(botId);
+        log.info("Updated tag {} (newName='{}')", tagId, trimmedName);
+        return broadcastMapper.toTagResponse(tag);
+    }
+
+    @Override
+    @Transactional
     public void deleteTag(Long tagId, Long userId) {
         Tag tag = tagRepository.findById(tagId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "broadcast.error.tag_not_found"));
@@ -115,7 +139,7 @@ public class TagServiceImpl implements TagService {
 
     private void evictTagsCache(Long botId) {
         if (botId != null) {
-            org.springframework.cache.Cache cache = cacheManager.getCache("tags");
+            Cache cache = cacheManager.getCache(CacheConstants.TAGS);
             if (cache != null) {
                 cache.evict(botId);
             }

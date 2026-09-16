@@ -14,27 +14,27 @@ import com.launchly.auth.repository.UserRepository;
 import com.launchly.auth.service.AuthService;
 import com.launchly.auth.service.TokenService;
 import com.launchly.billing.service.BillingService;
-import com.launchly.bot.entity.Bot;
-import com.launchly.bot.entity.BotMember;
+import com.launchly.bot.service.BotService;
 import com.launchly.common.exception.AppException;
 import com.launchly.auth.entity.AuthSessionStatus;
 import com.launchly.auth.entity.TelegramAuthSession;
 import com.launchly.auth.repository.TelegramAuthSessionRepository;
+import com.launchly.admin.service.UserAuditService;
+import com.launchly.common.security.turnstile.TurnstileService;
+import com.launchly.common.utils.MessageUtils;
 import com.launchly.auth.dto.response.TelegramSessionResponse;
 import com.launchly.auth.dto.response.TelegramStatusResponse;
 import org.springframework.beans.factory.annotation.Value;
-import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -43,11 +43,33 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final BillingService billingService;
     private final TelegramAuthSessionRepository telegramAuthSessionRepository;
-    private final com.launchly.admin.service.UserAuditService userAuditService;
-    private final com.launchly.bot.repository.BotRepository botRepository;
-    private final com.launchly.bot.repository.BotMemberRepository botMemberRepository;
-    private final com.launchly.billing.repository.SubscriptionRepository subscriptionRepository;
-    private final com.launchly.common.utils.MessageUtils messageUtils;
+    private final UserAuditService userAuditService;
+    private final BotService botService;
+    private final MessageUtils messageUtils;
+    private final TurnstileService turnstileService;
+
+    public AuthServiceImpl(
+            UserRepository userRepository,
+            TokenService tokenService,
+            AuthMapper authMapper,
+            PasswordEncoder passwordEncoder,
+            BillingService billingService,
+            TelegramAuthSessionRepository telegramAuthSessionRepository,
+            UserAuditService userAuditService,
+            @Lazy BotService botService,
+            MessageUtils messageUtils,
+            TurnstileService turnstileService) {
+        this.userRepository = userRepository;
+        this.tokenService = tokenService;
+        this.authMapper = authMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.billingService = billingService;
+        this.telegramAuthSessionRepository = telegramAuthSessionRepository;
+        this.userAuditService = userAuditService;
+        this.botService = botService;
+        this.messageUtils = messageUtils;
+        this.turnstileService = turnstileService;
+    }
 
     @Value("${telegram.system-bot-username:}")
     private String systemBotUsername;
@@ -58,6 +80,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
+        if (!turnstileService.verifyToken(request.turnstileToken())) {
+            throw new AppException(HttpStatus.BAD_REQUEST, messageUtils.getMessage("auth.error.captcha_invalid"));
+        }
+
         if (userRepository.existsByEmail(request.email())) {
             throw new AppException(HttpStatus.CONFLICT, messageUtils.getMessage("auth.error.email_already_in_use"));
         }
@@ -91,6 +117,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse login(LoginRequest request) {
+        if (!turnstileService.verifyToken(request.turnstileToken())) {
+            throw new AppException(HttpStatus.BAD_REQUEST, messageUtils.getMessage("auth.error.captcha_invalid"));
+        }
+
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, messageUtils.getMessage("auth.error.invalid_credentials")));
 
@@ -335,20 +365,17 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void deleteUserAccount(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
-
-        List<Bot> ownedBots = botRepository.findAllByUserId(userId);
-        for (Bot b : ownedBots) {
-            botRepository.delete(b);
-        }
-
-        List<BotMember> memberships = botMemberRepository.findByUserId(userId);
-        for (BotMember bm : memberships) {
-            botMemberRepository.delete(bm);
-        }
-
-        subscriptionRepository.findByUserId(userId).ifPresent(subscriptionRepository::delete);
-
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "auth.error.user_not_found"));
+        botService.deleteAllUserData(userId);
+        billingService.deleteSubscription(userId);
         userRepository.delete(user);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAccountByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "auth.error.user_not_found"));
+        deleteUserAccount(user.getId());
     }
 }

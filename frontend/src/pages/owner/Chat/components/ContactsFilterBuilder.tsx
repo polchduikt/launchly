@@ -1,16 +1,18 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { X, Plus, Search, Tag, User, Phone, Mail, Hash, Clock, Pause, Send, Sparkles } from 'lucide-react';
 import { useTranslation } from '../../../../i18n/config';
-import type { FilterCondition } from '../../../../types/crm';
+import type { FilterCondition, BotUserMetadata } from '../../../../types/crm';
 import type { TagResponse } from '../../../../types';
-import { getCustomFieldsApi } from '../../../../api/bot';
+import type { BotUserResponse } from '../../../../types/bot';
+import { useCustomFieldsQuery } from '../../../../hooks/bot/useCustomFieldsQuery';
+import { generateId } from '../../../../utils/id';
 
 interface ContactsFilterBuilderProps {
   isOpen: boolean;
   conditions: FilterCondition[];
   setConditions: React.Dispatch<React.SetStateAction<FilterCondition[]>>;
   tags: TagResponse[];
-  contacts: unknown[];
+  contacts: BotUserResponse[];
   botId: number;
 }
 
@@ -45,38 +47,37 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
   }, [isAddDropdownOpen]);
 
 
-  const [apiCustomFields, setApiCustomFields] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (botId) {
-      getCustomFieldsApi(botId)
-        .then((data) => {
-          if (data && typeof data === 'object') {
-            const list = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
-            const names = list.map((f: any) => typeof f === 'string' ? f : f?.name).filter(Boolean);
-            setApiCustomFields(names);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [botId]);
+  const { data: customFieldsData } = useCustomFieldsQuery(botId);
 
   const allCustomFields = useMemo(() => {
-    const fieldsSet = new Set<string>(apiCustomFields);
+    const list = customFieldsData && typeof customFieldsData === 'object'
+      ? Array.isArray(customFieldsData.fields)
+        ? customFieldsData.fields
+        : Array.isArray(customFieldsData)
+          ? (customFieldsData as unknown[])
+          : []
+      : [];
+    const names = list
+      .map((f: unknown) => (typeof f === 'string' ? f : (f as { name?: string })?.name))
+      .filter((n): n is string => Boolean(n && !n.toLowerCase().includes('cooldown')));
+    const fieldsSet = new Set<string>(names);
 
-    contacts.forEach((c: any) => {
+    contacts.forEach((c: { metadata?: string | null }) => {
       try {
-        const meta = c.metadata ? JSON.parse(c.metadata) : {};
-        if (meta.customFields) {
-          Object.keys(meta.customFields).forEach((k) => fieldsSet.add(k));
+        const meta = c.metadata ? (JSON.parse(c.metadata) as Record<string, unknown>) : {};
+        if (meta.customFields && typeof meta.customFields === 'object') {
+          Object.keys(meta.customFields).forEach((k) => {
+            if (!k.toLowerCase().includes('cooldown')) {
+              fieldsSet.add(k);
+            }
+          });
         }
-      } catch (e) {
-        void e;
+      } catch {
       }
     });
 
     return Array.from(fieldsSet);
-  }, [botId, contacts]);
+  }, [customFieldsData, contacts]);
 
   const filteredItems = useMemo(() => {
     const q = dropdownSearch.toLowerCase().trim();
@@ -126,7 +127,7 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
     const isPaused = item.field === 'paused' || item.field === 'optedInTelegram';
 
     const newCond: FilterCondition = {
-      id: `cond_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      id: generateId('cond'),
       field: item.field,
       label: item.label,
       operator: isDate ? 'after' : 'is',
@@ -167,24 +168,24 @@ export const ContactsFilterBuilder: React.FC<ContactsFilterBuilderProps> = ({
 
   const getSuggestionsForField = (field: string, searchVal: string) => {
     const values = new Set<string>();
-    contacts.forEach((c: any) => {
+    contacts.forEach((c) => {
       let val = '';
-      let meta: Record<string, unknown> = {};
+      let meta: BotUserMetadata = {};
       try {
         meta = c.metadata ? JSON.parse(c.metadata) : {};
       } catch {}
 
-      if (field === 'firstName') val = (c as any).firstName;
-      else if (field === 'lastName') val = (c as any).lastName;
-      else if (field === 'fullName') val = `${(c as any).firstName || ''} ${(c as any).lastName || ''}`;
-      else if (field === 'email') val = (meta as any).email || (meta as any).customFields?.Email || (meta as any).customFields?.email;
-      else if (field === 'phone') val = (meta as any).phone || (meta as any).customFields?.Phone || (meta as any).customFields?.phone;
-      else if (field === 'id') val = String((c as any).id);
-      else if (field === 'telegramUserId') val = String((c as any).telegramId);
-      else if (field === 'telegramUsername') val = (c as any).username;
+      if (field === 'firstName') val = c.firstName || '';
+      else if (field === 'lastName') val = c.lastName || '';
+      else if (field === 'fullName') val = `${c.firstName || ''} ${c.lastName || ''}`.trim();
+      else if (field === 'email') val = meta.email || (meta.customFields?.Email ? String(meta.customFields.Email) : '') || (meta.customFields?.email ? String(meta.customFields.email) : '') || '';
+      else if (field === 'phone') val = meta.phone || (meta.customFields?.Phone ? String(meta.customFields.Phone) : '') || (meta.customFields?.phone ? String(meta.customFields.phone) : '') || '';
+      else if (field === 'id') val = String(c.id);
+      else if (field === 'telegramUserId') val = String(c.telegramId);
+      else if (field === 'telegramUsername') val = c.username || '';
       else if (field.startsWith('custom:')) {
         const customKey = field.substring(7);
-        val = (meta as any).customFields?.[customKey];
+        val = meta.customFields?.[customKey] !== undefined ? String(meta.customFields[customKey]) : '';
       }
 
       if (val && val.trim() !== '') {

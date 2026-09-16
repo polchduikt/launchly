@@ -55,12 +55,55 @@ describe('useVirtualList', () => {
     Object.defineProperty(mockElement, 'clientHeight', { value: 500, configurable: true });
     Object.defineProperty(mockElement, 'scrollTop', { value: 200, writable: true, configurable: true });
 
-    (result.current.parentRef as any).current = mockElement;
+    (result.current.parentRef as { current: HTMLDivElement | null }).current = mockElement;
 
     act(() => {
       mockElement.dispatchEvent(new Event('scroll'));
     });
 
     expect(result.current.totalHeight).toBe(50000);
+  });
+
+  it('should handle scrollToIndex with various alignment modes', () => {
+    const { result } = renderHook(() =>
+      useVirtualList({
+        count: 100,
+        itemHeight: 50,
+      })
+    );
+
+    const mockElement = document.createElement('div');
+    Object.defineProperty(mockElement, 'clientHeight', { value: 200, configurable: true });
+    let currentScroll = 0;
+    Object.defineProperty(mockElement, 'scrollTop', {
+      get: () => currentScroll,
+      set: (val: number) => {
+        currentScroll = val;
+      },
+      configurable: true,
+    });
+
+    (result.current.parentRef as { current: HTMLDivElement | null }).current = mockElement;
+
+    act(() => {
+      result.current.scrollToIndex(10, 'start');
+    });
+    expect(mockElement.scrollTop).toBe(500);
+
+    act(() => {
+      result.current.scrollToIndex(10, 'center');
+    });
+    expect(mockElement.scrollTop).toBe(425);
+
+    act(() => {
+      result.current.scrollToIndex(10, 'end');
+    });
+    expect(mockElement.scrollTop).toBe(350);
+
+    act(() => {
+      result.current.scrollToIndex(-1);
+      result.current.scrollToIndex(200);
+    });
+    expect(mockElement.scrollTop).toBe(350);
   });
 });

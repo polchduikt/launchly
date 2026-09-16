@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { isAxiosError } from 'axios';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import {
   useUserTicketsQuery,
@@ -73,7 +74,7 @@ export const SupportPage: React.FC = () => {
     } else {
       setSelectedTicketId(null);
     }
-  }, [filterStatus, ticketsData]);
+  }, [filteredTickets, selectedTicketId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -119,8 +120,11 @@ export const SupportPage: React.FC = () => {
           setFilterStatus('active');
           setSelectedTicketId(created.id);
         },
-        onError: (err: any) => {
-          setNewError(err?.response?.data?.message || 'Failed to create support ticket');
+        onError: (err: unknown) => {
+          const msg = isAxiosError(err)
+            ? (err.response?.data?.message || err.message)
+            : (err instanceof Error ? err.message : 'Failed to create support ticket');
+          setNewError(msg);
         },
       }
     );
@@ -170,30 +174,20 @@ export const SupportPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-full bg-[#F2EBDD] font-['JetBrains_Mono',monospace] overflow-hidden">
-        <header className="px-6 py-4 border-b-2 border-[#0A0A0A] bg-white flex flex-wrap items-center justify-between gap-4 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#0A0A0A] text-[#F2EBDD] flex items-center justify-center border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
-              <Headphones size={20} />
-            </div>
-            <div>
-              <h1 className="font-['Anybody',sans-serif] text-lg md:text-xl font-black text-[#0A0A0A] uppercase tracking-tight leading-none">
-                {t('support.page_title', 'СЛУЖБА ПІДТРИМКИ')}
-              </h1>
-              <p className="text-xs text-slate-500 font-bold mt-1 hidden sm:block">
-                {t('support.page_subtitle', "Прямий зв'язок із менеджерами Launchly для вирішення питань")}
-              </p>
-            </div>
-          </div>
+      <div className="flex flex-col h-full bg-[#F2EBDD] font-['Geist',sans-serif] overflow-hidden">
+        <header className="h-16 border-b-2 border-[#0A0A0A] px-6 bg-[#F2EBDD] flex items-center justify-between shrink-0 z-20">
+          <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight select-none">
+            {t('support.page_title', 'СЛУЖБА ПІДТРИМКИ')}
+          </h1>
 
           <button
             onClick={() => {
               setNewError(null);
               setIsNewModalOpen(true);
             }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase shadow-[3px_3px_0px_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase shadow-[2px_2px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer"
           >
-            <Plus size={15} />
+            <Plus size={14} />
             <span>{t('support.btn_new_ticket', 'Нове звернення')}</span>
           </button>
         </header>
@@ -283,7 +277,7 @@ export const SupportPage: React.FC = () => {
                           {ticket.subject || t('support.page_title', 'Звернення')}
                         </span>
                         <span
-                          className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md border shrink-0 ${
+                          className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md border shrink-0 font-['JetBrains_Mono',monospace] ${
                             isClosed
                               ? 'bg-slate-200 border-slate-400 text-slate-700'
                               : isResolved
@@ -317,7 +311,7 @@ export const SupportPage: React.FC = () => {
                             </>
                           )}
                         </span>
-                        <span>{formatDate(ticket.lastMessageTime)}</span>
+                        <span className="font-['JetBrains_Mono',monospace]">{formatDate(ticket.lastMessageTime)}</span>
                       </div>
                     </div>
                   );
@@ -329,7 +323,7 @@ export const SupportPage: React.FC = () => {
           <main className="flex-1 flex flex-col bg-white overflow-hidden">
             {selectedTicketId && currentTicket ? (
               <>
-                <div className="px-6 py-3.5 border-b-2 border-[#0A0A0A] bg-[#FAF8F5] flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <div className="px-6 py-3.5 border-b-2 border-[#0A0A0A] bg-white flex flex-wrap items-center justify-between gap-3 shrink-0">
                   <div className="space-y-0.5">
                     <h2 className="font-['Anybody',sans-serif] text-sm md:text-base font-black text-[#0A0A0A] uppercase tracking-tight">
                       {currentTicket.subject}
@@ -367,7 +361,7 @@ export const SupportPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-slate-50/50 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-white custom-scrollbar">
                   {isDetailLoading ? (
                     <div className="h-full flex items-center justify-center">
                       <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
@@ -458,7 +452,7 @@ export const SupportPage: React.FC = () => {
                     </div>
                   ) : (
                     <>
-                      <div className="p-2.5 bg-[#FAF8F5] border-2 border-[#0A0A0A] rounded-2xl flex items-center justify-between gap-3 shadow-[2px_2px_0px_#0A0A0A]">
+                      <div className="p-2.5 bg-white border-2 border-[#0A0A0A] rounded-2xl flex items-center justify-between gap-3 shadow-[2px_2px_0px_#0A0A0A]">
                         <div className="text-xs font-black uppercase text-[#0A0A0A] flex items-center gap-2">
                           <CheckCircle2 size={15} className="text-[#0A0A0A]" />
                           <span>{t('support.actions_label', 'Дії з діалогом:')}</span>
@@ -490,7 +484,7 @@ export const SupportPage: React.FC = () => {
                         <button
                           type="submit"
                           disabled={!replyText.trim() || sendMessageMut.isPending}
-                          className="px-5 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 hover:bg-[#2A2A2A] disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-[3px_3px_0px_#0A0A0A]"
+                          className="px-5 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-2 hover:bg-white hover:text-[#0A0A0A] disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-[3px_3px_0px_#0A0A0A]"
                         >
                           {sendMessageMut.isPending ? (
                             <Loader2 className="animate-spin" size={16} />
@@ -507,7 +501,7 @@ export const SupportPage: React.FC = () => {
                 </div>
               </>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-3 bg-[#FAF8F5]">
+              <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-3 bg-white">
                 <div className="w-14 h-14 rounded-full bg-white border-2 border-[#0A0A0A] flex items-center justify-center shadow-[3px_3px_0px_#0A0A0A]">
                   <MessageSquare size={26} className="text-[#0A0A0A]" />
                 </div>
@@ -605,14 +599,14 @@ export const SupportPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsNewModalOpen(false)}
-                  className="px-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-slate-100 transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-colors cursor-pointer"
                 >
                   {t('support.cancel_btn', 'Скасувати')}
                 </button>
                 <button
                   type="submit"
                   disabled={createTicketMut.isPending || !newSubject.trim() || !newMessage.trim()}
-                  className="px-5 py-2 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase flex items-center gap-2 hover:bg-[#2A2A2A] disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-[3px_3px_0px_#0A0A0A]"
+                  className="px-5 py-2 bg-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black uppercase flex items-center gap-2 hover:bg-white hover:text-[#0A0A0A] disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-[3px_3px_0px_#0A0A0A]"
                 >
                   {createTicketMut.isPending ? (
                     <Loader2 className="animate-spin" size={14} />

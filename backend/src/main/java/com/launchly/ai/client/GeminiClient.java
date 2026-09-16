@@ -112,7 +112,7 @@ public class GeminiClient implements AiProviderClient {
             log.info("Sending chat request to Gemini model: {}", model);
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
+            if (response.statusCode() != HttpStatus.OK.value()) {
                 log.error("Gemini API error. Status: {}, Body: {}", response.statusCode(), response.body());
                 throw new AppException(HttpStatus.BAD_GATEWAY, "ai.error.provider_failed");
             }

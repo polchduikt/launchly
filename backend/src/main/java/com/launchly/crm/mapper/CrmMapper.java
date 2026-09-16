@@ -13,13 +13,13 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CrmMapper {
 
-    @Mapping(target = "botUserName", expression = "java(order.getBotUser().getFirstName() + (order.getBotUser().getLastName() != null ? \" \" + order.getBotUser().getLastName() : \"\"))")
+    @Mapping(target = "botUserName", expression = "java(order.getBotUser() != null ? order.getBotUser().getDisplayName() : null)")
     @Mapping(target = "botUserUsername", source = "botUser.username")
     OrderResponse toOrderResponse(Order order);
 
     List<OrderResponse> toOrderResponseList(List<Order> orders);
 
-    @Mapping(target = "botUserName", expression = "java(lead.getBotUser().getFirstName() + (lead.getBotUser().getLastName() != null ? \" \" + lead.getBotUser().getLastName() : \"\"))")
+    @Mapping(target = "botUserName", expression = "java(lead.getBotUser() != null ? lead.getBotUser().getDisplayName() : null)")
     @Mapping(target = "botUserUsername", source = "botUser.username")
     LeadResponse toLeadResponse(Lead lead);
 

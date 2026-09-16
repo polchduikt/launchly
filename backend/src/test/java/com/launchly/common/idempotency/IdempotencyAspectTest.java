@@ -1,6 +1,8 @@
 package com.launchly.common.idempotency;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
@@ -60,6 +62,8 @@ class IdempotencyAspectTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         idempotencyAspect = new IdempotencyAspect(stringRedisTemplate, objectMapper);
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request, response));
         lenient().when(idempotent.headerName()).thenReturn("Idempotency-Key");
@@ -166,6 +170,26 @@ class IdempotencyAspectTest {
 
         verify(stringRedisTemplate).delete(contains(":status"));
     }
+
+    @Test
+    void whenResponseBodyContainsLocalDateTime_serializesWithoutError() throws Throwable {
+        when(request.getHeader("Idempotency-Key")).thenReturn("test-key-123");
+        when(request.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.setIfAbsent(anyString(), eq("PROCESSING"), any(Duration.class))).thenReturn(true);
+
+        DateTimePayload payload = new DateTimePayload("campaign-1", java.time.LocalDateTime.of(2026, 9, 4, 14, 30));
+        ResponseEntity<DateTimePayload> responseEntity = ResponseEntity.ok(payload);
+        when(joinPoint.proceed()).thenReturn(responseEntity);
+
+        Object result = idempotencyAspect.handleIdempotency(joinPoint, idempotent);
+
+        assertThat(result).isEqualTo(responseEntity);
+        verify(valueOperations).set(contains(":data"), anyString(), any(Duration.class));
+        verify(valueOperations).set(contains(":status"), eq("COMPLETED"), any(Duration.class));
+    }
+
+    record DateTimePayload(String name, java.time.LocalDateTime createdAt) {}
 
     static class SampleController {
         public ResponseEntity<Map<String, Object>> sampleEndpoint() {

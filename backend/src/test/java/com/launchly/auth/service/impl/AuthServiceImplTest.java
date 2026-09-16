@@ -13,11 +13,10 @@ import com.launchly.auth.mapper.AuthMapper;
 import com.launchly.auth.repository.TelegramAuthSessionRepository;
 import com.launchly.auth.repository.UserRepository;
 import com.launchly.auth.service.TokenService;
-import com.launchly.billing.repository.SubscriptionRepository;
 import com.launchly.billing.service.BillingService;
-import com.launchly.bot.repository.BotMemberRepository;
-import com.launchly.bot.repository.BotRepository;
+import com.launchly.bot.service.BotService;
 import com.launchly.common.exception.AppException;
+import com.launchly.common.security.turnstile.TurnstileService;
 import com.launchly.common.utils.MessageUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -61,19 +60,16 @@ class AuthServiceImplTest {
     private TelegramAuthSessionRepository telegramAuthSessionRepository;
 
     @Mock
-    private BotRepository botRepository;
-
-    @Mock
-    private BotMemberRepository botMemberRepository;
-
-    @Mock
-    private SubscriptionRepository subscriptionRepository;
+    private BotService botService;
 
     @Mock
     private UserAuditService userAuditService;
 
     @Mock
     private MessageUtils messageUtils;
+
+    @Mock
+    private TurnstileService turnstileService;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -83,6 +79,7 @@ class AuthServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(turnstileService.verifyToken(any())).thenReturn(true);
         testUser = User.builder()
                 .email("test@launchly.pro")
                 .password("encoded_pass")
@@ -305,12 +302,11 @@ class AuthServiceImplTest {
     @DisplayName("Should cascade delete user and associated entities")
     void deleteUserAccount_Success() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(botRepository.findAllByUserId(1L)).thenReturn(Collections.emptyList());
-        when(botMemberRepository.findByUserId(1L)).thenReturn(Collections.emptyList());
-        when(subscriptionRepository.findByUserId(1L)).thenReturn(Optional.empty());
 
         authService.deleteUserAccount(1L);
 
+        verify(botService, times(1)).deleteAllUserData(1L);
+        verify(billingService, times(1)).deleteSubscription(1L);
         verify(userRepository, times(1)).delete(testUser);
     }
 
@@ -322,5 +318,27 @@ class AuthServiceImplTest {
         assertThatThrownBy(() -> authService.deleteUserAccount(99L))
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("Should throw BadRequest when Turnstile captcha fails on registration")
+    void register_WhenTurnstileFails_ThrowsBadRequest() {
+        RegisterRequest request = new RegisterRequest("new@launchly.pro", "secret123", "New User", "invalid_token");
+        when(turnstileService.verifyToken("invalid_token")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.register(request))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    @DisplayName("Should throw BadRequest when Turnstile captcha fails on login")
+    void login_WhenTurnstileFails_ThrowsBadRequest() {
+        LoginRequest request = new LoginRequest("test@launchly.pro", "secret123", "invalid_token");
+        when(turnstileService.verifyToken("invalid_token")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
     }
 }

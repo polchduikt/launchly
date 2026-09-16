@@ -81,9 +81,9 @@ export const CreateContactModal: React.FC<CreateContactModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-[#0A0A0A] hover:bg-white p-1 rounded-xl border-2 border-transparent hover:border-[#0A0A0A] transition-all cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 

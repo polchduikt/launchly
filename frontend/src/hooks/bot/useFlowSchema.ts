@@ -17,6 +17,7 @@ export const useSaveFlowSchemaMutation = (botId: number) => {
     mutationFn: ({ nodes, edges }) => saveFlowSchemaApi(botId, nodes, edges),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['flowSchema', botId] });
+      queryClient.invalidateQueries({ queryKey: ['bots'] });
     },
   });
 };

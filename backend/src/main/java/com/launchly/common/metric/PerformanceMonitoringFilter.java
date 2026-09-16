@@ -47,7 +47,7 @@ public class PerformanceMonitoringFilter implements Filter {
                 uri = ((HttpServletRequest) request).getRequestURI();
             }
 
-            if (!uri.contains("/assets/") && !uri.contains("/webjars/") && !uri.endsWith(".png") && !uri.endsWith(".js") && !uri.endsWith(".css")) {
+            if (!uri.contains("/assets/") && !uri.contains("/webjars/") && !uri.contains("/api-docs") && !uri.contains("/swagger-ui") && !uri.endsWith(".png") && !uri.endsWith(".js") && !uri.endsWith(".css")) {
                 String hourBucket = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00"));
                 HourlyMetric metric = hourlyMetrics.computeIfAbsent(hourBucket, k -> new HourlyMetric());
                 
@@ -55,6 +55,10 @@ public class PerformanceMonitoringFilter implements Filter {
                 metric.requestCount.incrementAndGet();
                 if (status >= 400) {
                     metric.errorCount.incrementAndGet();
+                }
+                if (hourlyMetrics.size() > 48) {
+                    String cutoff = LocalDateTime.now().minusHours(48).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00"));
+                    hourlyMetrics.keySet().removeIf(bucket -> bucket.compareTo(cutoff) < 0);
                 }
             }
         }

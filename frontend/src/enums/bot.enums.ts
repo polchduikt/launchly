@@ -19,7 +19,14 @@ export const NodeType = {
   Randomizer: 'RANDOMIZER',
   Comment: 'COMMENT',
   StartAutomation: 'START_AUTOMATION',
+  Command: 'COMMAND',
   Ai: 'AI',
+  Math: 'MATH',
+  Leaderboard: 'LEADERBOARD',
+  Cooldown: 'COOLDOWN',
+  Scheduler: 'SCHEDULER',
+  SubscriptionCheck: 'SUBSCRIPTION_CHECK',
+  Moderation: 'MODERATION',
 } as const;
 
 export type NodeType = (typeof NodeType)[keyof typeof NodeType];

@@ -4,19 +4,24 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useRegisterMutation } from './useRegisterMutation';
-import { registerSchema } from '../../schemas/auth.schema';
-import type { RegisterSchemaType } from '../../schemas/auth.schema';
+import { getRegisterSchema, type RegisterSchemaType } from '../../schemas/auth.schema';
+import { useTranslation } from '../../i18n/config';
+import { STORAGE_KEYS } from '../../const/constants';
+import { ROUTES } from '../../routes/paths';
+import { getSafeRedirectUrl } from '../../utils/auth';
 
 export type RegisterFields = RegisterSchemaType;
 
 export const useRegisterForm = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { mutateAsync: registerMutate, isPending } = useRegisterMutation();
   const [apiError, setApiError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const form = useForm<RegisterFields>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(getRegisterSchema(t)),
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -32,14 +37,16 @@ export const useRegisterForm = () => {
         name: [data.firstName, data.lastName].filter(Boolean).join(' '),
         email: data.email,
         password: data.password,
+        turnstileToken: turnstileToken || undefined,
       });
-      const redirectUrl = searchParams.get('redirect') || localStorage.getItem('auth_redirect_url');
-      if (redirectUrl) {
-        localStorage.removeItem('auth_redirect_url');
-        navigate(redirectUrl, { replace: true });
+      const rawRedirect = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
+      const safeRedirect = getSafeRedirectUrl(rawRedirect);
+      if (safeRedirect) {
+        navigate(safeRedirect, { replace: true });
         return;
       }
-      navigate('/home', { replace: true });
+      navigate(ROUTES.HOME, { replace: true });
     } catch (error: unknown) {
       const msg = axios.isAxiosError(error)
         ? (error.response?.data?.message ?? 'Email already in use. Please try another one.')
@@ -48,10 +55,16 @@ export const useRegisterForm = () => {
     }
   };
 
+  const isTurnstileConfigured = Boolean(import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY);
+  const isTurnstileReady = !isTurnstileConfigured || Boolean(turnstileToken);
+
   return {
     form,
     onSubmit: form.handleSubmit(onSubmit),
     isPending,
     apiError,
+    turnstileToken,
+    setTurnstileToken,
+    isTurnstileReady,
   };
 };

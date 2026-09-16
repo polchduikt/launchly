@@ -39,15 +39,21 @@ const parseButtons = (text: string) => {
   return { cleanText, buttons };
 };
 
+interface PhonePreviewMessage {
+  id?: string;
+  text: string;
+  isUser?: boolean;
+}
+
 const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
-  const [visibleMessages, setVisibleMessages] = useState<unknown[]>([]);
+  const [visibleMessages, setVisibleMessages] = useState<PhonePreviewMessage[]>([]);
   const [isWaitingInput, setIsWaitingInput] = useState(false);
   const [activeButtons, setActiveButtons] = useState<string[]>([]);
   const [clickedButton, setClickedButton] = useState<string | null>(null);
   const [key, setKey] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const timeoutsRef = useRef<any[]>([]);
+  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const nextIndexRef = useRef(1);
 
   const messages = template.phonePreview.messages || [];
@@ -63,12 +69,16 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
   };
 
   useEffect(() => {
+    return () => clearTimeouts();
+  }, []);
+
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [visibleMessages, isWaitingInput]);
 
-  const playStep = (msgIndex: number, currentVisible: unknown[]) => {
+  const playStep = (msgIndex: number, currentVisible: PhonePreviewMessage[]) => {
     nextIndexRef.current = msgIndex;
     if (msgIndex >= messages.length) {
       addTimeout(() => {
@@ -105,7 +115,7 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
           setClickedButton(null);
 
           addTimeout(() => {
-            playStep(msgIndex + 1, updatedVisible);
+            playStep(nextIndexRef.current + 1, updatedVisible);
           }, 900);
         }, 350);
       }, 1800);
@@ -120,6 +130,11 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
     }
   };
 
+  const playStepRef = useRef(playStep);
+  playStepRef.current = playStep;
+  const messagesLengthRef = useRef(messages.length);
+  messagesLengthRef.current = messages.length;
+
   useEffect(() => {
     clearTimeouts();
     setVisibleMessages([]);
@@ -128,9 +143,9 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
     setClickedButton(null);
     nextIndexRef.current = 1;
 
-    if (messages.length === 0) return;
+    if (messagesLengthRef.current === 0) return;
 
-    playStep(0, []);
+    playStepRef.current(0, []);
 
     return () => clearTimeouts();
   }, [template, key]);
@@ -193,7 +208,7 @@ const PhonePreview: React.FC<{ template: FlowTemplate }> = ({ template }) => {
           }} 
         />
              
-        {visibleMessages.map((msg: any, idx) => {
+        {visibleMessages.map((msg, idx) => {
           if (!msg || !msg.text) return null;
           const isUser = msg.isUser;
           const isLastMessage = idx === visibleMessages.length - 1;
@@ -268,7 +283,6 @@ export const DashboardPage: React.FC = () => {
     () => localStorage.getItem(DISPLAY_KEY_HOME_BLOG) !== 'false'
   );
 
-  // React to storage changes (e.g. from settings page)
   useEffect(() => {
     const handler = () => {
       setShowHomeTemplates(localStorage.getItem(DISPLAY_KEY_HOME_TEMPLATES) !== 'false');
@@ -313,7 +327,7 @@ export const DashboardPage: React.FC = () => {
         description: template.shortDesc,
       });
 
-      await saveFlowSchemaApi(newBot.id, template.nodes as any, template.edges as any);
+      await saveFlowSchemaApi(newBot.id, template.nodes, template.edges);
       await queryClient.refetchQueries({ queryKey: ['bots'] });
       const setActiveBotId = useBotStore.getState().setActiveBotId;
       setActiveBotId(newBot.id);
@@ -342,7 +356,13 @@ export const DashboardPage: React.FC = () => {
           type: 'START',
           position: { x: 100, y: 150 },
           data: {},
-        }
+        },
+        {
+          id: 'node_command_1',
+          type: 'COMMAND',
+          position: { x: 100, y: 340 },
+          data: { command: '/start', description: '' },
+        },
       ];
       await saveFlowSchemaApi(newBot.id, defaultNodes, []);
       await queryClient.refetchQueries({ queryKey: ['bots'] });
@@ -530,9 +550,10 @@ export const DashboardPage: React.FC = () => {
               
               <button
                 onClick={handleCloseAll}
-                className="absolute top-5 right-5 z-[10000] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] p-2 rounded-full transition-colors cursor-pointer"
+                className="absolute top-5 right-5 z-[10000] w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer shadow-md"
+                title="Close"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
 
               {selectedTemplate ? (
@@ -699,18 +720,18 @@ export const DashboardPage: React.FC = () => {
                                       setSelectedTemplate(tmpl);
                                       setIsOpenedFromList(true);
                                     }}
-                                    className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
+                                    className="bg-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
                                   >
                                     <div className="space-y-1.5">
                                       <h3 className="font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-[15px] leading-snug transition-colors">
                                         {getTemplateTitle(tmpl)}
                                       </h3>
-                                      <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2">
+                                      <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2 transition-colors">
                                         {getTemplateDesc(tmpl)}
                                       </p>
                                     </div>
-                                    <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
-                                      <Workflow size={13} />
+                                    <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors">
+                                      <Workflow size={13} className="text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors shrink-0" />
                                       <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                                     </div>
                                   </div>
@@ -730,18 +751,18 @@ export const DashboardPage: React.FC = () => {
                                       setSelectedTemplate(tmpl);
                                       setIsOpenedFromList(true);
                                     }}
-                                    className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
+                                    className="bg-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
                                   >
                                     <div className="space-y-1.5">
                                       <h3 className="font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-[15px] leading-snug transition-colors">
                                         {getTemplateTitle(tmpl)}
                                       </h3>
-                                      <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2">
+                                      <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2 transition-colors">
                                         {getTemplateDesc(tmpl)}
                                       </p>
                                     </div>
-                                    <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
-                                      <Workflow size={13} />
+                                    <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors">
+                                      <Workflow size={13} className="text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors shrink-0" />
                                       <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                                     </div>
                                   </div>
@@ -761,18 +782,18 @@ export const DashboardPage: React.FC = () => {
                                   setSelectedTemplate(tmpl);
                                   setIsOpenedFromList(true);
                                 }}
-                                className="bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
+                                className="bg-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-2xl p-5 flex flex-col justify-between group cursor-pointer min-h-[140px]"
                               >
                                 <div className="space-y-1.5">
                                   <h3 className="font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] text-[15px] leading-snug transition-colors">
                                     {getTemplateTitle(tmpl)}
                                   </h3>
-                                  <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2">
+                                  <p className="text-xs text-slate-700 group-hover:text-slate-300 leading-normal line-clamp-2 transition-colors">
                                     {getTemplateDesc(tmpl)}
                                   </p>
                                 </div>
-                                <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD]">
-                                  <Workflow size={13} />
+                                <div className="mt-3 pt-3 border-t border-[#0A0A0A]/20 group-hover:border-[#F2EBDD]/30 flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors">
+                                  <Workflow size={13} className="text-[#0A0A0A] group-hover:text-[#F2EBDD] transition-colors shrink-0" />
                                   <span>{t('dashboard.templates.flow_template', 'Шаблон Автоматизації')}</span>
                                 </div>
                               </div>

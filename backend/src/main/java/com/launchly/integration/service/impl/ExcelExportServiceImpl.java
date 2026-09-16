@@ -82,12 +82,7 @@ public class ExcelExportServiceImpl implements ExcelExportService {
                 row.createCell(6).setCellValue(order.getItems() != null ? order.getItems() : "");
                 row.createCell(7).setCellValue(order.getBotUser() != null && order.getBotUser().getTelegramId() != null ? order.getBotUser().getTelegramId() : 0L);
 
-                String customerName = "";
-                if (order.getBotUser() != null) {
-                    String firstName = order.getBotUser().getFirstName() != null ? order.getBotUser().getFirstName() : "";
-                    String lastName = order.getBotUser().getLastName() != null ? order.getBotUser().getLastName() : "";
-                    customerName = (firstName + " " + lastName).trim();
-                }
+                String customerName = order.getBotUser() != null ? order.getBotUser().getDisplayName() : "";
                 row.createCell(8).setCellValue(customerName);
                 row.createCell(9).setCellValue(order.getCreatedAt() != null ? order.getCreatedAt().format(DATE_FORMATTER) : "");
             }

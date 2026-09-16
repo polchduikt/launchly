@@ -12,6 +12,7 @@ import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.repository.FlowSchemaRepository;
+import com.launchly.bot.engine.router.FlowNodeRouter;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import com.launchly.bot.repository.BotMemberRepository;
-import com.launchly.bot.entity.BotMember;
-import com.launchly.auth.entity.User;
 import com.launchly.broadcast.repository.BotUserTagRepository;
 
 @Slf4j
@@ -35,9 +33,9 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final BotRepository botRepository;
     private final BotUserRepository botUserRepository;
     private final FlowSchemaRepository flowSchemaRepository;
-    private final BotMemberRepository botMemberRepository;
     private final BotUserTagRepository botUserTagRepository;
     private final ObjectMapper objectMapper;
+    private final FlowNodeRouter flowNodeRouter;
 
     @Override
     @Transactional
@@ -90,17 +88,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         List<Object[]> rawHeatmap = new ArrayList<>();
 
         if (botId == 0) {
-            List<Bot> userBots = new ArrayList<>(botRepository.findAllByUserId(userId));
-            List<BotMember> memberships = botMemberRepository.findByUserId(userId);
-            for (BotMember bm : memberships) {
-                User owner = bm.getBot().getUser();
-                List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
-                for (Bot b : ownerBots) {
-                    if (userBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
-                        userBots.add(b);
-                    }
-                }
-            }
+            List<Bot> userBots = botRepository.findAllAccessibleByUserId(userId);
 
             if (userBots.isEmpty()) {
                 return new DashboardStatsResponse(0L, 0L, 0L, 0L, new ArrayList<>(), new ArrayList<>(), 0L, 0, 0L, 0.0, new ArrayList<>(), new ArrayList<>(), 0.0, 0.0, 0.0, 0.0);
@@ -110,15 +98,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             totalSubscribers = botUserRepository.countDistinctTelegramIdByBotIdIn(botIds);
             activeUsers24h = analyticsEventRepository.countActiveUsersByBotIdsAndCreatedAtAfter(botIds, start24h);
             clicksCount30d = analyticsEventRepository.countClicksByBotIdsAndCreatedAtAfter(botIds, startClicks30d);
-            activeAutomations = userBots.stream().filter(Bot::isActive).count();
+            activeAutomations = botRepository.countAccessibleByUserIdAndActiveTrue(userId);
 
             long totalSubscribersLastWeek = botUserRepository.countDistinctTelegramIdByBotIdInAndCreatedAtBefore(botIds, lastWeekDate);
             long activeUsersYesterday = analyticsEventRepository.countActiveUsersByBotIdsAndCreatedAtBetween(botIds, startYesterday, start24h);
             long clicksCountLastMonth = analyticsEventRepository.countClicksByBotIdsAndCreatedAtBetween(botIds, startClicks60d, startClicks30d);
-            long activeAutomationsLastWeek = userBots.stream()
-                    .filter(Bot::isActive)
-                    .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().isBefore(lastWeekDate))
-                    .count();
+            long activeAutomationsLastWeek = botRepository.countAccessibleByUserIdAndActiveTrueAndCreatedAtBefore(userId, lastWeekDate);
 
             subscribersGrowth = AnalyticsUtils.calculateGrowth(totalSubscribersLastWeek, totalSubscribers);
             activeUsersGrowth = AnalyticsUtils.calculateGrowth(activeUsersYesterday, activeUsers24h);
@@ -130,7 +115,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             rawHeatmap = analyticsEventRepository.getActivityHeatmapForBots(botIds, startActivityDate);
         } else {
             Bot bot = botRepository.findByIdAndUserId(botId, userId)
-                    .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Access denied to bot analytics"));
+                    .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "analytics.error.access_denied"));
 
             botIds.add(botId);
 
@@ -138,28 +123,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             activeUsers24h = analyticsEventRepository.countActiveUsersByBotIdAndCreatedAtAfter(botId, start24h);
             clicksCount30d = analyticsEventRepository.countClicksByBotIdAndCreatedAtAfter(botId, startClicks30d);
 
-            List<Bot> userBots = new ArrayList<>(botRepository.findAllByUserId(userId));
-            List<BotMember> memberships = botMemberRepository.findByUserId(userId);
-            for (BotMember bm : memberships) {
-                User owner = bm.getBot().getUser();
-                List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
-                for (Bot b : ownerBots) {
-                    if (userBots.stream().noneMatch(existing -> existing.getId().equals(b.getId()))) {
-                        userBots.add(b);
-                    }
-                }
-            }
-            activeAutomations = userBots.stream()
-                    .filter(Bot::isActive)
-                    .count();
+            activeAutomations = botRepository.countAccessibleByUserIdAndActiveTrue(userId);
 
             long totalSubscribersLastWeek = botUserRepository.countByBotIdAndCreatedAtBefore(botId, lastWeekDate);
             long activeUsersYesterday = analyticsEventRepository.countActiveUsersByBotIdAndCreatedAtBetween(botId, startYesterday, start24h);
             long clicksCountLastMonth = analyticsEventRepository.countClicksByBotIdAndCreatedAtBetween(botId, startClicks60d, startClicks30d);
-            long activeAutomationsLastWeek = userBots.stream()
-                    .filter(Bot::isActive)
-                    .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().isBefore(lastWeekDate))
-                    .count();
+            long activeAutomationsLastWeek = botRepository.countAccessibleByUserIdAndActiveTrueAndCreatedAtBefore(userId, lastWeekDate);
 
             subscribersGrowth = AnalyticsUtils.calculateGrowth(totalSubscribersLastWeek, totalSubscribers);
             activeUsersGrowth = AnalyticsUtils.calculateGrowth(activeUsersYesterday, activeUsers24h);
@@ -182,8 +151,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         List<DashboardStatsResponse.ButtonStatsEntry> topButtons = new ArrayList<>();
         for (Object[] row : rawButtons) {
             String btnName = row[0] != null ? row[0].toString() : "Unknown";
-            if (btnName.startsWith("btn_")) {
-                btnName = AnalyticsUtils.resolveButtonLabel(flowSchemaRepository, botIds, btnName);
+            for (Long bId : botIds) {
+                String resolved = flowNodeRouter.resolveButtonLabel(bId, btnName);
+                if (resolved != null && !resolved.equals(btnName)) {
+                    btnName = resolved;
+                    break;
+                }
             }
             long clicks = row[1] != null ? ((Number) row[1]).longValue() : 0L;
             topButtons.add(new DashboardStatsResponse.ButtonStatsEntry(btnName, clicks));

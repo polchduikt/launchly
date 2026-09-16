@@ -11,7 +11,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
@@ -22,8 +24,10 @@ import lombok.NoArgsConstructor;
         @Index(name = "idx_bot_user_tags_bot_user_id", columnList = "bot_user_id"),
         @Index(name = "idx_bot_user_tags_tag_id", columnList = "tag_id")
 })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@ToString(exclude = {"botUser", "tag"})
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

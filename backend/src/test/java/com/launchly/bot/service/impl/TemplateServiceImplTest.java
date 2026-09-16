@@ -129,7 +129,7 @@ class TemplateServiceImplTest {
 
         when(userQueryService.getUserOrThrow(2L)).thenReturn(otherUser);
         when(botRepository.findById(10L)).thenReturn(Optional.of(testBot));
-        when(botMemberRepository.existsByBotIdAndUserId(10L, 2L)).thenReturn(false);
+        when(botMemberRepository.existsByBotOwnerIdAndUserId(1L, 2L)).thenReturn(false);
 
         assertThatThrownBy(() -> templateService.createTemplate(request, 2L))
                 .isInstanceOf(AppException.class);

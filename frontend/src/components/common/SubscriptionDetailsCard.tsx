@@ -99,12 +99,12 @@ export const SubscriptionDetailsCard: React.FC<SubscriptionDetailsCardProps> = (
       )}
 
       {!isFree && (
-        <div className="flex justify-end pt-4 border-t border-slate-50">
+        <div className="flex flex-col sm:flex-row justify-end pt-4 border-t border-slate-100 gap-3">
           {cancelAtPeriodEnd ? (
             <button
               onClick={onResume}
               disabled={isResumePending}
-              className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-md shadow-slate-950/10 flex items-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-md shadow-slate-950/10 flex items-center justify-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed text-center"
             >
               {isResumePending ? (
                 <>
@@ -119,7 +119,7 @@ export const SubscriptionDetailsCard: React.FC<SubscriptionDetailsCardProps> = (
             <button
               onClick={onCancel}
               disabled={isCancelPending}
-              className="px-5 py-2.5 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto px-5 py-2.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-75 disabled:cursor-not-allowed text-center"
             >
               {isCancelPending ? (
                 <>

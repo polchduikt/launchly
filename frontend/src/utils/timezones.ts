@@ -1,7 +1,7 @@
 export interface TimezoneOption {
-  value: string; // IANA timezone (e.g. "Europe/Kyiv")
-  label: string; // Display name  (e.g. "(UTC+03:00) Kyiv")
-  offset: number; // offset in minutes
+  value: string;
+  label: string;
+  offset: number;
 }
 
 function getOffset(iana: string): number {

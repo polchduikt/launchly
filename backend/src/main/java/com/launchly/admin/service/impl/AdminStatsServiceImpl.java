@@ -24,11 +24,13 @@ import com.launchly.billing.repository.PlanRepository;
 import com.launchly.billing.repository.SubscriptionRepository;
 import com.launchly.common.utils.DateTimeUtils;
 import com.launchly.common.utils.MathUtils;
-import com.launchly.integration.entity.Integration;
 import com.launchly.integration.entity.IntegrationType;
 import com.launchly.integration.repository.IntegrationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
@@ -39,6 +41,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminStatsServiceImpl implements AdminStatsService {
@@ -72,93 +75,125 @@ public class AdminStatsServiceImpl implements AdminStatsService {
     public AdminStatsDto getStats(String search, String period, LocalDateTime startDate, LocalDateTime endDate) {
         LocalDateTime resolvedEnd = endDate != null ? endDate : LocalDateTime.now();
         LocalDateTime resolvedStart = periodResolver.resolve(period, startDate);
+        LocalDateTime previousStart = resolvedStart.minus(Duration.between(resolvedStart.atZone(ZoneOffset.UTC), resolvedEnd.atZone(ZoneOffset.UTC)));
 
-        List<User> allUsers = userQueryService.findAllUsers();
-        List<Bot> allBots = botRepository.findAll();
-        List<BotUser> allBotUsers = botUserRepository.findAll();
-        List<FlowSchema> allSchemas = flowSchemaRepository.findAll();
-        List<BroadcastCampaign> allBroadcasts = broadcastCampaignRepository.findAll();
+        long totalUsers;
+        long totalOwners;
+        long activeOwners;
+        long totalBotUsers;
+        long activeBots;
+        long totalAutomations;
+        long totalMessagesSent;
+        long activeManagers;
+
+        long prevOwners;
+        long prevBotUsersCount;
+        long prevActiveBots;
+        long prevAutomations;
+        long prevMessages;
+
+        List<User> rangeUsers;
+        List<Bot> rangeBots;
+        List<BotUser> rangeBotUsers;
+        List<FlowSchema> rangeSchemas;
+        List<BroadcastCampaign> rangeBroadcasts;
+
+        long totalOwnersCount;
+        boolean hasBots;
 
         if (search != null && !search.trim().isEmpty()) {
             String q = search.trim().toLowerCase();
-            allUsers = allUsers.stream()
+            List<User> allUsers = userQueryService.findAllUsers().stream()
                     .filter(u -> AdminStatsCalculator.contains(u.getName(), q) || AdminStatsCalculator.contains(u.getEmail(), q) || AdminStatsCalculator.contains(u.getTelegramUsername(), q))
                     .collect(Collectors.toList());
-            allBots = allBots.stream()
+            List<Bot> allBots = botRepository.findAll().stream()
                     .filter(b -> AdminStatsCalculator.contains(b.getName(), q) || AdminStatsCalculator.contains(b.getUsername(), q))
                     .collect(Collectors.toList());
-            allSchemas = allSchemas.stream()
+            List<BotUser> allBotUsers = botUserRepository.findAll();
+            List<FlowSchema> allSchemas = flowSchemaRepository.findAll().stream()
                     .filter(s -> s.getBot() != null && AdminStatsCalculator.contains(s.getBot().getName(), q))
                     .collect(Collectors.toList());
-            allBroadcasts = allBroadcasts.stream()
+            List<BroadcastCampaign> allBroadcasts = broadcastCampaignRepository.findAll().stream()
                     .filter(bc -> AdminStatsCalculator.contains(bc.getName(), q))
                     .collect(Collectors.toList());
+
+            rangeUsers = DateTimeUtils.filterByDateRange(allUsers, User::getCreatedAt, resolvedStart, resolvedEnd);
+            rangeBots = DateTimeUtils.filterByDateRange(allBots, Bot::getCreatedAt, resolvedStart, resolvedEnd);
+            rangeBotUsers = DateTimeUtils.filterByDateRange(allBotUsers, BotUser::getCreatedAt, resolvedStart, resolvedEnd);
+            rangeSchemas = DateTimeUtils.filterByDateRange(allSchemas, FlowSchema::getCreatedAt, resolvedStart, resolvedEnd);
+            rangeBroadcasts = DateTimeUtils.filterByDateRange(allBroadcasts, BroadcastCampaign::getCreatedAt, resolvedStart, resolvedEnd);
+
+            totalUsers = rangeUsers.size();
+            totalOwners = rangeUsers.stream().filter(u -> u.getRole() == Role.ROLE_OWNER || u.getRole() == Role.ROLE_ADMIN).count();
+            LocalDateTime fifteenMinsAgo = LocalDateTime.now().minusMinutes(15);
+            activeOwners = allUsers.stream().filter(u -> u.isActive() && u.getUpdatedAt() != null && u.getUpdatedAt().isAfter(fifteenMinsAgo)).count();
+            totalBotUsers = rangeBotUsers.size();
+            activeBots = rangeBots.stream().filter(Bot::isActive).count();
+            totalAutomations = rangeSchemas.size();
+            totalMessagesSent = rangeBroadcasts.stream().mapToLong(c -> c.getSentCount() != null ? c.getSentCount() : 0).sum();
+            activeManagers = rangeUsers.stream().filter(u -> u.getRole() == Role.ROLE_MANAGER).count();
+
+            List<User> prevUsers = DateTimeUtils.filterByDateRange(allUsers, User::getCreatedAt, previousStart, resolvedStart);
+            List<BotUser> prevBotUsers = DateTimeUtils.filterByDateRange(allBotUsers, BotUser::getCreatedAt, previousStart, resolvedStart);
+            List<Bot> prevBots = DateTimeUtils.filterByDateRange(allBots, Bot::getCreatedAt, previousStart, resolvedStart);
+            List<FlowSchema> prevSchemas = DateTimeUtils.filterByDateRange(allSchemas, FlowSchema::getCreatedAt, previousStart, resolvedStart);
+            List<BroadcastCampaign> prevBroadcasts = DateTimeUtils.filterByDateRange(allBroadcasts, BroadcastCampaign::getCreatedAt, previousStart, resolvedStart);
+
+            prevOwners = prevUsers.stream().filter(u -> u.getRole() == Role.ROLE_OWNER || u.getRole() == Role.ROLE_ADMIN).count();
+            prevBotUsersCount = prevBotUsers.size();
+            prevActiveBots = prevBots.stream().filter(Bot::isActive).count();
+            prevAutomations = prevSchemas.size();
+            prevMessages = prevBroadcasts.stream().mapToLong(c -> c.getSentCount() != null ? c.getSentCount() : 0).sum();
+
+            totalOwnersCount = allUsers.stream().filter(u -> u.getRole() == Role.ROLE_OWNER || u.getRole() == Role.ROLE_ADMIN).count();
+            hasBots = !allBots.isEmpty();
+        } else {
+            totalUsers = userQueryService.countByCreatedAtBetween(resolvedStart, resolvedEnd);
+            totalOwners = userQueryService.countByRoleInAndCreatedAtBetween(List.of(Role.ROLE_OWNER, Role.ROLE_ADMIN), resolvedStart, resolvedEnd);
+            LocalDateTime fifteenMinsAgo = LocalDateTime.now().minusMinutes(15);
+            activeOwners = userQueryService.countByActiveTrueAndUpdatedAtAfter(fifteenMinsAgo);
+            totalBotUsers = botUserRepository.countByCreatedAtBetween(resolvedStart, resolvedEnd);
+            activeBots = botRepository.countByActiveTrueAndCreatedAtBetween(resolvedStart, resolvedEnd);
+            totalAutomations = flowSchemaRepository.countByCreatedAtBetween(resolvedStart, resolvedEnd);
+            totalMessagesSent = broadcastCampaignRepository.sumSentCountByCreatedAtBetween(resolvedStart, resolvedEnd);
+            activeManagers = userQueryService.countByRoleAndCreatedAtBetween(Role.ROLE_MANAGER, resolvedStart, resolvedEnd);
+
+            prevOwners = userQueryService.countByRoleInAndCreatedAtBetween(List.of(Role.ROLE_OWNER, Role.ROLE_ADMIN), previousStart, resolvedStart);
+            prevBotUsersCount = botUserRepository.countByCreatedAtBetween(previousStart, resolvedStart);
+            prevActiveBots = botRepository.countByActiveTrueAndCreatedAtBetween(previousStart, resolvedStart);
+            prevAutomations = flowSchemaRepository.countByCreatedAtBetween(previousStart, resolvedStart);
+            prevMessages = broadcastCampaignRepository.sumSentCountByCreatedAtBetween(previousStart, resolvedStart);
+
+            rangeUsers = userQueryService.findByCreatedAtBetween(resolvedStart, resolvedEnd);
+            rangeBots = botRepository.findByCreatedAtBetween(resolvedStart, resolvedEnd);
+            rangeBotUsers = botUserRepository.findByCreatedAtBetween(resolvedStart, resolvedEnd);
+            rangeSchemas = flowSchemaRepository.findByCreatedAtBetween(resolvedStart, resolvedEnd);
+            rangeBroadcasts = broadcastCampaignRepository.findByCreatedAtBetween(resolvedStart, resolvedEnd);
+
+            totalOwnersCount = userQueryService.countByRoleIn(List.of(Role.ROLE_OWNER, Role.ROLE_ADMIN));
+            hasBots = botRepository.count() > 0;
         }
-
-        final LocalDateTime finalStart = resolvedStart;
-        final LocalDateTime finalEnd = resolvedEnd;
-
-        List<User> rangeUsers = DateTimeUtils.filterByDateRange(allUsers, u -> u.getCreatedAt(), finalStart, finalEnd);
-        List<Bot> rangeBots = DateTimeUtils.filterByDateRange(allBots, b -> b.getCreatedAt(), finalStart, finalEnd);
-        List<BotUser> rangeBotUsers = DateTimeUtils.filterByDateRange(allBotUsers, bu -> bu.getCreatedAt(), finalStart, finalEnd);
-        List<FlowSchema> rangeSchemas = DateTimeUtils.filterByDateRange(allSchemas, s -> s.getCreatedAt(), finalStart, finalEnd);
-        List<BroadcastCampaign> rangeBroadcasts = DateTimeUtils.filterByDateRange(allBroadcasts, bc -> bc.getCreatedAt(), finalStart, finalEnd);
-
-        long totalUsers = rangeUsers.size();
-        long totalOwners = rangeUsers.stream()
-                .filter(u -> u.getRole() == Role.ROLE_OWNER || u.getRole() == Role.ROLE_ADMIN)
-                .count();
-
-        LocalDateTime fifteenMinsAgo = LocalDateTime.now().minusMinutes(15);
-        long activeOwners = allUsers.stream()
-                .filter(u -> u.isActive() && u.getUpdatedAt() != null && u.getUpdatedAt().isAfter(fifteenMinsAgo))
-                .count();
-
-        long totalBotUsers = rangeBotUsers.size();
-        long activeBots = rangeBots.stream().filter(Bot::isActive).count();
-        long totalAutomations = rangeSchemas.size();
-
-        long totalMessagesSent = rangeBroadcasts.stream()
-                .mapToLong(c -> c.getSentCount() != null ? c.getSentCount() : 0)
-                .sum();
-
-        long activeManagers = rangeUsers.stream()
-                .filter(u -> u.getRole() == Role.ROLE_MANAGER)
-                .count();
 
         long uptimeSeconds = (System.currentTimeMillis() - START_TIME) / 1000;
 
         List<AdminStatsDto.GrowthMetric> growth = buildGrowthMetrics(
-                finalStart, finalEnd, rangeUsers, rangeBotUsers, rangeBots, rangeSchemas, rangeBroadcasts, activeOwners);
+                resolvedStart, resolvedEnd, rangeUsers, rangeBotUsers, rangeBots, rangeSchemas, rangeBroadcasts, activeOwners);
 
-        AdminStatsDto.ServerHealthDto serverHealth = buildServerHealth(activeBots, allBots);
+        AdminStatsDto.ServerHealthDto serverHealth = buildServerHealth(activeBots, hasBots);
 
-        List<Subscription> allSubscriptions = subscriptionRepository.findAll();
+        List<Subscription> allSubscriptions = subscriptionRepository.findAllWithPlanAndUser();
         double mrrVal = AdminStatsCalculator.calculateMrr(allSubscriptions);
         double ltvVal = AdminStatsCalculator.calculateLtv(allSubscriptions);
 
-        LocalDateTime previousStart = resolvedStart.minus(Duration.between(resolvedStart.atZone(ZoneOffset.UTC), resolvedEnd.atZone(ZoneOffset.UTC)));
-        List<User> prevUsers = DateTimeUtils.filterByDateRange(allUsers, u -> u.getCreatedAt(), previousStart, finalStart);
-        List<BotUser> prevBotUsers = DateTimeUtils.filterByDateRange(allBotUsers, bu -> bu.getCreatedAt(), previousStart, finalStart);
-        List<Bot> prevBots = DateTimeUtils.filterByDateRange(allBots, b -> b.getCreatedAt(), previousStart, finalStart);
-        List<FlowSchema> prevSchemas = DateTimeUtils.filterByDateRange(allSchemas, s -> s.getCreatedAt(), previousStart, finalStart);
-        List<BroadcastCampaign> prevBroadcasts = DateTimeUtils.filterByDateRange(allBroadcasts, bc -> bc.getCreatedAt(), previousStart, finalStart);
-
-        long prevOwners = prevUsers.stream().filter(u -> u.getRole() == Role.ROLE_OWNER || u.getRole() == Role.ROLE_ADMIN).count();
-        long prevBotUsersCount = prevBotUsers.size();
-        long prevActiveBots = prevBots.stream().filter(Bot::isActive).count();
-        long prevAutomations = prevSchemas.size();
-        long prevMessages = prevBroadcasts.stream().mapToLong(c -> c.getSentCount() != null ? c.getSentCount() : 0).sum();
-
-        List<AdminStatsDto.PlanDistributionDto> planDistribution = buildPlanDistribution(allUsers, allSubscriptions);
-        List<AdminStatsDto.IntegrationPopularityDto> integrationsPopularity = buildIntegrationsPopularity(previousStart, finalStart);
-        List<AdminStatsDto.ClientGeoLangDto> geographyAndLanguages = buildGeography(allBotUsers, previousStart, finalStart);
+        List<AdminStatsDto.PlanDistributionDto> planDistribution = buildPlanDistribution(totalOwnersCount, allSubscriptions);
+        List<AdminStatsDto.IntegrationPopularityDto> integrationsPopularity = buildIntegrationsPopularity(resolvedStart);
+        List<AdminStatsDto.ClientGeoLangDto> geographyAndLanguages = buildGeography(resolvedStart);
 
         List<AdminLogDto> latestLogs = adminLogService.getSystemLogs(null, null, null, null, null, "desc", 0, 10).getContent();
 
         List<AdminStatsDto.PerformanceMetricDto> performanceMetrics = AdminStatsCalculator.buildPerformanceMetrics();
 
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isManagerUser = auth != null && auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
 
@@ -275,12 +310,13 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         return growth;
     }
 
-    private AdminStatsDto.ServerHealthDto buildServerHealth(long activeBots, List<Bot> allBots) {
+    private AdminStatsDto.ServerHealthDto buildServerHealth(long activeBots, boolean hasBots) {
         boolean dbHealthy = true;
         String dbStatus = "Connected";
         try {
             userQueryService.countTotalUsers();
         } catch (Exception e) {
+            log.warn("Database health check ping failed: {}", e.getMessage());
             dbHealthy = false;
             dbStatus = "Error";
         }
@@ -289,7 +325,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
                 .dbStatus(dbStatus)
                 .dbHealthy(dbHealthy)
                 .telegramStatus(activeBots > 0 ? "Polling Active" : "Idle")
-                .telegramHealthy(activeBots > 0 || !allBots.isEmpty())
+                .telegramHealthy(activeBots > 0 || hasBots)
                 .aiStatus("Operational")
                 .aiHealthy(true)
                 .broadcastStatus("Ready")
@@ -297,11 +333,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
                 .build();
     }
 
-    private List<AdminStatsDto.PlanDistributionDto> buildPlanDistribution(List<User> allUsers, List<Subscription> allSubscriptions) {
-        long totalOwnersCount = allUsers.stream()
-                .filter(u -> u.getRole() == Role.ROLE_OWNER || u.getRole() == Role.ROLE_ADMIN)
-                .count();
-
+    private List<AdminStatsDto.PlanDistributionDto> buildPlanDistribution(long totalOwnersCount, List<Subscription> allSubscriptions) {
         Map<String, Long> subCountsByPlan = allSubscriptions.stream()
                 .filter(sub -> sub.getStatus() == SubscriptionStatus.ACTIVE && sub.getPlan() != null)
                 .collect(Collectors.groupingBy(sub -> sub.getPlan().getDisplayName(), Collectors.counting()));
@@ -319,7 +351,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         for (Plan plan : allPlans) {
             String displayName = plan.getDisplayName();
             long count = subCountsByPlan.getOrDefault(displayName, 0L);
-            if (!displayName.equalsIgnoreCase("Free") && (count > 0 || true)) {
+            if (!displayName.equalsIgnoreCase("Free")) {
                 String color = AdminStatsCalculator.resolvePlanColor(displayName);
                 distribution.add(new AdminStatsDto.PlanDistributionDto(displayName, count, color));
             }
@@ -327,18 +359,24 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         return distribution;
     }
 
-    private List<AdminStatsDto.IntegrationPopularityDto> buildIntegrationsPopularity(LocalDateTime prevStart, LocalDateTime currentStart) {
-        List<Integration> allIntegrations = integrationRepository.findAll();
-        long totalCount = allIntegrations.size();
+    private List<AdminStatsDto.IntegrationPopularityDto> buildIntegrationsPopularity(LocalDateTime currentStart) {
+        long totalCount = integrationRepository.count();
 
-        Map<IntegrationType, Long> currentCounts = allIntegrations.stream()
-                .collect(Collectors.groupingBy(Integration::getType, Collectors.counting()));
+        Map<IntegrationType, Long> currentCounts = new EnumMap<>(IntegrationType.class);
+        List<Object[]> currentGrouped = integrationRepository.countGroupedByType();
+        for (Object[] row : currentGrouped) {
+            IntegrationType type = (IntegrationType) row[0];
+            Long count = ((Number) row[1]).longValue();
+            currentCounts.put(type, count);
+        }
 
-        List<Integration> prevIntegrations = allIntegrations.stream()
-                .filter(i -> i.getCreatedAt() != null && i.getCreatedAt().isBefore(currentStart))
-                .collect(Collectors.toList());
-        Map<IntegrationType, Long> prevCounts = prevIntegrations.stream()
-                .collect(Collectors.groupingBy(Integration::getType, Collectors.counting()));
+        Map<IntegrationType, Long> prevCounts = new EnumMap<>(IntegrationType.class);
+        List<Object[]> prevGrouped = integrationRepository.countGroupedByTypeAndCreatedAtBefore(currentStart);
+        for (Object[] row : prevGrouped) {
+            IntegrationType type = (IntegrationType) row[0];
+            Long count = ((Number) row[1]).longValue();
+            prevCounts.put(type, count);
+        }
 
         List<AdminStatsDto.IntegrationPopularityDto> result = new ArrayList<>();
 
@@ -355,22 +393,21 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         return result;
     }
 
-    private List<AdminStatsDto.ClientGeoLangDto> buildGeography(List<BotUser> allBotUsers, LocalDateTime prevStart, LocalDateTime currentStart) {
-        long totalBotUsersCount = allBotUsers.size();
+    private List<AdminStatsDto.ClientGeoLangDto> buildGeography(LocalDateTime currentStart) {
+        long totalBotUsersCount = botUserRepository.count();
 
         Map<String, Long> currentLangCounts = new HashMap<>();
-        for (BotUser bu : allBotUsers) {
-            String region = AdminStatsCalculator.langToRegion(AdminStatsCalculator.parseLang(bu.getMetadata()));
-            currentLangCounts.merge(region, 1L, Long::sum);
-        }
-
-        List<BotUser> prevBotUsers = allBotUsers.stream()
-                .filter(bu -> bu.getCreatedAt() != null && bu.getCreatedAt().isBefore(currentStart))
-                .collect(Collectors.toList());
         Map<String, Long> prevLangCounts = new HashMap<>();
-        for (BotUser bu : prevBotUsers) {
-            String region = AdminStatsCalculator.langToRegion(AdminStatsCalculator.parseLang(bu.getMetadata()));
-            prevLangCounts.merge(region, 1L, Long::sum);
+
+        List<Object[]> metadataList = botUserRepository.findAllMetadataAndCreatedAt();
+        for (Object[] row : metadataList) {
+            String metadata = (String) row[0];
+            LocalDateTime createdAt = (LocalDateTime) row[1];
+            String region = AdminStatsCalculator.langToRegion(AdminStatsCalculator.parseLang(metadata));
+            currentLangCounts.merge(region, 1L, Long::sum);
+            if (createdAt != null && createdAt.isBefore(currentStart)) {
+                prevLangCounts.merge(region, 1L, Long::sum);
+            }
         }
 
         String[] regions = {"Ukraine", "United States", "Poland", "Other"};

@@ -3,13 +3,15 @@ import {
   ReactFlow,
   Controls,
   Background,
-  getBezierPath,
-  getSmoothStepPath,
   ConnectionLineType,
   ReactFlowProvider,
 } from '@xyflow/react';
-import type { ConnectionLineComponentProps, Edge } from '@xyflow/react';
+import type { Edge, Node, OnNodeDrag } from '@xyflow/react';
+import { isAxiosError } from 'axios';
 import '@xyflow/react/dist/style.css';
+import { CustomConnectionLine } from '../../../components/common/CustomConnectionLine';
+import { FlowControlsStyles } from '../../../components/common/FlowControlsStyles';
+import { ErrorBoundary } from '../../../components/common/ErrorBoundary';
 import { useBroadcastBuilder } from '../../../hooks/broadcast/useBroadcastBuilder';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
 import { AudiencePanel } from '../Broadcasts/components/AudiencePanel';
@@ -23,10 +25,13 @@ import { getAutoLayoutedElements } from '../../../utils/flowLayout';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { NODE_TYPES } from '../../../const/nodeTypes';
-import { getCustomFieldsApi } from '../../../api/bot';
 import { FLOW_EDGE_DEFAULTS, EDGE_TYPES } from '../../../const/flowEdges';
-import { BROADCAST_BLOCKS, BROADCAST_CONTEXT_MENU_OPTIONS } from '../../../const/broadcastBlocks';
+import { useCustomFieldsQuery } from '../../../hooks/bot/useCustomFieldsQuery';
+import { BROADCAST_BLOCKS, BROADCAST_CONTEXT_MENU_OPTIONS, BROADCAST_CONTEXT_MENU_GROUPS } from '../../../const/broadcastBlocks';
+import { FLOW_BLOCK_COLORS } from '../../../const/flowBlocks';
+import { NODE_ICON_COMPONENTS } from '../../../const/nodeDisplay';
 import { ROUTES } from '../../../routes/paths';
+import { DEFAULT_CUSTOM_FIELDS } from '../../../const/constants';
 import { useFlowCollaboration } from '../../../hooks/bot/useFlowCollaboration';
 import type { FlowBlock } from '../../../types/bot';
 import type { CustomNode } from '../../../types/broadcast';
@@ -46,57 +51,15 @@ import {
   GitCommit,
   Undo2,
   Redo2,
-  Sparkles,
 } from 'lucide-react';
+import { AiIcon } from '../../../components/ui/AiIcon';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 import { useAiStore } from '../../../store/useAiStore';
 import { AiAssistantDrawer } from '../../../components/common/AiAssistantDrawer';
 
 
-const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
-  fromX,
-  fromY,
-  toX,
-  toY,
-  fromPosition,
-  toPosition,
-  connectionLineStyle,
-  connectionLineType,
-}) => {
-  const edgePath = connectionLineType === 'smoothstep'
-    ? getSmoothStepPath({
-        sourceX: fromX,
-        sourceY: fromY,
-        sourcePosition: fromPosition,
-        targetX: toX,
-        targetY: toY,
-        targetPosition: toPosition,
-      })[0]
-    : getBezierPath({
-        sourceX: fromX,
-        sourceY: fromY,
-        sourcePosition: fromPosition,
-        targetX: toX,
-        targetY: toY,
-        targetPosition: toPosition,
-      })[0];
 
-  return (
-    <g>
-      <path
-        fill="none"
-        stroke="#0A0A0A"
-        strokeWidth={2.5}
-        d={edgePath}
-        style={{
-          ...connectionLineStyle,
-          markerEnd: 'url(#arrow-grey)',
-        }}
-      />
-    </g>
-  );
-};
 
 interface ScheduleModalProps {
   isOpen: boolean;
@@ -105,6 +68,7 @@ interface ScheduleModalProps {
 }
 
 const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedule }) => {
+  const { t } = useTranslation();
   const [dateTime, setDateTime] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -187,30 +151,10 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, onSchedu
   );
 };
 
-const ControlsStyles: React.FC = React.memo(() => (
-  <style>{`
-    .react-flow__controls.custom-controls-panel {
-      display: flex;
-      flex-direction: column;
-      background: white;
-    }
-    .custom-controls-panel .react-flow__controls-button {
-      width: 38px !important;
-      height: 38px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-    }
-    .custom-controls-panel .react-flow__controls-button svg {
-      width: 18px !important;
-      height: 18px !important;
-      max-width: 18px !important;
-      max-height: 18px !important;
-    }
-  `}</style>
-));
+
 
 const BroadcastBuilderInner: React.FC = () => {
+  const { t } = useTranslation();
   const isLocalChangeRef = React.useRef(false);
 
   const {
@@ -315,17 +259,25 @@ const BroadcastBuilderInner: React.FC = () => {
     setDragging,
   } = useFlowCollaboration(activeBotId || 0, nodes, edges, setNodesRemote, setEdgesRemote, 'broadcast', isLocalChangeRef);
 
-  const handleNodeDragStart = React.useCallback((_evt: React.MouseEvent, node: { id: string }) => {
+  const handleNodeDragStart: OnNodeDrag<Node> = React.useCallback((_evt, node) => {
+    setSelectedNodeId(node.id);
+    setNodes((nds) => {
+      const idx = nds.findIndex((n) => n.id === node.id);
+      if (idx === -1 || idx === nds.length - 1) return nds;
+      const target = nds[idx];
+      const remaining = nds.filter((n) => n.id !== node.id);
+      return [...remaining, target];
+    });
     if (onNodeDragStart) onNodeDragStart();
     setDragging(true);
     updateLocalAction(`${currentUser?.name || 'Someone'} is dragging...`, node.id);
-  }, [onNodeDragStart, updateLocalAction, currentUser, setDragging]);
+  }, [onNodeDragStart, updateLocalAction, currentUser, setDragging, setNodes, setSelectedNodeId]);
 
-  const handleNodeDrag = React.useCallback((_evt: React.MouseEvent, node: { id: string; position: { x: number; y: number } }) => {
+  const handleNodeDrag: OnNodeDrag<Node> = React.useCallback((_evt, node) => {
     publishNodeMove(node.id, node.position);
   }, [publishNodeMove]);
 
-  const handleNodeDragStop = React.useCallback((_evt: React.MouseEvent, node: { id: string; position: { x: number; y: number } }) => {
+  const handleNodeDragStop: OnNodeDrag<Node> = React.useCallback((_evt, node) => {
     if (onNodeDragStop) onNodeDragStop();
     publishNodeMoveForce(node.id, node.position);
     setDragging(false);
@@ -362,26 +314,17 @@ const BroadcastBuilderInner: React.FC = () => {
     });
   }, [displayNodes, collaborators]);
 
-  const [apiCustomFields, setApiCustomFields] = React.useState<string[]>([]);
-
-  React.useEffect(() => {
-    if (activeBotId) {
-      getCustomFieldsApi(activeBotId)
-        .then((data) => {
-          if (data && typeof data === 'object') {
-            const list = Array.isArray(data.fields) ? data.fields : Array.isArray(data) ? data : [];
-            const names = list.map((f: any) => typeof f === 'string' ? f : f?.name).filter(Boolean);
-            setApiCustomFields(names);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [activeBotId]);
-
+  const { data: customFieldsData } = useCustomFieldsQuery(activeBotId);
   const customFields = React.useMemo(() => {
-    if (apiCustomFields.length > 0) return apiCustomFields;
-    return ['last_order_product', 'last_order_price', 'phone', 'email'];
-  }, [apiCustomFields]);
+    if (!customFieldsData) return [...DEFAULT_CUSTOM_FIELDS];
+    const list = Array.isArray(customFieldsData.fields)
+      ? customFieldsData.fields
+      : Array.isArray(customFieldsData)
+        ? (customFieldsData as unknown[])
+        : [];
+    const names = list.map((f: unknown) => (typeof f === 'string' ? f : (f as { name?: string })?.name)).filter(Boolean) as string[];
+    return names.length > 0 ? names : [...DEFAULT_CUSTOM_FIELDS];
+  }, [customFieldsData]);
 
   const filteredContextMenuOptions = React.useMemo(() => {
     if (!contextMenu) return BROADCAST_CONTEXT_MENU_OPTIONS;
@@ -419,7 +362,7 @@ const BroadcastBuilderInner: React.FC = () => {
     setIsDirty(true);
   };
 
-  const isValidConnection = React.useCallback((connection: any) => {
+  const isValidConnection = React.useCallback((connection: { source?: string | null; target?: string | null; sourceHandle?: string | null }) => {
     if (connection.source === connection.target) return false;
     const targetNode = nodes.find((n) => n.id === connection.target);
     if (targetNode?.type === 'START_BROADCAST') return false;
@@ -605,8 +548,8 @@ const BroadcastBuilderInner: React.FC = () => {
               ) : updateCampaignMut.isError ? (
                 <div
                   title={
-                    (updateCampaignMut.error as any)?.response?.data?.message ||
-                    (updateCampaignMut.error as any)?.message ||
+                    (isAxiosError(updateCampaignMut.error) && (updateCampaignMut.error.response?.data as { message?: string })?.message) ||
+                    updateCampaignMut.error?.message ||
                     String(updateCampaignMut.error)
                   }
                   className="flex items-center gap-1.5 cursor-help"
@@ -667,7 +610,7 @@ const BroadcastBuilderInner: React.FC = () => {
               className="flex items-center gap-1.5 px-3.5 py-2 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] text-xs font-bold rounded-xl transition-all border-2 border-[#0A0A0A] cursor-pointer shadow-sm"
               title="Generate flow with AI"
             >
-              <Sparkles size={14} className="animate-pulse" />
+              <AiIcon size={14} />
               <span>{t('flow_builder.ai_gen')}</span>
             </button>
           )}
@@ -742,107 +685,119 @@ const BroadcastBuilderInner: React.FC = () => {
                     className="fixed inset-0 z-10"
                     onClick={() => setIsAddDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 mt-2.5 w-56 bg-[#F2EBDD] border-2 border-[#0A0A0A] p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-1.5 animate-in fade-in zoom-in-95 duration-150">
-                    <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-1 font-['Anybody',sans-serif]">
+                  <div className="absolute right-0 mt-2.5 w-[440px] bg-[#F2EBDD] border-2 border-[#0A0A0A] p-3 rounded-2xl shadow-xl z-20 flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-150">
+                    <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider px-1 font-['Anybody',sans-serif]">
                       {t('broadcast.builder.add_standalone_node')}
                     </span>
-                    {BROADCAST_BLOCKS.map((item) => (
-                      <button
-                        key={item.type}
-                        onClick={() => {
-                          handleAddNode(item.type);
-                          setIsAddDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A]/10 hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group"
-                      >
-                        <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${item.color}`}>
-                          <Plus size={12} className="group-hover:scale-110 transition-transform" />
-                        </span>
-                        <span>{item.label}</span>
-                      </button>
-                    ))}
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {BROADCAST_BLOCKS.map((item) => {
+                        const IconComp = NODE_ICON_COMPONENTS[item.type] || Plus;
+                        return (
+                          <button
+                            key={item.type}
+                            onClick={() => {
+                              handleAddNode(item.type);
+                              setIsAddDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A]/10 hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group min-w-0"
+                          >
+                            <span
+                              data-block-type={item.type}
+                              className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${item.color}`}
+                            >
+                              <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+                            </span>
+                            <span className="truncate">{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </>
               )}
             </div>
           )}
 
-          <ReactFlow
-            nodes={nodesWithCollaborators}
-            edges={displayEdges}
-            onNodesChange={isViewer ? undefined : handleNodesChange}
-            onEdgesChange={isViewer ? undefined : handleEdgesChange}
-            onConnect={isViewer ? undefined : onConnect}
-            onConnectStart={isViewer ? undefined : onConnectStart}
-            onConnectEnd={isViewer ? undefined : onConnectEnd}
-            onNodeClick={isViewer ? undefined : onNodeClick}
-            onPaneClick={isViewer ? undefined : onPaneClick}
-            onSelectionChange={onSelectionChange}
-            onNodeDragStart={isViewer ? undefined : (handleNodeDragStart as any)}
-            onNodeDrag={isViewer ? undefined : (handleNodeDrag as any)}
-            onNodeDragStop={isViewer ? undefined : (handleNodeDragStop as any)}
-            nodeTypes={NODE_TYPES}
-            edgeTypes={EDGE_TYPES}
-            isValidConnection={isValidConnection}
-            defaultEdgeOptions={FLOW_EDGE_DEFAULTS}
-            connectionLineComponent={CustomConnectionLine}
-            connectionLineType={edgeType === 'default' ? ConnectionLineType.Bezier : ConnectionLineType.SmoothStep}
-            connectionLineStyle={{
-              strokeWidth: 2.5,
-              stroke: '#0A0A0A',
-            }}
-            nodesDraggable={!isViewer}
-            nodesConnectable={!isViewer}
-            elementsSelectable={!isViewer}
-            deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
-            fitView
-            fitViewOptions={{ padding: 0.6 }}
-            className="bg-[#F2EBDD]"
-            zoomOnDoubleClick={false}
-            proOptions={{ hideAttribution: true }}
-          >
-            <Background color="#0A0A0A" gap={20} size={1.2} />
-            <Controls
-              position="bottom-right"
-              style={{
-                position: 'absolute',
-                right: '16px',
-                top: '50%',
-                bottom: 'auto',
-                transform: 'translateY(-50%)',
-                margin: 0,
+          <ErrorBoundary inline fallbackTitle="Broadcast Canvas Error">
+            <ReactFlow
+              nodes={nodesWithCollaborators}
+              edges={displayEdges}
+              onNodesChange={isViewer ? undefined : handleNodesChange}
+              onEdgesChange={isViewer ? undefined : handleEdgesChange}
+              onConnect={isViewer ? undefined : onConnect}
+              onConnectStart={isViewer ? undefined : onConnectStart}
+              onConnectEnd={isViewer ? undefined : onConnectEnd}
+              onNodeClick={isViewer ? undefined : onNodeClick}
+              onPaneClick={isViewer ? undefined : onPaneClick}
+              onSelectionChange={onSelectionChange}
+              onNodeDragStart={isViewer ? undefined : handleNodeDragStart}
+              onNodeDrag={isViewer ? undefined : handleNodeDrag}
+              onNodeDragStop={isViewer ? undefined : handleNodeDragStop}
+              nodeTypes={NODE_TYPES}
+              edgeTypes={EDGE_TYPES}
+              isValidConnection={isValidConnection}
+              defaultEdgeOptions={FLOW_EDGE_DEFAULTS}
+              connectionLineComponent={CustomConnectionLine}
+              connectionLineType={edgeType === 'default' ? ConnectionLineType.Bezier : ConnectionLineType.SmoothStep}
+              connectionLineStyle={{
+                strokeWidth: 2.5,
+                stroke: '#0A0A0A',
               }}
-              className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-md flex flex-col bg-[#F2EBDD] custom-controls-panel"
+              nodesDraggable={!isViewer}
+              nodesConnectable={!isViewer}
+              elementsSelectable={!isViewer}
+              deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
+              elevateNodesOnSelect={true}
+              elevateEdgesOnSelect={true}
+              fitView
+              fitViewOptions={{ padding: 0.6 }}
+              className="bg-[#F2EBDD]"
+              zoomOnDoubleClick={false}
+              proOptions={{ hideAttribution: true }}
             >
-              <button
-                onClick={() => setEdgeType((t) => (t === 'default' ? 'smoothstep' : 'default'))}
-                title={edgeType === 'default' ? 'Switch to Step Lines' : 'Switch to Curved Lines'}
-                className="react-flow__controls-button flex items-center justify-center animate-in duration-75"
-                style={{ order: -3 }}
+              <Background color="#0A0A0A" gap={20} size={1.2} />
+              <Controls
+                position="bottom-right"
+                style={{
+                  position: 'absolute',
+                  right: '16px',
+                  top: '50%',
+                  bottom: 'auto',
+                  transform: 'translateY(-50%)',
+                  margin: 0,
+                }}
+                className="border-2 border-[#0A0A0A] rounded-2xl overflow-hidden shadow-md flex flex-col bg-[#F2EBDD] custom-controls-panel"
               >
-                {edgeType === 'default'
-                  ? <Route size={18} className="text-[#0A0A0A]" />
-                  : <GitCommit size={18} className="text-[#0A0A0A]" />
-                }
-              </button>
-              <button
-                onClick={() => handleAutoLayout('LR')}
-                title="Horizontal Layout"
-                className="react-flow__controls-button flex items-center justify-center"
-                style={{ order: -2 }}
-              >
-                <GitFork size={18} className="rotate-90 text-[#0A0A0A]" />
-              </button>
-              <button
-                onClick={() => handleAutoLayout('TB')}
-                title="Vertical Layout"
-                className="react-flow__controls-button flex items-center justify-center"
-                style={{ order: -1 }}
-              >
-                <GitFork size={18} className="text-[#0A0A0A]" />
-              </button>
-            </Controls>
-          </ReactFlow>
+                <button
+                  onClick={() => setEdgeType((t) => (t === 'default' ? 'smoothstep' : 'default'))}
+                  title={edgeType === 'default' ? 'Switch to Step Lines' : 'Switch to Curved Lines'}
+                  className="react-flow__controls-button flex items-center justify-center animate-in duration-75"
+                  style={{ order: -3 }}
+                >
+                  {edgeType === 'default'
+                    ? <Route size={18} className="text-[#0A0A0A]" />
+                    : <GitCommit size={18} className="text-[#0A0A0A]" />
+                  }
+                </button>
+                <button
+                  onClick={() => handleAutoLayout('LR')}
+                  title="Horizontal Layout"
+                  className="react-flow__controls-button flex items-center justify-center"
+                  style={{ order: -2 }}
+                >
+                  <GitFork size={18} className="rotate-90 text-[#0A0A0A]" />
+                </button>
+                <button
+                  onClick={() => handleAutoLayout('TB')}
+                  title="Vertical Layout"
+                  className="react-flow__controls-button flex items-center justify-center"
+                  style={{ order: -1 }}
+                >
+                  <GitFork size={18} className="text-[#0A0A0A]" />
+                </button>
+              </Controls>
+            </ReactFlow>
+          </ErrorBoundary>
 
           {contextMenu && (
             <div
@@ -850,30 +805,71 @@ const BroadcastBuilderInner: React.FC = () => {
               onClick={() => setContextMenu(null)}
             >
               <div
-                className="absolute bg-[#F2EBDD] border-2 border-[#0A0A0A] p-2.5 rounded-2xl shadow-xl w-60 flex flex-col gap-1 select-none pointer-events-auto animate-in fade-in zoom-in-95 duration-150 z-50"
+                className="absolute bg-[#F2EBDD] border-2 border-[#0A0A0A] p-3 rounded-2xl shadow-xl w-[440px] max-h-[80vh] overflow-y-auto custom-scrollbar flex flex-col gap-2.5 select-none pointer-events-auto animate-in fade-in zoom-in-95 duration-150 z-50 font-['JetBrains_Mono',monospace]"
                 style={{
-                  left: Math.min(contextMenu.x, window.innerWidth - 250),
-                  top: Math.min(contextMenu.y, window.innerHeight - 380),
+                  left: Math.min(contextMenu.x, window.innerWidth - 470),
+                  top: Math.min(contextMenu.y, window.innerHeight - 450),
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1 px-3 pt-1 select-none font-['Anybody',sans-serif]">
+                <span className="text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider px-1 pt-0.5 select-none font-['Anybody',sans-serif]">
                   {t('flow_builder.connect_to')}
                 </span>
-                {filteredContextMenuOptions.map((opt, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleCreateAndConnectNode(opt.type)}
-                    className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-transparent hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group select-none"
-                  >
-                    <span className="font-bold">{opt.label}</span>
-                    {opt.isPro && (
-                      <span className="text-[8px] font-black bg-amber-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
-                        PRO
-                      </span>
-                    )}
-                  </button>
-                ))}
+                <div className="flex flex-col gap-2.5">
+                  {BROADCAST_CONTEXT_MENU_GROUPS.map((group) => {
+                    const groupOptions = filteredContextMenuOptions.filter((opt) => group.types.includes(opt.type));
+                    if (groupOptions.length === 0) return null;
+                    return (
+                      <div key={group.id} className="space-y-1">
+                        <div className="text-[9px] font-black text-[#0A0A0A]/50 uppercase tracking-widest px-1 font-['Anybody',sans-serif]">
+                          {t(group.titleKey, group.defaultTitle)}
+                        </div>
+                        <div className="grid grid-cols-2 gap-1">
+                          {groupOptions.map((opt, idx) => {
+                            const IconComp = NODE_ICON_COMPONENTS[opt.type] || Plus;
+                            const colorClass = FLOW_BLOCK_COLORS[opt.type] || 'text-slate-500 bg-slate-50';
+                            const cleanLabel = opt.label.replace(/^\+\s*/, '');
+                            return (
+                              <button
+                                key={idx}
+                                onClick={() => handleCreateAndConnectNode(opt.type)}
+                                className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-transparent hover:border-[#0A0A0A] rounded-xl text-left text-xs font-bold text-[#0A0A0A] transition-all cursor-pointer group select-none min-w-0"
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span
+                                    data-block-type={opt.type}
+                                    className={`node-icon-badge w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${colorClass}`}
+                                  >
+                                    <IconComp size={12} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+                                  </span>
+                                  <span className="font-bold truncate">{cleanLabel}</span>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0 ml-1">
+                                  {opt.isPro && (
+                                    <span className="text-[8px] font-black bg-amber-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                      PRO
+                                    </span>
+                                  )}
+                                  {opt.isAi && (
+                                    <span className="text-[8px] font-black bg-purple-400 text-[#0A0A0A] border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                      AI
+                                    </span>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button
+                  onClick={() => setContextMenu(null)}
+                  className="w-full text-center py-2 text-xs font-black text-[#0A0A0A]/60 hover:text-[#0A0A0A] hover:bg-[#0A0A0A]/10 rounded-xl transition-all border-t-2 border-[#0A0A0A]/20 mt-1 cursor-pointer select-none uppercase tracking-wider font-['JetBrains_Mono',monospace]"
+                >
+                  {t('flow_builder.cancel')}
+                </button>
               </div>
             </div>
           )}
@@ -948,7 +944,7 @@ const BroadcastBuilderInner: React.FC = () => {
                         ...activeNode.data,
                         blocks: updated
                       });
-                      setEdges((eds: any[]) => eds.filter((e: any) => !(e.source === activeNode.id && (e.sourceHandle === 'reply' || e.sourceHandle === 'timeout'))));
+                      setEdges((eds) => eds.filter((e) => !(e.source === activeNode.id && (e.sourceHandle === 'reply' || e.sourceHandle === 'timeout'))));
                     }
                     editorState.setIsDataCollectionDrawerOpen(false);
                   }}
@@ -956,7 +952,7 @@ const BroadcastBuilderInner: React.FC = () => {
                   nodes={nodes}
                   nodeId={activeNode.id}
                   onUnlinkConnection={(handleId) => {
-                    setEdges((eds: any[]) => eds.filter((e: any) => !(e.source === activeNode.id && e.sourceHandle === handleId)));
+                    setEdges((eds) => eds.filter((e) => !(e.source === activeNode.id && e.sourceHandle === handleId)));
                   }}
                   onAddAndConnectNode={(sourceNodeId, type, sourceHandle) => {
                     handleAddAndConnectNode(sourceNodeId, type, sourceHandle);
@@ -972,7 +968,10 @@ const BroadcastBuilderInner: React.FC = () => {
                 />
               ) : activeNode && editorState.isBtnDialogOpen && editorState.editingButton ? (
                 <EditButtonDrawer
-                  onClose={() => editorState.setIsBtnDialogOpen(false)}
+                  onClose={() => {
+                    editorState.setIsBtnDialogOpen(false);
+                    useFlowUiStore.getState().closeEditButton();
+                  }}
                   button={editorState.editingButton}
                   onSave={editorState.handleSaveButton}
                   onRemove={editorState.handleRemoveButton}
@@ -980,7 +979,7 @@ const BroadcastBuilderInner: React.FC = () => {
                   nodes={nodes}
                   nodeId={activeNode.id}
                   onUnlinkConnection={(btnValue) => {
-                    setEdges((eds: any[]) => eds.filter((e: any) => !(e.source === activeNode.id && e.sourceHandle === btnValue)));
+                    setEdges((eds) => eds.filter((e) => !(e.source === activeNode.id && e.sourceHandle === btnValue)));
                   }}
                 />
               ) : null}
@@ -1046,7 +1045,7 @@ const BroadcastBuilderInner: React.FC = () => {
 export const BroadcastBuilderPage: React.FC = () => {
   return (
     <ReactFlowProvider>
-      <ControlsStyles />
+      <FlowControlsStyles />
       <BroadcastBuilderInner />
     </ReactFlowProvider>
   );

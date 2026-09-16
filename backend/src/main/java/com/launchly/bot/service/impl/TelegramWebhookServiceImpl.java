@@ -2,6 +2,7 @@ package com.launchly.bot.service.impl;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.launchly.bot.service.BotModerationService;
 import com.launchly.bot.service.FlowEngineService;
 import com.launchly.bot.service.TelegramWebhookService;
 import com.launchly.bot.telegram.TelegramBotManager;
@@ -14,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
-
 import java.time.Duration;
 
 @Slf4j
@@ -26,9 +26,14 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
     private final TelegramBotManager telegramBotManager;
     private final RateLimitService rateLimitService;
     private final StringRedisTemplate stringRedisTemplate;
+    private final BotModerationService moderationService;
 
     private static final ObjectMapper TELEGRAM_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    private static final Duration UPDATE_DEDUP_TTL = Duration.ofSeconds(120);
+    private static final int TG_USER_RATE_LIMIT_MAX = 30;
+    private static final Duration TG_USER_RATE_LIMIT_WINDOW = Duration.ofMinutes(1);
 
     @Override
     public void processWebhookUpdate(Long botId, String rawUpdate) {
@@ -42,7 +47,7 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
 
             if (update.getUpdateId() != null) {
                 String dedupKey = "telegram:update:" + botId + ":" + update.getUpdateId();
-                Boolean isNew = stringRedisTemplate.opsForValue().setIfAbsent(dedupKey, "1", Duration.ofSeconds(120));
+                Boolean isNew = stringRedisTemplate.opsForValue().setIfAbsent(dedupKey, "1", UPDATE_DEDUP_TTL);
                 if (Boolean.FALSE.equals(isNew)) {
                     log.info("Duplicate Telegram update ignored: botId={}, updateId={}", botId, update.getUpdateId());
                     return;
@@ -52,10 +57,15 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
             Long telegramUserId = extractTelegramUserId(update);
             if (telegramUserId != null) {
                 String rateKey = "rate:tg:user:" + botId + ":" + telegramUserId;
-                if (!rateLimitService.isAllowed(rateKey, 30, Duration.ofMinutes(1))) {
+                if (!rateLimitService.isAllowed(rateKey, TG_USER_RATE_LIMIT_MAX, TG_USER_RATE_LIMIT_WINDOW)) {
                     log.warn("Rate limit exceeded for Telegram user {} in bot {}", telegramUserId, botId);
                     return;
                 }
+            }
+
+            if (moderationService != null && moderationService.processUpdateModeration(botId, update, client)) {
+                log.info("Webhook update for bot {} was moderated and intercepted", botId);
+                return;
             }
 
             flowEngineService.processUpdate(botId, update, client);
@@ -76,6 +86,9 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
         }
         if (update.hasChannelPost() && update.getChannelPost().getFrom() != null) {
             return update.getChannelPost().getFrom().getId();
+        }
+        if (update.hasChatJoinRequest() && update.getChatJoinRequest().getUser() != null) {
+            return update.getChatJoinRequest().getUser().getId();
         }
         return null;
     }

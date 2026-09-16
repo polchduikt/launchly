@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ShieldAlert, Send, CheckCircle2, LogOut, Loader2, Mail } from 'lucide-react';
-import { t } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { PublicHeader } from '../../../components/layout/PublicHeader';
+import { STORAGE_KEYS } from '../../../const/constants';
+import { ROUTES } from '../../../routes/paths';
 import axios from 'axios';
 
 export const BlockedPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
 
-  const rawReason = searchParams.get('code') || searchParams.get('reason') || localStorage.getItem('launchly_block_reason') || 'admin.reason_rules';
+  const rawReason = searchParams.get('code') || searchParams.get('reason') || localStorage.getItem(STORAGE_KEYS.BLOCK_REASON) || 'admin.reason_rules';
 
   useEffect(() => {
     if (searchParams.get('code') || searchParams.get('reason')) {
-      localStorage.setItem('launchly_block_reason', rawReason);
-      window.history.replaceState(null, '', '/blocked');
+      localStorage.setItem(STORAGE_KEYS.BLOCK_REASON, rawReason);
+      window.history.replaceState(null, '', ROUTES.BLOCKED);
     }
   }, [searchParams, rawReason]);
 
@@ -60,7 +63,7 @@ export const BlockedPage: React.FC = () => {
       });
       setSentSuccess(true);
       setMessage('');
-    } catch (err: unknown) {
+    } catch {
       setErrorMsg('Error sending appeal. Please try again.');
     } finally {
       setIsSending(false);
@@ -68,9 +71,9 @@ export const BlockedPage: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('launchly_block_reason');
+    localStorage.removeItem(STORAGE_KEYS.BLOCK_REASON);
     logout();
-    navigate('/login');
+    navigate(ROUTES.LOGIN);
   };
 
   return (

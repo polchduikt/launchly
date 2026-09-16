@@ -1,41 +1,111 @@
 import React from 'react';
+import type { LucideIcon } from 'lucide-react';
 import {
-  Sparkles,
-  MessageSquare,
+  Zap,
+  Send,
   Filter,
   Globe,
-  Grid,
+  Octagon,
   Sliders,
   Clock,
   Shuffle,
   StickyNote,
   SquareArrowRight,
+  Terminal,
+  Calculator,
+  Trophy,
+  Hourglass,
+  CalendarClock,
+  Search,
+  HeartHandshake,
+  ShieldCheck,
+  ShieldAlert,
+  UserCheck,
 } from 'lucide-react';
+import { AiIcon } from '../components/ui/AiIcon';
+
+import { t } from '../i18n/config';
 
 export const NODE_TITLES: Record<string, string> = {
   START: 'Trigger Settings',
   MESSAGE: 'Send Message',
   CONDITION: 'Condition Rule',
+  SUBSCRIPTION_CHECK: 'Subscription Check',
+  MODERATION: 'Content Moderation',
   API_CALL: 'API Integration',
   ACTION: 'Actions',
+  MATH: 'Calculation',
+  LEADERBOARD: 'Leaderboard',
+  QUERY: 'Data Query',
+  INTERACTION: 'Interaction',
+  COOLDOWN: 'Cooldown',
+  SCHEDULER: 'Scheduler',
   END: 'End Session',
   SMART_DELAY: 'Smart Delay',
   RANDOMIZER: 'Randomizer',
   START_AUTOMATION: 'Start Automation',
+  COMMAND: 'Command Trigger',
+  JOIN_REQUEST: 'Join Request',
   COMMENT: 'Comment',
   AI: 'AI Step',
 };
 
+export const getNodeTitle = (type?: string): string => {
+  if (!type) return '';
+  const normalized = type.toUpperCase().replace(/^NODE_?/, '');
+  const key = `node.title.${normalized.toLowerCase()}`;
+  const translated = t(key);
+  if (translated && translated !== key) {
+    return translated;
+  }
+  return NODE_TITLES[normalized] || type;
+};
+
+export const NODE_ICON_COMPONENTS: Record<string, LucideIcon | React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>> = {
+  START: Zap,
+  MESSAGE: Send,
+  CONDITION: Filter,
+  SUBSCRIPTION_CHECK: ShieldCheck,
+  MODERATION: ShieldAlert,
+  API_CALL: Globe,
+  ACTION: Sliders,
+  MATH: Calculator,
+  LEADERBOARD: Trophy,
+  QUERY: Search,
+  INTERACTION: HeartHandshake,
+  COOLDOWN: Hourglass,
+  SCHEDULER: CalendarClock,
+  END: Octagon,
+  SMART_DELAY: Clock,
+  RANDOMIZER: Shuffle,
+  START_AUTOMATION: SquareArrowRight,
+  COMMAND: Terminal,
+  JOIN_REQUEST: UserCheck,
+  COMMENT: StickyNote,
+  AI: AiIcon,
+};
+
 export const NODE_ICONS: Record<string, React.ReactNode> = {
-  START: <Sparkles size={16} className="text-indigo-600 animate-pulse" />,
-  MESSAGE: <MessageSquare size={16} className="text-sky-500" />,
+  START: <Zap size={16} className="text-emerald-600" />,
+  MESSAGE: <Send size={16} className="text-sky-500" />,
   CONDITION: <Filter size={16} className="text-purple-600" />,
+  SUBSCRIPTION_CHECK: <ShieldCheck size={16} className="text-green-600" />,
+  MODERATION: <ShieldAlert size={16} className="text-red-600" />,
   API_CALL: <Globe size={16} className="text-indigo-500" />,
   ACTION: <Sliders size={16} className="text-amber-600" />,
-  END: <Grid size={16} className="text-slate-500" />,
+  MATH: <Calculator size={16} className="text-cyan-600" />,
+  LEADERBOARD: <Trophy size={16} className="text-fuchsia-600" />,
+  QUERY: <Search size={16} className="text-blue-600" />,
+  INTERACTION: <HeartHandshake size={16} className="text-pink-600" />,
+  COOLDOWN: <Hourglass size={16} className="text-amber-600" />,
+  SCHEDULER: <CalendarClock size={16} className="text-orange-600" />,
+  END: <Octagon size={16} className="text-slate-500" />,
   SMART_DELAY: <Clock size={16} className="text-rose-400" />,
   RANDOMIZER: <Shuffle size={16} className="text-purple-500" />,
   START_AUTOMATION: <SquareArrowRight size={16} className="text-lime-600" />,
+  COMMAND: <Terminal size={16} className="text-teal-600" />,
+  JOIN_REQUEST: <UserCheck size={16} className="text-amber-600" />,
   COMMENT: <StickyNote size={16} className="text-amber-500" />,
-  AI: <Sparkles size={16} className="text-emerald-600" />,
+  AI: <AiIcon size={16} className="text-emerald-600" />,
 };
+

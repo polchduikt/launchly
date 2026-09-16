@@ -23,6 +23,8 @@ import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -57,6 +59,9 @@ class BillingServiceImplTest {
     @Mock
     private StringRedisTemplate stringRedisTemplate;
 
+    @Mock
+    private TransactionTemplate transactionTemplate;
+
     @InjectMocks
     private BillingServiceImpl billingService;
 
@@ -68,6 +73,15 @@ class BillingServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(transactionTemplate.execute(any())).thenAnswer(invocation -> {
+            TransactionCallback<?> callback = invocation.getArgument(0);
+            return callback.doInTransaction(null);
+        });
+        lenient().doAnswer(invocation -> {
+            java.util.function.Consumer<org.springframework.transaction.TransactionStatus> action = invocation.getArgument(0);
+            action.accept(null);
+            return null;
+        }).when(transactionTemplate).executeWithoutResult(any());
         testUser = User.builder().email("billing@launchly.pro").name("Billing User").build();
         ReflectionTestUtils.setField(testUser, "id", 1L);
 

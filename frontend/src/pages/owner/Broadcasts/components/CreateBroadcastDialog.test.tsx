@@ -4,8 +4,8 @@ import { CreateBroadcastDialog } from './CreateBroadcastDialog';
 import type { CreateBroadcastDialogProps } from '../../../../types/broadcast';
 
 vi.mock('../../../../i18n/config', () => ({
-  t: (k: string) => k,
-  useTranslation: () => ({ t: (k: string, fb?: string) => fb || k }),
+  t: (k: string, fb?: unknown) => (typeof fb === 'string' ? fb : k),
+  useTranslation: () => ({ t: (k: string, fb?: unknown) => (typeof fb === 'string' ? fb : k) }),
 }));
 
 describe('CreateBroadcastDialog', () => {

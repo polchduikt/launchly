@@ -104,7 +104,7 @@ class CrmControllerTest {
         mockMvc.perform(post("/api/v1/crm/labels")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("name", "NEW"))))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$[1]").value("NEW"));
     }
 

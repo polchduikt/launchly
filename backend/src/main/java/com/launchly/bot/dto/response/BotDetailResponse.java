@@ -1,5 +1,6 @@
 package com.launchly.bot.dto.response;
 
+import com.launchly.bot.entity.BotResponseMode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
@@ -39,6 +40,9 @@ public record BotDetailResponse(
         boolean isTemplate,
 
         @Schema(description = "Template name if installed from a template")
-        String templateName
+        String templateName,
+
+        @Schema(description = "Chat response mode: ALL, PRIVATE_ONLY, GROUPS_ONLY", example = "ALL")
+        BotResponseMode responseMode
 ) {}
 

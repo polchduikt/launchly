@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react';
 import { BulkActionModal } from './BulkActionModal';
 
 vi.mock('../../../../i18n/config', () => ({
-  useTranslation: () => ({ t: (k: string, fb?: string) => fb || k }),
-  t: (k: string, fb?: string) => fb || k,
+  useTranslation: () => ({ t: (k: string, fb?: unknown) => (typeof fb === 'string' ? fb : k) }),
+  t: (k: string, fb?: unknown) => (typeof fb === 'string' ? fb : k),
 }));
 
 describe('BulkActionModal', () => {

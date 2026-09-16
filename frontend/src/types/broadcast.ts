@@ -23,6 +23,8 @@ export interface CampaignResponse {
   blocked?: boolean;
   blockReason?: string;
   blockedAt?: string;
+  templateName?: string;
+  isTemplate?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,6 +40,8 @@ export interface CreateCampaignRequest {
   botId?: number;
   targetAllBots?: boolean;
 }
+
+export type UpdateCampaignRequest = CreateCampaignRequest;
 
 export interface TagResponse {
   id: number | string;

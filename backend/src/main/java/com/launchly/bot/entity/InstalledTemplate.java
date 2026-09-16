@@ -10,8 +10,10 @@ import lombok.*;
     @Index(name = "idx_installed_templates_user_created", columnList = "user_id, created_at DESC"),
     @Index(name = "idx_installed_templates_bot", columnList = "bot_id")
 })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@ToString(exclude = {"user", "bot", "template"})
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

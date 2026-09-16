@@ -30,10 +30,20 @@ import com.launchly.bot.telegram.TelegramBotManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.launchly.bot.constant.BotConstants;
+import com.launchly.bot.constant.TelegramConstants;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
+
+    private static final int MAX_MESSAGE_PREVIEW_LENGTH = 150;
+    private static final int TRUNCATED_PREVIEW_LENGTH = 147;
+    private static final int TOP_BUTTONS_LIMIT = 5;
+    private static final String LOCALHOST = "localhost";
+    private static final String LOOPBACK_IP = "127.0.0.1";
+    private static final String DEV_TUNNEL_DOMAIN = "lvh.me";
 
     private final ObjectProvider<JavaMailSender> mailSenderProvider;
     private final ObjectProvider<TelegramBotManager> botManagerProvider;
@@ -83,7 +93,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Async
-    @Transactional(readOnly = true)
     public void sendAssignmentNotification(Long userId, Long botUserId) {
         User user = userQueryService.findById(userId).orElse(null);
         BotUser botUser = botUserRepository.findById(botUserId).orElse(null);
@@ -92,11 +101,7 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        String contactName = (botUser.getFirstName() != null ? botUser.getFirstName() : "") + 
-                             (botUser.getLastName() != null ? " " + botUser.getLastName() : "");
-        if (contactName.trim().isEmpty()) {
-            contactName = botUser.getUsername() != null ? "@" + botUser.getUsername() : "Contact ID " + botUser.getId();
-        }
+        String contactName = botUser.getDisplayName();
 
         String message = String.format("A new contact (%s) has performed a specific action in your bot '%s' and requires attention.",
                 contactName, botUser.getBot().getName());
@@ -135,7 +140,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (user.isNotifyTelegram() && user.getTelegramUserId() != null) {
             TelegramBotManager botManager = botManagerProvider.getIfAvailable();
-            TelegramClient systemBotClient = botManager != null ? botManager.getTelegramClient(-1L) : null;
+            TelegramClient systemBotClient = botManager != null ? botManager.getTelegramClient(BotConstants.SYSTEM_BOT_ID) : null;
             if (systemBotClient != null) {
                 try {
                     SendMessage sendMessage = SendMessage.builder()
@@ -155,7 +160,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Async
-    @Transactional(readOnly = true)
     public void sendNewMessageNotification(Long userId, Long conversationId, String messageContent) {
         User user = userQueryService.findById(userId).orElse(null);
         Conversation conversation = conversationRepository.findById(conversationId).orElse(null);
@@ -172,12 +176,12 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         String contactMention = botUser.getUsername() != null 
-                ? String.format("<a href=\"https://t.me/%s\">%s (@%s)</a>", botUser.getUsername(), contactName, botUser.getUsername())
-                : String.format("<a href=\"tg://user?id=%d\">%s</a>", botUser.getTelegramId(), contactName);
+                ? String.format("<a href=\"" + TelegramConstants.TELEGRAM_DEEP_LINK + "%s\">%s (@%s)</a>", botUser.getUsername(), contactName, botUser.getUsername())
+                : String.format("<a href=\"" + TelegramConstants.TELEGRAM_USER_LINK + "%d\">%s</a>", botUser.getTelegramId(), contactName);
 
         String messageText = messageContent;
-        if (messageText != null && messageText.length() > 150) {
-            messageText = messageText.substring(0, 147) + "...";
+        if (messageText != null && messageText.length() > MAX_MESSAGE_PREVIEW_LENGTH) {
+            messageText = messageText.substring(0, TRUNCATED_PREVIEW_LENGTH) + "...";
         }
 
         String convUrl = String.format("%s/chat?conversationId=%d", frontendUrl, conversation.getId());
@@ -231,26 +235,22 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (user.isNotifyTelegram() && user.getTelegramUserId() != null) {
             TelegramBotManager botManager = botManagerProvider.getIfAvailable();
-            TelegramClient systemBotClient = botManager != null ? botManager.getTelegramClient(-1L) : null;
+            TelegramClient systemBotClient = botManager != null ? botManager.getTelegramClient(BotConstants.SYSTEM_BOT_ID) : null;
             if (systemBotClient != null) {
                 try {
                     List<InlineKeyboardRow> keyboard = new ArrayList<>();
                     InlineKeyboardRow row = new InlineKeyboardRow();
 
                     String profileUrl = botUser.getUsername() != null 
-                            ? "https://t.me/" + botUser.getUsername()
-                            : "tg://user?id=" + botUser.getTelegramId();
+                            ? TelegramConstants.TELEGRAM_DEEP_LINK + botUser.getUsername()
+                            : TelegramConstants.TELEGRAM_USER_LINK + botUser.getTelegramId();
                     
                     row.add(InlineKeyboardButton.builder()
                             .text("👤 View Profile")
                             .url(profileUrl)
                             .build());
 
-                    String telegramUrl = convUrl;
-                    if (telegramUrl.contains("localhost") || telegramUrl.contains("127.0.0.1")) {
-                        telegramUrl = telegramUrl.replace("localhost", "lvh.me")
-                                                 .replace("127.0.0.1", "lvh.me");
-                    }
+                    String telegramUrl = toTelegramCompatibleUrl(convUrl);
 
                     row.add(InlineKeyboardButton.builder()
                             .text("💬 Open Conversation")
@@ -298,7 +298,7 @@ public class NotificationServiceImpl implements NotificationService {
             topButtonsHtml.append("    </tr>");
             topButtonsHtml.append("  </thead>");
             topButtonsHtml.append("  <tbody>");
-            for (DashboardStatsResponse.ButtonStatsEntry entry : stats.topButtons().stream().limit(5).toList()) {
+            for (DashboardStatsResponse.ButtonStatsEntry entry : stats.topButtons().stream().limit(TOP_BUTTONS_LIMIT).toList()) {
                 topButtonsHtml.append("    <tr style=\"border-bottom: 1px solid #f1f5f9;\">");
                 topButtonsHtml.append(String.format("      <td style=\"padding: 10px; font-size: 13px; color: #1e293b;\">%s</td>", entry.buttonName()));
                 topButtonsHtml.append(String.format("      <td style=\"padding: 10px; font-size: 13px; color: #1e293b; text-align: right;\">%d</td>", entry.clicks()));
@@ -313,7 +313,7 @@ public class NotificationServiceImpl implements NotificationService {
             topButtonsTg.append("<i>No button clicks logged.</i>");
         } else {
             int count = 1;
-            for (DashboardStatsResponse.ButtonStatsEntry entry : stats.topButtons().stream().limit(5).toList()) {
+            for (DashboardStatsResponse.ButtonStatsEntry entry : stats.topButtons().stream().limit(TOP_BUTTONS_LIMIT).toList()) {
                 topButtonsTg.append(String.format("%d. <b>%s</b> — %d clicks\n", count++, entry.buttonName(), entry.clicks()));
             }
         }
@@ -381,7 +381,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (user.isStatsNotifyTelegram() && user.getTelegramUserId() != null) {
             TelegramBotManager botManager = botManagerProvider.getIfAvailable();
-            TelegramClient systemBotClient = botManager != null ? botManager.getTelegramClient(-1L) : null;
+            TelegramClient systemBotClient = botManager != null ? botManager.getTelegramClient(BotConstants.SYSTEM_BOT_ID) : null;
             if (systemBotClient != null) {
                 try {
                     String telegramHtmlMessage = String.format(
@@ -402,11 +402,7 @@ public class NotificationServiceImpl implements NotificationService {
                     List<InlineKeyboardRow> keyboard = new ArrayList<>();
                     InlineKeyboardRow row = new InlineKeyboardRow();
 
-                    String telegramUrl = statsUrl;
-                    if (telegramUrl.contains("localhost") || telegramUrl.contains("127.0.0.1")) {
-                        telegramUrl = telegramUrl.replace("localhost", "lvh.me")
-                                                 .replace("127.0.0.1", "lvh.me");
-                    }
+                    String telegramUrl = toTelegramCompatibleUrl(statsUrl);
 
                     row.add(InlineKeyboardButton.builder()
                             .text("🌐 Open Dashboard")
@@ -432,5 +428,16 @@ public class NotificationServiceImpl implements NotificationService {
                 }
             }
         }
+    }
+
+    private String toTelegramCompatibleUrl(String url) {
+        if (url == null) {
+            return null;
+        }
+        if (url.contains(LOCALHOST) || url.contains(LOOPBACK_IP)) {
+            return url.replace(LOCALHOST, DEV_TUNNEL_DOMAIN)
+                      .replace(LOOPBACK_IP, DEV_TUNNEL_DOMAIN);
+        }
+        return url;
     }
 }

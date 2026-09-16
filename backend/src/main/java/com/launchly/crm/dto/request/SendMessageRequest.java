@@ -1,7 +1,9 @@
 package com.launchly.crm.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import java.time.LocalDateTime;
 
 @Schema(description = "Request payload for an agent to send or schedule a Live Chat message")
@@ -14,9 +16,10 @@ public record SendMessageRequest(
         String mediaUrl,
 
         @Schema(description = "Media MIME/type: IMAGE, DOCUMENT, AUDIO, VIDEO", example = "IMAGE")
+        @Pattern(regexp = "^(?i)(IMAGE|DOCUMENT|AUDIO|VIDEO)?$", message = "Invalid media type. Allowed values: IMAGE, DOCUMENT, AUDIO, VIDEO")
         String mediaType,
 
         @Schema(description = "Optional future dispatch timestamp for scheduled messages")
+        @Future(message = "Scheduled time must be in the future")
         LocalDateTime scheduledAt
 ) {}
-

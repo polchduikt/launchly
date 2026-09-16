@@ -2,7 +2,9 @@ package com.launchly.bot.validator;
 
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotMember;
+import com.launchly.bot.entity.WorkspaceRole;
 import com.launchly.bot.repository.BotMemberRepository;
+import com.launchly.bot.repository.BotRepository;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,7 +15,17 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BotAccessValidator {
 
+    private final BotRepository botRepository;
     private final BotMemberRepository botMemberRepository;
+
+    public Bot getBotWithAccess(Long botId, Long userId) {
+        Bot bot = botRepository.findById(botId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
+        if (!bot.getUser().getId().equals(userId) && !botMemberRepository.existsByBotOwnerIdAndUserId(bot.getUser().getId(), userId)) {
+            throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
+        }
+        return bot;
+    }
 
     public void validateWriteAccess(Bot bot, Long userId) {
         if (bot == null || userId == null) {
@@ -23,7 +35,7 @@ public class BotAccessValidator {
             BotMember member = getWorkspaceMembership(bot, userId)
                     .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied"));
 
-            if ("Viewer".equalsIgnoreCase(member.getRole())) {
+            if (WorkspaceRole.VIEWER.getValue().equalsIgnoreCase(member.getRole())) {
                 throw new AppException(HttpStatus.FORBIDDEN, "bot.error.viewer_cannot_modify");
             }
         }

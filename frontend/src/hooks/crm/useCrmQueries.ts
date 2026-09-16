@@ -56,6 +56,7 @@ export const useConversationsQuery = (botId: number, enabled: boolean = true) =>
     queryKey: ['conversations', botId],
     queryFn: () => getConversationsApi(botId),
     enabled: enabled && botId > 0,
+    staleTime: 1000 * 30,
   });
 };
 
@@ -64,6 +65,7 @@ export const useConversationQuery = (conversationId: number, enabled: boolean = 
     queryKey: ['conversation', conversationId],
     queryFn: () => getConversationApi(conversationId),
     enabled: enabled && conversationId > 0,
+    staleTime: 1000 * 30,
   });
 };
 
@@ -72,6 +74,7 @@ export const useAllConversationsQuery = (enabled: boolean = true) => {
     queryKey: ['conversations', 'all'],
     queryFn: () => getAllConversationsApi(),
     enabled: enabled,
+    staleTime: 1000 * 30,
   });
 };
 
@@ -241,33 +244,46 @@ export const useBotUsersQuery = (botId: number, enabled: boolean = true) => {
   });
 };
 
-export const useAllBotUsersQuery = () => {
+export const useAllBotUsersQuery = (enabled: boolean = true) => {
   const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
   const queries = useQueries({
     queries: bots.map((bot) => ({
       queryKey: ['botUsers', bot.id],
       queryFn: () => getBotUsersApi(bot.id),
-      enabled: bots.length > 0,
+      enabled: enabled && bots.length > 0,
     })),
   });
 
   const contacts = useMemo(() => {
-    const list = queries.flatMap((q) => q.data || []);
-    const uniqueMap = new Map<string | number, BotUserResponse>();
-    list.forEach((u) => {
-      if (u) {
-        const key = u.telegramId ? String(u.telegramId) : u.id;
-        if (!uniqueMap.has(key)) {
-          uniqueMap.set(key, u);
-        }
-      }
+    const list = queries.flatMap((q, idx) => {
+      const currentBot = bots[idx];
+      return (q.data || []).map((u) => ({
+        ...u,
+        botId: u.botId || currentBot?.id,
+        botName: u.botName || currentBot?.name || '',
+      }));
     });
-    return Array.from(uniqueMap.values());
-  }, [queries]);
+    return list;
+  }, [queries, bots]);
 
   const isLoading = isBotsLoading || queries.some((q) => q.isLoading);
 
   return { data: contacts, isLoading, refetch: () => queries.forEach((q) => q.refetch()) };
+};
+
+export const useContactsCountQuery = () => {
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
+  const queryClient = useQueryClient();
+  const cachedUsers = queryClient.getQueryData<BotUserResponse[]>(['allBotUsers']);
+
+  const count = useMemo(() => {
+    if (cachedUsers && Array.isArray(cachedUsers)) {
+      return cachedUsers.length;
+    }
+    return bots.reduce((sum, b) => sum + (b.totalUsers || 0), 0);
+  }, [cachedUsers, bots]);
+
+  return { count, isLoading: isBotsLoading };
 };
 
 export const useUpdateBotUserMutation = (botId: number) => {

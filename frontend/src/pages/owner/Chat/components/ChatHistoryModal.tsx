@@ -50,9 +50,9 @@ export const ChatHistoryModal: React.FC<ChatHistoryModalProps> = ({
           </h3>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
         <div className="flex items-center gap-3 px-6 py-3 border-b-2 border-[#0A0A0A] bg-[#F2EBDD] select-none">

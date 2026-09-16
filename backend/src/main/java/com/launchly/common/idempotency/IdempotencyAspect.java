@@ -2,6 +2,8 @@ package com.launchly.common.idempotency;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.launchly.common.exception.AppException;
 import com.launchly.common.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -31,13 +34,24 @@ import java.time.Duration;
 @Component
 public class IdempotencyAspect {
 
+    private static final int MAX_KEY_LENGTH = 255;
+    private static final Duration DEFAULT_LOCK_DURATION = Duration.ofSeconds(60);
+
     private final StringRedisTemplate stringRedisTemplate;
     private final ObjectMapper objectMapper;
 
     public IdempotencyAspect(@Autowired(required = false) StringRedisTemplate stringRedisTemplate,
                              @Autowired(required = false) ObjectMapper objectMapper) {
         this.stringRedisTemplate = stringRedisTemplate;
-        this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
+        ObjectMapper mapper = objectMapper != null ? objectMapper : new ObjectMapper();
+        try {
+            mapper.registerModule(new JavaTimeModule());
+            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        } catch (Throwable ignored) {
+            mapper.findAndRegisterModules();
+        }
+        this.objectMapper = mapper;
     }
 
     @Around("@annotation(idempotent)")
@@ -60,7 +74,7 @@ public class IdempotencyAspect {
         }
 
         String trimmedKey = keyHeader.trim();
-        if (trimmedKey.length() > 255) {
+        if (trimmedKey.length() > MAX_KEY_LENGTH) {
             throw new AppException(HttpStatus.BAD_REQUEST, "idempotency.error.invalid_key");
         }
 
@@ -69,7 +83,7 @@ public class IdempotencyAspect {
         String statusKey = baseKey + ":status";
         String dataKey = baseKey + ":data";
 
-        Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(statusKey, "PROCESSING", Duration.ofSeconds(60));
+        Boolean acquired = stringRedisTemplate.opsForValue().setIfAbsent(statusKey, "PROCESSING", DEFAULT_LOCK_DURATION);
 
         if (Boolean.TRUE.equals(acquired)) {
             try {

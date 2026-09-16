@@ -26,7 +26,15 @@ public interface BroadcastCampaignRepository extends JpaRepository<BroadcastCamp
     Optional<BroadcastCampaign> findById(Long id);
 
     @Query("SELECT COUNT(c) FROM BroadcastCampaign c WHERE c.bot.user.id = :userId")
-    long countByUserId(@Param("userId") Long userId);
+    long countByUserId(Long userId);
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    @Query("SELECT COALESCE(SUM(c.sentCount), 0L) FROM BroadcastCampaign c WHERE c.createdAt >= :start AND c.createdAt <= :end")
+    long sumSentCountByCreatedAtBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @EntityGraph(attributePaths = {"bot"})
+    List<BroadcastCampaign> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 
     @EntityGraph(attributePaths = {"bot"})
     List<BroadcastCampaign> findByStatusAndScheduledAtBefore(CampaignStatus status, LocalDateTime dateTime);

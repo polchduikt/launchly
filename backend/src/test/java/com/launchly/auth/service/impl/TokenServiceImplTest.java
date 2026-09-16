@@ -37,8 +37,8 @@ class TokenServiceImplTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(tokenService, "jwtSecret", secretKey);
-        ReflectionTestUtils.setField(tokenService, "accessTokenExpiration", 900000L); // 15 min
-        ReflectionTestUtils.setField(tokenService, "refreshTokenExpiration", 604800000L); // 7 days
+        ReflectionTestUtils.setField(tokenService, "accessTokenExpiration", 900000L);
+        ReflectionTestUtils.setField(tokenService, "refreshTokenExpiration", 604800000L);
 
         testUser = User.builder()
                 .email("test@example.com")

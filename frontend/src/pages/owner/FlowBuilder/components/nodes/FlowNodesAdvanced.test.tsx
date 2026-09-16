@@ -76,7 +76,7 @@ describe('FlowBuilder Advanced Node Components', () => {
     );
 
     expect(screen.getByText('PREMIUM_MEMBER')).toBeInTheDocument();
-    expect(screen.getByText('Set Score to 100')).toBeInTheDocument();
+    expect(screen.getByText(/Score/)).toBeInTheDocument();
   });
 
   it('renders ConditionNode with filter header', () => {

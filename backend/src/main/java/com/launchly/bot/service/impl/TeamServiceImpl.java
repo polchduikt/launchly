@@ -8,6 +8,7 @@ import com.launchly.bot.dto.response.TeamMemberResponse;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotInvitation;
 import com.launchly.bot.entity.BotMember;
+import com.launchly.bot.entity.WorkspaceRole;
 import com.launchly.bot.repository.BotInvitationRepository;
 import com.launchly.bot.repository.BotMemberRepository;
 import com.launchly.bot.repository.BotRepository;
@@ -17,8 +18,11 @@ import com.launchly.billing.entity.Subscription;
 import com.launchly.billing.entity.SubscriptionStatus;
 import com.launchly.billing.repository.PlanRepository;
 import com.launchly.billing.repository.SubscriptionRepository;
+import com.launchly.common.constant.CacheConstants;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +39,16 @@ public class TeamServiceImpl implements TeamService {
     private final BotInvitationRepository botInvitationRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final PlanRepository planRepository;
+    private final CacheManager cacheManager;
+
+    private void evictBotsCache(Long userId) {
+        if (userId != null && cacheManager != null) {
+            Cache cache = cacheManager.getCache(CacheConstants.BOTS);
+            if (cache != null) {
+                cache.evict(userId);
+            }
+        }
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -58,7 +72,7 @@ public class TeamServiceImpl implements TeamService {
                 bot.getUser().getEmail(),
                 bot.getUser().getName(),
                 bot.getUser().getAvatar(),
-                "Owner",
+                WorkspaceRole.OWNER.getValue(),
                 true,
                 true,
                 false,
@@ -121,13 +135,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     private int getRolePrivilege(String role) {
-        if (role == null) return 0;
-        return switch (role.toLowerCase()) {
-            case "admin" -> 3;
-            case "editor" -> 2;
-            case "viewer" -> 1;
-            default -> 0;
-        };
+        return WorkspaceRole.resolvePrivilege(role);
     }
 
     @Override
@@ -226,6 +234,7 @@ public class TeamServiceImpl implements TeamService {
                 firstUpdated = saved;
             }
         }
+        evictBotsCache(userId);
 
         return new TeamMemberResponse(
                 firstUpdated.getId(),
@@ -260,6 +269,7 @@ public class TeamServiceImpl implements TeamService {
         for (BotMember member : members) {
             botMemberRepository.delete(member);
         }
+        evictBotsCache(userId);
     }
 
     @Override
@@ -303,17 +313,33 @@ public class TeamServiceImpl implements TeamService {
         invite.setAccepted(true);
         botInvitationRepository.save(invite);
 
-        Optional<BotMember> existingMember = botMemberRepository.findByBotIdAndUserId(invite.getBot().getId(), user.getId());
-        if (existingMember.isEmpty()) {
-            BotMember member = BotMember.builder()
-                    .bot(invite.getBot())
-                    .user(user)
-                    .role(invite.getRole())
-                    .inboxSeat(invite.isInboxSeat())
-                    .billingPermission(invite.isBillingPermission())
-                    .build();
-            botMemberRepository.save(member);
+        User owner = invite.getBot().getUser();
+        List<Bot> ownerBots = botRepository.findAllByUserId(owner.getId());
+        if (ownerBots.isEmpty()) {
+            ownerBots = List.of(invite.getBot());
         }
+
+        for (Bot b : ownerBots) {
+            Optional<BotMember> existingMember = botMemberRepository.findByBotIdAndUserId(b.getId(), user.getId());
+            if (existingMember.isEmpty()) {
+                BotMember member = BotMember.builder()
+                        .bot(b)
+                        .user(user)
+                        .role(invite.getRole())
+                        .inboxSeat(invite.isInboxSeat())
+                        .billingPermission(invite.isBillingPermission())
+                        .build();
+                botMemberRepository.save(member);
+            } else {
+                BotMember member = existingMember.get();
+                member.setRole(invite.getRole());
+                member.setInboxSeat(invite.isInboxSeat());
+                member.setBillingPermission(invite.isBillingPermission());
+                botMemberRepository.save(member);
+            }
+        }
+
+        evictBotsCache(user.getId());
     }
 
     @Override
@@ -397,6 +423,9 @@ public class TeamServiceImpl implements TeamService {
                 }
             });
         }
+
+        evictBotsCache(oldOwner.getId());
+        evictBotsCache(newOwnerUserId);
     }
 
     @Override
@@ -418,6 +447,7 @@ public class TeamServiceImpl implements TeamService {
                 botMemberRepository.delete(member);
             }
         }
+        evictBotsCache(currentUserId);
     }
 
 }

@@ -18,7 +18,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -37,9 +38,10 @@ import java.util.List;
         @Index(name = "idx_conversations_bot_updated", columnList = "bot_id, updated_at DESC"),
         @Index(name = "idx_conversations_bot_status", columnList = "bot_id, status, updated_at DESC")
 })
-@Data
-@EqualsAndHashCode(callSuper = true, exclude = {"messages"})
-@ToString(exclude = {"messages"})
+@Getter
+@Setter
+@ToString(exclude = {"messages", "bot", "botUser"})
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

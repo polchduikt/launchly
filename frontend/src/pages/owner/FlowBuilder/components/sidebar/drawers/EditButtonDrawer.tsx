@@ -1,19 +1,28 @@
 import React, { useState } from 'react';
-import { X, Trash2, Send, Sparkles, Globe, CreditCard, Zap, GitFork, Shuffle, Clock, Play } from 'lucide-react';
+import { X, Trash2, Send, Globe, CreditCard, Zap, GitFork, Shuffle, Clock, Play, Hourglass, Calculator, Trophy, CalendarClock, Search, HeartHandshake, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { AiIcon } from '../../../../../../components/ui/AiIcon';
 import type { EditButtonDrawerProps } from '../../../../../../types/bot';
 import type { Node, Edge } from '@xyflow/react';
-import { NODE_TITLES } from '../../../../../../const/nodeDisplay';
+import { getNodeTitle } from '../../../../../../const/nodeDisplay';
 import { t } from '../../../../../../i18n/config';
 
 const mapNodeTypeToActionType = (nodeType?: string): string => {
   switch (nodeType) {
-    case 'MessageNode': return 'TELEGRAM';
-    case 'AiNode': return 'AI_STEP';
-    case 'ActionNode': return 'ACTIONS';
-    case 'ConditionNode': return 'CONDITION';
-    case 'RandomNode': return 'RANDOM';
-    case 'DelayNode': return 'DELAY';
-    case 'StartAutomationNode': return 'AUTOMATION';
+    case 'MessageNode': case 'MESSAGE': return 'TELEGRAM';
+    case 'AiNode': case 'AI': return 'AI_STEP';
+    case 'ActionNode': case 'ACTION': return 'ACTIONS';
+    case 'ConditionNode': case 'CONDITION': return 'CONDITION';
+    case 'SubscriptionCheckNode': case 'SUBSCRIPTION_CHECK': return 'SUBSCRIPTION_CHECK';
+    case 'ModerationNode': case 'MODERATION': return 'MODERATION';
+    case 'RandomNode': case 'RANDOMIZER': return 'RANDOM';
+    case 'DelayNode': case 'SMART_DELAY': return 'DELAY';
+    case 'StartAutomationNode': case 'START_AUTOMATION': return 'AUTOMATION';
+    case 'CooldownNode': case 'COOLDOWN': return 'COOLDOWN';
+    case 'MathNode': case 'MATH': return 'MATH';
+    case 'LeaderboardNode': case 'LEADERBOARD': return 'LEADERBOARD';
+    case 'QueryNode': case 'QUERY': return 'QUERY';
+    case 'InteractionNode': case 'INTERACTION': return 'INTERACTION';
+    case 'SchedulerNode': case 'SCHEDULER': return 'SCHEDULER';
     default: return 'TELEGRAM';
   }
 };
@@ -35,35 +44,35 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   const isStripeConnected = integrations.some((i: IntegrationResponse) => i.type === 'STRIPE' && i.active);
   const isPaypalConnected = integrations.some((i: IntegrationResponse) => i.type === 'PAYPAL' && i.active);
   const isPaymentConnected = isStripeConnected || isPaypalConnected;
-  const [label, setLabel] = useState('');
+  const [label, setLabel] = useState(button?.label || '');
   const [actionType, setActionType] = useState('');
   const [actionTarget, setActionTarget] = useState('');
   const [productName, setProductName] = useState('');
   const [price, setPrice] = useState('');
   const [currency, setCurrency] = useState('UAH');
 
-  const [prevButtonValue, setPrevButtonValue] = useState<string | null>(null);
-  if (button && button.value !== prevButtonValue) {
-    setPrevButtonValue(button.value);
-    setLabel(button.label || '');
-    const connectionEdge = (edges as Edge[]).find(
-      (e) => e.source === nodeId && e.sourceHandle === button.value
-    );
-    const targetNode = connectionEdge
-      ? (nodes as Node[]).find((n) => n.id === connectionEdge.target)
-      : null;
-      
-    let initialActionType = button.actionType || '';
-    if (!initialActionType && targetNode) {
-      initialActionType = mapNodeTypeToActionType(targetNode.type);
+  React.useEffect(() => {
+    if (button) {
+      setLabel(button.label || '');
+      const connectionEdge = (edges as Edge[]).find(
+        (e) => e.source === nodeId && e.sourceHandle === button.value
+      );
+      const targetNode = connectionEdge
+        ? (nodes as Node[]).find((n) => n.id === connectionEdge.target)
+        : null;
+
+      let initialActionType = button.actionType || '';
+      if (!initialActionType && targetNode) {
+        initialActionType = mapNodeTypeToActionType(targetNode.type);
+      }
+
+      setActionType(initialActionType);
+      setActionTarget(button.actionTarget || '');
+      setProductName(button.productName || '');
+      setPrice(button.price || '');
+      setCurrency(button.currency || 'UAH');
     }
-    
-    setActionType(initialActionType);
-    setActionTarget(button.actionTarget || '');
-    setProductName(button.productName || '');
-    setPrice(button.price || '');
-    setCurrency(button.currency || 'UAH');
-  }
+  }, [button?.value, button?.label, nodeId]);
 
   const typedEdges = edges as Edge[];
   const typedNodes = nodes as Node[];
@@ -80,7 +89,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   const getTargetNodeDisplayName = (tn: Node) => {
     const typedNodesFiltered = typedNodes.filter((n) => n.type === tn.type);
     const idx = typedNodesFiltered.findIndex((n) => n.id === tn.id);
-    const baseTitle = NODE_TITLES[tn.type || ''] || tn.type || '';
+    const baseTitle = getNodeTitle(tn.type);
     return idx !== -1 ? `${baseTitle} #${idx + 1}` : baseTitle;
   };
 
@@ -101,21 +110,50 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
   };
 
   const actionOptions = [
-    { type: 'TELEGRAM', label: t('editor.edit_button.action.telegram', 'Telegram'), icon: Send, color: 'text-sky-600 bg-sky-100' },
-    { type: 'AI_STEP', label: t('editor.edit_button.action.ai_step', 'AI step'), icon: Sparkles, color: 'text-indigo-600 bg-indigo-100' },
-    { type: 'URL', label: t('editor.edit_button.action.open_website'), icon: Globe, color: 'text-emerald-600 bg-emerald-100' },
-    { type: 'BUY', label: t('editor.edit_button.action.buy_button'), icon: CreditCard, color: 'text-amber-600 bg-amber-100', pro: true },
-    { type: 'ACTIONS', label: t('editor.edit_button.action.perform_actions', 'Perform actions'), icon: Zap, color: 'text-purple-600 bg-purple-100' },
-    { type: 'CONDITION', label: t('editor.edit_button.action.condition', 'Condition'), icon: GitFork, color: 'text-rose-600 bg-rose-100', pro: true },
-    { type: 'RANDOM', label: t('editor.edit_button.action.randomizer', 'Randomizer'), icon: Shuffle, color: 'text-violet-600 bg-violet-100', pro: true },
-    { type: 'DELAY', label: t('editor.edit_button.action.smart_delay', 'Smart delay'), icon: Clock, color: 'text-cyan-600 bg-cyan-100', pro: true },
-    { type: 'AUTOMATION', label: t('editor.edit_button.action.start_automation'), icon: Play, color: 'text-teal-600 bg-teal-100' },
+    { type: 'TELEGRAM', label: t('editor.edit_button.action.telegram', 'Telegram'), icon: Send, blockType: 'MESSAGE', color: 'text-sky-600 bg-sky-100' },
+    { type: 'AI_STEP', label: t('editor.edit_button.action.ai_step', 'Крок ШІ'), icon: AiIcon, blockType: 'AI', color: 'text-emerald-700 bg-emerald-100' },
+    { type: 'URL', label: t('editor.edit_button.action.open_website', 'Відкрити веб-сайт'), icon: Globe, blockType: 'API_CALL', color: 'text-indigo-600 bg-indigo-100' },
+    { type: 'BUY', label: t('editor.edit_button.action.buy_button', 'Кнопка купівлі'), icon: CreditCard, color: 'text-amber-600 bg-amber-100', pro: true },
+    { type: 'ACTIONS', label: t('editor.edit_button.action.perform_actions', 'Виконати дії'), icon: Zap, blockType: 'ACTION', color: 'text-amber-700 bg-amber-100' },
+    { type: 'CONDITION', label: t('editor.edit_button.action.condition', 'Умова'), icon: GitFork, blockType: 'CONDITION', color: 'text-purple-700 bg-purple-100', pro: true },
+    { type: 'SUBSCRIPTION_CHECK', label: t('flow_block.SUBSCRIPTION_CHECK', 'Перевірка підписки'), icon: ShieldCheck, blockType: 'SUBSCRIPTION_CHECK', color: 'text-teal-700 bg-teal-100' },
+    { type: 'MODERATION', label: t('flow_block.MODERATION', 'Модерація контенту'), icon: ShieldAlert, blockType: 'MODERATION', color: 'text-rose-700 bg-rose-100' },
+    { type: 'RANDOM', label: t('editor.edit_button.action.randomizer', 'Рандомізатор'), icon: Shuffle, blockType: 'RANDOMIZER', color: 'text-purple-700 bg-purple-100', pro: true },
+    { type: 'DELAY', label: t('editor.edit_button.action.smart_delay', 'Розумна затримка'), icon: Clock, blockType: 'SMART_DELAY', color: 'text-rose-600 bg-rose-100', pro: true },
+    { type: 'COOLDOWN', label: t('editor.edit_button.action.cooldown', 'Таймаут'), icon: Hourglass, blockType: 'COOLDOWN', color: 'text-amber-700 bg-amber-100' },
+    { type: 'MATH', label: t('editor.edit_button.action.math', 'Обчислення'), icon: Calculator, blockType: 'MATH', color: 'text-cyan-700 bg-cyan-100' },
+    { type: 'LEADERBOARD', label: t('editor.edit_button.action.leaderboard', 'Рейтинг'), icon: Trophy, blockType: 'LEADERBOARD', color: 'text-fuchsia-700 bg-fuchsia-100' },
+    { type: 'QUERY', label: t('editor.edit_button.action.query', 'Запит даних'), icon: Search, blockType: 'QUERY', color: 'text-indigo-700 bg-indigo-100' },
+    { type: 'INTERACTION', label: t('editor.edit_button.action.interaction', 'Взаємодія'), icon: HeartHandshake, blockType: 'INTERACTION', color: 'text-rose-700 bg-rose-100' },
+    { type: 'SCHEDULER', label: t('editor.edit_button.action.scheduler', 'Планувальник'), icon: CalendarClock, blockType: 'SCHEDULER', color: 'text-emerald-700 bg-emerald-100' },
+    { type: 'AUTOMATION', label: t('editor.edit_button.action.start_automation', 'Запустити іншу автоматизацію'), icon: Play, blockType: 'START_AUTOMATION', color: 'text-lime-700 bg-lime-100' },
   ];
 
-
+  const actionCategoryGroups = [
+    {
+      id: 'messaging',
+      title: t('editor.edit_button.cat_messaging', 'Повідомлення'),
+      types: ['TELEGRAM', 'AI_STEP'],
+    },
+    {
+      id: 'logic',
+      title: t('editor.edit_button.cat_logic', 'Логіка та перевірки'),
+      types: ['CONDITION', 'SUBSCRIPTION_CHECK', 'MODERATION', 'RANDOM', 'DELAY', 'COOLDOWN', 'SCHEDULER'],
+    },
+    {
+      id: 'operations',
+      title: t('editor.edit_button.cat_operations', 'Операції та рейтинг'),
+      types: ['ACTIONS', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION'],
+    },
+    {
+      id: 'integrations',
+      title: t('editor.edit_button.cat_integrations', 'Інтеграції та покупки'),
+      types: ['URL', 'BUY', 'AUTOMATION'],
+    },
+  ];
 
   return (
-    <div className="h-full flex flex-col justify-between bg-[#F2EBDD] font-['JetBrains_Mono',monospace] w-full">
+    <div className="h-full flex flex-col justify-between bg-[#F2EBDD] font-['JetBrains_Mono',monospace] w-full overflow-hidden">
       <div className="px-5 py-4 border-b-2 border-[#0A0A0A] flex justify-between items-center bg-[#F2EBDD] select-none shrink-0">
         <h3 className="font-['Anybody',sans-serif] font-black text-xs text-[#0A0A0A] uppercase tracking-wider">{t('editor.edit_button.title')}</h3>
         <button onClick={onClose} className="text-[#0A0A0A]/55 hover:text-[#0A0A0A] hover:bg-white p-1.5 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-[#0A0A0A]">
@@ -123,9 +161,9 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 pb-24 space-y-5 custom-scrollbar flex flex-col justify-between">
-        <div className="space-y-5">
-          <div>
+      <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className="flex-1 flex flex-col p-5 pb-3 space-y-4 overflow-y-auto custom-scrollbar min-h-0">
+          <div className="shrink-0">
             <label htmlFor="btnLabel" className="block text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mb-1.5">
               {t('editor.edit_button.button_title')}
             </label>
@@ -135,6 +173,12 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                 type="text"
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  }
+                }}
                 placeholder={t('editor.edit_button.title_placeholder')}
                 maxLength={25}
                 className="w-full px-4 py-2.5 pr-12 rounded-xl border-2 border-[#0A0A0A] focus:outline-none focus:ring-2 focus:ring-[#0A0A0A]/15 text-xs font-bold transition-all bg-white text-[#0A0A0A]"
@@ -146,8 +190,8 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
             </div>
           </div>
 
-          <div>
-            <label className="block text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mb-2">
+          <div className="flex-1 flex flex-col min-h-0">
+            <label className="block text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mb-2 shrink-0">
               {t('editor.edit_button.when_pressed')}
             </label>
             {targetNode ? (() => {
@@ -157,7 +201,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
               const optLabel = matchedOpt?.label || t('step_option.MESSAGE.label');
               const targetNodeTitle = getTargetNodeDisplayName(targetNode);
               return (
-                <div className="flex items-center justify-between p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl animate-fade-in select-none">
+                <div className="flex items-center justify-between p-4 bg-white border-2 border-[#0A0A0A] rounded-2xl animate-fade-in select-none shrink-0">
                   <div className="flex items-center gap-3">
                     <span className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${optColorClass}`}>
                       <IconComponent size={14} />
@@ -186,33 +230,49 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                 </div>
               );
             })() : (
-              <div className="space-y-1 bg-white border-2 border-[#0A0A0A] rounded-2xl p-1.5">
-                {actionOptions.map((opt) => {
-                  const IconComponent = opt.icon;
-                  const isSelected = actionType === opt.type;
+              <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-2.5 flex-1 min-h-0 overflow-y-auto custom-scrollbar flex flex-col gap-3">
+                {actionCategoryGroups.map((group) => {
+                  const groupItems = actionOptions.filter((opt) => group.types.includes(opt.type));
+                  if (groupItems.length === 0) return null;
                   return (
-                    <button
-                      key={opt.type}
-                      type="button"
-                      onClick={() => setActionType(opt.type)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-all border cursor-pointer select-none group ${
-                        isSelected
-                          ? 'border-[#0A0A0A] bg-amber-100 text-[#0A0A0A] font-black'
-                          : 'border-transparent hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] hover:border-[#0A0A0A]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${opt.color}`}>
-                          <IconComponent size={13} />
-                        </span>
-                        <span className="text-[11px] font-bold">{opt.label}</span>
+                    <div key={group.id} className="space-y-1">
+                      <span className="text-[9px] font-black text-[#0A0A0A]/50 uppercase tracking-wider px-1 font-['Anybody',sans-serif]">
+                        {group.title}
+                      </span>
+                      <div className="space-y-1">
+                        {groupItems.map((opt) => {
+                          const IconComponent = opt.icon;
+                          const isSelected = actionType === opt.type;
+                          return (
+                            <button
+                              key={opt.type}
+                              type="button"
+                              onClick={() => setActionType(opt.type)}
+                              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-all border cursor-pointer select-none group ${
+                                isSelected
+                                  ? 'border-[#0A0A0A] bg-amber-100 text-[#0A0A0A] font-black'
+                                  : 'border-transparent hover:bg-[#0A0A0A] hover:text-[#F2EBDD] text-[#0A0A0A] hover:border-[#0A0A0A]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span
+                                  data-block-type={opt.blockType}
+                                  className={`node-icon-badge w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-[#0A0A0A] ${opt.color}`}
+                                >
+                                  <IconComponent size={13} />
+                                </span>
+                                <span className="text-[11px] font-bold">{opt.label}</span>
+                              </div>
+                              {opt.pro && (
+                                <span className="text-[8px] font-black bg-indigo-100 text-indigo-700 border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                  PRO
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
-                      {opt.pro && (
-                        <span className="text-[8px] font-black bg-indigo-100 text-indigo-700 border border-[#0A0A0A] px-1.5 py-0.5 rounded uppercase tracking-wider">
-                          PRO
-                        </span>
-                      )}
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -220,7 +280,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
           </div>
 
           {actionType === 'URL' && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in shrink-0">
               <label htmlFor="btnUrl" className="block text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mb-1.5">
                 {t('editor.edit_button.url_link')}
               </label>
@@ -237,7 +297,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
 
           {actionType === 'BUY' && (
             !isPaymentConnected ? (
-              <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-5 text-center space-y-4 animate-fade-in select-none">
+              <div className="bg-white border-2 border-[#0A0A0A] rounded-2xl p-5 text-center space-y-4 animate-fade-in select-none shrink-0">
                 <p className="text-xs text-[#0A0A0A]/70 leading-relaxed font-bold">
                   {t('editor.edit_button.stripe_paypal_error')}
                 </p>
@@ -252,7 +312,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
                 </button>
               </div>
             ) : (
-              <div className="animate-fade-in space-y-4">
+              <div className="animate-fade-in space-y-4 shrink-0">
                 <div>
                   <label htmlFor="prodName" className="block text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider mb-1.5">
                     {t('editor.edit_button.product_name')}
@@ -301,8 +361,8 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
           )}
         </div>
 
-        {actionType === 'BUY' && !isPaymentConnected ? (
-          <div className="flex items-center justify-center pt-4 border-t-2 border-[#0A0A0A]/15 select-none shrink-0 mt-6">
+        <div className="p-4 bg-[#F2EBDD] border-t-2 border-[#0A0A0A]/15 shrink-0 select-none">
+          {actionType === 'BUY' && !isPaymentConnected ? (
             <button
               type="button"
               onClick={() => {
@@ -314,43 +374,43 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
               <Trash2 size={14} className="text-rose-500" />
               <span>{t('editor.edit_button.remove')}</span>
             </button>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between pt-4 border-t-2 border-[#0A0A0A]/15 select-none shrink-0 mt-6">
-            <button
-              type="button"
-              onClick={() => {
-                onRemove();
-                onClose();
-              }}
-              className="flex items-center justify-center gap-1 px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 text-[11px] font-black rounded-xl transition-all border-2 border-rose-300 cursor-pointer"
-            >
-              <Trash2 size={13} />
-              <span>{t('editor.edit_button.remove')}</span>
-            </button>
-
-            <div className="flex gap-2">
+          ) : (
+            <div className="flex items-center justify-between">
               <button
                 type="button"
-                onClick={onClose}
-                className="px-3.5 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-[#0A0A0A] text-[11px] font-black rounded-xl transition-all cursor-pointer"
+                onClick={() => {
+                  onRemove();
+                  onClose();
+                }}
+                className="flex items-center justify-center gap-1 px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 text-[11px] font-black rounded-xl transition-all border-2 border-rose-300 cursor-pointer"
               >
-                {t('editor.edit_button.cancel')}
+                <Trash2 size={13} />
+                <span>{t('editor.edit_button.remove')}</span>
               </button>
-              <button
-                 type="submit"
-                 disabled={
-                   !label.trim() ||
-                   (actionType === 'URL' && !actionTarget.trim()) ||
-                   (actionType === 'BUY' && (!productName.trim() || !price.trim()))
-                 }
-                 className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 disabled:opacity-50 text-[#F2EBDD] text-[11px] font-black rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed border-2 border-[#0A0A0A]"
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-3.5 py-2 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-[#0A0A0A] text-[#0A0A0A] text-[11px] font-black rounded-xl transition-all cursor-pointer"
+                >
+                  {t('editor.edit_button.cancel')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={
+                    !label.trim() ||
+                    (actionType === 'URL' && !actionTarget.trim()) ||
+                    (actionType === 'BUY' && (!productName.trim() || !price.trim()))
+                  }
+                  className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 disabled:opacity-50 text-[#F2EBDD] text-[11px] font-black rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed border-2 border-[#0A0A0A]"
                 >
                   {t('editor.edit_button.done')}
                 </button>
-             </div>
-           </div>
-        )}
+              </div>
+            </div>
+          )}
+        </div>
       </form>
     </div>
   );

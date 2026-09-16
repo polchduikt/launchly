@@ -14,6 +14,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,9 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class MailchimpServiceImpl implements MailchimpService {
+
+    private static final String MAILCHIMP_API_URL_TEMPLATE = "https://%s.api.mailchimp.com/3.0/lists/%s/members/%s";
+    private static final int MD5_HEX_LENGTH = 32;
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -40,7 +44,7 @@ public class MailchimpServiceImpl implements MailchimpService {
                 if (combinedTags == null) {
                     combinedTags = config.tags();
                 } else {
-                    combinedTags = new java.util.ArrayList<>(combinedTags);
+                    combinedTags = new ArrayList<>(combinedTags);
                     for (String t : config.tags()) {
                         if (!combinedTags.contains(t)) {
                             combinedTags.add(t);
@@ -65,7 +69,7 @@ public class MailchimpServiceImpl implements MailchimpService {
         String dc = resolveDataCenter(apiKey, serverPrefix);
         String md5Hash = calculateMd5(trimmedEmail);
 
-        String url = String.format("https://%s.api.mailchimp.com/3.0/lists/%s/members/%s", dc, listId.trim(), md5Hash);
+        String url = String.format(MAILCHIMP_API_URL_TEMPLATE, dc, listId.trim(), md5Hash);
 
         try {
             Map<String, Object> body = new HashMap<>();
@@ -128,19 +132,19 @@ public class MailchimpServiceImpl implements MailchimpService {
         return "us1";
     }
 
-    @SuppressWarnings("java:S4790") // Mailchimp API protocol explicitly mandates MD5 email hashing
+    @SuppressWarnings("java:S4790")
     private String calculateMd5(String input) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] messageDigest = md.digest(input.getBytes(StandardCharsets.UTF_8));
             BigInteger no = new BigInteger(1, messageDigest);
             StringBuilder hashtext = new StringBuilder(no.toString(16));
-            while (hashtext.length() < 32) {
+            while (hashtext.length() < MD5_HEX_LENGTH) {
                 hashtext.insert(0, "0");
             }
             return hashtext.toString();
         } catch (Exception e) {
-            return input;
+            throw new RuntimeException("MD5 hashing failed", e);
         }
     }
 }

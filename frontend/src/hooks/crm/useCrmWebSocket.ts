@@ -51,18 +51,18 @@ export const useCrmWebSocket = (botId: number) => {
           if (body.conversationId) {
             queryClient.invalidateQueries({ queryKey: ['messages', body.conversationId] });
           }
-          queryClient.invalidateQueries({ queryKey: ['conversations', botId] });
+          queryClient.invalidateQueries({ queryKey: ['conversations'] });
         } catch (e) {
           console.error('Failed to parse websocket message', e);
         }
       });
 
       client.subscribe(`/topic/crm/${botId}/leads`, () => {
-        queryClient.invalidateQueries({ queryKey: ['leads', botId] });
+        queryClient.invalidateQueries({ queryKey: ['leads'] });
       });
 
       client.subscribe(`/topic/crm/${botId}/orders`, () => {
-        queryClient.invalidateQueries({ queryKey: ['orders', botId] });
+        queryClient.invalidateQueries({ queryKey: ['orders'] });
       });
     };
 

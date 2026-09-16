@@ -8,8 +8,49 @@ import {
   Shuffle,
   StickyNote,
   Power,
-  SquareArrowRight
+  SquareArrowRight,
+  Terminal,
+  Calculator,
+  Trophy,
+  Search,
+  HeartHandshake,
+  ShieldCheck,
+  ShieldAlert,
+  UserCheck,
 } from 'lucide-react';
+
+export const STEP_OPTION_GROUPS = [
+  {
+    id: 'messaging',
+    titleKey: 'flow_builder.cat_messaging',
+    defaultTitle: 'Повідомлення',
+    types: ['MESSAGE'],
+  },
+  {
+    id: 'logic',
+    titleKey: 'flow_builder.cat_logic',
+    defaultTitle: 'Логіка та перевірки',
+    types: ['CONDITION', 'SUBSCRIPTION_CHECK', 'MODERATION', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN'],
+  },
+  {
+    id: 'operations',
+    titleKey: 'flow_builder.cat_operations',
+    defaultTitle: 'Операції та рейтинг',
+    types: ['ACTION', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION'],
+  },
+  {
+    id: 'integrations',
+    titleKey: 'flow_builder.cat_integrations',
+    defaultTitle: 'Інтеграції',
+    types: ['API_CALL', 'START_AUTOMATION'],
+  },
+  {
+    id: 'utilities',
+    titleKey: 'flow_builder.cat_utilities',
+    defaultTitle: 'Службові',
+    types: ['COMMAND', 'JOIN_REQUEST', 'COMMENT', 'END'],
+  },
+];
 
 export const STEP_OPTIONS = [
   {
@@ -27,10 +68,59 @@ export const STEP_OPTIONS = [
     color: 'text-purple-600 bg-purple-50 border-purple-100',
   },
   {
+    type: 'SUBSCRIPTION_CHECK',
+    get label() { return t('step_option.SUBSCRIPTION_CHECK.label', 'Subscription Check'); },
+    get description() { return t('step_option.SUBSCRIPTION_CHECK.desc', 'Check membership in channels/sponsors'); },
+    icon: ShieldCheck,
+    color: 'text-teal-600 bg-teal-50 border-teal-100',
+  },
+  {
+    type: 'MODERATION',
+    get label() { return t('step_option.MODERATION.label', 'Content Moderation'); },
+    get description() { return t('step_option.MODERATION.desc', 'Filter stop-words, links and enforce media modes'); },
+    icon: ShieldAlert,
+    color: 'text-rose-600 bg-rose-50 border-rose-100',
+  },
+  {
     type: 'ACTION',
     get label() { return t('step_option.ACTION.label'); },
     get description() { return t('step_option.ACTION.desc'); },
     icon: Sliders,
+    color: 'text-amber-600 bg-amber-50 border-amber-100',
+  },
+  {
+    type: 'MATH',
+    get label() { return t('step_option.MATH.label', 'Calculation'); },
+    get description() { return t('step_option.MATH.desc', 'Random or static points calculation and score management'); },
+    icon: Calculator,
+    color: 'text-cyan-600 bg-cyan-50 border-cyan-100',
+  },
+  {
+    type: 'LEADERBOARD',
+    get label() { return t('step_option.LEADERBOARD.label', 'Leaderboard'); },
+    get description() { return t('step_option.LEADERBOARD.desc', 'Rank users and generate leaderboard list text'); },
+    icon: Trophy,
+    color: 'text-fuchsia-600 bg-fuchsia-50 border-fuchsia-100',
+  },
+  {
+    type: 'QUERY',
+    get label() { return t('step_option.QUERY.label', 'Data Query'); },
+    get description() { return t('step_option.QUERY.desc', 'Search and filter contacts or catalog items'); },
+    icon: Search,
+    color: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+  },
+  {
+    type: 'INTERACTION',
+    get label() { return t('step_option.INTERACTION.label', 'Interaction'); },
+    get description() { return t('step_option.INTERACTION.desc', 'Record user reactions and check mutual matches'); },
+    icon: HeartHandshake,
+    color: 'text-rose-600 bg-rose-50 border-rose-100',
+  },
+  {
+    type: 'COOLDOWN',
+    get label() { return t('step_option.COOLDOWN.label', 'Cooldown'); },
+    get description() { return t('step_option.COOLDOWN.desc', 'Limit action frequency and send timeout warning'); },
+    icon: Clock,
     color: 'text-amber-600 bg-amber-50 border-amber-100',
   },
   {
@@ -60,6 +150,20 @@ export const STEP_OPTIONS = [
     get description() { return t('step_option.START_AUTOMATION.desc'); },
     icon: SquareArrowRight,
     color: 'text-lime-600 bg-lime-50 border-lime-100',
+  },
+  {
+    type: 'COMMAND',
+    get label() { return t('step_option.COMMAND.label'); },
+    get description() { return t('step_option.COMMAND.desc'); },
+    icon: Terminal,
+    color: 'text-teal-600 bg-teal-50 border-teal-100',
+  },
+  {
+    type: 'JOIN_REQUEST',
+    get label() { return t('step_option.JOIN_REQUEST.label', 'Join Request'); },
+    get description() { return t('step_option.JOIN_REQUEST.desc', 'Auto-approve channel join requests & start flow'); },
+    icon: UserCheck,
+    color: 'text-amber-600 bg-amber-50 border-amber-100',
   },
   {
     type: 'COMMENT',

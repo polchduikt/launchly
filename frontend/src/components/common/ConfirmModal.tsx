@@ -1,16 +1,20 @@
 import React from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { useTranslation } from '../../i18n/config';
 
-interface ConfirmModalProps {
+export interface ConfirmModalProps {
   isOpen: boolean;
   title: string;
   message: string;
   confirmText?: string;
+  confirmLabel?: string;
   cancelText?: string;
+  cancelLabel?: string;
   isDanger?: boolean;
+  variant?: 'danger' | 'warning' | 'default';
   onConfirm: () => void;
-  onClose: () => void;
+  onClose?: () => void;
+  onCancel?: () => void;
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -18,57 +22,74 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   title,
   message,
   confirmText,
+  confirmLabel,
   cancelText,
-  isDanger = true,
+  cancelLabel,
+  isDanger,
+  variant,
   onConfirm,
   onClose,
+  onCancel,
 }) => {
   const { t } = useTranslation();
   if (!isOpen) return null;
 
+  const handleClose = onCancel || onClose || (() => {});
+  const effectiveVariant = variant || (isDanger === false ? 'default' : 'danger');
+
+  const confirmBtnClass =
+    effectiveVariant === 'danger'
+      ? 'border border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800'
+      : effectiveVariant === 'warning'
+      ? 'border border-amber-200 bg-amber-100 hover:bg-amber-200 text-[#0A0A0A]'
+      : 'border border-[#0A0A0A] bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white';
+
+  const handleConfirm = () => {
+    onConfirm();
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/40 font-['JetBrains_Mono',monospace]">
-      <div className="bg-white border-2 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] w-full max-w-md p-6 space-y-5 animate-in fade-in zoom-in-95 duration-150 rounded-xl">
-        
-        <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-3">
-          <div className="flex items-center gap-2 font-black text-sm uppercase text-[#0A0A0A]">
-            <AlertTriangle className={isDanger ? 'text-rose-600' : 'text-amber-500'} size={18} />
-            <span>{title}</span>
+    <div
+      className="fixed inset-0 z-[9999] flex items-start justify-center pt-16 px-4 bg-slate-500/30 dark:bg-black/60 backdrop-blur-[1px]"
+      onClick={handleClose}
+    >
+      <div
+        className="bg-white dark:bg-[#18181B] rounded-3xl shadow-2xl border border-slate-200/80 dark:border-[#27272A] w-full max-w-md p-6 overflow-hidden animate-fade-in-down cursor-default"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-2xl border border-slate-200 dark:border-[#27272A] bg-white dark:bg-[#121214] flex items-center justify-center shrink-0">
+            <AlertTriangle size={22} className="text-[#0A0A0A] dark:text-rose-400" strokeWidth={1.8} />
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-slate-100 border border-[#0A0A0A] text-[#0A0A0A] transition-colors cursor-pointer"
-          >
-            <X size={16} />
-          </button>
+          <div className="flex-1 min-w-0 pt-0.5">
+            <h3 className="font-['Anybody',sans-serif] text-base font-black text-[#0A0A0A] dark:text-[#E4E4E7] uppercase tracking-wide leading-snug">
+              {title}
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-[#A1A1AA] font-bold mt-1.5 leading-relaxed">
+              {message}
+            </p>
+          </div>
         </div>
 
-        <p className="text-xs font-bold text-slate-700 leading-relaxed">
-          {message}
-        </p>
+        <div className="h-px bg-slate-200 dark:bg-[#27272A] my-5" />
 
-        <div className="flex items-center justify-end gap-3 pt-2">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3">
           <button
-            onClick={onClose}
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 border-2 border-[#0A0A0A] text-xs font-black uppercase text-[#0A0A0A] cursor-pointer"
+            onClick={handleClose}
+            className="w-full sm:w-auto px-5 py-2.5 text-xs font-bold text-[#0A0A0A] dark:text-[#E4E4E7] bg-white dark:bg-[#18181B] hover:bg-[#0A0A0A] hover:text-white dark:hover:bg-white dark:hover:text-[#0A0A0A] border border-slate-200 dark:border-[#27272A] rounded-2xl transition-all cursor-pointer shadow-sm text-center"
           >
-            {cancelText || t('common.cancel', 'Скасувати')}
+            {cancelLabel || cancelText || t('common.cancel', 'Скасувати')}
           </button>
           <button
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
-            className={`px-5 py-2 bg-indigo-600 border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase text-white cursor-pointer ${
-              isDanger
-                ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-            }`}
+            onClick={handleConfirm}
+            className={`w-full sm:w-auto px-5 py-2.5 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm text-center ${confirmBtnClass}`}
           >
-            {confirmText || t('common.confirm', 'Підтвердити')}
+            {confirmLabel || confirmText || t('common.confirm', 'Підтвердити')}
           </button>
         </div>
-
       </div>
     </div>
   );

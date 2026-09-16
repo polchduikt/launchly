@@ -10,26 +10,36 @@ vi.mock('../../../i18n/config', () => ({
   getLanguage: () => 'uk',
 }));
 
-vi.mock('../../../hooks/ai/useAiAssistant', () => ({
-  useAiAssistant: () => ({
-    inputValue: '',
-    setInputValue: vi.fn(),
-    isUsageLoading: false,
-    usage: { used: 10, limit: 100 },
-    isLimitReached: false,
-    chatMutation: { isPending: false },
-    messagesEndRef: { current: null },
-    refetchUsage: vi.fn(),
-    handleSend: vi.fn(),
-    handleKeyDown: vi.fn(),
-    handleQuickQuestion: vi.fn(),
+vi.mock('../../../hooks/ai/useAiQueries', () => ({
+  useAiSessionsQuery: () => ({
+    data: [{ id: 1, title: 'Test Session', createdAt: '2026-09-01T00:00:00', updatedAt: '2026-09-01T00:00:00' }],
+    isLoading: false,
+  }),
+  useAiSessionDetailsQuery: () => ({
+    data: { id: 1, title: 'Test Session', createdAt: '2026-09-01T00:00:00', updatedAt: '2026-09-01T00:00:00', messages: [] },
+    isLoading: false,
+  }),
+  useCreateAiSessionMutation: () => ({
+    mutateAsync: vi.fn().mockResolvedValue({ id: 2, title: 'New chat' }),
+    isPending: false,
+  }),
+  useDeleteAiSessionMutation: () => ({
+    mutateAsync: vi.fn().mockResolvedValue(undefined),
+    isPending: false,
+  }),
+  useAiChatMutation: () => ({
+    mutateAsync: vi.fn().mockResolvedValue({ reply: 'AI response' }),
+    isPending: false,
+  }),
+  useAiUsageQuery: () => ({
+    data: { tokensUsed: 10, tokenLimit: 100, remainingPercentage: 90 },
+    isLoading: false,
+    refetch: vi.fn(),
   }),
 }));
 
 vi.mock('../../../store/useAiStore', () => ({
   useAiStore: () => ({
-    messages: [],
-    clearMessages: vi.fn(),
     setActiveTab: vi.fn(),
     setOnGenerate: vi.fn(),
     setIsOpen: vi.fn(),
@@ -54,6 +64,6 @@ describe('AiPage', () => {
     render(<AiPage />, { wrapper: Wrapper });
 
     expect(screen.getByTestId('dashboard-layout')).toBeInTheDocument();
-    expect(screen.getByText('Launchly AI')).toBeInTheDocument();
+    expect(screen.getAllByText('LAUNCHLY AI').length).toBeGreaterThanOrEqual(1);
   });
 });

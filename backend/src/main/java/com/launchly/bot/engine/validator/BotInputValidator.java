@@ -12,55 +12,98 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 @RequiredArgsConstructor
 public class BotInputValidator {
 
+    public static final long MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024L;
+    public static final int MAX_TEXT_LENGTH = 2000;
+    public static final int MAX_EMAIL_LENGTH = 254;
+
+    private static final String MSG_KEY_IMAGE = "bot.validation.image";
+    private static final String MSG_KEY_EMAIL = "bot.validation.email";
+    private static final String MSG_KEY_PHONE = "bot.validation.phone";
+    private static final String MSG_KEY_NUMBER = "bot.validation.number";
+    private static final String MSG_KEY_INVALID_FORMAT = "bot.validation.invalid_format";
+    private static final String MSG_KEY_IMAGE_SIZE_LIMIT = "bot.validation.image_size_limit";
+    private static final String MSG_KEY_IMAGE_INVALID_FORMAT = "bot.validation.image_invalid_format";
+    private static final String MSG_KEY_TEXT_LENGTH_LIMIT = "bot.validation.text_length_limit";
+
     private final MessageUtils messageUtils;
 
-    private static final String NUMBER_REGEX = "-?\\d+(\\.\\d+)?";
-    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@(.+)$";
-    private static final String PHONE_REGEX = "^\\+?[0-9\\s\\-\\(\\)]+$";
-
     public boolean validate(String text, String replyType) {
-        if (text == null || text.trim().isEmpty()) {
+        ValidationType validationType = ValidationType.fromString(replyType);
+        if (validationType == ValidationType.IMAGE || validationType == ValidationType.PHOTO) {
             return false;
         }
-        if ("Number".equalsIgnoreCase(replyType)) {
-            return text.matches(NUMBER_REGEX);
+        if (text == null) {
+            return false;
         }
-        if ("Email".equalsIgnoreCase(replyType)) {
-            return text.matches(EMAIL_REGEX);
+        String trimmed = text.trim();
+        if (trimmed.isEmpty() || trimmed.length() > MAX_TEXT_LENGTH) {
+            return false;
         }
-        if ("Phone".equalsIgnoreCase(replyType)) {
-            return text.matches(PHONE_REGEX);
+
+        if (validationType == ValidationType.NUMBER) {
+            if (validationType.getPattern() != null && !validationType.getPattern().matcher(trimmed).matches()) {
+                return false;
+            }
+            try {
+                double val = Double.parseDouble(trimmed);
+                return !Double.isNaN(val) && !Double.isInfinite(val);
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        if (validationType == ValidationType.EMAIL) {
+            if (trimmed.length() > MAX_EMAIL_LENGTH) {
+                return false;
+            }
+            return validationType.getPattern() != null && validationType.getPattern().matcher(trimmed).matches();
+        }
+
+        if (validationType.getPattern() != null) {
+            return validationType.getPattern().matcher(trimmed).matches();
         }
         return true;
     }
 
     public String getValidationErrorMessage(String replyType) {
-        if ("Email".equalsIgnoreCase(replyType)) {
-            return messageUtils.getMessageWithDefault(
-                    "bot.validation.email",
-                    "Please enter a valid email address (e.g., name@example.com).");
+        ValidationType validationType = ValidationType.fromString(replyType);
+        switch (validationType) {
+            case IMAGE:
+            case PHOTO:
+                return messageUtils.getMessage(MSG_KEY_IMAGE);
+            case EMAIL:
+                return messageUtils.getMessage(MSG_KEY_EMAIL);
+            case PHONE:
+                return messageUtils.getMessage(MSG_KEY_PHONE);
+            case NUMBER:
+                return messageUtils.getMessage(MSG_KEY_NUMBER);
+            default:
+                return messageUtils.getMessage(MSG_KEY_INVALID_FORMAT);
         }
-        if ("Phone".equalsIgnoreCase(replyType)) {
-            return messageUtils.getMessageWithDefault(
-                    "bot.validation.phone",
-                    "Please enter a valid phone number (e.g., +380123456789).");
-        }
-        if ("Number".equalsIgnoreCase(replyType)) {
-            return messageUtils.getMessageWithDefault(
-                    "bot.validation.number",
-                    "Please enter a valid number.");
-        }
-        return messageUtils.getMessageWithDefault(
-                "bot.validation.invalid_format",
-                "Invalid format. Please enter valid data.");
+    }
+
+    public String getImageSizeErrorMessage() {
+        return messageUtils.getMessage(MSG_KEY_IMAGE_SIZE_LIMIT);
+    }
+
+    public String getImageFormatErrorMessage() {
+        return messageUtils.getMessage(MSG_KEY_IMAGE_INVALID_FORMAT);
+    }
+
+    public String getTextLengthErrorMessage() {
+        return messageUtils.getMessage(MSG_KEY_TEXT_LENGTH_LIMIT);
     }
 
     public void sendValidationErrorMessage(String chatId, String replyType, TelegramClient client) {
         String msgText = getValidationErrorMessage(replyType);
+        sendCustomErrorMessage(chatId, msgText, client);
+    }
+
+    public void sendCustomErrorMessage(String chatId, String messageText, TelegramClient client) {
         try {
             SendMessage message = SendMessage.builder()
                     .chatId(chatId)
-                    .text(msgText)
+                    .text(messageText)
                     .build();
             client.execute(message);
         } catch (Exception e) {

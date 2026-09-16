@@ -11,7 +11,10 @@ import java.time.LocalDateTime;
     @Index(name = "idx_user_audit_logs_user_date", columnList = "user_id, created_at"),
     @Index(name = "idx_audit_logs_user_created", columnList = "user_id, created_at DESC")
 })
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"user"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,6 +22,7 @@ public class UserAuditLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

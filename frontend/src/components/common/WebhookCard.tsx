@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { webhookSchema } from '../../schemas/integration.schema';
 import { t } from '../../i18n/config';
@@ -35,7 +35,7 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
     handleSubmit,
     reset,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<WebhookFields>({
     resolver: zodResolver(webhookSchema),
@@ -89,7 +89,7 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
     }
   };
 
-  const activeWebhookEvents = watch('events') || [];
+  const activeWebhookEvents = useWatch({ control, name: 'events' }) || [];
 
   const handleEventCheckboxChange = (event: 'ORDER_CREATED' | 'LEAD_CREATED', checked: boolean) => {
     if (checked) {
@@ -233,7 +233,7 @@ export const WebhookCard: React.FC<WebhookCardProps> = ({ botId, integration }) 
                 type="button"
                 onClick={handleDelete}
                 disabled={deleteMut.isPending}
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl transition-all border border-rose-100 cursor-pointer ml-auto"
+                className="flex items-center gap-1.5 px-4 py-2.5 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl transition-all cursor-pointer ml-auto"
               >
                 <Trash2 size={14} />
                 <span>{t('settings.integrations.webhook.btn_remove')}</span>

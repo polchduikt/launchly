@@ -50,7 +50,7 @@ export interface HotmartConfig {
 export interface StripeConfig {
   connected?: boolean;
   apiKey?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface PaypalConfig {
@@ -62,8 +62,8 @@ export interface PaypalConfig {
   notifyMessenger?: boolean;
   notifyEmail?: boolean;
   sendReceiptEmail?: boolean;
-  orders?: any[];
-  [key: string]: any;
+  orders?: unknown[];
+  [key: string]: unknown;
 }
 
 export interface IntegrationResponse {
@@ -71,7 +71,7 @@ export interface IntegrationResponse {
   name: string;
   type: IntegrationType;
   active: boolean;
-  config: Record<string, any> | null;
+  config: Record<string, unknown> | null;
   botId: number;
   createdAt: string;
 }
@@ -80,5 +80,5 @@ export interface IntegrationCreateRequest {
   name: string;
   type: IntegrationType;
   botId: number;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }

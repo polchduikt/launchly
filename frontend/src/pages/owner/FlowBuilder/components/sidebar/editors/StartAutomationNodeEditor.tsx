@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useBotsQuery } from '../../../../../../hooks/bot/useBotsQuery';
 import { useFlowSchemaQuery } from '../../../../../../hooks/bot/useFlowSchema';
 import { useBotStore } from '../../../../../../store/useBotStore';
+import { useFlowUiStore } from '../../../../../../store/useFlowUiStore';
 import { InlineFlowPreview } from './InlineFlowPreview';
 import type { Node, Edge } from '@xyflow/react';
 import { t } from '../../../../../../i18n/config';
@@ -25,6 +26,16 @@ export const StartAutomationNodeEditor: React.FC<StartAutomationNodeEditorProps>
   const [selectedBotId, setSelectedBotId] = useState<number | null>(null);
   const navigate = useNavigate();
   const setActiveBotId = useBotStore((state) => state.setActiveBotId);
+
+  const pickAutomationNodeId = useFlowUiStore((s) => s.pickAutomationNodeId);
+  const closePickAutomation = useFlowUiStore((s) => s.closePickAutomation);
+
+  useEffect(() => {
+    if (node && pickAutomationNodeId === node.id) {
+      setIsModalOpen(true);
+      closePickAutomation();
+    }
+  }, [node, pickAutomationNodeId, closePickAutomation]);
 
   useEffect(() => {
     const handleOpenPickEvent = (e: Event) => {
@@ -107,13 +118,14 @@ export const StartAutomationNodeEditor: React.FC<StartAutomationNodeEditorProps>
             <div className="border-t border-slate-100 my-4" />
 
             <button
+              type="button"
               onClick={() => {
                 if (editorState) {
                   editorState.setNextStepSourceHandle?.('next');
                   editorState.setIsNextStepDrawerOpen?.(true);
                 }
               }}
-              className="w-full py-3.5 bg-white hover:bg-lime-50/15 border border-dashed border-lime-200 hover:border-lime-400 text-lime-700 hover:text-lime-800 text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"
+              className="w-full py-2.5 bg-white hover:bg-indigo-50/30 border border-indigo-200 hover:border-indigo-450 text-indigo-650 hover:text-indigo-700 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm select-none"
             >
               {t('editor.start_automation.choose_next_step')}
             </button>

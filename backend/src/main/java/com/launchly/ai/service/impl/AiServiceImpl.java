@@ -5,13 +5,24 @@ import tools.jackson.databind.ObjectMapper;
 import com.launchly.ai.dto.AiMessage;
 import com.launchly.ai.dto.request.AiChatRequest;
 import com.launchly.ai.dto.request.AiSchemaRequest;
+import com.launchly.ai.dto.request.CreateAiSessionRequest;
+import com.launchly.ai.dto.request.UpdateAiSessionRequest;
+import com.launchly.ai.dto.response.AiChatMessageResponse;
 import com.launchly.ai.dto.response.AiChatResponse;
+import com.launchly.ai.dto.response.AiChatSessionDetailResponse;
+import com.launchly.ai.dto.response.AiChatSessionResponse;
 import com.launchly.ai.dto.response.AiSchemaResponse;
 import com.launchly.ai.dto.response.AiUsageResponse;
+import com.launchly.ai.entity.AiChatMessage;
+import com.launchly.ai.entity.AiChatSession;
+import com.launchly.ai.repository.AiChatMessageRepository;
+import com.launchly.ai.repository.AiChatSessionRepository;
 import com.launchly.ai.service.AiProviderRouter;
 import com.launchly.ai.service.AiService;
 import com.launchly.ai.service.AiUsageService;
 import com.launchly.ai.util.AiSchemaUtils;
+import com.launchly.auth.entity.User;
+import com.launchly.auth.repository.UserRepository;
 import com.launchly.billing.entity.Plan;
 import com.launchly.billing.service.PlanLimitService;
 import jakarta.annotation.PostConstruct;
@@ -20,12 +31,14 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import com.launchly.common.exception.AppException;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import java.io.IOException;
+import org.springframework.transaction.support.TransactionTemplate;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +48,19 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AiServiceImpl implements AiService {
 
+    private static final int AVG_CHARS_PER_TOKEN = 4;
+    private static final int MIN_USER_TOKENS = 10;
+    private static final int MIN_ESTIMATED_TOKENS = 1000;
+    private static final int AVG_CHARS_PER_SCHEMA_TOKEN = 3;
+
     private final AiProviderRouter aiProviderRouter;
     private final AiUsageService aiUsageService;
     private final PlanLimitService planLimitService;
     private final ObjectMapper objectMapper;
+    private final AiChatSessionRepository aiChatSessionRepository;
+    private final AiChatMessageRepository aiChatMessageRepository;
+    private final UserRepository userRepository;
+    private final TransactionTemplate transactionTemplate;
 
     @Value("${ai.prompt.chat-path:classpath:prompts/chat-system.txt}")
     private Resource chatPromptResource;
@@ -66,25 +88,150 @@ public class AiServiceImpl implements AiService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<AiChatSessionResponse> getSessions(Long userId) {
+        List<AiChatSession> sessions = aiChatSessionRepository.findAllByUserIdOrderByUpdatedAtDesc(userId);
+        return sessions.stream()
+                .map(s -> {
+                    String lastMessage = null;
+                    if (s.getMessages() != null && !s.getMessages().isEmpty()) {
+                        lastMessage = s.getMessages().get(s.getMessages().size() - 1).getContent();
+                    }
+                    return new AiChatSessionResponse(s.getId(), s.getTitle(), s.getCreatedAt(), s.getUpdatedAt(), lastMessage);
+                })
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AiChatSessionDetailResponse getSessionDetails(Long sessionId, Long userId) {
+        AiChatSession session = aiChatSessionRepository.findByIdAndUserIdWithMessages(sessionId, userId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "ai.session.not_found"));
+
+        List<AiChatMessageResponse> messages = session.getMessages().stream()
+                .map(m -> new AiChatMessageResponse(m.getId(), m.getRole(), m.getContent(), m.getTokensUsed(), m.getCreatedAt()))
+                .toList();
+
+        return new AiChatSessionDetailResponse(session.getId(), session.getTitle(), session.getCreatedAt(), session.getUpdatedAt(), messages);
+    }
+
+    @Override
+    @Transactional
+    public AiChatSessionResponse createSession(CreateAiSessionRequest request, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "user.error.not_found"));
+
+        String title = request != null && request.title() != null && !request.title().isBlank()
+                ? request.title().trim()
+                : null;
+
+        AiChatSession session = AiChatSession.builder()
+                .user(user)
+                .title(title)
+                .build();
+
+        session = aiChatSessionRepository.save(session);
+        return new AiChatSessionResponse(session.getId(), session.getTitle(), session.getCreatedAt(), session.getUpdatedAt(), null);
+    }
+
+    @Override
+    @Transactional
+    public AiChatSessionResponse updateSessionTitle(Long sessionId, UpdateAiSessionRequest request, Long userId) {
+        AiChatSession session = aiChatSessionRepository.findByIdAndUserId(sessionId, userId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "ai.session.not_found"));
+
+        session.setTitle(request.title().trim());
+        session = aiChatSessionRepository.save(session);
+
+        String lastMessage = null;
+        if (session.getMessages() != null && !session.getMessages().isEmpty()) {
+            lastMessage = session.getMessages().get(session.getMessages().size() - 1).getContent();
+        }
+
+        return new AiChatSessionResponse(session.getId(), session.getTitle(), session.getCreatedAt(), session.getUpdatedAt(), lastMessage);
+    }
+
+    @Override
+    @Transactional
+    public void deleteSession(Long sessionId, Long userId) {
+        AiChatSession session = aiChatSessionRepository.findByIdAndUserId(sessionId, userId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "ai.session.not_found"));
+        aiChatSessionRepository.delete(session);
+    }
+
+    @Override
     @CircuitBreaker(name = "aiProvider", fallbackMethod = "chatFallback")
     @Retry(name = "aiProvider")
     public AiChatResponse chat(AiChatRequest request, Long userId) {
         Plan plan = planLimitService.getActivePlan(userId);
         aiUsageService.checkTokenLimit(userId, plan);
 
+        AiChatSession session = null;
         List<AiMessage> messages = new ArrayList<>();
         messages.add(new AiMessage("system", chatSystemPrompt));
-        if (request.history() != null) {
+
+        if (request.sessionId() != null) {
+            session = aiChatSessionRepository.findByIdAndUserIdWithMessages(request.sessionId(), userId)
+                    .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "ai.session.not_found"));
+
+            for (AiChatMessage existingMsg : session.getMessages()) {
+                messages.add(new AiMessage(existingMsg.getRole(), existingMsg.getContent()));
+            }
+        } else if (request.history() != null) {
             messages.addAll(request.history());
         }
+
         messages.add(new AiMessage("user", request.message()));
 
         String reply = aiProviderRouter.chat(messages, null);
 
-        int estimatedTokens = Math.max(500, (chatSystemPrompt.length() + request.message().length() + (reply != null ? reply.length() : 0)) / 3);
+        int estimatedTokens = Math.max(500, (chatSystemPrompt.length() + request.message().length() + (reply != null ? reply.length() : 0)) / AVG_CHARS_PER_SCHEMA_TOKEN);
         aiUsageService.recordTokenUsage(userId, plan, estimatedTokens);
 
         AiUsageResponse usage = aiUsageService.getUsage(userId, plan);
+
+        if (session != null) {
+            final String finalReply = reply;
+            final AiChatSession targetSession = session;
+            List<AiChatMessageResponse> mappedMessages = transactionTemplate.execute(status -> {
+                int userTokens = Math.max(MIN_USER_TOKENS, request.message().length() / AVG_CHARS_PER_TOKEN);
+                int replyTokens = Math.max(MIN_USER_TOKENS, (finalReply != null ? finalReply.length() : 0) / AVG_CHARS_PER_TOKEN);
+
+                AiChatMessage userChatMessage = AiChatMessage.builder()
+                        .session(targetSession)
+                        .role("user")
+                        .content(request.message())
+                        .tokensUsed(userTokens)
+                        .build();
+                targetSession.getMessages().add(userChatMessage);
+
+                AiChatMessage assistantChatMessage = AiChatMessage.builder()
+                        .session(targetSession)
+                        .role("assistant")
+                        .content(finalReply)
+                        .tokensUsed(replyTokens)
+                        .build();
+                targetSession.getMessages().add(assistantChatMessage);
+
+                if (targetSession.getTitle() == null || targetSession.getTitle().isBlank()) {
+                    String autoTitle = request.message().trim();
+                    if (autoTitle.length() > 40) {
+                        autoTitle = autoTitle.substring(0, 40) + "...";
+                    }
+                    targetSession.setTitle(autoTitle);
+                }
+
+                targetSession.setUpdatedAt(LocalDateTime.now());
+                AiChatSession saved = aiChatSessionRepository.save(targetSession);
+
+                return saved.getMessages().stream()
+                        .map(m -> new AiChatMessageResponse(m.getId(), m.getRole(), m.getContent(), m.getTokensUsed(), m.getCreatedAt()))
+                        .toList();
+            });
+
+            return new AiChatResponse(targetSession.getId(), targetSession.getTitle(), reply, usage, mappedMessages);
+        }
+
         return new AiChatResponse(reply, usage);
     }
 
@@ -126,7 +273,7 @@ public class AiServiceImpl implements AiService {
             nodesNode = AiSchemaUtils.normalizeUsernameActions(nodesNode);
         }
 
-        int estimatedTokens = Math.max(1000, (schemaSystemPrompt.length() + request.description().length() + rawResponse.length()) / 3);
+        int estimatedTokens = Math.max(MIN_ESTIMATED_TOKENS, (schemaSystemPrompt.length() + request.description().length() + rawResponse.length()) / AVG_CHARS_PER_SCHEMA_TOKEN);
         aiUsageService.recordTokenUsage(userId, plan, estimatedTokens);
 
         AiUsageResponse usage = aiUsageService.getUsage(userId, plan);

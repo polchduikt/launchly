@@ -135,17 +135,14 @@ class ConditionNodeExecutorTest {
 
         when(stateService.getSessionData(1L, 111L)).thenReturn(Map.of("email", "alice@example.com", "notes", ""));
 
-        // Full name resolution
         FlowNode node1 = new FlowNode("c1", NodeType.CONDITION, Map.of("variable", "Full Name", "operator", "contains", "value", "Alice"), pos);
         List<FlowEdge> edges1 = List.of(new FlowEdge("e1", "c1", "target1", "true"));
         assertThat(executor.execute(node1, edges1, botUser, new Update(), telegramClient)).isEqualTo("target1");
 
-        // Begins with operator
         FlowNode node2 = new FlowNode("c2", NodeType.CONDITION, Map.of("variable", "email", "operator", "begins_with", "value", "alice"), pos);
         List<FlowEdge> edges2 = List.of(new FlowEdge("e2", "c2", "target2", "true"));
         assertThat(executor.execute(node2, edges2, botUser, new Update(), telegramClient)).isEqualTo("target2");
 
-        // Empty operator
         FlowNode node3 = new FlowNode("c3", NodeType.CONDITION, Map.of("variable", "notes", "operator", "empty"), pos);
         List<FlowEdge> edges3 = List.of(new FlowEdge("e3", "c3", "target3", "true"));
         assertThat(executor.execute(node3, edges3, botUser, new Update(), telegramClient)).isEqualTo("target3");

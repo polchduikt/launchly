@@ -28,7 +28,7 @@ globalThis.IntersectionObserver = class IntersectionObserver {
   takeRecords() {
     return [];
   }
-} as any;
+} as unknown as typeof IntersectionObserver;
 
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
 window.scrollTo = vi.fn();

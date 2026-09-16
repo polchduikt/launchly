@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '../../i18n/config';
 import { isValidAvatarUrl, getInitials } from '../../utils/avatar';
+import { ErrorBoundary } from '../common/ErrorBoundary';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -204,9 +205,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 h-full bg-[#F2EBDD] overflow-hidden">
-        <header className="h-16 border-b-4 border-[#0A0A0A] px-8 flex items-center justify-between bg-[#F2EBDD] shrink-0 font-['JetBrains_Mono',monospace]">
+        <header className="h-16 border-b-4 border-[#0A0A0A] px-8 flex items-center justify-between bg-[#F2EBDD] shrink-0">
           <div className="flex items-center space-x-3">
-            <h1 className="font-['Anybody',sans-serif] text-base font-black uppercase text-[#0A0A0A] tracking-tight">
+            <h1 className="font-['Anybody',sans-serif] text-xl font-black uppercase text-[#0A0A0A] tracking-tight">
               {getPageTitle()}
             </h1>
           </div>
@@ -241,7 +242,13 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, noPadding = 
         </header>
 
         <main className={`flex-1 overflow-y-auto bg-[#F2EBDD] text-[#0A0A0A] ${noPadding ? 'p-0 flex h-full min-h-0 overflow-hidden' : 'p-8'}`}>
-          {children}
+          <ErrorBoundary
+            inline
+            fallbackTitle="Admin View Error"
+            fallbackDescription="An unexpected error occurred in this view. Click retry to attempt reloading."
+          >
+            {children}
+          </ErrorBoundary>
         </main>
       </div>
     </div>

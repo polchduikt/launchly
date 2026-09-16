@@ -23,9 +23,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ApiCallNodeExecutor implements NodeExecutor {
 
+    private static final Duration HTTP_TIMEOUT = Duration.ofSeconds(5);
+
     private final BotDialogStateService stateService;
     private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(5))
+            .connectTimeout(HTTP_TIMEOUT)
             .build();
 
     @Override
@@ -56,7 +58,7 @@ public class ApiCallNodeExecutor implements NodeExecutor {
 
                 HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                         .uri(URI.create(resolvedUrl))
-                        .timeout(Duration.ofSeconds(5));
+                        .timeout(HTTP_TIMEOUT);
 
                 if (data.containsKey("headers") && data.get("headers") instanceof Map) {
                     Map<String, String> headers = (Map<String, String>) data.get("headers");

@@ -16,6 +16,16 @@ public enum NodeType {
     SMART_DELAY,
     RANDOMIZER,
     COMMENT,
-    AI
+    AI,
+    COMMAND,
+    MATH,
+    LEADERBOARD,
+    COOLDOWN,
+    SCHEDULER,
+    QUERY,
+    INTERACTION,
+    SUBSCRIPTION_CHECK,
+    MODERATION,
+    JOIN_REQUEST
 }
 

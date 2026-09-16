@@ -41,6 +41,20 @@ describe('AppRouter & Route Guards', () => {
     expect(ROUTES.REGISTER).toBe('/register');
     expect(ROUTES.DASHBOARD).toBe('/dashboard');
     expect(ROUTES.ADMIN_HOME).toBe('/admin');
+    expect(ROUTES.TEMPLATES).toBe('/templates');
+    expect(ROUTES.TEMPLATES_INSTALL).toBe('/templates/install/:shareCode');
+  });
+
+  it('verifies isPublicRoute identifies public routes correctly', async () => {
+    const { isPublicRoute } = await import('./paths');
+    expect(isPublicRoute('/')).toBe(true);
+    expect(isPublicRoute('/login')).toBe(true);
+    expect(isPublicRoute('/register')).toBe(true);
+    expect(isPublicRoute('/blog')).toBe(true);
+    expect(isPublicRoute('/blog/123')).toBe(true);
+    expect(isPublicRoute('/templates/install/abc')).toBe(true);
+    expect(isPublicRoute('/dashboard')).toBe(false);
+    expect(isPublicRoute('/builder')).toBe(false);
   });
 
   it('renders landing page on root route', async () => {

@@ -1,6 +1,19 @@
 import type { Node, Edge } from '@xyflow/react';
 import type { ButtonData, FlowBlock } from '../types/bot';
 
+export const isStartNode = (node: { id?: string; type?: string } | null | undefined): boolean => {
+  if (!node) return false;
+  const id = node.id?.toLowerCase();
+  const type = node.type?.toUpperCase();
+  return (
+    id === 'start' ||
+    id === 'node_start' ||
+    id === 'start_broadcast' ||
+    type === 'START' ||
+    type === 'START_BROADCAST'
+  );
+};
+
 export const getFlowKey = (nodes: Node[], edges: Edge[]) => {
   if (nodes.length > 50) {
     const nodeSummary = nodes.map(n => `${n.id}:${n.type}:${Math.round(n.position.x)},${Math.round(n.position.y)}:${JSON.stringify(n.data).length}`).join('|');
@@ -27,12 +40,14 @@ export const getFlowKey = (nodes: Node[], edges: Edge[]) => {
 export const getFlowLogicKey = (nodes: Node[], edges: Edge[]): string => {
   if (!nodes || nodes.length === 0) return '';
 
-  const startNodes = nodes.filter(n => n.type === 'START' || n.type === 'START_BROADCAST');
-  if (startNodes.length === 0) return '';
+  const triggerNodes = nodes.filter(
+    (n) => n.type === 'START' || n.type === 'START_BROADCAST' || n.type === 'COMMAND' || n.type === 'SCHEDULER' || n.type === 'MODERATION'
+  );
+  if (triggerNodes.length === 0) return '';
 
   const reachableNodeIds = new Set<string>();
-  const queue: string[] = startNodes.map(n => n.id);
-  startNodes.forEach(n => reachableNodeIds.add(n.id));
+  const queue: string[] = triggerNodes.map((n) => n.id);
+  triggerNodes.forEach((n) => reachableNodeIds.add(n.id));
 
   const adj = new Map<string, string[]>();
   edges.forEach(e => {
@@ -57,10 +72,10 @@ export const getFlowLogicKey = (nodes: Node[], edges: Edge[]): string => {
   const reachableEdges = edges.filter(e => reachableNodeIds.has(e.source) && reachableNodeIds.has(e.target));
 
   const cleanNodes = reachableNodes.map(({ id, type, data }) => {
-    const cleanData = { ...data };
-    delete (cleanData as any)._collaborator;
-    delete (cleanData as any)._tempSourceHandle;
-    delete (cleanData as any)._selected;
+    const cleanData: Record<string, unknown> = { ...data };
+    delete cleanData._collaborator;
+    delete cleanData._tempSourceHandle;
+    delete cleanData._selected;
     return {
       id,
       type,

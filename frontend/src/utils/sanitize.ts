@@ -1,10 +1,12 @@
+import DOMPurify from 'dompurify';
+
 export interface SanitizeOptions {
   allowedTags?: string[];
   allowedAttributes?: string[];
   allowedProtocols?: string[];
 }
 
-const DEFAULT_ALLOWED_TAGS = new Set([
+const DEFAULT_ALLOWED_TAGS = [
   'div',
   'b',
   'strong',
@@ -23,7 +25,9 @@ const DEFAULT_ALLOWED_TAGS = new Set([
   'li',
   'blockquote',
   'a',
-]);
+];
+
+const DEFAULT_ALLOWED_ATTR = ['href', 'target', 'rel', 'class', 'title'];
 
 const DEFAULT_ALLOWED_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'tel:']);
 
@@ -56,68 +60,35 @@ export const sanitizeUrl = (url: string): string => {
   return '';
 };
 
+let hookConfigured = false;
+const ensurePurifyHook = () => {
+  if (hookConfigured) return;
+  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    if (node.tagName === 'A') {
+      const href = node.getAttribute('href');
+      if (href) {
+        node.setAttribute('target', '_blank');
+        node.setAttribute('rel', 'noopener noreferrer');
+      }
+    }
+  });
+  hookConfigured = true;
+};
+
 export const sanitizeHtml = (dirtyHtml: string, options?: SanitizeOptions): string => {
   if (!dirtyHtml) return '';
 
-  const allowedTags = options?.allowedTags
-    ? new Set(options.allowedTags.map((t) => t.toLowerCase()))
-    : DEFAULT_ALLOWED_TAGS;
+  ensurePurifyHook();
 
-  if (typeof DOMParser === 'undefined') {
-    return escapeHtml(dirtyHtml);
-  }
+  const allowedTags = options?.allowedTags || DEFAULT_ALLOWED_TAGS;
+  const allowedAttributes = options?.allowedAttributes || DEFAULT_ALLOWED_ATTR;
 
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(dirtyHtml, 'text/html');
-
-    const cleanNode = (node: Node) => {
-      const children = Array.from(node.childNodes);
-      for (const child of children) {
-        if (child.nodeType === Node.ELEMENT_NODE) {
-          const element = child as HTMLElement;
-          const tagName = element.tagName.toLowerCase();
-
-          if (!allowedTags.has(tagName)) {
-            element.remove();
-            continue;
-          }
-
-          const attributes = Array.from(element.attributes);
-          for (const attr of attributes) {
-            const attrName = attr.name.toLowerCase();
-
-            if (attrName.startsWith('on') || attrName === 'style') {
-              element.removeAttribute(attr.name);
-              continue;
-            }
-
-            if (tagName === 'a' && attrName === 'href') {
-              const safeHref = sanitizeUrl(attr.value);
-              if (!safeHref) {
-                element.removeAttribute('href');
-              } else {
-                element.setAttribute('href', safeHref);
-                element.setAttribute('rel', 'noopener noreferrer');
-                element.setAttribute('target', '_blank');
-              }
-            } else if (attrName !== 'class' && attrName !== 'title') {
-              element.removeAttribute(attr.name);
-            }
-          }
-
-          cleanNode(element);
-        } else if (child.nodeType !== Node.TEXT_NODE) {
-          child.remove();
-        }
-      }
-    };
-
-    cleanNode(doc.body);
-    return doc.body.innerHTML;
-  } catch {
-    return escapeHtml(dirtyHtml);
-  }
+  return DOMPurify.sanitize(dirtyHtml, {
+    ALLOWED_TAGS: allowedTags,
+    ALLOWED_ATTR: allowedAttributes,
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|\/|#)/i,
+    RETURN_TRUSTED_TYPE: false,
+  }) as string;
 };
 
 export const createSafeHtml = (

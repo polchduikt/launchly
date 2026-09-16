@@ -4,6 +4,7 @@ import type { AudienceCondition, TagResponse } from '../../../../types';
 import { useBotsQuery } from '../../../../hooks/bot/useBotsQuery';
 import { useBotStore } from '../../../../store/useBotStore';
 import { useTranslation } from '../../../../i18n/config';
+import { DEFAULT_CUSTOM_FIELDS } from '../../../../const/constants';
 
 interface AudiencePanelProps {
   isAudienceOpen: boolean;
@@ -38,7 +39,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
   handleAddTagCondition: _handleAddTagCondition,
   setConditions,
   setIsDirty,
-  customFields = ['last_order_product', 'last_order_price', 'phone', 'email'],
+  customFields = [...DEFAULT_CUSTOM_FIELDS],
   leads = [],
   orders = [],
 }) => {
@@ -95,18 +96,26 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
     }
   };
 
-  const filteredItems = useMemo(() => {
+interface AudienceFilterItem {
+  type: string;
+  label: string;
+  val?: string;
+  icon?: React.ComponentType<{ size?: number; className?: string }>;
+  count?: number;
+}
+
+  const filteredItems: AudienceFilterItem[] = useMemo(() => {
     const search = dropdownSearch.toLowerCase().trim();
 
     if (selectedCategory === 'general') {
-      const items = [
+      const items: AudienceFilterItem[] = [
         { type: 'tag', label: t('audience.panel.field.tag'), val: '', icon: Tag },
       ];
       return items.filter(i => i.label.toLowerCase().includes(search));
     }
 
     if (selectedCategory === 'system') {
-      const items = [
+      const items: AudienceFilterItem[] = [
         { type: 'system', label: t('crm.contact.first_name'), icon: User },
         { type: 'system', label: t('crm.contact.last_name'), icon: User },
         { type: 'system', label: t('editor.gs.fields.username'), icon: User },
@@ -127,9 +136,9 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
     }
 
     return [];
-  }, [selectedCategory, dropdownSearch, tags, customFields]);
+  }, [selectedCategory, dropdownSearch, customFields, t]);
 
-  const handleAddConditionItem = (item: { type: string; label: string; val?: string }) => {
+  const handleAddConditionItem = (item: AudienceFilterItem) => {
     setIsConditionDropdownOpen(false);
     setDropdownSearch('');
     setIsDirty(true);
@@ -430,7 +439,7 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                       setIsDirty(true);
                                       setActiveDropdownId(null);
                                     }}
-                                    className="w-full py-1.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] font-black uppercase rounded-lg text-xs transition-all cursor-pointer text-center border-2 border-[#0A0A0A]"
+                                    className="w-full py-1.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] font-black uppercase rounded-lg text-xs transition-all cursor-pointer text-center border-2 border-[#0A0A0A]"
                                   >
                                     {t('editor.condition.apply')}
                                   </button>
@@ -566,9 +575,9 @@ export const AudiencePanel: React.FC<AudiencePanelProps> = ({
                                   >
                                     <IconComponent size={14} className="text-[#0A0A0A] shrink-0" />
                                     <span className="truncate flex-1">{item.label}</span>
-                                    {(item as any).count !== undefined && (
+                                    {item.count !== undefined && (
                                       <span className="text-[10px] text-slate-700 font-black shrink-0">
-                                        {(item as any).count}
+                                        {item.count}
                                       </span>
                                     )}
                                   </button>

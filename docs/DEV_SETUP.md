@@ -46,6 +46,9 @@ CLOUDINARY_API_SECRET=your_api_secret
 # Stripe
 STRIPE_API_KEY=sk_test_placeholder
 STRIPE_WEBHOOK_SECRET=whsec_placeholder
+
+# Cloudflare Turnstile (Anti-Bot)
+CLOUDFLARE_TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
 ```
 
 ### 2. Frontend Environment (`frontend/.env`)
@@ -54,6 +57,7 @@ Create `frontend/.env`:
 ```env
 VITE_API_URL=http://localhost:8080/api/v1
 VITE_WS_URL=http://localhost:8080/ws
+VITE_CLOUDFLARE_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 ```
 
 ---

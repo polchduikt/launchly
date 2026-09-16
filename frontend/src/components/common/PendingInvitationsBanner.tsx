@@ -5,6 +5,25 @@ import { getMyPendingInvitationsApi, acceptInvitationApi, declineInvitationApi }
 import { useBotStore } from '../../store/useBotStore';
 import { t } from '../../i18n/config';
 
+const getRoleLabel = (role: string) => {
+  if (!role) return '';
+  switch (role.toLowerCase()) {
+    case 'owner':
+      return t('settings.members.role.owner', 'Власник');
+    case 'admin':
+      return t('settings.members.role.admin', 'Адміністратор');
+    case 'editor':
+      return t('settings.members.role.editor', 'Редактор');
+    case 'inbox agent':
+    case 'agent':
+      return t('settings.members.role.agent', 'Агент Inbox');
+    case 'viewer':
+      return t('settings.members.role.viewer', 'Спостерігач');
+    default:
+      return role;
+  }
+};
+
 export const PendingInvitationsBanner: React.FC = () => {
   const queryClient = useQueryClient();
   const [processingId, setProcessingId] = useState<number | null>(null);
@@ -65,20 +84,20 @@ export const PendingInvitationsBanner: React.FC = () => {
                     <strong className="text-[#0A0A0A] underline">{invite.name || invite.email || 'Користувач'}</strong>{' '}
                     {t('invitations.banner.invited_you', 'запросив вас приєднатися до команди у ролі')}{' '}
                     <span className="bg-white px-1.5 py-0.5 rounded border border-[#0A0A0A] font-extrabold text-xs">
-                      {invite.role}
+                      {getRoleLabel(invite.role)}
                     </span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5 shrink-0">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0 w-full sm:w-auto">
                 <button
                   disabled={isProcessing}
                   onClick={() => {
                     setProcessingId(invite.id);
                     acceptMutation.mutate({ invitationId: invite.id, botId: invite.botId });
                   }}
-                  className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
+                  className="w-full sm:w-auto px-4 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-60 text-center"
                 >
                   {isProcessing ? (
                     <Loader2 size={14} className="animate-spin" />
@@ -94,7 +113,7 @@ export const PendingInvitationsBanner: React.FC = () => {
                     setProcessingId(invite.id);
                     declineMutation.mutate(invite.id);
                   }}
-                  className="px-4 py-2 bg-white hover:bg-rose-100 text-rose-700 border-2 border-[#0A0A0A] text-xs font-bold uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
+                  className="w-full sm:w-auto px-4 py-2 border-2 border-rose-600 bg-rose-100 hover:bg-rose-600 hover:text-white text-rose-800 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-60 text-center"
                 >
                   <X size={14} />
                   <span>{t('common.decline', 'Відхилити')}</span>

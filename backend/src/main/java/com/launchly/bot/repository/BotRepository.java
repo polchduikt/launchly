@@ -4,6 +4,8 @@ import com.launchly.bot.entity.Bot;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +19,15 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
 
     long countByUserId(Long userId);
 
+    long countByActiveTrue();
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    long countByActiveTrueAndCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    @EntityGraph(attributePaths = {"user"})
+    List<Bot> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
     @EntityGraph(attributePaths = {"user"})
     List<Bot> findAllByActiveTrue();
 
@@ -27,6 +38,16 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
     @Override
     @EntityGraph(attributePaths = {"user"})
     Optional<Bot> findById(Long id);
+
+    @EntityGraph(attributePaths = {"user"})
+    @Query("SELECT DISTINCT b FROM Bot b WHERE b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.user.id = b.user.id AND bm.user.id = :userId)")
+    List<Bot> findAllAccessibleByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT COUNT(DISTINCT b) FROM Bot b WHERE b.active = true AND (b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.user.id = b.user.id AND bm.user.id = :userId))")
+    long countAccessibleByUserIdAndActiveTrue(@Param("userId") Long userId);
+
+    @Query("SELECT COUNT(DISTINCT b) FROM Bot b WHERE b.active = true AND b.createdAt < :date AND (b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.user.id = b.user.id AND bm.user.id = :userId))")
+    long countAccessibleByUserIdAndActiveTrueAndCreatedAtBefore(@Param("userId") Long userId, @Param("date") LocalDateTime date);
 
     boolean existsByTelegramToken(String telegramToken);
 }

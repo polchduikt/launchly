@@ -11,9 +11,11 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CrmMessageScheduler {
 
+    private static final long SCHEDULED_MESSAGES_CHECK_DELAY_MS = 15_000L;
+
     private final CrmService crmService;
 
-    @Scheduled(fixedDelay = 15000)
+    @Scheduled(fixedDelay = SCHEDULED_MESSAGES_CHECK_DELAY_MS)
     public void processScheduledMessages() {
         try {
             crmService.sendScheduledMessages();

@@ -26,6 +26,7 @@ vi.mock('../../store/useThemeStore', () => ({
 
 vi.mock('../../hooks/crm/useCrmQueries', () => ({
   useAllBotUsersQuery: () => ({ data: [], isLoading: false }),
+  useContactsCountQuery: () => ({ count: 0, isLoading: false }),
 }));
 
 vi.mock('../../hooks/bot/useBillingQueries', () => ({

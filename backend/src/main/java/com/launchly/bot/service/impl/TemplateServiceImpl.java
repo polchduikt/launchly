@@ -1,9 +1,11 @@
 package com.launchly.bot.service.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.launchly.common.constant.CacheConstants;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.service.UserQueryService;
+import com.launchly.bot.constant.BotConstants;
 import com.launchly.bot.dto.request.CreateTemplateRequest;
 import com.launchly.bot.dto.request.UpdateTemplateRequest;
 import com.launchly.bot.dto.response.TemplateResponse;
@@ -51,7 +53,7 @@ public class TemplateServiceImpl implements TemplateService {
     private final BroadcastCampaignRepository broadcastCampaignRepository;
     private final TagRepository tagRepository;
     private final EncryptionUtil encryptionUtil;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
@@ -62,7 +64,7 @@ public class TemplateServiceImpl implements TemplateService {
         User creator = userQueryService.getUserOrThrow(userId);
 
         Bot bot = null;
-        String sourceBotName = "Автоматизація";
+        String sourceBotName = BotConstants.DEFAULT_AUTOMATION_NAME;
         String sourceBotDescription = "";
         String nodes = "[]";
         String edges = "[]";
@@ -71,7 +73,7 @@ public class TemplateServiceImpl implements TemplateService {
         if (request.botId() != null) {
             bot = botRepository.findById(request.botId()).orElse(null);
             if (bot != null) {
-                if (!bot.getUser().getId().equals(userId) && !botMemberRepository.existsByBotIdAndUserId(request.botId(), userId)) {
+                if (!bot.getUser().getId().equals(userId) && !botMemberRepository.existsByBotOwnerIdAndUserId(bot.getUser().getId(), userId)) {
                     throw new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied");
                 }
 
@@ -94,6 +96,7 @@ public class TemplateServiceImpl implements TemplateService {
         try {
             schemaJson = objectMapper.writeValueAsString(payload);
         } catch (Exception e) {
+            log.warn("Failed to serialize template flow schema: {}", e.getMessage());
             schemaJson = "{\"nodes\":\"[]\",\"edges\":\"[]\"}";
         }
 
@@ -138,6 +141,7 @@ public class TemplateServiceImpl implements TemplateService {
                     resolvedFieldCount = selectedFieldsList.size();
                 }
             } catch (Exception e) {
+                log.warn("Failed to filter custom fields data for template: {}", e.getMessage());
                 customFieldsData = bot.getCustomFieldsData();
                 resolvedFieldCount = fieldIds.size();
             }
@@ -212,7 +216,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Cacheable(value = "templates", key = "#shareCode")
     public TemplateResponse getTemplateByShareCode(String shareCode) {
         AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Template not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "template.error.not_found"));
 
         return toTemplateResponse(template);
     }
@@ -283,18 +287,18 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = "bots", key = "#userId"),
-            @CacheEvict(value = "flow_schemas", allEntries = true)
+            @CacheEvict(value = CacheConstants.BOTS, key = "#userId"),
+            @CacheEvict(value = CacheConstants.FLOW_SCHEMAS, allEntries = true)
     })
     public void installTemplate(String shareCode, Long targetBotId, Long userId) {
         AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Template not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "template.error.not_found"));
         User user = userQueryService.getUserOrThrow(userId);
 
         Bot targetBot = null;
         if (targetBotId != null) {
             Optional<Bot> botOpt = botRepository.findById(targetBotId);
-            if (botOpt.isPresent() && (botOpt.get().getUser().getId().equals(userId) || botMemberRepository.existsByBotIdAndUserId(targetBotId, userId))) {
+            if (botOpt.isPresent() && (botOpt.get().getUser().getId().equals(userId) || botMemberRepository.existsByBotOwnerIdAndUserId(botOpt.get().getUser().getId(), userId))) {
                 targetBot = botOpt.get();
             }
         }
@@ -313,7 +317,7 @@ public class TemplateServiceImpl implements TemplateService {
                     .avatar(template.getAvatarUrl())
                     .templateName(template.getName())
                     .template(true)
-                    .telegramToken(encryptionUtil.encrypt("0000000000:dummyTokenPlaceholderForNoBotConfig"))
+                    .telegramToken(encryptionUtil.encrypt(BotConstants.DUMMY_TOKEN_PLACEHOLDER))
                     .active(false)
                     .user(user)
                     .customFieldsData(customFields)

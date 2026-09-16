@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useClickOutside } from '../../../../hooks/useClickOutside';
 import { useTranslation } from '../../../../i18n/config';
 import {
   Hash,
@@ -18,7 +19,7 @@ import { UserAvatar } from './UserAvatar';
 import { useTagsQuery } from '../../../../hooks/broadcast/useBroadcastQueries';
 import { useUpdateBotUserMutation, useDeleteBotUserMutation } from '../../../../hooks/crm/useCrmQueries';
 import { createTagApi } from '../../../../api/broadcast';
-import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../api/bot';
+import { useCustomFieldsQuery, useSaveCustomFieldsMutation } from '../../../../hooks/bot/useCustomFieldsQuery';
 import { TagSearchSelect } from '../../FlowBuilder/components/sidebar/editors/TagSearchSelect';
 import { ChatHistoryModal } from './ChatHistoryModal';
 import { ConfirmActionModal } from './ConfirmActionModal';
@@ -52,15 +53,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
-        setShowMoreMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(moreMenuRef, () => setShowMoreMenu(false), showMoreMenu);
 
   const { t } = useTranslation();
 
@@ -109,7 +102,30 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
   const [showAddCustomField, setShowAddCustomField] = useState(false);
   const [customFieldName, setCustomFieldName] = useState('');
   const [customFieldValue, setCustomFieldValue] = useState('');
-  const [availableFields, setAvailableFields] = useState<string[]>([]);
+  const { data: customFieldsData } = useCustomFieldsQuery(conversation.botId);
+  const saveCustomFieldsMutation = useSaveCustomFieldsMutation(conversation.botId);
+
+  interface CustomFieldItem {
+    name: string;
+    value?: string;
+    type?: string;
+    description?: string;
+    folder?: string | null;
+  }
+
+  const availableFields = useMemo(() => {
+    if (!customFieldsData || typeof customFieldsData !== 'object') return [];
+    const list = Array.isArray(customFieldsData.fields)
+      ? (customFieldsData.fields as CustomFieldItem[])
+      : Array.isArray(customFieldsData)
+        ? (customFieldsData as (CustomFieldItem | string)[])
+        : [];
+    return list.filter((f) => {
+      const name = typeof f === 'string' ? f : f?.name;
+      return name && !name.toLowerCase().includes('cooldown');
+    });
+  }, [customFieldsData]);
+
   const [isFieldDropdownOpen, setIsFieldDropdownOpen] = useState(false);
   const fieldDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -126,18 +142,6 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
       document.removeEventListener('mousedown', handleOutsideClick);
     };
   }, [isFieldDropdownOpen]);
-
-  useEffect(() => {
-    if (conversation.botId) {
-      getCustomFieldsApi(conversation.botId)
-        .then((res) => {
-          const list = res && Array.isArray(res.fields) ? res.fields : Array.isArray(res) ? res : [];
-          const names = list.map((f: any) => f.name).filter(Boolean);
-          setAvailableFields(names);
-        })
-        .catch(() => {});
-    }
-  }, [conversation.botId]);
 
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showPauseMenu, setShowPauseMenu] = useState(false);
@@ -236,26 +240,23 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
     });
 
     if (conversation.botId) {
-      getCustomFieldsApi(conversation.botId)
-        .then((existing) => {
-          const list = existing && Array.isArray(existing.fields) ? existing.fields : Array.isArray(existing) ? existing : [];
-          if (!list.some((f: any) => f.name === nameTrimmed)) {
-            const updated = [...list, { name: nameTrimmed, type: 'Text', description: '', folder: null }];
-            saveCustomFieldsApi(conversation.botId, { fields: updated }).catch(() => {});
-          }
-        })
-        .catch(() => {});
+      const list = availableFields;
+      if (!list.some((f) => (typeof f === 'string' ? f === nameTrimmed : f?.name === nameTrimmed))) {
+        const updated = [...(list as CustomFieldItem[]), { name: nameTrimmed, type: 'Text', description: '', folder: null }];
+        saveCustomFieldsMutation.mutate({ fields: updated });
+      }
     }
 
     setCustomFieldName('');
     setCustomFieldValue('');
+    setIsFieldDropdownOpen(false);
     setShowAddCustomField(false);
   };
 
   const handleRemoveCustomField = (fieldKey: string) => {
     if (!botUser) return;
     const fields = { ...(meta.customFields || {}) };
-    delete (fields as Record<string, any>)[fieldKey];
+    delete (fields as Record<string, unknown>)[fieldKey];
 
     handleUpdateContactMetadata({
       ...meta,
@@ -299,7 +300,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
               </button>
             </div>
           )}
-          <button onClick={onClose} className="text-[#0A0A0A] hover:bg-white cursor-pointer p-1 rounded-lg border-2 border-transparent hover:border-[#0A0A0A] transition-all">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm">
             <X size={16} />
           </button>
         </div>
@@ -431,7 +432,7 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
                       tagName=""
                       tags={tags}
                       assignedTags={botUser?.tags || []}
-                      onChange={(selectedTag: any) => {
+                      onChange={(selectedTag: { name: string } | null) => {
                         if (selectedTag) {
                           handleAddTag(selectedTag.name);
                         }
@@ -474,29 +475,34 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
                       onClick={() => setIsFieldDropdownOpen(!isFieldDropdownOpen)}
                       className="w-full px-2.5 py-1.5 bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-lg text-xs font-bold text-[#0A0A0A] flex items-center justify-between cursor-pointer focus:outline-none select-none"
                     >
-                      <span className="truncate">{customFieldName || '-- Оберіть поле --'}</span>
+                      <span className="truncate">{customFieldName || t('crm.panel.fields.select_field', 'Оберіть поле')}</span>
                       <ChevronDown size={14} className={`text-[#0A0A0A] transition-transform ${isFieldDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     {isFieldDropdownOpen && (
-                      <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl overflow-hidden py-1 text-left max-h-40 overflow-y-auto animate-in fade-in duration-100">
-                        {availableFields.map((fname) => (
-                          <button
-                            key={fname}
-                            type="button"
-                            onClick={() => {
-                              setCustomFieldName(fname);
-                              setIsFieldDropdownOpen(false);
-                            }}
-                            className={`w-full px-3 py-1.5 text-xs font-bold text-left cursor-pointer transition-colors ${
-                              customFieldName === fname
-                                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
-                                : 'text-[#0A0A0A] hover:bg-white'
-                            }`}
-                          >
-                            {fname}
-                          </button>
-                        ))}
+                      <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] rounded-xl overflow-hidden py-1 text-left max-h-40 overflow-y-auto animate-in fade-in duration-100 font-['JetBrains_Mono',monospace]">
+                        {availableFields.map((f: unknown) => {
+                          const fname = typeof f === 'string' ? f : (f as CustomFieldItem).name;
+                          const fval = typeof f === 'object' && f !== null ? (f as CustomFieldItem).value : undefined;
+                          return (
+                            <button
+                              key={fname}
+                              type="button"
+                              onClick={() => {
+                                setCustomFieldName(fname);
+                                if (fval !== undefined) setCustomFieldValue(fval);
+                                setIsFieldDropdownOpen(false);
+                              }}
+                              className={`w-full px-3 py-1.5 text-xs font-bold text-left cursor-pointer transition-colors ${
+                                customFieldName === fname
+                                  ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                                  : 'text-[#0A0A0A] hover:bg-white'
+                              }`}
+                            >
+                              {fname}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -528,23 +534,25 @@ export const ContactInfoPanel: React.FC<ContactInfoPanelProps> = ({
               </div>
             )}
             <div className="space-y-1.5 max-h-[180px] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
-              {!(meta.customFields) || Object.keys(meta.customFields).length === 0 ? (
+              {Object.entries(meta.customFields || {}).filter(([k]) => !k.toLowerCase().includes('cooldown')).length === 0 ? (
                 <span className="text-xs text-slate-700 font-bold italic">{t('crm.panel.fields.no_fields')}</span>
               ) : (
-                Object.entries(meta.customFields).map(([k, v]) => (
-                  <div key={k} className="flex items-center justify-between py-1.5 px-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl shadow-[2px_2px_0px_0px_#0A0A0A]">
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider">{k}</span>
-                      <span className="text-xs font-bold text-slate-800 truncate">{v}</span>
+                Object.entries(meta.customFields || {})
+                  .filter(([k]) => !k.toLowerCase().includes('cooldown'))
+                  .map(([k, v]) => (
+                    <div key={k} className="flex items-center justify-between py-1.5 px-2.5 bg-white border-2 border-[#0A0A0A] rounded-xl shadow-[2px_2px_0px_0px_#0A0A0A]">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider">{k}</span>
+                        <span className="text-xs font-bold text-slate-800 truncate">{v}</span>
+                      </div>
+                      <button
+                        onClick={() => handleRemoveCustomField(k)}
+                        className="p-0.5 text-[#0A0A0A] hover:text-rose-600 rounded transition-all cursor-pointer"
+                      >
+                        <X size={12} />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleRemoveCustomField(k)}
-                      className="p-0.5 text-[#0A0A0A] hover:text-rose-600 rounded transition-all cursor-pointer"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                ))
+                  ))
               )}
             </div>
           </div>

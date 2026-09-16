@@ -17,6 +17,9 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class WebhookServiceImpl implements WebhookService {
 
+    private static final int MAX_DISPATCH_ATTEMPTS = 4;
+    private static final long RETRY_DELAY_MS = 2000L;
+
     private final HttpClient httpClient;
 
     @Override
@@ -30,8 +33,7 @@ public class WebhookServiceImpl implements WebhookService {
                 .POST(HttpRequest.BodyPublishers.ofString(payload))
                 .build();
 
-        int maxAttempts = 4;
-        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+        for (int attempt = 1; attempt <= MAX_DISPATCH_ATTEMPTS; attempt++) {
             try {
                 log.info("Sending webhook to {} (attempt {})", url, attempt);
                 HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
@@ -49,9 +51,9 @@ public class WebhookServiceImpl implements WebhookService {
                 log.warn("Webhook attempt {} failed with exception: {}", attempt, e.getMessage());
             }
 
-            if (attempt < maxAttempts) {
+            if (attempt < MAX_DISPATCH_ATTEMPTS) {
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(RETRY_DELAY_MS);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                     log.error("Webhook dispatch retry interrupted for {}", url);
@@ -60,7 +62,7 @@ public class WebhookServiceImpl implements WebhookService {
             }
         }
 
-        log.error("Failed to deliver webhook to {} after {} attempts", url, maxAttempts);
+        log.error("Failed to deliver webhook to {} after {} attempts", url, MAX_DISPATCH_ATTEMPTS);
     }
 
     private String calculateHmac(String payload, String secret) {

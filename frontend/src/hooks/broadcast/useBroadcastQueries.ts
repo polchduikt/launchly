@@ -8,6 +8,7 @@ import {
   sendCampaignApi,
   getTagsApi,
   createTagApi,
+  updateTagApi,
   deleteTagApi,
   deleteCampaignApi,
   cancelScheduleApi,
@@ -109,6 +110,19 @@ export const useCreateTagMutation = (botId: number) => {
     mutationFn: (req: CreateTagRequest) => createTagApi(botId, req),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tags', botId] });
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
+    },
+  });
+};
+
+export const useUpdateTagMutation = (botId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ tagId, req }: { tagId: number; req: CreateTagRequest }) =>
+      updateTagApi(botId, tagId, req),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tags', botId] });
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
     },
   });
 };
@@ -119,6 +133,7 @@ export const useDeleteTagMutation = (botId: number) => {
     mutationFn: (tagId: number) => deleteTagApi(botId, tagId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tags', botId] });
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
     },
   });
 };

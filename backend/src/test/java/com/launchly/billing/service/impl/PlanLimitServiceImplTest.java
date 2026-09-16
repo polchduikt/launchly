@@ -1,5 +1,6 @@
 package com.launchly.billing.service.impl;
 
+import com.launchly.auth.repository.UserRepository;
 import com.launchly.billing.entity.Plan;
 import com.launchly.billing.entity.Subscription;
 import com.launchly.billing.entity.SubscriptionStatus;
@@ -45,7 +46,7 @@ class PlanLimitServiceImplTest {
     private EncryptionUtil encryptionUtil;
 
     @Mock
-    private com.launchly.auth.repository.UserRepository userRepository;
+    private UserRepository userRepository;
 
     @InjectMocks
     private PlanLimitServiceImpl planLimitService;

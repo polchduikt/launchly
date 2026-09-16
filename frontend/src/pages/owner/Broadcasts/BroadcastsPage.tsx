@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useBotStore } from '../../../store/useBotStore';
-import { t, getLanguage } from '../../../i18n/config';
+import { useTranslation } from '../../../i18n/config';
 import { ROUTES } from '../../../routes/paths';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
@@ -19,6 +19,7 @@ import { useCreateBroadcastForm } from '../../../hooks/broadcast/useCreateBroadc
 import { StatusBadge, CreateBroadcastDialog, EditBroadcastDialog } from './components';
 import type { CampaignResponse } from '../../../types/broadcast';
 import { getFilterText } from '../../../utils/filterText';
+import { translateBlockReason } from '../../../utils/blockReason';
 import {
   Bell,
   Flame,
@@ -34,10 +35,11 @@ import {
 } from 'lucide-react';
 
 export const BroadcastsPage: React.FC = () => {
+  const { t, getLanguage } = useTranslation();
   const navigate = useNavigate();
   const activeBotId = useBotStore((state) => state.activeBotId);
-  const { data: bots = [] } = useBotsQuery();
-  const { data: installedTemplates = [] } = useQuery({
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
+  const { data: installedTemplates = [], isLoading: isTemplatesLoading } = useQuery({
     queryKey: ['installed_templates'],
     queryFn: getInstalledTemplatesApi,
   });
@@ -59,6 +61,14 @@ export const BroadcastsPage: React.FC = () => {
       queryKey: ['campaigns', bot.id],
       queryFn: () => getCampaignsApi(bot.id),
       enabled: bots.length > 0,
+      refetchInterval: (query: { state: { data?: CampaignResponse[] } }) => {
+        const data = query.state.data;
+        if (!data) return false;
+        const hasActive = data.some(
+          (c: CampaignResponse) => c.status === 'IN_PROGRESS' || c.status === 'SCHEDULED'
+        );
+        return hasActive ? 2000 : false;
+      },
     })),
   });
 
@@ -148,63 +158,9 @@ export const BroadcastsPage: React.FC = () => {
     }
   };
 
-  const translateBlockReason = (reason?: string | null) => {
-    if (!reason) return '';
-    const lang = getLanguage();
-    const ukMap: Record<string, string> = {
-      'Suspicious activity': 'Підозріла активність',
-      'Violation of platform rules': 'Порушення правил платформи',
-      'Spam or unauthorized bulk messaging': 'Спам або несанкціонована розсилка',
-      'Other reason': 'Інша причина',
-      'Підозріла активність': 'Підозріла активність',
-      'Порушення правил платформи': 'Порушення правил платформи',
-      'Спам або несанкціонована розсилка': 'Спам або несанкціонована розсилка',
-      'Інша причина': 'Інша причина',
-    };
-    const enMap: Record<string, string> = {
-      'Suspicious activity': 'Suspicious activity',
-      'Violation of platform rules': 'Violation of platform rules',
-      'Spam or unauthorized bulk messaging': 'Spam or unauthorized bulk messaging',
-      'Other reason': 'Other reason',
-      'Підозріла активність': 'Suspicious activity',
-      'Порушення правил платформи': 'Violation of platform rules',
-      'Спам або несанкціонована розсилка': 'Spam or unauthorized bulk messaging',
-      'Інша причина': 'Other reason',
-    };
-    if (lang === 'uk') {
-      return ukMap[reason] || t(reason) || reason;
-    }
-    return enMap[reason] || t(reason) || reason;
-  };
 
-  if (bots.length === 0 && installedTemplates.length === 0) {
-    return (
-      <DashboardLayout>
-        <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">
-          <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
-            <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
-              <Bell size={32} />
-            </div>
-            <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">
-              {t('broadcasts.connect_bot_title')}
-            </p>
-            <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">
-              {t('broadcasts.connect_bot_desc')}
-            </p>
-            <div className="pt-2">
-              <button
-                onClick={() => navigate('/connect-bot')}
-                className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
-              >
-                <Plus size={14} />
-                <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const isLoadingTotal = isBotsLoading || isTemplatesLoading || isCampaignsLoading;
+  const hasNoBots = !isBotsLoading && !isTemplatesLoading && bots.length === 0 && installedTemplates.length === 0;
 
   return (
     <DashboardLayout>
@@ -222,14 +178,14 @@ export const BroadcastsPage: React.FC = () => {
         <div className="flex items-center justify-between pb-6 border-b-2 border-[#0A0A0A]">
           <div>
             <h1 className="font-['Anybody',sans-serif] text-2xl font-black text-[#0A0A0A] uppercase tracking-tight select-none">{t('broadcasts.title')}</h1>
-            <p className="font-['JetBrains_Mono',monospace] text-xs text-slate-700 font-bold mt-1 uppercase">
+            <p className="font-['Geist',sans-serif] text-xs text-slate-700 font-bold mt-1">
               {t('broadcasts.subtitle')}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#0A0A0A] rounded-xl text-[#0A0A0A] font-['JetBrains_Mono',monospace] text-xs font-bold hover:bg-[#0A0A0A] hover:text-[#F2EBDD] transition-all cursor-pointer select-none"
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase text-[#F2EBDD] bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_#0A0A0A] select-none"
             >
               <Plus size={14} />
               <span>{t('broadcasts.btn.new')}</span>
@@ -237,9 +193,33 @@ export const BroadcastsPage: React.FC = () => {
           </div>
         </div>
 
-        {isCampaignsLoading ? (
-          <div className="flex items-center justify-center py-20">
+        {isLoadingTotal ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-3 font-['JetBrains_Mono',monospace]">
             <Loader2 className="animate-spin text-[#0A0A0A]" size={32} />
+            <span className="text-xs font-bold text-[#0A0A0A] uppercase tracking-wider">{t('common.loading', 'Loading...')}</span>
+          </div>
+        ) : hasNoBots ? (
+          <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">
+            <div className="max-w-md space-y-4 font-['JetBrains_Mono',monospace] bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 shadow-[4px_4px_0px_#0A0A0A]">
+              <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center mx-auto text-[#0A0A0A]">
+                <Bell size={32} />
+              </div>
+              <p className="font-['Anybody',sans-serif] font-black text-[#0A0A0A] text-xl uppercase tracking-tight">
+                {t('broadcasts.connect_bot_title')}
+              </p>
+              <p className="font-['Geist',sans-serif] text-xs text-[#0A0A0A]/70 font-semibold max-w-xs mx-auto leading-relaxed">
+                {t('broadcasts.connect_bot_desc')}
+              </p>
+              <div className="pt-2">
+                <button
+                  onClick={() => navigate('/connect-bot')}
+                  className="px-6 py-3 bg-[#0A0A0A] text-[#F2EBDD] font-['JetBrains_Mono',monospace] text-xs font-black uppercase tracking-wider border-2 border-[#0A0A0A] shadow-[4px_4px_0px_#0A0A0A] hover:bg-white hover:text-[#0A0A0A] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer inline-flex items-center gap-2"
+                >
+                  <Plus size={14} />
+                  <span>{t('connect_bot.btn_connect_existing', 'Connect Bot')}</span>
+                </button>
+              </div>
+            </div>
           </div>
         ) : campaigns.length === 0 ? (
           <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl p-10 md:p-16 text-center max-w-4xl mx-auto mt-6">
@@ -286,8 +266,8 @@ export const BroadcastsPage: React.FC = () => {
                   {campaigns.map((camp) => {
                     const campaignBot = bots.find((b) => b.id === camp.botId);
                     const isBlocked = camp.blocked || camp.status === 'BLOCKED';
-                    const templateNameTag = (camp as any).templateName || campaignBot?.templateName;
-                    const isTemplateBot = !!templateNameTag || (campaignBot?.isTemplate ?? false) || ((camp as any).isTemplate ?? false);
+                    const templateNameTag = camp.templateName || campaignBot?.templateName;
+                    const isTemplateBot = !!templateNameTag || (campaignBot?.isTemplate ?? false) || (camp.isTemplate ?? false);
 
                     return (
                       <tr
@@ -476,9 +456,9 @@ export const BroadcastsPage: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setBlockedDetailsCampaign(null)}
-                  className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-all cursor-pointer"
+                  className="w-8 h-8 flex items-center justify-center rounded-xl border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white transition-all cursor-pointer shadow-sm"
                 >
-                  <X size={18} />
+                  <X size={16} />
                 </button>
               </div>
 
@@ -496,7 +476,7 @@ export const BroadcastsPage: React.FC = () => {
               <div className="pt-2">
                 <button
                   onClick={() => setBlockedDetailsCampaign(null)}
-                  className="w-full py-3 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                  className="w-full py-3 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] border-2 border-[#0A0A0A] text-[#F2EBDD] font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
                 >
                   {t('common.close') || 'Зрозуміло'}
                 </button>

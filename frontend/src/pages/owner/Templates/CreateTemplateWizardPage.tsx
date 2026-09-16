@@ -28,6 +28,10 @@ import {
   getTemplateByShareCodeApi,
   type TemplateResponse,
 } from '../../../api/templateApi';
+import { useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { templateWizardSchema } from '../../../schemas';
+import { toast } from '../../../store/useToastStore';
 import { useTranslation } from '../../../i18n/config';
 import type { CampaignResponse, TagResponse } from '../../../types';
 
@@ -50,23 +54,37 @@ export const CreateTemplateWizardPage: React.FC = () => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [campaigns, setCampaigns] = useState<CampaignResponse[]>([]);
   const [tags, setTags] = useState<TagResponse[]>([]);
-  const [customFields, setCustomFields] = useState<any[]>([]);
+  const [customFields, setCustomFields] = useState<Record<string, unknown>[]>([]);
   const [loadingRealData, setLoadingRealData] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
-  const [templateName, setTemplateName] = useState('');
-  const [isProtected, setIsProtected] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(templateWizardSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      guideUrl: '',
+      videoUrl: '',
+      isProtected: false,
+    },
+  });
+
+  const templateName = useWatch({ control, name: 'name', defaultValue: '' });
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [createdTemplate, setCreatedTemplate] = useState<TemplateResponse | null>(null);
   const [copied, setCopied] = useState(false);
-  const [aboutText, setAboutText] = useState('');
-  const [guideUrl, setGuideUrl] = useState('');
-  const [videoUrl, setVideoUrl] = useState('');
   const [savingDetails, setSavingDetails] = useState(false);
   const [detailsSavedMsg, setDetailsSavedMsg] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     if (bots.length === 0) return;
     setLoadingRealData(true);
 
@@ -80,6 +98,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
       Promise.all(fieldPromises),
     ])
       .then(([allCamps, allTags, allFields]) => {
+        if (!isMounted) return;
         const mergedCamps: CampaignResponse[] = [];
         const campMap = new Map<number, CampaignResponse>();
         allCamps.flat().forEach((c) => {
@@ -100,30 +119,33 @@ export const CreateTemplateWizardPage: React.FC = () => {
         });
         setTags(mergedTags);
 
-        const mergedFields: any[] = [];
+        const mergedFields: Record<string, unknown>[] = [];
         const seenFieldNames = new Set<string>();
         allFields.forEach((fRes) => {
           if (!fRes) return;
-          let list: any[] = [];
+          let list: unknown[] = [];
           if (Array.isArray(fRes)) {
             list = fRes;
           } else if (typeof fRes === 'object') {
-            if (Array.isArray(fRes.fields)) {
-              list = [...fRes.fields];
+            const obj = fRes as Record<string, unknown>;
+            if (Array.isArray(obj.fields)) {
+              list = [...obj.fields];
             } else {
-              Object.keys(fRes).forEach((k) => {
+              Object.keys(obj).forEach((k) => {
                 if (k !== 'folders' && k !== 'archivedFields') {
-                  list.push({ name: k, label: typeof fRes[k] === 'string' ? fRes[k] : k });
+                  const val = obj[k];
+                  list.push({ name: k, label: typeof val === 'string' ? val : k });
                 }
               });
             }
           }
 
-          list.forEach((f: any) => {
-            const name = (typeof f === 'string' ? f : f?.name || f?.label || '').trim();
+          list.forEach((f: unknown) => {
+            const item = f as Record<string, unknown> | string;
+            const name = (typeof item === 'string' ? item : String(item?.name || item?.label || '')).trim();
             if (name && !seenFieldNames.has(name.toLowerCase())) {
               seenFieldNames.add(name.toLowerCase());
-              mergedFields.push(typeof f === 'string' ? { name, type: 'Text' } : f);
+              mergedFields.push(typeof item === 'string' ? { name, type: 'Text' } : (item as Record<string, unknown>));
             }
           });
         });
@@ -137,15 +159,17 @@ export const CreateTemplateWizardPage: React.FC = () => {
         if (editShareCode) {
           getTemplateByShareCodeApi(editShareCode).then((existingTpl) => {
             if (currentUser && existingTpl.creatorId && existingTpl.creatorId !== currentUser.id) {
-              alert(t('template.error.not_owner', 'Ви не можете редагувати чужий шаблон. Лише власник може вносити зміни.'));
+              toast.error(t('template.error.not_owner', 'Ви не можете редагувати чужий шаблон. Лише власник може вносити зміни.'));
               navigate('/templates');
               return;
             }
-            setTemplateName(existingTpl.name);
-            setAboutText(existingTpl.description || '');
-            setGuideUrl(existingTpl.guideUrl || '');
-            setVideoUrl(existingTpl.videoUrl || '');
-            setIsProtected(existingTpl.isProtected);
+            reset({
+              name: existingTpl.name || '',
+              description: existingTpl.description || '',
+              guideUrl: existingTpl.guideUrl || '',
+              videoUrl: existingTpl.videoUrl || '',
+              isProtected: Boolean(existingTpl.isProtected),
+            });
             if (existingTpl.avatarUrl) {
               setAvatarPreview(existingTpl.avatarUrl);
             }
@@ -169,8 +193,14 @@ export const CreateTemplateWizardPage: React.FC = () => {
           }).catch(() => {});
         }
       })
-      .finally(() => setLoadingRealData(false));
-  }, [bots, editShareCode, currentUser, navigate, t]);
+      .finally(() => {
+        if (isMounted) setLoadingRealData(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [bots, editShareCode, currentUser, navigate, t, reset]);
 
   const automationItems: SelectionItem[] = bots.map((b) => ({
     id: `automation_${b.id}`,
@@ -186,7 +216,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
 
   const fieldItems: SelectionItem[] = customFields.map((f, idx) => ({
     id: `field_${idx}`,
-    name: f.name || f.label || `${t('template.create.fallback_field', 'Поле')} #${idx + 1}`,
+    name: String(f.name || f.label || `${t('template.create.fallback_field', 'Поле')} #${idx + 1}`),
     category: 'fields',
   }));
 
@@ -228,8 +258,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
     }
   };
 
-  const handleCreateOrUpdateTemplate = async () => {
-    if (!templateName.trim()) return;
+  const handleCreateOrUpdateTemplate = handleSubmit(async (formData) => {
     setSubmitting(true);
     try {
       const selectedFlows = selectedIds.filter((id) => id.startsWith('automation_'));
@@ -259,65 +288,68 @@ export const CreateTemplateWizardPage: React.FC = () => {
 
       if (isEditMode && editShareCode) {
         const res = await updateTemplateApi(editShareCode, {
-          name: templateName,
-          description: aboutText,
+          name: formData.name,
+          description: formData.description,
           avatarUrl: avatarPreview || undefined,
-          isProtected,
-          guideUrl,
-          videoUrl,
+          isProtected: formData.isProtected,
+          guideUrl: formData.guideUrl || undefined,
+          videoUrl: formData.videoUrl || undefined,
           selectedFlowIds: selectedFlows,
           selectedBroadcastIds: selectedBroadcasts,
           selectedFieldIds: selectedFields,
           selectedTagIds: selectedTags,
         });
         setCreatedTemplate(res);
+        toast.success(t('template.create.updated_success', 'Шаблон успішно оновлено'));
         setStep(3);
       } else {
         if (!targetSourceBotId) return;
         const res = await createTemplateApi({
           botId: targetSourceBotId,
-          name: templateName,
-          description: aboutText,
+          name: formData.name,
+          description: formData.description,
           avatarUrl: avatarPreview || undefined,
-          isProtected,
-          guideUrl,
-          videoUrl,
+          isProtected: formData.isProtected,
+          guideUrl: formData.guideUrl || undefined,
+          videoUrl: formData.videoUrl || undefined,
           selectedFlowIds: selectedFlows,
           selectedBroadcastIds: selectedBroadcasts,
           selectedFieldIds: selectedFields,
           selectedTagIds: selectedTags,
         });
         setCreatedTemplate(res);
+        toast.success(t('template.create.success_sub', 'Шаблон успішно створено'));
         setStep(3);
       }
-    } catch (err) {
-      alert(t('template.create.error_create', 'Помилка збереження шаблону. Спробуйте пізніше.'));
+    } catch {
+      toast.error(t('template.create.error_create', 'Помилка збереження шаблону. Спробуйте пізніше.'));
     } finally {
       setSubmitting(false);
     }
-  };
+  });
 
-  const handleSaveDetails = async () => {
+  const handleSaveDetails = handleSubmit(async (formData) => {
     if (!createdTemplate?.shareCode) return;
     setSavingDetails(true);
     try {
       const updated = await updateTemplateApi(createdTemplate.shareCode, {
-        name: templateName,
-        description: aboutText,
+        name: formData.name,
+        description: formData.description,
         avatarUrl: avatarPreview || undefined,
-        isProtected,
-        guideUrl,
-        videoUrl,
+        isProtected: formData.isProtected,
+        guideUrl: formData.guideUrl || undefined,
+        videoUrl: formData.videoUrl || undefined,
       });
       setCreatedTemplate(updated);
       setDetailsSavedMsg(true);
+      toast.success(t('template.create.saved_success', 'Налаштування шаблону успішно збережено!'));
       setTimeout(() => setDetailsSavedMsg(false), 2500);
-    } catch (err) {
-      alert(t('template.create.error_save', 'Помилка збереження даних.'));
+    } catch {
+      toast.error(t('template.create.error_save', 'Помилка збереження даних.'));
     } finally {
       setSavingDetails(false);
     }
-  };
+  });
 
   const handleCopyLink = () => {
     const url = createdTemplate?.shareUrl || (createdTemplate?.shareCode ? `${window.location.origin}/templates/install/${createdTemplate.shareCode}` : '');
@@ -333,8 +365,8 @@ export const CreateTemplateWizardPage: React.FC = () => {
         <div className="w-full h-16 min-h-[64px] max-h-[64px] bg-white border-b-2 border-[#0A0A0A] px-6 flex items-center justify-between gap-4 sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => (step > 1 ? setStep((step - 1) as any) : navigate('/templates'))}
-              className="px-3 py-1.5 bg-[#F2EBDD] hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border border-[#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1 shrink-0"
+              onClick={() => (step === 3 ? setStep(2) : step === 2 ? setStep(1) : navigate('/templates'))}
+              className="px-3 py-1.5 bg-white hover:bg-[#0A0A0A] hover:text-white border border-[#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1 shrink-0"
             >
               <ChevronLeft size={15} />
               <span>{t('common.back', 'Назад')}</span>
@@ -354,7 +386,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
               <button
                 onClick={() => setStep(2)}
                 disabled={selectedIds.length === 0}
-                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>{t('template.create.next_step', 'Далі')}</span>
                 <ChevronRight size={15} />
@@ -364,7 +396,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
               <button
                 onClick={handleCreateOrUpdateTemplate}
                 disabled={submitting || !templateName.trim()}
-                className="px-4 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <>
@@ -437,7 +469,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                         >
                           <button
                             onClick={() => setCollapsed({ ...collapsed, [cat.key]: !isCollapsed })}
-                            className="w-full p-4 flex items-center justify-between bg-[#F2EBDD] border-b-2 border-[#0A0A0A] cursor-pointer"
+                            className="w-full p-4 flex items-center justify-between bg-slate-50 border-b-2 border-[#0A0A0A] cursor-pointer"
                           >
                             <span className="font-black text-xs uppercase text-[#0A0A0A] flex items-center gap-2">
                               {cat.icon}
@@ -459,7 +491,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                                 cat.items.map((item) => (
                                   <label
                                     key={item.id}
-                                    className="flex items-center gap-3 pt-2.5 first:pt-0 cursor-pointer hover:bg-amber-50 p-2 transition-all"
+                                    className="flex items-center gap-3 pt-2.5 first:pt-0 cursor-pointer hover:bg-slate-100 p-2 transition-all rounded-lg"
                                   >
                                     <input
                                       type="checkbox"
@@ -484,7 +516,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                       <h3 className="font-black text-xs uppercase text-[#0A0A0A]">
                         {t('template.create.selected_items_title', 'Що обрано')}
                       </h3>
-                      <span className="px-2 py-0.5 bg-amber-300 border border-[#0A0A0A] font-black text-[10px]">
+                      <span className="px-2 py-0.5 bg-[#0A0A0A] text-white border border-[#0A0A0A] font-black text-[10px] rounded">
                         {selectedIds.length}
                       </span>
                     </div>
@@ -570,11 +602,15 @@ export const CreateTemplateWizardPage: React.FC = () => {
                         </label>
                         <input
                           type="text"
-                          value={templateName}
-                          onChange={(e) => setTemplateName(e.target.value)}
+                          {...register('name')}
                           placeholder={t('template.create.template_name_placeholder', 'Введіть назву шаблону...')}
-                          className="w-full px-3.5 py-2.5 border-2 border-[#0A0A0A] bg-[#F2EBDD]/40 text-xs font-black focus:outline-none focus:bg-white"
+                          className={`w-full px-3.5 py-2.5 border-2 ${errors.name ? 'border-rose-600 bg-rose-50' : 'border-[#0A0A0A] bg-white'} text-xs font-black focus:outline-none`}
                         />
+                        {errors.name && (
+                          <span className="text-[10px] font-bold text-rose-600 mt-1 block">
+                            {errors.name.message}
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -592,8 +628,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                       </div>
                       <input
                         type="checkbox"
-                        checked={isProtected}
-                        onChange={(e) => setIsProtected(e.target.checked)}
+                        {...register('isProtected')}
                         className="w-5 h-5 border-2 border-[#0A0A0A] accent-indigo-600 cursor-pointer"
                       />
                     </div>
@@ -607,7 +642,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <div className="p-3 bg-amber-50 border-2 border-[#0A0A0A] flex items-center justify-between text-xs font-black">
+                    <div className="p-3 bg-slate-100 border-2 border-[#0A0A0A] flex items-center justify-between text-xs font-black text-slate-900 rounded-lg">
                       <span>{t('template.create.selected_items_count', '{{count}} обраних елементів', { count: selectedIds.length })}</span>
                     </div>
 
@@ -653,15 +688,15 @@ export const CreateTemplateWizardPage: React.FC = () => {
                       type="text"
                       readOnly
                       value={createdTemplate?.shareUrl || (createdTemplate?.shareCode ? `${window.location.origin}/templates/install/${createdTemplate.shareCode}` : '')}
-                      className="flex-1 px-4 py-2.5 border-2 border-[#0A0A0A] bg-[#F2EBDD] text-xs font-black select-all"
+                      className="flex-1 px-4 py-2.5 border-2 border-[#0A0A0A] bg-slate-50 text-xs font-black select-all"
                     />
                     <button
                       onClick={handleCopyLink}
-                      className="px-4 py-2.5 bg-amber-400 hover:bg-amber-500 border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                      className="px-4 py-2.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
                     >
                       {copied ? (
                         <>
-                          <Check size={14} className="text-emerald-800" />
+                          <Check size={14} className="text-emerald-400" />
                           <span>{t('template.copied', 'Скопійовано!')}</span>
                         </>
                       ) : (
@@ -687,11 +722,15 @@ export const CreateTemplateWizardPage: React.FC = () => {
                     </label>
                     <textarea
                       rows={4}
-                      value={aboutText}
-                      onChange={(e) => setAboutText(e.target.value)}
+                      {...register('description')}
                       placeholder={t('template.create.about_placeholder', 'Опишіть як користуватися цим шаблоном, для якого бізнесу тощо...')}
-                      className="w-full p-3 border-2 border-[#0A0A0A] bg-[#F2EBDD]/40 text-xs font-bold focus:outline-none focus:bg-white resize-none"
+                      className={`w-full p-3 border-2 ${errors.description ? 'border-rose-600 bg-rose-50' : 'border-[#0A0A0A] bg-white'} text-xs font-bold focus:outline-none resize-none`}
                     />
+                    {errors.description && (
+                      <span className="text-[10px] font-bold text-rose-600 mt-1 block">
+                        {errors.description.message}
+                      </span>
+                    )}
                   </div>
 
                   <div>
@@ -700,11 +739,15 @@ export const CreateTemplateWizardPage: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      value={guideUrl}
-                      onChange={(e) => setGuideUrl(e.target.value)}
-                      placeholder={t('template.create.guide_url_placeholder', 'e.g. mysite.com/my-template-guide')}
-                      className="w-full px-3 py-2 border-2 border-[#0A0A0A] bg-[#F2EBDD]/40 text-xs font-bold focus:outline-none focus:bg-white"
+                      {...register('guideUrl')}
+                      placeholder={t('template.create.guide_url_placeholder', 'e.g. https://mysite.com/my-template-guide')}
+                      className={`w-full px-3 py-2 border-2 ${errors.guideUrl ? 'border-rose-600 bg-rose-50' : 'border-[#0A0A0A] bg-white'} text-xs font-bold focus:outline-none`}
                     />
+                    {errors.guideUrl && (
+                      <span className="text-[10px] font-bold text-rose-600 mt-1 block">
+                        {errors.guideUrl.message}
+                      </span>
+                    )}
                   </div>
 
                   <div>
@@ -713,11 +756,15 @@ export const CreateTemplateWizardPage: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      value={videoUrl}
-                      onChange={(e) => setVideoUrl(e.target.value)}
+                      {...register('videoUrl')}
                       placeholder={t('template.create.video_url_placeholder', 'e.g. https://www.youtube.com/watch?v=XXXXXX')}
-                      className="w-full px-3 py-2 border-2 border-[#0A0A0A] bg-[#F2EBDD]/40 text-xs font-bold focus:outline-none focus:bg-white"
+                      className={`w-full px-3 py-2 border-2 ${errors.videoUrl ? 'border-rose-600 bg-rose-50' : 'border-[#0A0A0A] bg-white'} text-xs font-bold focus:outline-none`}
                     />
+                    {errors.videoUrl && (
+                      <span className="text-[10px] font-bold text-rose-600 mt-1 block">
+                        {errors.videoUrl.message}
+                      </span>
+                    )}
                   </div>
 
                   {detailsSavedMsg && (
@@ -730,7 +777,7 @@ export const CreateTemplateWizardPage: React.FC = () => {
                     <button
                       onClick={handleSaveDetails}
                       disabled={savingDetails}
-                      className="px-5 py-2 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-2"
+                      className="px-5 py-2 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-white border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer flex items-center gap-2"
                     >
                       {savingDetails ? (
                         <>

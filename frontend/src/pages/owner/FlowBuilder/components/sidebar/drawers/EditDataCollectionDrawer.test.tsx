@@ -37,5 +37,6 @@ describe('EditDataCollectionDrawer', () => {
       />
     );
     expect(screen.getByText('editor.data_collection.title')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /зображення/i })).toBeInTheDocument();
   });
 });

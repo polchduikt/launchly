@@ -65,4 +65,33 @@ describe('multiTabSync utility', () => {
   it('broadcasts events to localStorage without throwing', () => {
     expect(() => broadcastEvent('BOT_CHANGED', { botId: 10 })).not.toThrow();
   });
+
+  it('deduplicates identical messages arriving via multiple channels', () => {
+    const mockListener = vi.fn();
+    const unsubscribe = subscribeToSyncEvents(mockListener);
+
+    const duplicateMessage: SyncMessage = {
+      id: 'unique-msg-id-12345',
+      type: 'SYNC_QUERY_INVALIDATE',
+      senderTabId: 'other-tab-id',
+      timestamp: Date.now(),
+    };
+
+    const storageEvent1 = new StorageEvent('storage', {
+      key: 'launchly_multitab_sync_event',
+      newValue: JSON.stringify(duplicateMessage),
+    });
+
+    const storageEvent2 = new StorageEvent('storage', {
+      key: 'launchly_multitab_sync_event',
+      newValue: JSON.stringify(duplicateMessage),
+    });
+
+    window.dispatchEvent(storageEvent1);
+    window.dispatchEvent(storageEvent2);
+
+    expect(mockListener).toHaveBeenCalledTimes(1);
+    expect(mockListener).toHaveBeenCalledWith(duplicateMessage);
+    unsubscribe();
+  });
 });

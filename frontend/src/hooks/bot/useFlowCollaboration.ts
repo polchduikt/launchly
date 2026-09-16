@@ -94,12 +94,11 @@ export const useFlowCollaboration = (
     const token = useAuthStore.getState().accessToken;
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
-    const wsUrl = token
-      ? `${protocol}//${host}/ws?token=${encodeURIComponent(token)}`
-      : `${protocol}//${host}/ws`;
+    const wsUrl = `${protocol}//${host}/ws`;
 
     const client = new Client({
       brokerURL: wsUrl,
+      connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,

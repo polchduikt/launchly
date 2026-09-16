@@ -14,26 +14,35 @@ interface EditorStateLocal {
 }
 
 import { useEffect } from 'react';
-import { getCustomFieldsApi, saveCustomFieldsApi } from '../../../../../../api/bot';
+import { useCustomFieldsQuery, useSaveCustomFieldsMutation } from '../../../../../../hooks/bot/useCustomFieldsQuery';
 
 export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, handleChange, editorState }) => {
   const activeBotId = useBotStore((state) => state.activeBotId);
   const { data: tags = [] } = useTagsQuery(activeBotId || 0);
 
+  const { data: customFieldsData } = useCustomFieldsQuery(activeBotId);
+  const saveCustomFieldsMutation = useSaveCustomFieldsMutation(activeBotId);
   const [userFields, setUserFields] = useState<Array<{ name: string; type: string; description: string }>>([]);
 
   useEffect(() => {
-    if (activeBotId) {
-      getCustomFieldsApi(activeBotId)
-        .then((data) => {
-          if (data && typeof data === 'object') {
-            if (Array.isArray(data.fields)) setUserFields(data.fields);
-            else if (Array.isArray(data)) setUserFields(data);
-          }
-        })
-        .catch((err) => console.error('Failed to load custom fields:', err));
+    if (customFieldsData && typeof customFieldsData === 'object') {
+      const list = Array.isArray(customFieldsData.fields)
+        ? customFieldsData.fields
+        : Array.isArray(customFieldsData)
+          ? customFieldsData
+          : [];
+      setUserFields(
+        list.map((f: unknown) => {
+          const item = f as { name?: string; type?: string; description?: string } | string;
+          return {
+            name: typeof item === 'string' ? item : item?.name || '',
+            type: typeof item === 'string' ? 'Text' : item?.type || 'Text',
+            description: typeof item === 'string' ? '' : item?.description || '',
+          };
+        }).filter((f: { name: string }) => Boolean(f.name))
+      );
     }
-  }, [activeBotId]);
+  }, [customFieldsData]);
 
   const customFields = useMemo(() => {
     return userFields.map(f => f.name);
@@ -44,18 +53,38 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
     const updated = [...userFields, newField];
     setUserFields(updated);
     if (activeBotId) {
-      saveCustomFieldsApi(activeBotId, { fields: updated }).catch((err) =>
-        console.error('Failed to save custom field:', err)
-      );
+      saveCustomFieldsMutation.mutate({ fields: updated });
     }
   };
 
   const rawBranches = data?.branches;
-  const branches = (Array.isArray(rawBranches)
-    ? rawBranches
-    : (data?.variable
-        ? [{ id: 'branch_0', matchType: 'all', conditions: [{ id: 'legacy', variable: data.variable, operator: data.operator, value: data.value, caseSensitive: false }] }]
-        : [{ id: 'branch_0', matchType: 'all', conditions: [] }])) as ConditionBranch[];
+  const variable = data?.variable;
+  const operator = data?.operator;
+  const val = data?.value;
+
+  const branches = useMemo(() => {
+    if (Array.isArray(rawBranches)) {
+      return rawBranches as ConditionBranch[];
+    }
+    if (variable) {
+      return [
+        {
+          id: 'branch_0',
+          matchType: 'all',
+          conditions: [
+            {
+              id: 'legacy',
+              variable: variable as string,
+              operator: operator as string,
+              value: val as string,
+              caseSensitive: false,
+            },
+          ],
+        },
+      ] as ConditionBranch[];
+    }
+    return [{ id: 'branch_0', matchType: 'all', conditions: [] }] as ConditionBranch[];
+  }, [rawBranches, variable, operator, val]);
 
   type ConditionItem = NonNullable<ConditionBranch['conditions']>[number] & { caseSensitive?: boolean };
 
@@ -239,7 +268,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
               <button
                 type="button"
                 onClick={() => addCondition(branch.id!)}
-                className="w-full py-2.5 bg-white hover:bg-teal-50/30 border border-dashed border-teal-200 hover:border-teal-400 text-teal-650 hover:text-teal-700 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 select-none shadow-xs"
+                className="w-full py-2.5 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 select-none shadow-xs"
               >
                 <Plus size={13} />
                 <span>{t('editor.condition.add_condition')}</span>
@@ -256,7 +285,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
                     (editorState as EditorStateLocal).setIsNextStepDrawerOpen(true);
                   }
                 }}
-                className="w-full py-2.5 bg-white hover:bg-blue-50/20 border border-dashed border-blue-200 hover:border-blue-400 text-blue-600 hover:text-blue-700 text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"
+                className="w-full py-2.5 bg-white hover:bg-indigo-50/30 border border-indigo-200 hover:border-indigo-450 text-indigo-650 hover:text-indigo-700 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm select-none"
               >
                 {t('editor.condition.choose_next_step')}
               </button>
@@ -275,7 +304,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
         <button
           type="button"
           onClick={addBranch}
-          className="w-full py-2.5 bg-white hover:bg-teal-50/30 border border-dashed border-teal-200 hover:border-teal-400 text-teal-650 hover:text-teal-700 text-xs font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1 select-none shadow-xs"
+          className="w-full py-2.5 bg-white hover:bg-slate-50 border border-dashed border-slate-250 hover:border-slate-350 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 select-none shadow-xs"
         >
           <Plus size={13} />
           <span>{t('editor.condition.add_another')}</span>
@@ -289,7 +318,7 @@ export const ConditionNodeEditor: React.FC<ConditionNodeEditorProps> = ({ data, 
               (editorState as EditorStateLocal).setIsNextStepDrawerOpen(true);
             }
           }}
-          className="w-full py-2.5 bg-white hover:bg-blue-50/20 border border-dashed border-blue-200 hover:border-blue-400 text-blue-600 hover:text-blue-700 text-xs font-bold rounded-2xl transition-all cursor-pointer text-center select-none shadow-xs"
+          className="w-full py-2.5 bg-white hover:bg-indigo-50/30 border border-indigo-200 hover:border-indigo-450 text-indigo-650 hover:text-indigo-700 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm select-none"
         >
           {t('editor.condition.choose_next_step')}
         </button>

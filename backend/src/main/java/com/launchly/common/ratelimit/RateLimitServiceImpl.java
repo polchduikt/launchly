@@ -8,10 +8,11 @@ import io.github.bucket4j.distributed.proxy.ProxyManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 @Slf4j
@@ -19,7 +20,10 @@ import java.util.function.Supplier;
 public class RateLimitServiceImpl implements RateLimitService {
 
     private final ProxyManager<byte[]> proxyManager;
-    private final Map<String, Bucket> localBuckets = new ConcurrentHashMap<>();
+    private final Cache<String, Bucket> localBuckets = Caffeine.newBuilder()
+            .expireAfterAccess(Duration.ofMinutes(10))
+            .maximumSize(10_000)
+            .build();
 
     public RateLimitServiceImpl(@Autowired(required = false) ProxyManager<byte[]> proxyManager) {
         this.proxyManager = proxyManager;
@@ -47,7 +51,7 @@ public class RateLimitServiceImpl implements RateLimitService {
             }
         }
 
-        Bucket localBucket = localBuckets.computeIfAbsent(key, k -> {
+        Bucket localBucket = localBuckets.get(key, k -> {
             Bandwidth limit = Bandwidth.builder()
                     .capacity(capacity)
                     .refillGreedy(capacity, duration)
@@ -68,6 +72,6 @@ public class RateLimitServiceImpl implements RateLimitService {
 
     @Override
     public void reset(String key) {
-        localBuckets.remove(key);
+        localBuckets.invalidate(key);
     }
 }

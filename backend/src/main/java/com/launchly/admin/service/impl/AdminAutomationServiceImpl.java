@@ -48,7 +48,7 @@ public class AdminAutomationServiceImpl implements AdminAutomationService {
     private final AdminPeriodResolver periodResolver;
     private final AdminMapper adminMapper;
     private final MessageUtils messageUtils;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional(readOnly = true)

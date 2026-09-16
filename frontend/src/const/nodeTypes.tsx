@@ -11,50 +11,55 @@ import {
   RandomizerNode,
   CommentNode,
   StartAutomationNode,
+  CommandNode,
   StartBroadcastNode,
   AiNode,
+  MathNode,
+  LeaderboardNode,
+  CooldownNode,
+  SchedulerNode,
+  QueryNode,
+  InteractionNode,
+  SubscriptionCheckNode,
+  ModerationNode,
+  JoinRequestNode,
 } from '../pages/owner/FlowBuilder/components/nodes';
 
-const withCollaborationWrapper = <P extends { id: string; data?: Record<string, unknown>; selected?: boolean }>(
+const withCollaborationWrapper = <P extends { id: string; data?: Record<string, unknown>; selected?: boolean; dragging?: boolean }>(
   WrappedComponent: React.ComponentType<P>
 ) => {
   const ComponentWithCollaboration: React.FC<P> = (props) => {
-    const collaborator = (props.data as Record<string, any>)?._collaborator;
+    const collaborator = (props.data as { _collaborator?: { name?: string; avatar?: string } })?._collaborator;
     const isEditing = !!collaborator;
 
     return (
       <div className="relative">
-        {isEditing && collaborator && (
-          <div className="absolute -top-7 left-2 flex items-center gap-1.5 px-2 py-0.5 bg-violet-600 text-white text-[10px] font-extrabold rounded-full shadow-lg z-50 animate-in slide-in-from-bottom-2 duration-150 border border-white select-none">
+        {isEditing && (
+          <div className="absolute -top-6 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold shadow-sm z-50 animate-fade-in pointer-events-none">
             {collaborator.avatar ? (
               <img
                 src={collaborator.avatar}
                 alt={collaborator.name || 'User'}
-                className="w-3.5 h-3.5 rounded-full object-cover border border-white/40"
+                className="w-3.5 h-3.5 rounded-full object-cover ring-1 ring-white"
               />
             ) : (
-              <div className="w-3.5 h-3.5 rounded-full bg-violet-800 text-violet-200 flex items-center justify-center font-bold text-[8px] border border-white/40">
-                {(collaborator.name || 'U').charAt(0).toUpperCase()}
+              <div className="w-3.5 h-3.5 rounded-full bg-blue-450 flex items-center justify-center text-[8px] uppercase ring-1 ring-white">
+                {collaborator.name ? collaborator.name.charAt(0) : 'U'}
               </div>
             )}
-            <span className="truncate max-w-[120px]">{collaborator.name || 'User'} is editing</span>
+            <span className="truncate max-w-[100px]">{collaborator.name || 'Someone'} is editing</span>
           </div>
         )}
-        <div
-          className={`transition-all duration-200 rounded-[24px] ${
-            isEditing
-              ? 'ring-4 ring-violet-500 ring-offset-2 shadow-lg shadow-violet-500/25'
-              : ''
+        <WrappedComponent
+          {...props}
+          className={`${(props as { className?: string }).className || ''} ${
+            isEditing ? 'ring-2 ring-blue-500 ring-offset-2' : ''
           }`}
-        >
-          <WrappedComponent {...props} />
-        </div>
+        />
       </div>
     );
   };
-  const MemoizedComponentWithCollaboration = React.memo(ComponentWithCollaboration);
-  MemoizedComponentWithCollaboration.displayName = `withCollaborationWrapper(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
-  return MemoizedComponentWithCollaboration;
+  return ComponentWithCollaboration;
 };
 
 export const TempNode: React.FC = () => {
@@ -77,9 +82,19 @@ const ConditionNodeWrapped = withCollaborationWrapper(ConditionNode);
 const ApiCallNodeWrapped = withCollaborationWrapper(ApiCallNode);
 const EndNodeWrapped = withCollaborationWrapper(EndNode);
 const ActionNodeWrapped = withCollaborationWrapper(ActionNode);
+const MathNodeWrapped = withCollaborationWrapper(MathNode);
+const LeaderboardNodeWrapped = withCollaborationWrapper(LeaderboardNode);
+const CooldownNodeWrapped = withCollaborationWrapper(CooldownNode);
+const SchedulerNodeWrapped = withCollaborationWrapper(SchedulerNode);
+const QueryNodeWrapped = withCollaborationWrapper(QueryNode);
+const InteractionNodeWrapped = withCollaborationWrapper(InteractionNode);
+const SubscriptionCheckNodeWrapped = withCollaborationWrapper(SubscriptionCheckNode);
+const ModerationNodeWrapped = withCollaborationWrapper(ModerationNode);
 const SmartDelayNodeWrapped = withCollaborationWrapper(SmartDelayNode);
 const RandomizerNodeWrapped = withCollaborationWrapper(RandomizerNode);
 const StartAutomationNodeWrapped = withCollaborationWrapper(StartAutomationNode);
+const CommandNodeWrapped = withCollaborationWrapper(CommandNode);
+const JoinRequestNodeWrapped = withCollaborationWrapper(JoinRequestNode);
 const CommentNodeWrapped = withCollaborationWrapper(CommentNode);
 const AiNodeWrapped = withCollaborationWrapper(AiNode);
 
@@ -100,6 +115,14 @@ export const NODE_TYPES = {
   condition: ConditionNodeWrapped,
   Condition: ConditionNodeWrapped,
 
+  SUBSCRIPTION_CHECK: SubscriptionCheckNodeWrapped,
+  subscription_check: SubscriptionCheckNodeWrapped,
+  SubscriptionCheck: SubscriptionCheckNodeWrapped,
+
+  MODERATION: ModerationNodeWrapped,
+  moderation: ModerationNodeWrapped,
+  Moderation: ModerationNodeWrapped,
+
   API_CALL: ApiCallNodeWrapped,
   api_call: ApiCallNodeWrapped,
   ApiCall: ApiCallNodeWrapped,
@@ -111,6 +134,30 @@ export const NODE_TYPES = {
   ACTION: ActionNodeWrapped,
   action: ActionNodeWrapped,
   Action: ActionNodeWrapped,
+
+  MATH: MathNodeWrapped,
+  math: MathNodeWrapped,
+  Math: MathNodeWrapped,
+
+  LEADERBOARD: LeaderboardNodeWrapped,
+  leaderboard: LeaderboardNodeWrapped,
+  Leaderboard: LeaderboardNodeWrapped,
+
+  QUERY: QueryNodeWrapped,
+  query: QueryNodeWrapped,
+  Query: QueryNodeWrapped,
+
+  INTERACTION: InteractionNodeWrapped,
+  interaction: InteractionNodeWrapped,
+  Interaction: InteractionNodeWrapped,
+
+  COOLDOWN: CooldownNodeWrapped,
+  cooldown: CooldownNodeWrapped,
+  Cooldown: CooldownNodeWrapped,
+
+  SCHEDULER: SchedulerNodeWrapped,
+  scheduler: SchedulerNodeWrapped,
+  Scheduler: SchedulerNodeWrapped,
 
   SMART_DELAY: SmartDelayNodeWrapped,
   smart_delay: SmartDelayNodeWrapped,
@@ -124,6 +171,14 @@ export const NODE_TYPES = {
   start_automation: StartAutomationNodeWrapped,
   StartAutomation: StartAutomationNodeWrapped,
 
+  COMMAND: CommandNodeWrapped,
+  command: CommandNodeWrapped,
+  Command: CommandNodeWrapped,
+
+  JOIN_REQUEST: JoinRequestNodeWrapped,
+  join_request: JoinRequestNodeWrapped,
+  JoinRequest: JoinRequestNodeWrapped,
+
   COMMENT: CommentNodeWrapped,
   comment: CommentNodeWrapped,
   Comment: CommentNodeWrapped,
@@ -135,5 +190,3 @@ export const NODE_TYPES = {
   TEMP: TempNode,
   temp: TempNode,
 };
-
-

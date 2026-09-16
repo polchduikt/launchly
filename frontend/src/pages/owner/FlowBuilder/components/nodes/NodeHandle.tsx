@@ -31,6 +31,10 @@ export const NodeHandle: React.FC<NodeHandleProps> = ({
   const hasBgOverride = className.includes('!bg-') || !!(passedStyle && passedStyle.backgroundColor);
   const hasBorderOverride = className.includes('!border-') || !!(passedStyle && passedStyle.borderColor);
 
+  const statusClass = isConnected
+    ? `${hasBgOverride ? '' : 'handle-connected'} ${hasBorderOverride ? '' : 'border-[#7b8794]'}`
+    : `${hasBgOverride ? '' : 'handle-unconnected'} ${hasBorderOverride ? '' : 'border-slate-300'}`;
+
   return (
     <Handle
       type={type}
@@ -40,11 +44,7 @@ export const NodeHandle: React.FC<NodeHandleProps> = ({
       className={`!rounded-full !border-[1.5px] !transition-all ${
         isTarget
           ? '!z-0 !opacity-0 !bg-transparent !border-transparent'
-          : `!z-20 ${
-              isConnected
-                ? `${hasBgOverride ? '' : '!bg-[#7b8794]'} ${hasBorderOverride ? '' : '!border-[#7b8794]'}`
-                : `${hasBgOverride ? '' : '!bg-white'} ${hasBorderOverride ? '' : '!border-slate-300 hover:!border-slate-400'}`
-            }`
+          : `!z-20 ${statusClass}`
       } ${className}`}
     />
   );

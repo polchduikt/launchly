@@ -24,9 +24,9 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('CheckoutSuccessPage', () => {
-  it('renders checkout success confirmation and transaction id', () => {
+  it('renders checkout success confirmation and button', () => {
     render(<CheckoutSuccessPage />, { wrapper: Wrapper });
 
-    expect(screen.getByText('cs_test_123')).toBeInTheDocument();
+    expect(screen.getByText('Підписку Успішно Активовано!')).toBeInTheDocument();
   });
 });

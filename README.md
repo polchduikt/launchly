@@ -17,15 +17,24 @@
 [![Spring Boot 4.0.6](https://img.shields.io/badge/Spring%20Boot-4.0.6-brightgreen.svg?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D.svg?logo=redis&logoColor=white)](https://redis.io/)
+[![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-7.6-231F20.svg?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
 [![Liquibase](https://img.shields.io/badge/Liquibase-Migrations-006699.svg?logo=liquibase&logoColor=white)](https://www.liquibase.com/)
+[![WebSockets](https://img.shields.io/badge/WebSockets-STOMP-010101.svg?logo=socketdotio&logoColor=white)](https://docs.spring.io/spring-framework/reference/web/websocket.html)
 [![React 19](https://img.shields.io/badge/React-19-61dafb.svg?logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4-38b2ac.svg?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![TanStack Query](https://img.shields.io/badge/TanStack_Query-v5-FF4154.svg?logo=reactquery&logoColor=white)](https://tanstack.com/query)
+[![Zod](https://img.shields.io/badge/Zod-v4-3E67B1.svg?logo=zod&logoColor=white)](https://zod.dev/)
+[![AI Multi-Router](https://img.shields.io/badge/AI-Multi--Router-8E75B2.svg?logo=googlegemini&logoColor=white)](docs/backend/decisions/README.md#adr-002-multi-provider-ai-fallback-router-architecture)
+[![Stripe API](https://img.shields.io/badge/Stripe-API-635BFF.svg?logo=stripe&logoColor=white)](https://stripe.com/)
+[![Playwright](https://img.shields.io/badge/Playwright-E2E_Tests-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev/)
+[![Grafana k6](https://img.shields.io/badge/Grafana_k6-Load_Testing-7D64FF.svg?logo=k6&logoColor=white)](https://k6.io/)
 
 [![Docker](https://img.shields.io/badge/Docker-Multi--Stage-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
 [![Nginx](https://img.shields.io/badge/Nginx-Reverse_Proxy-009639.svg?logo=nginx&logoColor=white)](https://nginx.org/)
 [![Testcontainers](https://img.shields.io/badge/Testcontainers-Integration_Tests-0B1C28.svg)](https://testcontainers.com/)
 [![Telegram Bot API](https://img.shields.io/badge/Telegram-Bot_API-26A5E4.svg?logo=telegram&logoColor=white)](https://core.telegram.org/bots/api)
+[![Cloudflare Turnstile](https://img.shields.io/badge/Cloudflare-Turnstile-F38020.svg?logo=cloudflare&logoColor=white)](https://www.cloudflare.com/products/turnstile/)
 
 ---
 
@@ -36,8 +45,6 @@
 <p align="center">
   <img src="docs/images/preview.gif" alt="Launchly Platform Overview" width="100%" />
 </p>
-
----
 
 ## Tech Stack
 
@@ -51,6 +58,7 @@
 - **Transactional Outbox & DLQ**: Resilient asynchronous event delivery with retry backoff and Dead Letter Queue
 - **Distributed Idempotency Layer**: Redis-backed replay protection on all critical mutation endpoints
 - **Dynamic Tier-Based Rate Limiter**: Token-bucket algorithm with RFC headers and role-based quotas
+- **Cloudflare Turnstile Verify API**: Server-side bot verification and credential stuffing protection on auth endpoints
 - **Enterprise Security Headers**: Strict HSTS, Content-Type Options, Frame Options, Referrer and Permissions policies
 - **GDPR & SOC2 PII Masking**: Automatic redacting of emails, phone numbers, and secrets in runtime logs
 - **JPA Deep Entity Graphs & JDBC Batching**: High-throughput statement batching (size=50) and N+1 query elimination
@@ -69,6 +77,7 @@
 - **TanStack Query v5**: Server state caching, background synchronization, and optimistic mutations
 - **Zustand v5**: Client-only synchronous state (auth session, canvas selection, network health)
 - **React Hook Form + Zod v4**: Strict type-safe form validation and DTO transformations
+- **Cloudflare Turnstile Widget**: Non-blocking bot protection with dynamic theme and flexible sizing
 - **React Router v7**: Nested dashboard layouts and role-based route guards
 - **STOMP & SockJS Client**: Real-time live chat subscriptions
 - **TanStack Virtual & Custom Virtualizer**: Scalable windowing for high-volume conversation and contact lists
@@ -88,6 +97,7 @@
 
 - **Visual Bot Constructor**: Drag-and-drop conversational graph builder supporting Message, Menu, Action, Condition, and AI nodes.
 - **Omnichannel CRM & Live Inbox**: Two-way Telegram chat with live agent intervention, conversation search, and lead status pipelines.
+- **Cloudflare Turnstile Bot & Spam Protection**: Smart non-interactive challenge verification securing authentication flows (registration and login) with zero friction.
 - **Transactional Outbox & Integrations**: Guaranteed at-least-once delivery for webhooks (Hotmart, e-commerce, CRM leads) with automatic retry backoff and DLQ tracking.
 - **Distributed Idempotency Protection**: Safe concurrent execution prevention for AI generation, campaign dispatches, team invites, and support appeals.
 - **Dynamic Tier Rate Limiting**: Multi-tenant token-bucket rate limiting per plan tier (`ROLE_OWNER`, `ROLE_PRO`, `ROLE_ENTERPRISE`, `ROLE_ADMIN`).

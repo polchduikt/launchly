@@ -15,5 +15,7 @@ public interface TagService {
 
     TagResponse createTag(Long botId, Long userId, CreateTagRequest request);
 
+    TagResponse updateTag(Long tagId, Long userId, CreateTagRequest request);
+
     void deleteTag(Long tagId, Long userId);
 }

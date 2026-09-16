@@ -54,7 +54,7 @@ class HotmartWebhookControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("ok"));
+                .andExpect(jsonPath("$.status").value("success"));
 
         verify(hotmartService, times(1)).processWebhook(10L, hottok, payload);
     }

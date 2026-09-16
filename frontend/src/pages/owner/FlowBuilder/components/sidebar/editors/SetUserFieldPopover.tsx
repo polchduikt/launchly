@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, Plus, X } from 'lucide-react';
 import { FieldVariableSelector } from './FieldVariableSelector';
 import type { SetUserFieldPopoverProps } from '../../../../../../types/bot';
+import { t } from '../../../../../../i18n/config';
 
 export const SetUserFieldPopover: React.FC<SetUserFieldPopoverProps> = ({
   fieldName,
@@ -53,7 +54,7 @@ export const SetUserFieldPopover: React.FC<SetUserFieldPopoverProps> = ({
     >
       <div className="space-y-1.5 relative">
         <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider select-none">
-          User Field
+          {t('editor.action.popover.user_field', 'User Field')}
         </label>
         <div
           onClick={() => setIsFieldDropdownOpen(!isFieldDropdownOpen)}
@@ -66,7 +67,9 @@ export const SetUserFieldPopover: React.FC<SetUserFieldPopoverProps> = ({
                 <span className="text-xs font-bold text-slate-700">{fieldName}</span>
               </>
             ) : (
-              <span className="text-xs text-slate-400 font-semibold select-none">Select Field</span>
+              <span className="text-xs text-slate-400 font-semibold select-none">
+                {t('editor.action.select_field', 'Select Field')}
+              </span>
             )}
           </div>
           <ChevronDown size={14} className="text-slate-400" />
@@ -86,7 +89,7 @@ export const SetUserFieldPopover: React.FC<SetUserFieldPopoverProps> = ({
               className="w-full text-left px-2.5 py-1.5 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 rounded-lg text-xs font-extrabold flex items-center gap-1 transition-all cursor-pointer"
             >
               <Plus size={12} />
-              <span>Create New User Field</span>
+              <span>{t('editor.action.create_new_field', 'Create New User Field')}</span>
             </button>
 
             {userFields.map((field) => (
@@ -110,7 +113,7 @@ export const SetUserFieldPopover: React.FC<SetUserFieldPopoverProps> = ({
       {!hideValue && (
         <div className="space-y-1.5">
           <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider select-none">
-            Value
+            {t('editor.action.value_label', 'Value')}
           </label>
           <div className="relative flex items-center">
             <input
@@ -123,7 +126,7 @@ export const SetUserFieldPopover: React.FC<SetUserFieldPopoverProps> = ({
                   onClose();
                 }
               }}
-              placeholder="Enter value or variable"
+              placeholder={t('editor.action.enter_value_or_var', 'Enter value or variable')}
               className="w-full pl-3 pr-10 py-2 border border-slate-200 focus:outline-none focus:border-indigo-400 text-xs font-bold rounded-xl bg-white"
             />
             <div className="absolute right-2 flex items-center gap-1.5">

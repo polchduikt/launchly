@@ -1,5 +1,6 @@
 package com.launchly.bot.service.impl;
 
+import com.launchly.admin.service.UserAuditService;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import com.launchly.auth.service.UserQueryService;
@@ -12,7 +13,10 @@ import com.launchly.bot.dto.response.FlowSchemaResponse;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.FlowSchema;
 import com.launchly.bot.mapper.BotMapper;
+import com.launchly.bot.mapper.BotResponseFactory;
 import com.launchly.bot.repository.*;
+import com.launchly.bot.service.BotLifecycleService;
+import com.launchly.bot.service.BotSubscriberService;
 import com.launchly.bot.telegram.TelegramBotManager;
 import com.launchly.bot.validator.BotAccessValidator;
 import com.launchly.bot.validator.FlowSchemaValidator;
@@ -28,11 +32,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import tools.jackson.databind.ObjectMapper;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -78,13 +80,28 @@ class BotServiceImplTest {
     private AccountTemplateRepository accountTemplateRepository;
 
     @Mock
-    private com.launchly.admin.service.UserAuditService userAuditService;
+    private UserAuditService userAuditService;
 
     @Mock
     private FlowSchemaValidator flowSchemaValidator;
 
     @Mock
     private BotAccessValidator botAccessValidator;
+
+    @Mock
+    private BotLifecycleService botLifecycleService;
+
+    @Mock
+    private BotSubscriberService botSubscriberService;
+
+    @Mock
+    private BotResponseFactory botResponseFactory;
+
+    @Mock
+    private org.springframework.web.client.RestTemplate restTemplate;
+
+    @Mock
+    private org.springframework.transaction.support.TransactionTemplate transactionTemplate;
 
     @InjectMocks
     private BotServiceImpl botService;
@@ -95,6 +112,11 @@ class BotServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(transactionTemplate.execute(any())).thenAnswer(invocation -> {
+            org.springframework.transaction.support.TransactionCallback<?> callback = invocation.getArgument(0);
+            return callback.doInTransaction(null);
+        });
+
         testUser = User.builder()
                 .email("user@launchly.pro")
                 .name("Bot Creator")
@@ -122,7 +144,7 @@ class BotServiceImplTest {
         when(userQueryService.getUserOrThrow(1L)).thenReturn(testUser);
         when(encryptionUtil.encrypt("0000000000:dummyTokenPlaceholderForNoBotConfig")).thenReturn("encrypted_dummy");
         when(botRepository.save(any(Bot.class))).thenReturn(testBot);
-        when(botMapper.toBotResponse(any(Bot.class))).thenReturn(mockBotResponse);
+        when(botResponseFactory.toBotResponseWithStats(any(Bot.class))).thenReturn(mockBotResponse);
 
         BotResponse response = botService.createBot(request, 1L);
 
@@ -147,9 +169,9 @@ class BotServiceImplTest {
     @Test
     @DisplayName("Should return all bots owned or shared with the user")
     void getBotsByUser_Success() {
-        when(botRepository.findAllByUserId(1L)).thenReturn(List.of(testBot));
+        when(botRepository.findAllAccessibleByUserId(1L)).thenReturn(List.of(testBot));
         when(botMemberRepository.findByUserId(1L)).thenReturn(Collections.emptyList());
-        when(botMapper.toBotResponse(any(Bot.class))).thenReturn(mockBotResponse);
+        when(botResponseFactory.toBotResponseListWithStats(any(), eq(1L), any())).thenReturn(List.of(mockBotResponse));
 
         List<BotResponse> bots = botService.getBotsByUser(1L);
 
@@ -183,10 +205,10 @@ class BotServiceImplTest {
     @Test
     @DisplayName("Should successfully update bot details")
     void updateBot_Success() {
-        BotUpdateRequest request = new BotUpdateRequest("Renamed Bot", "Updated description", null, null, null, null);
+        BotUpdateRequest request = new BotUpdateRequest("Renamed Bot", "Updated description", null, null, null, null, null);
         when(botRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(testBot));
         when(botRepository.save(any(Bot.class))).thenReturn(testBot);
-        when(botMapper.toBotResponse(any(Bot.class))).thenReturn(mockBotResponse);
+        when(botResponseFactory.toBotResponseWithStats(any(Bot.class))).thenReturn(mockBotResponse);
 
         BotResponse response = botService.updateBot(10L, request, 1L);
 
@@ -197,7 +219,7 @@ class BotServiceImplTest {
     @Test
     @DisplayName("Should throw Forbidden when updating bot without write permissions")
     void updateBot_WhenAccessDenied_ThrowsForbidden() {
-        BotUpdateRequest request = new BotUpdateRequest("Renamed Bot", "Updated description", null, null, null, null);
+        BotUpdateRequest request = new BotUpdateRequest("Renamed Bot", "Updated description", null, null, null, null, null);
         when(botRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(testBot));
         doThrow(new AppException(HttpStatus.FORBIDDEN, "common.error.access_denied"))
                 .when(botAccessValidator).validateWriteAccess(testBot, 1L);
@@ -232,23 +254,19 @@ class BotServiceImplTest {
     @Test
     @DisplayName("Should start inactive bot with real token")
     void startBot_Success() {
-        when(botRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(testBot));
-        when(encryptionUtil.decrypt("encrypted_token_123")).thenReturn("123456:validToken");
-        when(botRepository.findAllByActiveTrue()).thenReturn(Collections.emptyList());
-        when(botRepository.save(any(Bot.class))).thenReturn(testBot);
-        when(botMapper.toBotResponse(any(Bot.class))).thenReturn(mockBotResponse);
+        when(botLifecycleService.startBot(10L, 1L)).thenReturn(mockBotResponse);
 
         BotResponse response = botService.startBot(10L, 1L);
 
         assertThat(response).isNotNull();
-        verify(telegramBotManager, times(1)).registerBot(testBot);
+        verify(botLifecycleService, times(1)).startBot(10L, 1L);
     }
 
     @Test
     @DisplayName("Should throw Conflict when starting already running bot")
     void startBot_WhenAlreadyRunning_ThrowsConflict() {
-        testBot.setActive(true);
-        when(botRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(testBot));
+        when(botLifecycleService.startBot(10L, 1L))
+                .thenThrow(new AppException(HttpStatus.CONFLICT, "bot.error.already_running"));
 
         assertThatThrownBy(() -> botService.startBot(10L, 1L))
                 .isInstanceOf(AppException.class)
@@ -258,9 +276,8 @@ class BotServiceImplTest {
     @Test
     @DisplayName("Should throw BadRequest when starting bot with dummy token")
     void startBot_WhenDummyToken_ThrowsBadRequest() {
-        when(botRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(testBot));
-        when(encryptionUtil.decrypt("encrypted_token_123"))
-                .thenReturn("0000000000:dummyTokenPlaceholderForNoBotConfig");
+        when(botLifecycleService.startBot(10L, 1L))
+                .thenThrow(new AppException(HttpStatus.BAD_REQUEST, "bot.error.dummy_token"));
 
         assertThatThrownBy(() -> botService.startBot(10L, 1L))
                 .isInstanceOf(AppException.class)
@@ -270,22 +287,19 @@ class BotServiceImplTest {
     @Test
     @DisplayName("Should stop active bot")
     void stopBot_Success() {
-        testBot.setActive(true);
-        when(botRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(testBot));
-        when(botRepository.save(any(Bot.class))).thenReturn(testBot);
-        when(botMapper.toBotResponse(any(Bot.class))).thenReturn(mockBotResponse);
+        when(botLifecycleService.stopBot(10L, 1L)).thenReturn(mockBotResponse);
 
         BotResponse response = botService.stopBot(10L, 1L);
 
         assertThat(response).isNotNull();
-        verify(telegramBotManager, times(1)).unregisterBot(10L);
+        verify(botLifecycleService, times(1)).stopBot(10L, 1L);
     }
 
     @Test
     @DisplayName("Should throw Conflict when stopping already inactive bot")
     void stopBot_WhenAlreadyStopped_ThrowsConflict() {
-        testBot.setActive(false);
-        when(botRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(testBot));
+        when(botLifecycleService.stopBot(10L, 1L))
+                .thenThrow(new AppException(HttpStatus.CONFLICT, "bot.error.not_running"));
 
         assertThatThrownBy(() -> botService.stopBot(10L, 1L))
                 .isInstanceOf(AppException.class)

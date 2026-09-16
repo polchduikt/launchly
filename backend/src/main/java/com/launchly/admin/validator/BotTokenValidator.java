@@ -1,5 +1,6 @@
 package com.launchly.admin.validator;
 
+import com.launchly.bot.constant.BotConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.common.utils.EncryptionUtil;
 import lombok.RequiredArgsConstructor;
@@ -9,8 +10,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class BotTokenValidator {
 
-    private static final String DUMMY_TOKEN = "0000000000:dummyTokenPlaceholderForNoBotConfig";
-
     private final EncryptionUtil encryptionUtil;
 
     public boolean isConnected(Bot bot) {
@@ -19,7 +18,7 @@ public class BotTokenValidator {
         if (rawToken == null || rawToken.isBlank()) return false;
         try {
             String decrypted = encryptionUtil.decrypt(rawToken);
-            return decrypted != null && !decrypted.isBlank() && !DUMMY_TOKEN.equals(decrypted);
+            return decrypted != null && !decrypted.isBlank() && !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(decrypted);
         } catch (Exception e) {
             return false;
         }

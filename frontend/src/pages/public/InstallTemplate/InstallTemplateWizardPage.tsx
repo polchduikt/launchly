@@ -49,7 +49,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
         setErrorMsg(t('template.install.not_found', 'Шаблон не знайдено або посилання застаріло.'));
       })
       .finally(() => setLoading(false));
-  }, [shareCode]);
+  }, [shareCode, t]);
 
   const handleInstall = async () => {
     if (!shareCode) return;
@@ -143,7 +143,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
             <div className="flex items-center justify-center pt-3">
               <button
                 onClick={() => navigate('/templates?tab=installed')}
-                className="px-8 py-3.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer inline-flex items-center gap-2"
+                className="px-8 py-3.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] text-xs font-black uppercase transition-all cursor-pointer inline-flex items-center gap-2"
               >
                 <span>{t('template.tab_installed_templates', 'Завантажені темплейти')}</span>
                 <ArrowRight size={15} />
@@ -165,7 +165,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 bg-amber-50 border-2 border-[#0A0A0A]">
+                <div className="flex items-center gap-3 p-3 bg-slate-50 border-2 border-[#0A0A0A]">
                   <div className="w-12 h-12 bg-[#0A0A0A] border border-[#0A0A0A] flex items-center justify-center shrink-0 overflow-hidden text-[#F2EBDD]">
                     {template.avatarUrl ? (
                       <img src={template.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -308,7 +308,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                         href={template.videoUrl.startsWith('http') ? template.videoUrl : `https://${template.videoUrl}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-2 text-amber-600 hover:underline"
+                        className="flex items-center gap-2 text-indigo-600 hover:underline"
                       >
                         <PlayCircle size={15} />
                         <span>{t('template.video_label', 'Відео-презентація шаблону')}</span>
@@ -331,7 +331,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                   <button
                     onClick={handleInstall}
                     disabled={submitting}
-                    className="px-10 py-3.5 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase tracking-wider transition-all cursor-pointer inline-flex items-center gap-2 disabled:opacity-50"
+                    className="px-10 py-3.5 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase tracking-wider transition-all cursor-pointer inline-flex items-center gap-2 disabled:opacity-50"
                   >
                     {submitting ? (
                       <>
@@ -348,7 +348,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-amber-100 border-2 border-[#0A0A0A] p-8 text-center space-y-4 shadow-[2px_2px_0px_#0A0A0A]">
+              <div className="bg-slate-100 border-2 border-[#0A0A0A] p-8 text-center space-y-4 shadow-[2px_2px_0px_#0A0A0A]">
                 <p className="text-xs font-black text-slate-800">
                   {t('template.install.login_prompt', 'Увійдіть у свій акаунт Launchly, щоб встановити цей шаблон.')}
                 </p>
@@ -359,7 +359,7 @@ export const InstallTemplateWizardPage: React.FC = () => {
                       localStorage.setItem('auth_redirect_url', `/templates/install/${shareCode}`);
                     }
                   }}
-                  className="inline-flex items-center justify-center py-3.5 px-8 bg-[#0A0A0A] hover:bg-[#2A2A2A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all gap-2 cursor-pointer"
+                  className="inline-flex items-center justify-center py-3.5 px-8 bg-[#0A0A0A] hover:bg-white hover:text-[#0A0A0A] text-[#F2EBDD] border border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] text-xs font-black uppercase transition-all gap-2 cursor-pointer"
                 >
                   <span>{t('template.install.login_btn', 'Увійти для встановлення')}</span>
                   <ArrowRight size={15} />

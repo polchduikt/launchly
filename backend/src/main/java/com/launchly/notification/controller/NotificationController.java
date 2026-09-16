@@ -3,6 +3,7 @@ package com.launchly.notification.controller;
 import com.launchly.auth.dto.response.UserResponse;
 import com.launchly.common.exception.ErrorResponse;
 import com.launchly.notification.dto.UpdateNotificationSettingsRequest;
+import com.launchly.notification.dto.request.UpdateTimezoneRequest;
 import com.launchly.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -55,10 +56,9 @@ public class NotificationController {
     })
     @PutMapping("/timezone")
     public ResponseEntity<UserResponse> updateTimezone(
-            @RequestBody Map<String, String> body,
+            @Valid @RequestBody UpdateTimezoneRequest request,
             Authentication authentication) {
-        String timezone = body.get("timezone");
-        return ResponseEntity.ok(notificationService.updateTimezone(authentication.getName(), timezone));
+        return ResponseEntity.ok(notificationService.updateTimezone(authentication.getName(), request.timezone()));
     }
 }
 

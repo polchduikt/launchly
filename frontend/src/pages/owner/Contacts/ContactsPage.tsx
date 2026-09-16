@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
+import { ErrorBoundary } from '../../../components/common/ErrorBoundary';
 import {
   useAllBotUsersQuery,
   useUpdateBotUserMutation,
@@ -29,6 +30,7 @@ import { ContactDetailModal } from '../Chat/components/ContactDetailModal';
 import { CreateContactModal } from '../Chat/components/CreateContactModal';
 import { ContactsFilterBuilder } from '../Chat/components/ContactsFilterBuilder';
 import type { BotUserMetadata, FilterCondition } from '../../../types/crm';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 import { useTranslation } from '../../../i18n/config';
 import { useBotsQuery } from '../../../hooks/bot/useBotsQuery';
@@ -37,7 +39,7 @@ import { DISPLAY_KEY_CONTACTS_HIDE_UNSUB } from '../FlowBuilder/components/Displ
 export const ContactsPage: React.FC = () => {
   const { t } = useTranslation();
   const activeBotId = useBotStore((state) => state.activeBotId);
-  const { data: bots = [] } = useBotsQuery();
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
 
   const botId = activeBotId || (bots[0]?.id || 0);
 
@@ -50,6 +52,7 @@ export const ContactsPage: React.FC = () => {
   const createBotUserMut = useCreateBotUserMutation(botId);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 250);
   const [selectedContactIds, setSelectedContactIds] = useState<Set<number>>(new Set());
   const [selectedContact, setSelectedContact] = useState<BotUserResponse | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -109,7 +112,6 @@ export const ContactsPage: React.FC = () => {
 
   const filteredContacts = useMemo(() => {
     return contacts.filter((c) => {
-      // Hide unsubscribed if toggle is on
       if (hideUnsub) {
         try {
           const meta = c.metadata ? JSON.parse(c.metadata) : {};
@@ -118,11 +120,11 @@ export const ContactsPage: React.FC = () => {
       }
       const fullname = `${c.firstName || ''} ${c.lastName || ''}`.toLowerCase();
       const username = (c.username || '').toLowerCase();
-      const q = searchQuery.toLowerCase().trim();
+      const q = debouncedSearchQuery.toLowerCase().trim();
       const matchesSearch = fullname.includes(q) || username.includes(q) || String(c.telegramId).includes(q);
       if (!matchesSearch) return false;
       if (conditions.length === 0) return true;
-      let meta: Record<string, unknown> = {};
+      let meta: BotUserMetadata = {};
       try {
         meta = c.metadata ? JSON.parse(c.metadata) : {};
       } catch {}
@@ -154,9 +156,9 @@ export const ContactsPage: React.FC = () => {
         } else if (cond.field === 'fullName') {
           fieldVal = `${c.firstName || ''} ${c.lastName || ''}`;
         } else if (cond.field === 'email') {
-          fieldVal = meta.email || (meta as any).customFields?.Email || (meta as any).customFields?.email || '';
+          fieldVal = meta.email || (meta.customFields?.Email ? String(meta.customFields.Email) : '') || (meta.customFields?.email ? String(meta.customFields.email) : '') || '';
         } else if (cond.field === 'phone') {
-          fieldVal = meta.phone || (meta as any).customFields?.Phone || (meta as any).customFields?.phone || '';
+          fieldVal = meta.phone || (meta.customFields?.Phone ? String(meta.customFields.Phone) : '') || (meta.customFields?.phone ? String(meta.customFields.phone) : '') || '';
         } else if (cond.field === 'id') {
           fieldVal = String(c.id);
         } else if (cond.field === 'telegramUserId') {
@@ -167,7 +169,7 @@ export const ContactsPage: React.FC = () => {
           fieldVal = c.createdAt ? c.createdAt.split('T')[0] : '';
         } else if (cond.field.startsWith('custom:')) {
           const customKey = cond.field.substring(7);
-          fieldVal = (meta as any).customFields?.[customKey] || '';
+          fieldVal = meta.customFields?.[customKey] !== undefined ? String(meta.customFields[customKey]) : '';
         }
 
         const condVal = cond.value || '';
@@ -197,7 +199,7 @@ export const ContactsPage: React.FC = () => {
         return true;
       });
     });
-  }, [contacts, searchQuery, conditions, hideUnsub]);
+  }, [contacts, debouncedSearchQuery, conditions, hideUnsub]);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -251,7 +253,7 @@ export const ContactsPage: React.FC = () => {
         }
       } else if (actionType === 'clear-field') {
         const fields = { ...(meta.customFields || {}) };
-        delete (fields as Record<string, any>)[actionValue];
+        delete (fields as Record<string, unknown>)[actionValue];
         updatedMeta.customFields = { ...fields };
       }
 
@@ -274,7 +276,7 @@ export const ContactsPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-4rem)] flex bg-[#F2EBDD] font-['Geist',sans-serif]">
+      <div className="min-h-full h-full flex bg-[#F2EBDD] font-['Geist',sans-serif]">
         <main className="flex-1 flex flex-col min-w-0 bg-[#F2EBDD] overflow-hidden">
           
           <ContactsHeader
@@ -364,21 +366,24 @@ export const ContactsPage: React.FC = () => {
 
 
 
-          <ContactsTable
-            botId={botId}
-            isContactsLoading={isContactsLoading}
-            filteredContacts={filteredContacts}
-            selectedContactIds={selectedContactIds}
-            onSelectAll={handleSelectAll}
-            onSelectContact={handleSelectContact}
-            onSelectContactDetail={setSelectedContact}
-          />
+          <ErrorBoundary inline fallbackTitle="Contacts Error">
+            <ContactsTable
+              botId={botId}
+              isBotsLoading={isBotsLoading}
+              isContactsLoading={isContactsLoading}
+              filteredContacts={filteredContacts}
+              selectedContactIds={selectedContactIds}
+              onSelectAll={handleSelectAll}
+              onSelectContact={handleSelectContact}
+              onSelectContactDetail={setSelectedContact}
+            />
+          </ErrorBoundary>
         </main>
       </div>
 
       {selectedContact && (
         <ContactDetailModal
-          botId={botId}
+          botId={selectedContact.botId || botId}
           selectedContact={selectedContact}
           conversations={conversations}
           tags={tags}

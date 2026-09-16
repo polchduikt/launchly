@@ -9,7 +9,7 @@ import { UserAvatar } from './UserAvatar';
 import { OwnerAvatar } from './OwnerAvatar';
 import { MessageBubble } from './MessageBubble';
 import { ChatToolbar } from './ChatToolbar';
-import { formatDateSeparator, getDateKey } from '../../../../utils/crmChat';
+import { formatDateSeparator, getDateKey, parseMessageButtons } from '../../../../utils/crmChat';
 import { t } from '../../../../i18n/config';
 import { MessageAreaSkeleton } from '../../../../components/common/Skeleton';
 
@@ -64,8 +64,10 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior });
   }, []);
 
+  const conversationId = conversation?.id;
+
   useEffect(() => {
-    if (!conversation) return;
+    if (!conversationId) return;
 
     scrollToBottom('auto');
     const t1 = setTimeout(() => scrollToBottom('auto'), 50);
@@ -75,11 +77,11 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [messages.length, conversation?.id, scrollToBottom]);
+  }, [messages.length, conversationId, scrollToBottom]);
 
-  const handleImageLoad = () => {
+  const handleImageLoad = useCallback(() => {
     scrollToBottom('auto');
-  };
+  }, [scrollToBottom]);
 
   const groupedMessages = useMemo(() => {
     const groups: { date: string; msgs: MessageResponse[] }[] = [];
@@ -96,6 +98,33 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     });
     return groups;
   }, [messages]);
+
+  const clickedButtonMap = useMemo(() => {
+    const map = new Map<number, string>();
+    for (let i = 0; i < messages.length; i++) {
+      const m = messages[i];
+      const { buttons } = parseMessageButtons(m.content);
+      if (buttons.length > 0) {
+        for (let j = i + 1; j < messages.length; j++) {
+          const nextMsg = messages[j];
+          if (nextMsg.senderType === 'BOT_USER') {
+            const cleanNextText = nextMsg.content ? nextMsg.content.replace('🖱️ ', '').trim() : '';
+            if (buttons.some(btn => btn.trim().toLowerCase() === cleanNextText.toLowerCase())) {
+              map.set(m.id, cleanNextText);
+            }
+            break;
+          }
+        }
+      }
+    }
+    return map;
+  }, [messages]);
+
+  const ownerAvatar = useMemo(() => <OwnerAvatar size={28} />, []);
+  const userAvatar = useMemo(
+    () => <UserAvatar name={conversation?.botUserName || ''} photoUrl={conversation?.botUserPhotoUrl} size={28} />,
+    [conversation?.botUserName, conversation?.botUserPhotoUrl]
+  );
 
   if (!conversation) {
     return (
@@ -164,9 +193,9 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
                   key={m.id}
                   message={m}
                   isOwner={m.senderType === 'OWNER'}
-                  ownerAvatar={<OwnerAvatar size={28} />}
-                  userAvatar={<UserAvatar name={conversation.botUserName} photoUrl={conversation.botUserPhotoUrl} size={28} />}
-                  allMessages={messages}
+                  ownerAvatar={ownerAvatar}
+                  userAvatar={userAvatar}
+                  clickedButtonLabel={clickedButtonMap.get(m.id) ?? null}
                   onButtonClick={onButtonClick}
                   onImageLoad={handleImageLoad}
                 />

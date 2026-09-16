@@ -5,6 +5,8 @@ import { StartNode } from './StartNode';
 import { EndNode } from './EndNode';
 import { CommentNode } from './CommentNode';
 import { AiNode } from './AiNode';
+import { SubscriptionCheckNode } from './SubscriptionCheckNode';
+import { ModerationNode } from './ModerationNode';
 
 const defaultNodeProps = {
   selected: false,
@@ -78,4 +80,44 @@ describe('FlowBuilder Node Components', () => {
 
     expect(screen.getByText('Recommend top 3 bestselling products')).toBeInTheDocument();
   });
+
+  it('renders SubscriptionCheckNode with configured channels and handles', () => {
+    render(
+      <ReactFlowProvider>
+        <SubscriptionCheckNode
+          id="sub-1"
+          type="SUBSCRIPTION_CHECK"
+          data={{
+            mode: 'all',
+            channels: [{ id: 'ch1', channelId: '@sponsor_channel', name: 'Main Sponsor', isRequired: true }],
+          }}
+          {...defaultNodeProps}
+        />
+      </ReactFlowProvider>
+    );
+
+    expect(screen.getByText(/Main Sponsor/i)).toBeInTheDocument();
+  });
+
+  it('renders ModerationNode with moderation filters and handles', () => {
+    render(
+      <ReactFlowProvider>
+        <ModerationNode
+          id="mod-1"
+          type="MODERATION"
+          data={{
+            antiForwardEnabled: true,
+            antiLinkEnabled: true,
+            mediaMode: 'TEXT_ONLY',
+            actionOnViolation: 'DELETE_AND_WARN',
+          }}
+          {...defaultNodeProps}
+        />
+      </ReactFlowProvider>
+    );
+
+    expect(screen.getByText(/Anti-Forward/i)).toBeInTheDocument();
+    expect(screen.getByText(/Anti-Link/i)).toBeInTheDocument();
+  });
 });
+

@@ -38,7 +38,7 @@ public class LeadNodeExecutor implements NodeExecutor {
         Map<String, String> sessionData = stateService.getSessionData(botId, telegramUserId);
 
         String name = data != null && data.containsKey("name") ? (String) data.get("name") 
-                : sessionData.getOrDefault("name", botUser.getFirstName() + " " + botUser.getLastName());
+                : sessionData.getOrDefault("name", botUser.getDisplayName());
         String email = data != null && data.containsKey("email") ? (String) data.get("email") 
                 : sessionData.getOrDefault("email", "");
         String phone = data != null && data.containsKey("phone") ? (String) data.get("phone") 

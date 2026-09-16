@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Position, useNodeConnections, useConnection } from '@xyflow/react';
+import React from 'react';
+import { Position, useNodeConnections, useConnection, useStore } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Sliders } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
@@ -9,40 +9,15 @@ import { NodeToolbar } from './NodeToolbar';
 import { t } from '../../../../../i18n/config';
 
 const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  let sourceConns: any[] = [];
-  try {
-    sourceConns = useNodeConnections({ handleType: 'source' }) || [];
-  } catch (e) {
-    sourceConns = [];
-  }
-  let targetConns: any[] = [];
-  try {
-    targetConns = useNodeConnections({ handleType: 'target' }) || [];
-  } catch (e) {
-    targetConns = [];
-  }
+  const sourceConns = useNodeConnections({ id, handleType: 'source' });
+  const targetConns = useNodeConnections({ id, handleType: 'target' });
   const actions = (data?.actions || []) as ActionItem[];
-
-  let connection: any = { inProgress: false };
-  try {
-    connection = useConnection() || { inProgress: false };
-  } catch (e) {
-    connection = { inProgress: false };
-  }
-  const isConnecting = connection.inProgress;
-  const isGrayedOut = useMemo(() => {
-    if (!isConnecting) return false;
-    if (connection.fromNode?.id === id) return true;
-    const sourceHandleId = connection.fromHandle?.id;
-    if (sourceHandleId === 'reply') {
-      return false;
-    }
-    if (sourceHandleId === 'timeout') {
-      return true;
-    }
-    return false;
-  }, [isConnecting, connection, id]);
+  const isConnecting = useConnection((s) => s.inProgress);
+  const isSelfSource = useConnection((s) => s.fromNode?.id === id);
+  const isTimeoutHandle = useConnection((s) => s.fromHandle?.id === 'timeout');
+  const isGrayedOut = isConnecting && (isSelfSource || isTimeoutHandle);
   const { showToolbar, bindHover } = useNodeHover();
+  const isZoomedOut = useStore((s) => s.transform[2] < 0.6);
 
   const getActionLabelForCanvas = (type: string) => {
     switch (type) {
@@ -61,6 +36,13 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
       case 'GS_GET_ROW':
       case 'GS_UPDATE_ROW':
         return t('node.action.sheets_actions');
+      case 'MARK_DONE':
+        return t('action.name.MARK_DONE');
+      case 'ASSIGN_AGENT':
+        return t('action.name.ASSIGN_AGENT');
+      case 'NOTIFY_CONTACT':
+      case 'NOTIFY_USER':
+        return t('action.name.NOTIFY_CONTACT', 'Сповістити контакт');
       default:
         return t('node.title.action');
     }
@@ -70,25 +52,33 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
     switch (action.type) {
       case 'ADD_TAG':
       case 'REMOVE_TAG':
-        return action.tagName || 'Unknown tag';
+        return action.tagName || t('node.action.unknown_tag');
       case 'SET_USER_FIELD':
-        return action.fieldName
-          ? `Set ${action.fieldName} to ${action.fieldValue || ''}`
-          : 'Unknown field';
+        if (!action.fieldName) return t('node.action.unknown_field');
+        return action.fieldValue
+          ? t('node.action.value_set_field', { field: action.fieldName, val: action.fieldValue })
+          : t('node.action.value_set_field_only', { field: action.fieldName });
       case 'CLEAR_USER_FIELD':
         return action.fieldName
-          ? `Clear ${action.fieldName}`
-          : 'Unknown field';
+          ? t('node.action.value_clear_field', { field: action.fieldName })
+          : t('node.action.unknown_field');
       case 'TELEGRAM_SUBSCRIBE':
-        return 'Subscribe to Telegram';
+        return t('node.action.value_subscribe_tg');
       case 'TELEGRAM_UNSUBSCRIBE':
-        return 'Unsubscribe Telegram';
+        return t('node.action.value_unsubscribe_tg');
       case 'GS_INSERT_ROW':
-        return 'Insert Row';
+        return t('node.action.value_gs_insert');
       case 'GS_GET_ROW':
-        return 'Get Row by Value';
+        return t('node.action.value_gs_get');
       case 'GS_UPDATE_ROW':
-        return 'Update Row';
+        return t('node.action.value_gs_update');
+      case 'MARK_DONE':
+        return t('action.name.MARK_DONE');
+      case 'ASSIGN_AGENT':
+        return t('action.name.ASSIGN_AGENT');
+      case 'NOTIFY_CONTACT':
+      case 'NOTIFY_USER':
+        return action.text ? action.text : t('action.name.NOTIFY_CONTACT', 'Сповістити контакт');
       default:
         return action.type || '';
     }
@@ -97,7 +87,7 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected
           ? 'shadow-lg ring-2 ring-[#0A0A0A]'
           : 'shadow-md'
@@ -105,7 +95,7 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
       
-      <div className="relative flex items-center gap-2 bg-amber-100 rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-amber-100/75 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
@@ -124,31 +114,47 @@ const ActionNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, select
         </div>
       </div>
 
-      <div className="p-4 space-y-3">
-        <div className="space-y-3">
-          {actions.length === 0 ? (
-            <div className="border border-dashed border-slate-200 rounded-2xl p-3 text-center text-[11px] text-slate-400 font-medium select-none italic bg-slate-50/50">
-              {t('node.action.no_actions')}
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2.5 max-h-56 overflow-y-auto pr-0.5 custom-scrollbar">
-              {actions.map((act, index) => {
-                const label = getActionLabelForCanvas(act.type);
-                const value = getActionValueForCanvas(act);
-                return (
-                  <div key={index} className="bg-slate-50/75 border border-slate-150 rounded-xl p-2.5 flex flex-col gap-0.5">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">{label}</span>
-                    <span className="text-[11px] font-extrabold text-slate-700 leading-normal">{value}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+      <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace]">
+        {isZoomedOut ? (
+          <div className="space-y-1.5 select-none pointer-events-none">
+            {actions.length === 0 ? (
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-2 text-[11px] font-bold text-amber-800 text-center">
+                {t('node.action.no_actions')}
+              </div>
+            ) : (
+              actions.slice(0, 3).map((act, index) => (
+                <div key={index} className="bg-slate-50 border border-slate-200/80 rounded-xl px-2.5 py-1 text-[11px] font-bold text-slate-700 truncate">
+                  {getActionLabelForCanvas(act.type)}
+                </div>
+              ))
+            )}
+          </div>
+        ) : (
+          <div>
+            {actions.length === 0 ? (
+              <div className="border-2 border-dashed border-[#0A0A0A]/40 rounded-2xl p-3 text-center text-xs text-[#0A0A0A]/60 font-black select-none italic bg-[#F2EBDD]/40">
+                {t('node.action.no_actions')}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 max-h-56 overflow-y-auto pr-0.5 custom-scrollbar">
+                {actions.map((act, index) => {
+                  const label = getActionLabelForCanvas(act.type);
+                  const value = getActionValueForCanvas(act);
+                  return (
+                    <div key={index} className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-2.5 flex flex-col gap-0.5 select-none">
+                      <span className="text-[9px] font-black uppercase tracking-wider text-[#0A0A0A]/60 leading-none">{label}</span>
+                      <span className="text-xs font-black text-[#0A0A0A] leading-normal break-words">{value}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">{t('node.action.next_step')}</span>
+      <div className="flex justify-end items-center px-4 py-2 bg-transparent select-none relative rounded-b-[22px]">
+        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-2 select-none">{t('node.action.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}

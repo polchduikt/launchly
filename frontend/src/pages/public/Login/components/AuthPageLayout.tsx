@@ -1,13 +1,14 @@
 import React from 'react';
 import logo from '../../../../assets/images/logo.png';
 import type { AuthPageLayoutProps } from '../../../../types';
-import { t } from '../../../../i18n/config';
+import { useTranslation } from '../../../../i18n/config';
 
 export const AuthPageLayout: React.FC<AuthPageLayoutProps> = ({
   leftTitle,
   leftDescription,
   rightContent,
 }) => {
+  const { t } = useTranslation();
   const title = leftTitle || t('auth.hero.title', 'Automate your business workflow with precision.');
   const description = leftDescription || t('auth.hero.description', 'The all-in-one CRM and Telegram Bot builder for modern enterprises.');
 

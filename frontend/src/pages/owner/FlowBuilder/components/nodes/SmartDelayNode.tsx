@@ -9,35 +9,12 @@ import { NodeToolbar } from './NodeToolbar';
 import { t } from '../../../../../i18n/config';
 
 const SmartDelayNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  let sourceConns: any[] = [];
-  try {
-    sourceConns = useNodeConnections({ handleType: 'source' }) || [];
-  } catch (e) {
-    sourceConns = [];
-  }
-  let targetConns: any[] = [];
-  try {
-    targetConns = useNodeConnections({ handleType: 'target' }) || [];
-  } catch (e) {
-    targetConns = [];
-  }
-
-  let connection: any = { inProgress: false };
-  try {
-    connection = useConnection() || { inProgress: false };
-  } catch (e) {
-    connection = { inProgress: false };
-  }
-  const isConnecting = connection.inProgress;
-  const isGrayedOut = useMemo(() => {
-    if (!isConnecting) return false;
-    if (connection.fromNode?.id === id) return true;
-    const sourceHandleId = connection.fromHandle?.id;
-    if (sourceHandleId === 'reply') {
-      return true;
-    }
-    return false;
-  }, [isConnecting, connection, id]);
+  const sourceConns = useNodeConnections({ id, handleType: 'source' });
+  const targetConns = useNodeConnections({ id, handleType: 'target' });
+  const isConnecting = useConnection((s) => s.inProgress);
+  const isSelfSource = useConnection((s) => s.fromNode?.id === id);
+  const isReplyHandle = useConnection((s) => s.fromHandle?.id === 'reply');
+  const isGrayedOut = isConnecting && (isSelfSource || isReplyHandle);
   const { showToolbar, bindHover } = useNodeHover();
 
   const mode = typeof data?.mode === 'string' ? data.mode : 'duration';
@@ -71,7 +48,7 @@ const SmartDelayNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
       return `${day} ${monthName} ${year}, ${hours}:${minutes} (UTC +03:00)`;
-    } catch (e) {
+    } catch {
       return dateStr;
     }
   }, [dateTimeStr]);
@@ -79,7 +56,7 @@ const SmartDelayNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected
           ? 'shadow-lg ring-2 ring-[#0A0A0A]'
           : 'shadow-md'
@@ -87,7 +64,7 @@ const SmartDelayNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 
-      <div className="relative flex items-center gap-2 bg-[#F9CBBF] rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-[#F9CBBF]/75 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
@@ -106,21 +83,32 @@ const SmartDelayNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
         </div>
       </div>
 
-      <div className="p-4">
-        {mode === 'date' ? (
-          <div className="space-y-1 select-none">
-            <p className="text-xs font-extrabold text-slate-800 leading-normal">{t('node.smart_delay.wait_until')}</p>
-            <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">{formattedDateTime}</p>
-          </div>
-        ) : (
-          <div className="text-xs text-slate-650 leading-relaxed font-semibold select-none">
-            {t('node.smart_delay.wait', { amount: String(waitAmount), unit: waitUnit })}
-          </div>
-        )}
+      <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace]">
+        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 space-y-2">
+          {mode === 'date' ? (
+            <div className="space-y-1 select-none">
+              <span className="text-[10px] font-black uppercase text-[#0A0A0A]/60 block leading-none">
+                {t('node.smart_delay.wait_until')}
+              </span>
+              <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-lg text-xs font-black text-[#0A0A0A] block truncate">
+                {formattedDateTime}
+              </span>
+            </div>
+          ) : (
+            <div className="space-y-1 select-none">
+              <span className="text-[10px] font-black uppercase text-[#0A0A0A]/60 block leading-none">
+                {t('node.smart_delay.category')}
+              </span>
+              <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-lg text-xs font-black text-[#0A0A0A] block leading-normal break-words">
+                {t('node.smart_delay.wait', { amount: String(waitAmount), unit: waitUnit })}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-2 select-none">{t('node.smart_delay.next_step')}</span>
+      <div className="flex justify-end items-center px-4 py-2 bg-transparent select-none relative rounded-b-[22px]">
+        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-2 select-none">{t('node.smart_delay.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}

@@ -71,50 +71,59 @@ function removeJsonLd(id: string) {
 }
 
 export function useSEO(options: UseSEOOptions) {
-  const applyTags = () => {
-    const lang = getLanguage();
-    const path = options.canonicalPath ?? window.location.pathname;
-    const canonicalUrl = `${SITE_URL}${path === '/' ? '' : path}`;
-    const ogImage = options.ogImage ?? DEFAULT_OG_IMAGE;
-    document.documentElement.setAttribute('lang', lang === 'uk' ? 'uk' : 'en');
-    document.title = options.title;
-    setMeta('description', options.description);
-    if (options.keywords) {
-      setMeta('keywords', options.keywords);
-    }
-    setMeta('robots', options.noindex ? 'noindex,nofollow' : 'index,follow');
-    setMeta('language', lang === 'uk' ? 'Ukrainian' : 'English');
-    setMeta('author', SITE_NAME);
-    setLink('canonical', canonicalUrl);
-    removeLinks('alternate', 'link[rel="alternate"][hreflang]');
-    setLink('alternate', canonicalUrl, { hreflang: 'uk' });
-    setLink('alternate', canonicalUrl, { hreflang: 'en' });
-    setLink('alternate', canonicalUrl, { hreflang: 'x-default' });
-
-    setMeta('og:type', options.ogType ?? 'website', 'property');
-    setMeta('og:url', canonicalUrl, 'property');
-    setMeta('og:title', options.title, 'property');
-    setMeta('og:description', options.description, 'property');
-    setMeta('og:image', ogImage, 'property');
-    setMeta('og:site_name', SITE_NAME, 'property');
-    setMeta('og:locale', lang === 'uk' ? 'uk_UA' : 'en_US', 'property');
-
-    setMeta('twitter:card', 'summary_large_image');
-    setMeta('twitter:title', options.title);
-    setMeta('twitter:description', options.description);
-    setMeta('twitter:image', ogImage);
-    setMeta('twitter:site', '@launchlyapp');
-
-    if (options.jsonLd) {
-      upsertJsonLd('page-schema', options.jsonLd);
-    } else {
-      removeJsonLd('page-schema');
-    }
-  };
-
   useEffect(() => {
+    const applyTags = () => {
+      const lang = getLanguage();
+      const path = options.canonicalPath ?? window.location.pathname;
+      const canonicalUrl = `${SITE_URL}${path === '/' ? '' : path}`;
+      const ogImage = options.ogImage ?? DEFAULT_OG_IMAGE;
+      document.documentElement.setAttribute('lang', lang === 'uk' ? 'uk' : 'en');
+      document.title = options.title;
+      setMeta('description', options.description);
+      if (options.keywords) {
+        setMeta('keywords', options.keywords);
+      }
+      setMeta('robots', options.noindex ? 'noindex,nofollow' : 'index,follow');
+      setMeta('language', lang === 'uk' ? 'Ukrainian' : 'English');
+      setMeta('author', SITE_NAME);
+      setLink('canonical', canonicalUrl);
+      removeLinks('alternate', 'link[rel="alternate"][hreflang]');
+      setLink('alternate', canonicalUrl, { hreflang: 'uk' });
+      setLink('alternate', canonicalUrl, { hreflang: 'en' });
+      setLink('alternate', canonicalUrl, { hreflang: 'x-default' });
+
+      setMeta('og:type', options.ogType ?? 'website', 'property');
+      setMeta('og:url', canonicalUrl, 'property');
+      setMeta('og:title', options.title, 'property');
+      setMeta('og:description', options.description, 'property');
+      setMeta('og:image', ogImage, 'property');
+      setMeta('og:site_name', SITE_NAME, 'property');
+      setMeta('og:locale', lang === 'uk' ? 'uk_UA' : 'en_US', 'property');
+
+      setMeta('twitter:card', 'summary_large_image');
+      setMeta('twitter:title', options.title);
+      setMeta('twitter:description', options.description);
+      setMeta('twitter:image', ogImage);
+      setMeta('twitter:site', '@launchlyapp');
+
+      if (options.jsonLd) {
+        upsertJsonLd('page-schema', options.jsonLd);
+      } else {
+        removeJsonLd('page-schema');
+      }
+    };
+
     applyTags();
     const unsubscribe = subscribeLanguageChange(applyTags);
     return unsubscribe;
-  }, [options.title, options.description, options.canonicalPath, options.noindex]);
+  }, [
+    options.title,
+    options.description,
+    options.canonicalPath,
+    options.noindex,
+    options.keywords,
+    options.ogImage,
+    options.ogType,
+    options.jsonLd,
+  ]);
 }

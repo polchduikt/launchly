@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { loginSchema, registerSchema } from './auth.schema';
+import {
+  loginSchema,
+  registerSchema,
+  getLoginSchema,
+  getRegisterSchema,
+  type TranslateFn,
+} from './auth.schema';
 
 describe('Auth Validation Schemas', () => {
   describe('loginSchema', () => {
@@ -55,6 +61,47 @@ describe('Auth Validation Schemas', () => {
         firstName: '   ',
       });
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('schema localization factories', () => {
+    it('uses custom translator function for login error messages', () => {
+      const mockT: TranslateFn = ((key: string) => `[localized:${key}]`) as TranslateFn;
+      const customLoginSchema = getLoginSchema(mockT);
+
+      const result = customLoginSchema.safeParse({
+        email: 'invalid',
+        password: '',
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const emailErr = result.error.issues.find((i) => i.path[0] === 'email');
+        const passErr = result.error.issues.find((i) => i.path[0] === 'password');
+        expect(emailErr?.message).toBe('[localized:auth.invalid_email]');
+        expect(passErr?.message).toBe('[localized:auth.password_required]');
+      }
+    });
+
+    it('uses custom translator function for register error messages', () => {
+      const mockT: TranslateFn = ((key: string) => `[localized:${key}]`) as TranslateFn;
+      const customRegisterSchema = getRegisterSchema(mockT);
+
+      const result = customRegisterSchema.safeParse({
+        email: '',
+        password: '123',
+        firstName: '',
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const emailErr = result.error.issues.find((i) => i.path[0] === 'email');
+        const passErr = result.error.issues.find((i) => i.path[0] === 'password');
+        const nameErr = result.error.issues.find((i) => i.path[0] === 'firstName');
+        expect(emailErr?.message).toBe('[localized:auth.email_required]');
+        expect(passErr?.message).toBe('[localized:auth.password_min_length]');
+        expect(nameErr?.message).toBe('[localized:auth.firstname_required]');
+      }
     });
   });
 });

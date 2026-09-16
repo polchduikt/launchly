@@ -3,16 +3,18 @@ import apiClient from './axios';
 import { useAuthStore } from '../store/useAuthStore';
 import { IDEMPOTENCY_HEADER_NAME } from '../utils/idempotency';
 
+import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios';
+
 describe('apiClient request interceptor', () => {
-  let originalAdapter: any;
-  let capturedConfig: any = null;
+  let originalAdapter: AxiosAdapter | AxiosAdapter[] | undefined;
+  let capturedConfig: InternalAxiosRequestConfig | null = null;
 
   beforeEach(() => {
     vi.restoreAllMocks();
     useAuthStore.setState({ accessToken: null, refreshToken: null, user: null });
     capturedConfig = null;
-    originalAdapter = apiClient.defaults.adapter;
-    apiClient.defaults.adapter = async (config: any) => {
+    originalAdapter = apiClient.defaults.adapter as unknown as AxiosAdapter | AxiosAdapter[] | undefined;
+    apiClient.defaults.adapter = (async (config: InternalAxiosRequestConfig) => {
       capturedConfig = config;
       return {
         data: { success: true },
@@ -21,7 +23,7 @@ describe('apiClient request interceptor', () => {
         headers: {},
         config,
       };
-    };
+    }) as unknown as AxiosAdapter;
   });
 
   afterEach(() => {
@@ -32,7 +34,8 @@ describe('apiClient request interceptor', () => {
     await apiClient.post('/test-endpoint', { name: 'Launchly' });
 
     expect(capturedConfig).not.toBeNull();
-    const headers = capturedConfig.headers;
+    const config = capturedConfig!;
+    const headers = config.headers;
     const idempotencyKey = typeof headers?.get === 'function'
       ? headers.get(IDEMPOTENCY_HEADER_NAME)
       : headers?.[IDEMPOTENCY_HEADER_NAME];
@@ -46,7 +49,8 @@ describe('apiClient request interceptor', () => {
     await apiClient.delete('/test-endpoint/123');
 
     expect(capturedConfig).not.toBeNull();
-    const headers = capturedConfig.headers;
+    const config = capturedConfig!;
+    const headers = config.headers;
     const idempotencyKey = typeof headers?.get === 'function'
       ? headers.get(IDEMPOTENCY_HEADER_NAME)
       : headers?.[IDEMPOTENCY_HEADER_NAME];
@@ -59,7 +63,8 @@ describe('apiClient request interceptor', () => {
     await apiClient.patch('/test-endpoint/123', { active: true });
 
     expect(capturedConfig).not.toBeNull();
-    const headers = capturedConfig.headers;
+    const config = capturedConfig!;
+    const headers = config.headers;
     const idempotencyKey = typeof headers?.get === 'function'
       ? headers.get(IDEMPOTENCY_HEADER_NAME)
       : headers?.[IDEMPOTENCY_HEADER_NAME];
@@ -71,7 +76,8 @@ describe('apiClient request interceptor', () => {
     await apiClient.get('/test-endpoint');
 
     expect(capturedConfig).not.toBeNull();
-    const headers = capturedConfig.headers;
+    const config = capturedConfig!;
+    const headers = config.headers;
     const idempotencyKey = typeof headers?.get === 'function'
       ? headers.get(IDEMPOTENCY_HEADER_NAME)
       : headers?.[IDEMPOTENCY_HEADER_NAME];
@@ -87,7 +93,8 @@ describe('apiClient request interceptor', () => {
     });
 
     expect(capturedConfig).not.toBeNull();
-    const headers = capturedConfig.headers;
+    const config = capturedConfig!;
+    const headers = config.headers;
     const idempotencyKey = typeof headers?.get === 'function'
       ? headers.get(IDEMPOTENCY_HEADER_NAME)
       : headers?.[IDEMPOTENCY_HEADER_NAME];
@@ -101,7 +108,8 @@ describe('apiClient request interceptor', () => {
     await apiClient.get('/secure-data');
 
     expect(capturedConfig).not.toBeNull();
-    const headers = capturedConfig.headers;
+    const config = capturedConfig!;
+    const headers = config.headers;
     const authHeader = typeof headers?.get === 'function'
       ? headers.get('Authorization')
       : headers?.['Authorization'];
@@ -113,7 +121,8 @@ describe('apiClient request interceptor', () => {
     await apiClient.get('/search-items', { params: { search: 'launchly' } });
 
     expect(capturedConfig).not.toBeNull();
-    expect(capturedConfig.signal).toBeDefined();
-    expect(capturedConfig.signal.aborted).toBe(false);
+    const config = capturedConfig!;
+    expect(config.signal).toBeDefined();
+    expect(config.signal?.aborted).toBe(false);
   });
 });

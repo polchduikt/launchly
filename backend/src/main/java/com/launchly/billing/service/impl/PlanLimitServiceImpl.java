@@ -1,5 +1,6 @@
 package com.launchly.billing.service.impl;
 
+import com.launchly.bot.constant.BotConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.common.utils.EncryptionUtil;
 import com.launchly.billing.entity.Plan;
@@ -14,6 +15,7 @@ import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PlanLimitServiceImpl implements PlanLimitService {
@@ -42,8 +45,8 @@ public class PlanLimitServiceImpl implements PlanLimitService {
         
         List<Bot> userBots = botRepository.findAllByUserId(userId);
         boolean tokenAlreadyExists = false;
-        if (newTelegramToken != null && !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(newTelegramToken)) {
-            for (com.launchly.bot.entity.Bot b : userBots) {
+        if (newTelegramToken != null && !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(newTelegramToken)) {
+            for (Bot b : userBots) {
                 try {
                     String decrypted = encryptionUtil.decrypt(b.getTelegramToken());
                     if (newTelegramToken.equals(decrypted)) {
@@ -51,6 +54,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
                         break;
                     }
                 } catch (Exception e) {
+                    log.warn("Failed to decrypt token for bot id={}: {}", b.getId(), e.getMessage());
                 }
             }
         }
@@ -66,7 +70,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
                         return b.getTelegramToken();
                     }
                 })
-                .filter(token -> !"0000000000:dummyTokenPlaceholderForNoBotConfig".equals(token))
+                .filter(token -> !BotConstants.DUMMY_TOKEN_PLACEHOLDER.equals(token))
                 .distinct()
                 .count();
 
@@ -123,7 +127,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
         if (userRepository != null && userRepository.findById(userId).map(u -> u.getRole() == Role.ROLE_ADMIN).orElse(false)) {
             return (Plan) Hibernate.unproxy(planRepository.findByName("ENTERPRISE")
                     .orElseGet(() -> planRepository.findByName("FREE")
-                            .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found"))));
+                            .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.default_plan_not_found"))));
         }
 
         Plan plan = subscriptionRepository.findByUserId(userId)
@@ -138,7 +142,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
                 })
                 .map(Subscription::getPlan)
                 .orElseGet(() -> planRepository.findByName("FREE")
-                        .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found")));
+                        .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.default_plan_not_found")));
         return (Plan) Hibernate.unproxy(plan);
     }
 
@@ -147,7 +151,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     @Cacheable(value = "plan", key = "#planId")
     public Plan getPlan(Long planId) {
         Plan plan = planRepository.findById(planId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Plan not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "billing.error.plan_not_found"));
         return (Plan) Hibernate.unproxy(plan);
     }
 }

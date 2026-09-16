@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -82,7 +83,7 @@ public class AdminBroadcastController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<Void> blockBroadcast(
             @Parameter(description = "Broadcast ID") @PathVariable Long broadcastId,
-            @RequestBody(required = false) AdminBlockRequest request) {
+            @Valid @RequestBody(required = false) AdminBlockRequest request) {
         adminBroadcastService.blockBroadcast(broadcastId, request);
         return ResponseEntity.ok().build();
     }

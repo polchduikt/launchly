@@ -15,14 +15,19 @@ import com.launchly.integration.repository.IntegrationRepository;
 import com.launchly.integration.service.GoogleSheetsService;
 import com.launchly.integration.service.MailchimpService;
 import com.launchly.notification.service.NotificationService;
+import com.launchly.bot.engine.action.ActionContactManager;
+import com.launchly.bot.engine.action.ActionPlaceholderResolver;
+import com.launchly.bot.engine.action.handler.TagBotActionHandler;
+import com.launchly.bot.engine.action.handler.UserFieldBotActionHandler;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -62,10 +67,21 @@ class ActionNodeExecutorTest {
     @Mock
     private TelegramClient telegramClient;
 
-    @InjectMocks
     private ActionNodeExecutor executor;
 
     private final Position pos = new Position(0.0, 0.0);
+
+    @BeforeEach
+    void setUp() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ActionPlaceholderResolver placeholderResolver = new ActionPlaceholderResolver(tagRepository, botUserTagRepository, objectMapper);
+        ActionContactManager contactManager = new ActionContactManager(botUserRepository, stateService, objectMapper);
+
+        TagBotActionHandler tagHandler = new TagBotActionHandler(tagRepository, botUserTagRepository);
+        UserFieldBotActionHandler userFieldHandler = new UserFieldBotActionHandler(stateService, placeholderResolver, contactManager);
+
+        executor = new ActionNodeExecutor(stateService, List.of(tagHandler, userFieldHandler));
+    }
 
     @Test
     @DisplayName("Should return ACTION type")
@@ -146,5 +162,33 @@ class ActionNodeExecutorTest {
         assertThat(nextNode).isEqualTo("target-step");
         verify(stateService).setSessionData(1L, 100L, "subscription_status", "active");
         verify(stateService).setSessionData(1L, 100L, "temp_code", "");
+    }
+
+    @Test
+    @DisplayName("Should clear field from both customFields and chatCustomFields")
+    void execute_ClearUserField_ClearsBothCustomFieldsAndChatCustomFields() {
+        Bot bot = Bot.builder().name("TestBot").build();
+        bot.setId(1L);
+        BotUser botUser = BotUser.builder()
+                .bot(bot)
+                .telegramId(100L)
+                .metadata("{\"customFields\":{\"iq\":\"10\",\"other\":\"val\"},\"chatCustomFields\":{\"-5534533581\":{\"iq\":\"25\",\"other\":\"gval\"}}}")
+                .build();
+
+        List<Map<String, Object>> actions = List.of(
+                Map.of("type", "CLEAR_USER_FIELD", "fieldName", "iq")
+        );
+
+        FlowNode node = new FlowNode("act-clear", NodeType.ACTION, Map.of("actions", actions), pos);
+        List<FlowEdge> edges = List.of(new FlowEdge("e-clear", "act-clear", "next-step", null));
+
+        String nextNode = executor.execute(node, edges, botUser, null, telegramClient);
+
+        assertThat(nextNode).isEqualTo("next-step");
+        verify(stateService).setSessionData(1L, 100L, "iq", "");
+        verify(botUserRepository).saveAndFlush(botUser);
+        assertThat(botUser.getMetadata()).doesNotContain("\"iq\"");
+        assertThat(botUser.getMetadata()).contains("\"other\":\"val\"");
+        assertThat(botUser.getMetadata()).contains("\"other\":\"gval\"");
     }
 }

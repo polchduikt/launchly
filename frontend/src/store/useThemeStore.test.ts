@@ -4,11 +4,11 @@ import { useThemeStore } from './useThemeStore';
 describe('useThemeStore', () => {
   beforeEach(() => {
     localStorage.clear();
-    useThemeStore.getState().setTheme('yellow');
+    useThemeStore.getState().setTheme('light');
   });
 
-  it('defaults to yellow theme', () => {
-    expect(useThemeStore.getState().theme).toBe('yellow');
+  it('defaults to light theme', () => {
+    expect(useThemeStore.getState().theme).toBe('light');
   });
 
   it('changes and persists theme in localStorage', () => {

@@ -8,13 +8,7 @@ import { t } from '../../../../../i18n/config';
 
 const CommentNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
   const { showToolbar, bindHover } = useNodeHover();
-  let connection: any = { inProgress: false };
-  try {
-    connection = useConnection() || { inProgress: false };
-  } catch (e) {
-    connection = { inProgress: false };
-  }
-  const isConnecting = connection.inProgress;
+  const isConnecting = useConnection((s) => s.inProgress);
 
   const noteSize = data.noteSize || 'M';
   const fontSize = data.fontSize || 'S';
@@ -46,7 +40,7 @@ const CommentNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
   return (
     <div
       {...bindHover}
-      className={`bg-amber-50 border-2 border-[#0A0A0A] rounded-3xl p-4 transition-all relative overflow-visible isolate ${getSizeClasses()} ${
+      className={`bg-amber-50/75 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl p-4 transition-all relative overflow-visible isolate ${getSizeClasses()} ${
         selected
           ? 'shadow-lg ring-2 ring-[#0A0A0A]'
           : 'shadow-md'

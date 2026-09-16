@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Position, useNodeConnections, useConnection } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Globe } from 'lucide-react';
@@ -10,43 +10,20 @@ import { NodeToolbar } from './NodeToolbar';
 import { t } from '../../../../../i18n/config';
 
 const ApiCallNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selected, data = {} }) => {
-  let sourceConns: any[] = [];
-  try {
-    sourceConns = useNodeConnections({ handleType: 'source' }) || [];
-  } catch (e) {
-    sourceConns = [];
-  }
-  let targetConns: any[] = [];
-  try {
-    targetConns = useNodeConnections({ handleType: 'target' }) || [];
-  } catch (e) {
-    targetConns = [];
-  }
+  const sourceConns = useNodeConnections({ id, handleType: 'source' });
+  const targetConns = useNodeConnections({ id, handleType: 'target' });
   const url = data?.url || 'https://api.example.com/endpoint';
   const method = data?.method || 'GET';
-
-  let connection: any = { inProgress: false };
-  try {
-    connection = useConnection() || { inProgress: false };
-  } catch (e) {
-    connection = { inProgress: false };
-  }
-  const isConnecting = connection.inProgress;
-  const isGrayedOut = useMemo(() => {
-    if (!isConnecting) return false;
-    if (connection.fromNode?.id === id) return true;
-    const sourceHandleId = connection.fromHandle?.id;
-    if (sourceHandleId === 'reply') {
-      return true;
-    }
-    return false;
-  }, [isConnecting, connection, id]);
+  const isConnecting = useConnection((s) => s.inProgress);
+  const isSelfSource = useConnection((s) => s.fromNode?.id === id);
+  const isReplyHandle = useConnection((s) => s.fromHandle?.id === 'reply');
+  const isGrayedOut = isConnecting && (isSelfSource || isReplyHandle);
   const { showToolbar, bindHover } = useNodeHover();
 
   return (
     <div
       {...bindHover}
-      className={`w-72 bg-white border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
+      className={`w-72 bg-white/70 backdrop-blur-[2px] border-2 border-[#0A0A0A] rounded-3xl transition-all relative overflow-visible isolate ${
         selected 
           ? 'shadow-lg ring-2 ring-[#0A0A0A]' 
           : 'shadow-md'
@@ -54,7 +31,7 @@ const ApiCallNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 
-      <div className="relative flex items-center gap-2 bg-indigo-100 rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-indigo-100/75 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
@@ -69,26 +46,24 @@ const ApiCallNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selec
         </div>
       </div>
 
-      <div className="p-4">
-        <div className="space-y-3">
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 leading-relaxed font-semibold">
-            <div className="flex justify-between items-center text-[10px] text-slate-400 uppercase tracking-wider mb-2.5">
-              <span>{t('node.api_call.request_info')}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={`text-[10px] uppercase font-extrabold tracking-wider px-2.5 py-1 rounded border shrink-0 ${API_METHOD_COLORS[method.toUpperCase()] || 'bg-slate-50 text-slate-500 border-slate-100'}`}>
-                {method}
-              </span>
-              <div className="flex-1 text-slate-850 truncate text-[11px] font-mono select-all bg-white border border-slate-100 p-1.5 rounded-lg leading-tight" title={url}>
-                {url || 'https://api.example.com/endpoint'}
-              </div>
+      <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace]">
+        <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 space-y-2">
+          <div className="flex justify-between items-center text-[10px] font-black text-[#0A0A0A]/60 uppercase tracking-wider">
+            <span>{t('node.api_call.request_info')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`text-[10px] uppercase font-black tracking-wider px-2 py-0.5 rounded-lg border border-[#0A0A0A] shrink-0 ${API_METHOD_COLORS[method.toUpperCase()] || 'bg-white text-[#0A0A0A] border-[#0A0A0A]'}`}>
+              {method}
+            </span>
+            <div className="flex-1 text-[#0A0A0A] truncate text-[11px] font-bold select-all bg-white border border-[#0A0A0A] px-2 py-1 rounded-lg leading-tight" title={url}>
+              {url || 'https://api.example.com/endpoint'}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end items-center px-4 py-2 bg-slate-50/30 select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mr-2">{t('node.api_call.next_step')}</span>
+      <div className="flex justify-end items-center px-4 py-2 bg-transparent select-none relative rounded-b-[22px]">
+        <span className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-2">{t('node.api_call.next_step')}</span>
         <NodeHandle
           type="source"
           position={Position.Right}

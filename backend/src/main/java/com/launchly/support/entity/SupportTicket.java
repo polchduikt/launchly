@@ -1,0 +1,84 @@
+package com.launchly.support.entity;
+
+import com.launchly.auth.entity.User;
+import com.launchly.common.entity.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "support_tickets", indexes = {
+    @Index(name = "idx_support_tickets_status", columnList = "status, created_at DESC"),
+    @Index(name = "idx_support_tickets_user_created", columnList = "user_id, created_at DESC")
+})
+@Getter
+@Setter
+@ToString(exclude = {"user", "assignedManager", "messages"})
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class SupportTicket extends BaseEntity {
+
+    @Version
+    private Long version;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(name = "subject")
+    private String subject;
+
+    @Column(name = "status", nullable = false)
+    @Builder.Default
+    private String status = "ACTIVE";
+
+    @Column(name = "unread_for_admin", nullable = false)
+    @Builder.Default
+    private Boolean unreadForAdmin = true;
+
+    @Column(name = "unread_for_user", nullable = false)
+    @Builder.Default
+    private Boolean unreadForUser = false;
+
+    @Column(name = "is_favorite", nullable = false)
+    @Builder.Default
+    private Boolean isFavorite = false;
+
+    @Column(name = "last_message", length = 1000)
+    private String lastMessage;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_manager_id")
+    private User assignedManager;
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt ASC")
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @Builder.Default
+    private List<SupportMessage> messages = new ArrayList<>();
+
+    public void assignManager(User manager) {
+        this.assignedManager = manager;
+    }
+
+    public void updateLastMessage(String text, boolean unreadForAdmin, boolean unreadForUser) {
+        this.lastMessage = text;
+        this.unreadForAdmin = unreadForAdmin;
+        this.unreadForUser = unreadForUser;
+    }
+
+    public void toggleFavorite() {
+        this.isFavorite = !Boolean.TRUE.equals(this.isFavorite);
+    }
+
+    public void resolve() {
+        this.status = "RESOLVED";
+    }
+
+    public void reopen() {
+        this.status = "ACTIVE";
+    }
+}

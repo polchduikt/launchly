@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Trash2, Database, Zap, AlertCircle } from 'lucide-react';
 import type { FlowBlock } from '../../../../../../types/bot';
+import type { TagResponse } from '../../../../../../types/broadcast';
 import type { Node, Edge } from '@xyflow/react';
 import { NODE_TITLES } from '../../../../../../const/nodeDisplay';
 import { FieldVariableSelector } from '../editors/FieldVariableSelector';
@@ -18,7 +19,7 @@ export interface EditDataCollectionDrawerProps {
   onAddAndConnectNode?: (sourceNodeId: string, type: string, sourceHandle: string) => void;
   onOpenNextStepDrawer?: (sourceHandle: string) => void;
   customFields?: string[];
-  tags?: unknown[];
+  tags?: TagResponse[];
 }
 
 const getTargetNodeDisplayName = (tn: Node, nodes: Node[]) => {
@@ -87,6 +88,7 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-xs font-bold bg-slate-50/20"
           >
             <option value="Text">{t('editor.data_collection.reply.text')}</option>
+            <option value="Image">{t('editor.data_collection.reply.image', 'Зображення / Фото')}</option>
             <option value="Number">{t('editor.data_collection.reply.number')}</option>
             <option value="Email">{t('editor.data_collection.reply.email')}</option>
             <option value="Phone">{t('editor.data_collection.reply.phone')}</option>
@@ -114,7 +116,7 @@ export const EditDataCollectionDrawer: React.FC<EditDataCollectionDrawerProps> =
             <div className="absolute right-2.5">
               <FieldVariableSelector
                 mode="variable"
-                tags={(tags as any) || []}
+                tags={tags || []}
                 customFields={customFields}
                 onSelect={(selectedVar) => {
                   setSaveToField(selectedVar);

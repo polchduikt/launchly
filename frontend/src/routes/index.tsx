@@ -1,16 +1,21 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { ROUTES } from './paths';
+import { STORAGE_KEYS } from '../const/constants';
 import { useAuthStore } from '../store/useAuthStore';
+import { useThemeStore } from '../store/useThemeStore';
+import { useShallow } from 'zustand/react/shallow';
+import { isAdminOrManager, getSafeRedirectUrl } from '../utils/auth';
 import { getCurrentUserApi } from '../api/auth';
 import { AuthLayout } from '../components/layout';
 
-import LandingPage from '../pages/public/Landing/LandingPage';
-import BlogPage from '../pages/public/Blog/BlogPage';
-import BlogDetailPage from '../pages/public/BlogDetail/BlogDetailPage';
-import TermsOfServicePage from '../pages/public/Terms/TermsOfServicePage';
-import PrivacyPolicyPage from '../pages/public/Privacy/PrivacyPolicyPage';
-import { FaqPage } from '../pages/public/Faq/FaqPage';
+
+const LandingPage = lazy(() => import('../pages/public/Landing/LandingPage'));
+const BlogPage = lazy(() => import('../pages/public/Blog/BlogPage'));
+const BlogDetailPage = lazy(() => import('../pages/public/BlogDetail/BlogDetailPage'));
+const TermsOfServicePage = lazy(() => import('../pages/public/Terms/TermsOfServicePage'));
+const PrivacyPolicyPage = lazy(() => import('../pages/public/Privacy/PrivacyPolicyPage'));
+const FaqPage = lazy(() => import('../pages/public/Faq/FaqPage').then(m => ({ default: m.FaqPage })));
 
 const LoginPage = lazy(() => import('../pages/public/Login/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/public/Register/RegisterPage'));
@@ -21,7 +26,10 @@ const BotsConnectPage = lazy(() => import('../pages/owner/BotsConnect/BotsConnec
 const AutomationsPage = lazy(() => import('../pages/owner/Automations/AutomationsPage').then(m => ({ default: m.AutomationsPage })));
 const SettingsPage = lazy(() => import('../pages/owner/Settings/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const FlowBuilderPage = lazy(() => import('../pages/owner/FlowBuilder/FlowBuilderPage').then(m => ({ default: m.FlowBuilderPage })));
-import { ChatPage } from '../pages/owner/Chat/ChatPage';
+import { ChatPageSkeleton } from '../pages/owner/Chat/components/ChatPageSkeleton';
+
+export const preloadChatPage = () => import('../pages/owner/Chat/ChatPage');
+const ChatPage = lazy(() => preloadChatPage().then(m => ({ default: m.ChatPage })));
 const ContactsPage = lazy(() => import('../pages/owner/Contacts/ContactsPage').then(m => ({ default: m.ContactsPage })));
 const AiPage = lazy(() => import('../pages/owner/Ai/AiPage'));
 const OrdersPage = lazy(() => import('../pages/owner/Orders/OrdersPage').then(m => ({ default: m.OrdersPage })));
@@ -34,10 +42,10 @@ const AcceptableUsePolicyPage = lazy(() => import('../pages/public/Legal/Accepta
 const AiTermsPage = lazy(() => import('../pages/public/Legal/AiTermsPage'));
 const PaymentTermsPage = lazy(() => import('../pages/public/Legal/PaymentTermsPage'));
 const BlockedPage = lazy(() => import('../pages/public/Blocked/BlockedPage'));
-import { CreateTemplateWizardPage } from '../pages/owner/Templates/CreateTemplateWizardPage';
-import { InstallTemplateWizardPage } from '../pages/public/InstallTemplate/InstallTemplateWizardPage';
-import { MyTemplatesPage } from '../pages/owner/Templates/MyTemplatesPage';
-import { TemplateDetailPage } from '../pages/owner/Templates/TemplateDetailPage';
+const CreateTemplateWizardPage = lazy(() => import('../pages/owner/Templates/CreateTemplateWizardPage').then(m => ({ default: m.CreateTemplateWizardPage })));
+const InstallTemplateWizardPage = lazy(() => import('../pages/public/InstallTemplate/InstallTemplateWizardPage').then(m => ({ default: m.InstallTemplateWizardPage })));
+const MyTemplatesPage = lazy(() => import('../pages/owner/Templates/MyTemplatesPage').then(m => ({ default: m.MyTemplatesPage })));
+const TemplateDetailPage = lazy(() => import('../pages/owner/Templates/TemplateDetailPage').then(m => ({ default: m.TemplateDetailPage })));
 
 const AdminStatsPage = lazy(() => import('../pages/admin/AdminStats/AdminStatsPage'));
 const AdminChatsPage = lazy(() => import('../pages/admin/AdminChats/AdminChatsPage'));
@@ -54,14 +62,14 @@ const PublicOnlyRoute = () => {
 
   if (accessToken) {
     const searchParams = new URLSearchParams(location.search);
-    const redirectUrl = searchParams.get('redirect') || localStorage.getItem('auth_redirect_url');
-    if (redirectUrl) {
-      localStorage.removeItem('auth_redirect_url');
-      return <Navigate to={redirectUrl} replace />;
+    const rawRedirect = searchParams.get('redirect') || localStorage.getItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
+    localStorage.removeItem(STORAGE_KEYS.AUTH_REDIRECT_URL);
+    const safeRedirect = getSafeRedirectUrl(rawRedirect);
+    if (safeRedirect) {
+      return <Navigate to={safeRedirect} replace />;
     }
     const role = user?.role;
-    const isAdminOrManager = role === 'ROLE_ADMIN' || role === 'ROLE_MANAGER';
-    return <Navigate to={isAdminOrManager ? ROUTES.ADMIN_HOME : ROUTES.DASHBOARD} replace />;
+    return <Navigate to={isAdminOrManager(role) ? ROUTES.ADMIN_HOME : ROUTES.DASHBOARD} replace />;
   }
 
   return <Outlet />;
@@ -69,9 +77,13 @@ const PublicOnlyRoute = () => {
 
 const PrivateRoute = () => {
   const location = useLocation();
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.setUser);
+  const { accessToken, user, setUser } = useAuthStore(
+    useShallow((state) => ({
+      accessToken: state.accessToken,
+      user: state.user,
+      setUser: state.setUser,
+    }))
+  );
   const [isSyncing, setIsSyncing] = useState(!user);
 
   useEffect(() => {
@@ -97,12 +109,11 @@ const PrivateRoute = () => {
   }
 
   if (isSyncing && !user) {
-    return <div className="min-h-screen bg-[#F2EBDD]" />;
+    return <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0A0A0A]" />;
   }
 
   const role = user?.role;
-  const isAdminOrManager = role === 'ROLE_ADMIN' || role === 'ROLE_MANAGER';
-  if (isAdminOrManager && !location.pathname.startsWith('/admin')) {
+  if (isAdminOrManager(role) && !location.pathname.startsWith('/admin')) {
     return <Navigate to={ROUTES.ADMIN_HOME} replace />;
   }
 
@@ -110,20 +121,58 @@ const PrivateRoute = () => {
 };
 
 const AdminRoute = () => {
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const user = useAuthStore((state) => state.user);
+  const { accessToken, user } = useAuthStore(
+    useShallow((state) => ({
+      accessToken: state.accessToken,
+      user: state.user,
+    }))
+  );
 
   if (!accessToken) {
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
   const role = user?.role;
-  const isAdminOrManager = role === 'ROLE_ADMIN' || role === 'ROLE_MANAGER';
-  if (!isAdminOrManager) {
+  if (!isAdminOrManager(role)) {
     return <Navigate to={ROUTES.DASHBOARD} replace />;
   }
 
   return <Outlet />;
+};
+
+const PUBLIC_BRAND_ROUTES = new Set<string>([
+  ROUTES.LANDING,
+  ROUTES.LOGIN,
+  ROUTES.REGISTER,
+  ROUTES.BLOCKED,
+  ROUTES.BLOG,
+  ROUTES.TERMS,
+  ROUTES.PRIVACY,
+  ROUTES.FAQ,
+  ROUTES.ACCEPTABLE_USE,
+  ROUTES.AI_TERMS,
+  ROUTES.PAYMENT_TERMS,
+]);
+
+const isPublicBrandPath = (pathname: string): boolean => {
+  if (PUBLIC_BRAND_ROUTES.has(pathname)) return true;
+  if (pathname.startsWith('/blog/')) return true;
+  return false;
+};
+
+const GlobalThemeSync = () => {
+  const { pathname } = useLocation();
+  const theme = useThemeStore((state) => state.theme);
+
+  useEffect(() => {
+    if (isPublicBrandPath(pathname)) {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  }, [pathname, theme]);
+
+  return null;
 };
 
 const ScrollToTop = () => {
@@ -141,6 +190,7 @@ const ScrollToTop = () => {
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
+      <GlobalThemeSync />
       <ScrollToTop />
       <Suspense fallback={null}>
         <Routes>
@@ -154,7 +204,7 @@ export const AppRouter: React.FC = () => {
           <Route path={ROUTES.AI_TERMS} element={<AiTermsPage />} />
           <Route path={ROUTES.PAYMENT_TERMS} element={<PaymentTermsPage />} />
           <Route path={ROUTES.BLOCKED} element={<BlockedPage />} />
-          <Route path="/templates/install/:shareCode" element={<InstallTemplateWizardPage />} />
+          <Route path={ROUTES.TEMPLATES_INSTALL} element={<InstallTemplateWizardPage />} />
           <Route path={ROUTES.OAUTH_CALLBACK} element={<OAuth2Callback />} />
 
           <Route element={<PublicOnlyRoute />}>
@@ -170,11 +220,18 @@ export const AppRouter: React.FC = () => {
             <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
             <Route path={ROUTES.INTEGRATIONS} element={<SettingsPage />} />
             <Route path={ROUTES.FLOW_BUILDER} element={<FlowBuilderPage />} />
-            <Route path="/templates/create" element={<CreateTemplateWizardPage />} />
-            <Route path="/templates/edit/:shareCode" element={<CreateTemplateWizardPage />} />
-            <Route path="/templates" element={<MyTemplatesPage />} />
-            <Route path="/templates/detail/:shareCode" element={<TemplateDetailPage />} />
-            <Route path={ROUTES.CHAT} element={<ChatPage />} />
+            <Route path={ROUTES.TEMPLATES_CREATE} element={<CreateTemplateWizardPage />} />
+            <Route path={ROUTES.TEMPLATES_EDIT} element={<CreateTemplateWizardPage />} />
+            <Route path={ROUTES.TEMPLATES} element={<MyTemplatesPage />} />
+            <Route path={ROUTES.TEMPLATES_DETAIL} element={<TemplateDetailPage />} />
+            <Route
+              path={ROUTES.CHAT}
+              element={
+                <Suspense fallback={<ChatPageSkeleton />}>
+                  <ChatPage />
+                </Suspense>
+              }
+            />
             <Route path={ROUTES.CONTACTS} element={<ContactsPage />} />
             <Route path={ROUTES.AI} element={<AiPage />} />
             <Route path={ROUTES.ORDERS} element={<OrdersPage />} />

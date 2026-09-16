@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBotStore } from '../../../store/useBotStore';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { useTranslation } from '../../../i18n/config';
+import { ErrorBoundary } from '../../../components/common/ErrorBoundary';
 import {
   useConversationQuery,
   useAllConversationsQuery,
@@ -36,7 +37,7 @@ export const ChatPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { activeBotId, setActiveBotId } = useBotStore();
-  const { data: bots = [] } = useBotsQuery();
+  const { data: bots = [], isLoading: isBotsLoading } = useBotsQuery();
 
   const botId = activeBotId || (bots[0]?.id || 0);
 
@@ -83,6 +84,7 @@ export const ChatPage: React.FC = () => {
     favorites: ls.favorites,
     unreadConvIds: ls.unreadConvIds,
     botUsers,
+    bots,
   });
 
   const currentBotUser = botUsers.find(u => u.telegramId === selectedConversation?.botUserTelegramId);
@@ -109,8 +111,11 @@ export const ChatPage: React.FC = () => {
     }
   }, [conversations, ls, queryClient]);
 
+  const contactNotesRef = useRef(ls.contactNotes);
+  contactNotesRef.current = ls.contactNotes;
+
   useEffect(() => {
-    if (selectedConvId) setTypedNote(ls.contactNotes[selectedConvId] || '');
+    if (selectedConvId) setTypedNote(contactNotesRef.current[selectedConvId] || '');
   }, [selectedConvId]);
   const parsedMeta: Record<string, unknown> = (() => {
     try {
@@ -174,7 +179,7 @@ export const ChatPage: React.FC = () => {
     setSelectedConvId(null);
   }, [selectedConvId, updateConvMut]);
 
-  if (botId === 0) {
+  if (!isBotsLoading && botId === 0) {
     return (
       <DashboardLayout>
         <div className="h-full flex items-center justify-center p-8 text-center bg-[#F2EBDD]">
@@ -205,7 +210,7 @@ export const ChatPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col bg-[#F2EBDD] font-['JetBrains_Mono',monospace] overflow-hidden w-full max-w-full">
+      <div className="h-full flex flex-col bg-[#F2EBDD] font-['Geist',sans-serif] overflow-hidden w-full max-w-full">
         <style>{`
           .scrollbar-none::-webkit-scrollbar { display: none; }
           .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
@@ -244,6 +249,12 @@ export const ChatPage: React.FC = () => {
               showSortDrop={filters.showSortDrop}
               onShowSortDrop={filters.setShowSortDrop}
               sortRef={filters.sortRef}
+              selectedAutomation={filters.selectedAutomation}
+              onSelectedAutomationChange={filters.setSelectedAutomation}
+              automations={filters.automations}
+              showAutomationDrop={filters.showAutomationDrop}
+              onShowAutomationDrop={filters.setShowAutomationDrop}
+              automationRef={filters.automationRef}
               onResetFilters={filters.resetFilters}
             />
 
@@ -261,61 +272,62 @@ export const ChatPage: React.FC = () => {
               />
 
               <div className="flex-1 flex flex-col min-w-0 bg-white overflow-hidden">
-                {selectedConversation ? (
-                  <>
-                    <MessageArea
-                      conversation={selectedConversation}
-                      botUser={currentBotUser}
-                      messages={messages}
-                      isMsgLoading={isMsgLoading}
-                      onButtonClick={(label) => actions.setTypedMessage(label)}
-                      infoPanelOpen={infoPanelOpen}
-                      onToggleInfoPanel={() => setInfoPanelOpen(v => !v)}
-                      onCloseConversation={handleCloseConversation}
-                      onMarkUnread={handleMarkUnread}
-                      onPause={handlePause}
-                      onResume={handleResume}
-                      onAddLabel={handleAddLabel}
-                      onRemoveLabel={handleRemoveLabel}
-                      onDeleteGlobalLabel={ls.deleteLabelByName}
-                      onSetReminder={handleSetReminder}
-                      allLabels={ls.labels}
-                      isPaused={isPaused}
-                      isFavorite={selectedConvId ? ls.favorites.includes(selectedConvId) : false}
-                      onToggleFavorite={() => selectedConvId && ls.toggleFavorite(selectedConvId)}
-                      meta={parsedMeta}
-                    />
-                    <ReplyBar
-                      bottomTab={bottomTab}
-                      onTabChange={setBottomTab}
-                      typedMessage={actions.typedMessage}
-                      onTypedMessageChange={actions.setTypedMessage}
-                      onKeyPress={actions.handleKeyPress}
-                      onSend={actions.handleSend}
-                      isSending={actions.sendMessageMut.isPending}
-                      pendingImage={actions.pendingImage}
-                      onClearPendingImage={() => actions.setPendingImage(null)}
-                      isRecording={actions.isRecording}
-                      onMicClick={actions.handleMicClick}
-                      showEmojiPicker={actions.showEmojiPicker}
-                      onToggleEmojiPicker={() => actions.setShowEmojiPicker(!actions.showEmojiPicker)}
-                      onEmojiSelect={actions.handleEmojiSelect}
-                      emojiRef={actions.emojiRef}
-                      imageInputRef={actions.imageInputRef}
-                      fileInputRef={actions.fileInputRef}
-                      onImageSelect={actions.handleImageSelect}
-                      onFileSelect={actions.handleFileSelect}
-                      isImageUploading={actions.mediaUpload.isPending}
-                      isFileUploading={actions.fileUpload.isPending}
-                      typedNote={typedNote}
-                      onTypedNoteChange={setTypedNote}
-                      onSaveNote={handleSaveNote}
-                      onScheduleClick={() => setShowScheduleModal(true)}
-                    />
-                  </>
-                ) : (
-                  <MessageArea conversation={null} messages={[]} isMsgLoading={false} onButtonClick={() => {}} />
-                )}
+                <ErrorBoundary
+                  inline
+                  fallbackTitle="Conversation Error"
+                  fallbackDescription="Unable to render the conversation. Click retry to reload this panel."
+                >
+                  {selectedConversation ? (
+                    <>
+                      <MessageArea
+                        conversation={selectedConversation}
+                        botUser={currentBotUser}
+                        messages={messages}
+                        isMsgLoading={isMsgLoading}
+                        onButtonClick={(label) => actions.setTypedMessage(label)}
+                        infoPanelOpen={infoPanelOpen}
+                        onToggleInfoPanel={() => setInfoPanelOpen(v => !v)}
+                        onCloseConversation={handleCloseConversation}
+                        onMarkUnread={handleMarkUnread}
+                        onPause={handlePause}
+                        onResume={handleResume}
+                        onAddLabel={handleAddLabel}
+                        onRemoveLabel={handleRemoveLabel}
+                        onDeleteGlobalLabel={ls.deleteLabelByName}
+                        onSetReminder={handleSetReminder}
+                        allLabels={ls.labels}
+                        isPaused={isPaused}
+                        isFavorite={selectedConvId ? ls.favorites.includes(selectedConvId) : false}
+                        onToggleFavorite={() => selectedConvId && ls.toggleFavorite(selectedConvId)}
+                        meta={parsedMeta}
+                      />
+                      <ReplyBar
+                        bottomTab={bottomTab}
+                        onTabChange={setBottomTab}
+                        typedMessage={actions.typedMessage}
+                        onTypedMessageChange={actions.setTypedMessage}
+                        onKeyPress={actions.handleKeyPress}
+                        onSend={actions.handleSend}
+                        isSending={actions.sendMessageMut.isPending}
+                        pendingImage={actions.pendingImage}
+                        onClearPendingImage={() => actions.setPendingImage(null)}
+                        isRecording={actions.isRecording}
+                        onMicClick={actions.handleMicClick}
+                        onEmojiSelect={actions.handleEmojiSelect}
+                        onImageSelect={actions.handleImageSelect}
+                        onFileSelect={actions.handleFileSelect}
+                        isImageUploading={actions.mediaUpload.isPending}
+                        isFileUploading={actions.fileUpload.isPending}
+                        typedNote={typedNote}
+                        onTypedNoteChange={setTypedNote}
+                        onSaveNote={handleSaveNote}
+                        onScheduleClick={() => setShowScheduleModal(true)}
+                      />
+                    </>
+                  ) : (
+                    <MessageArea conversation={null} messages={[]} isMsgLoading={false} onButtonClick={() => {}} />
+                  )}
+                </ErrorBoundary>
               </div>
             </div>
           </div>

@@ -1,6 +1,11 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useClickOutside } from '../../../../../../hooks/useClickOutside';
 import { createPortal } from 'react-dom';
 import { t } from '../../../../../../i18n/config';
+import { useBotStore } from '../../../../../../store/useBotStore';
+import { useCustomFieldsData } from '../../../../../../hooks/bot/useCustomFieldsData';
+import { FieldModal } from '../../userFields/FieldModal';
+import type { UserField } from '../../../../../../types/bot';
 import {
   User,
   Phone,
@@ -12,36 +17,53 @@ import {
   Tag as TagIcon,
   Search,
   Plus,
-  Check,
-  Sparkles
+  Sparkles,
+  X
 } from 'lucide-react';
 
 import type { TagResponse } from '../../../../../../types/broadcast';
+
+export interface NodeVariableItem {
+  key: string;
+  name: string;
+  val: string;
+  icon?: React.ReactNode;
+}
 
 interface FieldVariableSelectorProps {
   onSelect: (val: string) => void;
   tags?: TagResponse[];
   customFields?: string[];
+  extraSystemFields?: Array<{ key: string; name: string; val: string; icon?: React.ReactNode }>;
+  nodeVariables?: NodeVariableItem[];
+  nodeCategoryLabel?: string;
   onCreateCustomField?: (name: string) => void;
   mode?: 'field' | 'variable'; 
   trigger?: React.ReactNode;
   position?: 'top' | 'bottom';
+  className?: string;
 }
 
 export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
   onSelect,
   tags = [],
   customFields = [],
+  extraSystemFields,
+  nodeVariables,
+  nodeCategoryLabel,
   onCreateCustomField,
   mode = 'variable',
   trigger,
-  position = 'bottom'
+  position = 'bottom',
+  className
 }) => {
+  const activeBotId = useBotStore((state) => state?.activeBotId) || 0;
+  const { fields: globalFields, createField } = useCustomFieldsData({ botId: activeBotId });
+  const [isFieldModalOpen, setIsFieldModalOpen] = useState(false);
+
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<'system' | 'custom' | 'tags'>('system');
+  const [selectedCategory, setSelectedCategory] = useState<'node' | 'system' | 'custom' | 'tags'>('system');
   const [searchQuery, setSearchQuery] = useState('');
-  const [newFieldName, setNewFieldName] = useState('');
-  const [showCreateFieldInput, setShowCreateFieldInput] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -62,6 +84,8 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
   useEffect(() => {
     if (isOpen) {
       updateCoords();
+      setSelectedCategory('system');
+      setSearchQuery('');
       window.addEventListener('resize', updateCoords);
       window.addEventListener('scroll', updateCoords, true);
     }
@@ -69,69 +93,93 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
       window.removeEventListener('resize', updateCoords);
       window.removeEventListener('scroll', updateCoords, true);
     };
-  }, [isOpen]);
+  }, [isOpen, nodeVariables]);
 
-  
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current && !containerRef.current.contains(event.target as Node) &&
-        (!dropdownRef.current || !dropdownRef.current.contains(event.target as Node))
-      ) {
-        setIsOpen(false);
-      }
-    };
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+  useClickOutside([containerRef, dropdownRef], () => setIsOpen(false), isOpen);
+
+  const isSearching = searchQuery.trim().length > 0;
+
+  const filteredNodeVariables = useMemo(() => {
+    if (!nodeVariables) return [];
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return nodeVariables;
+    return nodeVariables.filter(f => f.name.toLowerCase().includes(q) || f.val.toLowerCase().includes(q) || f.key.toLowerCase().includes(q));
+  }, [nodeVariables, searchQuery]);
+
+  const systemFields = useMemo(() => {
+    const base = [
+      { key: 'first_name', name: t('editor.gs.fields.first_name'), val: 'first_name', icon: <User size={13} className="text-slate-400" /> },
+      { key: 'last_name', name: t('editor.gs.fields.last_name'), val: 'last_name', icon: <User size={13} className="text-slate-400" /> },
+      { key: 'phone', name: t('editor.gs.fields.phone'), val: 'phone', icon: <Phone size={13} className="text-slate-400" /> },
+      { key: 'email', name: t('editor.gs.fields.email'), val: 'email', icon: <User size={13} className="text-slate-400" /> },
+      { key: 'contact_id', name: t('editor.gs.fields.contact_id'), val: 'contact_id', icon: <Hash size={13} className="text-slate-400" /> },
+      { key: 'subscribed', name: t('editor.gs.fields.subscribed'), val: 'subscribed', icon: <Clock size={13} className="text-slate-400" /> },
+      { key: 'last_reply_type', name: t('editor.gs.fields.last_reply_type'), val: 'last_reply_type', icon: <MessageSquare size={13} className="text-slate-400" /> },
+      { key: 'telegram_user_id', name: t('editor.gs.fields.tg_id'), val: 'telegram_user_id', icon: <Hash size={13} className="text-slate-400" /> },
+      { key: 'telegram_username', name: t('editor.gs.fields.username'), val: 'telegram_username', icon: <Send size={13} className="text-sky-500" /> },
+      { key: 'opted_in_telegram', name: t('editor.gs.fields.opted_in_telegram'), val: 'telegram_opt_in', icon: <CheckSquare size={13} className="text-slate-400" /> },
+      { key: 'chat_type', name: 'Chat Type', val: 'chat_type', icon: <MessageSquare size={13} className="text-teal-500" /> },
+      { key: 'chat_title', name: 'Chat Title', val: 'chat_title', icon: <MessageSquare size={13} className="text-teal-500" /> },
+      { key: 'chat_id', name: 'Chat ID', val: 'chat_id', icon: <Hash size={13} className="text-teal-500" /> }
+    ];
+    if (extraSystemFields && extraSystemFields.length > 0) {
+      return [...extraSystemFields, ...base];
     }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
+    return base;
+  }, [extraSystemFields]);
 
-  const systemFields = useMemo(() => [
-    { key: 'first_name', name: t('editor.gs.fields.first_name'), val: 'first_name', icon: <User size={13} className="text-slate-400" /> },
-    { key: 'last_name', name: t('editor.gs.fields.last_name'), val: 'last_name', icon: <User size={13} className="text-slate-400" /> },
-    { key: 'phone', name: t('editor.gs.fields.phone'), val: 'phone', icon: <Phone size={13} className="text-slate-400" /> },
-    { key: 'email', name: t('editor.gs.fields.email'), val: 'email', icon: <User size={13} className="text-slate-400" /> },
-    { key: 'contact_id', name: t('editor.gs.fields.contact_id'), val: 'contact_id', icon: <Hash size={13} className="text-slate-400" /> },
-    { key: 'subscribed', name: t('editor.gs.fields.subscribed'), val: 'subscribed', icon: <Clock size={13} className="text-slate-400" /> },
-    { key: 'last_reply_type', name: t('editor.gs.fields.last_reply_type'), val: 'last_reply_type', icon: <MessageSquare size={13} className="text-slate-400" /> },
-    { key: 'telegram_user_id', name: t('editor.gs.fields.tg_id'), val: 'telegram_user_id', icon: <Hash size={13} className="text-slate-400" /> },
-    { key: 'telegram_username', name: t('editor.gs.fields.username'), val: 'telegram_username', icon: <Send size={13} className="text-sky-500" /> },
-    { key: 'opted_in_telegram', name: t('editor.gs.fields.opted_in_telegram'), val: 'telegram_opt_in', icon: <CheckSquare size={13} className="text-slate-400" /> }
-  ], []);
-
-  
   const filteredSystemFields = useMemo(() => {
-    return systemFields.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return systemFields;
+    return systemFields.filter(f => f.name.toLowerCase().includes(q) || (f.val && f.val.toLowerCase().includes(q)) || f.key.toLowerCase().includes(q));
   }, [systemFields, searchQuery]);
 
+  const allCustomFields = useMemo(() => {
+    const list: Array<string | { name: string; id?: string }> = [...customFields];
+    if (globalFields && globalFields.length > 0) {
+      globalFields.forEach((gf) => {
+        if (!list.some((f) => (typeof f === 'string' ? f : f.name) === gf.name)) {
+          list.push(gf);
+        }
+      });
+    }
+    return list;
+  }, [customFields, globalFields]);
+
   const filteredCustomFields = useMemo(() => {
-    return customFields.filter(f => f.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [customFields, searchQuery]);
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return allCustomFields;
+    return allCustomFields.filter((f: unknown) => {
+      const fname = typeof f === 'string' ? f : (f as { name?: string })?.name || '';
+      return fname.toLowerCase().includes(q);
+    });
+  }, [allCustomFields, searchQuery]);
 
   const filteredTags = useMemo(() => {
-    return tags.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return tags;
+    return tags.filter(t => t.name.toLowerCase().includes(q));
   }, [tags, searchQuery]);
 
+  const hasSearchResults =
+    filteredNodeVariables.length > 0 ||
+    filteredSystemFields.length > 0 ||
+    filteredCustomFields.length > 0 ||
+    (mode === 'variable' && filteredTags.length > 0);
+
   const handleItemSelect = (fieldName: string, _type: 'system' | 'custom' | 'tag') => {
-    
     onSelect(fieldName);
     setIsOpen(false);
     setSearchQuery('');
   };
 
-  const handleCreateField = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFieldName.trim()) return;
-    const name = newFieldName.trim();
+  const handleSaveModalField = (fieldData: UserField) => {
+    createField(fieldData);
     if (onCreateCustomField) {
-      onCreateCustomField(name);
+      onCreateCustomField(fieldData.name);
     }
-    handleItemSelect(name, 'custom');
-    setNewFieldName('');
-    setShowCreateFieldInput(false);
+    handleItemSelect(fieldData.name, 'custom');
+    setIsFieldModalOpen(false);
   };
 
   const handleTriggerClick = (e: React.MouseEvent) => {
@@ -158,8 +206,8 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
   }, [coords, position]);
 
   return (
-    <div className="relative inline-block text-left" ref={containerRef}>
-      <div onClick={handleTriggerClick}>
+    <div className={className || "relative inline-block text-left"} ref={containerRef}>
+      <div onClick={handleTriggerClick} className={className?.includes('w-full') ? 'w-full' : undefined}>
         {trigger || (
           <button
             type="button"
@@ -174,11 +222,10 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
         <div
           ref={dropdownRef}
           style={dropdownStyle}
-          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onMouseDown={(e) => { e.stopPropagation(); }}
           onClick={(e) => e.stopPropagation()}
           className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-3xl shadow-2xl flex overflow-hidden font-['JetBrains_Mono',monospace] text-[#0A0A0A]"
         >
-          {/* Left Category Navigation */}
           <div className="w-[145px] bg-[#F2EBDD] border-r-2 border-[#0A0A0A] p-2.5 flex flex-col gap-1 select-none shrink-0">
             <button
               type="button"
@@ -187,7 +234,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                 setSearchQuery('');
               }}
               className={`w-full px-2.5 py-1.5 text-left text-[11px] font-bold rounded-xl transition-all cursor-pointer border-2 ${
-                selectedCategory === 'system' ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' : 'border-transparent text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
+                !isSearching && selectedCategory === 'system' ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' : 'border-transparent text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
               }`}
             >
               {t('editor.gs.system_fields')}
@@ -199,7 +246,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                 setSearchQuery('');
               }}
               className={`w-full px-2.5 py-1.5 text-left text-[11px] font-bold rounded-xl transition-all cursor-pointer border-2 ${
-                selectedCategory === 'custom' ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' : 'border-transparent text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
+                !isSearching && selectedCategory === 'custom' ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' : 'border-transparent text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
               }`}
             >
               {t('editor.gs.custom_fields')}
@@ -212,129 +259,255 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
                   setSearchQuery('');
                 }}
                 className={`w-full px-2.5 py-1.5 text-left text-[11px] font-bold rounded-xl transition-all cursor-pointer border-2 ${
-                  selectedCategory === 'tags' ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' : 'border-transparent text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
+                  !isSearching && selectedCategory === 'tags' ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' : 'border-transparent text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
                 }`}
               >
                 {t('editor.gs.tags')}
               </button>
             )}
+            {nodeVariables && nodeVariables.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategory('node');
+                  setSearchQuery('');
+                }}
+                className={`w-full px-2.5 py-1.5 text-left text-[11px] font-bold rounded-xl transition-all cursor-pointer border-2 ${
+                  !isSearching && selectedCategory === 'node' ? 'bg-[#0A0A0A] text-[#F2EBDD] border-[#0A0A0A]' : 'border-transparent text-[#0A0A0A] hover:bg-[#0A0A0A]/10'
+                }`}
+              >
+                {nodeCategoryLabel || t('editor.gs.node_variables', 'Змінні вузла')}
+              </button>
+            )}
           </div>
 
-          {/* Right Field List */}
           <div className="flex-1 p-3 flex flex-col h-[264px] bg-[#F2EBDD]">
-            {/* Search Input */}
             <div className="relative mb-2 shrink-0">
               <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#0A0A0A]/40 pointer-events-none" />
               <input
                 type="text"
-                placeholder={t('common.search_placeholder')}
+                placeholder={t('editor.gs.search', 'Пошук')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-7 pr-3 py-1.5 border-2 border-[#0A0A0A] rounded-xl text-[10px] focus:outline-none bg-white text-[#0A0A0A] font-bold placeholder:text-[#0A0A0A]/40"
+                className="w-full pl-7 pr-7 py-1.5 border-2 border-[#0A0A0A] rounded-xl text-[10px] focus:outline-none bg-white text-[#0A0A0A] font-bold placeholder:text-[#0A0A0A]/40"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 hover:bg-[#0A0A0A]/10 rounded-full text-[#0A0A0A]/60 cursor-pointer"
+                >
+                  <X size={10} />
+                </button>
+              )}
             </div>
 
-            {/* Field List Items */}
             <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-0.5">
-              {/* System Fields */}
-              {selectedCategory === 'system' && (
+              {isSearching ? (
                 <>
-                  {filteredSystemFields.map((field) => (
-                    <button
-                      key={field.key}
-                      type="button"
-                      onClick={() => handleItemSelect(field.name, 'system')}
-                      className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
-                    >
-                      {field.icon}
-                      <span className="truncate">{field.name}</span>
-                    </button>
-                  ))}
-                  {filteredSystemFields.length === 0 && (
-                    <span className="text-[10px] text-[#0A0A0A]/60 italic text-center py-6 font-bold">
-                      {t('editor.action.no_actions_title')}
-                    </span>
-                  )}
-                </>
-              )}
-
-              {/* Custom Fields */}
-              {selectedCategory === 'custom' && (
-                <>
-                  {/* Create New Custom Field Option */}
-                  {onCreateCustomField && (
-                    <div className="mb-1">
-                      {!showCreateFieldInput ? (
+                  {filteredNodeVariables.length > 0 && (
+                    <div className="flex flex-col gap-0.5 pb-1">
+                      <div className="text-[9px] font-black uppercase text-[#0A0A0A]/60 px-2 pt-1 pb-0.5 tracking-wider font-['Anybody',sans-serif]">
+                        {nodeCategoryLabel || t('editor.gs.node_variables', 'Змінні вузла')}
+                      </div>
+                      {filteredNodeVariables.map((field) => (
                         <button
+                          key={`search-node-${field.key}`}
                           type="button"
-                          onClick={() => setShowCreateFieldInput(true)}
-                          className="w-full px-2.5 py-1.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] border-2 border-dashed border-[#0A0A0A] text-[#0A0A0A] rounded-xl text-left text-[10px] font-black flex items-center gap-1.5 cursor-pointer transition-all uppercase font-['Anybody',sans-serif]"
+                          onClick={() => handleItemSelect(field.val || field.key, 'system')}
+                          className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
                         >
-                          <Plus size={12} />
-                          <span>{t('settings.fields.create_field_title')}</span>
+                          {field.icon}
+                          <span className="truncate">{field.name}</span>
                         </button>
-                      ) : (
-                        <form onSubmit={handleCreateField} className="flex gap-1.5 items-center">
-                          <input
-                            type="text"
-                            required
-                            placeholder={t('settings.fields.placeholder_field_name')}
-                            autoFocus
-                            value={newFieldName}
-                            onChange={(e) => setNewFieldName(e.target.value)}
-                            className="flex-1 px-2.5 py-1.5 border-2 border-[#0A0A0A] rounded-xl text-[10px] focus:outline-none bg-white text-[#0A0A0A] font-bold"
-                          />
-                          <button
-                            type="submit"
-                            className="px-2.5 py-1.5 bg-[#0A0A0A] text-[#F2EBDD] font-black rounded-xl text-[10px] cursor-pointer border-2 border-[#0A0A0A]"
-                          >
-                            <Check size={12} />
-                          </button>
-                        </form>
-                      )}
+                      ))}
                     </div>
                   )}
 
-                  {filteredCustomFields.map((field: unknown, idx: number) => {
-                    const fname = typeof field === 'string' ? field : (field as { name: string }).name;
-                    return (
-                      <button
-                        key={(field as { id?: string }).id || fname || idx}
-                        type="button"
-                        onClick={() => handleItemSelect(fname, 'custom')}
-                        className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
-                      >
-                        <Sparkles size={12} className="text-amber-500 shrink-0" />
-                        <span className="truncate">{fname}</span>
-                      </button>
-                    );
-                  })}
-                  {filteredCustomFields.length === 0 && !showCreateFieldInput && (
-                    <span className="text-[10px] text-[#0A0A0A]/60 italic text-center py-6 font-bold">
-                      {t('crm.panel.fields.no_fields')}
+                  {filteredSystemFields.length > 0 && (
+                    <div className="flex flex-col gap-0.5 pb-1">
+                      <div className="text-[9px] font-black uppercase text-[#0A0A0A]/60 px-2 pt-1 pb-0.5 tracking-wider font-['Anybody',sans-serif]">
+                        {t('editor.gs.system_fields', 'Системні поля')}
+                      </div>
+                      {filteredSystemFields.map((field) => (
+                        <button
+                          key={`search-sys-${field.key}`}
+                          type="button"
+                          onClick={() => handleItemSelect(field.val || field.key, 'system')}
+                          className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
+                        >
+                          {field.icon}
+                          <span className="truncate">{field.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {filteredCustomFields.length > 0 && (
+                    <div className="flex flex-col gap-0.5 pb-1">
+                      <div className="text-[9px] font-black uppercase text-[#0A0A0A]/60 px-2 pt-1 pb-0.5 tracking-wider font-['Anybody',sans-serif]">
+                        {t('editor.gs.custom_fields', 'Спеціальні поля')}
+                      </div>
+                      {filteredCustomFields.map((field: unknown, idx: number) => {
+                        const fname = typeof field === 'string' ? field : (field as { name: string }).name;
+                        return (
+                          <button
+                            key={`search-custom-${(field as { id?: string }).id || fname || idx}`}
+                            type="button"
+                            onClick={() => handleItemSelect(fname, 'custom')}
+                            className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
+                          >
+                            <Sparkles size={12} className="text-amber-500 shrink-0" />
+                            <span className="truncate">{fname}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {mode === 'variable' && filteredTags.length > 0 && (
+                    <div className="flex flex-col gap-0.5 pb-1">
+                      <div className="text-[9px] font-black uppercase text-[#0A0A0A]/60 px-2 pt-1 pb-0.5 tracking-wider font-['Anybody',sans-serif]">
+                        {t('editor.gs.tags', 'Теги')}
+                      </div>
+                      {filteredTags.map((tag) => (
+                        <button
+                          key={`search-tag-${tag.id}`}
+                          type="button"
+                          onClick={() => handleItemSelect(tag.name, 'tag')}
+                          className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
+                        >
+                          <TagIcon size={12} className="text-amber-600 shrink-0" />
+                          <span className="truncate">{tag.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {!hasSearchResults && (
+                    <span className="text-[10px] text-[#0A0A0A]/60 italic text-center py-2 font-bold">
+                      {t('editor.gs.not_found', 'Нічого не знайдено')}
                     </span>
                   )}
-                </>
-              )}
 
-              {/* Tags */}
-              {selectedCategory === 'tags' && mode === 'variable' && (
-                <>
-                  {filteredTags.map((tag) => (
+                  {searchQuery.trim() && (
                     <button
-                      key={tag.id}
                       type="button"
-                      onClick={() => handleItemSelect(tag.name, 'tag')}
-                      className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
+                      onClick={() => {
+                        const name = searchQuery.trim();
+                        if (onCreateCustomField) {
+                          onCreateCustomField(name);
+                        }
+                        handleItemSelect(name, 'custom');
+                      }}
+                      className="w-full px-2.5 py-1.5 bg-white hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-black text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors border-2 border-dashed border-[#0A0A0A] mt-1"
                     >
-                      <TagIcon size={12} className="text-amber-600 shrink-0" />
-                      <span className="truncate">{tag.name}</span>
+                      <Plus size={12} className="text-indigo-600 shrink-0" />
+                      <span className="truncate">Використати "{searchQuery.trim()}"</span>
                     </button>
-                  ))}
-                  {filteredTags.length === 0 && (
-                    <span className="text-[10px] text-[#0A0A0A]/60 italic text-center py-6 font-bold">
-                      {t('crm.panel.tags.no_tags')}
-                    </span>
+                  )}
+                </>
+              ) : (
+                <>
+                  {selectedCategory === 'node' && (
+                    <>
+                      {filteredNodeVariables.map((field) => (
+                        <button
+                          key={field.key}
+                          type="button"
+                          onClick={() => handleItemSelect(field.val || field.key, 'system')}
+                          className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
+                        >
+                          {field.icon}
+                          <span className="truncate">{field.name}</span>
+                        </button>
+                      ))}
+                      {filteredNodeVariables.length === 0 && (
+                        <span className="text-[10px] text-[#0A0A0A]/60 italic text-center py-6 font-bold">
+                          {t('editor.gs.not_found', 'Нічого не знайдено')}
+                        </span>
+                      )}
+                    </>
+                  )}
+
+                  {selectedCategory === 'system' && (
+                    <>
+                      {filteredSystemFields.map((field) => (
+                        <button
+                          key={field.key}
+                          type="button"
+                          onClick={() => handleItemSelect(field.val || field.key, 'system')}
+                          className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
+                        >
+                          {field.icon}
+                          <span className="truncate">{field.name}</span>
+                        </button>
+                      ))}
+                      {filteredSystemFields.length === 0 && (
+                        <span className="text-[10px] text-[#0A0A0A]/60 italic text-center py-6 font-bold">
+                          {t('editor.gs.not_found', 'Нічого не знайдено')}
+                        </span>
+                      )}
+                    </>
+                  )}
+
+                  {selectedCategory === 'custom' && (
+                    <>
+                      <div className="mb-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsFieldModalOpen(true);
+                            setIsOpen(false);
+                          }}
+                          className="w-full px-2.5 py-2 bg-[#0A0A0A] hover:bg-[#0A0A0A]/90 text-[#F2EBDD] rounded-xl text-left text-[10px] font-black flex items-center gap-1.5 cursor-pointer transition-all uppercase font-['Anybody',sans-serif] shadow-xs"
+                        >
+                          <Plus size={12} />
+                          <span>{t('settings.fields.create_field_title', 'Створити поле користувача')}</span>
+                        </button>
+                      </div>
+
+                      {filteredCustomFields.map((field: unknown, idx: number) => {
+                        const fname = typeof field === 'string' ? field : (field as { name: string }).name;
+                        return (
+                          <button
+                            key={(field as { id?: string }).id || fname || idx}
+                            type="button"
+                            onClick={() => handleItemSelect(fname, 'custom')}
+                            className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
+                          >
+                            <Sparkles size={12} className="text-amber-500 shrink-0" />
+                            <span className="truncate">{fname}</span>
+                          </button>
+                        );
+                      })}
+                      {filteredCustomFields.length === 0 && (
+                        <span className="text-[10px] text-[#0A0A0A]/60 italic text-center py-6 font-bold">
+                          {t('crm.panel.fields.no_fields', 'Немає полів')}
+                        </span>
+                      )}
+                    </>
+                  )}
+
+                  {selectedCategory === 'tags' && mode === 'variable' && (
+                    <>
+                      {filteredTags.map((tag) => (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onClick={() => handleItemSelect(tag.name, 'tag')}
+                          className="w-full px-2.5 py-1.5 hover:bg-[#0A0A0A] hover:text-[#F2EBDD] rounded-xl text-left text-[11px] font-bold text-[#0A0A0A] flex items-center gap-2 cursor-pointer transition-colors group"
+                        >
+                          <TagIcon size={12} className="text-amber-600 shrink-0" />
+                          <span className="truncate">{tag.name}</span>
+                        </button>
+                      ))}
+                      {filteredTags.length === 0 && (
+                        <span className="text-[10px] text-[#0A0A0A]/60 italic text-center py-6 font-bold">
+                          {t('crm.panel.tags.no_tags')}
+                        </span>
+                      )}
+                    </>
                   )}
                 </>
               )}
@@ -343,6 +516,12 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
         </div>,
         document.body
       )}
+
+      <FieldModal
+        isOpen={isFieldModalOpen}
+        onClose={() => setIsFieldModalOpen(false)}
+        onSave={handleSaveModalField}
+      />
     </div>
   );
 };

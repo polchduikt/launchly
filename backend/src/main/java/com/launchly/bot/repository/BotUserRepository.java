@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,14 @@ public interface BotUserRepository extends JpaRepository<BotUser, Long> {
     Optional<BotUser> findById(Long id);
 
     long countByBotId(Long botId);
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    @EntityGraph(attributePaths = {"bot"})
+    List<BotUser> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    @Query("SELECT bu.metadata, bu.createdAt FROM BotUser bu WHERE bu.metadata IS NOT NULL")
+    List<Object[]> findAllMetadataAndCreatedAt();
 
     long countByBotIdIn(List<Long> botIds);
 
@@ -40,4 +49,7 @@ public interface BotUserRepository extends JpaRepository<BotUser, Long> {
 
     @Query("SELECT MIN(bu.telegramId) FROM BotUser bu WHERE bu.bot.id = :botId")
     Optional<Long> findMinTelegramIdByBotId(@Param("botId") Long botId);
+
+    @Query("SELECT bu.bot.id, COUNT(bu.id) FROM BotUser bu WHERE bu.bot.id IN :botIds GROUP BY bu.bot.id")
+    List<Object[]> countGroupedByBotIdIn(@Param("botIds") Collection<Long> botIds);
 }

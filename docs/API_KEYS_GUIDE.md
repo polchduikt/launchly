@@ -86,7 +86,22 @@ Enables one-click Google login on frontend and backend integration with Google S
 
 ---
 
-## 7. Security & Encryption Keys
+## 7. Cloudflare Turnstile (Bot & Anti-Abuse Protection)
+
+Cloudflare Turnstile provides smart, privacy-friendly bot verification on authentication forms (Login and Register) to prevent automated credential stuffing and spam registrations.
+
+| Variable | Scope | Description | Portal / Signup |
+| :--- | :--- | :--- | :--- |
+| `CLOUDFLARE_TURNSTILE_SECRET_KEY` | Backend | Turnstile Secret Key for `/siteverify` validation | [dash.cloudflare.com/?to=/:account/turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) |
+| `VITE_CLOUDFLARE_TURNSTILE_SITE_KEY` | Frontend | Turnstile Public Site Key for widget rendering | [dash.cloudflare.com/?to=/:account/turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) |
+
+> **Development Note**: For local development and testing, Cloudflare provides dummy test keys:
+> - Site Key (Always Passes): `1x00000000000000000000AA`
+> - Secret Key (Always Passes): `1x0000000000000000000000000000000AA`
+
+---
+
+## 8. Security & Encryption Keys
 
 | Variable | Description | Requirements |
 | :--- | :--- | :--- |

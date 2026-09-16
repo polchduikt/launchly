@@ -15,6 +15,7 @@ import com.launchly.broadcast.entity.CampaignStatus;
 import com.launchly.broadcast.entity.FilterType;
 import com.launchly.broadcast.mapper.BroadcastMapper;
 import com.launchly.broadcast.repository.BroadcastCampaignRepository;
+import com.launchly.broadcast.service.BroadcastExecutionService;
 import com.launchly.broadcast.service.BroadcastFilterService;
 import com.launchly.broadcast.validator.BroadcastValidator;
 import com.launchly.common.exception.AppException;
@@ -78,6 +79,9 @@ class BroadcastServiceImplTest {
 
     @Mock
     private StringRedisTemplate stringRedisTemplate;
+
+    @Mock
+    private BroadcastExecutionService broadcastExecutionService;
 
     @Mock
     private ValueOperations<String, String> valueOperations;

@@ -51,4 +51,6 @@ public interface BotService {
     String getAutomationFolders(Long userId);
 
     String saveAutomationFolders(String foldersJson, Long userId);
+
+    void deleteAllUserData(Long userId);
 }

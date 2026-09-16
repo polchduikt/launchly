@@ -10,7 +10,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -23,8 +25,10 @@ import org.hibernate.type.SqlTypes;
     @Index(name = "idx_bot_users_bot_telegram", columnList = "bot_id, telegram_id"),
     @Index(name = "idx_bot_users_bot_created", columnList = "bot_id, created_at")
 })
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@ToString(exclude = {"bot"})
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -64,6 +68,23 @@ public class BotUser extends BaseEntity {
 
     public void setCurrentNode(String nodeId) {
         this.currentNodeId = nodeId;
+    }
+
+    public String getDisplayName() {
+        String first = firstName != null ? firstName.trim() : "";
+        String last = lastName != null ? lastName.trim() : "";
+        String full = (first + " " + last).trim();
+        if (!full.isEmpty()) {
+            return full;
+        }
+        if (username != null && !username.isBlank()) {
+            String u = username.trim();
+            return u.startsWith("@") ? u : "@" + u;
+        }
+        if (telegramId != null) {
+            return "User " + telegramId;
+        }
+        return "Unknown";
     }
 }
 

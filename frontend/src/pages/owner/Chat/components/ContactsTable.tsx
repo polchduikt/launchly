@@ -9,6 +9,7 @@ import { TableSkeleton } from '../../../../components/common/Skeleton';
 
 interface ContactsTableProps {
   botId: number;
+  isBotsLoading?: boolean;
   isContactsLoading: boolean;
   filteredContacts: BotUserResponse[];
   selectedContactIds: Set<number>;
@@ -17,8 +18,96 @@ interface ContactsTableProps {
   onSelectContactDetail: (contact: BotUserResponse) => void;
 }
 
+import { formatRelativeTime } from '../../../../utils/date';
+
+interface ContactTableRowProps {
+  contact: BotUserResponse;
+  isSelected: boolean;
+  onToggleSelect: (id: number, checked: boolean) => void;
+  onSelectDetail: (contact: BotUserResponse) => void;
+}
+
+const parseContactMetadata = (metaStr: string | null) => {
+  try {
+    return metaStr ? JSON.parse(metaStr) : {};
+  } catch {
+    return {};
+  }
+};
+
+const ContactTableRow = React.memo<ContactTableRowProps>(({
+  contact: c,
+  isSelected,
+  onToggleSelect,
+  onSelectDetail,
+}) => {
+  const meta = parseContactMetadata(c.metadata);
+  const isPaused = meta.paused;
+  const isUnsubscribed = meta.unsubscribed;
+
+  let statusText = t('crm.contacts.status.subscribed');
+  if (isUnsubscribed) statusText = t('crm.contacts.status.unsubscribed');
+  else if (isPaused) statusText = t('crm.contacts.status.paused');
+
+  return (
+    <tr
+      className={`hover:bg-white/70 transition-all cursor-pointer ${
+        isSelected ? 'bg-white/90' : ''
+      }`}
+      onClick={() => onSelectDetail(c)}
+    >
+      <td
+        className="py-4 pl-6 pr-2 w-10"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={(e) => onToggleSelect(c.id, e.target.checked)}
+          className="accent-[#0A0A0A] cursor-pointer"
+        />
+      </td>
+      <td className="py-4 px-2 w-16">
+        <ContactAvatar photoUrl={c.photoUrl} name={c.firstName} size="md" />
+      </td>
+      <td className="py-4 px-2 font-black text-[#0A0A0A]">
+        <div className="flex flex-col">
+          <span className="font-extrabold">{c.firstName} {c.lastName}</span>
+          {c.username && (
+            <span className="text-[11px] font-semibold text-slate-700">@{c.username}</span>
+          )}
+        </div>
+      </td>
+      <td className="py-4 px-4 text-center font-bold text-xs text-[#0A0A0A]">
+        {c.botName || '—'}
+      </td>
+      <td className="py-4 px-6 text-center">
+        <div className="flex justify-center">
+          <span
+            className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase ${
+              isUnsubscribed
+                ? 'bg-rose-50 text-rose-700 border border-rose-100 shadow-sm shadow-rose-50'
+                : isPaused
+                ? 'bg-amber-50 text-amber-700 border border-amber-100 shadow-sm shadow-amber-50'
+                : 'bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm shadow-emerald-50'
+            }`}
+          >
+            {statusText}
+          </span>
+        </div>
+      </td>
+      <td className="py-4 px-6 text-slate-700 text-[11px] font-bold">
+        {formatRelativeTime(c.createdAt)}
+      </td>
+    </tr>
+  );
+});
+
+ContactTableRow.displayName = 'ContactTableRow';
+
 export const ContactsTable: React.FC<ContactsTableProps> = ({
   botId,
+  isBotsLoading,
   isContactsLoading,
   filteredContacts,
   selectedContactIds,
@@ -39,28 +128,13 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
   const paddingTop = firstItem ? firstItem.offsetTop : 0;
   const paddingBottom = lastItem ? Math.max(0, totalHeight - (lastItem.offsetTop + lastItem.size)) : 0;
 
-  const parseMetadata = (metaStr: string | null) => {
-    try {
-      return metaStr ? JSON.parse(metaStr) : {};
-    } catch {
-      return {};
-    }
-  };
-
-  const getRelativeTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffMins < 1) return t('common.time.just_now');
-    if (diffMins < 60) return t('common.time.mins_ago', { count: diffMins });
-    if (diffHours < 24) return t('common.time.hours_ago', { count: diffHours });
-    if (diffDays < 30) return t('common.time.days_ago', { count: diffDays });
-    return date.toLocaleDateString();
-  };
+  if (isContactsLoading || isBotsLoading) {
+    return (
+      <div className="flex-1 overflow-auto p-6 font-['JetBrains_Mono',monospace]">
+        <TableSkeleton rows={7} columns={6} />
+      </div>
+    );
+  }
 
   if (botId === 0) {
     return (
@@ -81,14 +155,6 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
             </button>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  if (isContactsLoading) {
-    return (
-      <div className="flex-1 overflow-auto p-6 font-['JetBrains_Mono',monospace]">
-        <TableSkeleton rows={7} columns={5} />
       </div>
     );
   }
@@ -120,81 +186,34 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({
               </th>
               <th className="py-4 px-2 w-16">{t('crm.contacts.table.avatar')}</th>
               <th className="py-4 px-2">{t('crm.contacts.table.name')}</th>
-              <th className="py-4 px-6">{t('crm.contacts.table.status')}</th>
+              <th className="py-4 px-4 text-center">{t('crm.contacts.table.automation')}</th>
+              <th className="py-4 px-6 text-center">{t('crm.contacts.table.status')}</th>
               <th className="py-4 px-6">{t('crm.contacts.table.subscribed')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#0A0A0A]/15 text-xs font-bold text-[#0A0A0A]">
             {paddingTop > 0 && (
               <tr>
-                <td style={{ height: `${paddingTop}px` }} colSpan={5} />
+                <td style={{ height: `${paddingTop}px` }} colSpan={6} />
               </tr>
             )}
             {virtualItems.map(({ index }) => {
               const c = filteredContacts[index];
               if (!c) return null;
 
-              const isSelected = selectedContactIds.has(c.id);
-              const meta = parseMetadata(c.metadata);
-              const isPaused = meta.paused;
-              const isUnsubscribed = meta.unsubscribed;
-
-              let statusText = t('crm.contacts.status.subscribed');
-              if (isUnsubscribed) statusText = t('crm.contacts.status.unsubscribed');
-              else if (isPaused) statusText = t('crm.contacts.status.paused');
-
               return (
-                <tr
+                <ContactTableRow
                   key={c.id}
-                  className={`hover:bg-white/70 transition-all cursor-pointer ${
-                    isSelected ? 'bg-white/90' : ''
-                  }`}
-                  onClick={() => onSelectContactDetail(c)}
-                >
-                  <td
-                    className="py-4 pl-6 pr-2 w-10"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) => onSelectContact(c.id, e.target.checked)}
-                      className="accent-[#0A0A0A] cursor-pointer"
-                    />
-                  </td>
-                  <td className="py-4 px-2 w-16">
-                    <ContactAvatar photoUrl={c.photoUrl} name={c.firstName} size="md" />
-                  </td>
-                  <td className="py-4 px-2 font-black text-[#0A0A0A]">
-                    <div className="flex flex-col">
-                      <span className="font-extrabold">{c.firstName} {c.lastName}</span>
-                      {c.username && (
-                        <span className="text-[11px] font-semibold text-slate-700">@{c.username}</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <span
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border-2 border-[#0A0A0A] ${
-                        isUnsubscribed
-                          ? 'bg-rose-200 text-[#0A0A0A]'
-                          : isPaused
-                          ? 'bg-amber-200 text-[#0A0A0A]'
-                          : 'bg-emerald-200 text-[#0A0A0A]'
-                      }`}
-                    >
-                      {statusText}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-slate-700 text-[11px] font-bold">
-                    {getRelativeTime(c.createdAt)}
-                  </td>
-                </tr>
+                  contact={c}
+                  isSelected={selectedContactIds.has(c.id)}
+                  onToggleSelect={onSelectContact}
+                  onSelectDetail={onSelectContactDetail}
+                />
               );
             })}
             {paddingBottom > 0 && (
               <tr>
-                <td style={{ height: `${paddingBottom}px` }} colSpan={5} />
+                <td style={{ height: `${paddingBottom}px` }} colSpan={6} />
               </tr>
             )}
           </tbody>
