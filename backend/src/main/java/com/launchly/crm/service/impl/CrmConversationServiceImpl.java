@@ -1,11 +1,9 @@
 package com.launchly.crm.service.impl;
 
-import com.launchly.bot.constant.TelegramConstants;
 import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotRepository;
 import com.launchly.bot.repository.BotUserRepository;
-import com.launchly.bot.service.UserAvatarService;
 import com.launchly.common.exception.AppException;
 import com.launchly.crm.dto.request.ConversationUpdateRequest;
 import com.launchly.crm.dto.response.ConversationResponse;
@@ -40,7 +38,6 @@ public class CrmConversationServiceImpl implements CrmConversationService {
     private final MessageRepository messageRepository;
     private final BotRepository botRepository;
     private final BotUserRepository botUserRepository;
-    private final UserAvatarService userAvatarService;
     private final CrmWebSocketService webSocketService;
 
     @Override
@@ -161,12 +158,6 @@ public class CrmConversationServiceImpl implements CrmConversationService {
 
     private ConversationResponse toConversationResponseWithLastMessage(Conversation conversation, Message last) {
         BotUser botUser = conversation.getBotUser();
-        if (botUser.getPhotoUrl() == null && botUser.getTelegramId() != null && botUser.getTelegramId() > 0) {
-            try {
-                userAvatarService.fetchAndSetPhotoUrl(botUser);
-            } catch (Exception ignored) {
-            }
-        }
         String botUserName = botUser.getDisplayName();
 
         String lastMessage = null;
@@ -196,10 +187,6 @@ public class CrmConversationServiceImpl implements CrmConversationService {
     }
 
     private ConversationResponse toConversationResponse(Conversation conversation) {
-        BotUser botUser = conversation.getBotUser();
-        if (botUser.getPhotoUrl() == null || botUser.getPhotoUrl().startsWith(TelegramConstants.API_BASE_URL)) {
-            userAvatarService.fetchAndSetPhotoUrl(botUser);
-        }
         Message last = messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(conversation.getId()).orElse(null);
         return toConversationResponseWithLastMessage(conversation, last);
     }
