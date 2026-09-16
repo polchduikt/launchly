@@ -14,6 +14,8 @@ import com.launchly.broadcast.service.TagService;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.launchly.common.constant.CacheConstants;
+import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
@@ -137,7 +139,7 @@ public class TagServiceImpl implements TagService {
 
     private void evictTagsCache(Long botId) {
         if (botId != null) {
-            org.springframework.cache.Cache cache = cacheManager.getCache("tags");
+            Cache cache = cacheManager.getCache(CacheConstants.TAGS);
             if (cache != null) {
                 cache.evict(botId);
             }

@@ -14,6 +14,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +44,7 @@ public class MailchimpServiceImpl implements MailchimpService {
                 if (combinedTags == null) {
                     combinedTags = config.tags();
                 } else {
-                    combinedTags = new java.util.ArrayList<>(combinedTags);
+                    combinedTags = new ArrayList<>(combinedTags);
                     for (String t : config.tags()) {
                         if (!combinedTags.contains(t)) {
                             combinedTags.add(t);

@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class AiServiceImpl implements AiService {
     private final AiChatSessionRepository aiChatSessionRepository;
     private final AiChatMessageRepository aiChatMessageRepository;
     private final UserRepository userRepository;
-    private final org.springframework.transaction.support.TransactionTemplate transactionTemplate;
+    private final TransactionTemplate transactionTemplate;
 
     @Value("${ai.prompt.chat-path:classpath:prompts/chat-system.txt}")
     private Resource chatPromptResource;

@@ -9,6 +9,7 @@ import com.launchly.bot.entity.Bot;
 import com.launchly.bot.entity.BotUser;
 import com.launchly.bot.repository.BotUserRepository;
 import com.launchly.bot.service.BotSubscriberService;
+import com.launchly.bot.service.UserAvatarService;
 import com.launchly.bot.validator.BotAccessValidator;
 import com.launchly.broadcast.entity.BotUserTag;
 import com.launchly.broadcast.entity.Tag;
@@ -38,7 +39,7 @@ public class BotSubscriberServiceImpl implements BotSubscriberService {
     private final BotAccessValidator botAccessValidator;
     private final PlanLimitService planLimitService;
     private final ObjectMapper objectMapper;
-    private final com.launchly.bot.service.UserAvatarService userAvatarService;
+    private final UserAvatarService userAvatarService;
 
     @Override
     @Transactional(readOnly = true)

@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Integration: Third-Party Services", description = "Google Sheets OAuth/Spreadsheets, Webhooks, Excel Exports, Mailchimp, and Hotmart")
 @RestController
@@ -130,11 +131,11 @@ public class IntegrationController {
 
     @Operation(summary = "Get Google OAuth authorization URL", description = "Returns Google OAuth authorization URL for the authenticated user without token query param.")
     @GetMapping("/google/auth-url")
-    public ResponseEntity<java.util.Map<String, String>> getGoogleAuthUrl(
+    public ResponseEntity<Map<String, String>> getGoogleAuthUrl(
             @Parameter(description = "Target Bot ID") @RequestParam Long botId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         String authUrl = googleSheetsService.buildAuthorizationUrl(botId, userDetails.getId());
-        return ResponseEntity.ok(java.util.Map.of("url", authUrl));
+        return ResponseEntity.ok(Map.of("url", authUrl));
     }
 
     @Operation(summary = "Initiate Google OAuth flow", description = "Redirect to Google authorization screen to authorize Google Sheets API integration.")
@@ -162,7 +163,7 @@ public class IntegrationController {
             @ApiResponse(responseCode = "200", description = "List of spreadsheets (id and title)")
     })
     @GetMapping("/google/spreadsheets")
-    public ResponseEntity<List<java.util.Map<String, String>>> getSpreadsheets(
+    public ResponseEntity<List<Map<String, String>>> getSpreadsheets(
             @Parameter(description = "Bot ID") @RequestParam Long botId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(googleSheetsService.getSpreadsheets(botId));

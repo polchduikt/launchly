@@ -18,8 +18,11 @@ import com.launchly.billing.entity.Subscription;
 import com.launchly.billing.entity.SubscriptionStatus;
 import com.launchly.billing.repository.PlanRepository;
 import com.launchly.billing.repository.SubscriptionRepository;
+import com.launchly.common.constant.CacheConstants;
 import com.launchly.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,11 +39,11 @@ public class TeamServiceImpl implements TeamService {
     private final BotInvitationRepository botInvitationRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final PlanRepository planRepository;
-    private final org.springframework.cache.CacheManager cacheManager;
+    private final CacheManager cacheManager;
 
     private void evictBotsCache(Long userId) {
         if (userId != null && cacheManager != null) {
-            org.springframework.cache.Cache cache = cacheManager.getCache(com.launchly.common.constant.CacheConstants.BOTS);
+            Cache cache = cacheManager.getCache(CacheConstants.BOTS);
             if (cache != null) {
                 cache.evict(userId);
             }

@@ -1,5 +1,6 @@
 package com.launchly.bot.service;
 
+import com.launchly.bot.entity.BotUser;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,5 +28,5 @@ public interface BotDialogStateService {
 
     void clearSession(Long botId, Long telegramUserId);
 
-    boolean isAutomationPaused(com.launchly.bot.entity.BotUser botUser);
+    boolean isAutomationPaused(BotUser botUser);
 }

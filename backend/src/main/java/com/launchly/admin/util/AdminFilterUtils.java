@@ -4,6 +4,7 @@ import com.launchly.admin.dto.AdminAutomationDto;
 import com.launchly.auth.entity.Role;
 import com.launchly.auth.entity.User;
 import java.util.List;
+import java.util.Map;
 
 public final class AdminFilterUtils {
 
@@ -50,15 +51,15 @@ public final class AdminFilterUtils {
         if (nodeArray == null) return 0;
         int count = 0;
         for (Object nodeObj : nodeArray) {
-            if (!(nodeObj instanceof java.util.Map<?, ?> nodeMap)) continue;
+            if (!(nodeObj instanceof Map<?, ?> nodeMap)) continue;
             String typeStr = nodeMap.get("type") != null ? nodeMap.get("type").toString().toLowerCase() : "";
             if ("ai".equals(typeStr) || "api_call".equals(typeStr) || "google_sheets".equals(typeStr) || "webhook".equals(typeStr) || "integration".equals(typeStr)) {
                 count++;
                 continue;
             }
-            if (nodeMap.get("data") instanceof java.util.Map<?, ?> dataMap && dataMap.get("actions") instanceof List<?> actionsList) {
+            if (nodeMap.get("data") instanceof Map<?, ?> dataMap && dataMap.get("actions") instanceof List<?> actionsList) {
                 for (Object act : actionsList) {
-                    if (act instanceof java.util.Map<?, ?> actMap && actMap.get("type") != null) {
+                    if (act instanceof Map<?, ?> actMap && actMap.get("type") != null) {
                         String actTypeStr = actMap.get("type").toString().toUpperCase();
                         if (actTypeStr.startsWith("GS_") || actTypeStr.startsWith("WEBHOOK") || actTypeStr.startsWith("INTEGRATION")) {
                             count++;

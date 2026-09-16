@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +38,7 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
     long countAccessibleByUserIdAndActiveTrue(@Param("userId") Long userId);
 
     @Query("SELECT COUNT(DISTINCT b) FROM Bot b WHERE b.active = true AND b.createdAt < :date AND (b.user.id = :userId OR EXISTS (SELECT 1 FROM BotMember bm WHERE bm.bot.user.id = b.user.id AND bm.user.id = :userId))")
-    long countAccessibleByUserIdAndActiveTrueAndCreatedAtBefore(@Param("userId") Long userId, @Param("date") java.time.LocalDateTime date);
+    long countAccessibleByUserIdAndActiveTrueAndCreatedAtBefore(@Param("userId") Long userId, @Param("date") LocalDateTime date);
 
     boolean existsByTelegramToken(String telegramToken);
 }

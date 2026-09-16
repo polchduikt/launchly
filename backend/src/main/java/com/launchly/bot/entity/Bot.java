@@ -21,6 +21,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bots", indexes = {
@@ -73,7 +74,7 @@ public class Bot extends BaseEntity {
     private String blockReason;
 
     @Column(name = "blocked_at")
-    private java.time.LocalDateTime blockedAt;
+    private LocalDateTime blockedAt;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "custom_fields_data", columnDefinition = "jsonb")
@@ -114,7 +115,7 @@ public class Bot extends BaseEntity {
         this.blocked = true;
         this.active = false;
         this.blockReason = reason != null && !reason.isBlank() ? reason.trim() : "Bot blocked by administrator";
-        this.blockedAt = java.time.LocalDateTime.now();
+        this.blockedAt = LocalDateTime.now();
     }
 
     public void unblock() {

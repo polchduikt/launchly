@@ -16,7 +16,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
@@ -61,7 +63,7 @@ public class TelegramBotManager implements TelegramClientProvider {
         return botLocks.computeIfAbsent(botId, k -> new ReentrantLock());
     }
 
-    @EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+    @EventListener(ApplicationReadyEvent.class)
     public void init() {
         if (!"polling".equalsIgnoreCase(mode)) {
             log.info("Telegram bot manager running in webhook mode, skipping auto-start");
@@ -141,7 +143,7 @@ public class TelegramBotManager implements TelegramClientProvider {
             if (bot.getUsername() == null || bot.getUsername().isBlank()) {
                 try {
                     String url = String.format(TelegramConstants.GET_ME_URL_TEMPLATE, token);
-                    org.springframework.http.ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
+                    ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
                     if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
                         JsonNode root = objectMapper.readTree(responseEntity.getBody());
                         if (root.has("ok") && root.get("ok").asBoolean()) {

@@ -40,13 +40,17 @@ import com.launchly.bot.validator.BotAccessValidator;
 import com.launchly.bot.validator.FlowSchemaValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -76,8 +80,8 @@ public class BotServiceImpl implements BotService {
     private final BotSubscriberService botSubscriberService;
     private final BotResponseFactory botResponseFactory;
     private final RestTemplate restTemplate;
-    private final org.springframework.transaction.support.TransactionTemplate transactionTemplate;
-    private final org.springframework.cache.CacheManager cacheManager;
+    private final TransactionTemplate transactionTemplate;
+    private final CacheManager cacheManager;
 
     private record TelegramBotInfo(String username, String firstName) {}
 
@@ -87,7 +91,7 @@ public class BotServiceImpl implements BotService {
         }
         try {
             String url = TelegramConstants.BOT_API_URL + unencryptedToken + "/getMe";
-            org.springframework.http.ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
+            ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
             if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
                 JsonNode responseNode = objectMapper.readTree(responseEntity.getBody());
                 if (responseNode.has("ok") && responseNode.get("ok").asBoolean()) {
@@ -176,7 +180,7 @@ public class BotServiceImpl implements BotService {
                         .build();
                 botMemberRepository.save(member);
                 if (cacheManager != null) {
-                    org.springframework.cache.Cache cache = cacheManager.getCache(CacheConstants.BOTS);
+                    Cache cache = cacheManager.getCache(CacheConstants.BOTS);
                     if (cache != null) {
                         cache.evict(m.getUser().getId());
                     }

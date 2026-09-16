@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,5 +43,5 @@ public interface BotUserRepository extends JpaRepository<BotUser, Long> {
     Optional<Long> findMinTelegramIdByBotId(@Param("botId") Long botId);
 
     @Query("SELECT bu.bot.id, COUNT(bu.id) FROM BotUser bu WHERE bu.bot.id IN :botIds GROUP BY bu.bot.id")
-    List<Object[]> countGroupedByBotIdIn(@Param("botIds") java.util.Collection<Long> botIds);
+    List<Object[]> countGroupedByBotIdIn(@Param("botIds") Collection<Long> botIds);
 }

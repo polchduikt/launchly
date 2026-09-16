@@ -1,5 +1,6 @@
 package com.launchly.common.ratelimit;
 
+import com.launchly.common.constant.PublicEndpoints;
 import com.launchly.common.security.CustomUserDetails;
 import com.launchly.common.utils.MessageUtils;
 import jakarta.servlet.FilterChain;
@@ -16,8 +17,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -27,7 +30,7 @@ public class TierRateLimitFilter extends OncePerRequestFilter {
 
     private final RateLimitService rateLimitService;
     private final MessageUtils messageUtils;
-    private final tools.jackson.databind.ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     private static final long ADMIN_RATE_LIMIT = 120_000;
@@ -41,7 +44,7 @@ public class TierRateLimitFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        for (String pattern : com.launchly.common.constant.PublicEndpoints.RATE_LIMIT_EXCLUDED) {
+        for (String pattern : PublicEndpoints.RATE_LIMIT_EXCLUDED) {
             if (pathMatcher.match(pattern, path)) {
                 return true;
             }
@@ -85,7 +88,7 @@ public class TierRateLimitFilter extends OncePerRequestFilter {
                     retryAfterSeconds
             );
 
-            java.util.Map<String, Object> body = java.util.Map.of(
+            Map<String, Object> body = Map.of(
                     "status", 429,
                     "error", "Too Many Requests",
                     "message", errorMessage,

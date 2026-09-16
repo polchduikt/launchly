@@ -33,9 +33,11 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -197,7 +199,7 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    @org.springframework.cache.annotation.Caching(evict = {
+    @Caching(evict = {
         @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "#userId"),
         @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "'plan:' + #userId")
     })
@@ -233,7 +235,7 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    @org.springframework.cache.annotation.Caching(evict = {
+    @Caching(evict = {
         @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "#userId"),
         @CacheEvict(value = CacheConstants.SUBSCRIPTION, key = "'plan:' + #userId")
     })
@@ -496,7 +498,7 @@ public class BillingServiceImpl implements BillingService {
 
     private void evictSubscriptionCache(Long userId) {
         if (userId != null) {
-            org.springframework.cache.Cache cache = cacheManager.getCache("subscription");
+            Cache cache = cacheManager.getCache("subscription");
             if (cache != null) {
                 cache.evict(userId);
                 cache.evict("plan:" + userId);

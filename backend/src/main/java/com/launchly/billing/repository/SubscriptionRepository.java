@@ -3,6 +3,8 @@ package com.launchly.billing.repository;
 import com.launchly.billing.entity.Subscription;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import java.util.List;
 import java.util.Optional;
 
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
@@ -21,6 +23,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     Optional<Subscription> findById(Long id);
 
     @EntityGraph(attributePaths = {"plan", "user"})
-    @org.springframework.data.jpa.repository.Query("SELECT s FROM Subscription s")
-    java.util.List<Subscription> findAllWithPlanAndUser();
+    @Query("SELECT s FROM Subscription s")
+    List<Subscription> findAllWithPlanAndUser();
 }

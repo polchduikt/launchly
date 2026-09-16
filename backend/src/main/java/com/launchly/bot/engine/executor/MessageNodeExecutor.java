@@ -18,6 +18,7 @@ import com.launchly.bot.entity.NodeType;
 import com.launchly.bot.service.BotDialogStateService;
 import com.launchly.common.utils.SanitizationUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -28,6 +29,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import tools.jackson.databind.ObjectMapper;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +45,7 @@ public class MessageNodeExecutor implements NodeExecutor {
     private final MessageBlockHelper helper;
     private final Map<String, MessageBlockHandler> handlerMap;
 
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     public MessageNodeExecutor(BotDialogStateService stateService,
                                StringRedisTemplate redisTemplate,
                                ObjectMapper objectMapper,
@@ -400,7 +402,7 @@ public class MessageNodeExecutor implements NodeExecutor {
                             if (groupId.startsWith("-")) {
                                 Long botId = botUser.getBot() != null ? botUser.getBot().getId() : 0L;
                                 String groupLockKey = "flow:scheduler:group_msg:" + botId + ":" + node.id() + ":" + groupId;
-                                Boolean canSend = redisTemplate.opsForValue().setIfAbsent(groupLockKey, "1", java.time.Duration.ofSeconds(60));
+                                Boolean canSend = redisTemplate.opsForValue().setIfAbsent(groupLockKey, "1", Duration.ofSeconds(60));
                                 if (Boolean.TRUE.equals(canSend)) {
                                     chatIds.add(groupId);
                                 }

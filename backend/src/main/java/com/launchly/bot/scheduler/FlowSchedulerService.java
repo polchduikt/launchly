@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -267,7 +268,7 @@ public class FlowSchedulerService {
                         redisTemplate.opsForValue().set(lastRunKey, String.valueOf(System.currentTimeMillis()), Duration.ofDays(7));
                         return false;
                     }
-                    LocalDateTime fromDateTime = LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(Long.parseLong(lastRunStr.trim())), zoneId);
+                    LocalDateTime fromDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(lastRunStr.trim())), zoneId);
                     LocalDateTime nextRun = expression.next(fromDateTime);
                     return nextRun != null && !nextRun.isAfter(now.toLocalDateTime());
                 } catch (Exception e) {
