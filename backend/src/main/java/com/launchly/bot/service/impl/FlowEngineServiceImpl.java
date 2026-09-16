@@ -25,8 +25,8 @@ import com.launchly.bot.service.BotUserProvisioningService;
 import com.launchly.bot.service.FlowEngineService;
 import com.launchly.bot.service.SystemBotAuthService;
 import com.launchly.bot.telegram.TelegramClientProvider;
-import com.launchly.broadcast.dto.response.CampaignResponse;
-import com.launchly.broadcast.service.BroadcastService;
+import com.launchly.broadcast.entity.BroadcastCampaign;
+import com.launchly.broadcast.repository.BroadcastCampaignRepository;
 import com.launchly.common.utils.SanitizationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -52,7 +52,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
     private final ObjectMapper objectMapper;
     private final Map<NodeType, NodeExecutor> executors;
     private final StringRedisTemplate redisTemplate;
-    private final BroadcastService broadcastService;
+    private final BroadcastCampaignRepository broadcastCampaignRepository;
     private final TelegramClientProvider telegramClientProvider;
     private final AnalyticsService analyticsService;
     private final BotInputValidator inputValidator;
@@ -69,7 +69,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                                   ObjectMapper objectMapper,
                                   List<NodeExecutor> nodeExecutors,
                                   StringRedisTemplate redisTemplate,
-                                  @Lazy BroadcastService broadcastService,
+                                  BroadcastCampaignRepository broadcastCampaignRepository,
                                   @Lazy TelegramClientProvider telegramClientProvider,
                                   AnalyticsService analyticsService,
                                   BotInputValidator inputValidator,
@@ -84,7 +84,7 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         this.stateService = stateService;
         this.objectMapper = objectMapper;
         this.redisTemplate = redisTemplate;
-        this.broadcastService = broadcastService;
+        this.broadcastCampaignRepository = broadcastCampaignRepository;
         this.telegramClientProvider = telegramClientProvider;
         this.analyticsService = analyticsService;
         this.inputValidator = inputValidator;
@@ -207,50 +207,24 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
 
             Long executingBotId = callStackManager.getExecutingBotId(botId, telegramUserId);
-            List<FlowNode> nodes;
-            List<FlowEdge> edges;
+            FlowSchemaData schemaData;
             if (!executingBotId.equals(botId)) {
-                FlowSchema schema = schemaCache.getSchema(executingBotId);
-                if (schema == null) {
-                    log.warn("No flow schema found for executing bot {}", executingBotId);
-                    return;
-                }
-                nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-                edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+                schemaData = loadBotSchema(executingBotId);
             } else {
                 Long campaignId = stateService.getActiveCampaignId(botId, telegramUserId).orElse(null);
-                if (campaignId != null) {
-                    CampaignResponse campaign = null;
-                    try {
-                        campaign = broadcastService.getCampaign(campaignId);
-                    } catch (Exception e) {}
-                    if (campaign != null) {
-                        nodes = objectMapper.readValue(campaign.nodes(), new TypeReference<>() {});
-                        edges = objectMapper.readValue(campaign.edges(), new TypeReference<>() {});
-                    } else {
-                        FlowSchema schema = schemaCache.getSchema(botId);
-                        if (schema == null) {
-                            log.warn("No flow schema found for bot {}", botId);
-                            return;
-                        }
-                        nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-                        edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
-                    }
-                } else {
-                    FlowSchema schema = schemaCache.getSchema(botId);
-                    if (schema == null) {
-                        log.warn("No flow schema found for bot {}", botId);
-                        return;
-                    }
-                    nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-                    edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+                schemaData = campaignId != null ? loadCampaignSchema(campaignId) : null;
+                if (schemaData == null) {
+                    schemaData = loadBotSchema(botId);
                 }
             }
 
-            if (nodes.isEmpty()) {
-                log.warn("Empty flow schema for bot {}", executingBotId);
+            if (schemaData == null || schemaData.nodes().isEmpty()) {
+                log.warn("Empty or missing flow schema for executing bot {}", executingBotId);
                 return;
             }
+
+            List<FlowNode> nodes = schemaData.nodes();
+            List<FlowEdge> edges = schemaData.edges();
 
             String dcKey = "launchly:bot:data_collection:" + botId + ":" + telegramUserId;
             if (update.hasChatJoinRequest()) {
@@ -448,36 +422,21 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             callStackManager.clear(botId, telegramUserId);
             callStackManager.setExecutingBotId(botId, telegramUserId, botId);
 
-
             if (campaignId != null) {
                 stateService.setActiveCampaignId(botId, telegramUserId, campaignId);
             } else {
                 stateService.clearActiveCampaignId(botId, telegramUserId);
             }
 
-            List<FlowNode> nodes;
-            List<FlowEdge> edges;
-            if (campaignId != null) {
-                CampaignResponse campaign = null;
-                try {
-                    campaign = broadcastService.getCampaign(campaignId);
-                } catch (Exception e) {}
-                if (campaign != null) {
-                    nodes = objectMapper.readValue(campaign.nodes(), new TypeReference<>() {});
-                    edges = objectMapper.readValue(campaign.edges(), new TypeReference<>() {});
-                } else {
-                    return;
-                }
-            } else {
-                FlowSchema schema = schemaCache.getSchema(botId);
-                if (schema == null) {
-                    return;
-                }
-                nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-                edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+            FlowSchemaData schemaData = campaignId != null ? loadCampaignSchema(campaignId) : null;
+            if (schemaData == null) {
+                schemaData = loadBotSchema(botId);
+            }
+            if (schemaData == null || schemaData.nodes().isEmpty()) {
+                return;
             }
 
-            executeNodeLoop(botId, botUser, telegramUserId, startNodeId, nodes, edges, botId, null, client);
+            executeNodeLoop(botId, botUser, telegramUserId, startNodeId, schemaData.nodes(), schemaData.edges(), botId, null, client);
 
         } catch (Exception e) {
             log.error("Error running flow for bot {}: {}", botId, e.getMessage(), e);
@@ -536,10 +495,10 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                     callStackManager.setExecutingBotId(botId, telegramUserId, executingBotId);
                     stateService.clearActiveCampaignId(botId, telegramUserId);
 
-                    FlowSchema schema = schemaCache.getSchema(executingBotId);
-                    if (schema != null) {
-                        nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-                        edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+                    FlowSchemaData targetSchemaData = loadBotSchema(executingBotId);
+                    if (targetSchemaData != null) {
+                        nodes = targetSchemaData.nodes();
+                        edges = targetSchemaData.edges();
 
                         String botStartNodeId = nodes.stream()
                                 .filter(n -> n.type() == NodeType.START)
@@ -551,7 +510,6 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                             currentNodeId = botStartNodeId;
                             stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
                             botUser.setCurrentNodeId(currentNodeId);
-                            botUser = botUserRepository.save(botUser);
                             continue;
                         }
                     }
@@ -560,7 +518,6 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 currentNodeId = returnNodeId;
                 stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
                 botUser.setCurrentNodeId(currentNodeId);
-                botUser = botUserRepository.save(botUser);
                 continue;
             }
 
@@ -583,35 +540,24 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                     callStackManager.setExecutingBotId(botId, telegramUserId, executingBotId);
 
                     if (!executingBotId.equals(botId)) {
-                        FlowSchema schema = schemaCache.getSchema(executingBotId);
-                        if (schema != null) {
-                            nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-                            edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+                        FlowSchemaData subBotData = loadBotSchema(executingBotId);
+                        if (subBotData != null) {
+                            nodes = subBotData.nodes();
+                            edges = subBotData.edges();
                         }
                     } else {
                         Long campaignId = poppedFrame.getCampaignId();
-                        if (campaignId != null) {
+                        FlowSchemaData campaignData = campaignId != null ? loadCampaignSchema(campaignId) : null;
+                        if (campaignData != null) {
                             stateService.setActiveCampaignId(botId, telegramUserId, campaignId);
-                            CampaignResponse campaign = null;
-                            try {
-                                campaign = broadcastService.getCampaign(campaignId);
-                            } catch (Exception e) {}
-                            if (campaign != null) {
-                                nodes = objectMapper.readValue(campaign.nodes(), new TypeReference<>() {});
-                                edges = objectMapper.readValue(campaign.edges(), new TypeReference<>() {});
-                            } else {
-                                FlowSchema schema = schemaCache.getSchema(botId);
-                                if (schema != null) {
-                                    nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-                                    edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
-                                }
-                            }
+                            nodes = campaignData.nodes();
+                            edges = campaignData.edges();
                         } else {
                             stateService.clearActiveCampaignId(botId, telegramUserId);
-                            FlowSchema schema = schemaCache.getSchema(botId);
-                            if (schema != null) {
-                                nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
-                                edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+                            FlowSchemaData mainBotData = loadBotSchema(botId);
+                            if (mainBotData != null) {
+                                nodes = mainBotData.nodes();
+                                edges = mainBotData.edges();
                             }
                         }
                     }
@@ -642,6 +588,45 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         } catch (Exception e) {
             log.error("Failed to persist final botUser state for user {}: {}", botUser.getId(), e.getMessage(), e);
             throw e;
+        }
+    }
+
+    private record FlowSchemaData(List<FlowNode> nodes, List<FlowEdge> edges) {}
+
+    private FlowSchemaData loadBotSchema(Long botId) {
+        if (botId == null) return null;
+        FlowSchema schema = schemaCache.getSchema(botId);
+        if (schema == null) {
+            return null;
+        }
+        try {
+            List<FlowNode> nodes = objectMapper.readValue(schema.getNodes(), new TypeReference<>() {});
+            List<FlowEdge> edges = objectMapper.readValue(schema.getEdges(), new TypeReference<>() {});
+            return new FlowSchemaData(nodes, edges);
+        } catch (Exception e) {
+            log.error("Failed to parse bot schema for bot {}: {}", botId, e.getMessage());
+            return null;
+        }
+    }
+
+    private FlowSchemaData loadCampaignSchema(Long campaignId) {
+        if (campaignId == null) return null;
+        try {
+            return broadcastCampaignRepository.findById(campaignId)
+                    .map(campaign -> {
+                        try {
+                            List<FlowNode> nodes = objectMapper.readValue(campaign.getNodes(), new TypeReference<>() {});
+                            List<FlowEdge> edges = objectMapper.readValue(campaign.getEdges(), new TypeReference<>() {});
+                            return new FlowSchemaData(nodes, edges);
+                        } catch (Exception e) {
+                            log.error("Failed to parse campaign schema for campaign {}: {}", campaignId, e.getMessage());
+                            return null;
+                        }
+                    })
+                    .orElse(null);
+        } catch (Exception e) {
+            log.warn("Failed to fetch campaign {}: {}", campaignId, e.getMessage());
+            return null;
         }
     }
 
