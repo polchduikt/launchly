@@ -92,7 +92,7 @@ public class BillingServiceImpl implements BillingService {
         User user = userQueryService.getUserOrThrow(userId);
 
         Plan freePlan = planRepository.findByName(BillingConstants.PLAN_FREE)
-                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.default_plan_not_found"));
 
         Subscription subscription = Subscription.builder()
                 .status(SubscriptionStatus.ACTIVE)
@@ -122,7 +122,7 @@ public class BillingServiceImpl implements BillingService {
                 .orElseGet(() -> {
                     createFreeSubscription(userId);
                     return subscriptionRepository.findByUserId(userId)
-                            .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to resolve subscription"));
+                            .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.resolve_subscription_failed"));
                 });
         return billingMapper.toSubscriptionResponse(subscription);
     }
@@ -143,7 +143,7 @@ public class BillingServiceImpl implements BillingService {
                     .orElseGet(() -> {
                         createFreeSubscription(userId);
                         return subscriptionRepository.findByUserId(userId)
-                                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to resolve subscription"));
+                                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.resolve_subscription_failed"));
                     });
 
             return new String[]{
@@ -207,7 +207,7 @@ public class BillingServiceImpl implements BillingService {
     @Retry(name = "stripe")
     public SubscriptionResponse cancelSubscription(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "billing.error.subscription_not_found"));
 
         String stripeSubId = subscription.getStripeSubscriptionId();
         if (stripeSubId == null || stripeSubId.isEmpty()) {
@@ -243,7 +243,7 @@ public class BillingServiceImpl implements BillingService {
     @Retry(name = "stripe")
     public SubscriptionResponse resumeSubscription(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "billing.error.subscription_not_found"));
 
         String stripeSubId = subscription.getStripeSubscriptionId();
         if (stripeSubId == null || stripeSubId.isEmpty()) {
@@ -408,7 +408,7 @@ public class BillingServiceImpl implements BillingService {
         Long planId = Long.valueOf(planIdStr);
         Plan plan = planLimitService.getPlan(planId);
         Subscription subscription = subscriptionRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Subscription not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "billing.error.subscription_not_found"));
 
         String stripeSubId = session.getSubscription();
         com.stripe.model.Subscription stripeSub = com.stripe.model.Subscription.retrieve(stripeSubId);
@@ -464,7 +464,7 @@ public class BillingServiceImpl implements BillingService {
         }
 
         Plan freePlan = planRepository.findByName(BillingConstants.PLAN_FREE)
-                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.default_plan_not_found"));
 
         subscription.setPlan(freePlan);
         subscription.setStatus(SubscriptionStatus.ACTIVE);

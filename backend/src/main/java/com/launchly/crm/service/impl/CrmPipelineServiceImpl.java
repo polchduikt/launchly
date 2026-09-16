@@ -66,9 +66,9 @@ public class CrmPipelineServiceImpl implements CrmPipelineService {
     public OrderResponse createOrder(Long botId, Long botUserId, String items,
                                      BigDecimal totalAmount, String currency) {
         Bot bot = botRepository.findById(botId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
         BotUser botUser = botUserRepository.findById(botUserId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot user not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.contact_not_found"));
         Long nextNumber = bot.getOrderSequence() + 1;
         bot.setOrderSequence(nextNumber);
         botRepository.save(bot);
@@ -117,7 +117,7 @@ public class CrmPipelineServiceImpl implements CrmPipelineService {
     @Transactional
     public OrderResponse updateOrder(Long orderId, OrderUpdateRequest request, Long userId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Order not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "crm.error.order_not_found"));
 
         verifyBotOwnership(order.getBot().getId(), userId);
 
@@ -140,9 +140,9 @@ public class CrmPipelineServiceImpl implements CrmPipelineService {
     public LeadResponse createLead(Long botId, Long botUserId, String name,
                                    String email, String phone, String data) {
         Bot bot = botRepository.findById(botId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
         BotUser botUser = botUserRepository.findById(botUserId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot user not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.contact_not_found"));
 
         Lead lead = Lead.builder()
                 .name(name)
@@ -188,7 +188,7 @@ public class CrmPipelineServiceImpl implements CrmPipelineService {
     @Transactional
     public LeadResponse updateLead(Long leadId, LeadUpdateRequest request, Long userId) {
         Lead lead = leadRepository.findById(leadId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Lead not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "crm.error.lead_not_found"));
 
         verifyBotOwnership(lead.getBot().getId(), userId);
 
@@ -208,6 +208,6 @@ public class CrmPipelineServiceImpl implements CrmPipelineService {
 
     private void verifyBotOwnership(Long botId, Long userId) {
         botRepository.findByIdAndUserId(botId, userId)
-                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Access denied to this bot"));
+                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied"));
     }
 }

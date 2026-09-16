@@ -115,7 +115,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             rawHeatmap = analyticsEventRepository.getActivityHeatmapForBots(botIds, startActivityDate);
         } else {
             Bot bot = botRepository.findByIdAndUserId(botId, userId)
-                    .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Access denied to bot analytics"));
+                    .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "analytics.error.access_denied"));
 
             botIds.add(botId);
 

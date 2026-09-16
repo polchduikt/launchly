@@ -64,7 +64,7 @@ public class EncryptionUtil {
 
             return Base64.getEncoder().encodeToString(buffer.array());
         } catch (Exception e) {
-            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to encrypt data");
+            throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "common.error.encryption_failed");
         }
     }
 

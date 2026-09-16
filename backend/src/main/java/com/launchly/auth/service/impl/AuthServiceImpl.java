@@ -365,7 +365,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void deleteUserAccount(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "auth.error.user_not_found"));
         botService.deleteAllUserData(userId);
         billingService.deleteSubscription(userId);
         userRepository.delete(user);
@@ -375,7 +375,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void deleteAccountByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "auth.error.user_not_found"));
         deleteUserAccount(user.getId());
     }
 }

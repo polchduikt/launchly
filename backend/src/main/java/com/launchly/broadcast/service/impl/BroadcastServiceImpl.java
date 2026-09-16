@@ -211,7 +211,7 @@ public class BroadcastServiceImpl implements BroadcastService {
     @Transactional
     public void deleteCampaign(Long campaignId, Long userId) {
         BroadcastCampaign campaign = campaignRepository.findById(campaignId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "broadcast.error.not_found"));
 
         broadcastValidator.validateWriteAccess(campaign.getBot().getId(), userId);
 

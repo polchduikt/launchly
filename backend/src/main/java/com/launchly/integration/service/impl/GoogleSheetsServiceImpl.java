@@ -388,7 +388,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     @Retry(name = "googleSheets")
     public List<String> getWorksheets(Long botId, String spreadsheetId) {
         Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "integration.error.google_sheets_not_connected"));
         refreshTokenIfNeeded(integration);
 
         try {
@@ -434,7 +434,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     @Retry(name = "googleSheets")
     public List<String> getHeaders(Long botId, String spreadsheetId, String worksheetName) {
         Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "integration.error.google_sheets_not_connected"));
         refreshTokenIfNeeded(integration);
 
         try {
@@ -481,7 +481,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     @Retry(name = "googleSheets")
     public List<List<Object>> getSheetValues(Long botId, String spreadsheetId, String worksheetName) {
         Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "integration.error.google_sheets_not_connected"));
         refreshTokenIfNeeded(integration);
 
         try {
@@ -531,7 +531,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     @Retry(name = "googleSheets")
     public void updateCell(Long botId, String spreadsheetId, String worksheetName, String cellReference, Object value) {
         Integration integration = integrationRepository.findByBotIdAndType(botId, IntegrationType.GOOGLE_SHEETS)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Google Sheets integration not connected"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "integration.error.google_sheets_not_connected"));
         refreshTokenIfNeeded(integration);
 
         try {

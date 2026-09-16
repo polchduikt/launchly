@@ -69,7 +69,7 @@ public class BroadcastExecutionServiceImpl implements BroadcastExecutionService 
         BroadcastCampaign campaign = null;
         try {
             campaign = campaignRepository.findById(campaignId)
-                    .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Campaign not found"));
+                    .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "broadcast.error.not_found"));
 
             if (campaign.isBlocked() || campaign.getStatus() == CampaignStatus.BLOCKED) {
                 log.warn("Campaign {} is BLOCKED by administrator — skipping execution", campaignId);

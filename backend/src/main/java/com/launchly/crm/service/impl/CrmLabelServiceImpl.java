@@ -35,7 +35,7 @@ public class CrmLabelServiceImpl implements CrmLabelService {
             String trimmed = name.trim();
             if (crmLabelRepository.findByUserIdAndName(userId, trimmed).isEmpty()) {
                 User user = userRepository.findById(userId)
-                        .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+                        .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "auth.error.user_not_found"));
                 crmLabelRepository.save(CrmLabel.builder()
                         .name(trimmed)
                         .user(user)

@@ -127,7 +127,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
         if (userRepository != null && userRepository.findById(userId).map(u -> u.getRole() == Role.ROLE_ADMIN).orElse(false)) {
             return (Plan) Hibernate.unproxy(planRepository.findByName("ENTERPRISE")
                     .orElseGet(() -> planRepository.findByName("FREE")
-                            .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found"))));
+                            .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.default_plan_not_found"))));
         }
 
         Plan plan = subscriptionRepository.findByUserId(userId)
@@ -142,7 +142,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
                 })
                 .map(Subscription::getPlan)
                 .orElseGet(() -> planRepository.findByName("FREE")
-                        .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Default FREE plan not found")));
+                        .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.default_plan_not_found")));
         return (Plan) Hibernate.unproxy(plan);
     }
 
@@ -151,7 +151,7 @@ public class PlanLimitServiceImpl implements PlanLimitService {
     @Cacheable(value = "plan", key = "#planId")
     public Plan getPlan(Long planId) {
         Plan plan = planRepository.findById(planId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Plan not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "billing.error.plan_not_found"));
         return (Plan) Hibernate.unproxy(plan);
     }
 }

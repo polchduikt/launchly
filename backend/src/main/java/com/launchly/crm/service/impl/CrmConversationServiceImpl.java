@@ -110,9 +110,9 @@ public class CrmConversationServiceImpl implements CrmConversationService {
         return conversationRepository.findByBotIdAndBotUserId(botId, botUserId)
                 .orElseGet(() -> {
                     Bot bot = botRepository.findById(botId)
-                            .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot not found"));
+                            .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.not_found"));
                     BotUser botUser = botUserRepository.findById(botUserId)
-                            .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Bot user not found"));
+                            .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "bot.error.contact_not_found"));
 
                     Conversation conversation = Conversation.builder()
                             .bot(bot)
@@ -126,14 +126,14 @@ public class CrmConversationServiceImpl implements CrmConversationService {
     @Transactional(readOnly = true)
     public Conversation getConversationOrThrow(Long conversationId, Long userId) {
         Conversation conversation = conversationRepository.findById(conversationId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Conversation not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "crm.error.conversation_not_found"));
         verifyBotOwnership(conversation.getBot().getId(), userId);
         return conversation;
     }
 
     private void verifyBotOwnership(Long botId, Long userId) {
         botRepository.findByIdAndUserId(botId, userId)
-                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "Access denied to this bot"));
+                .orElseThrow(() -> new AppException(HttpStatus.FORBIDDEN, "bot.error.access_denied"));
     }
 
     private List<ConversationResponse> toConversationResponseList(List<Conversation> conversations) {

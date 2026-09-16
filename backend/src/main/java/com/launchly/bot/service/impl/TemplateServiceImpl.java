@@ -216,7 +216,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Cacheable(value = "templates", key = "#shareCode")
     public TemplateResponse getTemplateByShareCode(String shareCode) {
         AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Template not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "template.error.not_found"));
 
         return toTemplateResponse(template);
     }
@@ -292,7 +292,7 @@ public class TemplateServiceImpl implements TemplateService {
     })
     public void installTemplate(String shareCode, Long targetBotId, Long userId) {
         AccountTemplate template = accountTemplateRepository.findByShareCode(shareCode)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Template not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "template.error.not_found"));
         User user = userQueryService.getUserOrThrow(userId);
 
         Bot targetBot = null;

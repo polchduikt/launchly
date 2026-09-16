@@ -21,13 +21,13 @@ public class UserQueryServiceImpl implements UserQueryService {
     @Override
     public User getUserOrThrow(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "auth.error.user_not_found"));
     }
 
     @Override
     public User getUserByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "auth.error.user_not_found"));
     }
 
     @Override
