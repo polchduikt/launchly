@@ -90,7 +90,7 @@ public class MessageBlockHelper {
         return connection.getInputStream();
     }
 
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{++([^\\s{}]+)\\}+");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{++([^{}\\r\\n]+)\\}+");
 
     public String resolvePlaceholders(String text, Map<String, String> variables, BotUser botUser) {
         if (text == null) return "";
