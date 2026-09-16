@@ -39,10 +39,17 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -481,7 +488,7 @@ public class BotModerationServiceImpl implements BotModerationService {
     }
 
     private InlineKeyboardMarkup buildMathKeyboard(Long userId) {
-        Random random = new Random();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         int a = random.nextInt(9) + 1;
         int b = random.nextInt(9) + 1;
         int correct = a + b;
@@ -496,7 +503,7 @@ public class BotModerationServiceImpl implements BotModerationService {
         }
 
         List<Integer> shuffled = new ArrayList<>(options);
-        Collections.shuffle(shuffled);
+        Collections.shuffle(shuffled, random);
 
         List<InlineKeyboardButton> buttons = new ArrayList<>();
         for (Integer opt : shuffled) {

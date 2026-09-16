@@ -20,8 +20,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Component
@@ -182,7 +182,7 @@ public class QueryNodeExecutor implements NodeExecutor {
                 });
                 selected = candidates.get(0);
             } else {
-                selected = candidates.get(new Random().nextInt(candidates.size()));
+                selected = candidates.get(ThreadLocalRandom.current().nextInt(candidates.size()));
             }
 
             populateCandidateSessionVariables(botId, currentTelegramId, outputPrefix, selected);

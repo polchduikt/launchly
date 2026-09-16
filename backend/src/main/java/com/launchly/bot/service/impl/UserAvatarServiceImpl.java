@@ -144,11 +144,18 @@ public class UserAvatarServiceImpl implements UserAvatarService {
                 } else {
                     botUser.setPhotoUrl(fileUrl);
                 }
+            } catch (InterruptedException ie) {
+                log.warn("Interrupted while downloading profile photo for user {}: {}", botUser.getTelegramId(), ie.getMessage());
+                Thread.currentThread().interrupt();
+                botUser.setPhotoUrl(fileUrl);
             } catch (Exception uploadEx) {
                 log.warn("Failed to upload profile photo to Cloudinary for user {}: {}", botUser.getTelegramId(), uploadEx.getMessage());
                 botUser.setPhotoUrl(fileUrl);
             }
             botUserRepository.save(botUser);
+        } catch (InterruptedException ie) {
+            log.warn("Interrupted while fetching profile photo for user {}: {}", botUser.getTelegramId(), ie.getMessage());
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             log.warn("Could not fetch profile photo for user {}: {}", botUser.getTelegramId(), e.getMessage());
         }

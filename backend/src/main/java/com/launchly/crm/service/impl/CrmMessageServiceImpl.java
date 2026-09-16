@@ -80,12 +80,16 @@ public class CrmMessageServiceImpl implements CrmMessageService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public MessageResponse saveBotMessage(Long botId, Long botUserId, String content) {
-        return saveBotMessage(botId, botUserId, content, null, null);
+        return saveBotMessageInternal(botId, botUserId, content, null, null);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public MessageResponse saveBotMessage(Long botId, Long botUserId, String content, String mediaUrl, String mediaType) {
+        return saveBotMessageInternal(botId, botUserId, content, mediaUrl, mediaType);
+    }
+
+    private MessageResponse saveBotMessageInternal(Long botId, Long botUserId, String content, String mediaUrl, String mediaType) {
         Conversation conversation = conversationService.getOrCreateConversation(botId, botUserId);
 
         Message message = Message.builder()

@@ -100,7 +100,7 @@ public class MessageBlockHelper {
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             String rawName = matcher.group(1).trim();
-            String cleanName = rawName.replaceAll("^\\{+|\\}+$", "").trim();
+            String cleanName = rawName.replaceAll("^(?:\\{+)|(?:\\}+)$", "").trim();
             String strippedName = cleanName.replaceFirst("^(?i)(custom_fields|customFields|fields|custom_field|field)\\.", "").trim();
             String replacement = "";
             boolean found = false;

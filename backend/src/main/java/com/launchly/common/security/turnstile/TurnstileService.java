@@ -82,6 +82,10 @@ public class TurnstileService {
             }
 
             return true;
+        } catch (InterruptedException ie) {
+            log.error("Interrupted during Turnstile token verification: {}", ie.getMessage(), ie);
+            Thread.currentThread().interrupt();
+            return false;
         } catch (Exception e) {
             log.error("Error during Turnstile token verification: {}", e.getMessage(), e);
             return false;
