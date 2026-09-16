@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ActionNodeEditor } from './ActionNodeEditor';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactFlowProvider } from '@xyflow/react';
 
 vi.mock('../../../../../../i18n/config', () => ({
   t: (k: string, fb?: string) => (typeof fb === 'string' ? fb : k),
@@ -32,7 +33,9 @@ vi.mock('../../../../../../api/bot', () => ({
 
 const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+  <QueryClientProvider client={qc}>
+    <ReactFlowProvider>{children}</ReactFlowProvider>
+  </QueryClientProvider>
 );
 
 describe('ActionNodeEditor', () => {

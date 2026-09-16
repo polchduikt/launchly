@@ -139,7 +139,7 @@ export const BotModerationModal: React.FC<BotModerationModalProps> = ({
       desc: 'Видаляє та блокує можливість писати'
     },
     {
-      value: 'DELETE_AND_BAN',
+      value: 'DELETE_AND_KICK',
       label: 'Видалити + Бан',
       desc: 'Видаляє та виганяє порушника з чату'
     }

@@ -33,6 +33,7 @@ import { NODE_ICON_COMPONENTS } from '../../../const/nodeDisplay';
 import { ROUTES } from '../../../routes/paths';
 import { DEFAULT_CUSTOM_FIELDS } from '../../../const/constants';
 import { useFlowCollaboration } from '../../../hooks/bot/useFlowCollaboration';
+import { useFlowUiStore } from '../../../store/useFlowUiStore';
 import type { FlowBlock } from '../../../types/bot';
 import type { CustomNode } from '../../../types/broadcast';
 

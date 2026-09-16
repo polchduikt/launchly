@@ -230,13 +230,6 @@ export const CooldownNodeEditor: React.FC<CooldownNodeEditorProps> = ({
   }, [blockMessage, isFocused]);
 
   useEffect(() => {
-    const el = contentEditableRef.current;
-    if (el && !el.innerHTML) {
-      el.innerHTML = textToHtml(blockMessage);
-    }
-  }, []);
-
-  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (!isFocused) return;
       const container = containerRef.current;

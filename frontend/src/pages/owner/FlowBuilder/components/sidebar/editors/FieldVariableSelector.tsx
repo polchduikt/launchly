@@ -135,7 +135,7 @@ export const FieldVariableSelector: React.FC<FieldVariableSelectorProps> = ({
   }, [systemFields, searchQuery]);
 
   const allCustomFields = useMemo(() => {
-    const list: Array<string | { name: string; id?: string }> = [...customFields];
+    const list: Array<string | UserField | { name: string; id?: string | number }> = [...customFields];
     if (globalFields && globalFields.length > 0) {
       globalFields.forEach((gf) => {
         if (!list.some((f) => (typeof f === 'string' ? f : f.name) === gf.name)) {

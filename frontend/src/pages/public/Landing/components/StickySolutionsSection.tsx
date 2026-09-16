@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   ShoppingBag,
   GraduationCap,
@@ -148,7 +148,7 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
     }
   };
 
-  const getTelegramDemoData = (tabKey: TabKey): TelegramMessage[] => {
+  const getTelegramDemoData = useCallback((tabKey: TabKey): TelegramMessage[] => {
     switch (tabKey) {
       case 'ecommerce':
         return [
@@ -331,7 +331,7 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
           },
         ];
     }
-  };
+  }, [t]);
 
   const currentMessages = getTelegramDemoData(activeTab);
   const currentBotName = t(`landing.demo.${activeTab}.bot_name`, DEFAULT_BOT_NAMES[activeTab]);
@@ -368,7 +368,7 @@ export const StickySolutionsSection: React.FC<StickySolutionsSectionProps> = ({ 
     return () => {
       timers.forEach(clearTimeout);
     };
-  }, [activeTab, replayKey]);
+  }, [activeTab, replayKey, getTelegramDemoData]);
 
   useEffect(() => {
     if (!chatContainerRef.current) return;
