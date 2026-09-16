@@ -84,6 +84,10 @@ public class BillingServiceImpl implements BillingService {
     @Override
     @Transactional
     public void createFreeSubscription(Long userId) {
+        createFreeSubscriptionInternal(userId);
+    }
+
+    private void createFreeSubscriptionInternal(Long userId) {
         if (subscriptionRepository.findByUserId(userId).isPresent()) {
             log.info("Subscription already exists for user {}", userId);
             return;
@@ -120,7 +124,7 @@ public class BillingServiceImpl implements BillingService {
     public SubscriptionResponse getSubscriptionByUser(Long userId) {
         Subscription subscription = subscriptionRepository.findByUserId(userId)
                 .orElseGet(() -> {
-                    createFreeSubscription(userId);
+                    createFreeSubscriptionInternal(userId);
                     return subscriptionRepository.findByUserId(userId)
                             .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.resolve_subscription_failed"));
                 });
@@ -141,7 +145,7 @@ public class BillingServiceImpl implements BillingService {
 
             Subscription subscription = subscriptionRepository.findByUserId(userId)
                     .orElseGet(() -> {
-                        createFreeSubscription(userId);
+                        createFreeSubscriptionInternal(userId);
                         return subscriptionRepository.findByUserId(userId)
                                 .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "billing.error.resolve_subscription_failed"));
                     });

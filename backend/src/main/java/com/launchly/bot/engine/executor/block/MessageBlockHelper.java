@@ -90,7 +90,7 @@ public class MessageBlockHelper {
         return connection.getInputStream();
     }
 
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{+([^{}]+)\\}+");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{++([^\\s{}]+)\\}+");
 
     public String resolvePlaceholders(String text, Map<String, String> variables, BotUser botUser) {
         if (text == null) return "";
@@ -100,7 +100,7 @@ public class MessageBlockHelper {
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             String rawName = matcher.group(1).trim();
-            String cleanName = rawName.replaceAll("^(?:\\{+)|(?:\\}+)$", "").trim();
+            String cleanName = rawName.replace("{", "").replace("}", "").trim();
             String strippedName = cleanName.replaceFirst("^(?i)(custom_fields|customFields|fields|custom_field|field)\\.", "").trim();
             String replacement = "";
             boolean found = false;

@@ -37,7 +37,7 @@ public class NotifyContactBotActionHandler implements BotActionHandler {
     private static final String VAR_LAST_NAME = "last_name";
     private static final String VAR_USERNAME = "username";
 
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{+([^{}]+)\\}+");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{++([^\\s{}]+)\\}+");
 
     private final TelegramSendService telegramSendService;
 
