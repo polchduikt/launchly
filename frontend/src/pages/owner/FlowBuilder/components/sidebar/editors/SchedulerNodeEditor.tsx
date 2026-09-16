@@ -12,13 +12,13 @@ interface EditorStateLocal {
 }
 
 const DAYS_OF_WEEK = [
-  { id: 'MONDAY', label: 'Пн' },
-  { id: 'TUESDAY', label: 'Вт' },
-  { id: 'WEDNESDAY', label: 'Ср' },
-  { id: 'THURSDAY', label: 'Чт' },
-  { id: 'FRIDAY', label: 'Пт' },
-  { id: 'SATURDAY', label: 'Сб' },
-  { id: 'SUNDAY', label: 'Нд' },
+  { id: 'MONDAY', key: 'node.scheduler.day_mon', defaultLabel: 'Пн' },
+  { id: 'TUESDAY', key: 'node.scheduler.day_tue', defaultLabel: 'Вт' },
+  { id: 'WEDNESDAY', key: 'node.scheduler.day_wed', defaultLabel: 'Ср' },
+  { id: 'THURSDAY', key: 'node.scheduler.day_thu', defaultLabel: 'Чт' },
+  { id: 'FRIDAY', key: 'node.scheduler.day_fri', defaultLabel: 'Пт' },
+  { id: 'SATURDAY', key: 'node.scheduler.day_sat', defaultLabel: 'Сб' },
+  { id: 'SUNDAY', key: 'node.scheduler.day_sun', defaultLabel: 'Нд' },
 ];
 
 export const SchedulerNodeEditor: React.FC<SchedulerNodeEditorProps> = ({
@@ -116,8 +116,46 @@ export const SchedulerNodeEditor: React.FC<SchedulerNodeEditorProps> = ({
     handleChange('daysOfWeek', newDays);
   };
 
+  const isEnabled = data?.isEnabled !== false && data?.isActive !== false;
+
   return (
     <div className="space-y-4 font-['JetBrains_Mono',monospace]">
+      <div className="space-y-1.5">
+        <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">
+          {t('editor.scheduler.active_status', 'Робота планувальника')}
+        </label>
+        <div className="grid grid-cols-2 gap-1.5 bg-white border-2 border-[#0A0A0A] p-1.5 rounded-2xl select-none shadow-xs">
+          <button
+            type="button"
+            onClick={() => {
+              handleChange('isEnabled', true);
+              handleChange('isActive', true);
+            }}
+            className={`py-2 text-xs font-black uppercase rounded-xl transition-all cursor-pointer border-none flex items-center justify-center gap-1.5 ${
+              isEnabled
+                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                : 'text-[#0A0A0A] hover:bg-[#F2EBDD] bg-transparent'
+            }`}
+          >
+            <span>{t('common.enabled', 'Увімкнено')}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              handleChange('isEnabled', false);
+              handleChange('isActive', false);
+            }}
+            className={`py-2 text-xs font-black uppercase rounded-xl transition-all cursor-pointer border-none flex items-center justify-center gap-1.5 ${
+              !isEnabled
+                ? 'bg-[#0A0A0A] text-[#F2EBDD]'
+                : 'text-[#0A0A0A] hover:bg-[#F2EBDD] bg-transparent'
+            }`}
+          >
+            <span>{t('common.disabled', 'Вимкнено')}</span>
+          </button>
+        </div>
+      </div>
+
       <div>
         <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
           {t('editor.scheduler.frequency_label', 'Періодичність')}
@@ -152,7 +190,7 @@ export const SchedulerNodeEditor: React.FC<SchedulerNodeEditorProps> = ({
                         : 'bg-white text-[#0A0A0A] hover:bg-slate-100'
                     }`}
                   >
-                    {d.label}
+                    {t(d.key, d.defaultLabel)}
                   </button>
                 );
               })}

@@ -186,6 +186,21 @@ function getNodeInfo(node: Node): NodeInfo {
     };
   }
 
+  if (t === 'MODERATION') {
+    return {
+      kind: 'path',
+      pathChoice: {
+        title: 'Choose the path to continue',
+        subtitle: 'Moderation: In real conversation message content is checked for stop words and links.',
+        options: [
+          { label: '✅ Clean / Passed', value: 'clean', color: '#16a34a' },
+          { label: '🚫 Violated / Blocked', value: 'violated', color: '#dc2626' },
+        ],
+        sourceNodeId: node.id,
+      },
+    };
+  }
+
   return { kind: 'skip' };
 }
 

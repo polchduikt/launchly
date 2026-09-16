@@ -22,6 +22,7 @@ import { SchedulerNodeEditor } from './editors/SchedulerNodeEditor';
 import { QueryNodeEditor } from './editors/QueryNodeEditor';
 import { InteractionNodeEditor } from './editors/InteractionNodeEditor';
 import { SubscriptionCheckNodeEditor } from './editors/SubscriptionCheckNodeEditor';
+import { ModerationNodeEditor } from './editors/ModerationNodeEditor';
 
 interface NodeEditorPanelProps {
   node?: Node;
@@ -46,8 +47,11 @@ const NODE_EDITORS: Record<string, NodeEditorComponent> = {
   CONDITION: ({ data, handleChange, editorState }) => (
     <ConditionNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
   ),
-  SUBSCRIPTION_CHECK: ({ data, handleChange, editorState }) => (
-    <SubscriptionCheckNodeEditor data={data} handleChange={handleChange} editorState={editorState} />
+  SUBSCRIPTION_CHECK: ({ data, handleChange, editorState, node, onSelectNode }) => (
+    <SubscriptionCheckNodeEditor data={data} handleChange={handleChange} editorState={editorState} node={node} onSelectNode={onSelectNode} />
+  ),
+  MODERATION: ({ data, handleChange, editorState, node, onSelectNode }) => (
+    <ModerationNodeEditor data={data} handleChange={handleChange} editorState={editorState} node={node} onSelectNode={onSelectNode} />
   ),
   API_CALL: ({ data, handleChange }) => (
     <ApiCallNodeEditor data={data} handleChange={handleChange} />

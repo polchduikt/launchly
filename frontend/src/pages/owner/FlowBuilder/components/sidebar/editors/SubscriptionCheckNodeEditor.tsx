@@ -93,7 +93,6 @@ export const SubscriptionCheckNodeEditor: React.FC<SubscriptionCheckNodeEditorPr
 
   return (
     <div className="space-y-4 font-['JetBrains_Mono',monospace]">
-      {/* 1. Стратегія перевірки (Segmented Control / Toggle) */}
       <div>
         <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider mb-1.5">
           {t('editor.subscription_check.check_mode', 'Стратегія перевірки')}
@@ -124,7 +123,6 @@ export const SubscriptionCheckNodeEditor: React.FC<SubscriptionCheckNodeEditorPr
         </div>
       </div>
 
-      {/* 2. Список каналів */}
       <div className="space-y-3">
         <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">
           {t('editor.subscription_check.channels_list', 'Канали')}
@@ -202,13 +200,11 @@ export const SubscriptionCheckNodeEditor: React.FC<SubscriptionCheckNodeEditorPr
         )}
       </div>
 
-      {/* 3. Маршрутизація сценарію (як у нодах Взаємодія / Пошук) */}
       <div className="space-y-2 pt-2 border-t-2 border-[#0A0A0A]/10">
         <label className="block text-[10px] font-black text-[#0A0A0A] uppercase tracking-wider">
           {t('editor.subscription_check.flow_routing', 'Маршрутизація сценарію')}
         </label>
 
-        {/* Гілка: Підписаний */}
         <div
           onClick={() => {
             if (isSubscribedConnected && subscribedTargetId) {
@@ -217,7 +213,7 @@ export const SubscriptionCheckNodeEditor: React.FC<SubscriptionCheckNodeEditorPr
               openNextStep('subscribed');
             }
           }}
-          className="w-full p-2.5 bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-600 rounded-xl text-xs font-black text-emerald-900 flex items-center justify-between cursor-pointer transition-colors shadow-xs select-none"
+          className="w-full p-2.5 bg-[#F2EBDD]/40 hover:bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black text-[#0A0A0A] flex items-center justify-between cursor-pointer transition-colors shadow-xs select-none"
         >
           <span>{t('editor.subscription_check.connect_yes', 'Підписаний')}</span>
           <button
@@ -230,10 +226,10 @@ export const SubscriptionCheckNodeEditor: React.FC<SubscriptionCheckNodeEditorPr
                 openNextStep('subscribed');
               }
             }}
-            className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 ${
+            className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 border-2 border-emerald-600 ${
               isSubscribedConnected
-                ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border-2 border-emerald-600 cursor-pointer'
-                : 'border-2 border-emerald-600/50 bg-white text-emerald-600/50 cursor-pointer'
+                ? 'bg-emerald-500 text-white cursor-pointer'
+                : 'bg-white text-emerald-600 cursor-pointer'
             }`}
           >
             {isSubscribedConnected ? (
@@ -242,7 +238,6 @@ export const SubscriptionCheckNodeEditor: React.FC<SubscriptionCheckNodeEditorPr
           </button>
         </div>
 
-        {/* Гілка: Не підписаний */}
         <div
           onClick={() => {
             if (isNotSubscribedConnected && notSubscribedTargetId) {
@@ -251,7 +246,7 @@ export const SubscriptionCheckNodeEditor: React.FC<SubscriptionCheckNodeEditorPr
               openNextStep('not_subscribed');
             }
           }}
-          className="w-full p-2.5 bg-rose-50 hover:bg-rose-100 border-2 border-rose-600 rounded-xl text-xs font-black text-rose-900 flex items-center justify-between cursor-pointer transition-colors shadow-xs select-none"
+          className="w-full p-2.5 bg-[#F2EBDD]/40 hover:bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black text-[#0A0A0A] flex items-center justify-between cursor-pointer transition-colors shadow-xs select-none"
         >
           <span>{t('editor.subscription_check.connect_no', 'Не підписаний')}</span>
           <button
@@ -264,10 +259,10 @@ export const SubscriptionCheckNodeEditor: React.FC<SubscriptionCheckNodeEditorPr
                 openNextStep('not_subscribed');
               }
             }}
-            className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 ${
+            className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 border-2 border-rose-600 ${
               isNotSubscribedConnected
-                ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-2 border-emerald-500 cursor-pointer'
-                : 'border-2 border-rose-600/50 bg-white text-rose-600/50 cursor-pointer'
+                ? 'bg-rose-500 text-white cursor-pointer'
+                : 'bg-white text-rose-600 cursor-pointer'
             }`}
           >
             {isNotSubscribedConnected ? (

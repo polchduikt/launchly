@@ -6,6 +6,7 @@ import { EndNode } from './EndNode';
 import { CommentNode } from './CommentNode';
 import { AiNode } from './AiNode';
 import { SubscriptionCheckNode } from './SubscriptionCheckNode';
+import { ModerationNode } from './ModerationNode';
 
 const defaultNodeProps = {
   selected: false,
@@ -97,4 +98,26 @@ describe('FlowBuilder Node Components', () => {
 
     expect(screen.getByText(/Main Sponsor/i)).toBeInTheDocument();
   });
+
+  it('renders ModerationNode with moderation filters and handles', () => {
+    render(
+      <ReactFlowProvider>
+        <ModerationNode
+          id="mod-1"
+          type="MODERATION"
+          data={{
+            antiForwardEnabled: true,
+            antiLinkEnabled: true,
+            mediaMode: 'TEXT_ONLY',
+            actionOnViolation: 'DELETE_AND_WARN',
+          }}
+          {...defaultNodeProps}
+        />
+      </ReactFlowProvider>
+    );
+
+    expect(screen.getByText(/Anti-Forward/i)).toBeInTheDocument();
+    expect(screen.getByText(/Anti-Link/i)).toBeInTheDocument();
+  });
 });
+

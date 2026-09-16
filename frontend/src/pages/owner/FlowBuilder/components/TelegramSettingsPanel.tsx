@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate as useRoutingNavigate } from 'react-router-dom';
 import { t } from '../../../../i18n/config';
 import {
@@ -9,6 +9,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useTelegramSettings } from '../../../../hooks/bot/useTelegramSettings';
+import type { BotResponse } from '../../../../types/bot';
 
 export const TelegramSettingsPanel: React.FC = () => {
   const navigate = useRoutingNavigate();

@@ -126,7 +126,7 @@ export const InteractionNodeEditor: React.FC<InteractionNodeEditorProps> = ({
                 openNextStep('mutual');
               }
             }}
-            className="w-full p-2.5 bg-rose-50 hover:bg-rose-100 border-2 border-rose-600 rounded-xl text-xs font-black text-rose-900 flex items-center justify-between cursor-pointer transition-colors shadow-xs select-none"
+            className="w-full p-2.5 bg-[#F2EBDD]/40 hover:bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black text-[#0A0A0A] flex items-center justify-between cursor-pointer transition-colors shadow-xs select-none"
           >
             <span>{t('editor.interaction.if_mutual', 'Якщо взаємно')}</span>
             <button
@@ -139,10 +139,10 @@ export const InteractionNodeEditor: React.FC<InteractionNodeEditorProps> = ({
                   openNextStep('mutual');
                 }
               }}
-              className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 ${
+              className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 border-2 border-rose-600 ${
                 isMutualConnected
-                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-2 border-emerald-500 cursor-pointer'
-                  : 'border-2 border-rose-600/50 bg-white text-rose-600/50 cursor-pointer'
+                  ? 'bg-rose-500 text-white cursor-pointer'
+                  : 'bg-white text-rose-600 cursor-pointer'
               }`}
             >
               {isMutualConnected ? (
@@ -159,7 +159,7 @@ export const InteractionNodeEditor: React.FC<InteractionNodeEditorProps> = ({
               openNextStep('saved');
             }
           }}
-          className="w-full p-2.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-500 rounded-xl text-xs font-black text-slate-900 flex items-center justify-between cursor-pointer transition-colors shadow-xs select-none"
+          className="w-full p-2.5 bg-[#F2EBDD]/40 hover:bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-xl text-xs font-black text-[#0A0A0A] flex items-center justify-between cursor-pointer transition-colors shadow-xs select-none"
         >
           <span>{t('editor.interaction.saved', 'Збережено')}</span>
           <button
@@ -172,10 +172,10 @@ export const InteractionNodeEditor: React.FC<InteractionNodeEditorProps> = ({
                 openNextStep('saved');
               }
             }}
-            className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 ${
+            className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 border-2 border-slate-600 ${
               isSavedConnected
-                ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-2 border-emerald-500 cursor-pointer'
-                : 'border-2 border-slate-400/60 bg-white text-slate-400 cursor-pointer'
+                ? 'bg-slate-700 text-white cursor-pointer'
+                : 'bg-white text-slate-600 cursor-pointer'
             }`}
           >
             {isSavedConnected ? (

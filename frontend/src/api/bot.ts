@@ -141,3 +141,72 @@ export const saveAutomationFoldersApi = async (data: AutomationFoldersResponse |
   });
   return parseJsonIfNeeded<AutomationFoldersResponse>(response.data);
 };
+
+export type MediaMode = 'ALL' | 'TEXT_ONLY' | 'MEDIA_ONLY';
+export type ViolationAction = 'DELETE_ONLY' | 'DELETE_AND_WARN' | 'DELETE_AND_MUTE' | 'DELETE_AND_KICK';
+
+export interface BotModerationRuleDto {
+  id?: number;
+  botId?: number;
+  chatId?: string;
+  threadId?: number | null;
+  enabled: boolean;
+  antiForwardEnabled: boolean;
+  antiLinkEnabled: boolean;
+  allowedLinks?: string;
+  stopWords?: string;
+  defaultProfanityFilter: boolean;
+  mediaMode: MediaMode;
+  actionOnViolation: ViolationAction;
+  warningTemplate?: string;
+  warnTtlSeconds?: number;
+}
+
+export interface UpdateBotModerationRuleRequest {
+  chatId?: string;
+  threadId?: number | null;
+  enabled: boolean;
+  antiForwardEnabled: boolean;
+  antiLinkEnabled: boolean;
+  allowedLinks?: string;
+  stopWords?: string;
+  defaultProfanityFilter: boolean;
+  mediaMode: MediaMode;
+  actionOnViolation: ViolationAction;
+  warningTemplate?: string;
+  warnTtlSeconds?: number;
+}
+
+export interface TestModerationRequest {
+  text?: string;
+  forwarded?: boolean;
+  hasMedia?: boolean;
+}
+
+export interface TestModerationResponse {
+  violated: boolean;
+  reasons: string[];
+  matchedStopWord?: string;
+}
+
+export const getBotModerationSettingsApi = async (botId: number): Promise<BotModerationRuleDto> => {
+  const response = await apiClient.get<BotModerationRuleDto>(`/bots/${botId}/moderation`);
+  return response.data;
+};
+
+export const updateBotModerationSettingsApi = async (
+  botId: number,
+  data: UpdateBotModerationRuleRequest
+): Promise<BotModerationRuleDto> => {
+  const response = await apiClient.put<BotModerationRuleDto>(`/bots/${botId}/moderation`, data);
+  return response.data;
+};
+
+export const testBotModerationApi = async (
+  botId: number,
+  data: TestModerationRequest
+): Promise<TestModerationResponse> => {
+  const response = await apiClient.post<TestModerationResponse>(`/bots/${botId}/moderation/test`, data);
+  return response.data;
+};
+

@@ -15,8 +15,8 @@ export const FLOW_BLOCK_COLORS: Record<string, string> = {
   MATH: 'text-cyan-700 bg-cyan-100',
   LEADERBOARD: 'text-fuchsia-700 bg-fuchsia-100',
   COOLDOWN: 'text-amber-700 bg-amber-100',
-  QUERY: 'text-indigo-700 bg-indigo-100',
-  INTERACTION: 'text-rose-700 bg-rose-100',
+  QUERY: 'text-blue-700 bg-blue-100',
+  INTERACTION: 'text-pink-700 bg-pink-100',
   API_CALL: 'text-indigo-600 bg-indigo-100',
   SMART_DELAY: 'text-rose-600 bg-rose-100',
   RANDOMIZER: 'text-purple-700 bg-purple-100',
@@ -25,11 +25,12 @@ export const FLOW_BLOCK_COLORS: Record<string, string> = {
   COMMENT: 'text-amber-600 bg-amber-100',
   AI: 'text-emerald-700 bg-emerald-100',
   SCHEDULER: 'text-orange-700 bg-orange-100',
-  SUBSCRIPTION_CHECK: 'text-teal-700 bg-teal-100',
+  SUBSCRIPTION_CHECK: 'text-green-700 bg-green-100',
+  MODERATION: 'text-red-700 bg-red-100',
   END: 'text-slate-600 bg-slate-200',
 };
 
-export const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'SUBSCRIPTION_CHECK', 'ACTION', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION', 'COOLDOWN', 'SCHEDULER', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMAND', 'COMMENT', 'AI', 'END'];
+export const FLOW_BLOCK_TYPES = ['MESSAGE', 'CONDITION', 'SUBSCRIPTION_CHECK', 'MODERATION', 'ACTION', 'MATH', 'LEADERBOARD', 'QUERY', 'INTERACTION', 'COOLDOWN', 'SCHEDULER', 'API_CALL', 'SMART_DELAY', 'RANDOMIZER', 'START_AUTOMATION', 'COMMAND', 'COMMENT', 'AI', 'END'];
 
 export const getFlowBlocks = (): Array<{ type: string; label: string; color: string; icon?: LucideIcon | React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }> }> =>
   FLOW_BLOCK_TYPES.map((type) => ({
@@ -50,7 +51,7 @@ export const FLOW_BLOCK_GROUPS = [
     id: 'logic',
     titleKey: 'flow_builder.cat_logic',
     defaultTitle: 'Логіка та перевірки',
-    types: ['CONDITION', 'SUBSCRIPTION_CHECK', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN', 'SCHEDULER'],
+    types: ['CONDITION', 'SUBSCRIPTION_CHECK', 'MODERATION', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN', 'SCHEDULER'],
   },
   {
     id: 'operations',
@@ -108,6 +109,23 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
         passVariable: 'is_subscribed',
         unsubscribedVariable: 'unsubscribed_channels',
       };
+    case 'MODERATION':
+      return {
+        isEnabled: true,
+        isActive: true,
+        antiForwardEnabled: true,
+        antiLinkEnabled: false,
+        whitelistedDomains: [],
+        stopWords: [],
+        filterProfanity: true,
+        mediaMode: 'ALL',
+        actionOnViolation: 'DELETE_AND_WARN',
+        warningTemplate: '{first_name}, ваше повідомлення видалено через порушення правил чату!',
+        warnAutoDeleteSeconds: 10,
+        muteDurationMinutes: 60,
+        passVariable: 'is_moderation_passed',
+        violationReasonVariable: 'moderation_violation_reasons',
+      };
     case 'ACTION':
       return { actions: [] };
     case 'MATH':
@@ -154,6 +172,8 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
       };
     case 'SCHEDULER':
       return {
+        isEnabled: true,
+        isActive: true,
         frequency: 'daily',
         time: '00:00',
         daysOfWeek: ['MONDAY'],
@@ -164,7 +184,6 @@ export const createDefaultNodeData = (type: string): Record<string, unknown> => 
         targetScope: 'system',
         targetTag: '',
         timezone: 'Europe/Kyiv',
-        isActive: true,
       };
     case 'API_CALL':
       return { url: 'https://api.example.com/endpoint', method: 'GET' };

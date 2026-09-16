@@ -26,6 +26,7 @@ export const NodeType = {
   Cooldown: 'COOLDOWN',
   Scheduler: 'SCHEDULER',
   SubscriptionCheck: 'SUBSCRIPTION_CHECK',
+  Moderation: 'MODERATION',
 } as const;
 
 export type NodeType = (typeof NodeType)[keyof typeof NodeType];

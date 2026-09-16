@@ -260,10 +260,18 @@ const BroadcastBuilderInner: React.FC = () => {
   } = useFlowCollaboration(activeBotId || 0, nodes, edges, setNodesRemote, setEdgesRemote, 'broadcast', isLocalChangeRef);
 
   const handleNodeDragStart: OnNodeDrag<Node> = React.useCallback((_evt, node) => {
+    setSelectedNodeId(node.id);
+    setNodes((nds) => {
+      const idx = nds.findIndex((n) => n.id === node.id);
+      if (idx === -1 || idx === nds.length - 1) return nds;
+      const target = nds[idx];
+      const remaining = nds.filter((n) => n.id !== node.id);
+      return [...remaining, target];
+    });
     if (onNodeDragStart) onNodeDragStart();
     setDragging(true);
     updateLocalAction(`${currentUser?.name || 'Someone'} is dragging...`, node.id);
-  }, [onNodeDragStart, updateLocalAction, currentUser, setDragging]);
+  }, [onNodeDragStart, updateLocalAction, currentUser, setDragging, setNodes, setSelectedNodeId]);
 
   const handleNodeDrag: OnNodeDrag<Node> = React.useCallback((_evt, node) => {
     publishNodeMove(node.id, node.position);
@@ -739,6 +747,8 @@ const BroadcastBuilderInner: React.FC = () => {
               nodesConnectable={!isViewer}
               elementsSelectable={!isViewer}
               deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
+              elevateNodesOnSelect={true}
+              elevateEdgesOnSelect={true}
               fitView
               fitViewOptions={{ padding: 0.6 }}
               className="bg-[#F2EBDD]"

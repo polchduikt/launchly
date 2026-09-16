@@ -17,6 +17,7 @@ const SchedulerNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
   const { showToolbar, bindHover } = useNodeHover();
   const isZoomedOut = useStore((s) => s.transform[2] < 0.6);
 
+  const isEnabled = data?.isEnabled !== false && data?.isActive !== false;
   const frequency = (data?.frequency as string) || (data?.scheduleType as string) || 'daily';
   const time = (data?.time as string) || '00:00';
   const daysOfWeek = (data?.daysOfWeek as string[]) || ['MONDAY'];
@@ -98,34 +99,37 @@ const SchedulerNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
           </div>
         ) : (
           <div className="bg-[#F2EBDD] border-2 border-[#0A0A0A] rounded-2xl p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase text-[#0A0A0A]/60">
-                {t('node.scheduler.schedule_label', 'Розклад')}
+            <div className="flex items-center justify-between text-[10px] font-black uppercase text-[#0A0A0A]/70">
+              <span>{t('node.scheduler.status_label', 'Статус')}:</span>
+              <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-md text-[10px] font-bold text-[#0A0A0A]">
+                {isEnabled ? t('common.enabled', 'Увімкнено') : t('common.disabled', 'Вимкнено')}
               </span>
-              <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-lg text-xs font-black text-[#0A0A0A]">
+            </div>
+
+            <div className="flex items-center justify-between text-[10px] font-black uppercase text-[#0A0A0A]/70 pt-1 border-t border-[#0A0A0A]/10">
+              <span>{t('node.scheduler.schedule_label', 'Розклад')}:</span>
+              <span className="px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-md text-[10px] font-bold text-[#0A0A0A] max-w-[150px] truncate">
                 {renderScheduleText()}
               </span>
             </div>
 
-            <div className="flex items-center justify-between pt-1 border-t border-[#0A0A0A]/10 text-xs font-bold text-[#0A0A0A]">
-              <span className="text-[10px] font-black uppercase text-[#0A0A0A]/60">
-                {t('node.scheduler.target_label', 'Ціль')}
-              </span>
-              <div className="flex items-center gap-1">
+            <div className="flex items-center justify-between text-[10px] font-black uppercase text-[#0A0A0A]/70 pt-1 border-t border-[#0A0A0A]/10">
+              <span>{t('node.scheduler.target_label', 'Ціль')}:</span>
+              <div className="flex items-center gap-1 px-2 py-0.5 bg-white border border-[#0A0A0A] rounded-md text-[10px] font-bold text-[#0A0A0A]">
                 {targetScope === 'system' ? (
                   <>
-                    <Cpu size={12} className="text-amber-600" />
-                    <span>{t('node.scheduler.scope_system', 'Системне виконання')}</span>
+                    <Cpu size={11} className="text-amber-600 shrink-0" />
+                    <span className="truncate">{t('node.scheduler.scope_system', 'Системне виконання')}</span>
                   </>
                 ) : targetScope === 'tag' ? (
                   <>
-                    <Tag size={12} className="text-indigo-600" />
-                    <span>{targetTag || t('node.scheduler.any_tag', 'З тегом')}</span>
+                    <Tag size={11} className="text-indigo-600 shrink-0" />
+                    <span className="truncate">{targetTag || t('node.scheduler.any_tag', 'З тегом')}</span>
                   </>
                 ) : (
                   <>
-                    <Users size={12} className="text-emerald-700" />
-                    <span>{t('node.scheduler.scope_all', 'Всі підписники')}</span>
+                    <Users size={11} className="text-emerald-700 shrink-0" />
+                    <span className="truncate">{t('node.scheduler.scope_all', 'Всі підписники')}</span>
                   </>
                 )}
               </div>
@@ -134,15 +138,16 @@ const SchedulerNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sel
         )}
       </div>
 
-      <div className="flex justify-end items-center px-4 py-2 bg-transparent select-none relative rounded-b-[22px]">
-        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-2 select-none">
-          {t('flow_builder.next_step')}
+      <div className="flex justify-end items-center px-4 py-2 bg-[#F2EBDD] select-none relative rounded-b-[22px]">
+        <span className="text-[9px] font-black text-[#0A0A0A] uppercase tracking-wider mr-2 font-['Anybody',sans-serif]">
+          {t('flow_builder.next_step', 'Наступний крок')}
         </span>
         <NodeHandle
           type="source"
           position={Position.Right}
           id="next"
           isConnected={data?._tempSourceHandle !== 'next' && sourceConns.some((c) => c.sourceHandle === 'next')}
+          padded={false}
         />
       </div>
     </div>

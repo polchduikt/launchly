@@ -5,6 +5,7 @@ export const queryKeys = {
     schema: (botId: number) => ['bot_schema', botId] as const,
     users: (botId: number) => ['botUsers', botId] as const,
     allUsers: ['allBotUsers'] as const,
+    moderation: (botId: number) => ['bot_moderation', botId] as const,
   },
   crm: {
     all: ['crm'] as const,

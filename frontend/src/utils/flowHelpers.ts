@@ -41,7 +41,7 @@ export const getFlowLogicKey = (nodes: Node[], edges: Edge[]): string => {
   if (!nodes || nodes.length === 0) return '';
 
   const triggerNodes = nodes.filter(
-    (n) => n.type === 'START' || n.type === 'START_BROADCAST' || n.type === 'COMMAND' || n.type === 'SCHEDULER'
+    (n) => n.type === 'START' || n.type === 'START_BROADCAST' || n.type === 'COMMAND' || n.type === 'SCHEDULER' || n.type === 'MODERATION'
   );
   if (triggerNodes.length === 0) return '';
 

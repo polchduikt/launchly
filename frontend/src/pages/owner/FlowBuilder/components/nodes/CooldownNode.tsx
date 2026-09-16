@@ -112,7 +112,7 @@ const CooldownNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, sele
               <span className="text-[9px] font-black uppercase text-[#0A0A0A]/60 block mb-1">
                 {t('node.cooldown.block_msg_label', 'Якщо зарано:')}
               </span>
-              <div className="p-2 bg-white border border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] line-clamp-2 leading-snug">
+              <div className="p-2.5 bg-white border border-[#0A0A0A] rounded-xl text-xs font-bold text-[#0A0A0A] min-h-[58px] line-clamp-3 leading-normal break-words">
                 {renderTextWithBadges(blockMessage)}
               </div>
             </div>

@@ -74,20 +74,20 @@ const QueryNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selecte
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 
-      <div className="relative flex items-center gap-2 bg-indigo-100/90 rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-[#DBEAFE]/90 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
           isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
         />
-        <span className="w-7 h-7 rounded-lg bg-indigo-200/70 text-indigo-800 flex items-center justify-center shrink-0">
+        <span className="w-7 h-7 rounded-lg bg-blue-200 text-blue-800 flex items-center justify-center shrink-0">
           <Search size={14} strokeWidth={2.5} />
         </span>
         <div className="flex-1 min-w-0">
-          <span className="font-extrabold text-[9px] text-indigo-800/80 uppercase tracking-wider block leading-none">
+          <span className="font-extrabold text-[9px] text-blue-800/80 uppercase tracking-wider block leading-none">
             {t('node.query.category', 'Дані')}
           </span>
-          <span className="text-xs font-bold text-indigo-950 truncate block mt-0.5">
+          <span className="text-xs font-bold text-blue-950 truncate block mt-0.5">
             {t('node.title.query', 'Запит даних')}
           </span>
         </div>
@@ -95,7 +95,7 @@ const QueryNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selecte
 
       <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace]">
         {isZoomedOut ? (
-          <div className="bg-slate-50 border border-slate-200/80 rounded-xl px-2.5 py-1.5 text-[11px] font-bold text-indigo-800 truncate select-none">
+          <div className="bg-slate-50 border border-slate-200/80 rounded-xl px-2.5 py-1.5 text-[11px] font-bold text-blue-800 truncate select-none">
             {formatFilterCount(filters.length)}
           </div>
         ) : (
@@ -129,7 +129,7 @@ const QueryNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, selecte
         )}
 
         <div className="space-y-1.5 pt-1">
-          <div className="relative flex items-center justify-between bg-emerald-50 border-2 border-emerald-600/60 rounded-xl px-3 py-1.5 text-xs font-black text-emerald-800 select-none">
+          <div className="relative flex items-center justify-between bg-slate-100 border-2 border-slate-400/60 rounded-xl px-3 py-1.5 text-xs font-black text-slate-700 select-none">
             <span>{t('node.query.found', 'Знайдено')}</span>
             <NodeHandle
               type="source"

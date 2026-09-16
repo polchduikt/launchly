@@ -80,6 +80,10 @@ const mapActionToNodeType = (actionType?: string): string | null => {
     case 'SUBSCRIPTION':
     case 'GATEKEEPING':
       return 'SUBSCRIPTION_CHECK';
+    case 'MODERATION':
+    case 'MODERATOR':
+    case 'STOP_WORDS':
+      return 'MODERATION';
     case 'SCHEDULER':
       return 'SCHEDULER';
     default:

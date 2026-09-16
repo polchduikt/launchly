@@ -898,6 +898,31 @@ button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="SUBSCRIPTI
   color: #0F766E !important;
 }
 
+.node-icon-badge[data-block-type="MODERATION"],
+button:hover .node-icon-badge[data-block-type="MODERATION"],
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MODERATION"],
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="MODERATION"],
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MODERATION"],
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MODERATION"] {
+  background-color: #FFE4E6 !important;
+  color: #BE123C !important;
+}
+.node-icon-badge[data-block-type="MODERATION"] svg,
+.node-icon-badge[data-block-type="MODERATION"] svg *,
+button:hover .node-icon-badge[data-block-type="MODERATION"] svg,
+button:hover .node-icon-badge[data-block-type="MODERATION"] svg *,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MODERATION"] svg,
+button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MODERATION"] svg *,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="MODERATION"] svg,
+[data-theme="light"] .group:hover .node-icon-badge[data-block-type="MODERATION"] svg *,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MODERATION"] svg,
+[data-theme="light"] .group.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MODERATION"] svg *,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MODERATION"] svg,
+[data-theme="light"] button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="MODERATION"] svg * {
+  stroke: #BE123C !important;
+  color: #BE123C !important;
+}
+
 .node-icon-badge[data-block-type="ACTION"],
 button:hover .node-icon-badge[data-block-type="ACTION"],
 button.hover\:bg-\[\#0A0A0A\]:hover .node-icon-badge[data-block-type="ACTION"],

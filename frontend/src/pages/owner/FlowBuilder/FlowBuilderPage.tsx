@@ -130,10 +130,29 @@ const FlowBuilderInner: React.FC = () => {
   } = useFlowCollaboration(activeBotId || 0, nodes, edges, setNodesRemote, setEdgesRemote, 'flow', isLocalChangeRef);
 
   const handleNodeDragStart: OnNodeDrag<Node> = useCallback((_evt, node) => {
+    setSelectedNodeId(node.id);
+    setNodes((nds) => {
+      const idx = nds.findIndex((n) => n.id === node.id);
+      if (idx === -1 || idx === nds.length - 1) return nds;
+      const target = nds[idx];
+      const remaining = nds.filter((n) => n.id !== node.id);
+      return [...remaining, target];
+    });
     onNodeDragStart();
     setDragging(true);
     updateLocalAction(`${currentUser?.name || 'Someone'} is dragging...`, node.id);
-  }, [onNodeDragStart, updateLocalAction, currentUser, setDragging]);
+  }, [onNodeDragStart, updateLocalAction, currentUser, setDragging, setNodes, setSelectedNodeId]);
+
+  const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    setSelectedNodeId(node.id);
+    setNodes((nds) => {
+      const idx = nds.findIndex((n) => n.id === node.id);
+      if (idx === -1 || idx === nds.length - 1) return nds;
+      const target = nds[idx];
+      const remaining = nds.filter((n) => n.id !== node.id);
+      return [...remaining, target];
+    });
+  }, [setNodes, setSelectedNodeId]);
 
   const handleNodeDrag: OnNodeDrag<Node> = useCallback((_evt, node) => {
     publishNodeMove(node.id, node.position);
@@ -545,7 +564,7 @@ const FlowBuilderInner: React.FC = () => {
                 onNodeDragStop={isViewer ? undefined : handleNodeDragStop}
                 nodeTypes={NODE_TYPES}
                 edgeTypes={EDGE_TYPES}
-                onNodeClick={isViewer ? undefined : (_, node) => setSelectedNodeId(node.id)}
+                onNodeClick={isViewer ? undefined : handleNodeClick}
                 onPaneClick={isViewer ? undefined : onPaneClick}
                 isValidConnection={isValidConnection}
                 defaultEdgeOptions={FLOW_EDGE_DEFAULTS}
@@ -559,7 +578,7 @@ const FlowBuilderInner: React.FC = () => {
                 nodesConnectable={!isViewer}
                 elementsSelectable={!isViewer}
                 deleteKeyCode={isViewer ? null : ['Backspace', 'Delete']}
-                elevateNodesOnSelect={false}
+                elevateNodesOnSelect={true}
                 elevateEdgesOnSelect={true}
                 fitView
                 fitViewOptions={{ maxZoom: 1, padding: 0.2 }}

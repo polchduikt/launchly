@@ -1,7 +1,7 @@
 import React from 'react';
 import { Position, useNodeConnections, useConnection, useStore } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
-import { ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { NodeHandle } from './NodeHandle';
 import type { CustomNodeData, TelegramChannelCheckItem } from '../../../../../types/bot';
 import { useNodeHover } from '../../../../../hooks/bot/useNodeHover';
@@ -43,20 +43,20 @@ const SubscriptionCheckNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({
     >
       {showToolbar && <NodeToolbar nodeId={id} />}
 
-      <div className="relative flex items-center gap-2 bg-[#CCFBF1]/85 rounded-t-[22px] px-4 py-3 select-none">
+      <div className="relative flex items-center gap-2 bg-[#DCFCE7]/90 rounded-t-[22px] px-4 py-3 select-none">
         <NodeHandle
           type="target"
           position={Position.Left}
           isConnected={targetConns.some((c) => c.source !== 'temp_menu_node')}
         />
-        <span className="w-7 h-7 rounded-lg bg-teal-100 text-[#0F766E] flex items-center justify-center shrink-0 shadow-sm">
+        <span className="w-7 h-7 rounded-lg bg-green-200 text-green-800 flex items-center justify-center shrink-0 shadow-sm">
           <ShieldCheck size={14} strokeWidth={2.5} />
         </span>
         <div className="flex-1 min-w-0">
-          <span className="font-extrabold text-[9px] text-[#0F766E]/80 uppercase tracking-wider block leading-none">
+          <span className="font-extrabold text-[9px] text-green-800/80 uppercase tracking-wider block leading-none">
             {t('node.subscription_check.category', 'Перевірка каналів')}
           </span>
-          <span className="text-xs font-bold text-[#095244] truncate block mt-0.5">
+          <span className="text-xs font-bold text-green-950 truncate block mt-0.5">
             {t('node.subscription_check.title', 'Перевірка підписки')}
           </span>
         </div>
@@ -64,7 +64,7 @@ const SubscriptionCheckNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({
 
       <div className="p-3.5 space-y-2 font-['JetBrains_Mono',monospace]">
         {isZoomedOut ? (
-          <div className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 text-[11px] font-bold text-teal-800 flex items-center justify-between select-none">
+          <div className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 text-[11px] font-bold text-green-800 flex items-center justify-between select-none">
             <span className="truncate">
               {channels.length === 0
                 ? t('node.subscription_check.no_channels', 'Канали не налаштовані')
@@ -101,32 +101,26 @@ const SubscriptionCheckNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({
           </div>
         )}
 
-        <div className="space-y-2 pt-1 border-t border-[#0A0A0A]/10">
-          <div className="relative bg-emerald-50/80 border border-emerald-200/80 rounded-xl px-3 py-1.5 text-xs font-bold text-emerald-800 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <CheckCircle size={13} className="text-emerald-600 shrink-0" />
-              <span className="text-[11px]">{t('node.subscription_check.handle_subscribed', 'Підписаний')}</span>
-            </div>
+        <div className="space-y-1.5 pt-1">
+          <div className="relative flex items-center justify-between bg-slate-100 border-2 border-slate-400/60 rounded-xl px-3 py-1.5 text-xs font-black text-slate-700 select-none">
+            <span>{t('node.subscription_check.handle_subscribed', 'Підписаний')}</span>
             <NodeHandle
               type="source"
               position={Position.Right}
               id="subscribed"
               isConnected={isSubscribedConnected}
-              className={isSubscribedConnected ? '!bg-[#10B981] !border-[#10B981]' : '!bg-white !border-[#10B981] hover:!bg-emerald-50'}
+              className={isSubscribedConnected ? '!bg-[#10B981] !border-[#10B981]' : '!bg-white !border-[#10B981]'}
             />
           </div>
 
-          <div className="relative bg-rose-50/80 border border-rose-200/80 rounded-xl px-3 py-1.5 text-xs font-bold text-rose-800 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <XCircle size={13} className="text-rose-600 shrink-0" />
-              <span className="text-[11px]">{t('node.subscription_check.handle_not_subscribed', 'Не підписаний')}</span>
-            </div>
+          <div className="relative flex items-center justify-between bg-slate-100 border-2 border-slate-400/60 rounded-xl px-3 py-1.5 text-xs font-black text-slate-700 select-none">
+            <span>{t('node.subscription_check.handle_not_subscribed', 'Не підписаний')}</span>
             <NodeHandle
               type="source"
               position={Position.Right}
               id="not_subscribed"
               isConnected={isNotSubscribedConnected}
-              className={isNotSubscribedConnected ? '!bg-[#EF4444] !border-[#EF4444]' : '!bg-white !border-[#EF4444] hover:!bg-rose-50'}
+              className={isNotSubscribedConnected ? '!bg-[#EF4444] !border-[#EF4444]' : '!bg-white !border-[#EF4444]'}
             />
           </div>
         </div>

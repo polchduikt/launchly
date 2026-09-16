@@ -9,7 +9,9 @@ export const textToHtml = (text: string): string => {
   escaped = escaped.replace(varRegex, (_match, p1) => {
     const rawName = p1.trim();
     let displayName = rawName;
-    if (rawName === 'first_name' || rawName === 'found_user.first_name') displayName = 'First Name';
+    if (rawName === 'first_name' || rawName === 'found_user.first_name') displayName = 'first_name';
+    else if (rawName === 'username' || rawName === 'found_user.username') displayName = 'username';
+    else if (rawName === 'user') displayName = 'user';
     else if (rawName === 'last_name' || rawName === 'found_user.last_name') displayName = 'Last Name';
     else if (rawName === 'phone' || rawName === 'found_user.phone') displayName = 'Phone';
     else if (rawName === 'email' || rawName === 'found_user.email') displayName = 'Email';
@@ -48,7 +50,10 @@ export const htmlToText = (html: string): string => {
       const el = node as HTMLElement;
       if (el.getAttribute('data-type') === 'variable') {
         const val = el.getAttribute('data-val') || '';
-        return val === 'remaining' ? '{remaining}' : `{{${val}}}`;
+        if (val === 'remaining' || val === 'first_name' || val === 'username' || val === 'user' || val.startsWith('found_user.') || val.startsWith('user.')) {
+          return `{${val}}`;
+        }
+        return `{{${val}}}`;
       }
       if (el.getAttribute('data-type') === 'link') {
         const url = el.getAttribute('data-url') || '';

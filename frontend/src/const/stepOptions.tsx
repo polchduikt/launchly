@@ -15,6 +15,7 @@ import {
   Search,
   HeartHandshake,
   ShieldCheck,
+  ShieldAlert,
 } from 'lucide-react';
 
 export const STEP_OPTION_GROUPS = [
@@ -28,7 +29,7 @@ export const STEP_OPTION_GROUPS = [
     id: 'logic',
     titleKey: 'flow_builder.cat_logic',
     defaultTitle: 'Логіка та перевірки',
-    types: ['CONDITION', 'SUBSCRIPTION_CHECK', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN'],
+    types: ['CONDITION', 'SUBSCRIPTION_CHECK', 'MODERATION', 'RANDOMIZER', 'SMART_DELAY', 'COOLDOWN'],
   },
   {
     id: 'operations',
@@ -71,6 +72,13 @@ export const STEP_OPTIONS = [
     get description() { return t('step_option.SUBSCRIPTION_CHECK.desc', 'Check membership in channels/sponsors'); },
     icon: ShieldCheck,
     color: 'text-teal-600 bg-teal-50 border-teal-100',
+  },
+  {
+    type: 'MODERATION',
+    get label() { return t('step_option.MODERATION.label', 'Content Moderation'); },
+    get description() { return t('step_option.MODERATION.desc', 'Filter stop-words, links and enforce media modes'); },
+    icon: ShieldAlert,
+    color: 'text-rose-600 bg-rose-50 border-rose-100',
   },
   {
     type: 'ACTION',
