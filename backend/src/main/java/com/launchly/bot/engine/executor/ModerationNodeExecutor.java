@@ -18,7 +18,6 @@ import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.*;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
@@ -31,16 +30,7 @@ public class ModerationNodeExecutor implements NodeExecutor {
 
     private final BotDialogStateService stateService;
     private final MessageUtils messageUtils;
-    private final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-
-    @PreDestroy
-    public void cleanup() {
-        try {
-            scheduledExecutor.shutdown();
-        } catch (Exception e) {
-            log.debug("Error shutting down moderation executor: {}", e.getMessage());
-        }
-    }
+    private final ScheduledExecutorService scheduledExecutor;
 
     @Override
     public NodeType getType() {

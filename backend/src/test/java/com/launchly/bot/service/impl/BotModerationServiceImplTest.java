@@ -27,6 +27,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import java.util.concurrent.ScheduledExecutorService;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -61,6 +62,9 @@ class BotModerationServiceImplTest {
 
     @Mock
     private MessageUtils messageUtils;
+
+    @Mock
+    private ScheduledExecutorService scheduledExecutor;
 
     @InjectMocks
     private BotModerationServiceImpl moderationService;

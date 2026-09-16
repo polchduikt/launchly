@@ -23,6 +23,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +40,9 @@ class ModerationNodeExecutorTest {
 
     @Mock
     private MessageUtils messageUtils;
+
+    @Mock
+    private ScheduledExecutorService scheduledExecutor;
 
     @InjectMocks
     private ModerationNodeExecutor executor;

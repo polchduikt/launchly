@@ -5,10 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
 public class DelayMessageBlockHandler implements MessageBlockHandler {
+
+    private static final int MAX_DELAY_SECONDS = 60;
 
     @Override
     public String getSupportedType() {
@@ -30,11 +33,14 @@ public class DelayMessageBlockHandler implements MessageBlockHandler {
             }
         }
 
-        try {
-            java.util.concurrent.TimeUnit.SECONDS.sleep(delaySeconds);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.warn("Delay interrupted in node {}", context.node().id());
+        int boundedDelay = Math.max(0, Math.min(delaySeconds, MAX_DELAY_SECONDS));
+        if (boundedDelay > 0) {
+            try {
+                TimeUnit.SECONDS.sleep(boundedDelay);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warn("Delay interrupted in node {}", context.node().id());
+            }
         }
 
         return MessageBlockResult.ok(false);

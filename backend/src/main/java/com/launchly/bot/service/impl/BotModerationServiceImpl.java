@@ -42,7 +42,6 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -56,18 +55,8 @@ public class BotModerationServiceImpl implements BotModerationService {
     private final FlowSchemaRepository flowSchemaRepository;
     private final ObjectMapper objectMapper;
     private final MessageUtils messageUtils;
-
-    private final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService scheduledExecutor;
     private final ConcurrentMap<String, Integer> pendingCaptchas = new ConcurrentHashMap<>();
-
-    @PreDestroy
-    public void cleanup() {
-        try {
-            scheduledExecutor.shutdown();
-        } catch (Exception e) {
-            log.debug("Error shutting down moderation executor: {}", e.getMessage());
-        }
-    }
 
     @Override
     @Transactional(readOnly = true)
