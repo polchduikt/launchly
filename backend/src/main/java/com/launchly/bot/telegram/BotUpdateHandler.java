@@ -1,6 +1,7 @@
 package com.launchly.bot.telegram;
 
 import com.launchly.bot.repository.BotUserRepository;
+import com.launchly.bot.service.BotModerationService;
 import com.launchly.bot.service.FlowEngineService;
 import com.launchly.crm.service.CrmService;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +19,15 @@ public class BotUpdateHandler implements LongPollingSingleThreadUpdateConsumer {
     private final TelegramClient telegramClient;
     private final CrmService crmService;
     private final BotUserRepository botUserRepository;
+    private final BotModerationService moderationService;
 
     @Override
     public void consume(Update update) {
         try {
+            if (moderationService != null && moderationService.processUpdateModeration(botId, update, telegramClient)) {
+                log.info("Update for bot {} was moderated and intercepted", botId);
+                return;
+            }
             saveIncomingMessageToCrm(update);
             flowEngineService.processUpdate(botId, update, telegramClient);
         } catch (Exception e) {

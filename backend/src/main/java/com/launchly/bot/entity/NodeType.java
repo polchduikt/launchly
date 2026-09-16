@@ -24,6 +24,7 @@ public enum NodeType {
     SCHEDULER,
     QUERY,
     INTERACTION,
-    SUBSCRIPTION_CHECK
+    SUBSCRIPTION_CHECK,
+    MODERATION
 }
 

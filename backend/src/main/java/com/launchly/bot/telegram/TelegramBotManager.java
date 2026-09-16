@@ -2,6 +2,7 @@ package com.launchly.bot.telegram;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import com.launchly.bot.service.BotModerationService;
 import com.launchly.bot.service.FlowEngineService;
 import com.launchly.bot.constant.BotConstants;
 import com.launchly.bot.constant.TelegramConstants;
@@ -37,6 +38,7 @@ public class TelegramBotManager implements TelegramClientProvider {
     private final EncryptionUtil encryptionUtil;
     private final FlowEngineService flowEngineService;
     private final CrmService crmService;
+    private final BotModerationService moderationService;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     @Qualifier("taskExecutor")
@@ -167,7 +169,7 @@ public class TelegramBotManager implements TelegramClientProvider {
 
             TelegramBotsLongPollingApplication pollingApp = new TelegramBotsLongPollingApplication();
             BotUpdateHandler handler = new BotUpdateHandler(
-                    bot.getId(), flowEngineService, telegramClient, crmService, botUserRepository);
+                    bot.getId(), flowEngineService, telegramClient, crmService, botUserRepository, moderationService);
             pollingApp.registerBot(token, handler);
             activeBots.put(bot.getId(), pollingApp);
             log.info("Registered bot {} for long polling", bot.getId());
@@ -199,7 +201,7 @@ public class TelegramBotManager implements TelegramClientProvider {
             TelegramClient telegramClient = new OkHttpTelegramClient(systemBotToken);
             TelegramBotsLongPollingApplication pollingApp = new TelegramBotsLongPollingApplication();
             BotUpdateHandler handler = new BotUpdateHandler(
-                    BotConstants.SYSTEM_BOT_ID, flowEngineService, telegramClient, crmService, botUserRepository);
+                    BotConstants.SYSTEM_BOT_ID, flowEngineService, telegramClient, crmService, botUserRepository, moderationService);
             pollingApp.registerBot(systemBotToken, handler);
             activeBots.put(BotConstants.SYSTEM_BOT_ID, pollingApp);
             telegramClients.put(BotConstants.SYSTEM_BOT_ID, telegramClient);

@@ -2,6 +2,7 @@ package com.launchly.bot.service.impl;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.launchly.bot.service.BotModerationService;
 import com.launchly.bot.service.FlowEngineService;
 import com.launchly.bot.service.TelegramWebhookService;
 import com.launchly.bot.telegram.TelegramBotManager;
@@ -14,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
-
 import java.time.Duration;
 
 @Slf4j
@@ -26,6 +26,7 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
     private final TelegramBotManager telegramBotManager;
     private final RateLimitService rateLimitService;
     private final StringRedisTemplate stringRedisTemplate;
+    private final BotModerationService moderationService;
 
     private static final ObjectMapper TELEGRAM_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -60,6 +61,11 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
                     log.warn("Rate limit exceeded for Telegram user {} in bot {}", telegramUserId, botId);
                     return;
                 }
+            }
+
+            if (moderationService != null && moderationService.processUpdateModeration(botId, update, client)) {
+                log.info("Webhook update for bot {} was moderated and intercepted", botId);
+                return;
             }
 
             flowEngineService.processUpdate(botId, update, client);

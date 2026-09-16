@@ -93,6 +93,12 @@ public class FlowSchedulerService {
 
     private void evaluateAndTriggerScheduler(Long botId, FlowNode node, List<FlowEdge> edges) {
         Map<String, Object> data = node.data() != null ? node.data() : Collections.emptyMap();
+        boolean isEnabled = parseBoolean(data.getOrDefault("isEnabled", data.getOrDefault("enabled", data.getOrDefault("isActive", true))), true);
+        if (!isEnabled) {
+            log.debug("Scheduler node {} is disabled for botId={}", node.id(), botId);
+            return;
+        }
+
         String timezoneStr = (String) data.getOrDefault("timezone", "Europe/Kyiv");
         if (timezoneStr == null || timezoneStr.isBlank() || "UTC".equalsIgnoreCase(timezoneStr)) {
             timezoneStr = "Europe/Kyiv";
@@ -308,5 +314,11 @@ public class FlowSchedulerService {
                         user.getId(), botId, e.getMessage());
             }
         }
+    }
+
+    private boolean parseBoolean(Object value, boolean defaultValue) {
+        if (value == null) return defaultValue;
+        if (value instanceof Boolean b) return b;
+        return Boolean.parseBoolean(value.toString());
     }
 }

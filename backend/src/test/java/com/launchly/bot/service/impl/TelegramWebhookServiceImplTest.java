@@ -38,6 +38,9 @@ class TelegramWebhookServiceImplTest {
     private StringRedisTemplate stringRedisTemplate;
 
     @Mock
+    private com.launchly.bot.service.BotModerationService moderationService;
+
+    @Mock
     private ValueOperations<String, String> valueOperations;
 
     private TelegramWebhookServiceImpl webhookService;
@@ -46,7 +49,7 @@ class TelegramWebhookServiceImplTest {
     void setUp() {
         lenient().when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
         lenient().when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
-        webhookService = new TelegramWebhookServiceImpl(flowEngineService, telegramBotManager, rateLimitService, stringRedisTemplate);
+        webhookService = new TelegramWebhookServiceImpl(flowEngineService, telegramBotManager, rateLimitService, stringRedisTemplate, moderationService);
     }
 
     @Test

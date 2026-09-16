@@ -125,9 +125,5 @@ databaseChangeLog:
       file: db/changelog/changes/V062__add_published_schema_to_flow_schemas.sql
   - include:
       file: db/changelog/changes/V063__create_bot_user_interactions_table.sql
-
-
-
-
-
-
+  - include:
+      file: db/changelog/changes/V064__create_bot_moderation_rules_table.sql
