@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.ApproveChatJoinRequest;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import tools.jackson.core.type.TypeReference;
@@ -164,9 +165,35 @@ public class FlowEngineServiceImpl implements FlowEngineService {
                 analyticsService.logEvent(botId, botUser, AnalyticsEventType.CLICK, buttonLabel);
             }
 
+            Long channelChatId = null;
+            String channelTitle = "";
+            String inviteLinkUrl = null;
+            String inviteLinkName = null;
+            if (update.hasChatJoinRequest() && update.getChatJoinRequest().getChat() != null) {
+                var joinReq = update.getChatJoinRequest();
+                channelChatId = joinReq.getChat().getId();
+                if (joinReq.getChat().getTitle() != null) {
+                    channelTitle = joinReq.getChat().getTitle();
+                }
+                if (joinReq.getInviteLink() != null) {
+                    inviteLinkUrl = joinReq.getInviteLink().getInviteLink();
+                    inviteLinkName = joinReq.getInviteLink().getName();
+                }
+            }
+
             stateService.setSessionData(botId, telegramUserId, "chat_type", chatType != null ? chatType : "private");
             stateService.setSessionData(botId, telegramUserId, "chat_id", incomingChatId != null ? String.valueOf(incomingChatId) : String.valueOf(telegramUserId));
             stateService.setSessionData(botId, telegramUserId, "chat_title", chatTitle != null ? chatTitle : "");
+            if (channelChatId != null) {
+                stateService.setSessionData(botId, telegramUserId, "joined_chat_id", String.valueOf(channelChatId));
+                stateService.setSessionData(botId, telegramUserId, "joined_chat_title", channelTitle != null ? channelTitle : "");
+                if (inviteLinkUrl != null) {
+                    stateService.setSessionData(botId, telegramUserId, "invite_link", inviteLinkUrl);
+                }
+                if (inviteLinkName != null) {
+                    stateService.setSessionData(botId, telegramUserId, "invite_name", inviteLinkName);
+                }
+            }
 
             if (update.hasMessage() && update.getMessage().hasText()
                     && update.getMessage().getText().trim().startsWith("/start")) {
@@ -226,6 +253,49 @@ public class FlowEngineServiceImpl implements FlowEngineService {
             }
 
             String dcKey = "launchly:bot:data_collection:" + botId + ":" + telegramUserId;
+            if (update.hasChatJoinRequest()) {
+                var joinReq = update.getChatJoinRequest();
+                String channelIdStr = joinReq.getChat() != null ? String.valueOf(joinReq.getChat().getId()) : null;
+                String inviteLinkStr = joinReq.getInviteLink() != null ? joinReq.getInviteLink().getInviteLink() : null;
+
+                FlowNode joinNode = router.findMatchingJoinRequestNode(nodes, channelIdStr, inviteLinkStr);
+
+                boolean autoApprove = true;
+                if (joinNode != null && joinNode.data() != null) {
+                    Object autoApproveObj = joinNode.data().get("autoApprove");
+                    if (autoApproveObj instanceof Boolean b) {
+                        autoApprove = b;
+                    } else if (autoApproveObj instanceof String s) {
+                        autoApprove = Boolean.parseBoolean(s);
+                    }
+                }
+
+                if (autoApprove && channelChatId != null) {
+                    try {
+                        client.execute(ApproveChatJoinRequest.builder()
+                                .chatId(String.valueOf(channelChatId))
+                                .userId(telegramUserId)
+                                .build());
+                        log.info("Auto-approved join request for user {} in chat {}", telegramUserId, channelChatId);
+                    } catch (Exception e) {
+                        log.warn("Failed to approve join request for user {} in chat {}: {}", telegramUserId, channelChatId, e.getMessage());
+                    }
+                }
+
+                if (joinNode != null) {
+                    redisTemplate.delete(dcKey);
+                    stateService.clearActiveCampaignId(botId, telegramUserId);
+                    callStackManager.clear(botId, telegramUserId);
+                    callStackManager.setExecutingBotId(botId, telegramUserId, botId);
+                    String currentNodeId = joinNode.id();
+                    stateService.setCurrentNodeId(botId, telegramUserId, currentNodeId);
+                    botUser.setCurrentNodeId(currentNodeId);
+                    botUser = botUserRepository.save(botUser);
+                    executeNodeLoop(botId, botUser, telegramUserId, currentNodeId, nodes, edges, botId, update, client);
+                    return;
+                }
+            }
+
             if (update.hasMessage() && update.getMessage().hasText()) {
                 String msgText = update.getMessage().getText().trim();
                 if (msgText.startsWith("/")) {
@@ -581,6 +651,9 @@ public class FlowEngineServiceImpl implements FlowEngineService {
         }
         if (update.hasCallbackQuery() && update.getCallbackQuery().getFrom() != null) {
             return update.getCallbackQuery().getFrom().getId();
+        }
+        if (update.hasChatJoinRequest() && update.getChatJoinRequest().getUser() != null) {
+            return update.getChatJoinRequest().getUser().getId();
         }
         return null;
     }

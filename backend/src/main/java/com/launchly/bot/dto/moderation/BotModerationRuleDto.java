@@ -1,5 +1,6 @@
 package com.launchly.bot.dto.moderation;
 
+import com.launchly.bot.entity.CaptchaMode;
 import com.launchly.bot.entity.MediaMode;
 import com.launchly.bot.entity.ViolationAction;
 import lombok.AllArgsConstructor;
@@ -26,4 +27,8 @@ public class BotModerationRuleDto {
     private ViolationAction actionOnViolation;
     private String warningTemplate;
     private Integer warnTtlSeconds;
+    private boolean captchaEnabled;
+    private CaptchaMode captchaMode;
+    private Integer captchaTimeoutSeconds;
+    private String captchaMessageTemplate;
 }

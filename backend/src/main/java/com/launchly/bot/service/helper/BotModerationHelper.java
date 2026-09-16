@@ -3,6 +3,7 @@ package com.launchly.bot.service.helper;
 import com.launchly.bot.constant.ModerationConstants;
 import com.launchly.common.utils.MessageUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.BanChatMember;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.UnbanChatMember;
@@ -263,5 +264,92 @@ public final class BotModerationHelper {
         } catch (Exception e) {
             log.warn("Failed to kick userId={} from chatId={}: {}", userId, chatId, e.getMessage());
         }
+    }
+
+    public static void unmuteUser(TelegramClient client, Long chatId, Long userId) {
+        if (client == null || chatId == null || userId == null) return;
+        try {
+            ChatPermissions permissions = ChatPermissions.builder()
+                    .canSendMessages(true)
+                    .canSendAudios(true)
+                    .canSendDocuments(true)
+                    .canSendPhotos(true)
+                    .canSendVideos(true)
+                    .canSendVideoNotes(true)
+                    .canSendVoiceNotes(true)
+                    .canSendPolls(true)
+                    .canSendOtherMessages(true)
+                    .canAddWebPagePreviews(true)
+                    .build();
+
+            client.execute(RestrictChatMember.builder()
+                    .chatId(String.valueOf(chatId))
+                    .userId(userId)
+                    .permissions(permissions)
+                    .useIndependentChatPermissions(true)
+                    .build());
+            log.info("Unmuted userId={} in chatId={}", userId, chatId);
+        } catch (Exception e) {
+            log.warn("Failed to unmute userId={} in chatId={}: {}", userId, chatId, e.getMessage());
+        }
+    }
+
+    public static void answerCallbackQuery(TelegramClient client, String callbackQueryId, String text, boolean showAlert) {
+        if (client == null || callbackQueryId == null) return;
+        try {
+            client.execute(AnswerCallbackQuery.builder()
+                    .callbackQueryId(callbackQueryId)
+                    .text(text)
+                    .showAlert(showAlert)
+                    .build());
+        } catch (Exception e) {
+            log.debug("Failed to answer callback query {}: {}", callbackQueryId, e.getMessage());
+        }
+    }
+
+    public static String formatCaptchaMessage(String template, User from, int timeoutSeconds, MessageUtils messageUtils) {
+        String defaultUser = ModerationConstants.DEFAULT_USER_NAME;
+        String defaultTemplate = ModerationConstants.DEFAULT_CAPTCHA_MESSAGE_TEMPLATE;
+
+        if (messageUtils != null) {
+            String resolvedUser = messageUtils.getMessageWithDefault(ModerationConstants.MSG_KEY_DEFAULT_USER, ModerationConstants.DEFAULT_USER_NAME);
+            if (resolvedUser != null && !resolvedUser.isBlank()) {
+                defaultUser = resolvedUser;
+            }
+            String resolvedTemplate = messageUtils.getMessageWithDefault(ModerationConstants.MSG_KEY_CAPTCHA_DEFAULT_MESSAGE, ModerationConstants.DEFAULT_CAPTCHA_MESSAGE_TEMPLATE);
+            if (resolvedTemplate != null && !resolvedTemplate.isBlank()) {
+                defaultTemplate = resolvedTemplate;
+            }
+        }
+
+        String firstName = defaultUser;
+        String usernameOnly = defaultUser.toLowerCase();
+        String mention = defaultUser;
+
+        if (from != null) {
+            if (from.getFirstName() != null && !from.getFirstName().isBlank()) {
+                firstName = from.getFirstName();
+            }
+            if (from.getUserName() != null && !from.getUserName().isBlank()) {
+                usernameOnly = from.getUserName();
+                mention = "@" + from.getUserName();
+            } else {
+                usernameOnly = firstName;
+                mention = firstName;
+            }
+        }
+
+        String effectiveTemplate = (template != null && !template.isBlank())
+                ? template
+                : defaultTemplate;
+
+        return effectiveTemplate
+                .replace("{first_name}", firstName)
+                .replace("{name}", firstName)
+                .replace("@{username}", mention)
+                .replace("{username}", usernameOnly)
+                .replace("{user}", mention)
+                .replace("{timeout}", String.valueOf(timeoutSeconds))
+                .replace("{timeout_seconds}", String.valueOf(timeoutSeconds));
     }
 }

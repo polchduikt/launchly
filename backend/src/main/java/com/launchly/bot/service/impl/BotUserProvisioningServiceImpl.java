@@ -50,6 +50,11 @@ public class BotUserProvisioningServiceImpl implements BotUserProvisioningServic
                         username = from.getUserName();
                         firstName = from.getFirstName();
                         lastName = from.getLastName();
+                    } else if (update.hasChatJoinRequest() && update.getChatJoinRequest().getUser() != null) {
+                        var from = update.getChatJoinRequest().getUser();
+                        username = from.getUserName();
+                        firstName = from.getFirstName();
+                        lastName = from.getLastName();
                     }
 
                     BotUser newUser = BotUser.builder()

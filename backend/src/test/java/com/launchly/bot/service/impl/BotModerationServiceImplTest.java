@@ -235,4 +235,83 @@ class BotModerationServiceImplTest {
         assertThat(intercepted).isFalse();
         verifyNoInteractions(telegramClient);
     }
+
+    @Test
+    @DisplayName("Should trigger captcha challenge when new member joins and captcha is enabled")
+    void shouldTriggerCaptchaForNewChatMembers() throws Exception {
+        testRule.setCaptchaEnabled(true);
+        testRule.setCaptchaMode(com.launchly.bot.entity.CaptchaMode.BUTTON);
+        testRule.setCaptchaTimeoutSeconds(60);
+        when(ruleRepository.findAllByBotIdAndEnabledTrue(1L)).thenReturn(List.of(testRule));
+
+        Update update = mock(Update.class);
+        Message message = mock(Message.class);
+        User newMember = mock(User.class);
+        when(newMember.getId()).thenReturn(555L);
+        when(newMember.getFirstName()).thenReturn("NewUser");
+        when(newMember.getIsBot()).thenReturn(false);
+
+        when(update.hasMessage()).thenReturn(true);
+        when(update.getMessage()).thenReturn(message);
+        when(message.getChatId()).thenReturn(123456L);
+        when(message.getNewChatMembers()).thenReturn(List.of(newMember));
+
+        Message challengeMsg = mock(Message.class);
+        when(challengeMsg.getMessageId()).thenReturn(777);
+        doReturn(null).when(telegramClient).execute(any(org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember.class));
+        doReturn(challengeMsg).when(telegramClient).execute(any(org.telegram.telegrambots.meta.api.methods.send.SendMessage.class));
+
+        boolean intercepted = moderationService.processUpdateModeration(1L, update, telegramClient);
+
+        assertThat(intercepted).isTrue();
+        verify(telegramClient).execute(any(org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember.class));
+        verify(telegramClient).execute(any(org.telegram.telegrambots.meta.api.methods.send.SendMessage.class));
+    }
+
+    @Test
+    @DisplayName("Should approve captcha callback from target user and unmute")
+    void shouldApproveCaptchaCallback() throws Exception {
+        Update update = mock(Update.class);
+        org.telegram.telegrambots.meta.api.objects.CallbackQuery cb = mock(org.telegram.telegrambots.meta.api.objects.CallbackQuery.class);
+        User user = mock(User.class);
+        Message origMsg = mock(Message.class);
+
+        when(update.hasCallbackQuery()).thenReturn(true);
+        when(update.getCallbackQuery()).thenReturn(cb);
+        when(cb.getData()).thenReturn("mod_captcha:btn:555");
+        when(cb.getFrom()).thenReturn(user);
+        when(cb.getId()).thenReturn("cb_123");
+        when(user.getId()).thenReturn(555L);
+        when(cb.getMessage()).thenReturn(origMsg);
+        when(origMsg.getChatId()).thenReturn(123456L);
+        when(origMsg.getMessageId()).thenReturn(777);
+
+        boolean intercepted = moderationService.processUpdateModeration(1L, update, telegramClient);
+
+        assertThat(intercepted).isTrue();
+        verify(telegramClient).execute(any(org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember.class));
+        verify(telegramClient).execute(any(org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage.class));
+        verify(telegramClient).execute(any(org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery.class));
+    }
+
+    @Test
+    @DisplayName("Should reject captcha callback from different user with alert")
+    void shouldRejectCaptchaFromNonTargetUser() throws Exception {
+        Update update = mock(Update.class);
+        org.telegram.telegrambots.meta.api.objects.CallbackQuery cb = mock(org.telegram.telegrambots.meta.api.objects.CallbackQuery.class);
+        User otherUser = mock(User.class);
+
+        when(update.hasCallbackQuery()).thenReturn(true);
+        when(update.getCallbackQuery()).thenReturn(cb);
+        when(cb.getData()).thenReturn("mod_captcha:btn:555");
+        when(cb.getFrom()).thenReturn(otherUser);
+        when(otherUser.getId()).thenReturn(999L); // Different from 555
+        when(cb.getId()).thenReturn("cb_123");
+
+        boolean intercepted = moderationService.processUpdateModeration(1L, update, telegramClient);
+
+        assertThat(intercepted).isTrue();
+        verify(telegramClient).execute(any(org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery.class));
+        verify(telegramClient, never()).execute(any(org.telegram.telegrambots.meta.api.methods.groupadministration.RestrictChatMember.class));
+    }
 }

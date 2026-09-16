@@ -77,6 +77,29 @@ public class FlowNodeRouter {
                 .orElse(null);
     }
 
+    public FlowNode findMatchingJoinRequestNode(List<FlowNode> nodes, String channelId, String inviteLink) {
+        if (nodes == null || nodes.isEmpty()) {
+            return null;
+        }
+        return nodes.stream()
+                .filter(n -> n.type() == NodeType.JOIN_REQUEST)
+                .filter(n -> {
+                    if (n.data() == null) return true;
+                    Object channelObj = n.data().get("channelId");
+                    if (channelObj == null || channelObj.toString().trim().isEmpty() || "*".equals(channelObj.toString().trim())) {
+                        return true;
+                    }
+                    String confChannel = channelObj.toString().trim().replace("@", "");
+                    if (channelId != null) {
+                        String cleanTarget = channelId.trim().replace("@", "");
+                        return confChannel.equalsIgnoreCase(cleanTarget);
+                    }
+                    return true;
+                })
+                .findFirst()
+                .orElse(null);
+    }
+
     @SuppressWarnings("unchecked")
     public String resolveButtonLabel(Long botId, String callbackData) {
         if (callbackData == null || callbackData.isBlank()) {

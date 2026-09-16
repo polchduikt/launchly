@@ -1,5 +1,6 @@
 package com.launchly.bot.entity;
 
+import com.launchly.bot.constant.ModerationConstants;
 import com.launchly.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -63,9 +64,25 @@ public class BotModerationRule extends BaseEntity {
 
     @Column(name = "warning_template", columnDefinition = "TEXT")
     @Builder.Default
-    private String warningTemplate = "⚠️ {user}, ваше повідомлення було видалено через порушення правил чату!";
+    private String warningTemplate = ModerationConstants.DEFAULT_WARNING_TEMPLATE;
 
     @Column(name = "warn_ttl_seconds", nullable = false)
     @Builder.Default
     private Integer warnTtlSeconds = 5;
+
+    @Column(name = "captcha_enabled", nullable = false)
+    @Builder.Default
+    private boolean captchaEnabled = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "captcha_mode", nullable = false, length = 32)
+    @Builder.Default
+    private CaptchaMode captchaMode = CaptchaMode.BUTTON;
+
+    @Column(name = "captcha_timeout_seconds", nullable = false)
+    @Builder.Default
+    private Integer captchaTimeoutSeconds = 60;
+
+    @Column(name = "captcha_message_template", columnDefinition = "TEXT")
+    private String captchaMessageTemplate;
 }

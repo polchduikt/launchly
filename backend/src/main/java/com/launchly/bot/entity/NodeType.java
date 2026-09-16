@@ -25,6 +25,7 @@ public enum NodeType {
     QUERY,
     INTERACTION,
     SUBSCRIPTION_CHECK,
-    MODERATION
+    MODERATION,
+    JOIN_REQUEST
 }
 

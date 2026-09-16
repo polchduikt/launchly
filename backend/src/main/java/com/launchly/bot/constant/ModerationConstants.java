@@ -17,11 +17,24 @@ public final class ModerationConstants {
     public static final String MSG_KEY_REASON_ANTI_LINK = "bot.moderation.reason.anti_link";
     public static final String MSG_KEY_REASON_STOP_WORD = "bot.moderation.reason.stop_word";
 
+    public static final String MSG_KEY_CAPTCHA_DEFAULT_MESSAGE = "bot.moderation.captcha.default_message";
+    public static final String MSG_KEY_CAPTCHA_BUTTON_HUMAN = "bot.moderation.captcha.button_human";
+    public static final String MSG_KEY_CAPTCHA_NOT_FOR_YOU = "bot.moderation.captcha.not_for_you";
+    public static final String MSG_KEY_CAPTCHA_SUCCESS = "bot.moderation.captcha.success";
+    public static final String MSG_KEY_CAPTCHA_FAIL = "bot.moderation.captcha.fail";
+
     public static final String DEFAULT_WARNING_TEMPLATE = "{first_name}, your message was deleted due to a violation of chat rules!";
+    public static final String DEFAULT_CAPTCHA_MESSAGE_TEMPLATE = "{name}, please confirm you are human within {timeout}s to chat!";
+    public static final String DEFAULT_CAPTCHA_BUTTON_LABEL = "I am human";
+    public static final String DEFAULT_CAPTCHA_NOT_FOR_YOU = "This verification is not intended for you!";
+    public static final String DEFAULT_CAPTCHA_SUCCESS = "Verification passed! Welcome to the group!";
+    public static final String DEFAULT_CAPTCHA_FAIL = "Incorrect answer. Please try again!";
     public static final String DEFAULT_USER_NAME = "User";
     public static final String DEFAULT_PASS_VARIABLE = "is_moderation_passed";
     public static final String DEFAULT_REASON_VARIABLE = "moderation_violation_reasons";
 
+    public static final String CB_CAPTCHA_PREFIX = "mod_captcha:";
+    public static final int DEFAULT_CAPTCHA_TIMEOUT_SECONDS = 60;
     public static final int DEFAULT_WARN_TTL_SECONDS = 5;
     public static final int DEFAULT_WARN_AUTO_DELETE_SECONDS = 10;
     public static final int DEFAULT_MUTE_DURATION_MINUTES = 60;

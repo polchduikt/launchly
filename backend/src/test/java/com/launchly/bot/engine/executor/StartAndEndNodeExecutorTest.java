@@ -77,6 +77,20 @@ class StartAndEndNodeExecutorTest {
     }
 
     @Test
+    @DisplayName("JoinRequestNodeExecutor should return JOIN_REQUEST type and resolve target node")
+    void joinRequestNodeExecutor_Success() {
+        JoinRequestNodeExecutor executor = new JoinRequestNodeExecutor();
+        assertThat(executor.getType()).isEqualTo(NodeType.JOIN_REQUEST);
+
+        FlowNode node = new FlowNode("join-1", NodeType.JOIN_REQUEST, Map.of("autoApprove", true), pos);
+        List<FlowEdge> edges = List.of(new FlowEdge("e1", "join-1", "msg-gift", "next"));
+        BotUser botUser = BotUser.builder().telegramId(111L).build();
+
+        String nextNodeId = executor.execute(node, edges, botUser, new Update(), telegramClient);
+        assertThat(nextNodeId).isEqualTo("msg-gift");
+    }
+
+    @Test
     @DisplayName("CommentNodeExecutor should return COMMENT type and return null")
     void commentNodeExecutor_Success() {
         CommentNodeExecutor executor = new CommentNodeExecutor();

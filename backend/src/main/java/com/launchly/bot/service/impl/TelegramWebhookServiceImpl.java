@@ -87,6 +87,9 @@ public class TelegramWebhookServiceImpl implements TelegramWebhookService {
         if (update.hasChannelPost() && update.getChannelPost().getFrom() != null) {
             return update.getChannelPost().getFrom().getId();
         }
+        if (update.hasChatJoinRequest() && update.getChatJoinRequest().getUser() != null) {
+            return update.getChatJoinRequest().getUser().getId();
+        }
         return null;
     }
 }
