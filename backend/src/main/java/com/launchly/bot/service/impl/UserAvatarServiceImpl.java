@@ -153,9 +153,6 @@ public class UserAvatarServiceImpl implements UserAvatarService {
                 botUser.setPhotoUrl(fileUrl);
             }
             botUserRepository.save(botUser);
-        } catch (InterruptedException ie) {
-            log.warn("Interrupted while fetching profile photo for user {}: {}", botUser.getTelegramId(), ie.getMessage());
-            Thread.currentThread().interrupt();
         } catch (Exception e) {
             log.warn("Could not fetch profile photo for user {}: {}", botUser.getTelegramId(), e.getMessage());
         }
