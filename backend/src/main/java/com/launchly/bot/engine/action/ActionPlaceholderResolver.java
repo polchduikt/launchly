@@ -48,6 +48,9 @@ public class ActionPlaceholderResolver {
         }
         String trimmed = text.trim();
 
+        if (trimmed.equalsIgnoreCase("Full Name") || trimmed.equalsIgnoreCase("full_name") || trimmed.equalsIgnoreCase("Name") || trimmed.equalsIgnoreCase("name")) {
+            return botUser.getDisplayName();
+        }
         if (trimmed.equalsIgnoreCase("First Name") || trimmed.equalsIgnoreCase("first_name")) {
             return botUser.getFirstName() != null ? botUser.getFirstName() : "";
         }

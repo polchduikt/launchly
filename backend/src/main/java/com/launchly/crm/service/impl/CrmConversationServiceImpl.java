@@ -167,7 +167,7 @@ public class CrmConversationServiceImpl implements CrmConversationService {
             } catch (Exception ignored) {
             }
         }
-        String botUserName = botUser.getFirstName() + (botUser.getLastName() != null ? " " + botUser.getLastName() : "");
+        String botUserName = botUser.getDisplayName();
 
         String lastMessage = null;
         LocalDateTime lastMessageAt = null;

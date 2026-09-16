@@ -101,11 +101,7 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        String contactName = (botUser.getFirstName() != null ? botUser.getFirstName() : "") + 
-                             (botUser.getLastName() != null ? " " + botUser.getLastName() : "");
-        if (contactName.trim().isEmpty()) {
-            contactName = botUser.getUsername() != null ? "@" + botUser.getUsername() : "Contact ID " + botUser.getId();
-        }
+        String contactName = botUser.getDisplayName();
 
         String message = String.format("A new contact (%s) has performed a specific action in your bot '%s' and requires attention.",
                 contactName, botUser.getBot().getName());

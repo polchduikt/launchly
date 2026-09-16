@@ -69,5 +69,22 @@ public class BotUser extends BaseEntity {
     public void setCurrentNode(String nodeId) {
         this.currentNodeId = nodeId;
     }
+
+    public String getDisplayName() {
+        String first = firstName != null ? firstName.trim() : "";
+        String last = lastName != null ? lastName.trim() : "";
+        String full = (first + " " + last).trim();
+        if (!full.isEmpty()) {
+            return full;
+        }
+        if (username != null && !username.isBlank()) {
+            String u = username.trim();
+            return u.startsWith("@") ? u : "@" + u;
+        }
+        if (telegramId != null) {
+            return "User " + telegramId;
+        }
+        return "Unknown";
+    }
 }
 

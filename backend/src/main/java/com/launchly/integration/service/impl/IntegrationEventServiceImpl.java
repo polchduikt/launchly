@@ -133,12 +133,7 @@ public class IntegrationEventServiceImpl implements IntegrationEventService {
         String dataType = configNode.path("dataType").asText(null);
 
         if ("ORDERS".equalsIgnoreCase(dataType)) {
-            String customerName = "";
-            if (order.getBotUser() != null) {
-                String firstName = order.getBotUser().getFirstName() != null ? order.getBotUser().getFirstName() : "";
-                String lastName = order.getBotUser().getLastName() != null ? order.getBotUser().getLastName() : "";
-                customerName = (firstName + " " + lastName).trim();
-            }
+            String customerName = order.getBotUser() != null ? order.getBotUser().getDisplayName() : "";
 
             List<Object> row = List.of(
                     order.getId() != null ? order.getId() : 0L,
