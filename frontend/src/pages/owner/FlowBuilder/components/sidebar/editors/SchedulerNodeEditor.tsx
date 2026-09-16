@@ -44,7 +44,7 @@ export const SchedulerNodeEditor: React.FC<SchedulerNodeEditorProps> = ({
     if (!data?.timezone || data.timezone === 'UTC') {
       handleChange('timezone', 'Europe/Kyiv');
     }
-  }, [data?.timezone]);
+  }, [data?.timezone, handleChange]);
 
   const HOURS_OPTIONS = Array.from({ length: 24 }, (_, i) => {
     const val = String(i).padStart(2, '0');

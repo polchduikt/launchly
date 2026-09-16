@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { t } from '../../../../../i18n/config';
-import { Handle, Position, useReactFlow, useNodeConnections, useUpdateNodeInternals, useConnection, useStore } from '@xyflow/react';
+import { Position, useReactFlow, useNodeConnections, useUpdateNodeInternals, useConnection, useStore } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { Send, Plus, Image as ImageIcon, Paperclip, Volume2, Video, Clock, MessageSquare, Zap, AlertCircle } from 'lucide-react';
 import type { ButtonData, CustomNodeData } from '../../../../../types/bot';

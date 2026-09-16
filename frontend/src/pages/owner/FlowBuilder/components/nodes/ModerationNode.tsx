@@ -19,13 +19,13 @@ const ModerationNodeInner: React.FC<NodeProps<Node<CustomNodeData>>> = ({ id, se
   const isZoomedOut = useStore((s) => s.transform[2] < 0.6);
 
   const isEnabled = data?.isEnabled !== false && data?.isActive !== false;
-  const antiForward = data?.antiForwardEnabled ?? true;
-  const antiLink = data?.antiLinkEnabled ?? false;
+  const antiForward = Boolean(data?.antiForwardEnabled ?? true);
+  const antiLink = Boolean(data?.antiLinkEnabled ?? false);
   const mediaMode = (data?.mediaMode as string) || 'ALL';
   const actionOnViolation = (data?.actionOnViolation as string) || 'DELETE_AND_WARN';
   const captchaEnabled = Boolean(data?.captchaEnabled);
   const captchaMode = (data?.captchaMode as string) || 'BUTTON';
-  const captchaTimeout = data?.captchaTimeoutSeconds || 60;
+  const captchaTimeout = (data?.captchaTimeoutSeconds as number | string) || 60;
 
   const isCleanConnected = data?._tempSourceHandle !== 'clean' && sourceConns.some((c) => c.sourceHandle === 'clean' || c.sourceHandle === 'passed' || c.sourceHandle === 'true');
   const isViolatedConnected = data?._tempSourceHandle !== 'violated' && sourceConns.some((c) => c.sourceHandle === 'violated' || c.sourceHandle === 'blocked' || c.sourceHandle === 'false');

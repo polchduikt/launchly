@@ -145,7 +145,7 @@ export const useNodeEditor = (
       setEditingButtonBlockId(foundBlockId);
       setIsBtnDialogOpen(true);
     }
-  }, [editingButtonState]);
+  }, [editingButtonState, node]);
 
   const data = (node?.data || {}) as CustomNodeData;
   const buttons = (data.buttons || []) as ButtonData[];

@@ -78,9 +78,9 @@ export const ModerationNodeEditor: React.FC<ModerationNodeEditorProps> = ({
   const { setNodes, fitView } = useReactFlow();
 
   const isEnabled = data?.isEnabled !== false && data?.isActive !== false;
-  const antiForward = data?.antiForwardEnabled ?? true;
-  const antiLink = data?.antiLinkEnabled ?? false;
-  const filterProfanity = data?.filterProfanity ?? true;
+  const antiForward = Boolean(data?.antiForwardEnabled ?? true);
+  const antiLink = Boolean(data?.antiLinkEnabled ?? false);
+  const filterProfanity = Boolean(data?.filterProfanity ?? true);
   const mediaMode = (data?.mediaMode as string) || 'ALL';
   const actionOnViolation = (data?.actionOnViolation as string) || 'DELETE_AND_WARN';
   const stopWords = Array.isArray(data?.stopWords) ? data.stopWords.join(', ') : (typeof data?.stopWords === 'string' ? data.stopWords : '');
@@ -119,13 +119,6 @@ export const ModerationNodeEditor: React.FC<ModerationNodeEditorProps> = ({
       }
     }
   }, [warningTemplate, isFocused]);
-
-  useEffect(() => {
-    const el = contentEditableRef.current;
-    if (el && !el.innerHTML) {
-      el.innerHTML = textToHtml(warningTemplate);
-    }
-  }, []);
 
   const handleStopWordsChange = (val: string) => {
     const list = val.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);

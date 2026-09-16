@@ -27,12 +27,7 @@ export const ActionNodeEditor: React.FC<ActionNodeEditorProps> = React.memo(({ d
   const createTagMutation = useCreateTagMutation(activeBotId || 0);
   const { data: integrations = [] } = useIntegrationsQuery();
 
-  let nodes: Array<{ id: string; type?: string }> = [];
-  try {
-    nodes = useNodes();
-  } catch {
-    nodes = [];
-  }
+  const nodes = useNodes();
 
   const { data: customFieldsData } = useCustomFieldsQuery(activeBotId);
   const saveCustomFieldsMutation = useSaveCustomFieldsMutation(activeBotId);

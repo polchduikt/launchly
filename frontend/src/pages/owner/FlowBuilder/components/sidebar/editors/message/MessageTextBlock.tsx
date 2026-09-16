@@ -60,19 +60,13 @@ export const MessageTextBlock: React.FC<MessageTextBlockProps> = ({
   const editableRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (editableRef.current) {
-      editableRef.current.innerHTML = textToHtml(block.text || '');
-    }
-  }, [block.id]);
-
-  React.useEffect(() => {
     if (editableRef.current && document.activeElement !== editableRef.current) {
       const currentText = htmlToText(editableRef.current.innerHTML);
       if (currentText !== (block.text || '')) {
         editableRef.current.innerHTML = textToHtml(block.text || '');
       }
     }
-  }, [block.text]);
+  }, [block.id, block.text]);
 
   return (
     <div className="flex flex-col">

@@ -72,7 +72,7 @@ export const EditButtonDrawer: React.FC<EditButtonDrawerProps> = ({
       setPrice(button.price || '');
       setCurrency(button.currency || 'UAH');
     }
-  }, [button?.value, button?.label, nodeId]);
+  }, [button, edges, nodes, nodeId]);
 
   const typedEdges = edges as Edge[];
   const typedNodes = nodes as Node[];

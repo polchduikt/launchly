@@ -38,6 +38,7 @@ import { EditDataCollectionDrawer } from './components/sidebar/drawers/EditDataC
 import { useTagsQuery } from '../../../hooks/broadcast/useBroadcastQueries';
 import type { FlowBlock } from "../../../types/bot";
 import { useFlowCollaboration } from '../../../hooks/bot/useFlowCollaboration';
+import { useFlowUiStore } from '../../../store/useFlowUiStore';
 
 
 
